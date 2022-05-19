@@ -4,38 +4,58 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useCallback, useState } from "react";
+import { Formik } from 'formik'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
+  Button,
   Card,
   Col,
   Container,
-  Pagination,
-  Table,
-  Modal,
-  Button,
   Form,
+  Modal,
+  Pagination,
   Row,
-} from "react-bootstrap";
-import { Formik } from "formik";
+  Table,
+} from 'react-bootstrap'
 
 const AdminTaskProposalTable = (props) => {
-  const { data, page, getPage, paginate, isEndOfPage, api } = props;
+  const { data, page, getPage, paginate, isEndOfPage, api } = props
+  const [dataUser, setDataUser] = useState({})
+  const [idCreator, setIdCreator] = useState(1)
 
   const [showViewModals, setShowViewModals] = useState(
-    data.map((datum) => false)
-  );
+    data.map((datum) => false),
+  )
 
-  const [showChangesModal, setShowChangesModal] = useState(false);
+  const [showChangesModal, setShowChangesModal] = useState(false)
 
   if (data.length !== showViewModals.length) {
-    setShowViewModals(data.map((datum) => false));
+    setShowViewModals(data.map((datum) => false))
   }
 
   const toggleShowViewModal = (index) => {
     setShowViewModals(
-      showViewModals.map((obj, obj_index) => (index === obj_index ? !obj : obj))
-    );
-  };
+      showViewModals.map((obj, obj_index) =>
+        index === obj_index ? !obj : obj,
+      ),
+    )
+  }
+
+  useEffect(() => {
+    // declare the async data fetching function
+    const fetchData = async () => {
+      // get the data from the api
+      const data = await api.getUser(idCreator)
+      // convert the data to json
+      // set state with the result
+      setDataUser(data)
+    }
+
+    // call the function
+    fetchData()
+      // make sure to catch any error
+      .catch(console.error)
+  }, [idCreator])
 
   return (
     <Col className="m-auto" lg={12}>
@@ -67,18 +87,35 @@ const AdminTaskProposalTable = (props) => {
                 </tr>
               ) : null}
               {data.map((datum, index) => {
+                datum['info_creator'] = dataUser
                 return (
                   <tr key={index}>
                     <Modal
                       size="lg"
                       show={showViewModals[index]}
-                      onHide={() => toggleShowViewModal(index)}
+                      onHide={() => {
+                        toggleShowViewModal(index)
+                      }}
                     >
                       <Modal.Header closeButton>
                         <Modal.Title>View Proposal</Modal.Title>
                       </Modal.Header>
                       <Modal.Body>
                         <Container>
+                          <Form.Group
+                            as={Row}
+                            className="py-3 my-0 border-bottom"
+                          >
+                            <Form.Label column>
+                              <b>Username</b>
+                            </Form.Label>
+                            <Col sm="8">
+                              <Form.Control
+                                disabled
+                                value={datum.info_creator.username}
+                              />
+                            </Col>
+                          </Form.Group>
                           <Form.Group
                             as={Row}
                             className="py-3 my-0 border-bottom"
@@ -132,19 +169,19 @@ const AdminTaskProposalTable = (props) => {
                             <Button
                               style={{ marginRight: 10 }}
                               onClick={() => {
-                                toggleShowViewModal(index);
+                                toggleShowViewModal(index)
                                 api
                                   .processTaskProposal(datum.id, true, null)
-                                  .then((result) => getPage());
+                                  .then((result) => getPage())
                               }}
                             >
                               Accept
-                            </Button>{" "}
+                            </Button>{' '}
                             <Button
                               variant="danger"
                               onClick={() => {
-                                toggleShowViewModal(index);
-                                setShowChangesModal(true);
+                                toggleShowViewModal(index)
+                                setShowChangesModal(true)
                               }}
                             >
                               Reject
@@ -164,18 +201,18 @@ const AdminTaskProposalTable = (props) => {
                       <Modal.Body>
                         <Formik
                           initialValues={{
-                            changes: "",
+                            changes: '',
                           }}
                           onSubmit={(values) => {
                             api
                               .processTaskProposal(
                                 datum.id,
                                 false,
-                                values.changes
+                                values.changes,
                               )
                               .then(() => {
-                                getPage();
-                              });
+                                getPage()
+                              })
                           }}
                         >
                           {({
@@ -213,8 +250,8 @@ const AdminTaskProposalTable = (props) => {
                                     style={{ marginRight: 10 }}
                                     variant="secondary"
                                     onClick={() => {
-                                      setShowChangesModal(false);
-                                      toggleShowViewModal(index);
+                                      setShowChangesModal(false)
+                                      toggleShowViewModal(index)
                                     }}
                                   >
                                     Close
@@ -238,7 +275,10 @@ const AdminTaskProposalTable = (props) => {
                     <td className="text-truncate long-text">
                       <span
                         className="btn-link dataset-link"
-                        onClick={() => toggleShowViewModal(index)}
+                        onClick={() => {
+                          setIdCreator(datum.uid)
+                          toggleShowViewModal(index)
+                        }}
                       >
                         {datum.name}
                       </span>
@@ -251,19 +291,19 @@ const AdminTaskProposalTable = (props) => {
                       <span>{datum.longdesc}</span>
                     </td>
                   </tr>
-                );
+                )
               })}
             </tbody>
           </Table>
         </Card.Body>
         <Card.Footer className="text-center">
           <Pagination className="mb-0 float-right" size="sm">
-            <Pagination.Item disabled={!page} onClick={() => paginate("prev")}>
+            <Pagination.Item disabled={!page} onClick={() => paginate('prev')}>
               Previous
             </Pagination.Item>
             <Pagination.Item
               disabled={isEndOfPage}
-              onClick={() => paginate("next")}
+              onClick={() => paginate('next')}
             >
               Next
             </Pagination.Item>
@@ -271,41 +311,40 @@ const AdminTaskProposalTable = (props) => {
         </Card.Footer>
       </Card>
     </Col>
-  );
-};
+  )
+}
 
 const AdminTaskProposalSubPage = (props) => {
-  const [userTaskProposals, setUserTaskProposals] = useState([]);
-  const [taskProposalsPage, setTaskProposalsPage] = useState(0);
-  const [isEndOfTaskProposalsPage, setIsEndOfTaskProposalsPage] =
-    useState(true);
+  const [userTaskProposals, setUserTaskProposals] = useState([])
+  const [taskProposalsPage, setTaskProposalsPage] = useState(0)
+  const [isEndOfTaskProposalsPage, setIsEndOfTaskProposalsPage] = useState(true)
 
-  const { api } = props;
-  const pageLimit = 5;
+  const { api } = props
+  const pageLimit = 5
 
   const getPage = useCallback(() => {
     api.getAllTaskProposals(taskProposalsPage, pageLimit).then(
       (result) => {
         const isEndOfPage =
-          (taskProposalsPage + 1) * pageLimit >= (result.count || 0);
-        setIsEndOfTaskProposalsPage(isEndOfPage);
-        setUserTaskProposals(result.data || []);
+          (taskProposalsPage + 1) * pageLimit >= (result.count || 0)
+        setIsEndOfTaskProposalsPage(isEndOfPage)
+        setUserTaskProposals(result.data || [])
       },
       (error) => {
-        console.log(error);
-      }
-    );
-  }, [api, taskProposalsPage]);
+        console.log(error)
+      },
+    )
+  }, [api, taskProposalsPage])
 
   useEffect(() => {
-    getPage();
-  }, [getPage]);
+    getPage()
+  }, [getPage])
 
   const paginate = (state) => {
-    const is_next = state === "next";
-    const newPage = is_next ? taskProposalsPage + 1 : taskProposalsPage - 1;
-    setTaskProposalsPage(newPage);
-  };
+    const is_next = state === 'next'
+    const newPage = is_next ? taskProposalsPage + 1 : taskProposalsPage - 1
+    setTaskProposalsPage(newPage)
+  }
 
   return (
     <Container className="mb-5 pb-5">
@@ -319,7 +358,7 @@ const AdminTaskProposalSubPage = (props) => {
         isEndOfPage={isEndOfTaskProposalsPage}
       />
     </Container>
-  );
-};
+  )
+}
 
-export default AdminTaskProposalSubPage;
+export default AdminTaskProposalSubPage
