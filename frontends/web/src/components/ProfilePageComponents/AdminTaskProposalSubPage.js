@@ -42,19 +42,11 @@ const AdminTaskProposalTable = (props) => {
   }
 
   useEffect(() => {
-    // declare the async data fetching function
     const fetchData = async () => {
-      // get the data from the api
       const data = await api.getUser(idCreator)
-      // convert the data to json
-      // set state with the result
       setDataUser(data)
     }
-
-    // call the function
-    fetchData()
-      // make sure to catch any error
-      .catch(console.error)
+    fetchData().catch(console.error)
   }, [idCreator])
 
   return (
