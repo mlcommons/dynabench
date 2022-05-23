@@ -135,8 +135,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # the set of keys.
     keys |= get_aws_secrets_from_env()
 
-    keys.remove("")
-    keys.remove('"')
+    if "" in keys:
+        keys.remove("")
+    if '"' in keys:
+        keys.remove('"')
 
     if not keys:
         return 0
