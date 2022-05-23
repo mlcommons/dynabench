@@ -3,124 +3,125 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import React from "react";
-import "./App.css";
-import { Navbar, Nav, NavDropdown, Row, Container } from "react-bootstrap";
-import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
-import { HashLink } from "react-router-hash-link";
-import HomePage from "./HomePage";
-import LoginPage from "./LoginPage";
-import ForgotPassword from "./ForgotPassword";
-import ResetPassword from "./ResetPassword";
-import RegisterPage from "./RegisterPage";
-import ProfilePage from "./ProfilePage";
-import AboutPage from "./AboutPage";
-import TaskPage from "./TaskPage";
-import FloresTaskPage from "./FloresTaskPage";
-import FloresTop5Page from "./FloresTop5Page";
-import ContactPage from "./ContactPage";
-import TermsPage from "./TermsPage";
-import DataPolicyPage from "./DataPolicyPage";
-import UserContext from "./UserContext";
-import TasksContext from "./TasksContext";
-import UserPage from "./UserPage";
-import ModelPage from "./ModelPage";
-import ApiService from "../common/ApiService";
-import ScrollToTop from "./ScrollToTop.js";
-import CreateInterface from "../common/Annotation/CreateInterface.js";
-import TaskOwnerPage from "./TaskOwnerPage";
-import ValidateInterface from "../common/Annotation/ValidateInterface.js";
-import UpdateModelInfoInterface from "./UpdateModelInfoInterface.js";
-import GenerateAPITokenPage from "./GenerateAPITokenPage.js";
-import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
-import ForkAndSnapshotRouter from "../components/TaskLeaderboard/ForkAndSnapshotRouter";
-import { Avatar } from "../components/Avatar/Avatar";
-import ReactGA from "react-ga";
-import SubmitInterface from "./SubmitInterface.js";
-import qs from "qs";
+import React from 'react'
+import './App.css'
+import { Navbar, Nav, NavDropdown, Row, Container } from 'react-bootstrap'
+import { BrowserRouter, Switch, Route, Link } from 'react-router-dom'
+import { HashLink } from 'react-router-hash-link'
+import HomePage from './HomePage'
+import LoginPage from './LoginPage'
+import ForgotPassword from './ForgotPassword'
+import ResetPassword from './ResetPassword'
+import RegisterPage from './RegisterPage'
+import ProfilePage from './ProfilePage'
+import AboutPage from './AboutPage'
+import PaperPage from './PaperPage'
+import TaskPage from './TaskPage'
+import FloresTaskPage from './FloresTaskPage'
+import FloresTop5Page from './FloresTop5Page'
+import ContactPage from './ContactPage'
+import TermsPage from './TermsPage'
+import DataPolicyPage from './DataPolicyPage'
+import UserContext from './UserContext'
+import TasksContext from './TasksContext'
+import UserPage from './UserPage'
+import ModelPage from './ModelPage'
+import ApiService from '../common/ApiService'
+import ScrollToTop from './ScrollToTop.js'
+import CreateInterface from '../common/Annotation/CreateInterface.js'
+import TaskOwnerPage from './TaskOwnerPage'
+import ValidateInterface from '../common/Annotation/ValidateInterface.js'
+import UpdateModelInfoInterface from './UpdateModelInfoInterface.js'
+import GenerateAPITokenPage from './GenerateAPITokenPage.js'
+import TaskModelLeaderboardPage from './TaskModelLeaderboardPage.js'
+import ForkAndSnapshotRouter from '../components/TaskLeaderboard/ForkAndSnapshotRouter'
+import { Avatar } from '../components/Avatar/Avatar'
+import ReactGA from 'react-ga'
+import SubmitInterface from './SubmitInterface.js'
+import qs from 'qs'
 
 class RouterMonitor extends React.Component {
   constructor(props) {
-    super(props);
-    this.api = this.props.api;
+    super(props)
+    this.api = this.props.api
   }
   render() {
     if (process.env.REACT_APP_GA_ID) {
-      ReactGA.set({ page: this.props.location.pathname });
-      ReactGA.pageview(this.props.location.pathname);
+      ReactGA.set({ page: this.props.location.pathname })
+      ReactGA.pageview(this.props.location.pathname)
     }
 
     if (process.env.REACT_APP_BETA_LOGIN_REQUIRED) {
       if (
         !this.api.loggedIn() &&
-        this.props.location.pathname !== "/login" &&
-        this.props.location.pathname !== "/register" &&
-        this.props.location.pathname !== "/termsofuse" &&
-        this.props.location.pathname !== "/datapolicy" &&
-        this.props.location.pathname !== "/forgot-password" &&
-        (!this.props.location.pathname.startsWith("/reset-password/") ||
-          this.props.location.pathname.length <= "/reset-password/".length)
+        this.props.location.pathname !== '/login' &&
+        this.props.location.pathname !== '/register' &&
+        this.props.location.pathname !== '/termsofuse' &&
+        this.props.location.pathname !== '/datapolicy' &&
+        this.props.location.pathname !== '/forgot-password' &&
+        (!this.props.location.pathname.startsWith('/reset-password/') ||
+          this.props.location.pathname.length <= '/reset-password/'.length)
       ) {
         this.props.history.push(
-          "/login?msg=" +
-            encodeURIComponent("You need to be logged in to access this beta.")
-        );
+          '/login?msg=' +
+            encodeURIComponent('You need to be logged in to access this beta.'),
+        )
       }
     }
-    return null;
+    return null
   }
 }
 
 class App extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       user: {},
       tasks: [],
-    };
-    this.updateState = this.updateState.bind(this);
-    this.refreshData = this.refreshData.bind(this);
-    this.api = new ApiService(process.env.REACT_APP_API_HOST);
+    }
+    this.updateState = this.updateState.bind(this)
+    this.refreshData = this.refreshData.bind(this)
+    this.api = new ApiService(process.env.REACT_APP_API_HOST)
     if (process.env.REACT_APP_GA_ID) {
-      ReactGA.initialize(process.env.REACT_APP_GA_ID);
+      ReactGA.initialize(process.env.REACT_APP_GA_ID)
     }
   }
   updateState(value) {
-    this.setState(value);
+    this.setState(value)
   }
   refreshData() {
     if (this.api.loggedIn()) {
-      const userCredentials = this.api.getCredentials();
+      const userCredentials = this.api.getCredentials()
       this.setState({ user: userCredentials }, () => {
         this.api.getUser(userCredentials.id).then(
           (result) => {
-            this.setState({ user: result });
+            this.setState({ user: result })
           },
           (error) => {
-            console.log(error);
-          }
-        );
-      });
+            console.log(error)
+          },
+        )
+      })
     }
     this.api.getTasks().then(
       (result) => {
-        this.setState({ tasks: result });
+        this.setState({ tasks: result })
       },
       (error) => {
-        console.log(error);
-      }
-    );
+        console.log(error)
+      },
+    )
   }
   componentDidMount() {
-    this.refreshData();
+    this.refreshData()
   }
 
   render() {
     //href={`/tasks/${taskCode}`}
     var query = qs.parse(window.location.search, {
       ignoreQueryPrefix: true,
-    });
-    const showContentOnly = query.content_only === "true";
+    })
+    const showContentOnly = query.content_only === 'true'
     const NavItems = this.state.tasks
       .filter((t) => t.official)
       .map((task, index) => (
@@ -132,7 +133,7 @@ class App extends React.Component {
         >
           {task.name}
         </NavDropdown.Item>
-      ));
+      ))
     return (
       <UserContext.Provider
         value={{
@@ -180,16 +181,16 @@ class App extends React.Component {
                       <div className="dropdown-divider my-0"></div>
                       <NavDropdown.Item
                         as={HashLink}
-                        to={"/#contributed-tasks"}
+                        to={'/#contributed-tasks'}
                         className="py-3"
                       >
                         Contributed Tasks
                       </NavDropdown.Item>
                       <div className="dropdown-divider my-0"></div>
                       <NavDropdown.Item
-                        key={"FLoRes"}
+                        key={'FLoRes'}
                         as={Link}
-                        to={"/flores"}
+                        to={'/flores'}
                         className="py-3"
                       >
                         Flores
@@ -221,13 +222,13 @@ class App extends React.Component {
                             as={Link}
                             to="/account#notifications"
                           >
-                            Notifications{" "}
+                            Notifications{' '}
                             {this.state.user &&
                             this.state.user.unseen_notifications
-                              ? "(" +
+                              ? '(' +
                                 this.state.user?.unseen_notifications +
-                                ")"
-                              : ""}
+                                ')'
+                              : ''}
                           </NavDropdown.Item>
                           <NavDropdown.Item as={Link} to="/account#stats">
                             Stats &amp; Badges
@@ -283,10 +284,11 @@ class App extends React.Component {
                 </Navbar.Collapse>
               </Navbar>
             )}
-            <div id={showContentOnly ? "" : "content"}>
+            <div id={showContentOnly ? '' : 'content'}>
               <Switch>
                 <Route path="/about" component={AboutPage} />
                 <Route path="/contact" component={ContactPage} />
+                <Route path="/fairer_nlp" component={PaperPage} />
                 <Route path="/termsofuse" component={TermsPage} />
                 <Route path="/datapolicy" component={DataPolicyPage} />
                 <Route
@@ -401,19 +403,19 @@ class App extends React.Component {
           </BrowserRouter>
         </TasksContext.Provider>
       </UserContext.Provider>
-    );
+    )
   }
 }
 class Logout extends React.Component {
-  static contextType = UserContext;
+  static contextType = UserContext
   componentDidMount() {
-    this.context.api.logout();
-    this.context.updateState({ user: {} });
-    this.props.history.push("/");
+    this.context.api.logout()
+    this.context.updateState({ user: {} })
+    this.props.history.push('/')
   }
   render() {
-    return <></>;
+    return <></>
   }
 }
 
-export default App;
+export default App
