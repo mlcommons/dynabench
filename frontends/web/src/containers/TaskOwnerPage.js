@@ -282,6 +282,7 @@ class TaskOwnerPage extends React.Component {
       "task_aws_account_id",
       "task_gateway_predict_prefix",
       "config_yaml",
+      "context",
     ];
 
     const data = Object.keys(values)

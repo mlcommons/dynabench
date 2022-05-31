@@ -134,9 +134,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Secrets might be part of environment variables, so add such secrets to
     # the set of keys.
     keys |= get_aws_secrets_from_env()
-
-    keys.remove("")
-    keys.remove('"')
+    if "" in keys:
+        keys.remove("")
+    if '"' in keys:
+        keys.remove('"')
 
     if not keys:
         return 0
