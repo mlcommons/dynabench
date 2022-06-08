@@ -93,8 +93,8 @@ def dataperf(train, test, config_obj):
         else:
             with tempfile.NamedTemporaryFile() as tf:
                 s3_client().download_fileobj(
-                    "dataperf-embeddings",
-                    "public_train_dataset_dynabench_formatted/train"
+                    "vision-dataperf",
+                    "public_train_dataset_embeddings_dynabench_formatted/train"
                     + str(uid)
                     + ".npy",
                     tf,
@@ -110,7 +110,7 @@ def dataperf(train, test, config_obj):
             return test_memo[uid]
         for label in config_obj["test_labels"]:
             with tempfile.TemporaryDirectory() as td:
-                download_s3_dir("dataperf-embeddings", label + "_test", td)
+                download_s3_dir("vision-dataperf", label + "_test", td)
                 df = pd.read_parquet(td, engine="pyarrow")
                 for _, row in df.iterrows():
                     array = np.array(row["Embedding"])
