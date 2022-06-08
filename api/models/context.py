@@ -231,7 +231,6 @@ class ContextModel(BaseModel):
         result = self.dbs.query(Context).filter(Context.r_realid == rid)
         if tags:
             result = result.filter(Context.tag.in_(tags))  # noqa
-
         contexts_with_example_stats, _, _, _ = self.getContextValidationResults(
             num_matching_validations
         )

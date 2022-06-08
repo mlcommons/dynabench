@@ -127,6 +127,7 @@ perf_metric:
             """,
             cur_round=1,
             last_updated=db.sql.func.now(),
+            context="min",
         )  # Annotation config is sentiment example.
 
         tpm.dbs.add(t)
@@ -447,6 +448,7 @@ def update(credentials, tid):
             "task_aws_account_id",
             "task_gateway_predict_prefix",
             "config_yaml",
+            "context",
         ):
             bottle.abort(
                 403,

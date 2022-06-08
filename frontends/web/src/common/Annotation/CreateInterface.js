@@ -93,7 +93,12 @@ class CreateInterface extends React.Component {
       { loading: true, submitDisabled: true, refreshDisabled: true },
       () => {
         this.context.api
-          .getRandomContext(this.state.task.id, this.state.task.cur_round)
+          .getRandomContext(
+            this.state.task.id,
+            this.state.task.cur_round,
+            [],
+            this.state.task.context
+          )
           .then(
             (result) => {
               const randomTargetModel =

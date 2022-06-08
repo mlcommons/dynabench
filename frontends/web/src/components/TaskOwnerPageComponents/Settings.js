@@ -44,6 +44,7 @@ const Settings = (props) => {
                   props.task.task_gateway_predict_prefix,
                 train_file_upload_instructions_md:
                   props.task.train_file_upload_instructions_md,
+                context: props.task.context,
               }}
               onSubmit={props.handleTaskUpdate}
             >
@@ -346,6 +347,49 @@ const Settings = (props) => {
                             defaultValue={values.num_matching_validations}
                             onChange={handleChange}
                           />
+                        </Col>
+                      </Form.Group>
+                      <Form.Group
+                        as={Row}
+                        controlId="context"
+                        className="py-3 my-0 border-bottom"
+                      >
+                        <Form.Label column>
+                          Sampling of Contexts In the Create Interface
+                          <Form.Text id="paramsHelpBlock" muted>
+                            <p>
+                              “uniform”: samples contexts uniformly at random
+                            </p>
+                            <p>
+                              “min”: samples contexts based on how many examples
+                              have been created with them (and it samples from
+                              the contexts with the fewest examples)
+                            </p>
+                            <p>
+                              “least_fooled”: samples from contexts where the
+                              crowdworkers have had the hardest time fooling the
+                              model{" "}
+                            </p>{" "}
+                            <p>
+                              “validation_failed” samples from the contexts that
+                              were used in examples that failed crowdworker
+                              validation
+                            </p>
+                          </Form.Text>
+                        </Form.Label>
+                        <Col sm="6">
+                          <Form.Control
+                            as="select"
+                            defaultValue={values.context}
+                            onChange={handleChange}
+                          >
+                            <option value="min">Min</option>
+                            <option value="uniform">Uniform</option>
+                            <option value="least_fooled">Least fooled</option>
+                            <option value="validation_failed">
+                              Validation failed
+                            </option>
+                          </Form.Control>
                         </Col>
                       </Form.Group>
                       <Form.Group as={Row} className="py-3 my-0">
