@@ -35,7 +35,7 @@ In this instance, we will first be setting up the environment using Anaconda:
 
 Now we will clone the Dynabench github repo, to finish setting up the environment:
 1. `cd` into your home directory (or just enter `cd`). This should be `/home/ubuntu` (you can check your current working directory by entering `pwd`)
-2. Run `git clone https://github.com/facebookresearch/dynabench.git`
+2. Run `git clone https://github.com/mlcommons/dynabench.git`
 3. Run `cd dynbench`
 4. Run `conda create -n dev python=3.7`
 5. Run `conda activate dev`

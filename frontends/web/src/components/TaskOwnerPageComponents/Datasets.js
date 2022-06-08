@@ -100,7 +100,7 @@ const Datasets = (props) => {
                           unordered model predictions to the correct examples.
                           If you are uploading fairness and/or robustness files,
                           you can use this script{" "}
-                          <a href="https://github.com/facebookresearch/dynabench/blob/main/evaluation/scripts/perturb.py">
+                          <a href="https://github.com/mlcommons/dynabench/blob/main/evaluation/scripts/perturb.py">
                             here
                           </a>{" "}
                           to generate them, or you can upload your own. Files

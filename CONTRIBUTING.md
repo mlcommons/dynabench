@@ -22,7 +22,7 @@ pip install pre-commit && pre-commit install
 
 After this pre-commit hooks will be run before every commit.
 
-* Read the [editorconfig](https://github.com/facebookresearch/dynabench/blob/main/.editorconfig) file to understand the exact coding style preferences.
+* Read the [editorconfig](https://github.com/mlcommons/dynabench/blob/main/.editorconfig) file to understand the exact coding style preferences.
 
 * Ideally, black and isort should be run via pre-commit hooks.
 But if for some reason you want to run black and isort separately follow this:

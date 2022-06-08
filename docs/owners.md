@@ -77,19 +77,19 @@ Data collection happens for the currently active round. Throughout the data coll
 
 The input/output format for a task, both in terms of what the model expects and how the annotator frontend behaves, are configured in the task config under the Advanced tab in the task owners interface. Here are examples of annotator configs for NLI, QA, Sentiment Analysis, Hate Speech Detection, and Machine Translation:
 
-* [NLI](https://github.com/facebookresearch/dynabench/blob/main/docs/examples/nli_task_config.yaml)
+* [NLI](https://github.com/mlcommons/dynabench/blob/main/docs/examples/nli_task_config.yaml)
 
-* [QA](https://github.com/facebookresearch/dynabench/blob/main/docs/examples/qa_task_config.yaml)
+* [QA](https://github.com/mlcommons/dynabench/blob/main/docs/examples/qa_task_config.yaml)
 
-* [Sentiment Analysis](https://github.com/facebookresearch/dynabench/blob/main/docs/examples/sentiment_task_config.yaml)
+* [Sentiment Analysis](https://github.com/mlcommons/dynabench/blob/main/docs/examples/sentiment_task_config.yaml)
 
-* [Hate Speech Detection](https://github.com/facebookresearch/dynabench/blob/main/docs/examples/hs_task_config.yaml)
+* [Hate Speech Detection](https://github.com/mlcommons/dynabench/blob/main/docs/examples/hs_task_config.yaml)
 
-* [Machine Translation](https://github.com/facebookresearch/dynabench/blob/main/docs/examples/flores_task_config.yaml)
+* [Machine Translation](https://github.com/mlcommons/dynabench/blob/main/docs/examples/flores_task_config.yaml)
 
-* [Visual Question Answering](https://github.com/facebookresearch/dynabench/blob/main/docs/examples/vqa_task_config.yaml)
+* [Visual Question Answering](https://github.com/mlcommons/dynabench/blob/main/docs/examples/vqa_task_config.yaml)
 
-* [Image Labelling with Core Set Selection Leaderboard](https://github.com/facebookresearch/dynabench/blob/main/docs/examples/dataperf_image_labelling_task_config.yaml)
+* [Image Labelling with Core Set Selection Leaderboard](https://github.com/mlcommons/dynabench/blob/main/docs/examples/dataperf_image_labelling_task_config.yaml)
 
 We recommend that you look through the examples before reading further. The task config can have the following fields:
 
@@ -136,15 +136,15 @@ We recommend that you look through the examples before reading further. The task
 
 ### Can I add a new annotation component?
 
-Yes! Submit a PR, and reach out to us if you need help. We've tried to make adding a new annotation component as easy as possible. You need to provide a frontend definition for your custom component [here](https://github.com/facebookresearch/dynabench/blob/main/frontends/web/src/common/Annotation/AnnotationComponent.js) and a syntax-checker for it [here](https://github.com/facebookresearch/dynabench/blob/main/api/models/task.py#L202) (to ensure that the backend rejects improperly formatted data)
+Yes! Submit a PR, and reach out to us if you need help. We've tried to make adding a new annotation component as easy as possible. You need to provide a frontend definition for your custom component [here](https://github.com/mlcommons/dynabench/blob/main/frontends/web/src/common/Annotation/AnnotationComponent.js) and a syntax-checker for it [here](https://github.com/mlcommons/dynabench/blob/main/api/models/task.py#L202) (to ensure that the backend rejects improperly formatted data)
 
 ### Can I add a new metric?
 
-Yes! Submit a PR, and reach out to us if you need help. You'll need to add your metric [here](https://github.com/facebookresearch/dynabench/tree/main/evaluation/metrics) and make a syntax checker for it's task config YAML specs [here](https://github.com/facebookresearch/dynabench/blob/main/api/models/task.py#L127)
+Yes! Submit a PR, and reach out to us if you need help. You'll need to add your metric [here](https://github.com/mlcommons/dynabench/tree/main/evaluation/metrics) and make a syntax checker for it's task config YAML specs [here](https://github.com/mlcommons/dynabench/blob/main/api/models/task.py#L127)
 
 ### Can I add a new model-wrong-metric?
 
-Yes! Submit a PR, and reach out to us if you need help. You'll need to add your metric [here](https://github.com/facebookresearch/dynabench/blob/main/api/models/task.py#L32) along with a syntax checker for it's task config YAML specs.
+Yes! Submit a PR, and reach out to us if you need help. You'll need to add your metric [here](https://github.com/mlcommons/dynabench/blob/main/api/models/task.py#L32) along with a syntax checker for it's task config YAML specs.
 
 ### Can I add a new aggregation metric?
 

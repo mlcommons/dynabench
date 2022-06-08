@@ -1,10 +1,10 @@
 # Development
 
-Please read our [contributing guidelines](https://github.com/facebookresearch/dynabench/blob/main/CONTRIBUTING.md) to understand how to setup your development environment including `pre-commit` hooks.
+Please read our [contributing guidelines](https://github.com/mlcommons/dynabench/blob/main/CONTRIBUTING.md) to understand how to setup your development environment including `pre-commit` hooks.
 
 ## Clone the repository
 
-After forking [facebookresearch/dynabench](https://github.com/facebookresearch/dynabench) to your own GitHub account, clone the forked repo using:
+After forking [facebookresearch/dynabench](https://github.com/mlcommons/dynabench) to your own GitHub account, clone the forked repo using:
 
 ```
 git clone git@github.com:{your_github_username}/dynabench.git
