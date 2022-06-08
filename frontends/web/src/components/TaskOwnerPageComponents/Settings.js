@@ -355,7 +355,7 @@ const Settings = (props) => {
                         className="py-3 my-0 border-bottom"
                       >
                         <Form.Label column>
-                          Context strategy
+                          Sampling of Contexts In the Create Interface
                           <Form.Text id="paramsHelpBlock" muted>
                             <p>
                               “uniform”: samples contexts uniformly at random
