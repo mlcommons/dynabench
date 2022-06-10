@@ -11,9 +11,9 @@ Install Mephisto in this local directory from the github:
 First step is to add the task to the backend. This involves writing a migration script for your task.
 We use yoyo-migrations for maintaining our migration scripts.
 
-1. Please see [migration notes](https://github.com/facebookresearch/dynabench#backend) to understand how yoyo works.
+1. Please see [migration notes](https://github.com/mlcommons/dynabench#backend) to understand how yoyo works.
 1. Create a migration script following the above commands and for the content follow the existing
-[migration script])(https://github.com/facebookresearch/dynabench/blob/master/api/migrations/20201215_01_Bb0Qw-add-advqa.py) created for VQA and create your own.
+[migration script])(https://github.com/mlcommons/dynabench/blob/master/api/migrations/20201215_01_Bb0Qw-add-advqa.py) created for VQA and create your own.
 
 # Task Frontend
 

@@ -74,7 +74,7 @@ const Advanced = (props) => {
                           specify the input/output format for dataset and model
                           submissions, as well as the fields in the create and
                           validation interfaces. See{" "}
-                          <a href="https://github.com/facebookresearch/dynabench/blob/main/docs/owners.md">
+                          <a href="https://github.com/mlcommons/dynabench/blob/main/docs/owners.md">
                             here
                           </a>{" "}
                           for more documentation. Please contact support or open
