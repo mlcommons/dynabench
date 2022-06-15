@@ -1,0 +1,27 @@
+name: Upload image to ECR
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        required: true
+        description: Name of branch to deploy.
+
+
+jobs:
+  setup-ecr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout
+        with:
+          ref: ${{ github.event.inputs.branch_name }}
+      - name: Package image and push to ECR
+        uses: appleboy/docker-ecr-action@master
+        with:
+          access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          repo: backend_api
+          registry: 877755283837.dkr.ecr.eu-west-3.amazonaws.com
+          tags: "latest,v${{ github.run_id }}"
+          dockerfile: Dockerfile.api
+          context:
