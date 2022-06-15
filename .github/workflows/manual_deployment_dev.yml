@@ -4,7 +4,7 @@ on:
     inputs:
       branch_name:
         required: true
-        description: Name of branch to deploy.
+        description: Name of branch  to deploy.
 
 
 jobs:
