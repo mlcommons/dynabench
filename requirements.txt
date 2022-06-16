@@ -22,3 +22,4 @@ spacy
 pyyaml
 textflint
 ujson>=4.2.0
+python-dotenv
