@@ -46,6 +46,8 @@ def add_cors_headers():
             "beta.dynabench.org",
             "api.dynabench.org",
             "dynabench.mlcommons.org",
+            "api-prod.dynabench.org",
+            "api-dev.dynabench.org",
         ]
     else:
         valid_hostnames = ["localhost"]

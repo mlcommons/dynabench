@@ -11,7 +11,7 @@ jobs:
   setup-ecr:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: Checkout
         with:
           ref: ${{ github.event.inputs.branch_name }}
