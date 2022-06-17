@@ -8,11 +8,11 @@ on:
 
 
 jobs:
-  setup-ecr:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        name: Checkout
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.branch_name }}
           token: ${{ secrets.ACCESS_TOKEN }}
