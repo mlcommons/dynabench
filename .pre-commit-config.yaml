@@ -20,14 +20,14 @@ repos:
     hooks:
     -   id: detect-aws
         name: Detect AWS Credentials
-        entry: python -m detect_aws_credentials
+        entry: python3 -m detect_aws_credentials
         language: system
 
 -   repo: local
     hooks:
     -   id: insecure-cors-configuration
         name: Detect Insecure CORS Configuration
-        entry: python -m detect_insecure_cors_configuration
+        entry: python3 -m detect_insecure_cors_configuration
         language: system
 
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
