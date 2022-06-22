@@ -6,6 +6,14 @@ on:
         required: true
         description: Name of branch  to deploy.
 
+env:
+  AWS_REGION: eu-west-3                   # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: backend-api           # set this to your Amazon ECR repository name
+  ECS_SERVICE: dyna-cluster-api-service               # set this to your Amazon ECS service name
+  ECS_CLUSTER: dyna-api                # set this to your Amazon ECS cluster name
+  ECS_TASK_DEFINITION: ./devops/ecs-task-definition.json # set this to the path to your Amazon ECS task definition
+  CONTAINER_NAME: dyna-cluster-api
+
 
 jobs:
   build:
@@ -35,6 +43,23 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Fill new image ID in the ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
 
       - name: Log out of ECR
         if: always()
