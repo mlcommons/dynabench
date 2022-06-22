@@ -258,6 +258,19 @@ def get_sp_bleu_meta(task=None):
     return {"unit": "", "pretty_name": "sp-BLEU", "utility_direction": 1, "offset": 0}
 
 
+def get_chrf_pp(predictions: list, targets: list):
+    """Chrf++ metric.
+
+    Note: word_order=2 is important otherwise we only get chrf
+    """
+    chrf = sacrebleu.corpus_chrf(predictions, [targets], word_order=2)
+    return chrf.score
+
+
+def get_chrf_pp_meta(task=None):
+    return {"unit": "", "pretty_name": "ᴄʜʀF++", "utility_direction": 1, "offset": 0}
+
+
 # job_metrics, takes raw job and dataset as input
 def get_memory_utilization(job, dataset):
     mem = (

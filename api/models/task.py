@@ -173,6 +173,7 @@ class PerfMetricEnum(enum.Enum):
     accuracy = "accuracy"
     sp_bleu = "sp_bleu"
     bleu = "bleu"
+    chrf_pp = "chrf_pp"
     vqa_accuracy = "vqa_accuracy"
     dataperf_f1 = "dataperf_f1"
 
@@ -240,6 +241,15 @@ def verify_bleu_config(config_obj):
     # is a string or string selection
 
 
+def verify_chrf_pp_config(config_obj):
+    prefixed_message = "in chrf_pp config: "
+    assert "reference_name" in config_obj, (
+        prefixed_message + "reference_name must be in config object"
+    )
+    # TODO: could do more verification to ensure that the type of the referenced object
+    # is a string or string selection
+
+
 perf_metric_config_verifiers = {
     PerfMetricEnum.macro_f1.name: verify_macro_f1_config,
     PerfMetricEnum.squad_f1.name: verify_squad_f1_config,
@@ -248,6 +258,7 @@ perf_metric_config_verifiers = {
     PerfMetricEnum.accuracy.name: verify_accuracy_config,
     PerfMetricEnum.sp_bleu.name: verify_sp_bleu_config,
     PerfMetricEnum.bleu.name: verify_bleu_config,
+    PerfMetricEnum.chrf_pp.name: verify_chrf_pp_config,
 }
 
 
