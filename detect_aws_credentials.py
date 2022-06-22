@@ -18,14 +18,7 @@ class BadFile(NamedTuple):
 def get_aws_cred_files_from_env() -> Set[str]:
     """Extract credential file paths from environment variables."""
     return {
-        os.environ[env_var]
-        for env_var in (
-            "AWS_CONFIG_FILE",
-            "AWS_CREDENTIAL_FILE",
-            "AWS_SHARED_CREDENTIALS_FILE",
-            "BOTO_CONFIG",
-        )
-        if env_var in os.environ
+        os.environ[env_var] for env_var in ("BOTO_CONFIG",) if env_var in os.environ
     }
 
 
@@ -33,7 +26,6 @@ def get_aws_secrets_from_env() -> Set[str]:
     """Extract AWS secrets from environment variables."""
     keys = set()
     for env_var in (
-        "AWS_SECRET_ACCESS_KEY",
         "AWS_SECURITY_TOKEN",
         "AWS_SESSION_TOKEN",
     ):
@@ -111,8 +103,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="append",
         default=[
             f"{curr_path}/builder/build_config.py",
-            f"{curr_path}/evaluation/eval_config.py",
-            f"{curr_path}/api/common/config.py",
         ],
         help=(
             "Location of additional AWS credential file from which to get "
