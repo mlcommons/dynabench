@@ -16,12 +16,7 @@ repos:
         args: ['--maxkb=500']
     -   id: end-of-file-fixer
 
--   repo: local
-    hooks:
-    -   id: detect-aws
-        name: Detect AWS Credentials
-        entry: python3 -m detect_aws_credentials
-        language: system
+
 
 -   repo: local
     hooks:
