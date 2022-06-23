@@ -8,32 +8,29 @@ on:
 
 
 jobs:
-  deploy:
-    name: Deploy
+  build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-
-    - name: Install Node.js
+    - name: Use Node.js 13.x
       uses: actions/setup-node@v1
       with:
         node-version: 13.x
-
     - name: Install dependencies
       run:  npm install
-
     - name: Build project
       run:  npm build
-
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-3
-
     - name: Deploy static site to S3 bucket
       uses: lbertenasco/s3-deploy@v1
           with:
