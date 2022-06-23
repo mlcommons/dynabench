@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  api:
+    build: .
+    ports:
+    - "8081:8081"
+    container_name: backend
+  react:
+    build: ./frontends/web
+    ports:
+    - "3000:3000"
+    container_name: frontend
