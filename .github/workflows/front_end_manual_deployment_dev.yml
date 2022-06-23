@@ -1,10 +1,10 @@
-name: Deploy build to Amazon S3
+name: Deploy to AWS S3
 on:
   workflow_dispatch:
     inputs:
-        branch_name:
-          required: true
-          description: Name of branch  to deploy.
+      branch_name:
+        required: true
+        description: Name of branch  to deploy.
 
 
 jobs:
