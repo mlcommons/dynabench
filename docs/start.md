@@ -84,3 +84,13 @@ npm start
 ```
 
 If you get a warning about SSL certificates, edit the corresponding paths in `package.json`. Your frontend should now be running at https://localhost:3000.
+
+## Docker Compose
+Alternatively, you can run the following two commands to setup both backend and frontend locally:
+
+```
+docker-compose build --no-cache
+docker-compose up
+```
+
+Backend will be running on localhost:8081 and Frontend will be running on localhost:3000.
