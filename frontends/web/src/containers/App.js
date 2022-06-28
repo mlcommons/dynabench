@@ -382,7 +382,7 @@ class App extends React.Component {
                 <Container fluid>
                   <Row>
                     <div className="footer-nav-link">
-                      Copyright © 2020 Facebook, Inc.
+                      Copyright © 2022 MLCommons, Inc.
                     </div>
                     <div className="footer-nav-link">
                       <Link to="/contact" className="text-reset">
