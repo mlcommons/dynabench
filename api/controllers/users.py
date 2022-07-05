@@ -465,3 +465,26 @@ def upload_user_profile_picture(credentials, id):
     except Exception as ex:
         logger.exception("Could not upload user profile picture: %s" % (ex))
         bottle.abort(400, "Could not upload user profile picture")
+
+
+@bottle.post("/users/<id:int>/model/upload")
+@_auth.requires_auth
+def model_upload_s3_dynalab_2():
+    """
+    Update user profile details like  real name, affiliation  and user name
+    :param credentials: Authentication detail
+    :param id: User id
+    :return: Json Object
+    """
+    upload = bottle.request.files.get("file")
+    app = bottle.default_app()
+    s3_service = app.config["s3_service"]
+    # upload new avatar picture with new uuid into s3 bucket
+
+    response = s3_service.put_object(
+        Body=upload.file,
+        Bucket=app.config["aws_s3_bucket_name"],
+        Key="models/test.zip",
+        ContentType=upload.content_type,
+    )
+    return response

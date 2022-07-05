@@ -115,6 +115,19 @@ export default class ApiService {
     });
   }
 
+  uploadModelUser(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const token = this.getToken();
+    return this.fetch(`${this.domain}/users/1/model/upload`, {
+      method: "POST",
+      body: formData,
+      headers: {
+        Authorization: token ? "Bearer " + token : "None",
+      },
+    });
+  }
+
   getAsyncBadges() {
     return this.fetch(`${this.domain}/badges/getasync`, {
       method: "GET",

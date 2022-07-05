@@ -24,10 +24,10 @@ const SubmitModel = () => {
   const handleSubmitModel = (e) => {
     e.preventDefault();
     const user = context.api.getCredentials();
-    const files = inputFile.files[0];
-    console.log(files);
+    const file = inputFile.files[0];
+    console.log(file);
     const fetchData = async () => {
-      await context.api.uploadModelUser(user.id, files);
+      await context.api.uploadModelUser(file);
     };
     fetchData();
   };

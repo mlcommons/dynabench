@@ -11,6 +11,6 @@ COPY api api
 COPY evaluation evaluation
 # Run API server
 WORKDIR /dynabench/api
-ENV PORT 8081
+ENV PORT 8080
 EXPOSE 8080
-CMD python server.py dev
+CMD python server.py prod
