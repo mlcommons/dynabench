@@ -18,6 +18,7 @@ import { useState } from "react";
 import { TokenAnnotator } from "react-text-annotate";
 import AtomicImage from "./AtomicImage";
 import "./AnnotationComponent.css";
+import Player from "../../components/Player/Player.js";
 
 const Multilabel = ({
   displayName,
@@ -381,6 +382,65 @@ const ImageComponent = ({
   );
 };
 
+const Audio = ({
+  displayName,
+  className,
+  create,
+  data,
+  setData,
+  name,
+  configObj,
+  showName = true,
+  inputReminder = false,
+}) => {
+  return (
+    <>
+      {!create ? (
+        <>
+          {showName && (
+            <h6 className={"spaced-header " + className}>
+              {displayName ? displayName : name}:
+            </h6>
+          )}
+          <AtomicImage src={data[name]} />
+        </>
+      ) : data[name] ? (
+        <>
+          <Button
+            onClick={(event) => {
+              data[name] = null;
+              setData(data);
+            }}
+          >
+            <i className="fas fa-trash-alt"></i>
+          </Button>
+          <AtomicImage src={data[name]} />
+        </>
+      ) : (
+        <div
+          className={inputReminder ? "p-2 border rounded border-danger" : ""}
+        >
+          <FormControl
+            className={"rounded-1 thick-border p-3 " + className}
+            placeholder={
+              "Enter link to audio (we only allow pasteing of valid audio urls (mp3, flac))..."
+            }
+            value={data[name] ? data[name] : ""}
+            onChange={(event) => {
+              const url = event.target.value;
+              isImageUrl(url, () => {
+                data[name] = url;
+                setData(data);
+              });
+            }}
+            required={true}
+          />
+        </div>
+      )}
+    </>
+  );
+};
+
 const AnnotationComponent = ({
   displayName,
   className,
@@ -467,6 +527,18 @@ const AnnotationComponent = ({
     case "prob":
       return (
         <Prob
+          create={create}
+          name={name}
+          data={data}
+          setData={setData}
+          configObj={configObj}
+          showName={showName}
+          inputReminder={inputReminder}
+        />
+      );
+    case "audio":
+      return (
+        <Audio
           create={create}
           name={name}
           data={data}
