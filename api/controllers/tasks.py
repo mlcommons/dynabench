@@ -13,6 +13,7 @@ import yaml
 import common.auth as _auth
 import common.helpers as util
 import common.mail_service as mail
+from common.config import config as config_env
 from common.logging import logger
 from models.context import Context
 from models.dataset import Dataset, DatasetModel
@@ -127,6 +128,7 @@ perf_metric:
             """,
             cur_round=1,
             last_updated=db.sql.func.now(),
+            s3_bucket=config_env["aws_s3_bucket_name"],
             context="min",
         )  # Annotation config is sentiment example.
 

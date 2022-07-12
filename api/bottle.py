@@ -3585,16 +3585,10 @@ class CherryPyServer(ServerAdapter):
 class CherootServer(ServerAdapter):
     def run(self, handler):  # pragma: no cover
         from cheroot import wsgi
-        from cheroot.ssl import builtin
 
         self.options["bind_addr"] = (self.host, self.port)
         self.options["wsgi_app"] = handler
-        certfile = self.options.pop("certfile", None)
-        keyfile = self.options.pop("keyfile", None)
-        chainfile = self.options.pop("chainfile", None)
         server = wsgi.Server(**self.options)
-        if certfile and keyfile:
-            server.ssl_adapter = builtin.BuiltinSSLAdapter(certfile, keyfile, chainfile)
         try:
             server.start()
         finally:
