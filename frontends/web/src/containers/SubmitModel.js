@@ -66,14 +66,14 @@ const SubmitModel = (props) => {
               <h2 className="task-page-header d-block font-weight-normal m-0 text-reset">
                 Imagine you developed a fancy model, living in
                 /path/to/fancy_project, and you want to share your amazing
-                results on the Dynabench model leaderboard. Dynalab makes it
-                easy for you to do just that
+                results on the Dynabench model leaderboard. Dynalab 2.0 makes it
+                easy for you to do just that.
               </h2>
             </div>
             <div className="mt-5">
               <ul>
                 <li>
-                  <strong>Download dynalab 2.0</strong>
+                  <strong>Download Dynalab 2.0</strong>
                   <p>
                     Please download{" "}
                     <a
@@ -83,45 +83,47 @@ const SubmitModel = (props) => {
                       {" "}
                       this
                     </a>{" "}
-                    project, and unzip in your own computer
+                    project, and unzip in your own computer.
                   </p>
                 </li>
                 <li>
                   <strong>Understand the folders</strong>
                   <p>
                     Inside the repository you will find a folder called app.
-                    Inside this folder you will find a folder called domain.
-                    Finally you will find a file called model.py, this is the
-                    only file that must be modified.
+                    This folder contains three folders: api, domain, and
+                    resources. The api stores some logic you don't need to
+                    touch. Resources is empty, and that's the place where you'll
+                    want to stote your model's components (i.e. weights,
+                    tokenizers, processors, etc.). Finally, the domain folder is
+                    where you'll be including your models logic. Specifically,
+                    look for the model.py file.
                   </p>
                 </li>
                 <li>
                   <strong>Single evaluation function</strong>
                   <p>
                     In this file you will find a class called "ModelController"
-                    with only two methods. The class contains only one mandatory
-                    method called "single_evaluation". As its name indicates
-                    this method must receive a single input and return a
-                    prediction.
+                    with only two methods: the class constructor, and a method
+                    called "single_evaluation". This is the method you need to
+                    update. As its name indicates this method must receive a
+                    single example as an input and return a prediction.
                   </p>
                 </li>
                 <li>
                   <strong>More classes, functions, ...</strong>
                   <p>
                     It is important to mention that you can create as many
-                    functions, classes, or variables as you consider necessary,
-                    just keeping in mind that the final result will be contained
-                    in the "single_evaluation" function of the "ModelController"
-                    class.
+                    functions, classes, or variables as you consider necessary.
+                    Keep in mind that the final result will be contained in the
+                    "single_evaluation" function of the "ModelController" class.
                   </p>
                 </li>
                 <li>
-                  <strong>Where put your model and dependencies</strong>
+                  <strong>Include the dependencies</strong>
                   <p>
-                    To store the different components of the model (weights,
-                    tokenizers, processors, etc) there is a folder called
-                    resources. Remember to put all the libraries necessary for
-                    your model in requirements.txt
+                    Don't forget to include the dependencies required to run
+                    your model on the requirements.txt file, without removing
+                    any of the libraries already included there.
                   </p>
                 </li>
                 <li>
@@ -134,9 +136,26 @@ const SubmitModel = (props) => {
                       <li>source env/bin/activate</li>
                       <li>python3 -m pip install -r requirements.txt</li>
                       <li>python3 -m uvicorn app.app:app --reload</li>
-                      <li>test the single_evaluation method</li>
                     </ul>
+                    Once you run the last command, open localhost:8000/docs on
+                    your favorite browser (i.e. Chrome, Firefox, Brave, etc.).
+                    In there, a FastAPI interface should allow you to test the
+                    POST request. Click on the single evaluation method, and
+                    then on the 'Try it out' button. Finally, fill the request
+                    body with your desired input, and click the execute button.
+                    Getting a 200 code as a response means you're ready to go!
                   </p>
+                </li>
+                <li>
+                  <strong>Upload your model</strong>
+                  <p>
+                    Once you're done testing, zip the whole repository. Finally,
+                    upload the zip file using the 'Upload model' button down
+                    below, and finally click on submit model. Congratulations,
+                    you've submitted your model to Dynabench.
+                  </p>
+                </li>
+                <li>
                   <div className="m-3">
                     <input id="input-file" className="d-none" type="file" />
                     {loadingFile ? (
