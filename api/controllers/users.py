@@ -6,12 +6,14 @@ import os
 import urllib
 from datetime import datetime, timedelta
 
+import boto3
 import bottle
 import uuid
 
 import common.auth as _auth
 import common.helpers as util
 import common.mail_service as mail
+from common.config import config as config_file
 from common.logging import logger
 from models.badge import BadgeModel
 from models.leaderboard_configuration import LeaderboardConfigurationModel
@@ -467,24 +469,42 @@ def upload_user_profile_picture(credentials, id):
         bottle.abort(400, "Could not upload user profile picture")
 
 
-@bottle.post("/users/<id:int>/model/upload")
+@bottle.post("/users/model/upload")
 @_auth.requires_auth
-def model_upload_s3_dynalab_2():
-    """
-    Update user profile details like  real name, affiliation  and user name
-    :param credentials: Authentication detail
-    :param id: User id
-    :return: Json Object
-    """
+def model_upload_s3_dynalab_2(credentials):
     upload = bottle.request.files.get("file")
-    app = bottle.default_app()
-    s3_service = app.config["s3_service"]
-    # upload new avatar picture with new uuid into s3 bucket
+    file_name = bottle.request.forms.get("file_name")
+    file_type = bottle.request.forms.get("file_type")
+    user_name = bottle.request.forms.get("user_name")
+    user_id = bottle.request.forms.get("user_id")
+    task_code = bottle.request.forms.get("task_code")
 
+    session = boto3.Session(
+        aws_access_key_id=config_file["aws_access_key_id"],
+        aws_secret_access_key=config_file["aws_secret_access_key"],
+        region_name=config_file["aws_region"],
+    )
+    s3_service = session.client("s3")
+    sqs_service = session.client("sqs")
+
+    if file_type != "application/zip":
+        bottle.abort(403, "It's not a zip file")
     response = s3_service.put_object(
         Body=upload.file,
-        Bucket=app.config["aws_s3_bucket_name"],
-        Key="models/test.zip",
+        Bucket=config_file["aws_s3_bucket_name"],
+        Key=f"models/{task_code}/{user_id}-{file_name}",
         ContentType=upload.content_type,
+    )
+    queue = sqs_service.get_queue_url(QueueName=config_file["new_builder_sqs_queue"])
+    sqs_service.send_message(
+        QueueUrl=queue["QueueUrl"],
+        MessageBody=util.json_encode(
+            {
+                "s3_uri": f"models/{task_code}/{user_id}-{file_name}",
+                "user_id": user_id,
+                "user_name": user_name,
+                "task_code": task_code,
+            }
+        ),
     )
     return response

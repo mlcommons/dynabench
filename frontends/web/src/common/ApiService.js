@@ -115,11 +115,16 @@ export default class ApiService {
     });
   }
 
-  uploadModelUser(file) {
+  uploadModelUser(file, userName, fileName, fileType, userId, taskCode) {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("file_name", fileName);
+    formData.append("file_type", fileType);
+    formData.append("user_name", userName);
+    formData.append("user_id", userId);
+    formData.append("task_code", taskCode);
     const token = this.getToken();
-    return this.fetch(`${this.domain}/users/1/model/upload`, {
+    return this.fetch(`${this.domain}/users/model/upload`, {
       method: "POST",
       body: formData,
       headers: {
