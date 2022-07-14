@@ -560,6 +560,20 @@ def get_task(task_id_or_code):
     return util.json_encode(task)
 
 
+@bottle.get("/tasks/<task_id_or_code>/dynalab")
+def get_dynalab_task(task_id_or_code):
+    if task_id_or_code == "18":
+        return util.json_encode(
+            """https://models-dynalab.s3.eu-west-3.amazonaws.com/
+            flores-full/dynalab-base-flores.zip"""
+        )
+    else:
+        return util.json_encode(
+            f"""https://models-dynalab.s3.eu-west-3.amazonaws.com/
+            {task_id_or_code}/dynalab-base-{task_id_or_code}.zip"""
+        )
+
+
 @bottle.get("/tasks/<tid:int>/<rid:int>")
 def get_task_round(tid, rid):
     rm = RoundModel()

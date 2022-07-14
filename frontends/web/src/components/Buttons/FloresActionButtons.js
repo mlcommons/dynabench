@@ -7,6 +7,8 @@
 import React from "react";
 import { Button, Nav, Tooltip, OverlayTrigger } from "react-bootstrap";
 import { Annotation } from "../../containers/Overlay";
+import { Link } from "react-router-dom";
+import SubmitModel from "../../containers/SubmitModel";
 
 const FloresActionButtons = () => {
   function renderTooltip(props, text) {
@@ -34,9 +36,9 @@ const FloresActionButtons = () => {
             overlay={renderSubmitTooltip}
           >
             <Button
+              as={Link}
               className="border-0 blue-color font-weight-bold light-gray-bg"
-              href="https://github.com/facebookresearch/flores/blob/master/dynalab/README.md"
-              target="_blank"
+              to={`/tasks/18/uploadModel`}
             >
               <i className="fas fa-upload"></i> Submit Models
             </Button>
