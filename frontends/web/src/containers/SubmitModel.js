@@ -16,21 +16,17 @@ const SubmitModel = (props) => {
   const [loadingFile, setLoadingFile] = useState(true);
   const [loading, setLoading] = useState(true);
   const [dynalab, setDynalab] = useState("");
-  const [taskData, setTaskData] = useState({});
 
   useEffect(() => {
     setInputFile(document.getElementById("input-file"));
     const fetchTaskData = async () => {
+      setLoading(false);
       const taskData = await context.api.getTask(props.match.params.taskCode);
-      setTaskData(taskData);
-    };
-    const fetchDynalabData = async () => {
-      const dynalab = await context.api.getDynalabTask(
-        props.match.params.taskCode
-      );
+      const taskCode = taskData.task_code.replace(/^\s+|\s+$/gm, "");
+      const dynalab = await context.api.getDynalabTask(taskCode);
       setDynalab(dynalab);
+      setLoading(true);
     };
-    fetchDynalabData();
     fetchTaskData();
   }, []);
 
@@ -72,10 +68,7 @@ const SubmitModel = (props) => {
                 Upload your own model
               </h1>
               <h2 className="task-page-header d-block font-weight-normal m-0 text-reset">
-                Imagine you developed a fancy model, living in
-                /path/to/fancy_project, and you want to share your amazing
-                results on the Dynabench model leaderboard. Dynalab 2.0 makes it
-                easy for you to do just that.
+                The instructions for model uploads are as follows:
               </h2>
             </div>
             <div className="mt-5">
@@ -167,7 +160,11 @@ const SubmitModel = (props) => {
                     <Row>
                       <Col className="text-center">
                         <center>
-                          <Button variant="primary" onClick={handleUploadModel}>
+                          <Button
+                            variant="primary"
+                            className="center-submit-model"
+                            onClick={handleUploadModel}
+                          >
                             <i className="fas fa-edit"></i> Upload model
                           </Button>
                         </center>
@@ -177,7 +174,11 @@ const SubmitModel = (props) => {
                     <Row>
                       <Col className="text-center">
                         <center>
-                          <Button variant="primary" onClick={handleSubmitModel}>
+                          <Button
+                            variant="primary"
+                            className="center-submit-model"
+                            onClick={handleSubmitModel}
+                          >
                             <i className="fas fa-edit"></i> Submit model
                           </Button>
                         </center>
@@ -192,8 +193,8 @@ const SubmitModel = (props) => {
                 Have a question?
               </h2>
               <a href="mailto:dynabench@fb.com">
-                <Button className="button-ellipse blue-bg home-readmore-btn border-0">
-                  Reach out to us
+                <Button variant="primary">
+                  <i className="fas fa-edit"></i> Reach out to us
                 </Button>
               </a>
             </div>
@@ -207,8 +208,7 @@ const SubmitModel = (props) => {
               role="status"
               aria-hidden="true"
             ></span>
-            &nbsp;&nbsp; &nbsp;Uploading your awesome model, please don't close
-            this window...
+            &nbsp;&nbsp; &nbsp;Loading
           </button>
         </div>
       )}

@@ -8,9 +8,8 @@ import React from "react";
 import { Button, Nav, Tooltip, OverlayTrigger } from "react-bootstrap";
 import { Annotation } from "../../containers/Overlay";
 import { Link } from "react-router-dom";
-import SubmitModel from "../../containers/SubmitModel";
 
-const FloresActionButtons = () => {
+const FloresActionButtons = ({ taskId }) => {
   function renderTooltip(props, text) {
     return (
       <Tooltip id="button-tooltip" {...props}>
@@ -38,7 +37,7 @@ const FloresActionButtons = () => {
             <Button
               as={Link}
               className="border-0 blue-color font-weight-bold light-gray-bg"
-              to={`/tasks/18/uploadModel`}
+              to={`/tasks/${taskId}/uploadModel`}
             >
               <i className="fas fa-upload"></i> Submit Models
             </Button>
