@@ -9,23 +9,52 @@ import { Button, Col, Container, Row } from "react-bootstrap";
 import UserContext from "../containers/UserContext";
 import "./SubmitModel.css";
 
+const LoadingButton = ({ text }) => {
+  return (
+    <div className="center-loading">
+      <button className="btn btn-primary" type="button" disabled>
+        <span
+          className="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        &nbsp;&nbsp; &nbsp;{text}
+      </button>
+    </div>
+  );
+};
+
 const SubmitModel = (props) => {
   const context = useContext(UserContext);
 
   const [inputFile, setInputFile] = useState(null);
   const [loadingFile, setLoadingFile] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState({
+    loading: true,
+    text: "",
+  });
   const [dynalab, setDynalab] = useState("");
 
   useEffect(() => {
     setInputFile(document.getElementById("input-file"));
     const fetchTaskData = async () => {
-      setLoading(false);
+      setLoading({ loading: false, text: "Loading" });
       const taskData = await context.api.getTask(props.match.params.taskCode);
       const taskCode = taskData.task_code.replace(/^\s+|\s+$/gm, "");
-      const dynalab = await context.api.getDynalabTask(taskCode);
-      setDynalab(dynalab);
-      setLoading(true);
+      if (!context.api.loggedIn()) {
+        props.history.push(
+          "/login?msg=" +
+            encodeURIComponent(
+              "Please sign up or log in so that you can upload a model"
+            ) +
+            "&src=" +
+            encodeURIComponent(`/tasks/${taskCode}/uploadModel`)
+        );
+      } else {
+        const dynalab = await context.api.getDynalabTask(taskCode);
+        setDynalab(dynalab);
+        setLoading({ loading: true, text: "Loading" });
+      }
     };
     fetchTaskData();
   }, []);
@@ -41,7 +70,10 @@ const SubmitModel = (props) => {
       const user = context.api.getCredentials();
       const file = inputFile.files[0];
       const sendModelData = async () => {
-        setLoading(false);
+        setLoading({
+          loading: false,
+          text: "Your model is being uploaded, you can continue enjoying Dyanabench",
+        });
         await context.api.uploadModelUser(
           file,
           user.username,
@@ -50,17 +82,18 @@ const SubmitModel = (props) => {
           user.id,
           props.match.params.taskCode
         );
-        setLoading(true);
+        setLoading({ loading: false, text: "Done" });
       };
       sendModelData();
     } else {
       alert("Please upload a model");
-      setLoadingFile(true);
+      setLoading({ loading: false, text: "Done" });
     }
   };
+
   return (
     <>
-      {loading ? (
+      {loading.loading ? (
         <Container className="mb-5 pb-5">
           <Col className="m-auto" lg={9}>
             <div className="mb-5 text-center">
@@ -126,7 +159,7 @@ const SubmitModel = (props) => {
                 </li>
                 <li>
                   <strong>Test your model</strong>
-                  <p>
+                  <span>
                     To make sure everything is working as intended, you have to
                     run the following commands:
                     <ul>
@@ -135,6 +168,7 @@ const SubmitModel = (props) => {
                       <li>python3 -m pip install -r requirements.txt</li>
                       <li>python3 -m uvicorn app.app:app --reload</li>
                     </ul>
+                    <br />
                     Once you run the last command, open localhost:8000/docs on
                     your favorite browser (i.e. Chrome, Firefox, Brave, etc.).
                     In there, a FastAPI interface should allow you to test the
@@ -142,16 +176,17 @@ const SubmitModel = (props) => {
                     then on the 'Try it out' button. Finally, fill the request
                     body with your desired input, and click the execute button.
                     Getting a 200 code as a response means you're ready to go!
-                  </p>
+                  </span>
                 </li>
+                <br />
                 <li>
                   <strong>Upload your model</strong>
-                  <p>
+                  <span>
                     Once you're done testing, zip the whole repository. Finally,
                     upload the zip file using the 'Upload model' button down
                     below, and finally click on submit model. Congratulations,
                     you've submitted your model to Dynabench.
-                  </p>
+                  </span>
                 </li>
 
                 <div className="m-3">
@@ -201,16 +236,7 @@ const SubmitModel = (props) => {
           </Col>
         </Container>
       ) : (
-        <div className="center-loading">
-          <button className="btn btn-primary" type="button" disabled>
-            <span
-              className="spinner-border spinner-border-sm"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            &nbsp;&nbsp; &nbsp;Loading
-          </button>
-        </div>
+        <LoadingButton text={loading.text} />
       )}
     </>
   );
