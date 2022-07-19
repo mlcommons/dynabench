@@ -14,7 +14,7 @@ app.include_router(model.router, prefix="/model", tags=["model"])
 
 @app.get("/")
 def read_root():
-    return {"Hello": "Welcome to the jungle"}
+    return {"Hello": "Welcome to Dynalab"}
 
 
 handler = Mangum(app)

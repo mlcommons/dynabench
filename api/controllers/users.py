@@ -3,6 +3,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
+import secrets
 import urllib
 from datetime import datetime, timedelta
 
@@ -21,6 +22,7 @@ from models.leaderboard_snapshot import LeaderboardSnapshotModel
 from models.model import ModelModel
 from models.notification import NotificationModel
 from models.refresh_token import RefreshTokenModel
+from models.task import TaskModel
 from models.task_user_permission import TaskUserPermissionModel
 from models.user import UserModel
 
@@ -479,6 +481,15 @@ def model_upload_s3_dynalab_2(credentials):
     user_id = bottle.request.forms.get("user_id")
     task_code = bottle.request.forms.get("task_code")
 
+    task_model = TaskModel()
+    task = task_model.getByTaskCode(task_code)
+    if not task:
+        bottle.abort(404, "Task not found")
+    if not task.submitable:
+        bottle.abort(403, "Task not available for model submission")
+    if file_type != "application/zip":
+        bottle.abort(403, "It's not a zip file")
+
     session = boto3.Session(
         aws_access_key_id=config_file["aws_access_key_id"],
         aws_secret_access_key=config_file["aws_secret_access_key"],
@@ -487,14 +498,35 @@ def model_upload_s3_dynalab_2(credentials):
     s3_service = session.client("s3")
     sqs_service = session.client("sqs")
 
-    if file_type != "application/zip":
-        bottle.abort(403, "It's not a zip file")
     response = s3_service.put_object(
         Body=upload.file,
         Bucket=config_file["aws_s3_bucket_name"],
         Key=f"models/{task_code}/{user_id}-{file_name}",
         ContentType=upload.content_type,
     )
+
+    model = ModelModel()
+    model = model.create(
+        task_id=task.id,
+        user_id=user_id,
+        name=file_name,
+        shortname="",
+        longdesc="",
+        desc="",
+        upload_datetime=datetime.now(),
+        endpoint_name="",
+        deployment_status="uploaded",
+        secret=secrets.token_hex(),
+    )
+
+    u = UserModel()
+    user_id = credentials["id"]
+    user = u.get(user_id)
+
+    user_model = UserModel()
+    user = user_model.get(user_id)
+    user_model.incrementModelSubmitCount(user.to_dict()["id"])
+
     queue = sqs_service.get_queue_url(QueueName=config_file["new_builder_sqs_queue"])
     sqs_service.send_message(
         QueueUrl=queue["QueueUrl"],

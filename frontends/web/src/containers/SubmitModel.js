@@ -72,7 +72,7 @@ const SubmitModel = (props) => {
       const sendModelData = async () => {
         setLoading({
           loading: false,
-          text: "Your model is being uploaded, you can continue enjoying Dyanabench",
+          text: "Your model is being uploaded, you can continue enjoying Dynabench",
         });
         await context.api.uploadModelUser(
           file,
@@ -82,10 +82,11 @@ const SubmitModel = (props) => {
           user.id,
           props.match.params.taskCode
         );
-        setLoading({ loading: false, text: "Done" });
+        setLoading({ loading: true, text: "Done" });
       };
       sendModelData();
     } else {
+      setLoadingFile(true);
       alert("Please upload a model");
       setLoading({ loading: true, text: "Done" });
     }
