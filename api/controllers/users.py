@@ -519,10 +519,6 @@ def model_upload_s3_dynalab_2(credentials):
         secret=secrets.token_hex(),
     )
 
-    u = UserModel()
-    user_id = credentials["id"]
-    user = u.get(user_id)
-
     user_model = UserModel()
     user = user_model.get(user_id)
     user_model.incrementModelSubmitCount(user.to_dict()["id"])
