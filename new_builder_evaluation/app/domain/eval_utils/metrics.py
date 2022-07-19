@@ -12,9 +12,9 @@ import sacrebleu
 import sentencepiece
 from sklearn.metrics import f1_score
 
-#from app.domain.eval_utils.instance_property import instance_property
+from app.domain.eval_utils.instance_property import instance_property
 
-#from .vqa_accuracy import VQAEval
+from .vqa_accuracy import VQAEval
 
 
 # perf functions. propose to move to dynalab
