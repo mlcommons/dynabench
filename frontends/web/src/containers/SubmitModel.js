@@ -87,7 +87,7 @@ const SubmitModel = (props) => {
       sendModelData();
     } else {
       alert("Please upload a model");
-      setLoading({ loading: false, text: "Done" });
+      setLoading({ loading: true, text: "Done" });
     }
   };
 

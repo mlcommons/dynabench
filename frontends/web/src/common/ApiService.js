@@ -133,8 +133,8 @@ export default class ApiService {
     });
   }
 
-  getDynalabTask(idOrCode) {
-    return this.doFetch(`${this.domain}/tasks/${idOrCode}/dynalab`, {
+  getDynalabTask(TaskCode) {
+    return this.doFetch(`${this.domain}/tasks/${TaskCode}/dynalab`, {
       method: "GET",
     });
   }
