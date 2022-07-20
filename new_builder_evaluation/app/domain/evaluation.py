@@ -156,21 +156,21 @@ class Evaluation:
 
         formatted_dict = {}
         for data_type in data_dict:
-            huevon = f"formatted_{data_type}"
-            ferovaes = f"grouped_{data_type}"
+            formatted_key = f"formatted_{data_type}"
+            grouped_key = f"grouped_{data_type}"
             if "dataset" in data_type:
-                formatted_dict[huevon] = input_formatter.format_labels(
+                formatted_dict[formatted_key] = input_formatter.format_labels(
                     data_dict[data_type]
                 )
-                formatted_dict[ferovaes] = input_formatter.group_labels(
-                    formatted_dict[huevon]
+                formatted_dict[grouped_key] = input_formatter.group_labels(
+                    formatted_dict[formatted_key]
                 )
             elif "predictions" in data_type:
-                formatted_dict[huevon] = input_formatter.format_predictions(
+                formatted_dict[formatted_key] = input_formatter.format_predictions(
                     data_dict[data_type]
                 )
-                formatted_dict[ferovaes] = input_formatter.group_predictions(
-                    formatted_dict[huevon]
+                formatted_dict[grouped_key] = input_formatter.group_predictions(
+                    formatted_dict[formatted_key]
                 )
 
         evaluator = Evaluator(task_configuration)
