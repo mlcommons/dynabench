@@ -1,11 +1,19 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 from fastapi import APIRouter
-from app.domain.evaluation import Evaluation
 from pydantic import BaseModel
+
+from app.domain.evaluation import Evaluation
+
 
 class ModelSingleInput(BaseModel):
     text: str
-    
+
+
 router = APIRouter()
+
 
 @router.get("/")
 async def hello():
