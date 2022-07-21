@@ -9,3 +9,11 @@ from app.infrastructure.repositories.abstract import AbstractRepository
 class RoundRepository(AbstractRepository):
     def __init__(self) -> None:
         super().__init__(Round)
+
+    def get_round_id_by_round_and_task(self, task_id: int, round_id: int):
+        instances = (
+            self.session.query(self.model)
+            .filter((self.model.rid == round_id) & (self.model.tid == task_id))
+            .first()
+        )
+        return instances
