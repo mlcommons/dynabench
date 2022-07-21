@@ -1,7 +1,5 @@
 from .metrics_dicts import eval_metrics_dict, delta_metrics_dict
 
-from metrics_dicts import eval_metrics_dict, delta_metrics_dict
-
 class Evaluator:
     def __init__(self, config: dict):
         self.config = config

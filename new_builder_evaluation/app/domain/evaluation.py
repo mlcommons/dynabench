@@ -6,9 +6,12 @@ import os
 import boto3
 import jsonlines
 import time
+from pathlib import Path
 
+from app import utils
 from app.domain.builder import Builder
-from app.infrastructure.repositories.task import TaskRepository 
+from app.infrastructure import repositories
+import app.infrastructure.repositories.task
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.domain.eval_utils.input_formatter import InputFormatter
@@ -16,7 +19,7 @@ from app.domain.eval_utils.evaluator import Evaluator
 
 
 class Evaluation:
-    
+
     def __init__(self):
         self.session = boto3.Session(
             aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
@@ -26,18 +29,25 @@ class Evaluation:
         self.s3 = self.session.client('s3')
         self.sqs = self.session.client('sqs')
         self.s3_bucket = os.getenv('AWS_S3_BUCKET')
+        assert self.s3_bucket
+        self.decentralized = bool(os.getenv("DYNABENCH_API"))
         self.builder = Builder()
-        self.task_repository = TaskRepository()
-        self.score_repository = ScoreRepository()
-        self.dataset_repository = DatasetRepository()
-        
+
+        if not self.decentralized:
+            self.task_repository = repositories.task.TaskRepository()
+            self.score_repository = ScoreRepository()
+            self.dataset_repository = DatasetRepository()
+        else:
+            self.task_repository = repositories.task.DecenTaskRepository()
+
+
     def require_fields_task(self):
-        return 
-        
-    def get_task_configuration(self, task_id:int):
-        task_configuration = yaml.safe_load( self.task_repository.get_by_id(task_id)['config_yaml'])
+        return
+
+    def get_task_configuration(self, task_id: int):
+        task_configuration = yaml.safe_load(self.task_repository.get_by_id(task_id)['config_yaml'])
         return task_configuration
-    
+
     def single_evaluation_ecs(self, ip:str, text):
         headers = {
             'accept': 'application/json',
@@ -47,21 +57,38 @@ class Evaluation:
         }
         response = requests.post('http://{}/model/single_evaluation'.format(ip), headers=headers, json=json_data)
         return json.loads(response.text)
-    
+
     def get_scoring_datasets(self, task_id: int, round_id: int):
+        if self.decentralized:
+            return ["flores101-small1-dev", "flores101-small1-devtest"]
+
         scoring_datasets = self.dataset_repository.get_scoring_datasets(task_id, round_id)
         jsonl_scoring_datasets = []
         for scoring_dataset in scoring_datasets:
             jsonl_scoring_datasets.append('{}'.format(scoring_dataset.name))
         return jsonl_scoring_datasets
-    
+
+    def dl_dataset(self, task_code: str, dataset: str, perturb_prefix: str = None) -> str:
+        if not perturb_prefix:
+            dataset_name = f'datasets/{task_code}/{dataset}.jsonl'
+        else:
+            dataset_name = f'datasets/{task_code}/{delta_metric}-{dataset}.jsonl'
+        local_path = f"./app/{dataset_name}.jsonl"
+
+        if self.decentralized:
+            file = utils.api_download_dataset(dataset, perturb_prefix)
+            Path(file).rename(local_path)
+        else:
+            self.s3.download_file(self.s3_bucket, dataset_name, local_path)
+        return Path(dataset_name).name
+
     def downloads_scoring_datasets(self, jsonl_scoring_datasets:list, bucket_name:str, task_code:str, delta_metrics:list):
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
             base_dataset_name = 'datasets/{}/{}.jsonl'.format(task_code, scoring_dataset)
             self.s3.download_file(bucket_name,
                                     base_dataset_name,
-                                    './app/datasets/{}.jsonl'.format(scoring_dataset))  
+                                    './app/datasets/{}.jsonl'.format(scoring_dataset))
             final_datasets.append('{}.jsonl'.format(scoring_dataset))
             for delta_metric in delta_metrics:
                 delta_dataset_name = 'datasets/{}/{}-{}.jsonl'.format(task_code, delta_metric, scoring_dataset)
@@ -70,11 +97,10 @@ class Evaluation:
                                     './app/datasets/{}-{}.jsonl'.format(delta_metric, scoring_dataset))
                 final_datasets.append('{}-{}.jsonl'.format(delta_metric, scoring_dataset))
         return final_datasets
-    
+
     def heavy_prediction(self, datasets:list, task_code:str, model:str):
-        #ip, model_name = self.builder.get_ip_ecs_task(model)
-        ip = '13.38.26.40'
-        model_name = 'dynalab-base-sentiment'
+        ip, model_name = self.builder.get_ip_ecs_task(model)
+        breakpoint()
         for dataset in datasets:
             with jsonlines.open('./app/datasets/{}'.format(dataset), 'r') as jsonl_f:
                 lst = [obj for obj in jsonl_f]
@@ -83,7 +109,7 @@ class Evaluation:
                 answer = self.single_evaluation_ecs(ip, line['statement'])
                 answer['signature'] = secrets.token_hex(15)
                 answer['id'] = line['uid']
-                responses.append(answer) 
+                responses.append(answer)
             predictions = './app/datasets/{}.out'.format(dataset)
             with jsonlines.open(predictions, 'w') as writer:
                 writer.write_all(responses)
@@ -100,7 +126,7 @@ class Evaluation:
 
     def evaluation(self, task:str, model_s3_zip:str):
         tasks = self.task_repository.get_id_and_code(task)
-        delta_metrics = self.get_task_configuration(tasks.task_id)['delta_metrics']
+        delta_metrics = self.get_task_configuration(tasks.task_id).get('delta_metrics', [])
         delta_metrics = [delta_metric['type'] for delta_metric in delta_metrics]
         jsonl_scoring_datasets = self.get_scoring_datasets(tasks.task_id, 1)
         datasets = self.downloads_scoring_datasets(jsonl_scoring_datasets, self.s3_bucket, tasks.task_code, delta_metrics)
@@ -176,8 +202,7 @@ class Evaluation:
                 except:
                     pass
             time.sleep(300)
-             
-        
+
     @staticmethod
     def _load_dataset(path: str):
         data = []
