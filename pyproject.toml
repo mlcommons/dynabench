@@ -7,7 +7,7 @@ known_third_party = [
     "torch", "tqdm", "werkzeug", "cryptography", "mephisto", "omegaconf", "hydra",
     "mmf", "PIL", "ts", "captum", "dateutil", "uuid", "pandas", "enum", "botocore",
     "sacrebleu", "sentencepiece", "sklearn", "dynalab", "datasets", "dynalab_cli",
-    "ujson", "sklearn", "spacy", "pyyaml", "yaml"
+    "ujson", "sklearn", "spacy", "pyyaml", "yaml", "fastapi",
 ]
 skip_glob = "**/build/**,frontends/**"
 combine_as_imports = true
