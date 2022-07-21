@@ -506,7 +506,7 @@ def model_upload_s3_dynalab_2(credentials):
     )
 
     model = ModelModel()
-    model = model.create(
+    model, model_id = model.create(
         task_id=task.id,
         user_id=user_id,
         name=file_name,
@@ -532,6 +532,7 @@ def model_upload_s3_dynalab_2(credentials):
                 "user_id": user_id,
                 "user_name": user_name,
                 "task_code": task_code,
+                "model_id": model_id,
             }
         ),
     )
