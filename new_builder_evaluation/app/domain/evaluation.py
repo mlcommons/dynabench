@@ -6,6 +6,7 @@ import importlib
 import json
 import os
 import secrets
+import shutil
 import sys
 import time
 
@@ -81,7 +82,9 @@ class Evaluation:
         bucket_name: str,
         task_code: str,
         delta_metrics: list,
+        model: str,
     ):
+        folder_name = model.split("/")[-1].split(".")[0]
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
             final_dataset = {}
@@ -91,7 +94,9 @@ class Evaluation:
             self.s3.download_file(
                 bucket_name,
                 base_dataset_name,
-                "./app/datasets/{}.jsonl".format(scoring_dataset["dataset"]),
+                "./app/{}/datasets/{}.jsonl".format(
+                    folder_name, scoring_dataset["dataset"]
+                ),
             )
             final_dataset["dataset_type"] = "base"
             final_dataset["round_id"] = scoring_dataset["round_id"]
@@ -106,8 +111,8 @@ class Evaluation:
                 self.s3.download_file(
                     bucket_name,
                     delta_dataset_name,
-                    "./app/datasets/{}-{}.jsonl".format(
-                        delta_metric, scoring_dataset["dataset"]
+                    "./app/{}/datasets/{}-{}.jsonl".format(
+                        folder_name, delta_metric, scoring_dataset["dataset"]
                     ),
                 )
                 final_dataset["dataset_type"] = delta_metric
@@ -120,12 +125,13 @@ class Evaluation:
         return final_datasets
 
     def heavy_prediction(self, datasets: list, task_code: str, model: str):
+        folder_name = model.split("/")[-1].split(".")[0]
         ip, model_name = self.builder.get_ip_ecs_task(model)
         final_dict_prediction = {}
         for dataset in datasets:
             dict_dataset_type = {}
             with jsonlines.open(
-                "./app/datasets/{}".format(dataset["dataset"]), "r"
+                "./app/{}/datasets/{}".format(folder_name, dataset["dataset"]), "r"
             ) as jsonl_f:
                 lst = [obj for obj in jsonl_f]
             responses = []
@@ -134,7 +140,9 @@ class Evaluation:
                 answer["signature"] = secrets.token_hex(15)
                 answer["id"] = line["uid"]
                 responses.append(answer)
-            predictions = "./app/datasets/{}.out".format(dataset["dataset"])
+            predictions = "./app/{}/datasets/{}.out".format(
+                folder_name, dataset["dataset"]
+            )
             with jsonlines.open(predictions, "w") as writer:
                 writer.write_all(responses)
             name_prediction = predictions.split("/")[-1]
@@ -143,10 +151,12 @@ class Evaluation:
                 self.s3_bucket,
                 f"predictions/{task_code}/{model_name}/{name_prediction}",
             )
-            dict_dataset_type["dataset"] = "./app/datasets/{}".format(
-                dataset["dataset"]
+            dict_dataset_type["dataset"] = "./app/{}/datasets/{}".format(
+                folder_name, dataset["dataset"]
             )
-            dict_dataset_type["predictions"] = f"./app/datasets/{name_prediction}"
+            dict_dataset_type[
+                "predictions"
+            ] = f"./app/{folder_name}/datasets/{name_prediction}"
             dataset_type = dataset["dataset_type"]
             final_dict_prediction[dataset_type] = dict_dataset_type
             dataset_id = dataset["dataset_id"]
@@ -158,7 +168,11 @@ class Evaluation:
         delta_metrics = [delta_metric["type"] for delta_metric in delta_metrics]
         jsonl_scoring_datasets = self.get_scoring_datasets(tasks.id)
         datasets = self.downloads_scoring_datasets(
-            jsonl_scoring_datasets, self.s3_bucket, tasks.task_code, delta_metrics
+            jsonl_scoring_datasets,
+            self.s3_bucket,
+            tasks.task_code,
+            delta_metrics,
+            model_s3_zip,
         )
         rounds = list(
             map(
@@ -173,20 +187,6 @@ class Evaluation:
             prediction_dict, dataset_id = self.heavy_prediction(
                 round_datasets, tasks.task_code, model_s3_zip
             )
-            prediction_dict = {
-                "base": {
-                    "dataset": "./app/datasets/rafa.jsonl",
-                    "predictions": "./app/datasets/rafa.jsonl.out",
-                },
-                "fairness": {
-                    "dataset": "./app/datasets/fairness-rafa.jsonl",
-                    "predictions": "./app/datasets/fairness-rafa.jsonl.out",
-                },
-                "robustness": {
-                    "dataset": "./app/datasets/robustness-rafa.jsonl",
-                    "predictions": "./app/datasets/robustness-rafa.jsonl.out",
-                },
-            }
             data_dict = {}
             for data_version, data_types in prediction_dict.items():
                 for data_type in data_types:
@@ -260,6 +260,8 @@ class Evaluation:
 
             self.score_repository.add(new_score)
             new_scores.append(new_score)
+
+            shutil.rmtree("./app/{}".format(model_s3_zip.split(".")[0]))
         return new_scores
 
     def get_sqs_messages(self):
