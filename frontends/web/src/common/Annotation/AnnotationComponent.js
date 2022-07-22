@@ -323,6 +323,17 @@ function isImageUrl(url, successCallback) {
   }, timeout);
 }
 
+function isAudioUrl(url, successCallback) {
+  console.log(url);
+  if (!url.audio) {
+    if (url.endsWith(".mp3") || url.endsWith(".flac")) {
+      successCallback();
+    } else {
+      alert("Please provide a valid audio format");
+    }
+  }
+}
+
 const ImageComponent = ({
   displayName,
   className,
@@ -382,17 +393,17 @@ const ImageComponent = ({
   );
 };
 
-const Audio = ({
+const AudioComponent = ({
   displayName,
   className,
   create,
   data,
   setData,
   name,
-  configObj,
   showName = true,
   inputReminder = false,
 }) => {
+  console.log(data);
   return (
     <>
       {!create ? (
@@ -402,39 +413,32 @@ const Audio = ({
               {displayName ? displayName : name}:
             </h6>
           )}
-          <AtomicImage src={data[name]} />
+          <Player audio={data} />
         </>
       ) : data[name] ? (
         <>
-          <Button
-            onClick={(event) => {
-              data[name] = null;
-              setData(data);
-            }}
-          >
-            <i className="fas fa-trash-alt"></i>
-          </Button>
-          <AtomicImage src={data[name]} />
+          <Player audio={data} />
         </>
       ) : (
         <div
           className={inputReminder ? "p-2 border rounded border-danger" : ""}
         >
           <FormControl
-            className={"rounded-1 thick-border p-3 " + className}
             placeholder={
               "Enter link to audio (we only allow pasteing of valid audio urls (mp3, flac))..."
             }
             value={data[name] ? data[name] : ""}
             onChange={(event) => {
               const url = event.target.value;
-              isImageUrl(url, () => {
+              isAudioUrl(url, () => {
                 data[name] = url;
-                setData(data);
+                setData(data.audio);
               });
             }}
             required={true}
           />
+          <br />
+          <Player audio={data} />
         </div>
       )}
     </>
@@ -538,7 +542,7 @@ const AnnotationComponent = ({
       );
     case "audio":
       return (
-        <Audio
+        <AudioComponent
           create={create}
           name={name}
           data={data}

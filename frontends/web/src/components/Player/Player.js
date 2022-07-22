@@ -7,13 +7,11 @@
 import React from "react";
 import ReactAudioPlayer from "react-audio-player";
 
-const Player = () => {
+const Player = ({ audio }) => {
+  console.log(audio);
   return (
     <>
-      <ReactAudioPlayer
-        src="https://ia801900.us.archive.org/19/items/randommusic2016_201610/5%20Seconds%20Of%20Summer%20-%20Don%27t%20Stop.mp3"
-        controls
-      />
+      <ReactAudioPlayer src={audio} controls />
     </>
   );
 };

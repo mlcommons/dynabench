@@ -1,85 +1,86 @@
 {
-  "name": "Dynabench-frontend",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
-    "bootstrap": "^4.5.0",
-    "bootstrap-switch-button-react": "^1.2.0",
-    "css-loader": "^3.6.0",
-    "downloadjs": "^1.4.7",
-    "formik": "^2.1.4",
-    "highcharts": "^9.1.0",
-    "highcharts-react-official": "^3.0.0",
-    "jwt-decode": "^2.2.0",
-    "mephisto-task": "^1.0.10",
-    "moment": "^2.24.0",
-    "prop-types": "^15.7.2",
-    "qs": "^6.9.3",
-    "react": "^16.13.1",
-    "react-bootstrap": "^1.2.2",
-    "react-c3js": "^0.1.20",
-    "react-dom": "^16.13.1",
-    "react-ga": "^3.1.2",
-    "react-magnifier": "^3.0.4",
-    "react-markdown": "^5.0.2",
-    "react-moment": "^0.9.7",
-    "react-player": "^2.6.2",
-    "react-powerplug": "^1.0.0",
-    "react-router-dom": "^5.2.0",
-    "react-router-hash-link": "^2.4.3",
-    "react-scripts": "^4.0.3",
-    "react-select": "^5.2.1",
-    "react-table": "^7.7.0",
-    "react-text-annotate": "^0.3.0",
-    "recharts": "^1.8.5",
-    "set-value": "^4.0.1",
-    "style-loader": "^1.2.1",
-    "js-yaml": "^4.1.0"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.10.5",
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "@babel/preset-env": "^7.10.4",
-    "@babel/preset-react": "^7.10.4",
-    "babel-preset-react": "^6.24.1",
-    "dotenv": "^8.2.0",
-    "prettier": "^2.2.1",
-    "stylelint": "^13.11.0",
-    "stylelint-config-prettier": "^8.0.1",
-    "stylelint-config-standard": "^20.0.0"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ],
-    "ecmaFeatures": {
-      "jsx": true
+    "name": "Dynabench-frontend",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@testing-library/jest-dom": "^4.2.4",
+        "@testing-library/react": "^9.5.0",
+        "@testing-library/user-event": "^7.2.1",
+        "bootstrap": "^4.5.0",
+        "bootstrap-switch-button-react": "^1.2.0",
+        "css-loader": "^3.6.0",
+        "downloadjs": "^1.4.7",
+        "formik": "^2.1.4",
+        "highcharts": "^9.1.0",
+        "highcharts-react-official": "^3.0.0",
+        "js-yaml": "^4.1.0",
+        "jwt-decode": "^2.2.0",
+        "mephisto-task": "^1.0.10",
+        "moment": "^2.24.0",
+        "prop-types": "^15.7.2",
+        "qs": "^6.9.3",
+        "react": "^16.13.1",
+        "react-audio-player": "^0.17.0",
+        "react-bootstrap": "^1.2.2",
+        "react-c3js": "^0.1.20",
+        "react-dom": "^16.13.1",
+        "react-ga": "^3.1.2",
+        "react-magnifier": "^3.0.4",
+        "react-markdown": "^5.0.2",
+        "react-moment": "^0.9.7",
+        "react-player": "^2.6.2",
+        "react-powerplug": "^1.0.0",
+        "react-router-dom": "^5.2.0",
+        "react-router-hash-link": "^2.4.3",
+        "react-scripts": "^4.0.3",
+        "react-select": "^5.2.1",
+        "react-table": "^7.7.0",
+        "react-text-annotate": "^0.3.0",
+        "recharts": "^1.8.5",
+        "set-value": "^4.0.1",
+        "style-loader": "^1.2.1"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.10.5",
+        "@babel/plugin-proposal-class-properties": "^7.8.3",
+        "@babel/preset-env": "^7.10.4",
+        "@babel/preset-react": "^7.10.4",
+        "babel-preset-react": "^6.24.1",
+        "dotenv": "^8.2.0",
+        "prettier": "^2.2.1",
+        "stylelint": "^13.11.0",
+        "stylelint-config-prettier": "^8.0.1",
+        "stylelint-config-standard": "^20.0.0"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app"
+        ],
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+    "scripts": {
+        "webpack": "webpack",
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject",
+        "mturk": "npm run webpack -- --mode development",
+        "stylelint": "stylelint **/*.css",
+        "prettier": "prettier -v && prettier **/*.{js,jsx} --check",
+        "eslint": "eslint **/*.{js,jsx} --ignore-path .gitignore --quiet"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
     }
-  },
-  "scripts": {
-    "webpack": "webpack",
-    "start": "HTTPS=true SSL_CRT_FILE=/home/ubuntu/.ssl/dynabench.org.crt SSL_KEY_FILE=/home/ubuntu/.ssl/dynabench.org-key.pem react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "mturk": "npm run webpack -- --mode development",
-    "stylelint": "stylelint **/*.css",
-    "prettier": "prettier -v && prettier **/*.{js,jsx} --check",
-    "eslint": "eslint **/*.{js,jsx} --ignore-path .gitignore --quiet"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
 }
