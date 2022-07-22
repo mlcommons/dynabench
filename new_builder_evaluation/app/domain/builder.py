@@ -2,10 +2,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# Copyright (c) MLCommons, Inc. and its affiliates.
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
 import base64
 import os
 import time
@@ -27,11 +23,18 @@ class Builder:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
             region_name=os.getenv("AWS_REGION"),
         )
+        self.eni = boto3.resource(
+            "ec2",
+            region_name=os.getenv("AWS_REGION"),
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        )
         self.s3 = self.session.client("s3")
         self.ecs = self.session.client("ecs")
         self.lamda_ = self.session.client("lambda")
         self.api_gateway = self.session.client("apigateway")
         self.ecr = self.session.client("ecr")
+        self.docker_client = docker.from_env()
 
     def download_zip(self, bucket_name: str, model: str):
         zip_name = model.split("/")[-1]
@@ -73,9 +76,9 @@ class Builder:
             password=ecr_config["ecr_password"],
             registry=ecr_config["ecr_url"],
         )
-        image, _ = docker_client.images.build(path=folder_name, tag=tag)
+        image, _ = self.docker_client.images.build(path=folder_name, tag=tag)
         image.tag(repository=repository_name, tag=tag)
-        docker_client.images.push(
+        self.docker_client.images.push(
             repository=repository_name,
             tag=tag,
             auth_config={
@@ -145,7 +148,7 @@ class Builder:
         ip = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name
 
-    def light_model_deployment(self, role, image_uri):
+    def light_model_deployment(self, image_uri: str, role: str):
         lambda_function = self.lamda_.create_function(
             {
                 "FunctionName": "lambda-sentiment-test-2",
