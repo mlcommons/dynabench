@@ -8,6 +8,7 @@ import time
 from zipfile import ZipFile
 
 import boto3
+
 import docker
 from dotenv import load_dotenv
 
@@ -22,11 +23,18 @@ class Builder:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
             region_name=os.getenv("AWS_REGION"),
         )
+        self.eni = boto3.resource(
+            "ec2",
+            region_name=os.getenv("AWS_REGION"),
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        )
         self.s3 = self.session.client("s3")
         self.ecs = self.session.client("ecs")
         self.lamda_ = self.session.client("lambda")
         self.api_gateway = self.session.client("apigateway")
         self.ecr = self.session.client("ecr")
+        self.docker_client = docker.from_env()
 
     def download_zip(self, bucket_name: str, model: str):
         zip_name = model.split("/")[-1]
@@ -59,15 +67,15 @@ class Builder:
         self, repository_name: str, folder_name: str, tag: str
     ) -> str:
         ecr_config = self.extract_ecr_configuration()
-        docker_client = docker.from_env()
-        docker_client.login(
+
+        self.docker_client.login(
             username=ecr_config["ecr_username"],
             password=ecr_config["ecr_password"],
             registry=ecr_config["ecr_url"],
         )
-        image, _ = docker_client.images.build(path=folder_name, tag=tag)
+        image, _ = self.docker_client.images.build(path=folder_name, tag=tag)
         image.tag(repository=repository_name, tag=tag)
-        docker_client.images.push(
+        self.docker_client.images.push(
             repository=repository_name,
             tag=tag,
             auth_config={
@@ -120,13 +128,8 @@ class Builder:
             if describe_task["tasks"][0]["containers"][0]["lastStatus"] != "RUNNING":
                 time.sleep(60)
             else:
-                eni = boto3.resource(
-                    "ec2",
-                    region_name=os.getenv("AWS_REGION"),
-                    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-                    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-                )
-                eni = eni.NetworkInterface(
+
+                eni = self.eni.NetworkInterface(
                     describe_task["tasks"][0]["attachments"][0]["details"][1]["value"]
                 )
                 ip = eni.association_attribute["PublicIp"]
@@ -142,14 +145,12 @@ class Builder:
         ip = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name
 
-    def light_model_deployment(self):
+    def light_model_deployment(self, image_uri: str, role: str):
         lambda_function = self.lamda_.create_function(
             {
                 "FunctionName": "lambda-sentiment-test-2",
-                "Role": "arn:aws:iam::877755283837:role/service-role/python-fastapi-hello-role-usk428mk",
-                "Code": {
-                    "ImageUri": "877755283837.dkr.ecr.eu-west-3.amazonaws.com/sentiment-lambda@sha256:11ccc0762147dc17e0007628dd4fddfdbbc2c108d3168e7e38bc89a58a2c4826"
-                },
+                "Role": role,
+                "Code": {"ImageUri": image_uri},
                 "PackageType": "Image",
             }
         )
