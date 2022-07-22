@@ -35,14 +35,18 @@ class Builder:
 
     def download_zip(self, bucket_name: str, model: str):
         zip_name = model.split("/")[-1]
+        folder_name = model.split("/")[-1].split(".")[0]
         model_name = "-".join(zip_name.split(".")[0].replace(" ", "").split("-")[1:])
-        self.s3.download_file(bucket_name, model, f"./app/model/{zip_name}")
+        self.s3.download_file(
+            bucket_name, model, f"./app/{folder_name}/model/{zip_name}"
+        )
         return zip_name, model_name
 
     def unzip_file(self, zip_name: str):
-        with ZipFile(f"./app/model/{zip_name}", "r") as zipObj:
-            zipObj.extractall("./app/model")
-        os.remove(f"./app/model/{zip_name}")
+        folder_name = zip_name.split(".")[0]
+        with ZipFile(f"./app/{folder_name}/model/{zip_name}", "r") as zipObj:
+            zipObj.extractall(f"./app/{folder_name}/model")
+        os.remove(f"./app{folder_name}/model/{zip_name}")
 
     def extract_ecr_configuration(self) -> dict:
         ecr_credentials = self.ecr.get_authorization_token()["authorizationData"][0]
@@ -64,8 +68,7 @@ class Builder:
         self, repository_name: str, folder_name: str, tag: str
     ) -> str:
         ecr_config = self.extract_ecr_configuration()
-        docker_client = docker.from_env()
-        docker_client.login(
+        self.docker_client.login(
             username=ecr_config["ecr_username"],
             password=ecr_config["ecr_password"],
             registry=ecr_config["ecr_url"],
@@ -125,13 +128,7 @@ class Builder:
             if describe_task["tasks"][0]["containers"][0]["lastStatus"] != "RUNNING":
                 time.sleep(60)
             else:
-                eni = boto3.resource(
-                    "ec2",
-                    region_name=os.getenv("AWS_REGION"),
-                    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-                    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-                )
-                eni = eni.NetworkInterface(
+                eni = self.eni.NetworkInterface(
                     describe_task["tasks"][0]["attachments"][0]["details"][1]["value"]
                 )
                 ip = eni.association_attribute["PublicIp"]
@@ -140,10 +137,11 @@ class Builder:
 
     def get_ip_ecs_task(self, model: str):
         zip_name, model_name = self.download_zip(os.getenv("AWS_S3_BUCKET"), model)
+        folder_name = zip_name.split(".")[0]
         self.unzip_file(zip_name)
         repo = self.create_repository(model_name)
         tag = "latest"
-        self.push_image_to_ECR(repo, f"./app/model/{model_name}", tag)
+        self.push_image_to_ECR(repo, f"./app/{folder_name}/model/{model_name}", tag)
         ip = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name
 
