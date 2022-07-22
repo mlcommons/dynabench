@@ -6,11 +6,9 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import importlib
 import json
 import os
 import secrets
-import sys
 import time
 
 import boto3
@@ -22,7 +20,6 @@ from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
 from app.domain.eval_utils.input_formatter import InputFormatter
 from app.infrastructure.repositories.dataset import DatasetRepository
-from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
 
@@ -41,14 +38,9 @@ class Evaluation:
         self.task_repository = TaskRepository()
         self.score_repository = ScoreRepository()
         self.dataset_repository = DatasetRepository()
-        self.round_repository = RoundRepository()
 
     def require_fields_task(self):
-        spec = importlib.util.spec_from_file_location("ModelSingleInput", "./test.py")
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[spec.name] = module
-        spec.loader.exec_module(module)
-        return module.ModelSingleInput.schema().get("required")
+        return
 
     def get_task_configuration(self, task_id: int):
         task_configuration = yaml.safe_load(
@@ -68,15 +60,13 @@ class Evaluation:
         )
         return json.loads(response.text)
 
-    def get_scoring_datasets(self, task_id: int):
-        scoring_datasets = self.dataset_repository.get_scoring_datasets(task_id)
+    def get_scoring_datasets(self, task_id: int, round_id: int):
+        scoring_datasets = self.dataset_repository.get_scoring_datasets(
+            task_id, round_id
+        )
         jsonl_scoring_datasets = []
         for scoring_dataset in scoring_datasets:
-            jsonl_scoring_dataset = {}
-            jsonl_scoring_dataset["dataset"] = scoring_dataset.name
-            jsonl_scoring_dataset["round_id"] = scoring_dataset.rid
-            jsonl_scoring_dataset["dataset_id"] = scoring_dataset.id
-            jsonl_scoring_datasets.append(jsonl_scoring_dataset)
+            jsonl_scoring_datasets.append(f"{scoring_dataset.name}")
         return jsonl_scoring_datasets
 
     def downloads_scoring_datasets(
@@ -88,49 +78,31 @@ class Evaluation:
     ):
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
-            final_dataset = {}
-            base_dataset_name = "datasets/{}/{}.jsonl".format(
-                task_code, scoring_dataset["dataset"]
-            )
+            base_dataset_name = f"datasets/{task_code}/{scoring_dataset}.jsonl"
             self.s3.download_file(
                 bucket_name,
                 base_dataset_name,
-                "./app/datasets/{}.jsonl".format(scoring_dataset["dataset"]),
+                f"./app/datasets/{scoring_dataset}.jsonl",
             )
-            final_dataset["dataset_type"] = "base"
-            final_dataset["round_id"] = scoring_dataset["round_id"]
-            final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
-            final_dataset["dataset"] = "{}.jsonl".format(scoring_dataset["dataset"])
-            final_datasets.append(final_dataset)
+            final_datasets.append(f"{scoring_dataset}.jsonl")
             for delta_metric in delta_metrics:
-                final_dataset = {}
-                delta_dataset_name = "datasets/{}/{}-{}.jsonl".format(
-                    task_code, delta_metric, scoring_dataset["dataset"]
+                delta_dataset_name = (
+                    f"datasets/{task_code}/{delta_metric}-{scoring_dataset}.jsonl"
                 )
                 self.s3.download_file(
                     bucket_name,
                     delta_dataset_name,
-                    "./app/datasets/{}-{}.jsonl".format(
-                        delta_metric, scoring_dataset["dataset"]
-                    ),
+                    f"./app/datasets/{delta_metric}-{scoring_dataset}.jsonl",
                 )
-                final_dataset["dataset_type"] = delta_metric
-                final_dataset["round_id"] = scoring_dataset["round_id"]
-                final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
-                final_dataset["dataset"] = "{}-{}.jsonl".format(
-                    delta_metric, scoring_dataset["dataset"]
-                )
-                final_datasets.append(final_dataset)
+                final_datasets.append(f"{delta_metric}-{scoring_dataset}.jsonl")
         return final_datasets
 
     def heavy_prediction(self, datasets: list, task_code: str, model: str):
-        ip, model_name = self.builder.get_ip_ecs_task(model)
-        final_dict_prediction = {}
+        # ip, model_name = self.builder.get_ip_ecs_task(model)
+        ip = "13.38.26.40"
+        model_name = "dynalab-base-sentiment"
         for dataset in datasets:
-            dict_dataset_type = {}
-            with jsonlines.open(
-                "./app/datasets/{}".format(dataset["dataset"]), "r"
-            ) as jsonl_f:
+            with jsonlines.open(f"./app/datasets/{dataset}", "r") as jsonl_f:
                 lst = [obj for obj in jsonl_f]
             responses = []
             for line in lst:
@@ -138,7 +110,7 @@ class Evaluation:
                 answer["signature"] = secrets.token_hex(15)
                 answer["id"] = line["uid"]
                 responses.append(answer)
-            predictions = "./app/datasets/{}.out".format(dataset["dataset"])
+            predictions = f"./app/datasets/{dataset}.out"
             with jsonlines.open(predictions, "w") as writer:
                 writer.write_all(responses)
             name_prediction = predictions.split("/")[-1]
@@ -147,124 +119,100 @@ class Evaluation:
                 self.s3_bucket,
                 f"predictions/{task_code}/{model_name}/{name_prediction}",
             )
-            dict_dataset_type["dataset"] = "./app/datasets/{}".format(
-                dataset["dataset"]
-            )
-            dict_dataset_type["predictions"] = f"./app/datasets/{name_prediction}"
-            dataset_type = dataset["dataset_type"]
-            final_dict_prediction[dataset_type] = dict_dataset_type
-            dataset_id = dataset["dataset_id"]
-        return final_dict_prediction, dataset_id
+        return {
+            "base": {
+                "dataset": "./app/datasets/rafa.jsonl",
+                "predictions": "./app/datasets/rafa.jsonl.out",
+            },
+            "fairness": {
+                "dataset": "./app/datasets/fairness-rafa.jsonl",
+                "predictions": "./app/datasets/fairness-rafa.jsonl.out",
+            },
+            "robustness": {
+                "dataset": "./app/datasets/robustness-rafa.jsonl",
+                "predictions": "./app/datasets/robustness-rafa.jsonl.out",
+            },
+        }
 
-    def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
+    def evaluation(self, task: str, model_s3_zip: str):
         tasks = self.task_repository.get_id_and_code(task)
-        delta_metrics = self.get_task_configuration(tasks.id)["delta_metrics"]
+        delta_metrics = self.get_task_configuration(tasks.task_id)["delta_metrics"]
         delta_metrics = [delta_metric["type"] for delta_metric in delta_metrics]
-        jsonl_scoring_datasets = self.get_scoring_datasets(tasks.id)
+        jsonl_scoring_datasets = self.get_scoring_datasets(tasks.task_id, 1)
         datasets = self.downloads_scoring_datasets(
             jsonl_scoring_datasets, self.s3_bucket, tasks.task_code, delta_metrics
         )
-        rounds = list(
-            map(
-                int, {round for rounds in datasets for round in str(rounds["round_id"])}
-            )
+        prediction_dict = self.heavy_prediction(datasets, tasks.task_code, model_s3_zip)
+        data_dict = {}
+        for data_version, data_types in prediction_dict.items():
+            for data_type in data_types:
+                data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
+                    prediction_dict[data_version][data_type]
+                )
+        perturb_exists = (
+            "fairness_predictions" in data_dict or "robustness_predictions" in data_dict
         )
-        new_scores = []
-        for round in rounds:
-            round_datasets = [
-                dataset for dataset in datasets if dataset["round_id"] == round
-            ]
-            prediction_dict, dataset_id = self.heavy_prediction(
-                round_datasets, tasks.task_code, model_s3_zip
-            )
-            prediction_dict = {
-                "base": {
-                    "dataset": "./app/datasets/rafa.jsonl",
-                    "predictions": "./app/datasets/rafa.jsonl.out",
-                },
-                "fairness": {
-                    "dataset": "./app/datasets/fairness-rafa.jsonl",
-                    "predictions": "./app/datasets/fairness-rafa.jsonl.out",
-                },
-                "robustness": {
-                    "dataset": "./app/datasets/robustness-rafa.jsonl",
-                    "predictions": "./app/datasets/robustness-rafa.jsonl.out",
-                },
-            }
-            data_dict = {}
-            for data_version, data_types in prediction_dict.items():
-                for data_type in data_types:
-                    data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
-                        prediction_dict[data_version][data_type]
-                    )
-            perturb_exists = (
-                "fairness_predictions" in data_dict
-                or "robustness_predictions" in data_dict
-            )
 
-            task_configuration = yaml.safe_load(
-                self.task_repository.get_by_id(tasks.id)["config_yaml"]
-            )
-            input_formatter = InputFormatter(task_configuration)
+        task_configuration = yaml.safe_load(
+            self.task_repository.get_by_id(tasks.task_id)["config_yaml"]
+        )
+        input_formatter = InputFormatter(task_configuration)
 
-            formatted_dict = {}
-            for data_type in data_dict:
-                huevon = f"formatted_{data_type}"
-                ferovaes = f"grouped_{data_type}"
-                if "dataset" in data_type:
-                    formatted_dict[huevon] = input_formatter.format_labels(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[ferovaes] = input_formatter.group_labels(
-                        formatted_dict[huevon]
-                    )
-                elif "predictions" in data_type:
-                    formatted_dict[huevon] = input_formatter.format_predictions(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[ferovaes] = input_formatter.group_predictions(
-                        formatted_dict[huevon]
-                    )
-
-            evaluator = Evaluator(task_configuration)
-            main_metric = evaluator.evaluate(
-                formatted_dict["formatted_base_predictions"],
-                formatted_dict["formatted_base_dataset"],
-            )
-            delta_metrics = {}
-            if perturb_exists:
-                delta_metrics = evaluator.evaluate_delta_metrics(
-                    formatted_dict.get("grouped_base_predictions"),
-                    formatted_dict.get("grouped_robustness_predictions"),
-                    formatted_dict.get("grouped_fairness_predictions"),
+        formatted_dict = {}
+        for data_type in data_dict:
+            formatted_key = f"formatted_{data_type}"
+            grouped_key = f"grouped_{data_type}"
+            if "dataset" in data_type:
+                formatted_dict[formatted_key] = input_formatter.format_labels(
+                    data_dict[data_type]
+                )
+                formatted_dict[grouped_key] = input_formatter.group_labels(
+                    formatted_dict[formatted_key]
+                )
+            elif "predictions" in data_type:
+                formatted_dict[formatted_key] = input_formatter.format_predictions(
+                    data_dict[data_type]
+                )
+                formatted_dict[grouped_key] = input_formatter.group_predictions(
+                    formatted_dict[formatted_key]
                 )
 
-            metric = task_configuration["perf_metric"]["type"]
-            final_scores = {
-                str(metric): main_metric,
-                "fairness": delta_metrics.get("fairness"),
-                "robustness": delta_metrics.get("robustness"),
-                "memory": 0,
-                "throughput": 0,
-            }
-            round_id = self.round_repository.get_round_id_by_round_and_task(
-                tasks.id, round
+        evaluator = Evaluator(task_configuration)
+        main_metric = evaluator.evaluate(
+            formatted_dict["formatted_base_predictions"],
+            formatted_dict["formatted_base_dataset"],
+        )
+        delta_metrics = {}
+        if perturb_exists:
+            delta_metrics = evaluator.evaluate_delta_metrics(
+                formatted_dict.get("grouped_base_predictions"),
+                formatted_dict.get("grouped_robustness_predictions"),
+                formatted_dict.get("grouped_fairness_predictions"),
             )
-            new_score = {
-                "perf": main_metric["perf"],
-                "pretty_perf": main_metric["pretty_perf"],
-                "fairness": final_scores["fairness"],
-                "robustness": final_scores["robustness"],
-                "mid": model_id,
-                "r_realid": round_id.id,
-                "did": dataset_id,
-                "memory_utilization": final_scores["memory"],
-                "examples_per_second": final_scores["throughput"],
-            }
 
-            self.score_repository.add(new_score)
-            new_scores.append(new_score)
-        return new_scores
+        metric = task_configuration["perf_metric"]["type"]
+        final_scores = {
+            str(metric): main_metric,
+            "fairness": delta_metrics.get("fairness"),
+            "robustness": delta_metrics.get("robustness"),
+            "memory": 0,
+            "throughput": 0,
+        }
+
+        new_score = {
+            "perf": main_metric["perf"],
+            "pretty_perf": main_metric["pretty_perf"],
+            "fairness": final_scores["fairness"],
+            "robustness": final_scores["robustness"],
+            "mid": 1,
+            "r_realid": 4,
+            "did": 1,
+            "memory_utilization": final_scores["memory"],
+            "examples_per_second": final_scores["throughput"],
+        }
+
+        self.score_repository.add(new_score)
+        return new_score
 
     def get_sqs_messages(self):
         queue_url = self.sqs.get_queue_url(
@@ -275,27 +223,21 @@ class Evaluation:
             MaxNumberOfMessages=1,
             WaitTimeSeconds=10,
         )
-        return response.get("Messages", []), queue_url
-
-    def delete_sqs_message(self, queue_url, receipt_handle):
-        self.sqs.delete_message(
-            QueueUrl=queue_url,
-            ReceiptHandle=receipt_handle,
-        )
+        return response.get("Messages", [])
 
     def trigger_sqs(self):
         while True:
-            messages, queue_url = self.get_sqs_messages()
+            messages = self.get_sqs_messages()
             for message in messages:
                 message_body = json.loads(message["Body"])
-                new_score = self.evaluation(
-                    message_body["task_code"],
-                    message_body["s3_uri"],
-                    message_body["model_id"],
-                )
-                self.delete_sqs_message(queue_url, message["ReceiptHandle"])
-                return new_score
-            time.sleep(15)
+                try:
+                    new_score = self.evaluation(
+                        message_body["task_code"], message_body["s3_uri"]
+                    )
+                    return new_score
+                except Exception as ex:
+                    return ex
+            time.sleep(300)
 
     @staticmethod
     def _load_dataset(path: str):

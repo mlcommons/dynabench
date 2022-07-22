@@ -3,6 +3,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from app.api.endpoints import builder, evaluation
+from app.domain.evaluation import Evaluation
 from fastapi import FastAPI
 
 
@@ -11,7 +12,7 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return "hello word"
+    return Evaluation().trigger_sqs()
 
 
 app.include_router(builder.router, prefix="/builder", tags=["builder"])
