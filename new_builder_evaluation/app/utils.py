@@ -69,13 +69,13 @@ def api_download_dataset(dataset_id, perturb_prefix, prod=False):
         return download_filename
 
 
-def wrap_data_with_signature(data, secret):
+def wrap_data_with_signature(data: str, secret):
     return {
         "data": data,
         "signature": generate_signature(data, secret)
     }
 
-def generate_signature(data, secret):
+def generate_signature(data: str, secret):
     h = hashlib.sha1()
     h.update(f"{data}{secret}".encode("utf-8"))
     signed = h.hexdigest()

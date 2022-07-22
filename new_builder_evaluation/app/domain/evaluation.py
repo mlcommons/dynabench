@@ -1,11 +1,14 @@
 import requests
 import json
+import functools
 import yaml
 import secrets
 import os
 import boto3
 import jsonlines
+import logging
 import time
+import typing as tp
 from pathlib import Path
 
 from app import utils
@@ -16,6 +19,8 @@ from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.domain.eval_utils.input_formatter import InputFormatter
 from app.domain.eval_utils.evaluator import Evaluator
+
+log = logging.getLogger(__name__)
 
 
 class Evaluation:
@@ -42,25 +47,24 @@ class Evaluation:
     def require_fields_task(self):
         return
 
-    def get_task_configuration(self, task_id: int):
+    @functools.lru_cache()
+    def get_task_configuration(self, task_id: int) -> dict:
         task_configuration = yaml.safe_load(
             self.task_repository.get_by_id(task_id)["config_yaml"]
         )
         return task_configuration
 
-    def single_evaluation_ecs(self, ip: str, text):
+    def single_evaluation_ecs(self, ip: str, data: dict):
         headers = {
             "accept": "application/json",
-        }
-        json_data = {
-            "input_text": text,
         }
         response = requests.post(
             "http://{}/model/single_evaluation".format(ip),
             headers=headers,
-            json=json_data,
+            json=data,
         )
-        return json.loads(response.text)
+        # TODO: error handling
+        return response.json()
 
     def get_scoring_datasets(self, task_id: int, round_id: int):
         if self.decentralized:
@@ -74,17 +78,15 @@ class Evaluation:
             jsonl_scoring_datasets.append("{}".format(scoring_dataset.name))
         return jsonl_scoring_datasets
 
-    def dl_dataset(
-        self, task_code: str, dataset: str, perturb_prefix: str = None
-    ) -> str:
-        if not perturb_prefix:
+    def dl_dataset(self, task_code: str, dataset: str, delta_metric: str = None) -> str:
+        if not delta_metric:
             dataset_name = f"datasets/{task_code}/{dataset}.jsonl"
         else:
             dataset_name = f"datasets/{task_code}/{delta_metric}-{dataset}.jsonl"
         local_path = f"./app/{dataset_name}.jsonl"
 
-        if self.decentralized:
-            file = utils.api_download_dataset(dataset, perturb_prefix)
+        if self.decentralized and not self.local_path.exists():
+            file = utils.api_download_dataset(dataset, delta_metric, local_path)
             Path(file).rename(local_path)
         else:
             self.s3.download_file(self.s3_bucket, dataset_name, local_path)
@@ -123,26 +125,51 @@ class Evaluation:
         return final_datasets
 
     def heavy_prediction(self, datasets: list, task_code: str, model: str):
+        output_files = {}
         ip, model_name = self.builder.get_ip_ecs_task(model)
-        breakpoint()
+        task_inputs = self.get_task_inputs(task_code)
+
         for dataset in datasets:
-            with jsonlines.open("./app/datasets/{}".format(dataset), "r") as jsonl_f:
-                lst = [obj for obj in jsonl_f]
+            dataset_file = "./app/datasets/{}".format(dataset)
+            with jsonlines.open(dataset_file, "r") as jsonl_f:
+                samples = list(jsonl_f)
+
+            # TODO: this seems very unefficient.
+            # There is always exactly one flying request.
+            # So this server is doing nothing while the task server is working,
+            # and the task server is doing nothing while we are handling responses.
+            # We should enqueue several queries or at least parallelize over datasets
             responses = []
-            for line in lst:
-                answer = self.single_evaluation_ecs(ip, line["statement"])
+            for sample in samples:
+                args = {k: sample[k] for k in task_inputs}
+                # TODO: where do those weird names come from ?
+                args = {
+                    "sourceText": args["sourceText"],
+                    "origin_lan": args["sourceLanguage"],
+                    "target_lan": args["targetLanguage"],
+                }
+                answer = self.single_evaluation_ecs(ip, args)
                 answer["signature"] = secrets.token_hex(15)
-                answer["id"] = line["uid"]
+                answer["id"] = sample["uid"]
                 responses.append(answer)
-            predictions = "./app/datasets/{}.out".format(dataset)
-            with jsonlines.open(predictions, "w") as writer:
+
+            predictions_file = "./app/datasets/{}.out".format(dataset)
+            with jsonlines.open(predictions_file, "w") as writer:
                 writer.write_all(responses)
-            name_prediction = predictions.split("/")[-1]
+
+            output_files["base"] = {
+                "dataset": dataset_file,
+                "predictions": predictions_file,
+            }
             self.s3.upload_file(
-                predictions,
+                predictions_file,
                 self.s3_bucket,
-                "predictions/{}/{}/{}".format(task_code, model_name, name_prediction),
+                "predictions/{}/{}/{}".format(
+                    task_code, model_name, predictions_file.split("/")[-1]
+                ),
             )
+        # TODO: remove hardcoding
+        # return output_files
         return {
             "base": {
                 "dataset": "./app/datasets/rafa.jsonl",
@@ -158,12 +185,13 @@ class Evaluation:
             },
         }
 
-    def evaluation(self, task: str, model_s3_zip: str):
+    def evaluation(self, task: str, model_id: str, model_s3_zip: str):
         tasks = self.task_repository.get_id_and_code(task)
-        delta_metrics = self.get_task_configuration(tasks.task_id).get(
-            "delta_metrics", []
-        )
-        delta_metrics = [delta_metric["type"] for delta_metric in delta_metrics]
+        task_configuration = self.get_task_configuration(tasks.task_id)
+        delta_metrics = [
+            delta_metric["type"]
+            for delta_metric in task_configuration.get("delta_metrics", [])
+        ]
         jsonl_scoring_datasets = self.get_scoring_datasets(tasks.task_id, 1)
         datasets = self.downloads_scoring_datasets(
             jsonl_scoring_datasets, self.s3_bucket, tasks.task_code, delta_metrics
@@ -179,9 +207,6 @@ class Evaluation:
             "fairness_predictions" in data_dict or "robustness_predictions" in data_dict
         )
 
-        task_configuration = yaml.safe_load(
-            self.task_repository.get_by_id(tasks.task_id)["config_yaml"]
-        )
         input_formatter = InputFormatter(task_configuration)
 
         formatted_dict = {}
@@ -208,6 +233,7 @@ class Evaluation:
             formatted_dict["formatted_base_predictions"],
             formatted_dict["formatted_base_dataset"],
         )
+        # TODO: remove hardcoding and use delta_metrics list
         delta_metrics = {}
         if perturb_exists:
             delta_metrics = evaluator.evaluate_delta_metrics(
@@ -230,15 +256,27 @@ class Evaluation:
             "pretty_perf": main_metric["pretty_perf"],
             "fairness": final_scores["fairness"],
             "robustness": final_scores["robustness"],
-            "mid": 1,
+            "mid": model_id,
             "r_realid": 4,
             "did": 1,
             "memory_utilization": final_scores["memory"],
             "examples_per_second": final_scores["throughput"],
         }
 
+        # TODO(decentralized): call models/update_database_with_metrics endpoint
         self.score_repository.add(new_score)
         return new_score
+
+    @functools.lru_cache()
+    def get_task_inputs(self, task_code: str) -> tp.List[str]:
+        task_config = self.get_task_configuration(task_code)
+        inputs = [obj["name"] for obj in task_config["input"]]
+        contexts = [obj["name"] for obj in task_config.get("context", [])]
+        outputs = set(obj["name"] for obj in task_config.get("output", []))
+
+        # Make sure the models don't receive the outputs.
+        # Maybe this could be validated before the task creation
+        return [x for x in inputs + contexts if x not in outputs]
 
     def get_sqs_messages(self):
         queue_url = self.sqs.get_queue_url(
@@ -258,7 +296,9 @@ class Evaluation:
                 message_body = json.loads(message["Body"])
                 try:
                     new_score = self.evaluation(
-                        message_body["task_code"], message_body["s3_uri"]
+                        message_body["task_code"],
+                        message_body["model_id"],
+                        message_body["s3_uri"],
                     )
                     return new_score
                 except:
