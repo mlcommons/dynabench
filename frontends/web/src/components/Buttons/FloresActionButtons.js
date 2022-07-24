@@ -35,9 +35,9 @@ const FloresActionButtons = ({ taskId }) => {
             overlay={renderSubmitTooltip}
           >
             <Button
-              as={Link}
               className="border-0 blue-color font-weight-bold light-gray-bg"
-              to={`/tasks/${taskId}/uploadModel`}
+              href="https://github.com/facebookresearch/dynalab"
+              target="_blank"
             >
               <i className="fas fa-upload"></i> Submit Models
             </Button>

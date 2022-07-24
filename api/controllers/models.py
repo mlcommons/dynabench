@@ -690,9 +690,8 @@ def upload_to_s3(credentials):
     except Exception as ex:
         logger.exception(ex)
         bottle.abort(400, "normal s3 upload failed")
-
     # Update database entry
-    model = m.create(
+    model, model_id = m.create(
         task_id=task.id,
         user_id=user_id,
         name=model_name,
@@ -730,7 +729,7 @@ def upload_to_s3(credentials):
         queue.send_message(
             MessageBody=util.json_encode(
                 {
-                    "model_id": model.id,
+                    "model_id": model_id,
                     "s3_uri": f"s3://{bucket_name}/{s3_path}",
                     "decen_eaas": True,
                     "model_info": full_model_info,
@@ -745,7 +744,7 @@ def upload_to_s3(credentials):
         queue = sqs.get_queue_by_name(QueueName=config["builder_sqs_queue"])
         queue.send_message(
             MessageBody=util.json_encode(
-                {"model_id": model.id, "s3_uri": f"s3://{bucket_name}/{s3_path}"}
+                {"model_id": model_id, "s3_uri": f"s3://{bucket_name}/{s3_path}"}
             )
         )
 
