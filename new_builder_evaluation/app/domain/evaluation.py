@@ -53,12 +53,9 @@ class Evaluation:
         )
         return task_configuration
 
-    def single_evaluation_ecs(self, ip: str, text):
+    def single_evaluation_ecs(self, ip: str, json_data: dict):
         headers = {
             "accept": "application/json",
-        }
-        json_data = {
-            "input_text": text,
         }
         response = requests.post(
             f"http://{ip}/model/single_evaluation", headers=headers, json=json_data
@@ -124,6 +121,14 @@ class Evaluation:
                 final_datasets.append(final_dataset)
         return final_datasets
 
+    def validate_input_schema(self, schema: list, dataset: list):
+        for param in schema:
+            if not (all([param in d for d in dataset])):
+                raise Exception(f"Missing param: {param}")
+
+    def build_single_request(self, schema: list, sample_dataset: dict):
+        return {param: sample_dataset.get(param) for param in schema}
+
     def heavy_prediction(self, datasets: list, task_code: str, model: str):
         folder_name = model.split("/")[-1].split(".")[0]
         ip, model_name = self.builder.get_ip_ecs_task(model)
@@ -135,8 +140,12 @@ class Evaluation:
             ) as jsonl_f:
                 lst = [obj for obj in jsonl_f]
             responses = []
+            schema = ["statement"]
+            self.validate_input_schema(schema, lst)
             for line in lst:
-                answer = self.single_evaluation_ecs(ip, line["statement"])
+                answer = self.single_evaluation_ecs(
+                    ip, self.build_single_request(schema, line)
+                )
                 answer["signature"] = secrets.token_hex(15)
                 answer["id"] = line["uid"]
                 responses.append(answer)
