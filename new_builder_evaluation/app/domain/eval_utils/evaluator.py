@@ -2,9 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from metrics_dicts import delta_metrics_dict, eval_metrics_dict
-
-from .metrics_dicts import delta_metrics_dict, eval_metrics_dict
+from app.domain.eval_utils.metrics_dicts import delta_metrics_dict, eval_metrics_dict
 
 
 class Evaluator:
@@ -114,8 +112,8 @@ class Evaluator:
         self, grouped_predictions: list, grouped_labels: list, perturb_prefix: str
     ) -> dict:
         """
-        predictions: a list of list of predictions. If computing robustness, predictions must
-        be concatenated by id.
+        predictions: a list of list of predictions. If computing robustness,
+        predictions must be concatenated by id.
         targets: a list of labels
         """
         perf_metric = eval_metrics_dict[self.metric]
