@@ -142,6 +142,7 @@ class Builder:
             )
             if describe_task["tasks"][0]["containers"][0]["lastStatus"] != "RUNNING":
                 time.sleep(60)
+                # TODO: handle "STOPPED" status vs "PENDING"
             else:
                 eni = self.ec2.NetworkInterface(
                     describe_task["tasks"][0]["attachments"][0]["details"][1]["value"]
@@ -152,8 +153,6 @@ class Builder:
 
     def get_ip_ecs_task(self, model_zip_uri: str):
         model_name = get_model_name(model_zip_uri)
-        # TODO: uncomment
-        return "18.236.97.178", model_name
 
         self.download_and_unzip(self.s3_bucket, model_zip_uri)
         repo = self.create_repository(model_name)
