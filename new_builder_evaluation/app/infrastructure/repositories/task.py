@@ -10,7 +10,7 @@ class TaskRepository(AbstractRepository):
     def __init__(self) -> None:
         super().__init__(Task)
 
-    def get_id_and_code(self, task):
+    def get_model_id_and_task_code(self, task):
         instance = (
             self.session.query(self.model)
             .filter((self.model.id == task) | (self.model.task_code == task))
