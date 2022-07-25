@@ -236,7 +236,7 @@ class Evaluation:
                 "memory": 0,
                 "throughput": 0,
             }
-            round_id = self.round_repository.get_round_id_by_round_and_task(
+            round_info = self.round_repository.get_round_info_by_round_and_task(
                 tasks.id, round
             )
             new_score = {
@@ -245,7 +245,7 @@ class Evaluation:
                 "fairness": final_scores["fairness"],
                 "robustness": final_scores["robustness"],
                 "mid": model_id,
-                "r_realid": round_id.id,
+                "r_realid": round_info.id,
                 "did": dataset_id,
                 "memory_utilization": final_scores["memory"],
                 "examples_per_second": final_scores["throughput"],
