@@ -18,14 +18,14 @@ const useUploadFile = () => {
   useEffect(() => {
     if (progress === 0.5) {
       const interval = setInterval(() => {
-        const tick = 0.1;
+        const tick = 0.05;
         console.log(progress);
         setProgress((p) => p + tick);
         console.log(progress);
         if (progress >= 1) {
           clearInterval(interval);
         }
-      }, 120000);
+      }, 60000);
     }
   }, [progress]);
 
@@ -68,9 +68,9 @@ const ProgressBar = ({ progress, text }) => {
         ></div>
       </div>
       <h6>
-        {progress > 0 && progress < 1
+        {progress > 0 && progress < 0.5
           ? text
-          : progress === 1
+          : progress >= 0.5
           ? "We are processing your model"
           : ""}
       </h6>
