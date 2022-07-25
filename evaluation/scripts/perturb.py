@@ -15,7 +15,6 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple
 
 import boto3
-
 from augly_perturbation import AuglyPerturbation
 from textflint_utils.utils import run_textflint
 

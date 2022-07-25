@@ -22,7 +22,6 @@ from mephisto.operations.hydra_config import RunScriptConfig, register_script_co
 from mephisto.operations.operator import Operator
 from mephisto.tools.scripts import load_db_and_process_config
 from omegaconf import DictConfig
-
 from util import get_qualifications
 
 

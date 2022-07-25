@@ -4,10 +4,11 @@
 import logging
 
 from dotenv import load_dotenv
+from fastapi import FastAPI
 
 from app.api.endpoints import builder, evaluation
 from app.domain.evaluation import Evaluation
-from fastapi import FastAPI
+
 
 logging.basicConfig(level=logging.INFO)
 load_dotenv()

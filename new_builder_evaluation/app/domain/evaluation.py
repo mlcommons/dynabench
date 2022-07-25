@@ -15,11 +15,11 @@ import typing as tp
 from pathlib import Path
 
 import boto3
+import jsonlines
 import requests
 import yaml
 
 import app.infrastructure.repositories.task
-import jsonlines
 from app import utils
 from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
@@ -173,12 +173,13 @@ class Evaluation:
         ip, model_name = self.builder.get_ip_ecs_task(model)
         final_dict_prediction = {}
         for dataset in datasets:
-            dict_dataset_type = {}
-            dataset_file = "./app/datasets/{}".format(dataset)
+            dataset_file = "./app/{}/datasets/{}".format(
+                folder_name, dataset["dataset"]
+            )
             with jsonlines.open(dataset_file, "r") as jsonl_f:
                 samples = list(jsonl_f)
 
-            # schema = ["statement"]
+            schema = self.get_task_inputs(task_code)
             # self.validate_input_schema(schema, samples)
 
             # TODO: this seems very unefficient.
@@ -188,7 +189,7 @@ class Evaluation:
             # We should enqueue several queries or at least parallelize over datasets
             responses = []
             for sample in samples:
-                args = {k: sample[k] for k in task_inputs}
+                args = {k: sample[k] for k in schema}
                 # TODO: where do those weird names come from ?
                 args = {
                     "sourceText": args["sourceText"],
@@ -211,12 +212,7 @@ class Evaluation:
                 self.s3_bucket,
                 f"predictions/{task_code}/{model_name}/{name_prediction}",
             )
-            dict_dataset_type["dataset"] = "./app/{}/datasets/{}".format(
-                folder_name, dataset["dataset"]
-            )
-            dict_dataset_type[
-                "predictions"
-            ] = f"./app/{folder_name}/datasets/{name_prediction}"
+            dict_dataset_type = {"dataset": dataset_file, "predictions": predictions}
             dataset_type = dataset["dataset_type"]
             final_dict_prediction[dataset_type] = dict_dataset_type
             dataset_id = dataset["dataset_id"]
