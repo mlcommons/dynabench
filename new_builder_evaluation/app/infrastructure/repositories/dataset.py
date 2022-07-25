@@ -11,9 +11,18 @@ class DatasetRepository(AbstractRepository):
         super().__init__(Dataset)
 
     def get_scoring_datasets(self, task_id: int, round_id: int) -> dict:
-        instances = self.session.query(self.model).filter(
+        scoring_datasets = self.session.query(self.model).filter(
             (self.model.access_type == "scoring")
             & (self.model.tid == task_id)
             & (self.model.rid == round_id)
         )
-        return instances
+        jsonl_scoring_datasets = []
+
+        for scoring_dataset in scoring_datasets:
+            jsonl_scoring_dataset = {}
+            jsonl_scoring_dataset["dataset"] = scoring_dataset.name
+            jsonl_scoring_dataset["round_id"] = scoring_dataset.rid
+            jsonl_scoring_dataset["dataset_id"] = scoring_dataset.id
+            jsonl_scoring_datasets.append(jsonl_scoring_dataset)
+
+        return jsonl_scoring_datasets

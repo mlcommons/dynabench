@@ -11,10 +11,10 @@ import sys
 import time
 
 import boto3
+import jsonlines
 import requests
 import yaml
 
-import jsonlines
 from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
 from app.domain.eval_utils.input_formatter import InputFormatter
@@ -66,14 +66,7 @@ class Evaluation:
         return json.loads(response.text)
 
     def get_scoring_datasets(self, task_id: int):
-        scoring_datasets = self.dataset_repository.get_scoring_datasets(task_id)
-        jsonl_scoring_datasets = []
-        for scoring_dataset in scoring_datasets:
-            jsonl_scoring_dataset = {}
-            jsonl_scoring_dataset["dataset"] = scoring_dataset.name
-            jsonl_scoring_dataset["round_id"] = scoring_dataset.rid
-            jsonl_scoring_dataset["dataset_id"] = scoring_dataset.id
-            jsonl_scoring_datasets.append(jsonl_scoring_dataset)
+        jsonl_scoring_datasets = self.dataset_repository.get_scoring_datasets(task_id)
         return jsonl_scoring_datasets
 
     def downloads_scoring_datasets(
@@ -163,7 +156,7 @@ class Evaluation:
         return final_dict_prediction, dataset_id
 
     def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
-        tasks = self.task_repository.get_id_and_code(task)
+        tasks = self.task_repository.get_model_id_and_task_code(task)
         delta_metrics = self.get_task_configuration(tasks.id)["delta_metrics"]
         delta_metrics = [delta_metric["type"] for delta_metric in delta_metrics]
         jsonl_scoring_datasets = self.get_scoring_datasets(tasks.id)
