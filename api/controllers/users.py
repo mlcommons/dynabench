@@ -505,8 +505,8 @@ def model_upload_s3_dynalab_2(credentials):
         ContentType=upload.content_type,
     )
 
-    model = ModelModel()
-    model, model_id = model.create(
+    models = ModelModel()
+    model, model_id = models.create(
         task_id=task.id,
         user_id=user_id,
         name=file_name,
@@ -522,18 +522,46 @@ def model_upload_s3_dynalab_2(credentials):
     user_model = UserModel()
     user = user_model.get(user_id)
     user_model.incrementModelSubmitCount(user.to_dict()["id"])
-
-    queue = sqs_service.get_queue_url(QueueName=config_file["new_builder_sqs_queue"])
-    sqs_service.send_message(
-        QueueUrl=queue["QueueUrl"],
-        MessageBody=util.json_encode(
-            {
-                "s3_uri": f"models/{task_code}/{user_id}-{file_name}",
-                "user_id": user_id,
-                "user_name": user_name,
-                "task_code": task_code,
-                "model_id": model_id,
-            }
-        ),
-    )
+    if task.is_decen_task:
+        model_dict = models.to_dict(model)
+        task_dict = models.to_dict(model.task)
+        full_model_info = util.json_encode(model_dict)
+        full_task_info = util.json_encode(task_dict)
+        queue = sqs_service.get_queue_url(
+            QueueName=config_file["new_builder_sqs_queue"]
+        )
+        queue = sqs_service.get_queue_by_name(
+            QueueName=task.build_sqs_queue,
+            QueueOwnerAWSAccountId=task.task_aws_account_id,
+        )
+        s3_name = f"s3://{task.s3_bucket}/models/{task_code}/{user_id}-{file_name}"
+        queue.send_message(
+            MessageBody=util.json_encode(
+                {
+                    "model_id": model_id,
+                    "s3_uri": s3_name,
+                    "decen_eaas": True,
+                    "model_info": full_model_info,
+                    "task_info": full_task_info,
+                    "model_secret": model.secret,
+                }
+            )
+        )
+    else:
+        queue = sqs_service.get_queue_url(
+            QueueName=config_file["new_builder_sqs_queue"]
+        )
+        sqs_service.send_message(
+            QueueUrl=queue["QueueUrl"],
+            MessageBody=util.json_encode(
+                {
+                    "s3_uri": f"models/{task_code}/{user_id}-{file_name}",
+                    "user_id": user_id,
+                    "user_name": user_name,
+                    "task_code": task_code,
+                    "model_id": model_id,
+                    "model_secret": model.secret,
+                }
+            ),
+        )
     return response
