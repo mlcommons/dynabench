@@ -1,15 +1,34 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # coding: utf-8
-from sqlalchemy import BigInteger, Column, DateTime, Enum, Float, ForeignKey, Index, Integer, String, TIMESTAMP, Text, Time, text
+from sqlalchemy import (
+    TIMESTAMP,
+    BigInteger,
+    Column,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    Time,
+    text,
+)
 from sqlalchemy.dialects.mysql import TINYINT
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+
 
 Base = declarative_base()
 metadata = Base.metadata
 
 
 class YoyoLog(Base):
-    __tablename__ = '_yoyo_log'
+    __tablename__ = "_yoyo_log"
 
     id = Column(String(36), primary_key=True)
     migration_hash = Column(String(64))
@@ -18,26 +37,38 @@ class YoyoLog(Base):
     username = Column(String(255))
     hostname = Column(String(255))
     comment = Column(String(255))
-    created_at_utc = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    created_at_utc = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+    )
 
 
 class YoyoMigration(Base):
-    __tablename__ = '_yoyo_migration'
+    __tablename__ = "_yoyo_migration"
 
     migration_hash = Column(String(64), primary_key=True)
     migration_id = Column(String(255))
-    applied_at_utc = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    applied_at_utc = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+    )
 
 
 class YoyoVersion(Base):
-    __tablename__ = '_yoyo_version'
+    __tablename__ = "_yoyo_version"
 
     version = Column(Integer, primary_key=True)
-    installed_at_utc = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    installed_at_utc = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+    )
 
 
 class Task(Base):
-    __tablename__ = 'tasks'
+    __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True)
     task_code = Column(String(255), nullable=False, unique=True)
@@ -77,7 +108,7 @@ class Task(Base):
 
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
     admin = Column(TINYINT(1))
@@ -106,79 +137,81 @@ class User(Base):
 
 
 class YoyoLock(Base):
-    __tablename__ = 'yoyo_lock'
+    __tablename__ = "yoyo_lock"
 
     locked = Column(Integer, primary_key=True, server_default=text("'1'"))
-    ctime = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
+    ctime = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+    )
     pid = Column(Integer, nullable=False)
 
 
 class Badge(Base):
-    __tablename__ = 'badges'
+    __tablename__ = "badges"
 
     id = Column(Integer, primary_key=True)
-    uid = Column(ForeignKey('users.id'), index=True)
+    uid = Column(ForeignKey("users.id"), index=True)
     name = Column(String(255))
     metadata_json = Column(Text)
     awarded = Column(DateTime)
 
-    user = relationship('User')
+    user = relationship("User")
 
 
 class Dataset(Base):
-    __tablename__ = 'datasets'
+    __tablename__ = "datasets"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True)
-    tid = Column(ForeignKey('tasks.id'), nullable=False, index=True)
+    tid = Column(ForeignKey("tasks.id"), nullable=False, index=True)
     rid = Column(Integer)
     desc = Column(String(255))
     longdesc = Column(Text)
     source_url = Column(Text)
-    access_type = Column(Enum('scoring', 'standard', 'hidden'))
-    log_access_type = Column(Enum('owner', 'user'))
+    access_type = Column(Enum("scoring", "standard", "hidden"))
+    log_access_type = Column(Enum("owner", "user"))
 
-    task = relationship('Task')
+    task = relationship("Task")
 
 
 class LeaderboardConfiguration(Base):
-    __tablename__ = 'leaderboard_configurations'
+    __tablename__ = "leaderboard_configurations"
 
-    tid = Column(ForeignKey('tasks.id'), primary_key=True, nullable=False)
+    tid = Column(ForeignKey("tasks.id"), primary_key=True, nullable=False)
     name = Column(String(255), primary_key=True, nullable=False)
-    uid = Column(ForeignKey('users.id'), nullable=False, index=True)
+    uid = Column(ForeignKey("users.id"), nullable=False, index=True)
     desc = Column(Text)
     create_datetime = Column(DateTime)
     configuration_json = Column(Text, nullable=False)
 
-    task = relationship('Task')
-    user = relationship('User')
+    task = relationship("Task")
+    user = relationship("User")
 
 
 class LeaderboardSnapshot(Base):
-    __tablename__ = 'leaderboard_snapshots'
-    __table_args__ = (
-        Index('tid', 'tid', 'name', unique=True),
-    )
+    __tablename__ = "leaderboard_snapshots"
+    __table_args__ = (Index("tid", "tid", "name", unique=True),)
 
     id = Column(Integer, primary_key=True)
-    tid = Column(ForeignKey('tasks.id'), nullable=False)
-    uid = Column(ForeignKey('users.id'), nullable=False, index=True)
+    tid = Column(ForeignKey("tasks.id"), nullable=False)
+    uid = Column(ForeignKey("users.id"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     desc = Column(Text)
     create_datetime = Column(DateTime)
     data_json = Column(Text, nullable=False)
 
-    task = relationship('Task')
-    user = relationship('User')
+    task = relationship("Task")
+    user = relationship("User")
 
 
 class Model(Base):
-    __tablename__ = 'models'
+    __tablename__ = "models"
 
     id = Column(Integer, primary_key=True)
-    tid = Column(ForeignKey('tasks.id'), nullable=False, index=True)
-    uid = Column(ForeignKey('users.id'), nullable=False, index=True)
+    tid = Column(ForeignKey("tasks.id"), nullable=False, index=True)
+    uid = Column(ForeignKey("users.id"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     shortname = Column(String(255), nullable=False)
     desc = Column(String(255))
@@ -194,43 +227,55 @@ class Model(Base):
     is_published = Column(TINYINT(1))
     is_anonymous = Column(TINYINT(1))
     endpoint_name = Column(Text)
-    deployment_status = Column(Enum('uploaded', 'processing', 'deployed', 'created', 'failed', 'unknown', 'takendown', 'predictions_upload', 'takendownnonactive'))
+    deployment_status = Column(
+        Enum(
+            "uploaded",
+            "processing",
+            "deployed",
+            "created",
+            "failed",
+            "unknown",
+            "takendown",
+            "predictions_upload",
+            "takendownnonactive",
+        )
+    )
     secret = Column(Text)
 
-    task = relationship('Task')
-    user = relationship('User')
+    task = relationship("Task")
+    user = relationship("User")
 
 
 class Notification(Base):
-    __tablename__ = 'notifications'
+    __tablename__ = "notifications"
 
     id = Column(Integer, primary_key=True)
-    uid = Column(ForeignKey('users.id'), index=True)
+    uid = Column(ForeignKey("users.id"), index=True)
     type = Column(String(255))
     message = Column(Text)
     metadata_json = Column(Text)
     seen = Column(TINYINT(1))
     created = Column(DateTime)
 
-    user = relationship('User')
+    user = relationship("User")
 
 
 class RefreshToken(Base):
-    __tablename__ = 'refresh_tokens'
+    __tablename__ = "refresh_tokens"
 
     id = Column(Integer, primary_key=True)
     token = Column(String(255), nullable=False, unique=True)
-    uid = Column(ForeignKey('users.id'), nullable=False, index=True)
+    uid = Column(ForeignKey("users.id"), nullable=False, index=True)
     generated_datetime = Column(DateTime)
 
-    user = relationship('User')
+    user = relationship("User")
 
 
 class Round(Base):
-    __tablename__ = 'rounds'
+    __tablename__ = "rounds"
 
     id = Column(Integer, primary_key=True)
-    tid = Column(ForeignKey('tasks.id'), nullable=False, index=True)
+    tid = Column(ForeignKey("tasks.id"), nullable=False, index=True)
     rid = Column(Integer, nullable=False, index=True)
     secret = Column(String(255), nullable=False)
     url = Column(Text)
@@ -243,69 +288,69 @@ class Round(Base):
     start_datetime = Column(DateTime)
     end_datetime = Column(DateTime)
 
-    task = relationship('Task')
+    task = relationship("Task")
 
 
 class TaskProposal(Base):
-    __tablename__ = 'task_proposals'
+    __tablename__ = "task_proposals"
 
     id = Column(Integer, primary_key=True)
-    uid = Column(ForeignKey('users.id'), index=True)
+    uid = Column(ForeignKey("users.id"), index=True)
     task_code = Column(String(255), nullable=False, unique=True)
     name = Column(String(255), nullable=False, unique=True)
     desc = Column(String(255))
     longdesc = Column(Text)
 
-    user = relationship('User')
+    user = relationship("User")
 
 
 class TaskUserPermission(Base):
-    __tablename__ = 'task_user_permissions'
+    __tablename__ = "task_user_permissions"
 
     id = Column(Integer, primary_key=True)
-    uid = Column(ForeignKey('users.id'), index=True)
+    uid = Column(ForeignKey("users.id"), index=True)
     type = Column(String(255))
-    tid = Column(ForeignKey('tasks.id'), index=True)
+    tid = Column(ForeignKey("tasks.id"), index=True)
 
-    task = relationship('Task')
-    user = relationship('User')
+    task = relationship("Task")
+    user = relationship("User")
 
 
 class Context(Base):
-    __tablename__ = 'contexts'
+    __tablename__ = "contexts"
 
     id = Column(Integer, primary_key=True)
-    r_realid = Column(ForeignKey('rounds.id'), nullable=False, index=True)
+    r_realid = Column(ForeignKey("rounds.id"), nullable=False, index=True)
     context_json = Column(Text)
     tag = Column(Text)
     metadata_json = Column(Text)
     total_used = Column(Integer)
     last_used = Column(DateTime)
 
-    round = relationship('Round')
+    round = relationship("Round")
 
 
 class RoundUserExampleInfo(Base):
-    __tablename__ = 'round_user_example_info'
+    __tablename__ = "round_user_example_info"
 
     id = Column(Integer, primary_key=True)
-    uid = Column(ForeignKey('users.id'), index=True)
-    r_realid = Column(ForeignKey('rounds.id'), index=True)
+    uid = Column(ForeignKey("users.id"), index=True)
+    r_realid = Column(ForeignKey("rounds.id"), index=True)
     total_verified_not_correct_fooled = Column(Integer)
     total_fooled = Column(Integer)
     examples_submitted = Column(Integer)
 
-    round = relationship('Round')
-    user = relationship('User')
+    round = relationship("Round")
+    user = relationship("User")
 
 
 class Score(Base):
-    __tablename__ = 'scores'
+    __tablename__ = "scores"
 
     id = Column(Integer, primary_key=True)
-    mid = Column(ForeignKey('models.id'), nullable=False, index=True)
-    r_realid = Column(ForeignKey('rounds.id'), nullable=False, index=True)
-    did = Column(ForeignKey('datasets.id'), nullable=False, index=True)
+    mid = Column(ForeignKey("models.id"), nullable=False, index=True)
+    r_realid = Column(ForeignKey("rounds.id"), nullable=False, index=True)
+    did = Column(ForeignKey("datasets.id"), nullable=False, index=True)
     desc = Column(String(255))
     longdesc = Column(Text)
     pretty_perf = Column(String(255))
@@ -318,17 +363,17 @@ class Score(Base):
     fairness = Column(Float)
     robustness = Column(Float)
 
-    dataset = relationship('Dataset')
-    model = relationship('Model')
-    round = relationship('Round')
+    dataset = relationship("Dataset")
+    model = relationship("Model")
+    round = relationship("Round")
 
 
 class Example(Base):
-    __tablename__ = 'examples'
+    __tablename__ = "examples"
 
     id = Column(Integer, primary_key=True)
-    cid = Column(ForeignKey('contexts.id'), nullable=False, index=True)
-    uid = Column(ForeignKey('users.id'), index=True)
+    cid = Column(ForeignKey("contexts.id"), nullable=False, index=True)
+    uid = Column(ForeignKey("users.id"), index=True)
     tag = Column(Text)
     input_json = Column(Text)
     output_json = Column(Text)
@@ -342,19 +387,19 @@ class Example(Base):
     time_elapsed = Column(Time)
     total_verified = Column(Integer)
 
-    context = relationship('Context')
-    user = relationship('User')
+    context = relationship("Context")
+    user = relationship("User")
 
 
 class Validation(Base):
-    __tablename__ = 'validations'
+    __tablename__ = "validations"
 
     id = Column(Integer, primary_key=True)
-    uid = Column(ForeignKey('users.id'), index=True)
-    eid = Column(ForeignKey('examples.id'), nullable=False, index=True)
-    label = Column(Enum('flagged', 'correct', 'incorrect', 'placeholder'))
-    mode = Column(Enum('user', 'owner'))
+    uid = Column(ForeignKey("users.id"), index=True)
+    eid = Column(ForeignKey("examples.id"), nullable=False, index=True)
+    label = Column(Enum("flagged", "correct", "incorrect", "placeholder"))
+    mode = Column(Enum("user", "owner"))
     metadata_json = Column(Text)
 
-    example = relationship('Example')
-    user = relationship('User')
+    example = relationship("Example")
+    user = relationship("User")

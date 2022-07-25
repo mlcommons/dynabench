@@ -1,9 +1,12 @@
-import json
 import hashlib
+import json
 import os
+
 import requests
 
+
 DYNABENCH_PROD_API = "https://api.dynabench.org"
+
 
 class dotdict(dict):
     """dot.notation access to dictionary attributes"""
@@ -13,7 +16,7 @@ class dotdict(dict):
     __delattr__ = dict.__delitem__
 
 
-def dynabench_get(uri: str, data = None, **kwargs):
+def dynabench_get(uri: str, data=None, **kwargs):
     DYNABENCH_API = os.getenv("DYNABENCH_API", DYNABENCH_PROD_API)
 
     if data:
@@ -22,7 +25,7 @@ def dynabench_get(uri: str, data = None, **kwargs):
     return requests.get("/".join((DYNABENCH_API, uri)), data=data, **kwargs)
 
 
-def dynabench_post(uri: str, data = None, **kwargs):
+def dynabench_post(uri: str, data=None, **kwargs):
     DYNABENCH_API = os.getenv("DYNABENCH_API", DYNABENCH_PROD_API)
 
     if data:
@@ -70,14 +73,11 @@ def api_download_dataset(dataset_id, perturb_prefix, prod=False):
 
 
 def wrap_data_with_signature(data: str, secret):
-    return {
-        "data": data,
-        "signature": generate_signature(data, secret)
-    }
+    return {"data": data, "signature": generate_signature(data, secret)}
+
 
 def generate_signature(data: str, secret):
     h = hashlib.sha1()
     h.update(f"{data}{secret}".encode("utf-8"))
     signed = h.hexdigest()
     return signed
-

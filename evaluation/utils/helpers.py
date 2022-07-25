@@ -7,8 +7,8 @@ import os
 import sys
 import tempfile
 from datetime import datetime, timedelta
-from typing import List
 from pathlib import Path
+from typing import List
 
 import boto3
 import requests
@@ -423,7 +423,9 @@ def load_models_ids_for_task_owners():
 def api_download_dataset(dataset_id, perturb_prefix, local_file: Path) -> None:
     data = {"dataset_id": dataset_id, "perturb_prefix": perturb_prefix}
 
-    _, download_filename =  tempfile.mkstemp(prefix=f"{dataset_id}_{perturb_prefix}", suffix=".tar.gz")
+    _, download_filename = tempfile.mkstemp(
+        prefix=f"{dataset_id}_{perturb_prefix}", suffix=".tar.gz"
+    )
     with requests.get(
         f"{DYNABENCH_API}/datasets/{dataset_id}/download",
         data=json.dumps(util.wrap_data_with_signature(data, decen_eaas_secret)),

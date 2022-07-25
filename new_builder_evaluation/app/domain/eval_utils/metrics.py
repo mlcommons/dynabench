@@ -198,7 +198,9 @@ def get_unperturbed_percent(predictions: dict, targets: dict, metric_function):
     total_unperturbed_weights, total = 0, 0
     for target in targets:
         if target in predictions:
-            total_unperturbed_weights += metric_function(predictions[target], [targets[target]] * len(predictions[target]))
+            total_unperturbed_weights += metric_function(
+                predictions[target], [targets[target]] * len(predictions[target])
+            )
             total += 1
     return round(total_unperturbed_weights / total, 2)
 

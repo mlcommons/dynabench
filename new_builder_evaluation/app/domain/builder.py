@@ -1,23 +1,29 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 import base64
 import logging
-import shutil
 import os
+import shutil
 import time
 from zipfile import ZipFile
 
 import boto3
-import botocore
-import docker
 
+import docker
 from app import utils
 
+
 log = logging.getLogger(__name__)
+
 
 def get_model_name(model_zip_uri: str) -> str:
     model_name = model_zip_uri.split("/")[-1]
     model_name = "-".join(model_name.split(".")[0].replace(" ", "").split("-")[1:])
     assert model_name, f"Couldn't extract a proper model name from {model_zip_uri}"
     return model_name
+
 
 class Builder:
     def __init__(self):
@@ -36,6 +42,7 @@ class Builder:
         # Required keys
         self.task_execution_role = os.environ["AWS_TASK_EXECUTION_ROLE"]
         self.s3_bucket = os.environ["AWS_S3_BUCKET"]
+        self.docker_client = docker.from_env()
 
     def download_and_unzip(self, bucket_name: str, model_zip_uri: str) -> None:
         zip_name = model_zip_uri.split("/")[-1]
@@ -78,15 +85,14 @@ class Builder:
         self, repository_name: str, folder_name: str, tag: str
     ) -> str:
         ecr_config = self.extract_ecr_configuration()
-        docker_client = docker.from_env()
-        docker_client.login(
+        self.docker_client.login(
             username=ecr_config["ecr_username"],
             password=ecr_config["ecr_password"],
             registry=ecr_config["ecr_url"],
         )
-        image, _ = docker_client.images.build(path=folder_name, tag=tag)
+        image, _ = self.docker_client.images.build(path=folder_name, tag=tag)
         image.tag(repository=repository_name, tag=tag)
-        docker_client.images.push(
+        self.docker_client.images.push(
             repository=repository_name,
             tag=tag,
             auth_config={
@@ -156,18 +162,16 @@ class Builder:
 
         self.download_and_unzip(self.s3_bucket, model_zip_uri)
         repo = self.create_repository(model_name)
-        self.push_image_to_ECR(repo, './app/model/{}'.format(model_name), tag = "latest")
+        self.push_image_to_ECR(repo, "./app/model/{}".format(model_name), tag="latest")
         ip = self.create_ecs_endpoint(model_name, repo)
         return ip, model_name
 
-    def light_model_deployment(self):
+    def light_model_deployment(self, image_uri: str, role: str):
         lambda_function = self.lamda_.create_function(
             {
                 "FunctionName": "lambda-sentiment-test-2",
-                "Role": "arn:aws:iam::877755283837:role/service-role/python-fastapi-hello-role-usk428mk",
-                "Code": {
-                    "ImageUri": "877755283837.dkr.ecr.eu-west-3.amazonaws.com/sentiment-lambda@sha256:11ccc0762147dc17e0007628dd4fddfdbbc2c108d3168e7e38bc89a58a2c4826"
-                },
+                "Role": role,
+                "Code": {"ImageUri": image_uri},
                 "PackageType": "Image",
             }
         )
