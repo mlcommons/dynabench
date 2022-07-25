@@ -8,18 +8,72 @@ import React, { useState, useEffect, useContext } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import UserContext from "../containers/UserContext";
 import "./SubmitModel.css";
+import axios from "axios";
 
-const LoadingButton = ({ text }) => {
+const useUploadFile = () => {
+  const context = useContext(UserContext);
+
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (progress === 0.5) {
+      const interval = setInterval(() => {
+        const tick = 0.1;
+        console.log(progress);
+        setProgress((p) => p + tick);
+        console.log(progress);
+        if (progress >= 1) {
+          clearInterval(interval);
+        }
+      }, 120000);
+    }
+  }, [progress]);
+
+  const send = (formData, url) => {
+    const token = context.api.getToken();
+    return axios
+      .request({
+        method: "post",
+        url: `${context.api.domain}${url}`,
+        data: formData,
+        headers: {
+          Authorization: token ? "Bearer " + token : "None",
+        },
+        onUploadProgress: (p) => {
+          setProgress(p.loaded / p.total / 2);
+        },
+      })
+      .then((data) => {
+        setProgress(1);
+        return true;
+      });
+  };
+
+  return { progress, send };
+};
+
+const ProgressBar = ({ progress, text }) => {
   return (
-    <div className="center-loading">
-      <button className="btn btn-primary" type="button" disabled>
-        <span
-          className="spinner-border spinner-border-sm"
-          role="status"
-          aria-hidden="true"
-        ></span>
-        &nbsp;&nbsp; &nbsp;{text}
-      </button>
+    <div
+      className="center-loading"
+      style={{
+        width: "50%",
+      }}
+    >
+      <div className="progress">
+        <div
+          className="progress-bar progress-bar-striped progress-bar-animated"
+          role="progressbar"
+          style={{ width: `${progress * 100}%` }}
+        ></div>
+      </div>
+      <h6>
+        {progress > 0 && progress < 1
+          ? text
+          : progress === 1
+          ? "We are processing your model"
+          : ""}
+      </h6>
     </div>
   );
 };
@@ -34,6 +88,8 @@ const SubmitModel = (props) => {
     text: "",
   });
   const [dynalab, setDynalab] = useState("");
+
+  const { progress, send } = useUploadFile();
 
   useEffect(() => {
     setInputFile(document.getElementById("input-file"));
@@ -64,27 +120,31 @@ const SubmitModel = (props) => {
     setLoadingFile(false);
   };
 
+  useEffect(() => {
+    console.log(progress);
+  }, [progress]);
+
   const handleSubmitModel = (e) => {
     e.preventDefault();
     if (inputFile.files.length !== 0) {
       const user = context.api.getCredentials();
       const file = inputFile.files[0];
-      const sendModelData = async () => {
-        setLoading({
-          loading: false,
-          text: "Your model is being uploaded, you can continue enjoying Dynabench",
-        });
-        await context.api.uploadModelUser(
-          file,
-          user.username,
-          file.name,
-          file.type,
-          user.id,
-          props.match.params.taskCode
-        );
+
+      setLoading({
+        loading: false,
+        text: "Your model is being uploaded.",
+      });
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("file_name", file.name);
+      formData.append("file_type", file.type);
+      formData.append("user_name", user.username);
+      formData.append("user_id", user.id);
+      formData.append("task_code", props.match.params.taskCode);
+      send(formData, "/users/model/upload").then((data) => {
         setLoading({ loading: true, text: "Done" });
-      };
-      sendModelData();
+        alert("Your model has been successfully uploaded");
+      });
     } else {
       setLoadingFile(true);
       alert("Please upload a model");
@@ -237,7 +297,7 @@ const SubmitModel = (props) => {
           </Col>
         </Container>
       ) : (
-        <LoadingButton text={loading.text} />
+        <ProgressBar progress={progress} text={loading.text} />
       )}
     </>
   );
