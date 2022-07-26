@@ -680,18 +680,19 @@ def upload_to_s3(credentials):
 
     logger.info(f"Uploading {model_name} to S3 at {s3_path} for user {user_id}")
 
-    try:
-        s3_client = session.client("s3")
-        tarball = bottle.request.files.get("tarball")
-        response = s3_client.upload_fileobj(tarball.file, bucket_name, s3_path)
-        if response:
-            logger.info(f"Response from the mar file upload to s3 {response}")
+    # try:
+    #     s3_client = session.client("s3")
+    #     tarball = bottle.request.files.get("tarball")
+    #     response = s3_client.upload_fileobj(tarball.file, bucket_name, s3_path)
+    #     if response:
+    #         logger.info(f"Response from the mar file upload to s3 {response}")
 
-    except Exception as ex:
-        logger.exception(ex)
-        bottle.abort(400, "normal s3 upload failed")
+    # except Exception as ex:
+    #     logger.exception(ex)
+    #     bottle.abort(400, "normal s3 upload failed")
+
     # Update database entry
-    model, model_id = m.create(
+    model = m.create(
         task_id=task.id,
         user_id=user_id,
         name=model_name,
@@ -720,7 +721,12 @@ def upload_to_s3(credentials):
             " and AWS account id {task.task_aws_account_id}"
             " - enqueue model {model_name} for deployment"
         )
-        sqs = session.resource("sqs")
+        sqs = session.resource(
+            "sqs",
+            aws_access_key_id=config["aws_access_key_id"],
+            aws_secret_access_key=config["aws_secret_access_key"],
+            region_name="us-west-1",
+        )
 
         queue = sqs.get_queue_by_name(
             QueueName=task.build_sqs_queue,
@@ -729,7 +735,7 @@ def upload_to_s3(credentials):
         queue.send_message(
             MessageBody=util.json_encode(
                 {
-                    "model_id": model_id,
+                    "model_id": model.id,
                     "s3_uri": f"s3://{bucket_name}/{s3_path}",
                     "decen_eaas": True,
                     "model_info": full_model_info,
@@ -744,7 +750,7 @@ def upload_to_s3(credentials):
         queue = sqs.get_queue_by_name(QueueName=config["builder_sqs_queue"])
         queue.send_message(
             MessageBody=util.json_encode(
-                {"model_id": model_id, "s3_uri": f"s3://{bucket_name}/{s3_path}"}
+                {"model_id": model.id, "s3_uri": f"s3://{bucket_name}/{s3_path}"}
             )
         )
 
