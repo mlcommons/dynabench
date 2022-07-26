@@ -16,6 +16,7 @@ config = {
     "aws_s3_profile_base_url": os.environ["DATASET_S3_PROFILE"],
     "aws_secret_access_key": os.environ["AWS_SECRET_ACCESS_KEY"],
     "builder_sqs_queue": os.environ["SQS_BUILDER"],
+    "new_builder_sqs_queue": os.environ["SQS_NEW_BUILDER"],
     "cookie_secret": "",
     "db_host": os.environ["DB_HOST"],
     "db_port": os.environ["DB_PORT"],

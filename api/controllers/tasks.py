@@ -13,6 +13,7 @@ import yaml
 import common.auth as _auth
 import common.helpers as util
 import common.mail_service as mail
+from common.config import config as config_env
 from common.logging import logger
 from models.context import Context
 from models.dataset import Dataset, DatasetModel
@@ -127,6 +128,7 @@ perf_metric:
             """,
             cur_round=1,
             last_updated=db.sql.func.now(),
+            s3_bucket=config_env["aws_s3_bucket_name"],
             context="min",
         )  # Annotation config is sentiment example.
 
@@ -556,6 +558,12 @@ def get_task(task_id_or_code):
     if not task:
         bottle.abort(404, "Not found")
     return util.json_encode(task)
+
+
+@bottle.get("/tasks/<task_code>/dynalab")
+def get_dynalab_task(task_code):
+    bucket = "https://models-dynalab.s3.eu-west-3.amazonaws.com"
+    return util.json_encode(f"""{bucket}/{task_code}/dynalab-base-{task_code}.zip""")
 
 
 @bottle.get("/tasks/<tid:int>/<rid:int>")

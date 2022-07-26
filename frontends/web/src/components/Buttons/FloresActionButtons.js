@@ -7,8 +7,9 @@
 import React from "react";
 import { Button, Nav, Tooltip, OverlayTrigger } from "react-bootstrap";
 import { Annotation } from "../../containers/Overlay";
+import { Link } from "react-router-dom";
 
-const FloresActionButtons = () => {
+const FloresActionButtons = ({ taskId }) => {
   function renderTooltip(props, text) {
     return (
       <Tooltip id="button-tooltip" {...props}>
@@ -35,7 +36,7 @@ const FloresActionButtons = () => {
           >
             <Button
               className="border-0 blue-color font-weight-bold light-gray-bg"
-              href="https://github.com/facebookresearch/flores/blob/master/dynalab/README.md"
+              href="https://github.com/facebookresearch/dynalab"
               target="_blank"
             >
               <i className="fas fa-upload"></i> Submit Models
