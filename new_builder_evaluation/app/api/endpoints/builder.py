@@ -2,10 +2,9 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from app.domain.builder import Builder
 from fastapi import APIRouter
 from pydantic import BaseModel
-
-from app.domain.builder import Builder
 
 
 class ModelSingleInput(BaseModel):
@@ -23,7 +22,7 @@ async def hello():
 
 
 @router.post("/test")
-async def test(model_name):
+async def test():
     model = Builder()
-    api = model.principal(model_name)
+    api = model.principal()
     return {"api": api}

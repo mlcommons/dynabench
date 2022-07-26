@@ -52,10 +52,11 @@ class Builder:
         os.remove(f"./app/models/{folder_name}/{zip_name}")
         return folder_name
 
-    def principal(self, bucket_name: str, model: str):
-        zip_name, model_name = self.download_zip(bucket_name, model)
-        self.unzip_file(zip_name)
-        return model_name
+    def principal(self):
+        zip_name, model_name = self.download_zip(
+            "dynabench-api-ciro", "models/sentiment/1675-dynalab-base-sentiment.zip"
+        )
+        return self.unzip_file(zip_name), model_name
 
     def extract_ecr_configuration(self) -> dict:
         ecr_credentials = self.ecr.get_authorization_token()["authorizationData"][0]
