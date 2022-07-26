@@ -11,10 +11,10 @@ import sys
 import time
 
 import boto3
-import jsonlines
 import requests
 import yaml
 
+import jsonlines
 from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
 from app.domain.eval_utils.input_formatter import InputFormatter
@@ -40,8 +40,11 @@ class Evaluation:
         self.dataset_repository = DatasetRepository()
         self.round_repository = RoundRepository()
 
-    def require_fields_task(self):
-        spec = importlib.util.spec_from_file_location("ModelSingleInput", "./test.py")
+    def require_fields_task(self, folder_name: str):
+        input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
+        spec = importlib.util.spec_from_file_location(
+            "ModelSingleInput", input_location
+        )
         module = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = module
         spec.loader.exec_module(module)
@@ -75,6 +78,8 @@ class Evaluation:
         model: str,
     ):
         folder_name = model.split("/")[-1].split(".")[0]
+        os.mkdir(f"./app/models/{folder_name}")
+        os.mkdir(f"./app/models/{folder_name}/datasets/")
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
             final_dataset = {}
@@ -84,7 +89,7 @@ class Evaluation:
             self.s3.download_file(
                 bucket_name,
                 base_dataset_name,
-                "./app/{}/datasets/{}.jsonl".format(
+                "./app/models/{}/datasets/{}.jsonl".format(
                     folder_name, scoring_dataset["dataset"]
                 ),
             )
@@ -101,7 +106,7 @@ class Evaluation:
                 self.s3.download_file(
                     bucket_name,
                     delta_dataset_name,
-                    "./app/{}/datasets/{}-{}.jsonl".format(
+                    "./app/models/{}/datasets/{}-{}.jsonl".format(
                         folder_name, delta_metric, scoring_dataset["dataset"]
                     ),
                 )
@@ -123,17 +128,17 @@ class Evaluation:
         return {param: sample_dataset.get(param) for param in schema}
 
     def heavy_prediction(self, datasets: list, task_code: str, model: str):
-        folder_name = model.split("/")[-1].split(".")[0]
-        ip, model_name = self.builder.get_ip_ecs_task(model)
+        ip, model_name, folder_name = self.builder.get_ip_ecs_task(model)
         final_dict_prediction = {}
         for dataset in datasets:
             dict_dataset_type = {}
             with jsonlines.open(
-                "./app/{}/datasets/{}".format(folder_name, dataset["dataset"]), "r"
+                "./app/models/{}/datasets/{}".format(folder_name, dataset["dataset"]),
+                "r",
             ) as jsonl_f:
                 lst = [obj for obj in jsonl_f]
             responses = []
-            schema = ["statement"]
+            schema = self.require_fields_task(folder_name)
             self.validate_input_schema(schema, lst)
             for line in lst:
                 answer = self.single_evaluation_ecs(
@@ -142,7 +147,7 @@ class Evaluation:
                 answer["signature"] = secrets.token_hex(15)
                 answer["id"] = line["uid"]
                 responses.append(answer)
-            predictions = "./app/{}/datasets/{}.out".format(
+            predictions = "./app/models/{}/datasets/{}.out".format(
                 folder_name, dataset["dataset"]
             )
             with jsonlines.open(predictions, "w") as writer:
@@ -153,12 +158,12 @@ class Evaluation:
                 self.s3_bucket,
                 f"predictions/{task_code}/{model_name}/{name_prediction}",
             )
-            dict_dataset_type["dataset"] = "./app/{}/datasets/{}".format(
+            dict_dataset_type["dataset"] = "./app/models/{}/datasets/{}".format(
                 folder_name, dataset["dataset"]
             )
             dict_dataset_type[
                 "predictions"
-            ] = f"./app/{folder_name}/datasets/{name_prediction}"
+            ] = f"./app/models/{folder_name}/datasets/{name_prediction}"
             dataset_type = dataset["dataset_type"]
             final_dict_prediction[dataset_type] = dict_dataset_type
             dataset_id = dataset["dataset_id"]
@@ -263,7 +268,7 @@ class Evaluation:
             self.score_repository.add(new_score)
             new_scores.append(new_score)
 
-            shutil.rmtree("./app/{}".format(model_s3_zip.split(".")[0]))
+            shutil.rmtree("./app/models/{}".format(model_s3_zip.split(".")[0]))
         return new_scores
 
     def get_sqs_messages(self):

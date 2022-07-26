@@ -41,15 +41,21 @@ class Builder:
         folder_name = model.split("/")[-1].split(".")[0]
         model_name = "-".join(zip_name.split(".")[0].replace(" ", "").split("-")[1:])
         self.s3.download_file(
-            bucket_name, model, f"./app/{folder_name}/model/{zip_name}"
+            bucket_name, model, f"./app/models/{folder_name}/{zip_name}"
         )
         return zip_name, model_name
 
     def unzip_file(self, zip_name: str):
         folder_name = zip_name.split(".")[0]
-        with ZipFile(f"./app/{folder_name}/model/{zip_name}", "r") as zipObj:
-            zipObj.extractall(f"./app/{folder_name}/model")
-        os.remove(f"./app{folder_name}/model/{zip_name}")
+        with ZipFile(f"./app/models/{folder_name}/{zip_name}", "r") as zipObj:
+            zipObj.extractall(f"./app/models/{folder_name}")
+        os.remove(f"./app/models/{folder_name}/{zip_name}")
+        return folder_name
+
+    def principal(self, bucket_name: str, model: str):
+        zip_name, model_name = self.download_zip(bucket_name, model)
+        self.unzip_file(zip_name)
+        return model_name
 
     def extract_ecr_configuration(self) -> dict:
         ecr_credentials = self.ecr.get_authorization_token()["authorizationData"][0]
@@ -120,7 +126,7 @@ class Builder:
                         "subnet-05e3df7114f1e3355",
                     ],
                     "assignPublicIp": "ENABLED",
-                    "securityGroups": ["sg-0e498213dde90a0fd"],
+                    "securityGroups": [os.getenv("SECURITY_GROUP")],
                 }
             },
         )
@@ -140,13 +146,12 @@ class Builder:
 
     def get_ip_ecs_task(self, model: str):
         zip_name, model_name = self.download_zip(os.getenv("AWS_S3_BUCKET"), model)
-        folder_name = zip_name.split(".")[0]
-        self.unzip_file(zip_name)
+        folder_name = self.unzip_file(zip_name)
         repo = self.create_repository(model_name)
         tag = "latest"
-        self.push_image_to_ECR(repo, f"./app/{folder_name}/model/{model_name}", tag)
+        self.push_image_to_ECR(repo, f"./app/models/{folder_name}/{model_name}", tag)
         ip = self.create_ecs_endpoint(model_name, f"{repo}")
-        return ip, model_name
+        return ip, model_name, folder_name
 
     def light_model_deployment(self, image_uri: str, role: str):
         lambda_function = self.lamda_.create_function(
