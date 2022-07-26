@@ -18,6 +18,7 @@ import { useState } from "react";
 import { TokenAnnotator } from "react-text-annotate";
 import AtomicImage from "./AtomicImage";
 import "./AnnotationComponent.css";
+import Player from "../../components/Player/Player.js";
 
 const Multilabel = ({
   displayName,
@@ -322,6 +323,17 @@ function isImageUrl(url, successCallback) {
   }, timeout);
 }
 
+function isAudioUrl(url, successCallback) {
+  console.log(url);
+  if (!url.audio) {
+    if (url.endsWith(".mp3") || url.endsWith(".flac")) {
+      successCallback();
+    } else {
+      alert("Please provide a valid audio format");
+    }
+  }
+}
+
 const ImageComponent = ({
   displayName,
   className,
@@ -375,6 +387,58 @@ const ImageComponent = ({
             }}
             required={true}
           />
+        </div>
+      )}
+    </>
+  );
+};
+
+const AudioComponent = ({
+  displayName,
+  className,
+  create,
+  data,
+  setData,
+  name,
+  showName = true,
+  inputReminder = false,
+}) => {
+  console.log(data);
+  return (
+    <>
+      {!create ? (
+        <>
+          {showName && (
+            <h6 className={"spaced-header " + className}>
+              {displayName ? displayName : name}:
+            </h6>
+          )}
+          <Player audio={data} />
+        </>
+      ) : data[name] ? (
+        <>
+          <Player audio={data} />
+        </>
+      ) : (
+        <div
+          className={inputReminder ? "p-2 border rounded border-danger" : ""}
+        >
+          <FormControl
+            placeholder={
+              "Enter link to audio (we only allow pasteing of valid audio urls (mp3, flac))..."
+            }
+            value={data[name] ? data[name] : ""}
+            onChange={(event) => {
+              const url = event.target.value;
+              isAudioUrl(url, () => {
+                data[name] = url;
+                setData(data.audio);
+              });
+            }}
+            required={true}
+          />
+          <br />
+          <Player audio={data} />
         </div>
       )}
     </>
@@ -467,6 +531,18 @@ const AnnotationComponent = ({
     case "prob":
       return (
         <Prob
+          create={create}
+          name={name}
+          data={data}
+          setData={setData}
+          configObj={configObj}
+          showName={showName}
+          inputReminder={inputReminder}
+        />
+      );
+    case "audio":
+      return (
+        <AudioComponent
           create={create}
           name={name}
           data={data}

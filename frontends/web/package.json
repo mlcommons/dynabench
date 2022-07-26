@@ -21,6 +21,7 @@
         "prop-types": "^15.7.2",
         "qs": "^6.9.3",
         "react": "^16.13.1",
+        "react-audio-player": "^0.17.0",
         "react-bootstrap": "^1.2.2",
         "react-c3js": "^0.1.20",
         "react-dom": "^16.13.1",

@@ -258,6 +258,7 @@ class AnnotationTypeEnum(enum.Enum):
     prob = "prob"
     multilabel = "multilabel"
     multiclass = "multiclass"
+    audio = "audio"
 
 
 class AnnotationVerifierMode(enum.Enum):
@@ -356,6 +357,21 @@ class String(AnnotationComponent):
             assert isinstance(data[name], str), (
                 prefixed_message + "the value must be a string"
             )
+
+    @staticmethod
+    def verify_config(config_obj, config):
+        pass
+
+
+class Audio(AnnotationComponent):
+    @staticmethod
+    def verify(
+        name,
+        config,
+        data,
+        mode=AnnotationVerifierMode.default,
+    ):
+        pass
 
     @staticmethod
     def verify_config(config_obj, config):
@@ -567,6 +583,7 @@ annotation_components = {
     AnnotationTypeEnum.prob.name: Prob,
     AnnotationTypeEnum.multilabel.name: Multilabel,
     AnnotationTypeEnum.multiclass.name: Multiclass,
+    AnnotationTypeEnum.audio.name: Audio,
 }
 
 
