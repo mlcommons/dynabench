@@ -12,6 +12,7 @@ eval_metrics_dict = {
     "squad_f1": metrics.get_squad_f1,
     "bleu": metrics.get_bleu,
     "sp_bleu": metrics.get_sp_bleu,
+    "chrf_pp": metrics.get_chrf_pp,
     "vqa_accuracy": metrics.get_vqa_accuracy,
     "dataperf_f1": metrics.get_dataperf_f1,
 }
@@ -32,6 +33,7 @@ metrics_meta_dict = {
     "squad_f1": metrics.get_squad_f1_meta,
     "bleu": metrics.get_bleu_meta,
     "sp_bleu": metrics.get_sp_bleu_meta,
+    "chrf_pp": metrics.get_chrf_pp_meta,
     "memory_utilization": metrics.get_memory_utilization_meta,
     "examples_per_second": metrics.get_examples_per_second_meta,
     "fairness": metrics.get_fairness_meta,

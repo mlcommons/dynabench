@@ -14,7 +14,7 @@ werkzeug
 boto3
 yoyo-migrations
 pandas==1.3.0
-sacrebleu
+sacrebleu>=2.0.0
 sklearn
 git+https://github.com/facebookresearch/dynalab.git
 sentencepiece
