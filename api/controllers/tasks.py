@@ -560,6 +560,12 @@ def get_task(task_id_or_code):
     return util.json_encode(task)
 
 
+@bottle.get("/tasks/<task_code>/dynalab")
+def get_dynalab_task(task_code):
+    bucket = "https://models-dynalab.s3.eu-west-3.amazonaws.com"
+    return util.json_encode(f"""{bucket}/{task_code}/dynalab-base-{task_code}.zip""")
+
+
 @bottle.get("/tasks/<tid:int>/<rid:int>")
 def get_task_round(tid, rid):
     rm = RoundModel()

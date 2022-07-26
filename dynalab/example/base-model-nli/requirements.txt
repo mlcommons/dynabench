@@ -1,0 +1,7 @@
+fastapi==0.63.0
+mangum==0.10.0
+pydantic==1.7.3
+python-dotenv==0.15.0
+typing-extensions==3.7.4.3
+uvicorn==0.13.2
+websockets==8.1

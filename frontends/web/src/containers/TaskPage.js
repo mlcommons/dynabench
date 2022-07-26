@@ -172,9 +172,9 @@ const TaskActionButtons = (props) => {
               overlay={renderSubmitTooltip}
             >
               <Button
+                as={Link}
                 className="border-0 blue-color font-weight-bold light-gray-bg"
-                href="https://github.com/facebookresearch/dynalab"
-                target="_blank"
+                to={`/tasks/${props.taskCode}/uploadModel`}
               >
                 <i className="fas fa-upload"></i> Submit Models
               </Button>

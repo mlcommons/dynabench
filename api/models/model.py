@@ -84,8 +84,9 @@ class ModelModel(BaseModel):
         m = Model(tid=task_id, uid=user_id, **kwargs)
         self.dbs.add(m)
         self.dbs.flush()
+        self.dbs.refresh(m)
         self.dbs.commit()
-        return m
+        return m, m.id
 
     def delete(self, model):
         self.dbs.delete(model)

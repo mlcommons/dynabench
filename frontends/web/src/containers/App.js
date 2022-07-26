@@ -25,6 +25,7 @@ import UserContext from "./UserContext";
 import TasksContext from "./TasksContext";
 import UserPage from "./UserPage";
 import ModelPage from "./ModelPage";
+import SubmitModel from "./SubmitModel";
 import ApiService from "../common/ApiService";
 import ScrollToTop from "./ScrollToTop.js";
 import CreateInterface from "../common/Annotation/CreateInterface.js";
@@ -300,6 +301,10 @@ class App extends React.Component {
                 <Route
                   path="/tasks/:taskCode/validate"
                   component={ValidateInterface}
+                />
+                <Route
+                  path="/tasks/:taskCode/uploadModel"
+                  component={SubmitModel}
                 />
                 <Route
                   path="/tasks/:taskCode/models/:modelId/updateModelInfo"
