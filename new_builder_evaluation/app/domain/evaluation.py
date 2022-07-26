@@ -19,13 +19,13 @@ import jsonlines
 import requests
 import yaml
 
+import app.infrastructure.repositories.dataset
 import app.infrastructure.repositories.task
 from app import utils
 from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
 from app.domain.eval_utils.input_formatter import InputFormatter
 from app.infrastructure import repositories
-from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.score import ScoreRepository
 
@@ -50,9 +50,10 @@ class Evaluation:
         if not self.decentralized:
             self.task_repository = repositories.task.TaskRepository()
             self.score_repository = ScoreRepository()
-            self.dataset_repository = DatasetRepository()
+            self.dataset_repository = repositories.dataset.DatasetRepository()
         else:
             self.task_repository = repositories.task.DecenTaskRepository()
+            self.dataset_repository = repositories.dataset.DecenDatasetRepository()
 
     @functools.lru_cache()
     def get_task_configuration(self, task_id: int) -> dict:
@@ -91,13 +92,6 @@ class Evaluation:
         # TODO: error handling
         return response.json()
 
-    def get_scoring_datasets(self, task_id: int, round_id: int):
-        if self.decentralized:
-            return ["flores101-small1-dev", "flores101-small1-devtest"]
-
-        jsonl_scoring_datasets = self.dataset_repository.get_scoring_datasets(task_id)
-        return jsonl_scoring_datasets
-
     def dl_dataset(self, task_code: str, dataset: str, delta_metric: str = None) -> str:
         if not delta_metric:
             dataset_name = f"datasets/{task_code}/{dataset}.jsonl"
@@ -114,49 +108,39 @@ class Evaluation:
 
     def downloads_scoring_datasets(
         self,
-        jsonl_scoring_datasets: list,
         bucket_name: str,
         task_code: str,
         delta_metrics: list,
         model: str,
     ):
-        folder_name = model.split("/")[-1].split(".")[0]
+        jsonl_scoring_datasets = self.dataset_repository.get_scoring_datasets(task_code)
         final_datasets = []
+        folder_name = model.split("/")[-1].split(".")[0]
+        dataset_dir = f"{folder_name}/datasets"
+        (Path("./app") / dataset_dir).mkdir(exist_ok=True, parents=True)
         for scoring_dataset in jsonl_scoring_datasets:
             final_dataset = {}
-            base_dataset_name = "datasets/{}/{}.jsonl".format(
-                task_code, scoring_dataset["dataset"]
-            )
+            base_dataset_file = f"{dataset_dir}/{scoring_dataset['dataset']}.jsonl"
             self.s3.download_file(
-                bucket_name,
-                base_dataset_name,
-                "./app/{}/datasets/{}.jsonl".format(
-                    folder_name, scoring_dataset["dataset"]
-                ),
+                bucket_name, base_dataset_file, f"./app/{base_dataset_file}"
             )
             final_dataset["dataset_type"] = "base"
             final_dataset["round_id"] = scoring_dataset["round_id"]
             final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
-            final_dataset["dataset"] = "{}.jsonl".format(scoring_dataset["dataset"])
+            final_dataset["dataset"] = Path(base_dataset_file).name
             final_datasets.append(final_dataset)
             for delta_metric in delta_metrics:
                 final_dataset = {}
-                delta_dataset_name = "datasets/{}/{}-{}.jsonl".format(
-                    task_code, delta_metric, scoring_dataset["dataset"]
+                delta_dataset_file = (
+                    f"{dataset_dir}/{delta_metric}-{scoring_dataset['dataset']}.jsonl"
                 )
                 self.s3.download_file(
-                    bucket_name,
-                    delta_dataset_name,
-                    "./app/{}/datasets/{}-{}.jsonl".format(
-                        folder_name, delta_metric, scoring_dataset["dataset"]
-                    ),
+                    bucket_name, delta_dataset_file, f"./app/{delta_dataset_file}"
                 )
                 final_dataset["dataset_type"] = delta_metric
                 final_dataset["round_id"] = scoring_dataset["round_id"]
                 final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
-                final_dataset["dataset"] = "{}-{}.jsonl".format(
-                    delta_metric, scoring_dataset["dataset"]
-                )
+                final_dataset["dataset"] = Path(delta_dataset_file).name
                 final_datasets.append(final_dataset)
         return final_datasets
 
@@ -221,11 +205,11 @@ class Evaluation:
     def evaluation(self, task_code: str, model_s3_zip: str, model_id: int) -> list:
         task = self.task_repository.get_by_id_or_code(task_code)
         task_configuration = self.get_task_configuration(task_code)
-        delta_metrics = self.get_task_configuration(task.id)["delta_metrics"]
-        delta_metrics = [delta_metric["type"] for delta_metric in delta_metrics]
-        jsonl_scoring_datasets = self.get_scoring_datasets(task.id)
+        delta_metrics = [
+            delta_metric["type"]
+            for delta_metric in task_configuration.get("delta_metrics", [])
+        ]
         datasets = self.downloads_scoring_datasets(
-            jsonl_scoring_datasets,
             self.s3_bucket,
             task.task_code,
             delta_metrics,

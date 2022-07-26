@@ -25,4 +25,4 @@ app.include_router(builder.router, prefix="/builder", tags=["builder"])
 app.include_router(evaluation.router, prefix="/evaluation", tags=["evaluation"])
 
 server = Evaluation()
-server.evaluation("flores_small1", "s3://submissions/flores_small1-dummy.zip")
+server.evaluation("flores_small1", "s3://submissions/flores_small1-dummy.zip", "311")

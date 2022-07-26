@@ -44,8 +44,9 @@ class Builder:
         self.s3_bucket = os.environ["AWS_S3_BUCKET"]
         self.docker_client = docker.from_env()
 
-    def download_and_unzip(self, bucket_name: str, model_zip_uri: str) -> None:
+    def download_and_unzip(self, bucket_name: str, model_zip_uri: str) -> str:
         zip_name = model_zip_uri.split("/")[-1]
+        folder_name = zip_name.split(".")[0]
         local_zip_file = f"./app/model/{zip_name}"
         if self.decentralized:
             # return utils.api_download_model(model, model.secret)
@@ -56,9 +57,11 @@ class Builder:
         else:
             self.s3.download_file(bucket_name, model_zip_uri, local_zip_file)
 
+        model_dir = f"./app/{folder_name}/model"
         with ZipFile(local_zip_file, "r") as zipObj:
-            zipObj.extractall("./app/model")
+            zipObj.extractall(model_dir)
         os.remove(local_zip_file)
+        return model_dir
 
     def extract_ecr_configuration(self) -> dict:
         ecr_credentials = self.ecr.get_authorization_token()["authorizationData"][0]
@@ -133,7 +136,6 @@ class Builder:
                 "securityGroups": ["sg-038b2a6f25a971995"],
             }
         }
-        breakpoint()
         run_task = self.ecs.run_task(
             taskDefinition=task_definition,
             launchType="FARGATE",
@@ -142,27 +144,30 @@ class Builder:
             count=1,
             networkConfiguration=network_conf,
         )
+        task_arn = run_task["tasks"][0]["taskArn"]
         while True:
             describe_task = self.ecs.describe_tasks(
-                cluster="heavy-task-evaluation", tasks=[run_task["tasks"][0]["taskArn"]]
+                cluster="heavy-task-evaluation", tasks=[task_arn]
             )
-            if describe_task["tasks"][0]["containers"][0]["lastStatus"] != "RUNNING":
-                time.sleep(60)
-                # TODO: handle "STOPPED" status vs "PENDING"
-            else:
+            status = describe_task["tasks"][0]["containers"][0]["lastStatus"]
+            if status == "RUNNING":
                 eni = self.ec2.NetworkInterface(
                     describe_task["tasks"][0]["attachments"][0]["details"][1]["value"]
                 )
                 ip = eni.association_attribute["PublicIp"]
                 break
+            if status == "PENDING":
+                time.sleep(60)
+            elif status == "STOPPING":
+                raise Exception(f"Task {task_arn} failed evaluation with status {status}.")
         return ip
 
     def get_ip_ecs_task(self, model_zip_uri: str):
         model_name = get_model_name(model_zip_uri)
 
-        self.download_and_unzip(self.s3_bucket, model_zip_uri)
+        model_file = self.download_and_unzip(self.s3_bucket, model_zip_uri)
         repo = self.create_repository(model_name)
-        self.push_image_to_ECR(repo, "./app/model/{}".format(model_name), tag="latest")
+        self.push_image_to_ECR(repo, model_file, tag="latest")
         ip = self.create_ecs_endpoint(model_name, repo)
         return ip, model_name
 
