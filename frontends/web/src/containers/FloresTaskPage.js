@@ -23,12 +23,14 @@ import FloresTaskDescription from "../components/FloresComponents/FloresTaskDesc
 import FloresPairsLeaderBoard from "../components/FloresComponents/FloresPairsLeaderboard";
 
 const FLORES_TASK_NAMES = [
+  "Flores MT Evaluation (African)",
   "Flores MT Evaluation (FULL)",
   "Flores MT Evaluation (Small task 1)",
   "Flores MT Evaluation (Small task 2)",
 ];
 
 export const FLORES_TASK_CODES = [
+  "flores_african",
   "flores_full",
   "flores_small1",
   "flores_small2",
@@ -116,6 +118,15 @@ const FloresTaskPage = (props) => {
     );
   }
 
+  const geturl = () => {
+    return [
+      "Flores MT Evaluation (FULL)",
+      "Flores MT Evaluation (Small task 1)",
+      "Flores MT Evaluation (Small task 2)",
+    ].includes(task.name)
+      ? "http://data.statmt.org/wmt21/multilingual-task/"
+      : "https://statmt.org/wmt22/large-scale-multilingual-translation-task.html";
+  };
   return (
     <OverlayProvider initiallyHide={true} delayMs="1700">
       <Container fluid>
@@ -181,7 +192,8 @@ const FloresTaskPage = (props) => {
               the data that is provided can be used. This will enable fairer
               comparison across methods. Check the{" "}
               <a
-                href="http://data.statmt.org/wmt21/multilingual-task/"
+                //href="http://data.statmt.org/wmt21/multilingual-task/"
+                href={geturl()}
                 target="_blank"
                 rel="noreferrer"
               >
