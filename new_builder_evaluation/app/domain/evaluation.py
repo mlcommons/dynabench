@@ -2,6 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import datetime
 import importlib
 import json
 import os
@@ -33,6 +34,7 @@ class Evaluation:
         )
         self.s3 = self.session.client("s3")
         self.sqs = self.session.client("sqs")
+        self.cloud_watch = self.session.client("cloudwatch")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.builder = Builder()
         self.task_repository = TaskRepository()
@@ -128,8 +130,10 @@ class Evaluation:
         return {param: sample_dataset.get(param) for param in schema}
 
     def heavy_prediction(self, datasets: list, task_code: str, model: str):
-        ip, model_name, folder_name = self.builder.get_ip_ecs_task(model)
+        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(model)
         final_dict_prediction = {}
+        start_prediction = time.time()
+        num_samples = 0
         for dataset in datasets:
             dict_dataset_type = {}
             with jsonlines.open(
@@ -150,6 +154,7 @@ class Evaluation:
             predictions = "./app/models/{}/datasets/{}.out".format(
                 folder_name, dataset["dataset"]
             )
+            num_samples += len(lst)
             with jsonlines.open(predictions, "w") as writer:
                 writer.write_all(responses)
             name_prediction = predictions.split("/")[-1]
@@ -167,7 +172,34 @@ class Evaluation:
             dataset_type = dataset["dataset_type"]
             final_dict_prediction[dataset_type] = dict_dataset_type
             dataset_id = dataset["dataset_id"]
-        return final_dict_prediction, dataset_id
+        end_prediction = time.time()
+        minutes_time_prediction = (end_prediction - start_prediction) / 60
+        return (
+            final_dict_prediction,
+            dataset_id,
+            arn_service,
+            model_name,
+            minutes_time_prediction,
+            num_samples,
+        )
+
+    def get_memory_utilization(self, model_name: str) -> float:
+        memory_utilization = self.cloudwatch.get_metric_statistics(
+            Namespace="AWS/ECS",
+            MetricName="CPUUtilization",
+            Dimensions=[
+                {"Name": "ClusterName", "Value": os.getenv("CLUSTER_TASK_EVALUATION")},
+                {"Name": "ServiceName", "Value": model_name},
+            ],
+            StartTime=datetime.datetime.now() - datetime.timedelta(hours=0.5),
+            EndTime=datetime.datetime.now(),
+            Period=36000,
+            Statistics=["Average"],
+        )
+        return memory_utilization["Datapoints"][0]["Average"]
+
+    def get_throughput(self, num_samples: int, time_in_minutes: float):
+        return round(num_samples / time_in_minutes, 2)
 
     def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
         tasks = self.task_repository.get_model_id_and_task_code(task)
@@ -185,17 +217,30 @@ class Evaluation:
         )
         rounds = list(
             map(
-                int, {round for rounds in datasets for round in str(rounds["round_id"])}
+                int,
+                {
+                    current_round
+                    for rounds in datasets
+                    for current_round in str(rounds["round_id"])
+                },
             )
         )
         new_scores = []
-        for round in rounds:
+        for current_round in rounds:
             round_datasets = [
-                dataset for dataset in datasets if dataset["round_id"] == round
+                dataset for dataset in datasets if dataset["round_id"] == current_round
             ]
-            prediction_dict, dataset_id = self.heavy_prediction(
-                round_datasets, tasks.task_code, model_s3_zip
-            )
+            (
+                prediction_dict,
+                dataset_id,
+                arn_service,
+                model_name,
+                minutes_time_prediction,
+                num_samples,
+            ) = self.heavy_prediction(round_datasets, tasks.task_code, model_s3_zip)
+            self.builder.delete_ecs_service(arn_service)
+            memory = self.get_memory_utilization(model_name)
+            throughput = self.get_throughput(num_samples, minutes_time_prediction)
             data_dict = {}
             for data_version, data_types in prediction_dict.items():
                 for data_type in data_types:
@@ -248,11 +293,11 @@ class Evaluation:
                 str(metric): main_metric,
                 "fairness": delta_metrics.get("fairness"),
                 "robustness": delta_metrics.get("robustness"),
-                "memory": 0,
-                "throughput": 0,
+                "memory": memory,
+                "throughput": throughput,
             }
             round_info = self.round_repository.get_round_info_by_round_and_task(
-                tasks.id, round
+                tasks.id, current_round
             )
             new_score = {
                 "perf": main_metric["perf"],

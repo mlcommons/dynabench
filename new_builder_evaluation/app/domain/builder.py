@@ -114,12 +114,13 @@ class Builder:
 
     def create_ecs_endpoint(self, name_task: str, repo: str) -> str:
         task_definition = self.create_task_definition(name_task, repo)
-        run_task = self.ecs.run_task(
-            taskDefinition=task_definition,
-            launchType="FARGATE",
-            platformVersion="LATEST",
+        run_service = self.ecs.create_service(
             cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
-            count=1,
+            serviceName=name_task,
+            taskDefinition=task_definition["taskDefinition"]["containerDefinitions"][0][
+                "name"
+            ],
+            desiredCount=1,
             networkConfiguration={
                 "awsvpcConfiguration": {
                     "subnets": [
@@ -130,21 +131,39 @@ class Builder:
                     "securityGroups": [os.getenv("SECURITY_GROUP")],
                 }
             },
+            launchType="FARGATE",
         )
         while True:
-            describe_task = self.ecs.describe_tasks(
+            describe_service = self.ecs.describe_services(
                 cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
-                tasks=[run_task["tasks"][0]["taskArn"]],
+                services=[run_service["service"]["serviceArn"]],
             )
-            if describe_task["tasks"][0]["containers"][0]["lastStatus"] != "RUNNING":
+            service_state = describe_service["services"][0]["deployments"][0][
+                "rolloutState"
+            ]
+            if service_state != "COMPLETED":
                 time.sleep(60)
             else:
+                arn_service = describe_service["services"][0]["serviceArn"]
+                run_task = self.ecs.list_tasks(
+                    cluster=os.getenv("CLUSTER_TASK_EVALUATION"), serviceName=name_task
+                )["taskArns"]
+                describe_task = self.ecs.describe_tasks(
+                    cluster=os.getenv("CLUSTER_TASK_EVALUATION"), tasks=run_task
+                )
                 eni = self.eni.NetworkInterface(
                     describe_task["tasks"][0]["attachments"][0]["details"][1]["value"]
                 )
                 ip = eni.association_attribute["PublicIp"]
                 break
-        return ip
+        return ip, arn_service
+
+    def delete_ecs_service(self, arn_service: str):
+        self.ecs.delete_service(
+            cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
+            service=arn_service,
+            force=True,
+        )
 
     def get_ip_ecs_task(self, model: str):
         zip_name, model_name = self.download_zip(os.getenv("AWS_S3_BUCKET"), model)
@@ -152,8 +171,8 @@ class Builder:
         repo = self.create_repository(model_name)
         tag = "latest"
         self.push_image_to_ECR(repo, f"./app/models/{folder_name}/{model_name}", tag)
-        ip = self.create_ecs_endpoint(model_name, f"{repo}")
-        return ip, model_name, folder_name
+        ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
+        return ip, model_name, folder_name, arn_service
 
     def light_model_deployment(self, image_uri: str, role: str):
         lambda_function = self.lamda_.create_function(
