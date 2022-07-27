@@ -110,9 +110,10 @@ class ContextModel(BaseModel):
     def getContextValidationResults(
         self, num_matching_validations, validate_non_fooling=False, example_tags=None
     ):
-        from models.example import Example
-        from models.validation import Validation, LabelEnum
         from sqlalchemy import distinct
+
+        from models.example import Example
+        from models.validation import LabelEnum, Validation
 
         cnt_correct_val = db.sql.func.sum(
             case([(Validation.label == LabelEnum.correct, 1)], else_=0)

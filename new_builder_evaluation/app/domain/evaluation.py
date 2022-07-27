@@ -12,10 +12,10 @@ import sys
 import time
 
 import boto3
+import jsonlines
 import requests
 import yaml
 
-import jsonlines
 from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
 from app.domain.eval_utils.input_formatter import InputFormatter

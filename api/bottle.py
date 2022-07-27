@@ -160,17 +160,22 @@ except OSError:
 
 # Lots of stdlib and builtin differences.
 if py3k:
-    import http.client as httplib
     import _thread as thread
-    from urllib.parse import urljoin, SplitResult as UrlSplitResult
-    from urllib.parse import urlencode, quote as urlquote, unquote as urlunquote
+    import http.client as httplib
+    from urllib.parse import (
+        SplitResult as UrlSplitResult,
+        quote as urlquote,
+        unquote as urlunquote,
+        urlencode,
+        urljoin,
+    )
 
     urlunquote = functools.partial(urlunquote, encoding="latin1")
-    from http.cookies import SimpleCookie, Morsel, CookieError
-    from collections.abc import MutableMapping as DictMixin
-    import pickle
-    from io import BytesIO
     import configparser
+    import pickle
+    from collections.abc import MutableMapping as DictMixin
+    from http.cookies import CookieError, Morsel, SimpleCookie
+    from io import BytesIO
 
     basestring = str
     unicode = str
@@ -187,16 +192,17 @@ if py3k:
         raise a[0](a[1]).with_traceback(a[2])
 
 else:  # 2.x
+    from collections import MutableMapping as DictMixin
+    from itertools import imap
+    from urllib import quote as urlquote, unquote as urlunquote, urlencode
+
+    import ConfigParser as configparser
+    import cPickle as pickle
     import httplib
     import thread
-    from urlparse import urljoin, SplitResult as UrlSplitResult
-    from urllib import urlencode, quote as urlquote, unquote as urlunquote
-    from Cookie import SimpleCookie, Morsel, CookieError
-    from itertools import imap
-    import cPickle as pickle
+    from Cookie import CookieError, Morsel, SimpleCookie
     from StringIO import StringIO as BytesIO
-    import ConfigParser as configparser
-    from collections import MutableMapping as DictMixin
+    from urlparse import SplitResult as UrlSplitResult, urljoin
 
     unicode = unicode
     json_loads = json_lds
@@ -3518,9 +3524,8 @@ class FlupFCGIServer(ServerAdapter):
 
 class WSGIRefServer(ServerAdapter):
     def run(self, app):  # pragma: no cover
-        from wsgiref.simple_server import make_server
-        from wsgiref.simple_server import WSGIRequestHandler, WSGIServer
         import socket
+        from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
         class FixedHandler(WSGIRequestHandler):
             def address_string(self):  # Prevent reverse DNS lookups please.
@@ -3651,9 +3656,9 @@ class TornadoServer(ServerAdapter):
     """The super hyped asynchronous server by facebook. Untested."""
 
     def run(self, handler):  # pragma: no cover
-        import tornado.wsgi
         import tornado.httpserver
         import tornado.ioloop
+        import tornado.wsgi
 
         container = tornado.wsgi.WSGIContainer(handler)
         server = tornado.httpserver.HTTPServer(container)
@@ -3687,9 +3692,9 @@ class TwistedServer(ServerAdapter):
     """Untested."""
 
     def run(self, handler):
-        from twisted.web import server, wsgi
-        from twisted.python.threadpool import ThreadPool
         from twisted.internet import reactor
+        from twisted.python.threadpool import ThreadPool
+        from twisted.web import server, wsgi
 
         thread_pool = ThreadPool()
         thread_pool.start()
@@ -3717,7 +3722,7 @@ class GeventServer(ServerAdapter):
     """
 
     def run(self, handler):
-        from gevent import pywsgi, local
+        from gevent import local, pywsgi
 
         if not isinstance(threading.local(), local.local):
             msg = "Bottle requires gevent.monkey.patch_all() (before import)"
@@ -3768,7 +3773,7 @@ class EventletServer(ServerAdapter):
     """
 
     def run(self, handler):
-        from eventlet import wsgi, listen, patcher
+        from eventlet import listen, patcher, wsgi
 
         if not patcher.is_monkey_patched(os):
             msg = "Bottle requires eventlet.monkey_patch() (before import)"
@@ -3818,6 +3823,7 @@ class AiohttpServer(AsyncioServerAdapter):
 
     def run(self, handler):
         import asyncio
+
         from aiohttp_wsgi.wsgi import serve
 
         self.loop = self.get_event_loop()
@@ -4204,8 +4210,8 @@ class BaseTemplate:
 
 class MakoTemplate(BaseTemplate):
     def prepare(self, **options):
-        from mako.template import Template
         from mako.lookup import TemplateLookup
+        from mako.template import Template
 
         options.update({"input_encoding": self.encoding})
         options.setdefault("format_exceptions", bool(DEBUG))
