@@ -118,7 +118,7 @@ class Builder:
             taskDefinition=task_definition,
             launchType="FARGATE",
             platformVersion="LATEST",
-            cluster="heavy-task-evaluation",
+            cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
             count=1,
             networkConfiguration={
                 "awsvpcConfiguration": {
@@ -133,7 +133,8 @@ class Builder:
         )
         while True:
             describe_task = self.ecs.describe_tasks(
-                cluster="heavy-task-evaluation", tasks=[run_task["tasks"][0]["taskArn"]]
+                cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
+                tasks=[run_task["tasks"][0]["taskArn"]],
             )
             if describe_task["tasks"][0]["containers"][0]["lastStatus"] != "RUNNING":
                 time.sleep(60)

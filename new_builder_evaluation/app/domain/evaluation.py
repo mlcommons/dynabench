@@ -40,10 +40,8 @@ class Evaluation:
         self.dataset_repository = DatasetRepository()
         self.round_repository = RoundRepository()
 
-    def require_fields_task(self, folder_name: str, model_name: str):
-        input_location = (
-            f"./app/models/{folder_name}/{model_name}/app/api/schemas/model.py"
-        )
+    def require_fields_task(self, folder_name: str):
+        input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
         spec = importlib.util.spec_from_file_location(
             "ModelSingleInput", input_location
         )
@@ -76,7 +74,7 @@ class Evaluation:
         jsonl_scoring_datasets: list,
         bucket_name: str,
         task_code: str,
-        delta_metrics: list,
+        delta_metrics_task: list,
         model: str,
     ):
         folder_name = model.split("/")[-1].split(".")[0]
@@ -100,7 +98,7 @@ class Evaluation:
             final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
             final_dataset["dataset"] = "{}.jsonl".format(scoring_dataset["dataset"])
             final_datasets.append(final_dataset)
-            for delta_metric in delta_metrics:
+            for delta_metric in delta_metrics_task:
                 final_dataset = {}
                 delta_dataset_name = "datasets/{}/{}-{}.jsonl".format(
                     task_code, delta_metric, scoring_dataset["dataset"]
@@ -140,7 +138,7 @@ class Evaluation:
             ) as jsonl_f:
                 lst = [obj for obj in jsonl_f]
             responses = []
-            schema = self.require_fields_task(folder_name, model_name)
+            schema = self.require_fields_task(folder_name)
             self.validate_input_schema(schema, lst)
             for line in lst:
                 answer = self.single_evaluation_ecs(
@@ -173,14 +171,16 @@ class Evaluation:
 
     def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
         tasks = self.task_repository.get_model_id_and_task_code(task)
-        delta_metrics = self.get_task_configuration(tasks.id)["delta_metrics"]
-        delta_metrics = [delta_metric["type"] for delta_metric in delta_metrics]
+        delta_metrics_task = self.get_task_configuration(tasks.id)["delta_metrics"]
+        delta_metrics_task = [
+            delta_metric_task["type"] for delta_metric_task in delta_metrics_task
+        ]
         jsonl_scoring_datasets = self.get_scoring_datasets(tasks.id)
         datasets = self.downloads_scoring_datasets(
             jsonl_scoring_datasets,
             self.s3_bucket,
             tasks.task_code,
-            delta_metrics,
+            delta_metrics_task,
             model_s3_zip,
         )
         rounds = list(
@@ -243,7 +243,6 @@ class Evaluation:
                     formatted_dict.get("grouped_robustness_predictions"),
                     formatted_dict.get("grouped_fairness_predictions"),
                 )
-
             metric = task_configuration["perf_metric"]["type"]
             final_scores = {
                 str(metric): main_metric,

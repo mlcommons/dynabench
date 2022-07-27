@@ -84,20 +84,19 @@ class Evaluator:
         predictions  #Strong assumption is not having to
         calculate alternative metrics from the yaml one.
         """
-        delta_metrics = []
+        delta_metrics = {}
 
         for prefix in self.perturb_prefixes:
             if prefix == "robustness":
                 delta_metric = self._compute_delta_metrics(
                     grouped_robusts, grouped_predictions, prefix
                 )
-                delta_metrics.append(delta_metric)
+                delta_metrics["robustness"] = delta_metric
             else:
                 delta_metric = self._compute_delta_metrics(
                     grouped_fairs, grouped_predictions, prefix
                 )
-                delta_metrics.append(delta_metric)
-
+                delta_metrics["fairness"] = delta_metric
         return delta_metrics
 
     def _compute_metric(self, predictions: list, targets: list) -> tuple:
