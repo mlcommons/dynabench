@@ -91,12 +91,12 @@ class Evaluator:
                 delta_metric = self._compute_delta_metrics(
                     grouped_robusts, grouped_predictions, prefix
                 )
-                delta_metrics["robustness"] = delta_metric
+                delta_metrics["robustness"] = delta_metric.get("robustness")
             else:
                 delta_metric = self._compute_delta_metrics(
                     grouped_fairs, grouped_predictions, prefix
                 )
-                delta_metrics["fairness"] = delta_metric
+                delta_metrics["fairness"] = delta_metric.get("fairness")
         return delta_metrics
 
     def _compute_metric(self, predictions: list, targets: list) -> tuple:
