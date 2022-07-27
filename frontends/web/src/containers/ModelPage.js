@@ -518,7 +518,7 @@ ${latexTableContent}
 
   render() {
     const { model, task, taskCode } = this.state;
-    const isFlores = FLORES_TASK_CODES.includes(task.task_code);
+    const isFlores = FLORES_TASK_CODES.slice(1).includes(task.task_code);
     const isModelOwner =
       parseInt(this.state.model.uid) === parseInt(this.state.ctxUserId);
 
