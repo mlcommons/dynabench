@@ -88,6 +88,7 @@ class Evaluation:
             base_dataset_name = "datasets/{}/{}.jsonl".format(
                 task_code, scoring_dataset["dataset"]
             )
+            print(bucket_name, base_dataset_name)
             self.s3.download_file(
                 bucket_name,
                 base_dataset_name,
@@ -299,6 +300,7 @@ class Evaluation:
             round_info = self.round_repository.get_round_info_by_round_and_task(
                 tasks.id, current_round
             )
+
             new_score = {
                 "perf": main_metric["perf"],
                 "pretty_perf": main_metric["pretty_perf"],
@@ -310,6 +312,8 @@ class Evaluation:
                 "memory_utilization": final_scores["memory"],
                 "examples_per_second": final_scores["throughput"],
             }
+
+            new_score["metadata_json"] = json.dumps(new_score)
 
             self.score_repository.add(new_score)
             new_scores.append(new_score)
