@@ -1,22 +1,25 @@
 [tool.isort]
-# This is required to make sorting same as fbcode as all absolute imports
-# are considered third party there
-known_third_party = [
-    "transformers", "yoyo", "boto3", "bottle", "aiohttp", "pyjwt", "jwt", "cheroot",
-    "numpy", "sqlalchemy", "pymysql", "requests", "six", "SQLAlchemy", "sagemaker",
-    "torch", "tqdm", "werkzeug", "cryptography", "mephisto", "omegaconf", "hydra",
-    "mmf", "PIL", "ts", "captum", "dateutil", "uuid", "pandas", "enum", "botocore",
-    "sacrebleu", "sentencepiece", "sklearn", "dynalab", "datasets", "dynalab_cli",
-    "ujson", "sklearn", "spacy", "pyyaml", "yaml"
+# Avoid conflicts between local folders and pypi packages
+known_first_party = [
+    "app",
+    "common",
+    "models",
+    "utils",
+    "eval_config",
+    "build_config",
+    "controllers",
+    "config",
+    "metrics",
+    "settings"
 ]
-skip_glob = "**/build/**,frontends/**"
+# This is arguably wrong, but this was configured like this in the past,
+# so keeping them to avoid noise changes.
+known_third_party = ["uuid", "enum"]
+skip_glob = "**/build/**,frontends/**,legacy/**"
 combine_as_imports = true
-force_grid_wrap = false
-include_trailing_comma = true
-line_length = 88
-multi_line_output = 3
-use_parentheses = true
 lines_after_imports = 2
+# Make isort compatible with black
+profile = "black"
 
 [tool.black]
 line-length = 88
