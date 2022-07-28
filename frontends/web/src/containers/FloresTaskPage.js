@@ -27,7 +27,6 @@ const FLORES_TASK_NAMES = [
   "Flores MT Evaluation (FULL)",
   "Flores MT Evaluation (Small task 1)",
   "Flores MT Evaluation (Small task 2)",
-
 ];
 
 export const FLORES_TASK_CODES = [
@@ -35,7 +34,6 @@ export const FLORES_TASK_CODES = [
   "flores_full",
   "flores_small1",
   "flores_small2",
-
 ];
 
 const TaskNav = ({ location, taskLookup, taskId, setTask }) => {
@@ -120,11 +118,15 @@ const FloresTaskPage = (props) => {
     );
   }
 
-const geturl = () => {return [
-  "Flores MT Evaluation (FULL)",
-  "Flores MT Evaluation (Small task 1)",
-  "Flores MT Evaluation (Small task 2)"
-  ].includes(task.name)?"http://data.statmt.org/wmt21/multilingual-task/":"https://statmt.org/wmt22/large-scale-multilingual-translation-task.html"}
+  const geturl = () => {
+    return [
+      "Flores MT Evaluation (FULL)",
+      "Flores MT Evaluation (Small task 1)",
+      "Flores MT Evaluation (Small task 2)",
+    ].includes(task.name)
+      ? "http://data.statmt.org/wmt21/multilingual-task/"
+      : "https://statmt.org/wmt22/large-scale-multilingual-translation-task.html";
+  };
   return (
     <OverlayProvider initiallyHide={true} delayMs="1700">
       <Container fluid>
@@ -191,7 +193,7 @@ const geturl = () => {return [
               comparison across methods. Check the{" "}
               <a
                 //href="http://data.statmt.org/wmt21/multilingual-task/"
-                href = {geturl()}
+                href={geturl()}
                 target="_blank"
                 rel="noreferrer"
               >
