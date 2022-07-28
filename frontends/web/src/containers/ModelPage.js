@@ -234,7 +234,17 @@ const ScoreRow = ({
                   key={`score-${score.dataset_name}-${perf_and_tag.tag}-overall`}
                 >
                   <span>
-                    {parseFloat(perf_and_tag.perf).toFixed(2) +
+                    {parseFloat(perf_and_tag.perf_dict.chrf_pp).toFixed(2) +
+                      (score.perf_std !== null ? "\xB1" + score.perf_std : "")}
+                    &nbsp;
+                  </span>
+                </td>
+                <td
+                  className="text-right "
+                  key={`score-${score.dataset_name}-${perf_and_tag.tag}-overall`}
+                >
+                  <span>
+                    {parseFloat(perf_and_tag.perf_dict.sp_bleu).toFixed(2) +
                       (score.perf_std !== null ? "\xB1" + score.perf_std : "")}
                   </span>
                 </td>
@@ -518,7 +528,9 @@ ${latexTableContent}
 
   render() {
     const { model, task, taskCode } = this.state;
+
     const isFlores = FLORES_TASK_CODES.slice(1).includes(task.task_code);
+
     const isModelOwner =
       parseInt(this.state.model.uid) === parseInt(this.state.ctxUserId);
 
@@ -757,6 +769,18 @@ ${latexTableContent}
                               <h5>Leaderboard Datasets</h5>
                             </td>
                           </tr>
+                          <tr>
+                            <td>
+                              <div className="parent">
+                                <label className="child1">
+                                  <b>chrf_pp</b>
+                                </label>
+                                <label className="child2">
+                                  <b>sp_bleu</b>
+                                </label>
+                              </div>
+                            </td>
+                          </tr>
                         </tbody>
                       </Table>
                     ) : (
@@ -787,7 +811,7 @@ ${latexTableContent}
                       <Table>
                         <tbody>
                           <tr>
-                            <td colSpan={2}>
+                            <td colSpan={3}>
                               <h5>Non-Leaderboard Datasets</h5>
                             </td>
                           </tr>
