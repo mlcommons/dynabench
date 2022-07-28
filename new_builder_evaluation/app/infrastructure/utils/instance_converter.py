@@ -30,4 +30,4 @@ class ORMInstanceConverter:
 
     def _instance_list_to_dict(self, instances: list):
         dict_rows = [self.instance_to_dict(instance) for instance in instances]
-        return
+        return dict_rows
