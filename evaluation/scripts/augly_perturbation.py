@@ -11,9 +11,8 @@ import zlib
 from multiprocessing import Pool
 from typing import Any, Callable, Dict, List, Optional
 
-import spacy
-
 import augly.text as textaugs
+import spacy
 from augly.utils import pathmgr
 from util import postprocess, preprocess
 
