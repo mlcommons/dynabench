@@ -38,7 +38,7 @@ jobs:
         conda activate dynabench
         python -m pip install --upgrade pip
         pip install --progress-bar off flake8==3.7.9
-        pip install --progress-bar off isort[pyproject]==4.3.21
+        pip install --progress-bar off isort==5.10.1
         pip install --progress-bar off black==22.3.0
         npm install --prefix frontends/web/
 
@@ -59,7 +59,7 @@ jobs:
       run: |
         conda activate dynabench
         isort --version
-        isort -c -df -sp .
+        isort --check --diff .
 
     - name: Run linter
       shell: bash -l {0}
