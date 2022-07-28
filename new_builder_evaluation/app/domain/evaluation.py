@@ -173,33 +173,41 @@ class Evaluation:
             final_dict_prediction[dataset_type] = dict_dataset_type
             dataset_id = dataset["dataset_id"]
         end_prediction = time.time()
-        minutes_time_prediction = (end_prediction - start_prediction) / 60
+        seconds_time_prediction = end_prediction - start_prediction
         return (
             final_dict_prediction,
             dataset_id,
             arn_service,
             model_name,
-            minutes_time_prediction,
+            seconds_time_prediction,
             num_samples,
+            folder_name,
         )
 
     def get_memory_utilization(self, model_name: str) -> float:
-        memory_utilization = self.cloudwatch.get_metric_statistics(
-            Namespace="AWS/ECS",
-            MetricName="CPUUtilization",
-            Dimensions=[
-                {"Name": "ClusterName", "Value": os.getenv("CLUSTER_TASK_EVALUATION")},
-                {"Name": "ServiceName", "Value": model_name},
-            ],
-            StartTime=datetime.datetime.now() - datetime.timedelta(hours=0.5),
-            EndTime=datetime.datetime.now(),
-            Period=36000,
-            Statistics=["Average"],
-        )
-        return memory_utilization["Datapoints"][0]["Average"]
+        while True:
+            memory_utilization = self.cloud_watch.get_metric_statistics(
+                Namespace="AWS/ECS",
+                MetricName="CPUUtilization",
+                Dimensions=[
+                    {
+                        "Name": "ClusterName",
+                        "Value": os.getenv("CLUSTER_TASK_EVALUATION"),
+                    },
+                    {"Name": "ServiceName", "Value": model_name},
+                ],
+                StartTime=datetime.datetime.now() - datetime.timedelta(hours=0.05),
+                EndTime=datetime.datetime.now(),
+                Period=36000,
+                Statistics=["Average"],
+            )
+            if len(memory_utilization["Datapoints"]) > 0:
+                return memory_utilization["Datapoints"][0]["Average"]
+            else:
+                time.sleep(15)
 
-    def get_throughput(self, num_samples: int, time_in_minutes: float):
-        return round(num_samples / time_in_minutes, 2)
+    def get_throughput(self, num_samples: int, seconds_time_prediction: float):
+        return round(num_samples / seconds_time_prediction, 2)
 
     def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
         tasks = self.task_repository.get_model_id_and_task_code(task)
@@ -237,6 +245,7 @@ class Evaluation:
                 model_name,
                 minutes_time_prediction,
                 num_samples,
+                folder_name,
             ) = self.heavy_prediction(round_datasets, tasks.task_code, model_s3_zip)
             self.builder.delete_ecs_service(arn_service)
             memory = self.get_memory_utilization(model_name)
@@ -314,7 +323,7 @@ class Evaluation:
             self.score_repository.add(new_score)
             new_scores.append(new_score)
 
-            shutil.rmtree("./app/models/{}".format(model_s3_zip.split(".")[0]))
+            shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores
 
     def get_sqs_messages(self):

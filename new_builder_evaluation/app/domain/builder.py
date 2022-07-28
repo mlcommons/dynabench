@@ -117,15 +117,13 @@ class Builder:
         run_service = self.ecs.create_service(
             cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
             serviceName=name_task,
-            taskDefinition=task_definition["taskDefinition"]["containerDefinitions"][0][
-                "name"
-            ],
+            taskDefinition=task_definition,
             desiredCount=1,
             networkConfiguration={
                 "awsvpcConfiguration": {
                     "subnets": [
-                        "subnet-04083c55819f5735b",
-                        "subnet-05e3df7114f1e3355",
+                        os.getenv("SUBNET_1"),
+                        os.getenv("SUBNET_2"),
                     ],
                     "assignPublicIp": "ENABLED",
                     "securityGroups": [os.getenv("SECURITY_GROUP")],
@@ -170,14 +168,14 @@ class Builder:
         folder_name = self.unzip_file(zip_name)
         repo = self.create_repository(model_name)
         tag = "latest"
-        self.push_image_to_ECR(repo, f"./app/models/{folder_name}/{model_name}", tag)
+        self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)
         ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name, folder_name, arn_service
 
-    def light_model_deployment(self, image_uri: str, role: str):
+    def light_model_deployment(self, function_name: str, image_uri: str, role: str):
         lambda_function = self.lamda_.create_function(
             {
-                "FunctionName": "lambda-sentiment-test-2",
+                "FunctionName": function_name,
                 "Role": role,
                 "Code": {"ImageUri": image_uri},
                 "PackageType": "Image",
