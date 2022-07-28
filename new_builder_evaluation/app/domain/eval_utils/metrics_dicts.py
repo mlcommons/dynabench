@@ -2,7 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from .metrics import *
+from app.domain.eval_utils.metrics import *
 
 
 # all eval_metrics takes predictions and targets as input, and output a metric number
