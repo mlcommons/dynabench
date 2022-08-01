@@ -1,4 +1,4 @@
-exclude: 'build'
+exclude: 'ˆbuild'
 
 default_language_version:
     python: python3
@@ -57,10 +57,9 @@ repos:
         args: ['--py36-plus']
 
 -   repo: https://github.com/timothycrosley/isort
-    rev: 4.3.21
+    rev: 5.10.1
     hooks:
     -   id: isort
-        additional_dependencies: [toml]
         exclude: ^website
 
 -   repo: https://github.com/ambv/black

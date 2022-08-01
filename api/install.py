@@ -58,12 +58,11 @@ if __name__ == "__main__":
         print("Config already exists.")
         from common.config import config
 
-    from models.base import Base
-
     ##
     # Mark all existing migrations done
     ##
     from common.migrator import first_time_migrations
+    from models.base import Base
 
     first_time_migrations()
 
@@ -94,12 +93,13 @@ if __name__ == "__main__":
     ##
     # Create one admin user and one task with one round
     ##
+    import getpass
+
     from models.base import DBSession as dbs
-    from models.user import User
+    from models.round import Round
     from models.task import Task
     from models.task_user_permission import TaskUserPermission
-    from models.round import Round
-    import getpass
+    from models.user import User
 
     dbs.flush()
     u = User(
