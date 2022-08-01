@@ -174,6 +174,7 @@ const ScoreRow = ({
             )}
           </td>
           <td
+            colSpan={2}
             className="text-right t-2"
             key={`score-${score.dataset_name}-overall`}
           >
