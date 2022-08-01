@@ -5,14 +5,24 @@
  */
 
 .modelCard h2 {
-    color: #ccc;
-    display: inline-block;
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0;
-    padding: 0;
+  color: #ccc;
+  display: inline-block;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
 }
 
 .dataset-link:hover {
-    cursor: pointer;
+  cursor: pointer;
+}
+.parent {
+  position: relative;
+}
+.child2 {
+  float: right;
+}
+.child1 {
+  position: absolute;
+  right: 35%;
 }
