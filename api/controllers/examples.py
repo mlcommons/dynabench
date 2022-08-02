@@ -74,7 +74,7 @@ def get_random_example(credentials, tid, rid):
     round = rm.getByTidAndRid(tid, rid)
     em = ExampleModel()
     if credentials["id"] != "turk":
-        example = em.getRandom(
+        example = em.getRandomOptimized(
             round.id,
             task.validate_non_fooling,
             task.num_matching_validations,
