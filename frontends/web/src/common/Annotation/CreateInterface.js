@@ -354,7 +354,7 @@ class CreateInterface extends React.Component {
             (modelResponseResult) => {
               // Begin hack that can be removed upon full dynalab integration
               if (
-                !endpoint.startsWith("ts") &&
+                !endpoint.startsxWith("ts") &&
                 this.state.task.task_code === "hs"
               ) {
                 modelResponseResult["label"] =
@@ -689,6 +689,13 @@ class CreateInterface extends React.Component {
         </div>
       ));
 
+    const lightModelPrediction = (e) => {
+      e.preventDefault();
+      this.context.api.getModelLightPrediction({
+        task_code: "sentiment",
+      });
+    };
+
     return (
       <OverlayProvider initiallyHide={true}>
         <BadgeOverlay
@@ -889,7 +896,7 @@ class CreateInterface extends React.Component {
                             <Button
                               type="submit"
                               className="font-weight-bold blue-bg border-0 task-action-btn"
-                              onClick={this.handleResponse}
+                              onClick={lightModelPrediction}
                               disabled={this.state.submitDisabled}
                             >
                               {"Submit "}

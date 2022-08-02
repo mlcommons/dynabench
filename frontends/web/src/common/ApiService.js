@@ -115,24 +115,6 @@ export default class ApiService {
     });
   }
 
-  uploadModelUser(file, userName, fileName, fileType, userId, taskCode) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("file_name", fileName);
-    formData.append("file_type", fileType);
-    formData.append("user_name", userName);
-    formData.append("user_id", userId);
-    formData.append("task_code", taskCode);
-    const token = this.getToken();
-    return this.fetch(`${this.domain}/users/model/upload`, {
-      method: "POST",
-      body: formData,
-      headers: {
-        Authorization: token ? "Bearer " + token : "None",
-      },
-    });
-  }
-
   getDynalabTask(TaskCode) {
     return this.doFetch(`${this.domain}/tasks/${TaskCode}/dynalab`, {
       method: "GET",
@@ -455,6 +437,19 @@ export default class ApiService {
       method: "POST",
       body: JSON.stringify(data),
       ...(customHeader == null ? {} : { headers: customHeader }),
+    });
+  }
+
+  getModelLightPrediction(data) {
+    const token = this.getToken();
+    return this.fetch(`${this.domain}/users/light_prediction`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        Authorization: token ? "Bearer " + token : "None",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     });
   }
 
