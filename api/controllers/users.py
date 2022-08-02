@@ -13,7 +13,7 @@ import uuid
 
 import common.auth as _auth
 import common.helpers as util
-import common.mail_service as mail
+from infrastructure.email.mail_service import Email
 from common.config import config as config_file
 from common.logging import logger
 from models.badge import BadgeModel
@@ -243,14 +243,13 @@ def recover_password():
         }
 
         config = bottle.default_app().config
-        mail.send(
-            config["mail"],
-            config,
-            [user.email],
-            template_name="templates/forgot_password.txt",
+        Email().send(
+            contact = user.email,
+            template_name = "forgot_password.txt",
             msg_dict=msg,
             subject=subject,
-        )
+            )
+
         return {"status": "success"}
     except Exception as error_message:
         logger.exception(

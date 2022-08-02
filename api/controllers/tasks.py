@@ -12,7 +12,7 @@ import yaml
 
 import common.auth as _auth
 import common.helpers as util
-import common.mail_service as mail
+from infrastructure.email.mail_service import Email
 from common.config import config as config_env
 from common.logging import logger
 from models.context import Context
@@ -149,28 +149,25 @@ perf_metric:
         logger.info("Added round (%s)" % (r.id))
 
         config = bottle.default_app().config
+        
+        Email().send(
+                contact = tp_creator_email,
+                template_name = "task_proposal_approval.txt",
+                subject=f"Your Task Proposal has been Accepted",
+                )
 
-        mail.send(
-            config["mail"],
-            config,
-            [tp_creator_email],
-            template_name="templates/task_proposal_approval.txt",
-            subject="Your Task Proposal has been Accepted",
-        )
 
     else:
         config = bottle.default_app().config
         msg = {
             "rejection_message": data["changes"],
         }
-        mail.send(
-            config["mail"],
-            config,
-            [tp_creator_email],
-            template_name="templates/task_proposal_rejection.txt",
-            msg_dict=msg,
-            subject="Your Task Proposal has been Rejected",
-        )
+        Email().send(
+                contact = tp_creator_email,
+                template_name = "task_proposal_rejection.txt",
+                msg_dict=msg,
+                subject=f"Your Task Proposal has been Rejected",
+                )
 
     tpm.dbs.query(TaskProposal).filter(TaskProposal.id == tpid).delete()
     tpm.dbs.flush()

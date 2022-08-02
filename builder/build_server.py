@@ -18,6 +18,7 @@ from utils.logging import init_logger, logger
 
 sys.path.append("../api")  # noqa
 import common.mail_service as mail  # isort:skip
+from infrastructure.email.mail_service import Email
 from common.config import config  # noqa isort:skip
 from models.model import DeploymentStatusEnum, ModelModel  # isort:skip
 from models.notification import NotificationModel  # isort:skip
@@ -121,15 +122,15 @@ if __name__ == "__main__":
                     # send email
                     if mail_session:
                         _, user = m.getModelUserByMid(model_id)
-                        mail.send(
-                            mail_session,
-                            config,
-                            [user.email],
-                            cc_contact="dynabench@fb.com",
-                            template_name=f"templates/{template}.txt",
-                            msg_dict=msg,
-                            subject=subject,
-                        )
+
+                        Email().send(
+                                contact = user.email,
+                                cc_contact = "dynabench-site@mlcommons.org",
+                                template_name = "{}.txt".format(template),
+                                msg_dict=msg,
+                                subject=subject,
+                                )
+
                         nm = NotificationModel()
                         nm.create(user.id, "MODEL_DEPLOYMENT_STATUS", template.upper())
                 elif model.deployment_status == DeploymentStatusEnum.failed:
