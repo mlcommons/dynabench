@@ -16,7 +16,7 @@ from bottle import response
 
 import common.auth as _auth
 import common.helpers as util
-import common.mail_service as mail
+from infrastructure.email.mail_service import Email
 from common.config import config
 from common.logging import logger
 from models.badge import BadgeModel
@@ -193,12 +193,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
         ):
             bottle.abort(400, "Need to upload train files for all leaderboard datasets")
 
-    mail_session = mail.get_mail_session(
-        host=config["smtp_host"],
-        port=config["smtp_port"],
-        smtp_user=config["smtp_user"],
-        smtp_secret=config["smtp_secret"],
-    )
 
     parsed_uploads = {}
     for name, upload in train_files.items():
@@ -221,15 +215,13 @@ def do_upload_via_train_files(credentials, tid, model_name):
             parsed_uploads[name] = parsed_prediction_file
 
         except Exception as ex:
-            mail.send(
-                mail_session,
-                config,
-                [user.email],
-                cc_contact="dynabench@fb.com",
-                template_name="templates/model_train_failed.txt",
-                msg_dict={"name": model_name},
-                subject=f"Model {model_name} training failed.",
-            )
+            Email().send(
+                contact = user.email,
+                cc_contact = "dynabench-site@mlcommons.org",
+                template_name = "model_train_failed.txt",
+                msg_dict = {"name": model_name},
+                subject = "Model {} training failed.".format(model_name),
+                )
             logger.exception(ex)
             bottle.abort(400, "Invalid train file")
 
@@ -262,15 +254,14 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 tmp.close()
                 ret = _eval_dataset(dataset_name, endpoint_name, model, task, tmp.name)
                 status_dict.update(ret)
-    mail.send(
-        mail_session,
-        config,
-        [user.email],
-        cc_contact="dynabench@fb.com",
-        template_name="templates/model_train_successful.txt",
-        msg_dict={"name": model_name, "model_id": model.id},
-        subject=f"Model {model_name} training succeeded.",
-    )
+    Email().send(
+                contact = user.email,
+                cc_contact = "dynabench-site@mlcommons.org",
+                template_name = "model_train_successful.txt",
+                msg_dict={"name": model_name, "model_id": model.id},
+                subject=f"Model {model_name} training succeeded.",
+                )
+
     return util.json_encode({"success": "ok", "model_id": model.id})
 
 
@@ -894,15 +885,14 @@ def email_decen_eaas(mid):
         template = data["template"]
         msg = data["msg"]
         subject = data["subject"]
-        mail.send(
-            config["mail"],
-            config,
-            [user.email],
-            cc_contact="dynabench@fb.com",
-            template_name=f"templates/{template}.txt",
-            msg_dict=msg,
-            subject=subject,
-        )
+        Email().send(
+                contact = user.email,
+                cc_contact = "dynabench-site@mlcommons.org",
+                template_name = "{}.txt".format(template),
+                msg_dict=msg,
+                subject=subject,
+                )
+
         nm = NotificationModel()
         nm.create(user.id, "MODEL_DEPLOYMENT_STATUS", template.upper())
 
