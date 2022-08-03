@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -174,6 +180,7 @@ const ScoreRow = ({
             )}
           </td>
           <td
+            colSpan={2}
             className="text-right t-2"
             key={`score-${score.dataset_name}-overall`}
           >
