@@ -4,34 +4,34 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import React from "react";
 import {
-  Container,
-  Row,
-  Col,
-  Card,
   Button,
+  ButtonGroup,
+  Card,
+  Col,
+  Container,
   Form,
   InputGroup,
-  ButtonGroup,
-  OverlayTrigger,
-  Tooltip,
   Modal,
+  OverlayTrigger,
+  Row,
   Spinner,
+  Tooltip,
 } from "react-bootstrap";
-import UserContext from "../../containers/UserContext";
-import BootstrapSwitchButton from "bootstrap-switch-button-react";
-import {
-  OverlayProvider,
-  Annotation,
-  OverlayContext,
-  BadgeOverlay,
-} from "../../containers/Overlay";
 import Markdown from "react-markdown";
+import {
+  Annotation,
+  BadgeOverlay,
+  OverlayContext,
+  OverlayProvider,
+} from "../../containers/Overlay";
+import UserContext from "../../containers/UserContext";
 import AnnotationComponent from "./AnnotationComponent.js";
+import Explainer from "./Explainer.js";
 import initializeData from "./InitializeAnnotationData.js";
 import ResponseInfo from "./ResponseInfo.js";
-import Explainer from "./Explainer.js";
 const yaml = require("js-yaml");
 
 function deepCopyJSON(obj) {
@@ -605,13 +605,6 @@ class CreateInterface extends React.Component {
           />
         </div>
       ));
-
-    const lightModelPrediction = (e) => {
-      e.preventDefault();
-      this.context.api.getModelLightPrediction({
-        statement: "I hate my life",
-      });
-    };
 
     return (
       <OverlayProvider initiallyHide={true}>
