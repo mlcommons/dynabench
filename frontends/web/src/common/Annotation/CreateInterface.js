@@ -368,7 +368,7 @@ class CreateInterface extends React.Component {
                           : modelResponseResult["signature"], // TODO: pre-dynatask models use signed, post-dynatask models use signature. Make this cleaner somehow?
                         modelWrongResult.model_wrong,
                         output,
-                        endpoint
+                        url
                       ),
                     (error) => {
                       console.log(error);
