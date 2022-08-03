@@ -325,97 +325,19 @@ class CreateInterface extends React.Component {
       }
 
       // Begin hack that can be removed upon full dynalab integration
-      const endpoint = url.split("predict?model=")[1];
-
-      if (
-        !endpoint.startsWith("ts") &&
-        (this.state.task.task_code === "hs" ||
-          this.state.task.task_code === "sentiment")
-      ) {
-        this.state.data["hypothesis"] = this.state.data["statement"];
-      }
-      if (!endpoint.startsWith("ts") && this.state.task.task_code === "qa") {
-        this.state.data["hypothesis"] = this.state.data["question"];
-      }
+      const endpoint = url;
       // End hack that can be removed upon full dynalab integration
       this.context.api
         .convertToModelIO(this.state.task.id, this.state.data)
         .then((model_io_result) => {
           // Begin hack that can be removed upon full dynalab integration
-          if (
-            !endpoint.startsWith("ts") &&
-            this.state.task.task_code === "vqa"
-          ) {
+          if (this.state.task.task_code === "vqa") {
             model_io_result = this.state.data;
             model_io_result["image_url"] = model_io_result["image"];
           }
           // End hack that can be removed upon full dynalab integration
           this.context.api.getModelResponse(url, model_io_result).then(
             (modelResponseResult) => {
-              // Begin hack that can be removed upon full dynalab integration
-              if (
-                !endpoint.startsxWith("ts") &&
-                this.state.task.task_code === "hs"
-              ) {
-                modelResponseResult["label"] =
-                  modelResponseResult["prob"][0] >
-                  modelResponseResult["prob"][1]
-                    ? "not-hateful"
-                    : "hateful";
-                modelResponseResult["prob"] = {
-                  "not-hateful": modelResponseResult["prob"][0],
-                  hateful: modelResponseResult["prob"][1],
-                };
-              }
-              if (
-                !endpoint.startsWith("ts") &&
-                this.state.task.task_code === "sentiment"
-              ) {
-                modelResponseResult["label"] =
-                  modelResponseResult["prob"][0] >
-                    modelResponseResult["prob"][1] &&
-                  modelResponseResult["prob"][0] >
-                    modelResponseResult["prob"][2]
-                    ? "negative"
-                    : modelResponseResult["prob"][1] >
-                      modelResponseResult["prob"][2]
-                    ? "positive"
-                    : "neutral";
-                modelResponseResult["prob"] = {
-                  negative: modelResponseResult["prob"][0],
-                  positive: modelResponseResult["prob"][1],
-                  neutral: modelResponseResult["prob"][2],
-                };
-              }
-              if (
-                !endpoint.startsWith("ts") &&
-                this.state.task.task_code === "nli"
-              ) {
-                modelResponseResult["label"] =
-                  modelResponseResult["prob"][0] >
-                    modelResponseResult["prob"][1] &&
-                  modelResponseResult["prob"][0] >
-                    modelResponseResult["prob"][2]
-                    ? "entailed"
-                    : modelResponseResult["prob"][1] >
-                      modelResponseResult["prob"][2]
-                    ? "neutral"
-                    : "contradictory";
-                modelResponseResult["prob"] = {
-                  entailed: modelResponseResult["prob"][0],
-                  neutral: modelResponseResult["prob"][1],
-                  contradictory: modelResponseResult["prob"][2],
-                };
-              }
-              if (
-                !endpoint.startsWith("ts") &&
-                this.state.task.task_code === "qa"
-              ) {
-                modelResponseResult["answer"] = modelResponseResult["text"];
-                modelResponseResult["conf"] = modelResponseResult["prob"];
-              }
-              // End hack that can be removed upon full dynalab integration
-
               if (modelResponseResult.errorMessage) {
                 this.setState({
                   submitDisabled: false,
@@ -428,11 +350,7 @@ class CreateInterface extends React.Component {
                     fetchPredictionError: false,
                   });
                 }
-
                 const output = deepCopyJSON(modelResponseResult);
-
-                // Get the target, which is the user input that is expected to
-                // be in the model's output.
                 const target = {};
                 for (const taskConfigObj of this.state.taskConfig.output) {
                   if (this.state.data.hasOwnProperty(taskConfigObj.name)) {
@@ -440,7 +358,6 @@ class CreateInterface extends React.Component {
                       this.state.data[taskConfigObj.name];
                   }
                 }
-
                 this.context.api
                   .getModelWrong(this.state.task.id, target, output)
                   .then(
@@ -692,7 +609,7 @@ class CreateInterface extends React.Component {
     const lightModelPrediction = (e) => {
       e.preventDefault();
       this.context.api.getModelLightPrediction({
-        task_code: "sentiment",
+        statement: "I hate my life",
       });
     };
 
@@ -896,7 +813,7 @@ class CreateInterface extends React.Component {
                             <Button
                               type="submit"
                               className="font-weight-bold blue-bg border-0 task-action-btn"
-                              onClick={lightModelPrediction}
+                              onClick={this.handleResponse}
                               disabled={this.state.submitDisabled}
                             >
                               {"Submit "}

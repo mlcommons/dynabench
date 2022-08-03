@@ -422,8 +422,6 @@ export default class ApiService {
   }
 
   getModelResponse(modelUrl, data) {
-    data["uid"] = "0"; // A required field for dynalab uploaded models. TODO: fix
-    data["insight"] = false; // TODO: an artifact of old models
     const trialAuthToken = localStorage.getItem("trial_auth_token");
     const customHeader =
       this.loggedIn() || this.mode === "mturk" || trialAuthToken == null
@@ -437,19 +435,6 @@ export default class ApiService {
       method: "POST",
       body: JSON.stringify(data),
       ...(customHeader == null ? {} : { headers: customHeader }),
-    });
-  }
-
-  getModelLightPrediction(data) {
-    const token = this.getToken();
-    return this.fetch(`${this.domain}/users/light_prediction`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        Authorization: token ? "Bearer " + token : "None",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
     });
   }
 
