@@ -50,6 +50,8 @@ class Example(Base):
     time_elapsed = db.Column(db.Time)
 
     total_verified = db.Column(db.Integer, default=0)
+    verified_incorrect = db.Column(db.Integer, default=0)
+    verified_flagged = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return f"<Example {self.id}>"
@@ -332,6 +334,48 @@ class ExampleModel(BaseModel):
                 )
             else:
                 result = result.filter(Example.uid != my_uid)
+        result = (
+            result.order_by(
+                db.not_(Example.model_wrong),
+                Example.total_verified.asc(),
+                db.sql.func.rand(),
+            )
+            .limit(n)
+            .all()
+        )
+        return result
+
+    def getRandomOptimized(
+        self,
+        rid,
+        validate_non_fooling,
+        num_matching_validations,
+        n=1,
+        my_uid=None,
+        tags=None,
+        turk=False,
+    ):
+        result = (
+            self.dbs.query(Example)
+            .join(Context, Example.cid == Context.id)
+            .filter(Context.r_realid == rid)
+            .filter(Example.retracted == False)  # noqa
+        )
+        if tags:
+            result = result.filter(Example.tag.in_(tags))  # noqa
+
+        if not validate_non_fooling:
+            result = result.filter(Example.model_wrong == True)  # noqa
+
+        result = result.filter(Example.uid != my_uid)
+        result = result.filter(
+            db.and_(
+                Example.total_verified < num_matching_validations,
+                Example.verified_incorrect < num_matching_validations,
+                Example.verified_flagged < num_matching_validations,
+            )
+        )
+
         result = (
             result.order_by(
                 db.not_(Example.model_wrong),
