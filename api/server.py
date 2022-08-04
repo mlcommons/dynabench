@@ -109,8 +109,6 @@ if running_mode == "dev":
         server="cheroot",
         reloader=True,
         timeout=60,
-        certfile=config["ssl_cert_file_path"],
-        keyfile=config["ssl_org_pem_file_path"],
     )
 elif running_mode == "prod":
 
