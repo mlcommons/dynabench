@@ -1,9 +1,11 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 import json
-import os
 import pickle
-import subprocess
 import sys
 import time
 
@@ -19,6 +21,8 @@ from utils.logging import init_logger, logger
 sys.path.append("../api")  # noqa
 import common.mail_service as mail  # isort:skip
 from infrastructure.email.mail_service import Email
+
+
 from common.config import config  # noqa isort:skip
 from models.model import DeploymentStatusEnum, ModelModel  # isort:skip
 from models.notification import NotificationModel  # isort:skip
@@ -124,12 +128,12 @@ if __name__ == "__main__":
                         _, user = m.getModelUserByMid(model_id)
 
                         Email().send(
-                                contact = user.email,
-                                cc_contact = "dynabench-site@mlcommons.org",
-                                template_name = "{}.txt".format(template),
-                                msg_dict=msg,
-                                subject=subject,
-                                )
+                            contact=user.email,
+                            cc_contact="dynabench-site@mlcommons.org",
+                            template_name=f"{template}.txt",
+                            msg_dict=msg,
+                            subject=subject,
+                        )
 
                         nm = NotificationModel()
                         nm.create(user.id, "MODEL_DEPLOYMENT_STATUS", template.upper())
