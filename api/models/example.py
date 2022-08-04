@@ -3,23 +3,19 @@
 # LICENSE file in the root directory of this source tree.
 
 import hashlib
-import tempfile
 
 import sqlalchemy as db
-import yaml
-from dynalab.tasks.task_io import TaskIO
 from sqlalchemy import case
 
 import common.helpers as util
 from common.logging import logger
 from models.context import Context
-from models.model import Model
 from models.round import Round
 from models.validation import LabelEnum, ModeEnum, Validation
 
 from .base import Base, BaseModel
 from .context import ContextModel
-from .task import TaskModel, get_name_to_full_annotation_config_obj
+from .task import TaskModel
 from .user import UserModel
 
 
@@ -131,159 +127,6 @@ class ExampleModel(BaseModel):
             if not verified:
                 logger.error("Improper formatting in model annotation components")
                 return False
-
-            if model_endpoint_name.startswith(
-                "ts"
-            ):  # This means that we have a dynalab model
-
-                all_model_annotation_data = task.convert_to_model_io(
-                    all_model_annotation_data
-                )
-
-                with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
-                    task_config = yaml.load(task.config_yaml, yaml.SafeLoader)
-                    tmp.write(
-                        util.json_encode(
-                            {
-                                "config": task_config,
-                                "task": task.task_code,
-                            }
-                        )
-                    )
-                    tmp.close()
-                    task_io = TaskIO(task.task_code, task_info_path=tmp.name)
-
-                # This is to check if we have a pre-dynatask dynalab model
-                with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
-                    task_config = yaml.load(task.config_yaml, yaml.SafeLoader)
-                    if task.task_code in ("hs", "sentiment"):
-                        task_config["context"] = []
-                    name_to_config_obj = get_name_to_full_annotation_config_obj(
-                        task_config
-                    )
-                    task_config["output"] = [
-                        name_to_config_obj[obj["name"]]
-                        for obj in task_config.get("output", [])
-                        if name_to_config_obj[obj["name"]]["type"] not in ("prob")
-                    ]
-                    tmp.write(
-                        util.json_encode(
-                            {
-                                "config": task_config,
-                                "task": task.task_code,
-                            }
-                        )
-                    )
-                    tmp.close()
-                    pre_dynatask_task_io = TaskIO(
-                        task.task_code, task_info_path=tmp.name
-                    )
-
-                model_secret = (
-                    self.dbs.query(Model)
-                    .filter(Model.endpoint_name == model_endpoint_name)
-                    .one()
-                    .secret
-                )
-                if model_signature not in (
-                    task_io.generate_response_signature(
-                        all_model_annotation_data,
-                        all_model_annotation_data,
-                        model_secret,
-                    ),
-                    pre_dynatask_task_io.generate_response_signature(
-                        all_model_annotation_data,
-                        all_model_annotation_data,
-                        model_secret,
-                    ),
-                ):
-                    logger.error(
-                        "Signature does not match (received %s, expected to be"
-                        + " %s or %s)"
-                        % (
-                            model_signature,
-                            task_io.generate_response_signature(
-                                all_model_annotation_data,
-                                all_model_annotation_data,
-                                model_secret,
-                            ),
-                            pre_dynatask_task_io.generate_response_signature(
-                                all_model_annotation_data,
-                                all_model_annotation_data,
-                                model_secret,
-                            ),
-                        )
-                    )
-                    return False
-                else:
-                    logger.info(
-                        "Signature matches (received %s, expected to be %s or %s)"
-                        % (
-                            model_signature,
-                            task_io.generate_response_signature(
-                                all_model_annotation_data,
-                                all_model_annotation_data,
-                                model_secret,
-                            ),
-                            pre_dynatask_task_io.generate_response_signature(
-                                all_model_annotation_data,
-                                all_model_annotation_data,
-                                model_secret,
-                            ),
-                        )
-                    )
-            else:
-                # Begin hack that can be removed upon full dynalab integration
-                if c.round.task.task_code in ("qa", "vqa"):
-                    if (
-                        c.round.task.task_code == "vqa"
-                        and "answer" in output
-                        and "prob" in output
-                    ):
-                        model_wrong = False
-                        pred = str(output["answer"]) + "|" + str(float(output["prob"]))
-                    elif "model_is_correct" in output and "text" in output:
-                        pred = (
-                            str(output["model_is_correct"]) + "|" + str(output["text"])
-                        )
-                        model_wrong = not output["model_is_correct"]
-                    else:
-                        return False
-                    if "model_id" in output:
-                        pred += "|" + str(output["model_id"])
-                else:
-                    if "prob" not in output:
-                        return False
-                    if c.round.task.task_code == "nli":
-                        pred = "|".join(
-                            [
-                                str(output["prob"]["entailed"]),
-                                str(output["prob"]["neutral"]),
-                                str(output["prob"]["contradictory"]),
-                            ]
-                        )
-                    if c.round.task.task_code == "sentiment":
-                        pred = "|".join(
-                            [
-                                str(output["prob"]["negative"]),
-                                str(output["prob"]["positive"]),
-                                str(output["prob"]["neutral"]),
-                            ]
-                        )
-                    if c.round.task.task_code == "hs":
-                        pred = "|".join(
-                            [
-                                str(output["prob"]["not-hateful"]),
-                                str(output["prob"]["hateful"]),
-                            ]
-                        )
-
-                if not self.verify_signature(
-                    model_signature, c, list(input.values())[0], pred
-                ):
-                    return False
-                # End hack that can be removed upon full dynalab integration
-
         try:
             e = Example(
                 context=c,

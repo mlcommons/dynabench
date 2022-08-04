@@ -408,7 +408,7 @@ class CreateInterface extends React.Component {
     if (checked === true) {
       if (!this.context.api.loggedIn()) {
         this.props.history.push(
-          "/register?msg=" +
+          "/login?msg=" +
             encodeURIComponent(
               "Please sign up or log in so that you can get credit for your generated examples."
             ) +
