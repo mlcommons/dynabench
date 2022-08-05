@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -10,10 +14,10 @@ from datetime import datetime, timedelta
 import boto3
 import bottle
 import uuid
+from infrastructure.email.mail_service import Email
 
 import common.auth as _auth
 import common.helpers as util
-import common.mail_service as mail
 from common.config import config as config_file
 from common.logging import logger
 from models.badge import BadgeModel
@@ -242,15 +246,13 @@ def recover_password():
             "token": forgot_password_token,
         }
 
-        config = bottle.default_app().config
-        mail.send(
-            config["mail"],
-            config,
-            [user.email],
-            template_name="templates/forgot_password.txt",
+        Email().send(
+            contact=user.email,
+            template_name="forgot_password.txt",
             msg_dict=msg,
             subject=subject,
         )
+
         return {"status": "success"}
     except Exception as error_message:
         logger.exception(

@@ -1,0 +1,7 @@
+After some consideration, we have decided to reject your task for the following reasons:
+
+$rejection_message
+
+Thanks,
+
+The Dynabench Team
