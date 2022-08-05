@@ -11,7 +11,6 @@
  */
 
 import React, { useContext, useState, useEffect } from "react";
-import { useParams, withRouter } from "react-router-dom";
 import "./TaskPage.css";
 import { Container, Row, Spinner } from "react-bootstrap";
 import UserContext from "./UserContext";
