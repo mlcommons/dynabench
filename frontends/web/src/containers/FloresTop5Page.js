@@ -1,11 +1,16 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
 import React, { useContext, useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import "./TaskPage.css";
 import { Container, Row, Spinner } from "react-bootstrap";
 import UserContext from "./UserContext";
@@ -17,7 +22,9 @@ const FloresTop5Page = (props) => {
   const [task, setTask] = useState(null); // Current Task ID
   const [isLoading, setIsLoading] = useState(false);
 
-  let { taskCode } = useParams();
+  const taskCode = props.match.params.taskShortName
+    .toLowerCase()
+    .replace("-", "_");
 
   // Call api only once
   useEffect(() => {

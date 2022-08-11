@@ -29,7 +29,7 @@ config = {
     "evaluation_sqs_queue": os.environ["SQS_EVAL"],
     "jwtalgo": "HS256",
     "jwtexp": 900,
-    "jwtsecret": "",
+    "jwtsecret": os.environ["JWT_SECRET"],
     "profile_img_max_size": 5242880,
     "refreshexp": 90,
     "email_sender_name": "DynaBench",

@@ -16,3 +16,16 @@
 .dataset-link:hover {
     cursor: pointer;
 }
+
+.parent {
+    position: relative;
+}
+
+.child2 {
+    float: right;
+}
+
+.child1 {
+    position: absolute;
+    right: 35%;
+}
