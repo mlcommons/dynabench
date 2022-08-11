@@ -1,10 +1,10 @@
 __Install docker__
 
-Download and instal docker using this [link](https://docs.docker.com/engine/install/). Make sure that you have docker runing before following the next steps
+Download and install docker using this [link](https://docs.docker.com/engine/install/). Make sure that you have docker runing before following the next steps.
 
 __Instal virtualenv__
 
-to install virtualenv run the following command on your terminal
+To install virtualenv run the following command on your terminal
 ~~~
 pip install virtualenv
 ~~~
@@ -17,18 +17,17 @@ source ./env/bin/activate
 ~~~
 __Install mlcube runner__
 
-once you activate your environment, you have to install mlcube running the following command:
+Once you activate your environment, you have to install mlcube running the following command:
 ~~~
 pip install mlcube-docker
 ~~~
 __putting your model into place__
 
-When the previous step is completed, you will find a directory calls dataperf-vision-selection. Access that folder and go to the route selection.py where you are going to find a class call "Predictor" with a method named "closest_and_furthest". This metod is the one that you must update.
+When the previous step is completed, you will find a directory called dataperf-vision-selection. Access that folder and go to the route selection.py where you are going to find a class call "Predictor" with a method named "closest_and_furthest". This metod is the one that you must update.
 
 __Evaluate your model__
 
-The las thing you have to do is run this 3 comands
-Keep in mind that the each of this 3 commands will take some minuts.
+The last thing you have to do is run this 3 commands. Keep in mind that the each of this 3 commands will take some minutes.
 ~~~
 # Run download task
 mlcube run --task=download -Pdocker.build_strategy=always
@@ -39,7 +38,7 @@ mlcube run --task=select -Pdocker.build_strategy=always
 # Run evaluate task
 mlcube run --task=evaluate -Pdocker.build_strategy=always
 ~~~
-at the end of the execution you will get an output like this:
+At the end of the execution you will get an output like this:
 ~~~
 {
     "Cupcake": {
