@@ -1,0 +1,33 @@
+# Memory used by Spark driver (recommend > 6g)
+spark_driver_memory: '6g'
+
+# Path for data directory. Note that all other paths in this setup
+# file will be relative to this one (e.g. if data_dir='some/path'
+# and emb_file='to/emb.parquet', the embeddings will be loaded from
+# 'some/path/to/emb.parquet')
+data_dir: 'data'
+
+# Relative path for embedding file
+emb_file: 'embeddings/train_emb_256_dataperf.parquet'
+
+# Paths to training and test files for each tasks. Task names must match names
+# in eval_tasks above. See example below:
+# task_name: ['relative/path/to/training_set.csv', 'relative/path/to/test_set.csv']
+Cupcake: ['selection_output/Cupcake.csv', 'test_sets/alpha_test_set_Cupcake_256.parquet']
+Hawk: ['selection_output/Hawk.csv', 'test_sets/alpha_test_set_Hawk_256.parquet']
+Sushi: ['selection_output/Sushi.csv', 'test_sets/alpha_test_set_Sushi_256.parquet']
+
+# Relative path for results file
+results_dir: 'results'
+
+# Parameters specific to alpha below (likely not useful to modify)
+
+# Embedding dimensionality
+dim: 256
+
+# List the names of tasks to evaluate
+eval_tasks: ['Cupcake','Hawk','Sushi']
+
+# Path for data directory in docker image.
+# DO NOT MODIFY
+docker_data_dir: 'data'
