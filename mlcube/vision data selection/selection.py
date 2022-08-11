@@ -2,8 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-"""Selection script
-Replace this file with your own logic"""
+# Replace this file with your own logic
 
 import numpy as np
 import pandas as pd
