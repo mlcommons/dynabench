@@ -1,0 +1,6 @@
+services:
+  dataperf-visual-submission:
+    container_name: dataperf-visual-submission
+    build: .
+    volumes:
+      - ./data:/app/data
