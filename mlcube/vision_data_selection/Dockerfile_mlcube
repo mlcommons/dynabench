@@ -1,0 +1,16 @@
+FROM ubuntu:18.04
+
+RUN apt-get update && apt-get install -y \
+    software-properties-common && apt install default-jdk -y
+RUN apt-get install -y python3.8 python3-pip
+
+COPY requirements.txt /app/requirements.txt
+RUN pip3 install --upgrade pip && pip3 install -r /app/requirements.txt
+
+COPY *.py /app/
+COPY *.yaml /app/
+COPY *.sh /app/
+
+WORKDIR /app/
+RUN chmod +x /app/run_evaluate.sh
+ENTRYPOINT ["python3", "/app/mlcube.py"]
