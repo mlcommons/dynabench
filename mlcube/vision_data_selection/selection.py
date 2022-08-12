@@ -53,3 +53,27 @@ class Predictor:
         submission_furthest["Confidence"] = 0
         submission = submission_closest.append(submission_furthest, ignore_index=True)
         submission.to_csv(output_path, index=False)
+
+    def select(self, input_path, output_path, n_closest=100, n_random=1000):
+        df = pd.read_csv(input_path)
+        df = self.embeddings.loc[self.embeddings["ImageID"].isin(df["ImageID"])]
+        print("Embeddings loaded")
+        print("Getting centroids")
+
+        centroid = df["embedding"].apply(lambda x: np.array(x)).values.mean()
+        print("Running similairty")
+        random_indexes = np.random.choice(
+            len(self.embeddings_vect), size=n_random, replace=False
+        )
+        distances = np.linalg.norm(
+            self.embeddings_vect[random_indexes] - centroid, axis=1
+        )
+        closest = np.argsort(distances)[:n_closest]
+        furthest = np.argsort(distances)[-n_closest:]
+        print("Saving submission")
+        submission_closest = pd.DataFrame(self.embeddings.iloc[closest]["ImageID"])
+        submission_closest["Confidence"] = 1
+        submission_furthest = pd.DataFrame(self.embeddings.iloc[furthest]["ImageID"])
+        submission_furthest["Confidence"] = 0
+        submission = submission_closest.append(submission_furthest, ignore_index=True)
+        submission.to_csv(output_path, index=False)

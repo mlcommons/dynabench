@@ -42,20 +42,19 @@ class SelectTask:
         print("Creating predictor")
         predictor = Predictor(embeddings_path)
 
-        input_files = [
-            "alpha_example_set_Cupcake.csv",
-            "alpha_example_set_Hawk.csv",
-            "alpha_example_set_Sushi.csv",
-        ]
-        output_files = ["Cupcake.csv", "Hawk.csv", "Sushi.csv"]
+        input_files = os.listdir(input_path)
 
         for file_index in range(len(input_files)):
-            new_input_path = input_path.replace("file", input_files[file_index])
-            new_output_path = output_path.replace("file", output_files[file_index])
+            if input_files[file_index] != ".DS_Store":
+                new_input_path = os.path.join(input_path, input_files[file_index])
+                new_output_path = os.path.join(output_path, input_files[file_index])
 
-            predictor.closest_and_furthest(
-                new_input_path, new_output_path, params["n_closest"], params["n_random"]
-            )
+                predictor.select(
+                    new_input_path,
+                    new_output_path,
+                    params["n_closest"],
+                    params["n_random"],
+                )
 
 
 class EvaluateTask:

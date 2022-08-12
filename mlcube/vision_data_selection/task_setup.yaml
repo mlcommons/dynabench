@@ -13,9 +13,9 @@ emb_file: 'embeddings/train_emb_256_dataperf.parquet'
 # Paths to training and test files for each tasks. Task names must match names
 # in eval_tasks above. See example below:
 # task_name: ['relative/path/to/training_set.csv', 'relative/path/to/test_set.csv']
-Cupcake: ['selection_output/Cupcake.csv', 'test_sets/alpha_test_set_Cupcake_256.parquet']
-Hawk: ['selection_output/Hawk.csv', 'test_sets/alpha_test_set_Hawk_256.parquet']
-Sushi: ['selection_output/Sushi.csv', 'test_sets/alpha_test_set_Sushi_256.parquet']
+Cupcake: ['selection_output/alpha_example_set_Cupcake.csv', 'test_sets/alpha_test_set_Cupcake_256.parquet']
+Hawk: ['selection_output/alpha_example_set_Hawk.csv', 'test_sets/alpha_test_set_Hawk_256.parquet']
+Sushi: ['selection_output/alpha_example_set_Sushi.csv', 'test_sets/alpha_test_set_Sushi_256.parquet']
 
 # Relative path for results file
 results_dir: 'results'

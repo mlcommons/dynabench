@@ -25,11 +25,11 @@ tasks:
     # Run selection script
     parameters:
       inputs: {
-        input_path: { type: file, default: data/dataperf-vision-selection-resources/examples/file},
+        input_path: { type: file, default: data/dataperf-vision-selection-resources/examples},
         embeddings_path: { type: file, default: data/dataperf-vision-selection-resources/embeddings/train_emb_256_dataperf.parquet},
         parameters_file: { type: file, default: parameters.yaml }
         }
-      outputs: { output_path: { type: file, default: data/dataperf-vision-selection-resources/selection_output/file} }
+      outputs: { output_path: { type: file, default: data/dataperf-vision-selection-resources/selection_output} }
 
   evaluate:
     # Perfom evaluation

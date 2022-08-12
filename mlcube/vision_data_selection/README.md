@@ -23,7 +23,7 @@ pip install mlcube-docker
 ~~~
 __putting your model into place__
 
-When the previous step is completed, you will find a directory called dataperf-vision-selection. Access that folder and go to the route selection.py where you are going to find a class call "Predictor" with a method named "closest_and_furthest". This metod is the one that you must update.
+When the previous step is completed, you will find a directory called dataperf-vision-selection. Access that folder and go to the route selection.py where you are going to find a class call "Predictor" with a method named "selection". This metod is the one that you must update.
 
 __Evaluate your model__
 
