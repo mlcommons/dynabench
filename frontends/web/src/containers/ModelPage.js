@@ -38,6 +38,7 @@ import { FLORES_TASK_CODES } from "./FloresTaskPage";
 const EvalStatusRow = ({
   status,
   downloadLog,
+  downloadPrediction,
   isModelOwner,
   isAdminOrTaskOwner,
   modelId,
@@ -102,6 +103,34 @@ const EvalStatusRow = ({
                 )}
               </Button>
             )}{" "}
+            {(isAdminOrTaskOwner ||
+              (status.dataset_log_access_type === "user" && isModelOwner)) && (
+              <Button
+                variant="outline-primary"
+                size="sm"
+                disabled={showSpinner}
+                onClick={() => {
+                  setShowSpinner(
+                    true,
+                    downloadPrediction(modelId, status.dataset_id).then(
+                      (result) => {
+                        setShowSpinner(false);
+                      },
+                      (error) => {
+                        console.log(error);
+                        setShowSpinner(false);
+                      }
+                    )
+                  );
+                }}
+              >
+                {showSpinner ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <i className="fas fa-file-download"></i>
+                )}
+              </Button>
+            )}
             <span>
               <EvaluationStatus evaluationStatus={status.evaluation_status} />
             </span>
@@ -115,6 +144,7 @@ const EvalStatusRow = ({
 const ScoreRow = ({
   score,
   downloadLog,
+  downloadPrediction,
   isModelOwner,
   isAdminOrTaskOwner,
   modelId,
@@ -206,6 +236,34 @@ const ScoreRow = ({
                 )}
               </Button>
             )}{" "}
+            {(isAdminOrTaskOwner ||
+              (score.dataset_log_access_type === "user" && isModelOwner)) && (
+              <Button
+                variant="outline-primary"
+                size="sm"
+                disabled={showSpinner}
+                onClick={() => {
+                  setShowSpinner(
+                    true,
+                    downloadPrediction(modelId, score.dataset_id).then(
+                      (result) => {
+                        setShowSpinner(false);
+                      },
+                      (error) => {
+                        console.log(error);
+                        setShowSpinner(false);
+                      }
+                    )
+                  );
+                }}
+              >
+                {showSpinner ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <i className="fas fa-file-download"></i>
+                )}
+              </Button>
+            )}
             <span>
               {expanded ? (
                 <b>
@@ -791,6 +849,7 @@ ${latexTableContent}
                         key={index}
                         score={score}
                         downloadLog={this.context.api.exportDatasetLog}
+                        downloadPrediction={this.context.api.exportPrediction}
                         isModelOwner={isModelOwner}
                         isAdminOrTaskOwner={this.state.isAdminOrTaskOwner}
                         modelId={this.state.modelId}
@@ -801,6 +860,7 @@ ${latexTableContent}
                         key={index}
                         status={status}
                         downloadLog={this.context.api.exportDatasetLog}
+                        downloadPrediction={this.context.api.exportPrediction}
                         isModelOwner={isModelOwner}
                         isAdminOrTaskOwner={this.state.isAdminOrTaskOwner}
                         modelId={this.state.modelId}
@@ -811,7 +871,7 @@ ${latexTableContent}
                       <Table>
                         <tbody>
                           <tr>
-                            <td colSpan={3}>
+                            <td colSpan={2}>
                               <h5>Non-Leaderboard Datasets</h5>
                             </td>
                           </tr>
@@ -825,6 +885,7 @@ ${latexTableContent}
                         key={index}
                         score={score}
                         downloadLog={this.context.api.exportDatasetLog}
+                        downloadPrediction={this.context.api.exportPrediction}
                         isModelOwner={isModelOwner}
                         isAdminOrTaskOwner={this.state.isAdminOrTaskOwner}
                         modelId={this.state.modelId}
@@ -836,6 +897,7 @@ ${latexTableContent}
                           key={index}
                           status={status}
                           downloadLog={this.context.api.exportDatasetLog}
+                          downloadPrediction={this.context.api.exportPrediction}
                           isModelOwner={isModelOwner}
                           isAdminOrTaskOwner={this.state.isAdminOrTaskOwner}
                           modelId={this.state.modelId}

@@ -29,6 +29,7 @@ export default class ApiService {
     this.updating_already = false;
     this.mode = "normal";
     this.exportDatasetLog = this.exportDatasetLog.bind(this);
+    this.exportPrediction = this.exportPrediction.bind(this);
   }
 
   setMturkMode() {
@@ -474,6 +475,15 @@ export default class ApiService {
 
   exportDatasetLog(mid, did) {
     return this.fetch(`${this.domain}/models/latest_job_log/${mid}/${did}`, {
+      method: "GET",
+    }).then((res) => {
+      res = new TextEncoder("utf-8").encode(JSON.stringify(res));
+      return download(res, "log.json", "text/json");
+    });
+  }
+
+  exportPrediction(mid, did) {
+    return this.fetch(`${this.domain}/models/predictions/${mid}/${did}`, {
       method: "GET",
     }).then((res) => {
       res = new TextEncoder("utf-8").encode(JSON.stringify(res));
