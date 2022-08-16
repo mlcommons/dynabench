@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -6,7 +10,6 @@ import datetime
 import importlib
 import json
 import os
-import secrets
 import shutil
 import sys
 import time
@@ -42,8 +45,10 @@ class Evaluation:
         self.dataset_repository = DatasetRepository()
         self.round_repository = RoundRepository()
 
-    def require_fields_task(self, folder_name: str):
-        input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
+    def require_fields_task(self, folder_name: str, model_name: str):
+        input_location = (
+            f"./app/models/{folder_name}/{model_name}/app/api/schemas/model.py"
+        )
         spec = importlib.util.spec_from_file_location(
             "ModelSingleInput", input_location
         )
@@ -64,6 +69,17 @@ class Evaluation:
         }
         response = requests.post(
             f"http://{ip}/model/single_evaluation", headers=headers, json=json_data
+        )
+        return json.loads(response.text)
+
+    def batch_evaluation_ecs(self, ip: str, data: list):
+        dataset_samples = {}
+        dataset_samples["dataset_samples"] = data
+        headers = {
+            "accept": "application/json",
+        }
+        response = requests.post(
+            f"http://{ip}/model/batch_evaluation", headers=headers, json=dataset_samples
         )
         return json.loads(response.text)
 
@@ -88,7 +104,6 @@ class Evaluation:
             base_dataset_name = "datasets/{}/{}.jsonl".format(
                 task_code, scoring_dataset["dataset"]
             )
-            print(bucket_name, base_dataset_name)
             self.s3.download_file(
                 bucket_name,
                 base_dataset_name,
@@ -141,21 +156,17 @@ class Evaluation:
                 "./app/models/{}/datasets/{}".format(folder_name, dataset["dataset"]),
                 "r",
             ) as jsonl_f:
-                lst = [obj for obj in jsonl_f]
+                dataset_samples = [json.loads(json.dumps(obj)) for obj in jsonl_f]
             responses = []
-            schema = self.require_fields_task(folder_name)
-            self.validate_input_schema(schema, lst)
-            for line in lst:
-                answer = self.single_evaluation_ecs(
-                    ip, self.build_single_request(schema, line)
-                )
-                answer["signature"] = secrets.token_hex(15)
-                answer["id"] = line["uid"]
-                responses.append(answer)
+            schema = self.require_fields_task(folder_name, model_name)
+            self.validate_input_schema(schema, dataset_samples)
+            print(len(dataset_samples))
+            responses = self.batch_evaluation_ecs(ip, dataset_samples)
+            print(len(responses))
             predictions = "./app/models/{}/datasets/{}.out".format(
                 folder_name, dataset["dataset"]
             )
-            num_samples += len(lst)
+            num_samples += len(dataset_samples)
             with jsonlines.open(predictions, "w") as writer:
                 writer.write_all(responses)
             name_prediction = predictions.split("/")[-1]
