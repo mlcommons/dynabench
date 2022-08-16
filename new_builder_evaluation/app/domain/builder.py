@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -29,6 +33,7 @@ class Builder:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
         self.s3 = self.session.client("s3")
+        self.iam = self.session.client("iam")
         self.ecs = self.session.client("ecs")
         self.lamda_ = self.session.client("lambda")
         self.api_gateway = self.session.client("apigateway")
@@ -74,7 +79,11 @@ class Builder:
         return response["repository"]["repositoryUri"]
 
     def push_image_to_ECR(
-        self, repository_name: str, folder_name: str, tag: str
+        self,
+        repository_name: str,
+        folder_name: str,
+        tag: str,
+        image: str = "Dockerfile",
     ) -> str:
         ecr_config = self.extract_ecr_configuration()
         self.docker_client.login(
@@ -82,7 +91,9 @@ class Builder:
             password=ecr_config["ecr_password"],
             registry=ecr_config["ecr_url"],
         )
-        image, _ = self.docker_client.images.build(path=folder_name, tag=tag)
+        image, _ = self.docker_client.images.build(
+            path=folder_name, tag=tag, image=f"{folder_name}/{image}"
+        )
         image.tag(repository=repository_name, tag=tag)
         self.docker_client.images.push(
             repository=repository_name,
@@ -171,13 +182,42 @@ class Builder:
         ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name, folder_name, arn_service
 
-    def light_model_deployment(self, function_name: str, image_uri: str, role: str):
+    def create_light_repository(self, repo_name: str) -> str:
+        response = self.ecr.create_repository(
+            repositoryName=repo_name, imageScanningConfiguration={"scanOnPush": True}
+        )
+        return response["repository"]["repositoryUri"]
+
+    def get_digest_repo(self, repo_name: str):
+        return self.ecr.list_images(repositoryName=repo_name)["imageIds"][0][
+            "imageDigest"
+        ]
+
+    def light_model_deployment(self, function_name: str, repo: str):
         lambda_function = self.lamda_.create_function(
-            {
-                "FunctionName": function_name,
-                "Role": role,
-                "Code": {"ImageUri": image_uri},
-                "PackageType": "Image",
-            }
+            FunctionName=function_name,
+            Code={"ImageUri": repo},
+            Role=os.getenv("ROLE_ARN_LAMBDA"),
+            PackageType="Image",
+            Timeout=800,
+            MemorySize=10240,
+            EphemeralStorage={"Size": 10240},
         )
         return lambda_function
+
+    def create_url_light_model(self, function_name: str):
+        return self.lamda_.create_function_url_config(
+            FunctionName=function_name, AuthType="NONE"
+        )["FunctionUrl"]
+
+    def create_light_model(self, model_name: str, folder_name: str):
+        model_name = model_name + "-light"
+        repo = self.create_light_repository(model_name)
+        tag = "latest"
+        digest = self.get_digest_repo(model_name)
+        repo = repo + "@" + digest
+        self.push_image_to_ECR(
+            repo, f"./app/models/{folder_name}", tag, "Dockerfile.aws.lambda"
+        )
+        self.light_model_deployment(model_name, repo)
+        return self.create_url_light_model(model_name)

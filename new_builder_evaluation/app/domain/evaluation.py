@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -20,6 +24,7 @@ from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
 from app.domain.eval_utils.input_formatter import InputFormatter
 from app.infrastructure.repositories.dataset import DatasetRepository
+from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
@@ -41,6 +46,7 @@ class Evaluation:
         self.score_repository = ScoreRepository()
         self.dataset_repository = DatasetRepository()
         self.round_repository = RoundRepository()
+        self.model_repository = ModelRepository()
 
     def require_fields_task(self, folder_name: str):
         input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
@@ -326,7 +332,8 @@ class Evaluation:
 
             self.score_repository.add(new_score)
             new_scores.append(new_score)
-
+            url_light_model = self.builder.create_light_model(model_name, folder_name)
+            self.model_repository.update_light_model(model_id, url_light_model)
             shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores
 
