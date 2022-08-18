@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -42,8 +46,10 @@ class Evaluation:
         self.dataset_repository = DatasetRepository()
         self.round_repository = RoundRepository()
 
-    def require_fields_task(self, folder_name: str):
-        input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
+    def require_fields_task(self, folder_name: str, model_name: str):
+        input_location = (
+            f"./app/models/{folder_name}/{model_name}/app/api/schemas/model.py"
+        )
         spec = importlib.util.spec_from_file_location(
             "ModelSingleInput", input_location
         )
@@ -67,6 +73,34 @@ class Evaluation:
         )
         return json.loads(response.text)
 
+    def batch_evaluation_ecs(self, ip: str, data: list, batch_size: int = 64):
+        final_predictions = []
+        for i in range(0, len(data), batch_size):
+            uid = [
+                (x)
+                for x in [
+                    dataset_sample["uid"] for dataset_sample in data[i : batch_size + i]
+                ]
+            ]
+            if i % batch_size * 20 == 0:
+                print(i)
+            dataset_samples = {}
+            dataset_samples["dataset_samples"] = data[i : batch_size + i]
+            headers = {
+                "accept": "application/json",
+            }
+            responses = requests.post(
+                f"http://{ip}/model/batch_evaluation",
+                headers=headers,
+                json=dataset_samples,
+            )
+            responses = json.loads(responses.text)
+            for i, response in enumerate(responses):
+                response["id"] = uid[i]
+                response["signature"] = secrets.token_hex(15)
+            final_predictions = final_predictions + responses
+        return final_predictions
+
     def get_scoring_datasets(self, task_id: int):
         jsonl_scoring_datasets = self.dataset_repository.get_scoring_datasets(task_id)
         return jsonl_scoring_datasets
@@ -88,7 +122,6 @@ class Evaluation:
             base_dataset_name = "datasets/{}/{}.jsonl".format(
                 task_code, scoring_dataset["dataset"]
             )
-            print(bucket_name, base_dataset_name)
             self.s3.download_file(
                 bucket_name,
                 base_dataset_name,
@@ -141,21 +174,16 @@ class Evaluation:
                 "./app/models/{}/datasets/{}".format(folder_name, dataset["dataset"]),
                 "r",
             ) as jsonl_f:
-                lst = [obj for obj in jsonl_f]
+                dataset_samples = [json.loads(json.dumps(obj)) for obj in jsonl_f]
             responses = []
-            schema = self.require_fields_task(folder_name)
-            self.validate_input_schema(schema, lst)
-            for line in lst:
-                answer = self.single_evaluation_ecs(
-                    ip, self.build_single_request(schema, line)
-                )
-                answer["signature"] = secrets.token_hex(15)
-                answer["id"] = line["uid"]
-                responses.append(answer)
+            schema = self.require_fields_task(folder_name, model_name)
+            self.validate_input_schema(schema, dataset_samples)
+            print(len(dataset_samples))
+            responses = self.batch_evaluation_ecs(ip, dataset_samples)
             predictions = "./app/models/{}/datasets/{}.out".format(
                 folder_name, dataset["dataset"]
             )
-            num_samples += len(lst)
+            num_samples += len(dataset_samples)
             with jsonlines.open(predictions, "w") as writer:
                 writer.write_all(responses)
             name_prediction = predictions.split("/")[-1]
@@ -197,8 +225,8 @@ class Evaluation:
                     },
                     {"Name": "ServiceName", "Value": model_name},
                 ],
-                StartTime=datetime.datetime.now() - datetime.timedelta(hours=0.05),
-                EndTime=datetime.datetime.now(),
+                StartTime=datetime.datetime.utcnow() - datetime.timedelta(hours=0.5),
+                EndTime=datetime.datetime.utcnow(),
                 Period=36000,
                 Statistics=["Average"],
             )
@@ -248,9 +276,9 @@ class Evaluation:
                 num_samples,
                 folder_name,
             ) = self.heavy_prediction(round_datasets, tasks.task_code, model_s3_zip)
-            self.builder.delete_ecs_service(arn_service)
             memory = self.get_memory_utilization(model_name)
             throughput = self.get_throughput(num_samples, minutes_time_prediction)
+            self.builder.delete_ecs_service(arn_service)
             data_dict = {}
             for data_version, data_types in prediction_dict.items():
                 for data_type in data_types:
@@ -266,7 +294,6 @@ class Evaluation:
                 self.task_repository.get_by_id(tasks.id)["config_yaml"]
             )
             input_formatter = InputFormatter(task_configuration)
-
             formatted_dict = {}
             for data_type in data_dict:
                 formatted_key = f"formatted_{data_type}"
@@ -285,7 +312,6 @@ class Evaluation:
                     formatted_dict[grouped_key] = input_formatter.group_predictions(
                         formatted_dict[formatted_key]
                     )
-
             evaluator = Evaluator(task_configuration)
             main_metric = evaluator.evaluate(
                 formatted_dict["formatted_base_predictions"],

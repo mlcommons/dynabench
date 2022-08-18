@@ -25,7 +25,7 @@ steps = [
     step(
         """
         UPDATE rounds
-        SET url={}/model/single_evaluation
+        SET url="{}/model/single_evaluation"
         WHERE tid=1 AND rid=4
         """.format(
             url_nli
