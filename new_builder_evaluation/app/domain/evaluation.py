@@ -10,6 +10,7 @@ import datetime
 import importlib
 import json
 import os
+import secrets
 import shutil
 import sys
 import time
@@ -72,19 +73,39 @@ class Evaluation:
         )
         return json.loads(response.text)
 
-    def batch_evaluation_ecs(self, ip: str, data: list):
-        dataset_samples = {}
-        dataset_samples["dataset_samples"] = data
-        headers = {
-            "accept": "application/json",
-        }
-        response = requests.post(
-            f"http://{ip}/model/batch_evaluation", headers=headers, json=dataset_samples
-        )
-        return json.loads(response.text)
+    def batch_evaluation_ecs(self, ip: str, data: list, batch_size: int = 64):
+        final_predictions = []
+        for i in range(0, len(data), batch_size):
+            uid = [
+                (x)
+                for x in [
+                    dataset_sample["uid"] for dataset_sample in data[i : batch_size + i]
+                ]
+            ]
+            if i % batch_size * 20 == 0:
+                print(i)
+            dataset_samples = {}
+            dataset_samples["dataset_samples"] = data[i : batch_size + i]
+            headers = {
+                "accept": "application/json",
+            }
+            responses = requests.post(
+                f"http://{ip}/model/batch_evaluation",
+                headers=headers,
+                json=dataset_samples,
+            )
+            responses = json.loads(responses.text)
+            for i, response in enumerate(responses):
+                response["id"] = uid[i]
+                response["signature"] = secrets.token_hex(15)
+            final_predictions = final_predictions + responses
+        return final_predictions
 
     def get_scoring_datasets(self, task_id: int):
         jsonl_scoring_datasets = self.dataset_repository.get_scoring_datasets(task_id)
+        jsonl_scoring_datasets = [
+            {"dataset": "dynasent-r1-test", "round_id": 2, "dataset_id": 11}
+        ]
         return jsonl_scoring_datasets
 
     def downloads_scoring_datasets(
@@ -162,7 +183,6 @@ class Evaluation:
             self.validate_input_schema(schema, dataset_samples)
             print(len(dataset_samples))
             responses = self.batch_evaluation_ecs(ip, dataset_samples)
-            print(len(responses))
             predictions = "./app/models/{}/datasets/{}.out".format(
                 folder_name, dataset["dataset"]
             )
@@ -208,8 +228,8 @@ class Evaluation:
                     },
                     {"Name": "ServiceName", "Value": model_name},
                 ],
-                StartTime=datetime.datetime.now() - datetime.timedelta(hours=0.05),
-                EndTime=datetime.datetime.now(),
+                StartTime=datetime.datetime.utcnow() - datetime.timedelta(hours=0.5),
+                EndTime=datetime.datetime.utcnow(),
                 Period=36000,
                 Statistics=["Average"],
             )
@@ -259,9 +279,9 @@ class Evaluation:
                 num_samples,
                 folder_name,
             ) = self.heavy_prediction(round_datasets, tasks.task_code, model_s3_zip)
-            self.builder.delete_ecs_service(arn_service)
             memory = self.get_memory_utilization(model_name)
             throughput = self.get_throughput(num_samples, minutes_time_prediction)
+            self.builder.delete_ecs_service(arn_service)
             data_dict = {}
             for data_version, data_types in prediction_dict.items():
                 for data_type in data_types:
@@ -277,7 +297,6 @@ class Evaluation:
                 self.task_repository.get_by_id(tasks.id)["config_yaml"]
             )
             input_formatter = InputFormatter(task_configuration)
-
             formatted_dict = {}
             for data_type in data_dict:
                 formatted_key = f"formatted_{data_type}"
@@ -296,7 +315,6 @@ class Evaluation:
                     formatted_dict[grouped_key] = input_formatter.group_predictions(
                         formatted_dict[formatted_key]
                     )
-
             evaluator = Evaluator(task_configuration)
             main_metric = evaluator.evaluate(
                 formatted_dict["formatted_base_predictions"],

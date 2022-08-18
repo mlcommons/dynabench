@@ -105,8 +105,8 @@ class Builder:
             family=name_task,
             networkMode="awsvpc",
             requiresCompatibilities=["FARGATE"],
-            cpu="4096",
-            memory="20480",
+            cpu="2048",
+            memory="16384",
         )
         return task_definition["taskDefinition"]["containerDefinitions"][0]["name"]
 
