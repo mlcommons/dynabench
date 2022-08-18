@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -33,9 +37,9 @@ def get_task_configuration(id: int) -> dict:
 
 
 @router.get("/get_model_id_and_task_code")
-def get_model_id_and_task_code(task_id: int):
+def get_model_id_and_task_code(task_code: str):
     task = TaskRepository()
-    return task.get_model_id_and_task_code(task_id)
+    return task.get_model_id_and_task_code(task_code)
 
 
 @router.get("/get_scoring_datasets")

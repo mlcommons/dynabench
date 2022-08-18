@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -47,11 +51,11 @@ class Evaluation:
 
         return task_configuration
 
-    def get_model_id_and_task_code(task_id: int):
+    def get_model_id_and_task_code(task_code: str):
         centralized_host = os.getenv("CENTRALIZED_URL")
         task_code = requests.get(
             f"{centralized_host}evaluation/get_model_id_and_task_code",
-            params={"task_id": task_id},
+            params={"task_code": task_code},
         ).json()
 
         return task_code
