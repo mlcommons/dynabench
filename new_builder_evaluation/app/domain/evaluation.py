@@ -103,9 +103,6 @@ class Evaluation:
 
     def get_scoring_datasets(self, task_id: int):
         jsonl_scoring_datasets = self.dataset_repository.get_scoring_datasets(task_id)
-        jsonl_scoring_datasets = [
-            {"dataset": "dynasent-r2-test", "round_id": 2, "dataset_id": 12}
-        ]
         return jsonl_scoring_datasets
 
     def downloads_scoring_datasets(
