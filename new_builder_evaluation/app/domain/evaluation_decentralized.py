@@ -42,7 +42,7 @@ class Evaluation:
         centralized_host = os.getenv("CENTRALIZED_URL")
         task_configuration = requests.get(
             f"{centralized_host}evaluation/get_task_configuration",
-            params={"task_id": task_id},
+            params={"id": task_id},
         ).json()
 
         return task_configuration
