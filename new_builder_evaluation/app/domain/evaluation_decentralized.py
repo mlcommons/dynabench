@@ -86,12 +86,12 @@ class Evaluation:
         )
         return json.loads(response.text)
 
-    def get_scoring_datasets(self, task_id: int, round_id: int):
+    def get_scoring_datasets(self, task_id: int):
         centralized_host = os.getenv("CENTRALIZED_URL")
 
         jsonl_scoring_datasets = requests.get(
-            f"{centralized_host}+evaluation/get_scoring_datasets",
-            params={"task_id": task_id, "round_id": round_id},
+            f"{centralized_host}evaluation/get_scoring_datasets",
+            params={"task_id": task_id},
         ).json()
 
         return jsonl_scoring_datasets
