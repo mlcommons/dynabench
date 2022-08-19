@@ -5,7 +5,6 @@
 import importlib
 import json
 import os
-import secrets
 import shutil
 import sys
 import time
@@ -147,24 +146,26 @@ class Evaluation:
         return final_datasets
 
     def heavy_prediction(self, datasets: list, task_code: str, model: str):
-        folder_name = model.split("/")[-1].split(".")[0]
-        ip, model_name = self.builder.get_ip_ecs_task(model)
+        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(model)
         final_dict_prediction = {}
+        start_prediction = time.time()
+        num_samples = 0
         for dataset in datasets:
             dict_dataset_type = {}
             with jsonlines.open(
-                "./app/{}/datasets/{}".format(folder_name, dataset["dataset"]), "r"
+                "./app/models/{}/datasets/{}".format(folder_name, dataset["dataset"]),
+                "r",
             ) as jsonl_f:
-                lst = [obj for obj in jsonl_f]
+                dataset_samples = [json.loads(json.dumps(obj)) for obj in jsonl_f]
             responses = []
-            for line in lst:
-                answer = self.single_evaluation_ecs(ip, line["statement"])
-                answer["signature"] = secrets.token_hex(15)
-                answer["id"] = line["uid"]
-                responses.append(answer)
-            predictions = "./app/{}/datasets/{}.out".format(
+            schema = self.require_fields_task(folder_name, model_name)
+            self.validate_input_schema(schema, dataset_samples)
+            print(len(dataset_samples))
+            responses = self.batch_evaluation_ecs(ip, dataset_samples)
+            predictions = "./app/models/{}/datasets/{}.out".format(
                 folder_name, dataset["dataset"]
             )
+            num_samples += len(dataset_samples)
             with jsonlines.open(predictions, "w") as writer:
                 writer.write_all(responses)
             name_prediction = predictions.split("/")[-1]
@@ -173,16 +174,26 @@ class Evaluation:
                 self.s3_bucket,
                 f"predictions/{task_code}/{model_name}/{name_prediction}",
             )
-            dict_dataset_type["dataset"] = "./app/{}/datasets/{}".format(
+            dict_dataset_type["dataset"] = "./app/models/{}/datasets/{}".format(
                 folder_name, dataset["dataset"]
             )
             dict_dataset_type[
                 "predictions"
-            ] = f"./app/{folder_name}/datasets/{name_prediction}"
+            ] = f"./app/models/{folder_name}/datasets/{name_prediction}"
             dataset_type = dataset["dataset_type"]
             final_dict_prediction[dataset_type] = dict_dataset_type
             dataset_id = dataset["dataset_id"]
-        return final_dict_prediction, dataset_id
+        end_prediction = time.time()
+        seconds_time_prediction = end_prediction - start_prediction
+        return (
+            final_dict_prediction,
+            dataset_id,
+            arn_service,
+            model_name,
+            seconds_time_prediction,
+            num_samples,
+            folder_name,
+        )
 
     def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
         tasks = self.get_model_id_and_task_code(task)
