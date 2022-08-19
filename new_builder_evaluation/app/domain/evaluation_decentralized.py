@@ -101,10 +101,12 @@ class Evaluation:
         jsonl_scoring_datasets: list,
         bucket_name: str,
         task_code: str,
-        delta_metrics: list,
+        delta_metrics_task: list,
         model: str,
     ):
         folder_name = model.split("/")[-1].split(".")[0]
+        os.mkdir(f"./app/models/{folder_name}")
+        os.mkdir(f"./app/models/{folder_name}/datasets/")
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
             final_dataset = {}
@@ -114,7 +116,7 @@ class Evaluation:
             self.s3.download_file(
                 bucket_name,
                 base_dataset_name,
-                "./app/{}/datasets/{}.jsonl".format(
+                "./app/models/{}/datasets/{}.jsonl".format(
                     folder_name, scoring_dataset["dataset"]
                 ),
             )
@@ -123,7 +125,7 @@ class Evaluation:
             final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
             final_dataset["dataset"] = "{}.jsonl".format(scoring_dataset["dataset"])
             final_datasets.append(final_dataset)
-            for delta_metric in delta_metrics:
+            for delta_metric in delta_metrics_task:
                 final_dataset = {}
                 delta_dataset_name = "datasets/{}/{}-{}.jsonl".format(
                     task_code, delta_metric, scoring_dataset["dataset"]
@@ -131,7 +133,7 @@ class Evaluation:
                 self.s3.download_file(
                     bucket_name,
                     delta_dataset_name,
-                    "./app/{}/datasets/{}-{}.jsonl".format(
+                    "./app/models/{}/datasets/{}-{}.jsonl".format(
                         folder_name, delta_metric, scoring_dataset["dataset"]
                     ),
                 )
