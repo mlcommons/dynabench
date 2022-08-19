@@ -9,7 +9,6 @@
 import importlib
 import json
 import os
-import secrets
 import shutil
 import sys
 import time
@@ -46,19 +45,18 @@ class Evaluation:
         centralized_host = os.getenv("CENTRALIZED_URL")
         task_configuration = requests.get(
             f"{centralized_host}evaluation/get_task_configuration",
-            params={"task_id": task_id},
+            params={"id": task_id},
         ).json()
 
         return task_configuration
 
-    def get_model_id_and_task_code(task_code: str):
+    def get_model_id_and_task_code(self, task_code: str):
         centralized_host = os.getenv("CENTRALIZED_URL")
-        task_code = requests.get(
+        task = requests.get(
             f"{centralized_host}evaluation/get_model_id_and_task_code",
             params={"task_code": task_code},
         ).json()
-
-        return task_code
+        return task
 
     def get_round_info_by_round_and_task(task_id: int, round_id: int):
         centralized_host = os.getenv("CENTRALIZED_URL")
@@ -90,12 +88,12 @@ class Evaluation:
         )
         return json.loads(response.text)
 
-    def get_scoring_datasets(self, task_id: int, round_id: int):
+    def get_scoring_datasets(self, task_id: int):
         centralized_host = os.getenv("CENTRALIZED_URL")
 
         jsonl_scoring_datasets = requests.get(
-            f"{centralized_host}+evaluation/get_scoring_datasets",
-            params={"task_id": task_id, "round_id": round_id},
+            f"{centralized_host}evaluation/get_scoring_datasets",
+            params={"task_id": task_id},
         ).json()
 
         return jsonl_scoring_datasets
@@ -105,10 +103,13 @@ class Evaluation:
         jsonl_scoring_datasets: list,
         bucket_name: str,
         task_code: str,
-        delta_metrics: list,
+        delta_metrics_task: list,
         model: str,
     ):
         folder_name = model.split("/")[-1].split(".")[0]
+        print(folder_name)
+        os.mkdir(f"./app/models/{folder_name}")
+        os.mkdir(f"./app/models/{folder_name}/datasets/")
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
             final_dataset = {}
@@ -118,7 +119,7 @@ class Evaluation:
             self.s3.download_file(
                 bucket_name,
                 base_dataset_name,
-                "./app/{}/datasets/{}.jsonl".format(
+                "./app/models/{}/datasets/{}.jsonl".format(
                     folder_name, scoring_dataset["dataset"]
                 ),
             )
@@ -127,7 +128,7 @@ class Evaluation:
             final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
             final_dataset["dataset"] = "{}.jsonl".format(scoring_dataset["dataset"])
             final_datasets.append(final_dataset)
-            for delta_metric in delta_metrics:
+            for delta_metric in delta_metrics_task:
                 final_dataset = {}
                 delta_dataset_name = "datasets/{}/{}-{}.jsonl".format(
                     task_code, delta_metric, scoring_dataset["dataset"]
@@ -135,7 +136,7 @@ class Evaluation:
                 self.s3.download_file(
                     bucket_name,
                     delta_dataset_name,
-                    "./app/{}/datasets/{}-{}.jsonl".format(
+                    "./app/models/{}/datasets/{}-{}.jsonl".format(
                         folder_name, delta_metric, scoring_dataset["dataset"]
                     ),
                 )
@@ -149,24 +150,26 @@ class Evaluation:
         return final_datasets
 
     def heavy_prediction(self, datasets: list, task_code: str, model: str):
-        folder_name = model.split("/")[-1].split(".")[0]
-        ip, model_name = self.builder.get_ip_ecs_task(model)
+        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(model)
         final_dict_prediction = {}
+        start_prediction = time.time()
+        num_samples = 0
         for dataset in datasets:
             dict_dataset_type = {}
             with jsonlines.open(
-                "./app/{}/datasets/{}".format(folder_name, dataset["dataset"]), "r"
+                "./app/models/{}/datasets/{}".format(folder_name, dataset["dataset"]),
+                "r",
             ) as jsonl_f:
-                lst = [obj for obj in jsonl_f]
+                dataset_samples = [json.loads(json.dumps(obj)) for obj in jsonl_f]
             responses = []
-            for line in lst:
-                answer = self.single_evaluation_ecs(ip, line["statement"])
-                answer["signature"] = secrets.token_hex(15)
-                answer["id"] = line["uid"]
-                responses.append(answer)
-            predictions = "./app/{}/datasets/{}.out".format(
+            schema = self.require_fields_task(folder_name, model_name)
+            self.validate_input_schema(schema, dataset_samples)
+            print(len(dataset_samples))
+            responses = self.batch_evaluation_ecs(ip, dataset_samples)
+            predictions = "./app/models/{}/datasets/{}.out".format(
                 folder_name, dataset["dataset"]
             )
+            num_samples += len(dataset_samples)
             with jsonlines.open(predictions, "w") as writer:
                 writer.write_all(responses)
             name_prediction = predictions.split("/")[-1]
@@ -175,16 +178,75 @@ class Evaluation:
                 self.s3_bucket,
                 f"predictions/{task_code}/{model_name}/{name_prediction}",
             )
-            dict_dataset_type["dataset"] = "./app/{}/datasets/{}".format(
+            dict_dataset_type["dataset"] = "./app/models/{}/datasets/{}".format(
                 folder_name, dataset["dataset"]
             )
             dict_dataset_type[
                 "predictions"
-            ] = f"./app/{folder_name}/datasets/{name_prediction}"
+            ] = f"./app/models/{folder_name}/datasets/{name_prediction}"
             dataset_type = dataset["dataset_type"]
             final_dict_prediction[dataset_type] = dict_dataset_type
             dataset_id = dataset["dataset_id"]
-        return final_dict_prediction, dataset_id
+        end_prediction = time.time()
+        seconds_time_prediction = end_prediction - start_prediction
+        return (
+            final_dict_prediction,
+            dataset_id,
+            arn_service,
+            model_name,
+            seconds_time_prediction,
+            num_samples,
+            folder_name,
+        )
+
+    def test_eval(self, task: str, model_s3_zip: str, model_id: int) -> dict:
+        tasks = self.get_model_id_and_task_code(task)
+        print(tasks["id"])
+        delta_metrics = self.get_task_configuration(tasks["id"])["delta_metrics"]
+        delta_metrics = [delta_metric["type"] for delta_metric in delta_metrics]
+        jsonl_scoring_datasets = self.get_scoring_datasets(tasks["id"])
+        datasets = self.downloads_scoring_datasets(
+            jsonl_scoring_datasets,
+            self.s3_bucket,
+            tasks["task_code"],
+            delta_metrics,
+            model_s3_zip,
+        )
+        rounds = list(
+            map(
+                int,
+                {
+                    current_round
+                    for rounds in datasets
+                    for current_round in str(rounds["round_id"])
+                },
+            )
+        )
+        # new_scores = []
+        for current_round in rounds:
+            round_datasets = [
+                dataset for dataset in datasets if dataset["round_id"] == current_round
+            ]
+
+            (
+                prediction_dict,
+                dataset_id,
+                arn_service,
+                model_name,
+                minutes_time_prediction,
+                num_samples,
+                folder_name,
+            ) = self.heavy_prediction(round_datasets, tasks["task_code"], model_s3_zip)
+
+            return [
+                prediction_dict,
+                dataset_id,
+                arn_service,
+                model_name,
+                minutes_time_prediction,
+                num_samples,
+                folder_name,
+            ]
 
     def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
         tasks = self.get_model_id_and_task_code(task)
@@ -204,10 +266,31 @@ class Evaluation:
             )
         )
         new_scores = []
-        for round in rounds:
+        for current_round in rounds:
             round_datasets = [
-                dataset for dataset in datasets if dataset["round_id"] == round
+                dataset for dataset in datasets if dataset["round_id"] == current_round
             ]
+
+            (
+                prediction_dict,
+                dataset_id,
+                arn_service,
+                model_name,
+                minutes_time_prediction,
+                num_samples,
+                folder_name,
+            ) = self.heavy_prediction(round_datasets, tasks.task_code, model_s3_zip)
+
+            return [
+                prediction_dict,
+                dataset_id,
+                arn_service,
+                model_name,
+                minutes_time_prediction,
+                num_samples,
+                folder_name,
+            ]
+
             prediction_dict, dataset_id = self.heavy_prediction(
                 round_datasets, tasks["task_code"], model_s3_zip
             )
