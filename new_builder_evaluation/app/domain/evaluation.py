@@ -340,6 +340,7 @@ class Evaluation:
             )
 
             new_score = {
+                str(metric): main_metric["perf"],
                 "perf": main_metric["perf"],
                 "pretty_perf": main_metric["pretty_perf"],
                 "fairness": final_scores["fairness"],
