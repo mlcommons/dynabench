@@ -73,7 +73,7 @@ class Evaluation:
         )
         return json.loads(response.text)
 
-    def batch_evaluation_ecs(self, ip: str, data: list, batch_size: int = 64):
+    def batch_evaluation_ecs(self, ip: str, data: list, batch_size: int = 128):
         final_predictions = []
         for i in range(0, len(data), batch_size):
             uid = [
@@ -82,7 +82,7 @@ class Evaluation:
                     dataset_sample["uid"] for dataset_sample in data[i : batch_size + i]
                 ]
             ]
-            if i % batch_size * 20 == 0:
+            if i % (batch_size * 10) == 0:
                 print(i)
             dataset_samples = {}
             dataset_samples["dataset_samples"] = data[i : batch_size + i]
@@ -163,8 +163,9 @@ class Evaluation:
     def build_single_request(self, schema: list, sample_dataset: dict):
         return {param: sample_dataset.get(param) for param in schema}
 
-    def heavy_prediction(self, datasets: list, task_code: str, model: str):
-        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(model)
+    def heavy_prediction(
+        self, datasets: list, task_code: str, ip: str, model_name: str, folder_name: str
+    ):
         final_dict_prediction = {}
         start_prediction = time.time()
         num_samples = 0
@@ -206,7 +207,6 @@ class Evaluation:
         return (
             final_dict_prediction,
             dataset_id,
-            arn_service,
             model_name,
             seconds_time_prediction,
             num_samples,
@@ -263,6 +263,9 @@ class Evaluation:
             )
         )
         new_scores = []
+        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
+            model_s3_zip
+        )
         for current_round in rounds:
             round_datasets = [
                 dataset for dataset in datasets if dataset["round_id"] == current_round
@@ -270,15 +273,15 @@ class Evaluation:
             (
                 prediction_dict,
                 dataset_id,
-                arn_service,
                 model_name,
                 minutes_time_prediction,
                 num_samples,
                 folder_name,
-            ) = self.heavy_prediction(round_datasets, tasks.task_code, model_s3_zip)
+            ) = self.heavy_prediction(
+                round_datasets, tasks.task_code, ip, model_name, folder_name
+            )
             memory = self.get_memory_utilization(model_name)
             throughput = self.get_throughput(num_samples, minutes_time_prediction)
-            self.builder.delete_ecs_service(arn_service)
             data_dict = {}
             for data_version, data_types in prediction_dict.items():
                 for data_type in data_types:
@@ -337,6 +340,7 @@ class Evaluation:
             )
 
             new_score = {
+                str(metric): main_metric["perf"],
                 "perf": main_metric["perf"],
                 "pretty_perf": main_metric["pretty_perf"],
                 "fairness": final_scores["fairness"],
@@ -352,8 +356,8 @@ class Evaluation:
 
             self.score_repository.add(new_score)
             new_scores.append(new_score)
-
-            shutil.rmtree(f"./app/models/{folder_name}")
+        self.builder.delete_ecs_service(arn_service)
+        shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores
 
     def get_sqs_messages(self):
