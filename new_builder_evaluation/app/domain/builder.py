@@ -101,7 +101,7 @@ class Builder:
                     "image": repo,
                 }
             ],
-            executionRoleArn="arn:aws:iam::877755283837:role/ecsTaskExecutionRole",
+            executionRoleArn=os.getenv("EXECUTION_ROLE_ARN"),
             family=name_task,
             networkMode="awsvpc",
             requiresCompatibilities=["FARGATE"],
