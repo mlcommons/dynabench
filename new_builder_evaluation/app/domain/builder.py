@@ -26,7 +26,7 @@ class Builder:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
             region_name=os.getenv("AWS_REGION"),
         )
-        self.eni = boto3.resource(
+        self.ec2 = boto3.resource(
             "ec2",
             region_name=os.getenv("AWS_REGION"),
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -55,12 +55,6 @@ class Builder:
             zipObj.extractall(f"./app/models/{folder_name}")
         os.remove(f"./app/models/{folder_name}/{zip_name}")
         return folder_name
-
-    def principal(self):
-        zip_name, model_name = self.download_zip(
-            "dynabench-api-ciro", "models/sentiment/1675-dynalab-base-sentiment.zip"
-        )
-        return self.unzip_file(zip_name), model_name
 
     def extract_ecr_configuration(self) -> dict:
         ecr_credentials = self.ecr.get_authorization_token()["authorizationData"][0]
@@ -113,12 +107,12 @@ class Builder:
                     "image": repo,
                 }
             ],
-            executionRoleArn="arn:aws:iam::877755283837:role/ecsTaskExecutionRole",
+            executionRoleArn=os.getenv("EXECUTION_ROLE_ARN"),
             family=name_task,
             networkMode="awsvpc",
             requiresCompatibilities=["FARGATE"],
-            cpu="4096",
-            memory="20480",
+            cpu="2048",
+            memory="16384",
         )
         return task_definition["taskDefinition"]["containerDefinitions"][0]["name"]
 
@@ -159,7 +153,7 @@ class Builder:
                 describe_task = self.ecs.describe_tasks(
                     cluster=os.getenv("CLUSTER_TASK_EVALUATION"), tasks=run_task
                 )
-                eni = self.eni.NetworkInterface(
+                eni = self.ec2.NetworkInterface(
                     describe_task["tasks"][0]["attachments"][0]["details"][1]["value"]
                 )
                 ip = eni.association_attribute["PublicIp"]
@@ -178,7 +172,7 @@ class Builder:
         folder_name = self.unzip_file(zip_name)
         repo = self.create_repository(model_name)
         tag = "latest"
-        self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)
+        self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag, model_name)
         ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name, folder_name, arn_service
 

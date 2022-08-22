@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -62,7 +66,7 @@ class InputFormatter:
         grouped_predictions = defaultdict(list)
 
         for example in examples:
-            id = example["id"].split("_")[0]
+            id = str(example["id"]).split("_")[0]
             grouped_predictions[id].append(example["pred"])
 
         return grouped_predictions
@@ -77,7 +81,6 @@ class InputFormatter:
         final_labels = defaultdict(list)
 
         for example in examples:
-            id = example["id"].split("_")[0]
+            id = str(example["id"]).split("_")[0]
             final_labels[id] = example["answer"]
-
         return final_labels
