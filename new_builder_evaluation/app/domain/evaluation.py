@@ -219,7 +219,7 @@ class Evaluation:
         while True:
             memory_utilization = self.cloud_watch.get_metric_statistics(
                 Namespace="AWS/ECS",
-                MetricName="CPUUtilization",
+                MetricName="MemoryUtilization",
                 Dimensions=[
                     {
                         "Name": "ClusterName",
@@ -233,7 +233,7 @@ class Evaluation:
                 Statistics=["Average"],
             )
             if len(memory_utilization["Datapoints"]) > 0:
-                return memory_utilization["Datapoints"][0]["Average"]
+                return memory_utilization["Datapoints"][0]["Average"] * 16
             else:
                 time.sleep(15)
 
