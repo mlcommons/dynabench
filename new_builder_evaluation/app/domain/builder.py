@@ -215,3 +215,14 @@ class Builder:
         )
         self.light_model_deployment(model_name, repo)
         return self.create_url_light_model(model_name)
+
+    def test(
+        self,
+    ):
+        zip_name, model_name = self.download_zip(
+            os.getenv("AWS_S3_BUCKET"),
+            "models/sentiment/1675-dynalab-albert-sentiment.zip",
+        )
+        folder_name = self.unzip_file(zip_name)
+        url_light_model = self.builder.create_light_model(model_name, folder_name)
+        return url_light_model
