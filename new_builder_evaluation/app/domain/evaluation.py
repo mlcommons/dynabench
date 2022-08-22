@@ -340,7 +340,6 @@ class Evaluation:
             )
 
             new_score = {
-                str(metric): main_metric["perf"],
                 "perf": main_metric["perf"],
                 "pretty_perf": main_metric["pretty_perf"],
                 "fairness": final_scores["fairness"],
@@ -351,8 +350,10 @@ class Evaluation:
                 "memory_utilization": final_scores["memory"],
                 "examples_per_second": final_scores["throughput"],
             }
-
-            new_score["metadata_json"] = json.dumps(new_score)
+            final_score = new_score.copy()
+            metric_name = str(metric)
+            final_score[metric_name] = main_metric["perf"]
+            new_score["metadata_json"] = json.dumps(final_score)
 
             self.score_repository.add(new_score)
             new_scores.append(new_score)
