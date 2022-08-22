@@ -114,8 +114,8 @@ class Builder:
             family=name_task,
             networkMode="awsvpc",
             requiresCompatibilities=["FARGATE"],
-            cpu="2048",
-            memory="16384",
+            cpu=os.getenv("CPU_UTILIZATION"),
+            memory=os.getenv("MEMORY_UTILIZATION"),
         )
         return task_definition["taskDefinition"]["containerDefinitions"][0]["name"]
 
