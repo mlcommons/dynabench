@@ -77,7 +77,8 @@ class Builder:
         repository_name: str,
         folder_name: str,
         tag: str,
-        image: str = "Dockerfile",
+        model_name: str,
+        docker_name: str = "Dockerfile",
     ) -> str:
         ecr_config = self.extract_ecr_configuration()
         self.docker_client.login(
@@ -85,8 +86,10 @@ class Builder:
             password=ecr_config["ecr_password"],
             registry=ecr_config["ecr_url"],
         )
+        path = f"{folder_name}/{model_name}"
+        absolute_path = os.getenv("ABSOLUTE_PATH")
         image, _ = self.docker_client.images.build(
-            path=folder_name, tag=tag, image=f"{folder_name}/{image}"
+            path=path, tag=tag, dockerfile=f"{absolute_path}/{path}/{docker_name}"
         )
         image.tag(repository=repository_name, tag=tag)
         self.docker_client.images.push(
@@ -199,30 +202,43 @@ class Builder:
         )
         return lambda_function
 
+    def create_permission_lambda_function(self, function_name: str):
+        self.lamda_.add_permission(
+            FunctionName="dynalab-albert-sentiment",
+            StatementId="FunctionURLAllowAccess",
+            Action="lambda:InvokeFunctionUrl",
+            Principal="*",
+            FunctionUrlAuthType="NONE",
+        )
+
     def create_url_light_model(self, function_name: str):
         return self.lamda_.create_function_url_config(
-            FunctionName=function_name, AuthType="NONE"
+            FunctionName=function_name,
+            AuthType="NONE",
+            Cors={
+                "AllowCredentials": True,
+                "AllowMethods": [
+                    "*",
+                ],
+                "AllowOrigins": [
+                    "*",
+                ],
+            },
         )["FunctionUrl"]
 
     def create_light_model(self, model_name: str, folder_name: str):
-        model_name = model_name + "-light"
-        repo = self.create_light_repository(model_name)
+        model_name_light = model_name + "-light"
+        repo = self.create_light_repository(model_name_light)
         tag = "latest"
-        digest = self.get_digest_repo(model_name)
-        repo = repo + "@" + digest
         self.push_image_to_ECR(
-            repo, f"./app/models/{folder_name}", tag, "Dockerfile.aws.lambda"
+            repo,
+            f"./app/models/{folder_name}",
+            tag,
+            model_name,
+            docker_name="Dockerfile.aws.lambda",
         )
+        digest = self.get_digest_repo(model_name_light)
+        repo = repo + "@" + digest
         self.light_model_deployment(model_name, repo)
+        self.create_permission_lambda_function(model_name)
         return self.create_url_light_model(model_name)
-
-    def test(
-        self,
-    ):
-        zip_name, model_name = self.download_zip(
-            os.getenv("AWS_S3_BUCKET"),
-            "models/sentiment/1675-dynalab-albert-sentiment.zip",
-        )
-        folder_name = self.unzip_file(zip_name)
-        url_light_model = self.builder.create_light_model(model_name, folder_name)
-        return url_light_model

@@ -15,7 +15,7 @@ from yoyo import step
 
 __depends__ = {"20220504_01_WOGoS-add-context-parameter-task"}
 url_nli = "https://26d2flibrxcgm453pupq7xx4pi0mgnwy.lambda-url.eu-west-3.on.aws/"
-url_sen = "https://xg7yn6wnbj32scbnv2i6vvp4mm0npsyj.lambda-url.eu-west-3.on.aws/"
+url_sen = "https://i327m3hentejqdymbrrxaqppby0lbhqj.lambda-url.eu-west-3.on.aws/"
 url_hs = "https://7qezcrvld5pf72jxktulyv7ssa0nwwin.lambda-url.eu-west-3.on.aws/"
 url_vqa = "https://mmwlt7wnruuc5nmcxlwfugwnd40vjotj.lambda-url.eu-west-3.on.aws/"
 url_qb = "https://x3rgzv7ermzkymu3fp3ieciat40hcqlq.lambda-url.eu-west-3.on.aws/"

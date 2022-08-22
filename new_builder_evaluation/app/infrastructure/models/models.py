@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -227,6 +231,7 @@ class Model(Base):
     is_published = Column(TINYINT(1))
     is_anonymous = Column(TINYINT(1))
     endpoint_name = Column(Text)
+    light_model = Column(Text)
     deployment_status = Column(
         Enum(
             "uploaded",
