@@ -24,6 +24,7 @@ from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
 from app.domain.eval_utils.input_formatter import InputFormatter
 from app.infrastructure.repositories.dataset import DatasetRepository
+from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
@@ -45,6 +46,7 @@ class Evaluation:
         self.score_repository = ScoreRepository()
         self.dataset_repository = DatasetRepository()
         self.round_repository = RoundRepository()
+        self.model_repository = ModelRepository()
 
     def require_fields_task(self, folder_name: str, model_name: str):
         input_location = (
@@ -359,6 +361,8 @@ class Evaluation:
 
             self.score_repository.add(new_score)
             new_scores.append(new_score)
+            url_light_model = self.builder.create_light_model(model_name, folder_name)
+            self.model_repository.update_light_model(model_id, url_light_model)
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores

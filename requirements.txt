@@ -11,7 +11,7 @@ SQLAlchemy==1.3.23
 torch
 transformers
 werkzeug
-boto3
+boto3==1.24.56
 yoyo-migrations
 pandas==1.3.0
 sacrebleu>=2.0.0

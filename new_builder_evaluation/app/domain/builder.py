@@ -33,6 +33,7 @@ class Builder:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
         self.s3 = self.session.client("s3")
+        self.iam = self.session.client("iam")
         self.ecs = self.session.client("ecs")
         self.lamda_ = self.session.client("lambda")
         self.api_gateway = self.session.client("apigateway")
@@ -72,7 +73,12 @@ class Builder:
         return response["repository"]["repositoryUri"]
 
     def push_image_to_ECR(
-        self, repository_name: str, folder_name: str, tag: str, model_name: str
+        self,
+        repository_name: str,
+        folder_name: str,
+        tag: str,
+        model_name: str,
+        docker_name: str = "Dockerfile",
     ) -> str:
         ecr_config = self.extract_ecr_configuration()
         self.docker_client.login(
@@ -81,7 +87,10 @@ class Builder:
             registry=ecr_config["ecr_url"],
         )
         path = f"{folder_name}/{model_name}"
-        image, _ = self.docker_client.images.build(path=path, tag=tag)
+        absolute_path = os.getenv("ABSOLUTE_PATH")
+        image, _ = self.docker_client.images.build(
+            path=path, tag=tag, dockerfile=f"{absolute_path}/{path}/{docker_name}"
+        )
         image.tag(repository=repository_name, tag=tag)
         self.docker_client.images.push(
             repository=repository_name,
@@ -170,13 +179,66 @@ class Builder:
         ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name, folder_name, arn_service
 
-    def light_model_deployment(self, function_name: str, image_uri: str, role: str):
+    def create_light_repository(self, repo_name: str) -> str:
+        response = self.ecr.create_repository(
+            repositoryName=repo_name, imageScanningConfiguration={"scanOnPush": True}
+        )
+        return response["repository"]["repositoryUri"]
+
+    def get_digest_repo(self, repo_name: str):
+        return self.ecr.list_images(repositoryName=repo_name)["imageIds"][0][
+            "imageDigest"
+        ]
+
+    def light_model_deployment(self, function_name: str, repo: str):
         lambda_function = self.lamda_.create_function(
-            {
-                "FunctionName": function_name,
-                "Role": role,
-                "Code": {"ImageUri": image_uri},
-                "PackageType": "Image",
-            }
+            FunctionName=function_name,
+            Code={"ImageUri": repo},
+            Role=os.getenv("ROLE_ARN_LAMBDA"),
+            PackageType="Image",
+            Timeout=800,
+            MemorySize=10240,
+            EphemeralStorage={"Size": 10240},
         )
         return lambda_function
+
+    def create_permission_lambda_function(self, function_name: str):
+        self.lamda_.add_permission(
+            FunctionName="dynalab-albert-sentiment",
+            StatementId="FunctionURLAllowAccess",
+            Action="lambda:InvokeFunctionUrl",
+            Principal="*",
+            FunctionUrlAuthType="NONE",
+        )
+
+    def create_url_light_model(self, function_name: str):
+        return self.lamda_.create_function_url_config(
+            FunctionName=function_name,
+            AuthType="NONE",
+            Cors={
+                "AllowCredentials": True,
+                "AllowMethods": [
+                    "*",
+                ],
+                "AllowOrigins": [
+                    "*",
+                ],
+            },
+        )["FunctionUrl"]
+
+    def create_light_model(self, model_name: str, folder_name: str):
+        model_name_light = model_name + "-light"
+        repo = self.create_light_repository(model_name_light)
+        tag = "latest"
+        self.push_image_to_ECR(
+            repo,
+            f"./app/models/{folder_name}",
+            tag,
+            model_name,
+            docker_name="Dockerfile.aws.lambda",
+        )
+        digest = self.get_digest_repo(model_name_light)
+        repo = repo + "@" + digest
+        self.light_model_deployment(model_name, repo)
+        self.create_permission_lambda_function(model_name)
+        return self.create_url_light_model(model_name)

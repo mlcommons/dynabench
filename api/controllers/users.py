@@ -507,16 +507,20 @@ def model_upload_s3_dynalab_2(credentials):
         ContentType=upload.content_type,
     )
 
+    model_name = file_name.split("/")[-1].split(".")[0]
+    model_name = "-".join(model_name.split(".")[0].replace(" ", "").split("-")[1:])
+
     models = ModelModel()
     model, model_id = models.create(
         task_id=task.id,
         user_id=user_id,
-        name=file_name,
+        name=model_name,
         shortname="",
         longdesc="",
         desc="",
         upload_datetime=datetime.now(),
         endpoint_name="",
+        light_model="",
         deployment_status="uploaded",
         secret=secrets.token_hex(),
     )
