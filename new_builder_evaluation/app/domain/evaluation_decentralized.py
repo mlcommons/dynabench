@@ -2,9 +2,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import datetime
 import importlib
 import json
 import os
+import secrets
 import shutil
 import sys
 import time
@@ -12,6 +14,7 @@ import time
 import boto3
 import jsonlines
 import requests
+import yaml
 
 from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
@@ -27,11 +30,17 @@ class Evaluation:
         )
         self.s3 = self.session.client("s3")
         self.sqs = self.session.client("sqs")
+        self.cloud_watch = self.session.client("cloudwatch")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.builder = Builder()
 
-    def require_fields_task(self):
-        spec = importlib.util.spec_from_file_location("ModelSingleInput", "./test.py")
+    def require_fields_task(self, folder_name: str, model_name: str):
+        input_location = (
+            f"./app/models/{folder_name}/{model_name}/app/api/schemas/model.py"
+        )
+        spec = importlib.util.spec_from_file_location(
+            "ModelSingleInput", input_location
+        )
         module = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = module
         spec.loader.exec_module(module)
@@ -55,7 +64,7 @@ class Evaluation:
 
         return task
 
-    def get_round_info_by_round_and_task(task_id: int, round_id: int):
+    def get_round_info_by_round_and_task(self, task_id: int, round_id: int):
         centralized_host = os.getenv("CENTRALIZED_URL")
         round_info = requests.get(
             f"{centralized_host}evaluation/get_round_info_by_round_and_task",
@@ -64,7 +73,15 @@ class Evaluation:
 
         return round_info
 
-    def post_scores(scores: dict):
+    def get_by_id(self, id: int):
+        centralized_host = os.getenv("CENTRALIZED_URL")
+        round_info = requests.get(
+            f"{centralized_host}evaluation/get_by_id",
+            params={"id": id},
+        ).json()
+        return round_info
+
+    def post_descentralized_scores(self, scores: dict):
         centralized_host = os.getenv("CENTRALIZED_URL")
         post = requests.post(
             f"{centralized_host}evaluation/descentralized_scores",
@@ -73,17 +90,43 @@ class Evaluation:
 
         return post.status_code
 
-    def single_evaluation_ecs(self, ip: str, text):
+    def single_evaluation_ecs(self, ip: str, json_data: dict):
         headers = {
             "accept": "application/json",
-        }
-        json_data = {
-            "input_text": text,
         }
         response = requests.post(
             f"http://{ip}/model/single_evaluation", headers=headers, json=json_data
         )
         return json.loads(response.text)
+
+    def batch_evaluation_ecs(self, ip: str, data: list, batch_size: int = 128):
+        final_predictions = []
+        for i in range(0, len(data), batch_size):
+            uid = [
+                (x)
+                for x in [
+                    dataset_sample["uid"] for dataset_sample in data[i : batch_size + i]
+                ]
+            ]
+            if i % (batch_size * 10) == 0:
+                print(i)
+            dataset_samples = {}
+            dataset_samples["dataset_samples"] = data[i : batch_size + i]
+            headers = {
+                "accept": "application/json",
+            }
+
+            responses = requests.post(
+                f"http://{ip}:80/model/batch_evaluation",
+                headers=headers,
+                json=dataset_samples,
+            )
+            responses = json.loads(responses.text)
+            for i, response in enumerate(responses):
+                response["id"] = uid[i]
+                response["signature"] = secrets.token_hex(15)
+            final_predictions = final_predictions + responses
+        return final_predictions
 
     def get_scoring_datasets(self, task_id: int):
         centralized_host = os.getenv("CENTRALIZED_URL")
@@ -145,8 +188,17 @@ class Evaluation:
                 final_datasets.append(final_dataset)
         return final_datasets
 
-    def heavy_prediction(self, datasets: list, task_code: str, model: str):
-        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(model)
+    def validate_input_schema(self, schema: list, dataset: list):
+        for param in schema:
+            if not (all([param in d for d in dataset])):
+                raise Exception(f"Missing param: {param}")
+
+    def build_single_request(self, schema: list, sample_dataset: dict):
+        return {param: sample_dataset.get(param) for param in schema}
+
+    def heavy_prediction(
+        self, datasets: list, task_code: str, ip: str, model_name: str, folder_name: str
+    ):
         final_dict_prediction = {}
         start_prediction = time.time()
         num_samples = 0
@@ -160,7 +212,6 @@ class Evaluation:
             responses = []
             schema = self.require_fields_task(folder_name, model_name)
             self.validate_input_schema(schema, dataset_samples)
-            print(len(dataset_samples))
             responses = self.batch_evaluation_ecs(ip, dataset_samples)
             predictions = "./app/models/{}/datasets/{}.out".format(
                 folder_name, dataset["dataset"]
@@ -188,12 +239,158 @@ class Evaluation:
         return (
             final_dict_prediction,
             dataset_id,
-            arn_service,
             model_name,
             seconds_time_prediction,
             num_samples,
             folder_name,
         )
+
+    def get_memory_utilization(self, model_name: str) -> float:
+        while True:
+            memory_utilization = self.cloud_watch.get_metric_statistics(
+                Namespace="AWS/ECS",
+                MetricName="CPUUtilization",
+                Dimensions=[
+                    {
+                        "Name": "ClusterName",
+                        "Value": os.getenv("CLUSTER_TASK_EVALUATION"),
+                    },
+                    {"Name": "ServiceName", "Value": model_name},
+                ],
+                StartTime=datetime.datetime.utcnow() - datetime.timedelta(hours=0.5),
+                EndTime=datetime.datetime.utcnow(),
+                Period=36000,
+                Statistics=["Average"],
+            )
+            if len(memory_utilization["Datapoints"]) > 0:
+                return memory_utilization["Datapoints"][0]["Average"]
+            else:
+                time.sleep(15)
+
+    def get_throughput(self, num_samples: int, seconds_time_prediction: float):
+        return round(num_samples / seconds_time_prediction, 2)
+
+    def test_eval(self, task: str, model_s3_zip: str, model_id: int) -> dict:
+        tasks = self.get_model_id_and_task_code(task)
+        delta_metrics_task = self.get_task_configuration(tasks["id"])["delta_metrics"]
+        delta_metrics_task = [
+            delta_metric_task["type"] for delta_metric_task in delta_metrics_task
+        ]
+        jsonl_scoring_datasets = self.get_scoring_datasets(tasks["id"])
+        datasets = self.downloads_scoring_datasets(
+            jsonl_scoring_datasets,
+            self.s3_bucket,
+            tasks["task_code"],
+            delta_metrics_task,
+            model_s3_zip,
+        )
+        rounds = list(
+            map(
+                int,
+                {
+                    current_round
+                    for rounds in datasets
+                    for current_round in str(rounds["round_id"])
+                },
+            )
+        )
+        new_scores = []
+        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
+            model_s3_zip
+        )
+        for current_round in rounds:
+            round_datasets = [
+                dataset for dataset in datasets if dataset["round_id"] == current_round
+            ]
+            (
+                prediction_dict,
+                dataset_id,
+                model_name,
+                minutes_time_prediction,
+                num_samples,
+                folder_name,
+            ) = self.heavy_prediction(
+                round_datasets, tasks["task_code"], ip, model_name, folder_name
+            )
+
+            memory = self.get_memory_utilization(model_name)
+            throughput = self.get_throughput(num_samples, minutes_time_prediction)
+            data_dict = {}
+            for data_version, data_types in prediction_dict.items():
+                for data_type in data_types:
+                    data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
+                        prediction_dict[data_version][data_type]
+                    )
+            perturb_exists = (
+                "fairness_predictions" in data_dict
+                or "robustness_predictions" in data_dict
+            )
+            task_configuration = yaml.safe_load(
+                self.get_by_id(tasks["id"])["config_yaml"]
+            )
+            input_formatter = InputFormatter(task_configuration)
+            formatted_dict = {}
+            for data_type in data_dict:
+                formatted_key = f"formatted_{data_type}"
+                grouped_key = f"grouped_{data_type}"
+                if "dataset" in data_type:
+                    formatted_dict[formatted_key] = input_formatter.format_labels(
+                        data_dict[data_type]
+                    )
+                    formatted_dict[grouped_key] = input_formatter.group_labels(
+                        formatted_dict[formatted_key]
+                    )
+                elif "predictions" in data_type:
+                    formatted_dict[formatted_key] = input_formatter.format_predictions(
+                        data_dict[data_type]
+                    )
+                    formatted_dict[grouped_key] = input_formatter.group_predictions(
+                        formatted_dict[formatted_key]
+                    )
+            evaluator = Evaluator(task_configuration)
+            main_metric = evaluator.evaluate(
+                formatted_dict["formatted_base_predictions"],
+                formatted_dict["formatted_base_dataset"],
+            )
+            delta_metrics = {}
+            if perturb_exists:
+                delta_metrics = evaluator.evaluate_delta_metrics(
+                    formatted_dict.get("grouped_base_predictions"),
+                    formatted_dict.get("grouped_robustness_predictions"),
+                    formatted_dict.get("grouped_fairness_predictions"),
+                )
+            metric = task_configuration["perf_metric"]["type"]
+            final_scores = {
+                str(metric): main_metric,
+                "fairness": delta_metrics.get("fairness"),
+                "robustness": delta_metrics.get("robustness"),
+                "memory": memory,
+                "throughput": throughput,
+            }
+            round_info = self.get_round_info_by_round_and_task(
+                tasks["id"], current_round
+            )
+
+            new_score = {
+                str(metric): main_metric["perf"],
+                "perf": main_metric["perf"],
+                "pretty_perf": main_metric["pretty_perf"],
+                "fairness": final_scores["fairness"],
+                "robustness": final_scores["robustness"],
+                "mid": model_id,
+                "r_realid": round_info["id"],
+                "did": dataset_id,
+                "memory_utilization": final_scores["memory"],
+                "examples_per_second": final_scores["throughput"],
+            }
+
+            new_score["metadata_json"] = json.dumps(new_score)
+
+            self.post_descentralized_scores(new_score)
+            new_scores.append(new_score)
+        self.builder.delete_ecs_service(arn_service)
+        shutil.rmtree(f"./app/models/{folder_name}")
+        return new_scores
 
     def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
         tasks = self.get_model_id_and_task_code(task)
@@ -287,7 +484,7 @@ class Evaluation:
                 "examples_per_second": final_scores["throughput"],
             }
 
-            self.post_scores(new_score)
+            self.post_descentralized_scores(new_score)
             new_scores.append(new_score)
 
             shutil.rmtree("./app/{}".format(model_s3_zip.split(".")[0]))
