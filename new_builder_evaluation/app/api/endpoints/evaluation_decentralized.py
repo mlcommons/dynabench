@@ -15,10 +15,8 @@ class ModelSingleInput(BaseModel):
 router = APIRouter()
 
 
-@router.get("/test_des")
-async def test_des():
+@router.get("/")
+async def hello():
     model = Evaluation()
-    api = model.test_eval(
-        "sentiment", "models/sentiment/123-julian_sentiment.zip", 3333
-    )
+    api = model.trigger_sqs()
     return {"api": api}
