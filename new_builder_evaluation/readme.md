@@ -12,8 +12,9 @@
    1. [Establishing AWS region](#region)
    2. [Creating user](#user)
    3. [Creating S3 bucket](#bucket)
-   4. [Creating ECS cluster](#cluster)
-   5. [Create SQS queue](#sqs)
+   4. [Creating Role arn](#execution_role)
+   5. [Creating ECS cluster](#cluster)
+   6. [Create SQS queue](#sqs)
 3. [Starting the app](#start_app)
    1. [Download the project](#download)
    2. [Access to the correct folder](#folders)
@@ -328,7 +329,7 @@ In trusted relationships, enter the following policy:
 Make sure you store the name of the role because you'd have to add it to a .env file
 example variable name:
 
-- EXECUTION_ROLE_ARN=arn:aws:iam::426765194657:role/dynabench_arn
+- EXECUTION_ROLE_ARN=arn:aws:iam::42676594657:role/dynabench_arn
 
 Steps:
 
@@ -393,6 +394,7 @@ Steps:
    ![queue name](img/queue%20name.png)
 
 3. click on create queue
+
    ![create queue](img/create%20queue.png)
 
 ## Starting the app <a name="start_app"></a>
@@ -433,19 +435,17 @@ sudo nano app/domain/.env
 
 Add all the variables that you store in the previous steps and you will end up with a file like the following:
 
-``` bash
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=
-AWS_S3_BUCKET=
-CLUSTER_TASK_EVALUATION=
-SUBNET_1=
-SUBNET_2=
-SECURITY_GROUP=
-EXECUTION_ROLE_ARN=
-dynabench_arn=
-SQS_NEW_BUILDER=
-CENTRALIZED_URL=*****insert******
+- AWS_ACCESS_KEY_ID=[get here](#user)
+- AWS_SECRET_ACCESS_KEY=[get here](#user)
+- AWS_REGION=[get here](#region)
+- AWS_S3_BUCKET=[get here](#bucket)
+- CLUSTER_TASK_EVALUATION=[get here](#cluster)
+- SUBNET_1=[get here](#cluster)
+- SUBNET_2=[get here](#cluster)
+- SECURITY_GROUP=[get here](#cluster)
+- EXECUTION_ROLE_ARN=[get here](#execution_role)
+- SQS_NEW_BUILDER=[get here](#sqs)
+- CENTRALIZED_URL=*****insert*****
 ```
 
 ### Run the API <a name="run_api"></a>
