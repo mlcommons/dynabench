@@ -44,6 +44,7 @@ import { FLORES_TASK_CODES } from "./FloresTaskPage";
 const EvalStatusRow = ({
   status,
   downloadLog,
+  downloadPrediction,
   isModelOwner,
   isAdminOrTaskOwner,
   modelId,
@@ -108,6 +109,62 @@ const EvalStatusRow = ({
                 )}
               </Button>
             )}{" "}
+            {(isAdminOrTaskOwner ||
+              (status.dataset_log_access_type === "user" && isModelOwner)) && (
+              <Button
+                variant="outline-primary"
+                size="sm"
+                disabled={showSpinner}
+                onClick={() => {
+                  setShowSpinner(
+                    true,
+                    downloadPrediction(modelId, status.dataset_id).then(
+                      (result) => {
+                        setShowSpinner(false);
+                      },
+                      (error) => {
+                        console.log(error);
+                        setShowSpinner(false);
+                      }
+                    )
+                  );
+                }}
+              >
+                {showSpinner ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <i className="fas fa-file-download"></i>
+                )}
+              </Button>
+            )}
+            {(isAdminOrTaskOwner ||
+              (status.dataset_log_access_type === "user" && isModelOwner)) && (
+              <Button
+                variant="outline-primary"
+                size="sm"
+                disabled={showSpinner}
+                onClick={() => {
+                  setShowSpinner(
+                    true,
+                    downloadPrediction(modelId, status.dataset_id).then(
+                      (result) => {
+                        setShowSpinner(false);
+                      },
+                      (error) => {
+                        console.log(error);
+                        setShowSpinner(false);
+                      }
+                    )
+                  );
+                }}
+              >
+                {showSpinner ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <i className="fas fa-file-download"></i>
+                )}
+              </Button>
+            )}
             <span>
               <EvaluationStatus evaluationStatus={status.evaluation_status} />
             </span>
@@ -121,6 +178,7 @@ const EvalStatusRow = ({
 const ScoreRow = ({
   score,
   downloadLog,
+  downloadPrediction,
   isModelOwner,
   isAdminOrTaskOwner,
   modelId,
@@ -212,6 +270,34 @@ const ScoreRow = ({
                 )}
               </Button>
             )}{" "}
+            {(isAdminOrTaskOwner ||
+              (score.dataset_log_access_type === "user" && isModelOwner)) && (
+              <Button
+                variant="outline-primary"
+                size="sm"
+                disabled={showSpinner}
+                onClick={() => {
+                  setShowSpinner(
+                    true,
+                    downloadPrediction(modelId, score.dataset_id).then(
+                      (result) => {
+                        setShowSpinner(false);
+                      },
+                      (error) => {
+                        console.log(error);
+                        setShowSpinner(false);
+                      }
+                    )
+                  );
+                }}
+              >
+                {showSpinner ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  <i className="fas fa-file-download"></i>
+                )}
+              </Button>
+            )}
             <span>
               {expanded ? (
                 <b>
@@ -242,6 +328,16 @@ const ScoreRow = ({
                 >
                   <span>
                     {parseFloat(perf_and_tag.perf_dict.chrf_pp).toFixed(2) +
+                      (score.perf_std !== null ? "\xB1" + score.perf_std : "")}
+                    &nbsp;
+                  </span>
+                </td>
+                <td
+                  className="text-right "
+                  key={`score-${score.dataset_name}-${perf_and_tag.tag}-overall`}
+                >
+                  <span>
+                    {parseFloat(perf_and_tag.perf_dict.sp_bleu).toFixed(2) +
                       (score.perf_std !== null ? "\xB1" + score.perf_std : "")}
                     &nbsp;
                   </span>
@@ -797,6 +893,7 @@ ${latexTableContent}
                         key={index}
                         score={score}
                         downloadLog={this.context.api.exportDatasetLog}
+                        downloadPrediction={this.context.api.exportPrediction}
                         isModelOwner={isModelOwner}
                         isAdminOrTaskOwner={this.state.isAdminOrTaskOwner}
                         modelId={this.state.modelId}
@@ -807,6 +904,7 @@ ${latexTableContent}
                         key={index}
                         status={status}
                         downloadLog={this.context.api.exportDatasetLog}
+                        downloadPrediction={this.context.api.exportPrediction}
                         isModelOwner={isModelOwner}
                         isAdminOrTaskOwner={this.state.isAdminOrTaskOwner}
                         modelId={this.state.modelId}
@@ -831,6 +929,7 @@ ${latexTableContent}
                         key={index}
                         score={score}
                         downloadLog={this.context.api.exportDatasetLog}
+                        downloadPrediction={this.context.api.exportPrediction}
                         isModelOwner={isModelOwner}
                         isAdminOrTaskOwner={this.state.isAdminOrTaskOwner}
                         modelId={this.state.modelId}
@@ -842,6 +941,7 @@ ${latexTableContent}
                           key={index}
                           status={status}
                           downloadLog={this.context.api.exportDatasetLog}
+                          downloadPrediction={this.context.api.exportPrediction}
                           isModelOwner={isModelOwner}
                           isAdminOrTaskOwner={this.state.isAdminOrTaskOwner}
                           modelId={this.state.modelId}

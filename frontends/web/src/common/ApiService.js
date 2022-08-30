@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -647,6 +653,15 @@ export default class ApiService {
   createRound(tid) {
     return this.fetch(`${this.domain}/tasks/create_round/${tid}`, {
       method: "POST",
+    });
+  }
+
+  exportPrediction(mid, did) {
+    return this.fetch(`${this.domain}/models/predictions/${mid}/${did}`, {
+      method: "GET",
+    }).then((res) => {
+      res = new TextEncoder("utf-8").encode(JSON.stringify(res));
+      return download(res, "log.json", "text/json");
     });
   }
 
