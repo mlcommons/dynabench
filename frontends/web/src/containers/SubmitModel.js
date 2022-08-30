@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -9,6 +15,8 @@ import { Button, Col, Container, Row } from "react-bootstrap";
 import UserContext from "../containers/UserContext";
 import "./SubmitModel.css";
 import axios from "axios";
+import CreateModel from "../components/Forms/CreateModel";
+import Modal from "react-bootstrap/Modal";
 
 const useUploadFile = () => {
   const context = useContext(UserContext);
@@ -88,6 +96,10 @@ const SubmitModel = (props) => {
     text: "",
   });
   const [dynalab, setDynalab] = useState("");
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   const { progress, send } = useUploadFile();
 
@@ -257,12 +269,17 @@ const SubmitModel = (props) => {
                       <Col className="text-center">
                         <center>
                           <Button
-                            variant="primary"
+                            onClick={() => handleShow(true)}
                             className="center-submit-model"
-                            onClick={handleUploadModel}
                           >
                             <i className="fas fa-edit"></i> Upload model
                           </Button>
+                          <Modal show={show} onHide={handleClose}>
+                            <CreateModel
+                              handleClose={handleClose}
+                              handleSubmitModel={handleSubmitModel}
+                            />
+                          </Modal>
                         </center>
                       </Col>
                     </Row>
