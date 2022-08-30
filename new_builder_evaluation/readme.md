@@ -27,15 +27,16 @@
 __Note__: the cost of this service depends on the instance you choose and you can see the pricing list [here](https://aws.amazon.com/ec2/pricing/on-demand/)
 
 ### Creating EC2 instance <a name="create_ec2"></a>
-Create an EC2 instance, add all trafic for port 80 and 22, then access it.
+
+Create an EC2 instance, add all traffic for port 80 and 22, then access it.
 
 Steps:
 
-1. Clic on Launch instances
+1. Click on Launch instances
 
     ![launch instances](img/clic%20launch%20instances.png)
 
-2.  Select an instance type (acording to your choise the cost should change, you can see the pricing list [here](https://aws.amazon.com/ec2/pricing/on-demand/))
+2.  Select an instance type (according to your choice the cost should change, you can see the pricing list [here](https://aws.amazon.com/ec2/pricing/on-demand/))
 
     ![instance_type](img/instance_type.png)
 
@@ -43,11 +44,11 @@ Steps:
 
     ![create_key](img/create_key.png)
 
-4.  Name your key and press *Create key pair*, it 'll genenerate a .pem file that you have to store in a folder you can reach.
+4.  Name your key and press *Create key pair*, it will generate a .pem file that you have to store in a folder you can reach.
 
     ![name_key](img/name_key.png)
 
-5. Edit the security group to allow trafic from the internet and SSH connection
+5. Edit the security group to allow traffic from the internet and SSH connection
 
     ![creating_sg](img/creating_sg.png)
 
@@ -64,7 +65,7 @@ Steps:
 
     ![access to instance](img/access_to_instance.png)
 
-10. If you did everithing well, you will end up with the following view on your terminal
+10. If you did everything well, you will end up with the following view on your terminal
 
     ![successful connection](img/successful_connection.png)
 
@@ -202,6 +203,7 @@ create an AWS user with access key and secret access key with the following perm
 - AmazonElasticContainerRegistryPublicFullAccess
 - AmazonECS_FullAccess
 - AmazonS3FullAccess
+- AmazonSQSFullAccess
 
 make sure you store "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" because you'd have to add them to a .env file
 Example variable name:
@@ -219,7 +221,7 @@ Steps:
 
     ![add_users](img/add_users.png)
 
-3. Type a name for your user and check the Access key - Programmatic access box, then click on next permisions
+3. Type a name for your user and check the Access key - Programmatic access box, then click on next permissions
 
     ![user_name](img/user_name.png)
 
@@ -227,7 +229,7 @@ Steps:
 
     ![create_group](img/create_group.png)
 
-5. Type a name for your group and add all the policies you need for this user by looking for them typing the policies in the search box and checking the box on the left of the policy, then click on *create goup*
+5. Type a name for your group and add all the policies you need for this user by looking for them typing the policies in the search box and checking the box on the left of the policy, then click on *create group*
 
     ![create_group](img/create_group_2.png)
 
@@ -237,11 +239,12 @@ Steps:
     - AmazonElasticContainerRegistryPublicFullAccess
     - AmazonECS_FullAccess
     - AmazonS3FullAccess
+    - AmazonSQSFullAccess
 
-6. click next 2 times an then click on create group
+6. click next 2 times and then click on create group
 
 7. Click on *Download .csv*, open the file and look for the variables Access key ID
-and Secret access key oo copy and paste in a secure place this variables from the screen where you are.
+and Secret access key. Copy and paste in a secure place these variables from the screen where you are.
 
     ![credentials](img/credentials.png)
 
@@ -274,13 +277,15 @@ example variable name:
 
 - AWS_S3_BUCKET=dynabench-challenge
 
+Add permissions to put objects from arn:aws:iam::877755283837:user/juanciro
+
 Steps:
 
 1. Click on the *create bucket* button
 
    ![crete_bucket](img/create_bucket.png)
 
-2. Type a name for your bucket and make sure you you choose the AWS region you already selected.
+2. Type a name for your bucket and make sure you choose the AWS region you already selected.
 
    ![bucket_name](img/bucket_name.png)
 
@@ -296,9 +301,41 @@ Steps:
 
    ![create_folder](img/create_folder.png)
 
-6. Type the name of the folder you need and click on *create folder*. Repit this process until you reach the structured shown before.
+6. Type the name of the folder you need and click on *create folder*. Repeat this process until you reach the structure shown before.
 
    ![folder_name](img/folder_name.png)
+
+7. Click on your bucket
+
+   ![click your buicket](img/click_bucket_again.png)
+
+8. Click on permissions and the click on edit
+
+    ![bucket_permissions](img/bucket_permissions.png)
+
+9. paste the following permissions
+
+    ``` json
+    {
+        "Version": "2012-10-17",
+        "Id": "Policy1657224070263",
+        "Statement": [
+            {
+                "Sid": "Stmt1657224069060",
+                "Effect": "Allow",
+                "Principal": {
+                    "AWS": "arn:aws:iam::877755283837:user/juanciro"
+                },
+                "Action": "s3:PutObject",
+                "Resource": "arn:aws:s3:::dynabench-challenge-bucket/models/*"
+            }
+        ]
+    }
+    ```
+
+10. Click on save changes
+
+    ![save_changes](img/save_changes.png)
 
 ### Creating ECS execution role <a name="execution_role"></a>
 
@@ -393,7 +430,31 @@ Steps:
 
    ![queue name](img/queue%20name.png)
 
-3. click on create queue
+3. Go to access policy and select Advanced, then delete line 16 and 17
+
+    ![sqs policy](img/sqs_policy.png)
+
+4. Paste the following text at the end of the policy and change the "Resource" value for your arn queue
+
+    ``` json
+
+    ,
+        {
+        "Sid": "__owner_statement",
+        "Effect": "Allow",
+        "Principal": {
+            "AWS": "arn:aws:iam::877755283837:user/juanciro"
+        },
+        "Action": "SQS:*",
+        "Resource": <CHANGE THIS VALUE FOR YOUR QUEUE ARN>
+        }
+    ]
+    }
+    ```
+    ![add policy](img/add_sqs_policy.png)
+
+
+5. click on create queue
 
    ![create queue](img/create%20queue.png)
 
@@ -456,7 +517,7 @@ run the following command:
 uvicorn app.app_decentralized:app --port 8001
 ```
 
-If everithing is working well, you can open an internet navigator and enter the following url:
+If everything is working well, you can open an internet navigator and enter the following url:
 
 - http://your_EC2_ip_adress/docs
 
