@@ -24,7 +24,7 @@
 
 ## Setting up EC2 instance<a name="ec2"></a>
 
-__Note__: the cost of this service depends on the instance you choose and you can see the pricing list [here](https://aws.amazon.com/ec2/pricing/on-demand/)
+__Note__: The cost of this service depends on the instance you choose and you can see the pricing list [here](https://aws.amazon.com/ec2/pricing/on-demand/).
 
 ### Creating EC2 instance <a name="create_ec2"></a>
 
@@ -32,15 +32,15 @@ Create an EC2 instance, add all traffic for port 80 and 22, then access it.
 
 Steps:
 
-1. Click on Launch instances
+1. Click on Launch instances.
 
     ![launch instances](img/clic%20launch%20instances.png)
 
-2.  Select an instance type (according to your choice the cost should change, you can see the pricing list [here](https://aws.amazon.com/ec2/pricing/on-demand/))
+2.  Select an instance type (according to your choice the cost should change, you can see the pricing list [here](https://aws.amazon.com/ec2/pricing/on-demand/)).
 
     ![instance_type](img/instance_type.png)
 
-3.  Create a new key to connect to your instance
+3.  Create a new key to connect to your instance.
 
     ![create_key](img/create_key.png)
 
@@ -48,30 +48,33 @@ Steps:
 
     ![name_key](img/name_key.png)
 
-5. Edit the security group to allow traffic from the internet and SSH connection
+5. Edit the security group to allow traffic from the internet and SSH connection.
 
     ![creating_sg](img/creating_sg.png)
 
 6. Rename the security group and make sure you have available port 80 and port 22, if you don't, press the *Add security group rule* button and look for bouth rules.
+
     ![add_sg_rules](img/add_sg_rules.png)
 
-7. Press the *Launch instance* button on the lower right side
+7. Press the *Launch instance* button on the lower right side.
+
     ![launch_instance](img/launch_instance.png)
 
-8.  Go back to EC2, select your instance and click on *Connect*
+8. Go back to EC2, select your instance and click on *Connect*.
+
     ![connect instance](img/connect_instance.png)
 
-9.  Click on ssh client, open a new terminal on your computer, access to the folder where you store your .pem file generated on step 6 and run the *chmod* and then run the *ssh* command
+9. Click on ssh client, open a new terminal on your computer, access to the folder where you store your .pem file generated on step 6 and run the *chmod* and then run the *ssh* command.
 
     ![access to instance](img/access_to_instance.png)
 
-10. If you did everything well, you will end up with the following view on your terminal
+10. If you did everything well, you will end up with the following view on your terminal.
 
     ![successful connection](img/successful_connection.png)
 
 ### Installing git <a name="git"></a>
 
-Install git with the following command
+Install git with the following command.
 
 ``` bash
 sudo yum install git
@@ -79,7 +82,7 @@ sudo yum install git
 
 ### Installing docker <a name="docker"></a>
 
-Install and run docker with the following commands
+Install and run docker with the following commands.
 
 ``` bash
 sudo yum install docker -y
@@ -92,13 +95,13 @@ After installing docker, make sure you have permissions to run docker commands b
 docker images
 ```
 
-if you run the previous command and you end up with the following message, run the next command.
+If you run the previous command and you end up with the following message, run the next command.
 
 ``` bash
 Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/images/json": dial unix /var/run/docker.sock: connect: permission denied
 ```
 
-Command to run
+Command to run:
 
 ``` bash
 sudo chmod 777 /var/run/docker.sock
@@ -106,7 +109,7 @@ sudo chmod 777 /var/run/docker.sock
 
 ### Installing nginx <a name="nginx"></a>
 
-Install nginx with the following command
+Install nginx with the following command:
 
 ``` bash
 sudo amazon-linux-extras install nginx1
@@ -120,7 +123,7 @@ Open the nginx.conf file with the following command:
 sudo nano /etc/nginx/nginx.conf
 ```
 
-Replace this file with the following content
+Replace this file with the following content:
 
 ``` none
 user nginx;
@@ -163,17 +166,17 @@ http {
 }
 ```
 
-Make sure you update the variable __server_name__ located in the __server__ key in the previous text
+Make sure you update the variable __server_name__ located in the __server__ key in the previous text.
 
-example:
+Example:
 
-server_name  32.268.128.194;
+server_name  32.268.128.174;
 
 In order to get your instance IP adress, open EC2 in your AWS account and click on your instance, then copy the number on the Public IPv4 address part.
 
 ![ip_adress](img/ip_adress.png)
 
-Then restart nginx with the following command
+Then restart nginx with the following command:
 
 ``` bash
 sudo service nginx restart
@@ -183,21 +186,21 @@ sudo service nginx restart
 
 ### Establishing AWS region <a name="region"></a>
 
-__Note__: This service is free
+__Note__: This service is free.
 
 Define a region where you are going to deploy all these services.
-make sure you store the name because you are going to add it to a .env file
+Make sure you store the name because you are going to add it to a .env file.
 Example variable name:
 
 - AWS_REGION=us-east-1
 
-If you don't know how to see a list of the regions, check the following [link](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html)
+If you don't know how to see a list of the regions, check the following [link](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
 ### Creating user <a name="user"></a>
 
-__Note__: This service is cree
+__Note__: This service is cree.
 
-create an AWS user with access key and secret access key with the following permissions:
+Create an AWS user with access key and secret access key with the following permissions:
 
 - AmazonEC2ContainerRegistryFullAccess
 - AmazonElasticContainerRegistryPublicFullAccess
@@ -205,7 +208,7 @@ create an AWS user with access key and secret access key with the following perm
 - AmazonS3FullAccess
 - AmazonSQSFullAccess
 
-make sure you store "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" because you'd have to add them to a .env file
+Make sure you store "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" because you'd have to add them to a .env file.
 Example variable name:
 
 - AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY
@@ -213,23 +216,23 @@ Example variable name:
 
 Steps:
 
-1. On the left part of the screen click on *Users*
+1. On the left part of the screen click on *Users*.
 
     ![users](img/users.png)
 
-2. On the right part of the screen click on *Add users*
+2. On the right part of the screen click on *Add users*.
 
     ![add_users](img/add_users.png)
 
-3. Type a name for your user and check the Access key - Programmatic access box, then click on next permissions
+3. Type a name for your user and check the Access key - Programmatic access box, then click on next permissions:
 
     ![user_name](img/user_name.png)
 
-4. Click on create group
+4. Click on create group.
 
     ![create_group](img/create_group.png)
 
-5. Type a name for your group and add all the policies you need for this user by looking for them typing the policies in the search box and checking the box on the left of the policy, then click on *create group*
+5. Type a name for your group and add all the policies you need for this user by looking for them typing the policies in the search box and checking the box on the left of the policy, then click on *create group*.
 
     ![create_group](img/create_group_2.png)
 
@@ -241,18 +244,17 @@ Steps:
     - AmazonS3FullAccess
     - AmazonSQSFullAccess
 
-6. click next 2 times and then click on create group
+6. Click next 2 times and then click on create group.
 
-7. Click on *Download .csv*, open the file and look for the variables Access key ID
-and Secret access key. Copy and paste in a secure place these variables from the screen where you are.
+7. Click on *Download .csv*, open the file and look for the variables Access key ID and Secret access key. Copy and paste in a secure place these variables from the screen where you are.
 
     ![credentials](img/credentials.png)
 
 ### Creating S3 bucket <a name="bucket"></a>
 
-__Note__: The cost for this service depends on the size of the files that you upload but creating it is free
+__Note__: The cost for this service depends on the size of the files that you upload but creating it is free.
 
-Create an S3 bucket that contains the following structure
+Create an S3 bucket that contains the following structure.
 
 ``` none
 bucket_name (your bucket name)
@@ -281,7 +283,7 @@ Add permissions to put objects from arn:aws:iam::877755283837:user/juanciro
 
 Steps:
 
-1. Click on the *create bucket* button
+1. Click on the *create bucket* button.
 
    ![crete_bucket](img/create_bucket.png)
 
@@ -289,15 +291,15 @@ Steps:
 
    ![bucket_name](img/bucket_name.png)
 
-3. Scroll down and click on *Create bucket*
+3. Scroll down and click on *Create bucket*.
 
    ![create_bucket](img/create_bucket_2.png)
 
-4. Click on your bucket
+4. Click on your bucket.
 
    ![click_bucket](img/click_bucket.png)
 
-5. Click on *create folder*
+5. Click on *create folder*.
 
    ![create_folder](img/create_folder.png)
 
@@ -305,15 +307,15 @@ Steps:
 
    ![folder_name](img/folder_name.png)
 
-7. Click on your bucket
+7. Click on your bucket.
 
    ![click your buicket](img/click_bucket_again.png)
 
-8. Click on permissions and the click on edit
+8. Click on permissions and the click on edit.
 
     ![bucket_permissions](img/bucket_permissions.png)
 
-9. paste the following permissions
+9. paste the following permissions.
 
     ``` json
     {
@@ -333,13 +335,13 @@ Steps:
     }
     ```
 
-10. Click on save changes
+10. Click on save changes.
 
     ![save_changes](img/save_changes.png)
 
 ### Creating ECS execution role <a name="execution_role"></a>
 
-__Note__: This service is free
+__Note__: This service is free.
 
 Create a role with the following permissions:
 
@@ -363,36 +365,37 @@ In trusted relationships, enter the following policy:
 }
 ```
 
-Make sure you store the name of the role because you'd have to add it to a .env file
-example variable name:
+Make sure you store the name of the role because you'd have to add it to a .env file.
+
+Example variable name:
 
 - EXECUTION_ROLE_ARN=arn:aws:iam::42676594657:role/dynabench_arn
 
 Steps:
 
-1. On the left side of the screen, click on *roles*
+1. On the left side of the screen, click on *roles*.
 
    ![roles](img/roles.png)
 
-2. On the up right corner of the screen select *create role*
+2. On the up right corner of the screen select *create role*.
 
    ![create_role](img/cretate_role.png)
 
-3. Click on *Custom trust policy* and paste the json showed previosly and click on *next*
+3. Click on *Custom trust policy* and paste the json showed previosly and click on *next*.
 
    ![policy](img/policy.png)
 
-4. Search *AmazonECSTaskExecutionRolePolicy* and add the policy, then click on the *next* button
+4. Search *AmazonECSTaskExecutionRolePolicy* and add the policy, then click on the *next* button.
 
    ![next_button](img/role_policy.png)
 
-5. Type a role name and click on *create role*
+5. Type a role name and click on *create role*.
 
    ![create_role](img/role_name.png)
 
 ### Creating ECS cluster <a name="cluster"></a>
 
-Create and ECS cluster with 2 subnets, a new VPC and a new security group
+Create and ECS cluster with 2 subnets, a new VPC and a new security group.
 Make sure you store the name of your cluster and name of the 2 subnets because you have to add them to the .env file
 example variables names:
 
@@ -404,37 +407,37 @@ SUBNET_2=YOUR_SUBNET_2
 
 Steps:
 
-1. Click on *Clusters* and then click on *create cluster*
+1. Click on *Clusters* and then click on *create cluster*.
 
    ![cluser_create](img/create_cluster.png)
 
-2. Click on *EC2 Linux + Networking* and then on *next step*
+2. Click on *EC2 Linux + Networking* and then on *next step*.
 
    ![cluster_networking](img/cluster_networking.png)
 
-3. Type a name for your cluster and select the instance according to your  budget and needs then click on create
+3. Type a name for your cluster and select the instance according to your  budget and needs then click on create.
 
    ![cluster_definition](img/cluster_definition.png)
 
 ### Create SQS queue <a name="sqs"></a>
 
-Create an SQS queue and save the name of the queue because you have to store it on .env file
+Create an SQS queue and save the name of the queue because you have to store it on .env file.
 
 Steps:
 
-1. Click on create queue
+1. Click on create queue.
 
    ![queue](img/sqs%20queue.png)
 
-2. Choose a name for your queue
+2. Choose a name for your queue.
 
    ![queue name](img/queue%20name.png)
 
-3. Go to access policy and select Advanced, then delete line 16 and 17
+3. Go to access policy and select Advanced, then delete line 16 and 17.
 
     ![sqs policy](img/sqs_policy.png)
 
-4. Paste the following text at the end of the policy and change the "Resource" value for your arn queue
+4. Paste the following text at the end of the policy and change the "Resource" value for your arn queue.
 
     ``` json
 
@@ -451,10 +454,10 @@ Steps:
     ]
     }
     ```
+
     ![add policy](img/add_sqs_policy.png)
 
-
-5. click on create queue
+5. Click on create queue.
 
    ![create queue](img/create%20queue.png)
 
@@ -486,7 +489,7 @@ pip3 install -r requirements.txt
 
 ### Creating .env file <a name="env"></a>
 
-At this point you have stored 9 variables, but you are missing just one called *CENTRALIZED_URL*. The value for this variable is ****insert****
+At this point you have stored 9 variables, but you are missing just one called *CENTRALIZED_URL*. The value for this variable is builder.dynabench.org
 
 Create the .env file by running the following command:
 
@@ -506,12 +509,11 @@ Add all the variables that you store in the previous steps and you will end up w
 - SECURITY_GROUP=[get here](#cluster)
 - EXECUTION_ROLE_ARN=[get here](#execution_role)
 - SQS_NEW_BUILDER=[get here](#sqs)
-- CENTRALIZED_URL=*****insert*****
-```
+- CENTRALIZED_URL=builder.dynabench.org
 
 ### Run the API <a name="run_api"></a>
 
-run the following command:
+Run the following command:
 
 ``` bash
 uvicorn app.app_decentralized:app --port 8001
