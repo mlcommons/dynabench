@@ -115,11 +115,11 @@ Open your browser and access to localhost:8000/docs. In there, a FastAPI interfa
 
 2. Fill the request body with your desired input, and click the execute button.
 
-    ![fill request](img/filll_request.png)
+    ![fill request](img/fill_request.png)
 
 3. Check the response code and the output of your model, if everything is OK you will get a 200 code and the response of your model according to the example you sent before.
 
-    ![fill request](img/filll_request.png)
+    ![fill request](img/check_output.png)
 
 4. Do the same for the batch_evaluation endpoint.
 
