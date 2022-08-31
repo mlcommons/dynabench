@@ -17,7 +17,7 @@
    6. [Create SQS queue](#sqs)
 3. [Starting the app](#start_app)
    1. [Download the project](#download)
-   2. [Access to the correct folder](#folders)
+   2. [Access the correct folder](#folders)
    3. [Install requirements](#requirements)
    4. [Creating .env file](#env)
    5. [Run the API](#run_api)
@@ -52,7 +52,7 @@ Steps:
 
     ![creating_sg](img/creating_sg.png)
 
-6. Rename the security group and make sure you have available port 80 and port 22, if you don't, press the *Add security group rule* button and look for bouth rules.
+6. Rename the security group and make sure you have available port 80 and port 22, if you don't, press the *Add security group rule* button and look for both rules.
 
     ![add_sg_rules](img/add_sg_rules.png)
 
@@ -64,7 +64,7 @@ Steps:
 
     ![connect instance](img/connect_instance.png)
 
-9. Click on ssh client, open a new terminal on your computer, access to the folder where you store your .pem file generated on step 6 and run the *chmod* and then run the *ssh* command.
+9. Click on ssh client, open a new terminal on your computer, access the folder where you store your .pem file generated on step 6 and run the *chmod* and then run the *ssh* command.
 
     ![access to instance](img/access_to_instance.png)
 
@@ -172,7 +172,7 @@ Example:
 
 server_name  32.268.128.174;
 
-In order to get your instance IP adress, open EC2 in your AWS account and click on your instance, then copy the number on the Public IPv4 address part.
+In order to get your instance IP address, open EC2 in your AWS account and click on your instance, then copy the number on the Public IPv4 address section.
 
 ![ip_adress](img/ip_adress.png)
 
@@ -194,13 +194,13 @@ Example variable name:
 
 - AWS_REGION=us-east-1
 
-If you don't know how to see a list of the regions, check the following [link](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
+If you don't know how to see the list of regions, check the following [link](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html).
 
 ### Creating user <a name="user"></a>
 
-__Note__: This service is cree.
+__Note__: This service is free.
 
-Create an AWS user with access key and secret access key with the following permissions:
+Create an AWS user with an access key and secret access key with the following permissions:
 
 - AmazonEC2ContainerRegistryFullAccess
 - AmazonElasticContainerRegistryPublicFullAccess
@@ -208,7 +208,7 @@ Create an AWS user with access key and secret access key with the following perm
 - AmazonS3FullAccess
 - AmazonSQSFullAccess
 
-Make sure you store "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" because you'd have to add them to a .env file.
+Make sure you store "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" because you have to add them to a .env file.
 Example variable name:
 
 - AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY
@@ -224,7 +224,7 @@ Steps:
 
     ![add_users](img/add_users.png)
 
-3. Type a name for your user and check the Access key - Programmatic access box, then click on next permissions:
+3. Type a name for your user and check the *Access key - Programmatic access* box, then click on next permissions:
 
     ![user_name](img/user_name.png)
 
@@ -232,7 +232,7 @@ Steps:
 
     ![create_group](img/create_group.png)
 
-5. Type a name for your group and add all the policies you need for this user by looking for them typing the policies in the search box and checking the box on the left of the policy, then click on *create group*.
+5. Type a name for your group and add all the policies you need for this user by looking for them in the search box and checking the box on the left of the policy, then click on *create group*.
 
     ![create_group](img/create_group_2.png)
 
@@ -246,7 +246,7 @@ Steps:
 
 6. Click next 2 times and then click on create group.
 
-7. Click on *Download .csv*, open the file and look for the variables Access key ID and Secret access key. Copy and paste in a secure place these variables from the screen where you are.
+7. Click on *Download .csv*, open the file and look for the variables Access key ID and Secret access key. In a secure place, copy and paste these variables from the screen you are in.
 
     ![credentials](img/credentials.png)
 
@@ -311,7 +311,7 @@ Steps:
 
    ![click your buicket](img/click_bucket_again.png)
 
-8. Click on permissions and the click on edit.
+8. Click on permissions and then click on edit.
 
     ![bucket_permissions](img/bucket_permissions.png)
 
@@ -365,7 +365,7 @@ In trusted relationships, enter the following policy:
 }
 ```
 
-Make sure you store the name of the role because you'd have to add it to a .env file.
+Make sure you store the name of the role because you have to add it to a .env file.
 
 Example variable name:
 
@@ -377,11 +377,11 @@ Steps:
 
    ![roles](img/roles.png)
 
-2. On the up right corner of the screen select *create role*.
+2. On the top right corner of the screen select *create role*.
 
    ![create_role](img/cretate_role.png)
 
-3. Click on *Custom trust policy* and paste the json showed previosly and click on *next*.
+3. Click on *Custom trust policy* and paste the json shown previosly and click on *next*.
 
    ![policy](img/policy.png)
 
@@ -395,7 +395,7 @@ Steps:
 
 ### Creating ECS cluster <a name="cluster"></a>
 
-Create and ECS cluster with 2 subnets, a new VPC and a new security group.
+Create an ECS cluster with 2 subnets, a new VPC and a new security group.
 Make sure you store the name of your cluster and name of the 2 subnets because you have to add them to the .env file
 example variables names:
 
@@ -471,7 +471,7 @@ Download repository with the following command:
 git pull https://github.com/mlcommons/dynabench.git
 ```
 
-### Access to the correct folder <a name="folders"></a>
+### Access the correct folder <a name="folders"></a>
 
 Access to new_builder_evaluation folder that contains the backend of the challenge with the following command:
 
@@ -489,7 +489,7 @@ pip3 install -r requirements.txt
 
 ### Creating .env file <a name="env"></a>
 
-At this point you have stored 9 variables, but you are missing just one called *CENTRALIZED_URL*. The value for this variable is builder.dynabench.org
+At this point you have stored 9 variables, but you are missing just one called *CENTRALIZED_URL*. The value for this variable is http://builder.dynabench.org/
 
 Create the .env file by running the following command:
 
@@ -497,7 +497,7 @@ Create the .env file by running the following command:
 sudo nano app/domain/.env
 ```
 
-Add all the variables that you store in the previous steps and you will end up with a file like the following:
+Add all the variables that you stored in the previous steps and you will end up with a file like the following:
 
 - AWS_ACCESS_KEY_ID=[get here](#user)
 - AWS_SECRET_ACCESS_KEY=[get here](#user)
@@ -509,7 +509,7 @@ Add all the variables that you store in the previous steps and you will end up w
 - SECURITY_GROUP=[get here](#cluster)
 - EXECUTION_ROLE_ARN=[get here](#execution_role)
 - SQS_NEW_BUILDER=[get here](#sqs)
-- CENTRALIZED_URL=builder.dynabench.org
+- CENTRALIZED_URL=http://builder.dynabench.org/
 
 ### Run the API <a name="run_api"></a>
 
@@ -519,7 +519,7 @@ Run the following command:
 uvicorn app.app_decentralized:app --port 8001
 ```
 
-If everything is working well, you can open an internet navigator and enter the following url:
+If everything is working well, you can open an internet browser and enter the following url:
 
 - http://your_EC2_ip_adress/docs
 
