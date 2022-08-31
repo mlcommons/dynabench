@@ -121,6 +121,6 @@ Open your browser and access to localhost:8000/docs. In there, a FastAPI interfa
 
     ![fill request](img/filll_request.png)
 
-4. Do the same for the batch_evaluation endpoint
+4. Do the same for the batch_evaluation endpoint.
 
 Upload your model once you're done testing, zip the whole repository. Finally, upload the zip file using the 'Upload model' button down below, and finally click on submit model. Congratulations, you've submitted your model to Dynabench.
