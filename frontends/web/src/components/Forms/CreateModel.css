@@ -1,0 +1,17 @@
+.div-upload-file {
+    cursor: pointer;
+    overflow: hidden;
+    padding: 40px 60px;
+    text-align: center;
+    position: relative;
+    border: 1px dashed #ddd;
+    border-radius: 5px;
+}
+
+.label-upload-file {
+    color: #1283d8;
+}
+
+.input-upload-file {
+    color: #1283d8;
+}

@@ -10,13 +10,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect, useContext } from "react";
+import axios from "axios";
+import React, { useContext, useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
+import Modal from "react-bootstrap/Modal";
+import CreateModel from "../components/Forms/CreateModel";
 import UserContext from "../containers/UserContext";
 import "./SubmitModel.css";
-import axios from "axios";
-import CreateModel from "../components/Forms/CreateModel";
-import Modal from "react-bootstrap/Modal";
 
 const useUploadFile = () => {
   const context = useContext(UserContext);
@@ -89,7 +89,6 @@ const ProgressBar = ({ progress, text }) => {
 const SubmitModel = (props) => {
   const context = useContext(UserContext);
 
-  const [inputFile, setInputFile] = useState(null);
   const [loadingFile, setLoadingFile] = useState(true);
   const [loading, setLoading] = useState({
     loading: true,
@@ -104,7 +103,6 @@ const SubmitModel = (props) => {
   const { progress, send } = useUploadFile();
 
   useEffect(() => {
-    setInputFile(document.getElementById("input-file"));
     const fetchTaskData = async () => {
       setLoading({ loading: false, text: "Loading" });
       const taskData = await context.api.getTask(props.match.params.taskCode);
@@ -127,20 +125,16 @@ const SubmitModel = (props) => {
     fetchTaskData();
   }, []);
 
-  const handleUploadModel = () => {
-    inputFile?.click();
-    setLoadingFile(false);
-  };
-
   useEffect(() => {
     console.log(progress);
   }, [progress]);
 
-  const handleSubmitModel = (e) => {
-    e.preventDefault();
-    if (inputFile.files.length !== 0) {
+  const handleSubmitModel = (modelData) => {
+    console.log(modelData);
+
+    if (modelData.file.length !== 0) {
       const user = context.api.getCredentials();
-      const file = inputFile.files[0];
+      const file = modelData.file[0];
 
       setLoading({
         loading: false,

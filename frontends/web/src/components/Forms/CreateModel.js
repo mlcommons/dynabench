@@ -4,13 +4,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect } from "react";
-import Modal from "react-bootstrap/Modal";
+import React, { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Modal from "react-bootstrap/Modal";
 import { useForm } from "react-hook-form";
+import "./CreateModel.css";
 
-const CreateModel = ({ handleClose, ...props }) => {
+const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
   const initState = {
     modelName: "",
     desc: "",
@@ -20,101 +21,87 @@ const CreateModel = ({ handleClose, ...props }) => {
     modelCard: "",
   };
 
-  // eslint-disable-next-line no-unused-vars
   const [initialValues, setInitialValues] = useState(initState);
 
   const onSubmit = (values) => {
-    console.log("Values:::", values);
+    handleSubmitModel(values);
   };
 
   const {
     register,
     handleSubmit,
-    getValues,
-    watch,
     formState: { errors },
   } = useForm({
     mode: "onTouched",
     reValidateMode: "onSubmit",
-    // reValidateMode: "onChange",
     defaultValues: initialValues,
   });
 
-  useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
-      console.log(">>", value, name, type);
-      // {1: '1', 2: '9'} '2' 'change'
-    });
-
-    return () => subscription.unsubscribe();
-  }, [watch]);
-
   return (
-    <>
+    <Form onSubmit={handleSubmit(onSubmit)}>
       <Modal.Header closeButton>
         <Modal.Title>Submit Model</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group className="mb-3" controlId="modelName">
-            <Form.Label>Model name</Form.Label>
-            <Form.Control
-              placeholder="Model name"
-              autoFocus
-              {...register("modelName")}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="desc">
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              placeholder="Description"
-              autoFocus
-              {...register("desc")}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="numParams">
-            <Form.Label>Num parameters</Form.Label>
-            <Form.Control
-              placeholder="Num parameters"
-              autoFocus
-              {...register("numParams")}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="languages">
-            <Form.Label>Languages</Form.Label>
-            <Form.Control
-              placeholder="Languages"
-              autoFocus
-              {...register("languages")}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="license">
-            <Form.Label>License</Form.Label>
-            <Form.Control
-              placeholder="License"
-              autoFocus
-              {...register("license")}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="modelCard">
-            <Form.Label>Model Card</Form.Label>
-            <Form.Control
-              placeholder="Model Card"
-              autoFocus
-              {...register("modelCard")}
-            />
-          </Form.Group>
-        </Form>
+        <Form.Group className="mb-3" controlId="modelName">
+          <Form.Label>Model name</Form.Label>
+          <Form.Control
+            placeholder="Model name"
+            autoFocus
+            {...register("modelName")}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="desc">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            placeholder="Description"
+            autoFocus
+            {...register("desc")}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="numParams">
+          <Form.Label>Num parameters</Form.Label>
+          <Form.Control
+            placeholder="Num parameters"
+            autoFocus
+            {...register("numParams")}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="languages">
+          <Form.Label>Languages</Form.Label>
+          <Form.Control
+            placeholder="Languages"
+            autoFocus
+            {...register("languages")}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="license">
+          <Form.Label>License</Form.Label>
+          <Form.Control
+            placeholder="License"
+            autoFocus
+            {...register("license")}
+          />
+        </Form.Group>
+        <Form.Group className="div-upload-file" controlId="uploadFile">
+          <Form.Control
+            placeholder="Drag & drop your zip model here"
+            autoFocus
+            type="file"
+            className="input-upload-file"
+            {...register("file")}
+          />
+        </Form.Group>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
           Close
         </Button>
-        <Button variant="primary" onClick={onSubmit}>
-          Save Changes
+        <Button variant="primary" type="submit">
+          Submit Model
         </Button>
       </Modal.Footer>
-    </>
+    </Form>
   );
 };
 
