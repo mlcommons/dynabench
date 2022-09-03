@@ -4,8 +4,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState } from "react";
-import Button from "react-bootstrap/Button";
+import React, { useState, useEffect } from "react";
+import { Button, Col, Container, Row, Card } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import { useForm } from "react-hook-form";
@@ -36,6 +36,12 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
     reValidateMode: "onSubmit",
     defaultValues: initialValues,
   });
+
+  const [fileName, setFileName] = useState();
+
+  const handleChange = (e) => {
+    setFileName(e.target.value);
+  };
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
@@ -83,14 +89,66 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
             {...register("license")}
           />
         </Form.Group>
-        <Form.Group className="div-upload-file" controlId="uploadFile">
-          <Form.Control
-            placeholder="Drag & drop your zip model here"
-            autoFocus
-            type="file"
-            className="input-upload-file"
-            {...register("file")}
-          />
+        <Form.Group className="div-upload-file" controlId="file">
+          {fileName ? (
+            <>
+              <div>
+                <Card
+                  style={{
+                    borderRadius: 0,
+                  }}
+                >
+                  <Card.Body>
+                    <Container>
+                      <Row>
+                        <Col md={12}>{fileName}</Col>
+                        <Col
+                          md={12}
+                          style={{
+                            paddingTop: "20px",
+                          }}
+                        >
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => {
+                              setFileName("");
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </Col>
+                      </Row>
+                    </Container>
+                  </Card.Body>
+                </Card>
+              </div>
+              <Form.Control
+                placeholder="Drag & drop your zip model here"
+                autoFocus
+                type="file"
+                style={{
+                  height: 0,
+                }}
+                {...register("file")}
+                onChange={handleChange}
+              />
+            </>
+          ) : (
+            <>
+              <Form.Label className="label-upload-file">
+                Drag & drop your zip model here
+              </Form.Label>
+              <Form.Control
+                placeholder="Drag & drop your zip model here"
+                autoFocus
+                type="file"
+                className="input-upload-file"
+                {...register("file")}
+                onChange={handleChange}
+              />
+            </>
+          )}
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>
