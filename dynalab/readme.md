@@ -2,7 +2,7 @@
 
 ## What is Dynalab 2.0?
 
-Dynalab 2.0 is the tool that you are going to use when you want to upload a model to a challenge on dynabench. This tool helps you to get the logic of your model and deploy it in a way the owner of the challenge can evaluate and score the performance of your algorithm.
+Dynalab 2.0 is the tool used to upload a model in Dynabench challenges. This tool allows to deploy a model and display it so that the model can be evaluated in the different datasets of the challenge.
 
 ## Understand the folders
 
@@ -24,7 +24,7 @@ Dynalab 2.0 is the tool that you are going to use when you want to upload a mode
 
 ### Foldes contents
 
-Inside the repository you will find a folder called app. This folder contains three folders: api, domain, and resources. The api stores some logic you don't need to update. The resources folder is empty, and that's the place where you want to store your model's components (i.e. weights, tokenizers, processors, etc.). Finally, the domain folder is where you'll be including your models logic. Specifically, look for the model .py file.
+Inside the repository you will find a folder called app. This folder contains three folders: api, domain, and resources. The api stores some logic you don't need to update. The resources folder is empty, and that's the place where you want to store your model's components (i.e. weights, tokenizers, processors, etc.). Finally, the domain folder is where you'll be including your models logic. Specifically, look for the model.py file. The api folder stores certain logic that does not need to be updated and the data models used in each challenge, i.e. the input and the expected output.
 
 ## Resources folder
 
@@ -84,7 +84,7 @@ If you don't know the output format of a function, follow this steps:
 
 ## Requirements
 
-Once you add all the files in the resources folder and you update the model.py file, you have to add all the libraries you used to run your model in the requirements.txt file. It is important that you don't delete any library listed before, otherwise your model will not run.
+Once you add all the files in the resources folder and you update the model.py file, you have to add all the libraries you used to run your model in the requirements.txt file. It is important that you don't modify any library listed before, otherwise your model will not run.
 
 Example:
 
