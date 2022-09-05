@@ -25,6 +25,7 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
 
   const onSubmit = (values) => {
     handleSubmitModel(values);
+    handleClose();
   };
 
   const {

@@ -135,12 +135,16 @@ const SubmitModel = (props) => {
     if (modelData.file.length !== 0) {
       const user = context.api.getCredentials();
       const file = modelData.file[0];
-
       setLoading({
         loading: false,
         text: "Your model is being uploaded.",
       });
       const formData = new FormData();
+      formData.append("model_name", modelData.modelName);
+      formData.append("description", modelData.desc);
+      formData.append("num_paramaters", modelData.numParams);
+      formData.append("languages", modelData.languages);
+      formData.append("license", modelData.license);
       formData.append("file", file);
       formData.append("file_name", file.name);
       formData.append("file_type", file.type);
@@ -198,13 +202,13 @@ const SubmitModel = (props) => {
                   </p>
                 </li>
                 <li>
-                  <strong>Single evaluation function</strong>
+                  <strong>Single and batch evaluation functions</strong>
                   <p>
-                    In this file you will find a class called "ModelController"
-                    with only two methods: the class constructor, and a method
-                    called "single_evaluation". This is the method you need to
-                    update. As its name indicates this method must receive a
-                    single example as an input and return a prediction.
+                    In model script you will find a class called
+                    *ModelController* where you can delete everything except by
+                    3 methods *constructor*, *single_evaluation* and
+                    *batch_evaluation*. These 2 methods are the ones you have to
+                    update in order to make inferences using your model.
                   </p>
                 </li>
                 <li>
@@ -213,7 +217,8 @@ const SubmitModel = (props) => {
                     It is important to mention that you can create as many
                     functions, classes, or variables as you consider necessary.
                     Keep in mind that the final result will be contained in the
-                    "single_evaluation" function of the "ModelController" class.
+                    "single_evaluation" and "batch_evaluation" functions of the
+                    "ModelController" class.
                   </p>
                 </li>
                 <li>
@@ -226,6 +231,7 @@ const SubmitModel = (props) => {
                 </li>
                 <li>
                   <strong>Test your model</strong>
+                  <br />
                   <span>
                     To make sure everything is working as intended, you have to
                     run the following commands:
@@ -248,6 +254,7 @@ const SubmitModel = (props) => {
                 <br />
                 <li>
                   <strong>Upload your model</strong>
+                  <br />
                   <span>
                     Once you're done testing, zip the whole repository. Finally,
                     upload the zip file using the 'Upload model' button down
