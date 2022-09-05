@@ -1,14 +1,22 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect, useContext } from "react";
+import axios from "axios";
+import React, { useContext, useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
+import Modal from "react-bootstrap/Modal";
+import CreateModel from "../components/Forms/CreateModel";
 import UserContext from "../containers/UserContext";
 import "./SubmitModel.css";
-import axios from "axios";
 
 const useUploadFile = () => {
   const context = useContext(UserContext);
@@ -81,18 +89,20 @@ const ProgressBar = ({ progress, text }) => {
 const SubmitModel = (props) => {
   const context = useContext(UserContext);
 
-  const [inputFile, setInputFile] = useState(null);
   const [loadingFile, setLoadingFile] = useState(true);
   const [loading, setLoading] = useState({
     loading: true,
     text: "",
   });
   const [dynalab, setDynalab] = useState("");
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   const { progress, send } = useUploadFile();
 
   useEffect(() => {
-    setInputFile(document.getElementById("input-file"));
     const fetchTaskData = async () => {
       setLoading({ loading: false, text: "Loading" });
       const taskData = await context.api.getTask(props.match.params.taskCode);
@@ -115,26 +125,26 @@ const SubmitModel = (props) => {
     fetchTaskData();
   }, []);
 
-  const handleUploadModel = () => {
-    inputFile?.click();
-    setLoadingFile(false);
-  };
-
   useEffect(() => {
     console.log(progress);
   }, [progress]);
 
-  const handleSubmitModel = (e) => {
-    e.preventDefault();
-    if (inputFile.files.length !== 0) {
-      const user = context.api.getCredentials();
-      const file = inputFile.files[0];
+  const handleSubmitModel = (modelData) => {
+    console.log(modelData);
 
+    if (modelData.file.length !== 0) {
+      const user = context.api.getCredentials();
+      const file = modelData.file[0];
       setLoading({
         loading: false,
         text: "Your model is being uploaded.",
       });
       const formData = new FormData();
+      formData.append("model_name", modelData.modelName);
+      formData.append("description", modelData.desc);
+      formData.append("num_paramaters", modelData.numParams);
+      formData.append("languages", modelData.languages);
+      formData.append("license", modelData.license);
       formData.append("file", file);
       formData.append("file_name", file.name);
       formData.append("file_type", file.type);
@@ -192,13 +202,13 @@ const SubmitModel = (props) => {
                   </p>
                 </li>
                 <li>
-                  <strong>Single evaluation function</strong>
+                  <strong>Single and batch evaluation functions</strong>
                   <p>
-                    In this file you will find a class called "ModelController"
-                    with only two methods: the class constructor, and a method
-                    called "single_evaluation". This is the method you need to
-                    update. As its name indicates this method must receive a
-                    single example as an input and return a prediction.
+                    In model script you will find a class called
+                    *ModelController* where you can delete everything except by
+                    3 methods *constructor*, *single_evaluation* and
+                    *batch_evaluation*. These 2 methods are the ones you have to
+                    update in order to make inferences using your model.
                   </p>
                 </li>
                 <li>
@@ -207,7 +217,8 @@ const SubmitModel = (props) => {
                     It is important to mention that you can create as many
                     functions, classes, or variables as you consider necessary.
                     Keep in mind that the final result will be contained in the
-                    "single_evaluation" function of the "ModelController" class.
+                    "single_evaluation" and "batch_evaluation" functions of the
+                    "ModelController" class.
                   </p>
                 </li>
                 <li>
@@ -220,6 +231,7 @@ const SubmitModel = (props) => {
                 </li>
                 <li>
                   <strong>Test your model</strong>
+                  <br />
                   <span>
                     To make sure everything is working as intended, you have to
                     run the following commands:
@@ -242,6 +254,7 @@ const SubmitModel = (props) => {
                 <br />
                 <li>
                   <strong>Upload your model</strong>
+                  <br />
                   <span>
                     Once you're done testing, zip the whole repository. Finally,
                     upload the zip file using the 'Upload model' button down
@@ -257,12 +270,17 @@ const SubmitModel = (props) => {
                       <Col className="text-center">
                         <center>
                           <Button
-                            variant="primary"
+                            onClick={() => handleShow(true)}
                             className="center-submit-model"
-                            onClick={handleUploadModel}
                           >
                             <i className="fas fa-edit"></i> Upload model
                           </Button>
+                          <Modal show={show} onHide={handleClose}>
+                            <CreateModel
+                              handleClose={handleClose}
+                              handleSubmitModel={handleSubmitModel}
+                            />
+                          </Modal>
                         </center>
                       </Col>
                     </Row>

@@ -477,6 +477,11 @@ def upload_user_profile_picture(credentials, id):
 @_auth.requires_auth
 def model_upload_s3_dynalab_2(credentials):
     upload = bottle.request.files.get("file")
+    model_name = bottle.request.forms.get("model_name")
+    description = bottle.request.forms.get("description")
+    num_paramaters = bottle.request.forms.get("num_paramaters")
+    languages = bottle.request.forms.get("languages")
+    license = bottle.request.forms.get("license")
     file_name = bottle.request.forms.get("file_name")
     file_type = bottle.request.forms.get("file_type")
     user_name = bottle.request.forms.get("user_name")
@@ -507,17 +512,17 @@ def model_upload_s3_dynalab_2(credentials):
         ContentType=upload.content_type,
     )
 
-    model_name = file_name.split("/")[-1].split(".")[0]
-    model_name = "-".join(model_name.split(".")[0].replace(" ", "").split("-")[1:])
-
     models = ModelModel()
     model, model_id = models.create(
         task_id=task.id,
         user_id=user_id,
         name=model_name,
         shortname="",
-        longdesc="",
-        desc="",
+        longdesc=description,
+        desc=description,
+        languages=languages,
+        license=license,
+        params=num_paramaters,
         upload_datetime=datetime.now(),
         endpoint_name="",
         light_model="",
