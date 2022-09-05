@@ -1,0 +1,46 @@
+name: MLCommons DataPerf
+description: MLCommons DataPerf integration
+authors:
+  - { name: "MLCommons Best Practices Working Group" }
+
+platform:
+  accelerator_count: 0
+
+docker:
+  # Image name.
+  image: mlcommons/dataperf:0.0.1
+  # Docker build context relative to $MLCUBE_ROOT. Default is `build`.
+  build_context: "."
+  # Docker file name within docker build context, default is `Dockerfile`.
+  build_file: "Dockerfile_mlcube"
+
+tasks:
+  download:
+    # Download dataset
+    parameters:
+      inputs: { parameters_file: { type: file, default: parameters.yaml } }
+      outputs: { output_path: data/ }
+
+  select:
+    # Run selection algorithm
+    parameters:
+      inputs:
+        {
+          allowed_training_set: { type: file, default: data/preliminary_evaluation_dataset/allowed_training_set.yaml },
+          train_embeddings_dir: data/preliminary_evaluation_dataset/train_embeddings/,
+        }
+      outputs: { outdir: select_output/ }
+
+  evaluate:
+    # Perfom evaluation
+    parameters:
+      inputs:
+        {
+          eval_embeddings_dir: data/preliminary_evaluation_dataset/eval_embeddings/,
+          train_embeddings_dir: data/preliminary_evaluation_dataset/train_embeddings/,
+          allowed_training_set: { type: file, default: data/preliminary_evaluation_dataset/allowed_training_set.yaml },
+          eval_file: { type: file, default: data/preliminary_evaluation_dataset/eval.yaml },
+          train_file: { type: file, default: select_output/train.yaml },
+          config_file: { type: file, default: dataperf_speech_config.yaml },
+        }
+      outputs: { log_path: { type: file, default: log.txt } }

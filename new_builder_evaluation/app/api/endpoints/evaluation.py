@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -33,15 +37,15 @@ def get_task_configuration(id: int) -> dict:
 
 
 @router.get("/get_model_id_and_task_code")
-def get_model_id_and_task_code(task_id: int):
+def get_model_id_and_task_code(task_code: str):
     task = TaskRepository()
-    return task.get_model_id_and_task_code(task_id)
+    return task.get_model_id_and_task_code(task_code)
 
 
 @router.get("/get_scoring_datasets")
-def get_scoring_datasets(task_id: int, round_id: int):
+def get_scoring_datasets(task_id: int):
     dataset = DatasetRepository()
-    return dataset.get_scoring_datasets(task_id, round_id)
+    return dataset.get_scoring_datasets(task_id)
 
 
 @router.get("/get_round_info_by_round_and_task")
@@ -54,3 +58,9 @@ def get_round_info_by_round_and_task(task_id: int, round_id: int):
 def post_descentralized_scores(scores: dict):
     score = ScoreRepository()
     return score.add(scores)
+
+
+@router.get("/get_by_id")
+def get_by_id(id: int):
+    task = TaskRepository()
+    return task.get_by_id(id)
