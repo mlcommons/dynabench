@@ -1,13 +1,39 @@
-version: '3.9'
-
+version: '2'
 services:
+  mysql:
+    image: 'mysql:5.7'
+    restart: always
+    environment:
+      - MYSQL_DATABASE=dynabench
+      - MYSQL_USER=dynabench
+      - MYSQL_PASSWORD=admin
+      - MYSQL_ROOT_PASSWORD=admin
+    volumes:
+      - '.backend/db/empty-dynabench-db.sql:/docker-entrypoint-initdb.d/dump.sql'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
   api:
-    build: .
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: always
     ports:
-    - "8081:8081"
-    container_name: backend
-  react:
-    build: ./frontends/web
+      - '8081:8081'
+    depends_on:
+      - mysql
+  builder_evaluation:
+    build:
+      context: ./new_builder_evaluation/
+      dockerfile: Dockerfile
+    restart: always
     ports:
-    - "3000:3000"
-    container_name: frontend
+      - '8000:8000'
+    depends_on:
+      - mysql
+  front:
+    build: ./frontends/web/
+    restart: always
+    ports:
+      - '80:3000'
