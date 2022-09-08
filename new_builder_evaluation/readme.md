@@ -279,7 +279,7 @@ example variable name:
 
 - AWS_S3_BUCKET=dynabench-challenge
 
-Add permissions to put objects from arn:aws:iam::877755283837:user/juanciro
+Add full s3 access from arn:aws:iam::877755283837:user/juanciro
 
 Steps:
 
@@ -328,8 +328,8 @@ Steps:
                 "Principal": {
                     "AWS": "arn:aws:iam::877755283837:user/juanciro"
                 },
-                "Action": "s3:PutObject",
-                "Resource": "arn:aws:s3:::dynabench-challenge-bucket/models/*"
+                "Action": "s3:*",
+                "Resource": "arn:aws:s3:::dynabench-challenge-bucket/*"
             }
         ]
     }
@@ -468,7 +468,7 @@ Steps:
 Download repository with the following command:
 
 ``` bash
-git pull https://github.com/mlcommons/dynabench.git
+git clone https://github.com/mlcommons/dynabench.git
 ```
 
 ### Access the correct folder <a name="folders"></a>

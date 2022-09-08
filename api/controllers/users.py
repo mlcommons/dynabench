@@ -497,21 +497,6 @@ def model_upload_s3_dynalab_2(credentials):
     if file_type != "application/zip":
         bottle.abort(403, "It's not a zip file")
 
-    session = boto3.Session(
-        aws_access_key_id=config_file["aws_access_key_id"],
-        aws_secret_access_key=config_file["aws_secret_access_key"],
-        region_name=config_file["aws_region"],
-    )
-    s3_service = session.client("s3")
-    sqs_service = session.client("sqs")
-
-    response = s3_service.put_object(
-        Body=upload.file,
-        Bucket=config_file["aws_s3_bucket_name"],
-        Key=f"models/{task_code}/{user_id}-{file_name}",
-        ContentType=upload.content_type,
-    )
-
     models = ModelModel()
     model, model_id = models.create(
         task_id=task.id,
@@ -534,31 +519,56 @@ def model_upload_s3_dynalab_2(credentials):
     user = user_model.get(user_id)
     user_model.incrementModelSubmitCount(user.to_dict()["id"])
     if task.is_decen_task:
-        model_dict = models.to_dict(model)
-        task_dict = models.to_dict(model.task)
-        full_model_info = util.json_encode(model_dict)
-        full_task_info = util.json_encode(task_dict)
-        queue = sqs_service.get_queue_url(
-            QueueName=config_file["new_builder_sqs_queue"]
+
+        session = boto3.Session(
+            aws_access_key_id=config_file["aws_access_key_id"],
+            aws_secret_access_key=config_file["aws_secret_access_key"],
+            region_name="us-east-1",  # task.region,
         )
-        queue = sqs_service.get_queue_by_name(
-            QueueName=task.build_sqs_queue,
+        s3_service = session.client("s3")
+        sqs_service = session.client("sqs")
+
+        response = s3_service.put_object(
+            Body=upload.file,
+            Bucket="dynabench-challenge",
+            Key=f"models/{task_code}/{user_id}-{file_name}",
+            ContentType=upload.content_type,
+        )
+
+        queue = sqs_service.get_queue_url(
+            QueueName="julian_sqs",  # task.queue,
             QueueOwnerAWSAccountId=task.task_aws_account_id,
         )
-        s3_name = f"s3://{task.s3_bucket}/models/{task_code}/{user_id}-{file_name}"
-        queue.send_message(
+
+        sqs_service.send_message(
+            QueueUrl=queue["QueueUrl"],
             MessageBody=util.json_encode(
                 {
+                    "s3_uri": f"models/{task_code}/{user_id}-{file_name}",
+                    "user_id": user_id,
+                    "user_name": user_name,
+                    "task_code": task_code,
                     "model_id": model_id,
-                    "s3_uri": s3_name,
-                    "decen_eaas": True,
-                    "model_info": full_model_info,
-                    "task_info": full_task_info,
                     "model_secret": model.secret,
                 }
-            )
+            ),
         )
     else:
+        session = boto3.Session(
+            aws_access_key_id=config_file["aws_access_key_id"],
+            aws_secret_access_key=config_file["aws_secret_access_key"],
+            region_name=config_file["aws_region"],
+        )
+        s3_service = session.client("s3")
+        sqs_service = session.client("sqs")
+
+        response = s3_service.put_object(
+            Body=upload.file,
+            Bucket=config_file["aws_s3_bucket_name"],
+            Key=f"models/{task_code}/{user_id}-{file_name}",
+            ContentType=upload.content_type,
+        )
+
         queue = sqs_service.get_queue_url(
             QueueName=config_file["new_builder_sqs_queue"]
         )
