@@ -399,7 +399,7 @@ class Evaluation:
             self.post_descentralized_scores(new_score)
             new_scores.append(new_score)
             url_light_model = self.builder.create_light_model(model_name, folder_name)
-            self.model_repository.update_light_model(model_id, url_light_model)
+            self.update_light_model(model_id, url_light_model)
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores
