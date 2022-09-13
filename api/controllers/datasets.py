@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -171,12 +175,12 @@ def create(credentials, tid, name):
         for io in parsed_upload:
             try:
                 assert "uid" in io, "'uid' must be present for every example"
-                assert (
-                    "tags" in io
-                ), "there must be a field called 'tags' on every line of the jsonl"
-                assert isinstance(
-                    io["tags"], list
-                ), "'tags' must be a list on every line of the jsonl"
+                # assert (
+                #     "tags" in io
+                # ), "there must be a field called 'tags' on every line of the jsonl"
+                # assert isinstance(
+                #     io["tags"], list
+                # ), "'tags' must be a list on every line of the jsonl"
                 if perturb_prefix is not None:
                     assert "input_id" in io, (
                         "'input_id' must be present for every example for"
@@ -203,15 +207,16 @@ def create(credentials, tid, name):
                 "s3",
                 aws_access_key_id=config["eval_aws_access_key_id"],
                 aws_secret_access_key=config["eval_aws_secret_access_key"],
-                region_name=config["eval_aws_region"],
+                region_name=task.region,
             )
+
             with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
                 for datum in parsed_upload:
                     tmp.write(util.json_encode(task.convert_to_model_io(datum)) + "\n")
                 tmp.close()
                 response = s3_client.upload_file(
                     tmp.name,
-                    task.s3_bucket,
+                    task.bucket,
                     get_data_s3_path(task.task_code, name + ".jsonl", perturb_prefix),
                 )
                 if task.is_decen_task:
@@ -249,7 +254,7 @@ def create(credentials, tid, name):
         eval_config = {
             "aws_access_key_id": config["aws_access_key_id"],
             "aws_secret_access_key": config["aws_secret_access_key"],
-            "aws_region": config["aws_region"],
+            "aws_region": task.region,
         }
 
         # send download dataset requests for all datasets first
