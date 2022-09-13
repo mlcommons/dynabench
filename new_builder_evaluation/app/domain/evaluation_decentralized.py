@@ -90,6 +90,14 @@ class Evaluation:
 
         return post.status_code
 
+    def update_light_model(self, model_id: int, url_light_model: str):
+        centralized_host = os.getenv("CENTRALIZED_URL")
+        post = requests.post(
+            f"{centralized_host}evaluation/update_light_model",
+            json={"model_id": model_id, "url_light_model": url_light_model},
+        )
+        return post.status_code
+
     def single_evaluation_ecs(self, ip: str, json_data: dict):
         headers = {
             "accept": "application/json",
@@ -383,11 +391,15 @@ class Evaluation:
                 "memory_utilization": final_scores["memory"],
                 "examples_per_second": final_scores["throughput"],
             }
-
-            new_score["metadata_json"] = json.dumps(new_score)
+            final_score = new_score.copy()
+            metric_name = str(metric)
+            final_score[metric_name] = main_metric["perf"]
+            new_score["metadata_json"] = json.dumps(final_score)
 
             self.post_descentralized_scores(new_score)
             new_scores.append(new_score)
+            url_light_model = self.builder.create_light_model(model_name, folder_name)
+            self.model_repository.update_light_model(model_id, url_light_model)
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores
