@@ -78,6 +78,7 @@ class Builder:
         folder_name: str,
         tag: str,
         model_name: str,
+        docker_name="Dockerfile",
     ) -> str:
         ecr_config = self.extract_ecr_configuration()
         self.docker_client.login(
@@ -88,7 +89,9 @@ class Builder:
         path = f"{folder_name}/{model_name}"
         absolute_path = os.getcwd()
         path = absolute_path + path.strip(".")
-        image, _ = self.docker_client.images.build(path=path, tag=tag)
+        image, _ = self.docker_client.images.build(
+            path=path, tag=tag, dockerfile=f"{path}/{docker_name}"
+        )
         image.tag(repository=repository_name, tag=tag)
         self.docker_client.images.push(
             repository=repository_name,
