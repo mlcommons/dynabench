@@ -204,7 +204,9 @@ def do_upload_via_train_files(credentials, tid, model_name):
             dataset.access_type == AccessTypeEnum.scoring
             and dataset.name not in train_files.keys()
         ):
-            bottle.abort(400, "Need to upload train files for all leaderboard datasets")
+            print(
+                "Testing"
+            )  # bottle.abort(400, "Need to upload train files for all leaderboard datasets")
 
     # accumulated_predictions = [] Implementation for accumulated labels instead of mean
     # accumulated_labels = [] Implementation for accumulated labels instead of mean
@@ -225,9 +227,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
     )
 
     for name, upload in train_files.items():
-
-        old_metadata = sm.getByTid(27)[0].metadata_json
-        new_metadata = old_metadata
 
         current_upload = json.loads(upload.file.read().decode("utf-8"))
         current_upload = current_upload[list(current_upload.keys())[0]]
@@ -360,9 +359,7 @@ def get_test_dataframe(bucket_name, key):
         region_name="eu-west-3",
     )
     with tempfile.NamedTemporaryFile() as tf:
-        s3_client.download_fileobj(
-            Bucket="vision-dataperf", Key="test-bird.parquet", Fileobj=tf
-        )
+        s3_client.download_fileobj(Bucket=bucket_name, Key=key, Fileobj=tf)
         dataframe = pd.read_parquet(
             tf, columns=["target_label", "Embedding", "ImageID"]
         )
