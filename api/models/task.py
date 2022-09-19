@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -649,7 +653,7 @@ class Task(Base):
     task_aws_account_id = db.Column(db.Text)
     task_gateway_predict_prefix = db.Column(db.Text)
     context = db.Column(db.Text)
-    dataperf = db.Column(db.Boolean, default = False)
+    dataperf = db.Column(db.Boolean, default=False)
     lambda_model = db.Column(db.Text)
 
     unique_validators_for_example_tags = db.Column(db.Boolean, default=False)
