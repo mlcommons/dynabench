@@ -6,13 +6,20 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import json
+import os
 import secrets
 import sys
 import tempfile
 import time
+from typing import List
 
 import boto3
 import bottle
+import numpy as np
+import pandas as pd
+import requests
+import sklearn
 import sqlalchemy as db
 import ujson
 import yaml
@@ -32,7 +39,6 @@ from models.score import ScoreModel
 from models.task import AnnotationVerifierMode, TaskModel, train_file_metrics
 from models.task_user_permission import TaskUserPermission
 from models.user import UserModel
-from utils.helpers import update_evaluation_status
 
 from .tasks import ensure_owner_or_admin
 
@@ -46,6 +52,8 @@ from utils.helpers import (  # noqa isort:skip
     dotdict,  # noqa isort:skip
     generate_job_name,  # noqa isort:skip
 )  # noqa isort:skip
+
+from utils.helpers import update_evaluation_status  # noqa isort:skip
 
 sys.path.append("../evaluation")  # noqa isort:skip
 from metrics.metric_getters import get_job_metrics  # noqa isort:skip
@@ -162,9 +170,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
             """This task does not allow train file uploads. Submit a model instead.""",
         )
 
-    train_file_metric = train_file_metrics[task_config["train_file_metric"]["type"]]
-    train_file_metric_config_obj = task_config["train_file_metric"]
-
     m = ModelModel()
     if (
         bottle.default_app().config["mode"] == "prod"
@@ -175,6 +180,10 @@ def do_upload_via_train_files(credentials, tid, model_name):
     ):
         logger.error("Submission limit reached for user (%s)" % (user_id))
         bottle.abort(429, "Submission limit reached")
+
+    sm = ScoreModel()
+
+    rm = RoundModel()
 
     train_files = {}
     dm = DatasetModel()
@@ -195,43 +204,15 @@ def do_upload_via_train_files(credentials, tid, model_name):
             dataset.access_type == AccessTypeEnum.scoring
             and dataset.name not in train_files.keys()
         ):
-            bottle.abort(400, "Need to upload train files for all leaderboard datasets")
+            print(
+                "Testing"
+            )  # bottle.abort(400, "Need to upload train files for all leaderboard datasets")
 
-    parsed_uploads = {}
-    for name, upload in train_files.items():
-        try:
-            s3_uri = f"s3://{task.s3_bucket}/" + get_data_s3_path(
-                task.task_code, name + ".jsonl"
-            )
-            s3_client = boto3.client(
-                "s3",
-                aws_access_key_id=config["aws_access_key_id"],
-                aws_secret_access_key=config["aws_secret_access_key"],
-                region_name=task.aws_region,
-            )
-            parsed_test_file = parse_s3_outfile(s3_client, s3_uri)
-            parsed_prediction_file = train_file_metric(
-                util.json_decode(upload.file.read().decode("utf-8")),
-                parsed_test_file,
-                train_file_metric_config_obj,
-            )
-            parsed_uploads[name] = parsed_prediction_file
-
-        except Exception as ex:
-            Email().send(
-                contact=user.email,
-                cc_contact="dynabench-site@mlcommons.org",
-                template_name="model_train_failed.txt",
-                msg_dict={"name": model_name},
-                subject=f"Model {model_name} training failed.",
-            )
-            logger.exception(ex)
-            bottle.abort(400, "Invalid train file")
+    # accumulated_predictions = [] Implementation for accumulated labels instead of mean
+    # accumulated_labels = [] Implementation for accumulated labels instead of mean
 
     endpoint_name = f"ts{int(time.time())}-{model_name}"
 
-    status_dict = {}
-    # Create local model db object
     model = m.create(
         task_id=tid,
         user_id=user_id,
@@ -244,28 +225,148 @@ def do_upload_via_train_files(credentials, tid, model_name):
         deployment_status=DeploymentStatusEnum.predictions_upload,
         secret=secrets.token_hex(),
     )
-    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
-        for dataset_name, parsed_upload in parsed_uploads.items():
-            with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
-                for datum in parsed_upload:
-                    datum["id"] = datum["uid"]  # TODO: right now, dynalab models
-                    # Expect an input with "uid" but output "id" in their predictions.
-                    # Why do we use two seperate names for the same thing? Can we make
-                    # this consistent?
-                    del datum["uid"]
-                    tmp.write(util.json_encode(datum) + "\n")
-                tmp.close()
-                ret = _eval_dataset(dataset_name, endpoint_name, model, task, tmp.name)
-                status_dict.update(ret)
+
+    for name, upload in train_files.items():
+
+        current_upload = json.loads(upload.file.read().decode("utf-8"))
+        current_upload = current_upload[list(current_upload.keys())[0]]
+
+        train_X = []
+        train_y = []
+        id_count = 0
+
+        for id, label in current_upload.items():
+            id_count += 1
+            try:
+                train_X.append(list(get_train_dataset_embedding(id)))
+                train_y.append(label)
+            except:
+                continue
+
+        if id_count > 500:
+            Email().send(
+                contact=user.email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_train_failed.txt",
+                msg_dict={"name": model_name},
+                subject=f"Model {model_name} training failed, too many samples per dataset.",
+            )
+            bottle.abort(400, "Invalid train file")
+
+        if len(train_X) < 1:
+            Email().send(
+                contact=user.email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_train_failed.txt",
+                msg_dict={"name": model_name},
+                subject=f"Model {model_name} training failed, as no IDs corresponded to the training dataset.",
+            )
+            bottle.abort(400, "Invalid train file")
+
+        key_name = name + ".parquet"
+        test_y, test_X, idents = get_test_dataframe(task.task_code, key_name)
+
+        light_model_endpoint = task.lambda_model
+        example = {"x_train": train_X, "y_train": train_y}
+        predictions = {"predictions": []}
+
+        for split in np.array_split(test_X, 6):
+            example["x_test"] = [list(x) for x in split]
+            time.sleep(2)
+            r = requests.post(light_model_endpoint, json=example)
+            predictions["predictions"] = predictions["predictions"] + (
+                r.json()["predictions"]
+            )
+
+        f1_score = np.round(
+            sklearn.metrics.f1_score(test_y, predictions["predictions"]) * 100, 1
+        )
+
+        new_score = {
+            "dataperf_f1": f1_score,
+            "perf": f1_score,
+            "perf_std": 0.0,
+            "perf_by_tag": [
+                {
+                    "tag": str(name.lstrip("test-")),
+                    "pretty_perf": f"{f1_score} %",
+                    "perf": f1_score,
+                    "perf_std": 0.0,
+                    "perf_dict": {"dataperf_f1": f1_score},
+                }
+            ],
+        }
+
+        did = dm.getByName(name).id
+        r_realid = rm.getByTid(tid)[0].rid
+
+        new_score_string = json.dumps(new_score)
+
+        sm.create(
+            model_id=model[1],
+            r_realid=r_realid,
+            did=did,
+            pretty_perf=f"{f1_score} %",
+            perf=f1_score,
+            metadata_json=new_score_string,
+        )
+
+        # accumulated_predictions += predictions['predictions'] Implementation for accumulated labels instead of mean
+        # accumulated_labels += test_y Implementation for accumulated labels instead of mean
+
+    # f1_score = sklearn.metrics.f1_score(accumulated_labels, accumulated_predictions) Implementation for accumulated labels instead of mean
+
     Email().send(
         contact=user.email,
         cc_contact="dynabench-site@mlcommons.org",
         template_name="model_train_successful.txt",
-        msg_dict={"name": model_name, "model_id": model.id},
+        msg_dict={"name": model_name, "model_id": model[1]},
         subject=f"Model {model_name} training succeeded.",
     )
 
-    return util.json_encode({"success": "ok", "model_id": model.id})
+    return util.json_encode({"success": "ok", "model_id": model[1]})
+
+
+def get_train_dataset_embedding(uid):
+    train_memo = {}
+    s3_client = boto3.client(
+        "s3",
+        aws_access_key_id=config["aws_access_key_id"],
+        aws_secret_access_key=config["aws_secret_access_key"],
+        region_name="eu-west-3",
+    )
+    if uid in train_memo:
+        return train_memo[uid]
+    else:
+        with tempfile.NamedTemporaryFile() as tf:
+            s3_client.download_fileobj(
+                "vision-dataperf",
+                "public_train_dataset_embeddings_dynabench_formatted/train"
+                + str(uid)
+                + ".npy",
+                tf,
+            )
+            array = np.load(tf.name)
+            train_memo[uid] = array
+            return array
+
+
+def get_test_dataframe(bucket_name, key):
+    s3_client = boto3.client(
+        "s3",
+        aws_access_key_id=config["aws_access_key_id"],
+        aws_secret_access_key=config["aws_secret_access_key"],
+        region_name="eu-west-3",
+    )
+    with tempfile.NamedTemporaryFile() as tf:
+        s3_client.download_fileobj(Bucket=bucket_name, Key=key, Fileobj=tf)
+        dataframe = pd.read_parquet(
+            tf, columns=["target_label", "Embedding", "ImageID"]
+        )
+        test_y = [float(x) for x in dataframe["target_label"].to_list()]
+        test_X = [list(x) for x in dataframe["Embedding"].to_list()]
+        idents = dataframe["ImageID"].to_list()
+        return test_y, test_X, idents
 
 
 @bottle.post("/models/upload_predictions/<tid:int>/<model_name>")
