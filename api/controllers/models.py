@@ -197,8 +197,8 @@ def do_upload_via_train_files(credentials, tid, model_name):
     train_files = {
         name: train_files[name]
         for name, upload in train_files.items()
-        if train_files[name] is not None}
-
+        if train_files[name] is not None
+    }
 
     for dataset in datasets:
         if (
@@ -302,13 +302,15 @@ def do_upload_via_train_files(credentials, tid, model_name):
         did = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
 
+        new_score_string = json.dumps(new_score)
+
         sm.create(
             model_id=model[1],
             r_realid=r_realid,
             did=did,
             pretty_perf=f"{f1_score} %",
             perf=f1_score,
-            metadata_json=str(new_score),
+            metadata_json=new_score_string,
         )
 
         # accumulated_predictions += predictions['predictions'] Implementation for accumulated labels instead of mean
@@ -369,15 +371,6 @@ def get_test_dataframe(bucket_name, key):
         test_X = [list(x) for x in dataframe["Embedding"].to_list()]
         idents = dataframe["ImageID"].to_list()
         return test_y, test_X, idents
-
-
-def update_metadata_json_string(original_json_string, new_json_string_list):
-    original_json = json.loads(original_json_string)
-    for new_json_string in new_json_string_list:
-        new_json = json.loads(new_json_string)
-        original_json = {**original_json, **new_json}
-    metadata_json_string = json.dumps(original_json)
-    return metadata_json_string
 
 
 @bottle.post("/models/upload_predictions/<tid:int>/<model_name>")
