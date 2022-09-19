@@ -43,21 +43,21 @@ from models.user import UserModel
 from .tasks import ensure_owner_or_admin
 
 
-# from utils.helpers import update_evaluation_status
+from utils.helpers import update_evaluation_status
 
 
-# from utils.helpers import (  # noqa isort:skip
-#     get_data_s3_path,  # noqa isort:skip
-#     get_predictions_s3_path,  # noqa isort:skip
-#     parse_s3_outfile,  # noqa isort:skip
-#     send_eval_request,  # noqa isort:skip
-#     update_metadata_json_string,  # noqa isort:skip
-#     dotdict,  # noqa isort:skip
-#     generate_job_name,  # noqa isort:skip
-# )  # noqa isort:skip
+from utils.helpers import (  # noqa isort:skip
+    get_data_s3_path,  # noqa isort:skip
+    get_predictions_s3_path,  # noqa isort:skip
+    parse_s3_outfile,  # noqa isort:skip
+    send_eval_request,  # noqa isort:skip
+    update_metadata_json_string,  # noqa isort:skip
+    dotdict,  # noqa isort:skip
+    generate_job_name,  # noqa isort:skip
+)  # noqa isort:skip
 
 sys.path.append("../evaluation")  # noqa isort:skip
-# from metrics.metric_getters import get_job_metrics  # noqa isort:skip
+from metrics.metric_getters import get_job_metrics  # noqa isort:skip
 
 
 @bottle.get("/models/latest_job_log/<mid:int>/<did:int>")
