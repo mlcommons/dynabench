@@ -215,7 +215,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
     # accumulated_predictions = [] Implementation for accumulated labels instead of mean
     # accumulated_labels = [] Implementation for accumulated labels instead of mean
-    
+
     endpoint_name = f"ts{int(time.time())}-{model_name}"
 
     model = m.create(
@@ -902,8 +902,7 @@ def update_model_decen_eaas(mid):
             bottle.abort(401, "Operation not authorized")
 
         m.update(
-            model.id,
-            deployment_status=data["deployment_status"],
+            model.id, deployment_status=data["deployment_status"],
         )
 
         return {"status": "success"}
