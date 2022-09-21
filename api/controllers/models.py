@@ -7,12 +7,10 @@
 # LICENSE file in the root directory of this source tree.
 
 import json
-import os
 import secrets
 import sys
 import tempfile
 import time
-from typing import List
 
 import boto3
 import bottle
@@ -30,13 +28,14 @@ import common.auth as _auth
 import common.helpers as util
 from common.config import config
 from common.logging import logger
+from evaluation.metrics.metric_getters import get_job_metrics
 from models.badge import BadgeModel
 from models.dataset import AccessTypeEnum, DatasetModel, LogAccessTypeEnum
 from models.model import DeploymentStatusEnum, ModelModel
 from models.notification import NotificationModel
 from models.round import RoundModel
 from models.score import ScoreModel
-from models.task import AnnotationVerifierMode, TaskModel, train_file_metrics
+from models.task import AnnotationVerifierMode, TaskModel
 from models.task_user_permission import TaskUserPermission
 from models.user import UserModel
 
@@ -56,7 +55,6 @@ from utils.helpers import (  # noqa isort:skip
 from utils.helpers import update_evaluation_status  # noqa isort:skip
 
 sys.path.append("../evaluation")  # noqa isort:skip
-from metrics.metric_getters import get_job_metrics  # noqa isort:skip
 
 
 @bottle.get("/models/latest_job_log/<mid:int>/<did:int>")
@@ -902,7 +900,8 @@ def update_model_decen_eaas(mid):
             bottle.abort(401, "Operation not authorized")
 
         m.update(
-            model.id, deployment_status=data["deployment_status"],
+            model.id,
+            deployment_status=data["deployment_status"],
         )
 
         return {"status": "success"}
