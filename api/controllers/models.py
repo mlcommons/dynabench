@@ -215,7 +215,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
     # accumulated_predictions = [] Implementation for accumulated labels instead of mean
     # accumulated_labels = [] Implementation for accumulated labels instead of mean
-
+    
     endpoint_name = f"ts{int(time.time())}-{model_name}"
 
     model = m.create(
