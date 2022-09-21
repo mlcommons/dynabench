@@ -28,7 +28,6 @@ import common.auth as _auth
 import common.helpers as util
 from common.config import config
 from common.logging import logger
-from evaluation.metrics.metric_getters import get_job_metrics
 from models.badge import BadgeModel
 from models.dataset import AccessTypeEnum, DatasetModel, LogAccessTypeEnum
 from models.model import DeploymentStatusEnum, ModelModel
@@ -54,7 +53,9 @@ from utils.helpers import (  # noqa isort:skip
 
 from utils.helpers import update_evaluation_status  # noqa isort:skip
 
-sys.path.append("../evaluation")  # noqa isort:skip
+sys.path.append("../evaluation/")  # noqa isort:skip
+
+from metrics.metric_getters import get_job_metrics
 
 
 @bottle.get("/models/latest_job_log/<mid:int>/<did:int>")
