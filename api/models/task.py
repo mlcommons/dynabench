@@ -657,6 +657,7 @@ class Task(Base):
     lambda_model = db.Column(db.Text)
 
     unique_validators_for_example_tags = db.Column(db.Boolean, default=False)
+    mlcube_tutorial_markdown = db.Column(db.Text)
     train_file_upload_instructions_md = db.Column(db.Text)
 
     def __repr__(self):

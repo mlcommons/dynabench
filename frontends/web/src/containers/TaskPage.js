@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -207,29 +213,58 @@ const TaskActionButtons = (props) => {
         </Nav.Item>
       )}
       {hasTrainFileUpload && (
-        <Nav.Item className="task-action-btn">
-          <Annotation
-            placement="top"
-            tooltip={
-              "Click here to submit your train files to trigger the training of" +
-              " a model and evaluation on our datasets"
-            }
-          >
-            <OverlayTrigger
-              placement="bottom"
-              delay={{ show: 250, hide: 400 }}
-              overlay={renderVerifyTooltip}
+        <>
+          <Nav.Item className="task-action-btn">
+            <Annotation
+              placement="top"
+              tooltip={
+                "Click here to submit your train files to trigger the training of" +
+                " a model and evaluation on our datasets"
+              }
             >
-              <Button
-                as={Link}
-                className="border-0 blue-color font-weight-bold light-gray-bg"
-                to={"/tasks/" + props.taskCode + "/submit_train_files"}
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 250, hide: 400 }}
+                overlay={renderVerifyTooltip}
               >
-                <i className="fa fa-upload"></i> Submit Train Files
-              </Button>
-            </OverlayTrigger>
-          </Annotation>
-        </Nav.Item>
+                <>
+                  <Button
+                    as={Link}
+                    className="border-0 blue-color font-weight-bold light-gray-bg"
+                    to={"/tasks/" + props.taskCode + "/submit_train_files"}
+                  >
+                    <i className="fa fa-upload"></i> Submit Train Files
+                  </Button>
+                </>
+              </OverlayTrigger>
+            </Annotation>
+          </Nav.Item>
+          <Nav.Item className="task-action-btn">
+            <Annotation
+              placement="top"
+              tooltip={
+                "Click here to submit your train files to trigger the training of" +
+                " a model and evaluation on our datasets"
+              }
+            >
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 250, hide: 400 }}
+                overlay={renderVerifyTooltip}
+              >
+                <>
+                  <Button
+                    as={Link}
+                    className="border-0 blue-color font-weight-bold light-gray-bg"
+                    to={"/tasks/" + props.taskCode + "/mlcube_tutorial"}
+                  >
+                    <i className="fa fa-upload"></i> MLCube Tutorial
+                  </Button>
+                </>
+              </OverlayTrigger>
+            </Annotation>
+          </Nav.Item>
+        </>
       )}
     </Nav>
   );

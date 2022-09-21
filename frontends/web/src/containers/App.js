@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -38,6 +44,7 @@ import ForkAndSnapshotRouter from "../components/TaskLeaderboard/ForkAndSnapshot
 import { Avatar } from "../components/Avatar/Avatar";
 import ReactGA from "react-ga";
 import SubmitInterface from "./SubmitInterface.js";
+import MLCubeTutorial from "./MLCubeTutorial";
 import qs from "qs";
 
 class RouterMonitor extends React.Component {
@@ -326,6 +333,18 @@ class App extends React.Component {
                   path="/tasks/:taskId/submit_train_files"
                   render={(props) => (
                     <SubmitInterface
+                      history={props.history}
+                      location={props.location}
+                      staticContext={props.staticContext}
+                      match={props.match}
+                      submission_type="train_files"
+                    />
+                  )}
+                />
+                <Route
+                  path="/tasks/:taskId/mlcube_tutorial"
+                  render={(props) => (
+                    <MLCubeTutorial
                       history={props.history}
                       location={props.location}
                       staticContext={props.staticContext}
