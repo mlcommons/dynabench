@@ -204,9 +204,8 @@ def do_upload_via_train_files(credentials, tid, model_name):
             dataset.access_type == AccessTypeEnum.scoring
             and dataset.name not in train_files.keys()
         ):
-            print(
-                "Testing"
-            )  # bottle.abort(400, "Need to upload train files for all leaderboard datasets")
+
+            bottle.abort(400, "Need to upload train files for all leaderboard datasets")
 
     # accumulated_predictions = [] Implementation for accumulated labels instead of mean
     # accumulated_labels = [] Implementation for accumulated labels instead of mean
@@ -225,25 +224,16 @@ def do_upload_via_train_files(credentials, tid, model_name):
         deployment_status=DeploymentStatusEnum.predictions_upload,
         secret=secrets.token_hex(),
     )
-
     for name, upload in train_files.items():
 
         current_upload = json.loads(upload.file.read().decode("utf-8"))
         current_upload = current_upload[list(current_upload.keys())[0]]
 
-        train_X = []
-        train_y = []
         id_count = 0
-
         for id, label in current_upload.items():
             id_count += 1
-            try:
-                train_X.append(list(get_train_dataset_embedding(id)))
-                train_y.append(label)
-            except:
-                continue
 
-        if id_count > 500:
+        if id_count > 1000:
             Email().send(
                 contact=user.email,
                 cc_contact="dynabench-site@mlcommons.org",
@@ -252,36 +242,23 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 subject=f"Model {model_name} training failed, too many samples per dataset.",
             )
             bottle.abort(400, "Invalid train file")
-
-        if len(train_X) < 1:
-            Email().send(
-                contact=user.email,
-                cc_contact="dynabench-site@mlcommons.org",
-                template_name="model_train_failed.txt",
-                msg_dict={"name": model_name},
-                subject=f"Model {model_name} training failed, as no IDs corresponded to the training dataset.",
-            )
-            bottle.abort(400, "Invalid train file")
-
-        key_name = name + ".parquet"
-        test_y, test_X, idents = get_test_dataframe(task.task_code, key_name)
-
+        request_packet = {
+            "id_json": current_upload,
+            "bucket_name": "vision-dataperf",
+            "key": f"{name}.parquet",
+        }
         light_model_endpoint = task.lambda_model
-        example = {"x_train": train_X, "y_train": train_y}
-        predictions = {"predictions": []}
 
-        for split in np.array_split(test_X, 6):
-            example["x_test"] = [list(x) for x in split]
-            time.sleep(2)
-            r = requests.post(light_model_endpoint, json=example)
-            predictions["predictions"] = predictions["predictions"] + (
-                r.json()["predictions"]
-            )
+        r = requests.post(light_model_endpoint, json=request_packet)
 
-        f1_score = np.round(
-            sklearn.metrics.f1_score(test_y, predictions["predictions"]) * 100, 1
-        )
+        predictions = r.json()["predictions"]
 
+        test_y = get_test_dataframe(task.task_code, f"{name}.parquet")
+
+        f1_score = np.round(sklearn.metrics.f1_score(test_y, predictions) * 100, 1)
+
+        did = dm.getByName(name).id
+        r_realid = rm.getByTid(tid)[0].rid
         new_score = {
             "dataperf_f1": f1_score,
             "perf": f1_score,
@@ -296,9 +273,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 }
             ],
         }
-
-        did = dm.getByName(name).id
-        r_realid = rm.getByTid(tid)[0].rid
 
         new_score_string = json.dumps(new_score)
 
@@ -315,7 +289,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
         # accumulated_labels += test_y Implementation for accumulated labels instead of mean
 
     # f1_score = sklearn.metrics.f1_score(accumulated_labels, accumulated_predictions) Implementation for accumulated labels instead of mean
-
     Email().send(
         contact=user.email,
         cc_contact="dynabench-site@mlcommons.org",
@@ -325,30 +298,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
     )
 
     return util.json_encode({"success": "ok", "model_id": model[1]})
-
-
-def get_train_dataset_embedding(uid):
-    train_memo = {}
-    s3_client = boto3.client(
-        "s3",
-        aws_access_key_id=config["aws_access_key_id"],
-        aws_secret_access_key=config["aws_secret_access_key"],
-        region_name="eu-west-3",
-    )
-    if uid in train_memo:
-        return train_memo[uid]
-    else:
-        with tempfile.NamedTemporaryFile() as tf:
-            s3_client.download_fileobj(
-                "vision-dataperf",
-                "public_train_dataset_embeddings_dynabench_formatted/train"
-                + str(uid)
-                + ".npy",
-                tf,
-            )
-            array = np.load(tf.name)
-            train_memo[uid] = array
-            return array
 
 
 def get_test_dataframe(bucket_name, key):
@@ -364,9 +313,7 @@ def get_test_dataframe(bucket_name, key):
             tf, columns=["target_label", "Embedding", "ImageID"]
         )
         test_y = [float(x) for x in dataframe["target_label"].to_list()]
-        test_X = [list(x) for x in dataframe["Embedding"].to_list()]
-        idents = dataframe["ImageID"].to_list()
-        return test_y, test_X, idents
+        return test_y
 
 
 @bottle.post("/models/upload_predictions/<tid:int>/<model_name>")
