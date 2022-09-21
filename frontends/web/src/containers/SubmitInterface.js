@@ -85,7 +85,7 @@ class SubmitInterface extends React.Component {
         "/login?&src=" +
           encodeURIComponent(
             "/tasks/" +
-              this.state.task_code +
+              this.props.match.params.taskId +
               "/submit_" +
               this.state.submission_type
           )

@@ -29,7 +29,7 @@ const MLCubeTutorial = (props) => {
             ) +
             "&src=" +
             encodeURIComponent(
-              `/tasks/${props.match.params.taskId}/uploadModel`
+              `/tasks/${props.match.params.taskId}/mlcube_tutorial`
             )
         );
       } else {
@@ -56,7 +56,11 @@ const MLCubeTutorial = (props) => {
                     <Button
                       as={Link}
                       className="text-center border-0 blue-color font-weight-bold light-gray-bg"
-                      to={"/tasks/" + props.taskCode + "/submit_train_files"}
+                      to={
+                        "/tasks/" +
+                        props.match.params.taskId +
+                        "/submit_train_files"
+                      }
                     >
                       <i className="fa fa-upload"></i> Submit Train Files
                     </Button>
