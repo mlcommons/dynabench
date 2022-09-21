@@ -93,7 +93,6 @@ class TaskOwnerPage extends React.Component {
       (result) => {
         this.context.api.getAdminOrOwner(result.id).then(
           (adminOrOwnerResult) => {
-            console.log(this.setState);
             this.setState(
               {
                 admin_or_owner: adminOrOwnerResult.admin_or_owner,
