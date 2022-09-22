@@ -198,14 +198,14 @@ class Builder:
             Role=os.getenv("ROLE_ARN_LAMBDA"),
             PackageType="Image",
             Timeout=800,
-            MemorySize=10240,
+            MemorySize=os.getenv("LAMBDA_MEMORY_SIZE"),
             EphemeralStorage={"Size": 10240},
         )
         return lambda_function
 
     def create_permission_lambda_function(self, function_name: str):
         self.lamda_.add_permission(
-            FunctionName="dynalab-albert-sentiment",
+            FunctionName=function_name,
             StatementId="FunctionURLAllowAccess",
             Action="lambda:InvokeFunctionUrl",
             Principal="*",
