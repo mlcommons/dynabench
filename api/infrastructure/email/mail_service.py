@@ -17,7 +17,7 @@ class Email:
         load_dotenv()
 
         self.login = os.getenv("MAIL_LOGIN")
-        self.pwd = os.getenv("MAIL_PASWORD")
+        self.pwd = os.getenv("MAIL_PASSWORD")
 
         self.local_dir = pathlib.Path(__file__).parent
 
