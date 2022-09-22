@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -273,6 +279,7 @@ class TaskOwnerPage extends React.Component {
       "instructions_md",
       "predictions_upload_instructions_md",
       "train_file_upload_instructions_md",
+      "mlcube_tutorial_markdown",
       "hidden",
       "submitable",
       "create_endpoint",

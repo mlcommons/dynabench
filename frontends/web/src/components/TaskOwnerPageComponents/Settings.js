@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -42,6 +48,7 @@ const Settings = (props) => {
                 task_aws_account_id: props.task.task_aws_account_id,
                 task_gateway_predict_prefix:
                   props.task.task_gateway_predict_prefix,
+                mlcube_tutorial_markdown: props.task.mlcube_tutorial_markdown,
                 train_file_upload_instructions_md:
                   props.task.train_file_upload_instructions_md,
                 context: props.task.context,
@@ -120,32 +127,58 @@ const Settings = (props) => {
                         yaml
                           .load(props.task.config_yaml)
                           .hasOwnProperty("train_file_metric") && (
-                          <Form.Group
-                            as={Row}
-                            controlId="train_file_upload_instructions_md"
-                            className="py-3 my-0"
-                          >
-                            <Form.Label column>
-                              Instructions For Train File Uploads
-                            </Form.Label>
-                            <Col sm="12">
-                              <Form.Control
-                                as="textarea"
-                                defaultValue={
-                                  values.train_file_upload_instructions_md
-                                }
-                                rows="12"
-                                onChange={handleChange}
-                              />
-                              <Form.Text id="paramsHelpBlock" muted>
-                                <Markdown>
-                                  The text will be rendered as
-                                  [markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
-                                  in the train file submission interface.
-                                </Markdown>
-                              </Form.Text>
-                            </Col>
-                          </Form.Group>
+                          <>
+                            <Form.Group
+                              as={Row}
+                              controlId="train_file_upload_instructions_md"
+                              className="py-3 my-0"
+                            >
+                              <Form.Label column>
+                                Instructions For Train File Uploads
+                              </Form.Label>
+                              <Col sm="12">
+                                <Form.Control
+                                  as="textarea"
+                                  defaultValue={
+                                    values.train_file_upload_instructions_md
+                                  }
+                                  rows="12"
+                                  onChange={handleChange}
+                                />
+                                <Form.Text id="paramsHelpBlock" muted>
+                                  <Markdown>
+                                    The text will be rendered as
+                                    [markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
+                                    in the train file submission interface.
+                                  </Markdown>
+                                </Form.Text>
+                              </Col>
+                            </Form.Group>
+                            <Form.Group
+                              as={Row}
+                              controlId="mlcube_tutorial_markdown"
+                              className="py-3 my-0"
+                            >
+                              <Form.Label column>
+                                Instructions For MLCube Tutorial
+                              </Form.Label>
+                              <Col sm="12">
+                                <Form.Control
+                                  as="textarea"
+                                  defaultValue={values.mlcube_tutorial_markdown}
+                                  rows="12"
+                                  onChange={handleChange}
+                                />
+                                <Form.Text id="paramsHelpBlock" muted>
+                                  <Markdown>
+                                    The text will be rendered as
+                                    [markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
+                                    in the train file submission interface.
+                                  </Markdown>
+                                </Form.Text>
+                              </Col>
+                            </Form.Group>
+                          </>
                         )}
                       <Form.Group
                         as={Row}

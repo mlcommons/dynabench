@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -79,7 +85,7 @@ class SubmitInterface extends React.Component {
         "/login?&src=" +
           encodeURIComponent(
             "/tasks/" +
-              this.state.task_code +
+              this.props.match.params.taskId +
               "/submit_" +
               this.state.submission_type
           )
