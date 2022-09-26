@@ -12,7 +12,7 @@ env:
   ECS_SERVICE: dyna-cluster-api-service               # set this to your Amazon ECS service name
   ECS_CLUSTER: dyna-api                # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: ./devops/ecs-task-definition.json # set this to the path to your Amazon ECS task definition
-  CONTAINER_NAME: dyna-cluster-api
+  CONTAINER_NAME: dynabench-cluster
 
 
 jobs:
