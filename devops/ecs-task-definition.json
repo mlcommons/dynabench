@@ -42,7 +42,7 @@
         "memoryReservation": 1024,
         "volumesFrom": [],
         "stopTimeout": null,
-        "image": "877755283837.dkr.ecr.eu-west-3.amazonaws.com/backend-api",
+        "image": "877755283837.dkr.ecr.us-west-1.amazonaws.com/backend-api",
         "startTimeout": null,
         "firelensConfiguration": null,
         "dependsOn": null,
