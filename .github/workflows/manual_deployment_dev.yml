@@ -35,6 +35,13 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Do Something with env files
+        working-directory: ./api 
+        env:
+          DEV_ENV_FILE: ${{ secrets.ENV_VARIABLES }}
+        run:  |
+          echo $DEV_ENV_FILE | base64 --decode > .env
+
       - name: Build, tag, and push image to ECR
         id: build-image
         env:
