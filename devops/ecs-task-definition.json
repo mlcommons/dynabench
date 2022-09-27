@@ -47,7 +47,7 @@
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "877755283837.dkr.ecr.us-west-1.amazonaws.com/dynabench-dev:5f91a5a582a8a4832ca310835eb024d90d41cf08",
+      "image": "877755283837.dkr.ecr.us-west-1.amazonaws.com/dynabench-dev",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": null,
