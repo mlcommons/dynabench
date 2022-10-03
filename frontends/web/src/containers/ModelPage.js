@@ -24,6 +24,7 @@ import {
   Spinner,
   DropdownButton,
   Dropdown,
+  Alert,
 } from "react-bootstrap";
 import Moment from "react-moment";
 import Markdown from "react-markdown";
@@ -39,7 +40,9 @@ import { OverlayProvider, BadgeOverlay } from "./Overlay";
 import { useState } from "react";
 import FloresGrid from "../components/FloresComponents/FloresGrid";
 import ChevronExpandButton from "../components/Buttons/ChevronExpandButton";
+import swal from "sweetalert";
 import { FLORES_TASK_CODES } from "./FloresTaskPage";
+const yaml = require("js-yaml");
 
 const EvalStatusRow = ({
   status,
@@ -83,89 +86,67 @@ const EvalStatusRow = ({
           <td className="text-right t-2" key={`status-${status.dataset_name}`}>
             {(isAdminOrTaskOwner ||
               (status.dataset_log_access_type === "user" && isModelOwner)) && (
-              <Button
-                variant="outline-primary"
-                size="sm"
-                disabled={showSpinner}
-                onClick={() => {
-                  setShowSpinner(
-                    true,
-                    downloadLog(modelId, status.dataset_id).then(
-                      (result) => {
-                        setShowSpinner(false);
-                      },
-                      (error) => {
-                        console.log(error);
-                        setShowSpinner(false);
-                      }
-                    )
-                  );
-                }}
-              >
-                {showSpinner ? (
-                  <Spinner animation="border" size="sm" />
-                ) : (
-                  <i className="fas fa-file-download"></i>
-                )}
-              </Button>
+              <>
+                <Button
+                  className="logs-button"
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={showSpinner}
+                  onClick={() => {
+                    setShowSpinner(
+                      true,
+                      downloadLog(modelId, status.dataset_id).then(
+                        (result) => {
+                          setShowSpinner(false);
+                        },
+                        (error) => {
+                          console.log(error);
+                          setShowSpinner(false);
+                        }
+                      )
+                    );
+                  }}
+                >
+                  {showSpinner ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    <i className="fas fa-file-download">
+                      {" "}
+                      <span className="name-buttons">Logs</span>
+                    </i>
+                  )}
+                </Button>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={showSpinner}
+                  onClick={() => {
+                    setShowSpinner(
+                      true,
+                      downloadPrediction(modelId, status.dataset_id).then(
+                        (result) => {
+                          setShowSpinner(false);
+                        },
+                        (error) => {
+                          console.log(error);
+                          setShowSpinner(false);
+                        }
+                      )
+                    );
+                  }}
+                >
+                  {showSpinner ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    <i className="fas fa-file-download">
+                      {" "}
+                      <span className="name-buttons">Pred</span>
+                    </i>
+                  )}
+                </Button>
+              </>
             )}{" "}
-            {(isAdminOrTaskOwner ||
-              (status.dataset_log_access_type === "user" && isModelOwner)) && (
-              <Button
-                variant="outline-primary"
-                size="sm"
-                disabled={showSpinner}
-                onClick={() => {
-                  setShowSpinner(
-                    true,
-                    downloadPrediction(modelId, status.dataset_id).then(
-                      (result) => {
-                        setShowSpinner(false);
-                      },
-                      (error) => {
-                        console.log(error);
-                        setShowSpinner(false);
-                      }
-                    )
-                  );
-                }}
-              >
-                {showSpinner ? (
-                  <Spinner animation="border" size="sm" />
-                ) : (
-                  <i className="fas fa-file-download"></i>
-                )}
-              </Button>
-            )}
-            {(isAdminOrTaskOwner ||
-              (status.dataset_log_access_type === "user" && isModelOwner)) && (
-              <Button
-                variant="outline-primary"
-                size="sm"
-                disabled={showSpinner}
-                onClick={() => {
-                  setShowSpinner(
-                    true,
-                    downloadPrediction(modelId, status.dataset_id).then(
-                      (result) => {
-                        setShowSpinner(false);
-                      },
-                      (error) => {
-                        console.log(error);
-                        setShowSpinner(false);
-                      }
-                    )
-                  );
-                }}
-              >
-                {showSpinner ? (
-                  <Spinner animation="border" size="sm" />
-                ) : (
-                  <i className="fas fa-file-download"></i>
-                )}
-              </Button>
-            )}
-            <span>
+            <span className="result_metric">
               <EvaluationStatus evaluationStatus={status.evaluation_status} />
             </span>
           </td>
@@ -244,13 +225,14 @@ const ScoreRow = ({
           >
             {(isAdminOrTaskOwner ||
               (score.dataset_log_access_type === "user" && isModelOwner)) && (
-              <Button
-                variant="outline-primary"
-                size="sm"
-                disabled={showSpinner}
-                onClick={() => {
-                  setShowSpinner(
-                    true,
+              <>
+                <Button
+                  className="logs-button"
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={showSpinner}
+                  onClick={() => {
+                    setShowSpinner(true);
                     downloadLog(modelId, score.dataset_id).then(
                       (result) => {
                         setShowSpinner(false);
@@ -258,27 +240,30 @@ const ScoreRow = ({
                       (error) => {
                         console.log(error);
                         setShowSpinner(false);
+                        swal({
+                          title: "Oh no!!",
+                          text: error.error,
+                          icon: "warning",
+                        });
                       }
-                    )
-                  );
-                }}
-              >
-                {showSpinner ? (
-                  <Spinner animation="border" size="sm" />
-                ) : (
-                  <i className="fas fa-file-download"></i>
-                )}
-              </Button>
-            )}{" "}
-            {(isAdminOrTaskOwner ||
-              (score.dataset_log_access_type === "user" && isModelOwner)) && (
-              <Button
-                variant="outline-primary"
-                size="sm"
-                disabled={showSpinner}
-                onClick={() => {
-                  setShowSpinner(
-                    true,
+                    );
+                  }}
+                >
+                  {showSpinner ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    <i className="fas fa-file-download">
+                      {" "}
+                      <span className="name-buttons">Logs</span>
+                    </i>
+                  )}
+                </Button>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={showSpinner}
+                  onClick={() => {
+                    setShowSpinner(true);
                     downloadPrediction(modelId, score.dataset_id).then(
                       (result) => {
                         setShowSpinner(false);
@@ -286,19 +271,31 @@ const ScoreRow = ({
                       (error) => {
                         console.log(error);
                         setShowSpinner(false);
+                        swal({
+                          title: "Oh no!!",
+                          text: error.error,
+                          icon: "warning",
+                        });
                       }
-                    )
-                  );
-                }}
-              >
-                {showSpinner ? (
-                  <Spinner animation="border" size="sm" />
-                ) : (
-                  <i className="fas fa-file-download"></i>
-                )}
-              </Button>
-            )}
-            <span>
+                    );
+                  }}
+                >
+                  {showSpinner ? (
+                    <>
+                      <Spinner animation="border" size="sm" />
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-file-download">
+                        {" "}
+                        <span className="name-buttons">Pred</span>
+                      </i>
+                    </>
+                  )}
+                </Button>
+              </>
+            )}{" "}
+            <span className="result_metric">
               {expanded ? (
                 <b>
                   {parseFloat(score.accuracy).toFixed(2) +
@@ -447,21 +444,11 @@ class ModelPage extends React.Component {
   };
 
   handleInteract = () => {
-    const user_provided_gateway_url =
-      this.state.task.task_gateway_predict_prefix != null
-        ? this.state.task.task_gateway_predict_prefix.trim()
-        : "";
-    const gateway_url =
-      user_provided_gateway_url != ""
-        ? user_provided_gateway_url
-        : "obws766r82";
     this.props.history.push({
       pathname: `/tasks/${this.state.taskCode}/create`,
       state: {
         detail: {
-          endpointUrl:
-            `https://${gateway_url}.execute-api.${this.state.task.aws_region}.amazonaws.com/predict?model=` +
-            this.state.model.endpoint_name,
+          endpointUrl: this.state.model.light_model,
           name: this.state.model.name,
           mid: this.state.model.id,
         },
@@ -632,6 +619,11 @@ ${latexTableContent}
   render() {
     const { model, task, taskCode } = this.state;
 
+    const config = yaml.load(task.config_yaml);
+    const perf_metric_metric_configs = config.perf_metric
+      ? config.perf_metric
+      : [];
+
     const isFlores = FLORES_TASK_CODES.slice(1).includes(task.task_code);
     const isModelOwner =
       parseInt(this.state.model.uid) === parseInt(this.state.ctxUserId);
@@ -672,6 +664,7 @@ ${latexTableContent}
                     {"< Back"}
                   </Button>
                   <div>
+                    {console.log(model)}
                     {(isModelOwner || model.is_published) &&
                     model.deployment_status === "deployed" ? (
                       <Button
@@ -874,11 +867,8 @@ ${latexTableContent}
                           <tr>
                             <td>
                               <div className="parent">
-                                <label className="child1">
-                                  <b>chrf_pp</b>
-                                </label>
                                 <label className="child2">
-                                  <b>sp_bleu</b>
+                                  <b>{perf_metric_metric_configs.type}</b>
                                 </label>
                               </div>
                             </td>

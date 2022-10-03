@@ -35,6 +35,7 @@ export default class ApiService {
     this.updating_already = false;
     this.mode = "normal";
     this.exportDatasetLog = this.exportDatasetLog.bind(this);
+    this.exportPrediction = this.exportPrediction.bind(this);
   }
 
   setMturkMode() {
@@ -467,6 +468,15 @@ export default class ApiService {
     });
   }
 
+  exportPrediction(mid, did) {
+    return this.fetch(`${this.domain}/models/predictions/${mid}/${did}`, {
+      method: "GET",
+    }).then((res) => {
+      res = new TextEncoder("utf-8").encode(JSON.stringify(res));
+      return download(res, "log.json", "text/json");
+    });
+  }
+
   getExampleMetadata(id) {
     return this.fetch(`${this.domain}/examples/${id}/metadata`, {
       method: "GET",
@@ -653,15 +663,6 @@ export default class ApiService {
   createRound(tid) {
     return this.fetch(`${this.domain}/tasks/create_round/${tid}`, {
       method: "POST",
-    });
-  }
-
-  exportPrediction(mid, did) {
-    return this.fetch(`${this.domain}/models/predictions/${mid}/${did}`, {
-      method: "GET",
-    }).then((res) => {
-      res = new TextEncoder("utf-8").encode(JSON.stringify(res));
-      return download(res, "log.json", "text/json");
     });
   }
 

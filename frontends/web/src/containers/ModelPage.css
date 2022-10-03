@@ -29,3 +29,16 @@
     position: absolute;
     right: 35%;
 }
+
+.result_metric {
+    padding-left: 30px;
+}
+
+.logs-button {
+    margin-right: 7px;
+    margin-left: 7px;
+}
+
+.name-buttons {
+    font-family: 'OpenSansRegular', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
