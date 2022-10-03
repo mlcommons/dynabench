@@ -232,7 +232,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
                     cc_contact="dynabench-site@mlcommons.org",
                     template_name="model_train_failed.txt",
                     msg_dict={"name": model_name, "model_id": model[1]},
-                    subject=f"Model {model_name} training failed. File type is wrong",
+                    subject=f"Model {model_name} training failed. File type is wrong. Submit a .txt file. ",
                 )
                 bottle.abort(400, "Unknown file type")
 
