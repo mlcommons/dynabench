@@ -655,6 +655,7 @@ class Task(Base):
     context = db.Column(db.Text)
     dataperf = db.Column(db.Boolean, default=False)
     lambda_model = db.Column(db.Text)
+    mlsphere_json = db.Column(db.JSON)
 
     unique_validators_for_example_tags = db.Column(db.Boolean, default=False)
     mlcube_tutorial_markdown = db.Column(db.Text)
