@@ -360,7 +360,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         predictions = r.json()["predictions"]
 
-        test_y = get_test_dataframe("vision-dataperf", f"{name}.parquet")
+        test_y = get_test_dataframe(task.task_code, f"{name}.parquet")
 
         f1_score = np.round(sklearn.metrics.f1_score(test_y, predictions) * 100, 1)
 
