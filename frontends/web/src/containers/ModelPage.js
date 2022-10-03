@@ -10,38 +10,36 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import {
-  Container,
-  Row,
   Badge,
-  Col,
-  Card,
   Button,
-  Table,
+  Card,
+  Col,
+  Container,
+  Dropdown,
+  DropdownButton,
   InputGroup,
   Modal,
+  Row,
   Spinner,
-  DropdownButton,
-  Dropdown,
-  Alert,
+  Table,
 } from "react-bootstrap";
-import Moment from "react-moment";
 import Markdown from "react-markdown";
+import Moment from "react-moment";
 import { Link } from "react-router-dom";
-import UserContext from "./UserContext";
+import swal from "sweetalert";
+import ChevronExpandButton from "../components/Buttons/ChevronExpandButton";
+import FloresGrid from "../components/FloresComponents/FloresGrid";
+import { FLORES_TASK_CODES } from "./FloresTaskPage";
 import "./ModelPage.css";
 import {
+  AnonymousStatus,
   DeploymentStatus,
   EvaluationStatus,
-  AnonymousStatus,
 } from "./ModelStatus";
-import { OverlayProvider, BadgeOverlay } from "./Overlay";
-import { useState } from "react";
-import FloresGrid from "../components/FloresComponents/FloresGrid";
-import ChevronExpandButton from "../components/Buttons/ChevronExpandButton";
-import swal from "sweetalert";
-import { FLORES_TASK_CODES } from "./FloresTaskPage";
+import { BadgeOverlay, OverlayProvider } from "./Overlay";
+import UserContext from "./UserContext";
 const yaml = require("js-yaml");
 
 const EvalStatusRow = ({
