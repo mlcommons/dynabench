@@ -1,10 +1,8 @@
 name: Upload image to ECR
 on:
-  workflow_dispatch:
-    inputs:
-      branch_name:
-        required: true
-        description: Name of branch  to deploy.
+  push:
+    branches:
+      - main
 
 env:
   AWS_REGION: us-west-1                   # set this to your preferred AWS region, e.g. us-west-1
