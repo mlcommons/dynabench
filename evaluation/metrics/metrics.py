@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -10,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import sacrebleu
 import sentencepiece
-from sklearn.metrics import f1_score
+from sklearn.metrics import auc, f1_score, roc_curve
 
 from metrics.instance_property import instance_property
 
@@ -91,6 +95,34 @@ def get_dataperf_f1_meta(task=None):
     return {
         "unit": "%",
         "pretty_name": "Dataperf F1",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
+def get_dataperf_auc(predictions, labels):
+    fpt, tpr, thresholds = roc_curve(labels, predictions)
+    return auc(fpt, tpr)
+
+
+def get_dataperf_auc_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "AUC",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
+def get_dataperf_fraction_of_fixes(required_fixes, total_fixes):
+    fraction_of_fixes = required_fixes / total_fixes
+    return fraction_of_fixes
+
+
+def get_dataperf_fraction_of_fixes_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Fraction of fixes",
         "utility_direction": 1,
         "offset": 0,
     }
