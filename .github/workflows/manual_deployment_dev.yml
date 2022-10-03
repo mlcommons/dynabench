@@ -34,7 +34,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Do Something with env files
-        working-directory: ./api 
+        working-directory: ./api
         env:
           DEV_ENV_FILE: ${{ secrets.ENV_VARIABLES }}
         run:  |
