@@ -7,7 +7,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import json
+import os
 import secrets
+import shutil
 import sys
 import tempfile
 import time
@@ -153,15 +155,24 @@ def get_latest_job_log(credentials, mid, did):
 @bottle.post("/models/upload_train_files/<tid:int>/<model_name>")
 @_auth.requires_auth
 def do_upload_via_train_files(credentials, tid, model_name):
+    s3_client = boto3.client(
+        "s3",
+        aws_access_key_id=config["aws_access_key_id"],
+        aws_secret_access_key=config["aws_secret_access_key"],
+        region_name="eu-west-3",
+    )
+
     u = UserModel()
     user_id = credentials["id"]
     user = u.get(user_id)
+
     if not user:
         logger.error("Invalid user detail for id (%s)" % (user_id))
         bottle.abort(404, "User information not found")
 
     tm = TaskModel()
     task = tm.get(tid)
+
     task_config = yaml.load(task.config_yaml, yaml.SafeLoader)
     if "train_file_metric" not in task_config:
         bottle.abort(
@@ -198,6 +209,111 @@ def do_upload_via_train_files(credentials, tid, model_name):
         if train_files[name] is not None
     }
 
+    endpoint_name = f"ts{int(time.time())}-{model_name}"
+    model = m.create(
+        task_id=tid,
+        user_id=user_id,
+        name=model_name,
+        shortname="",
+        longdesc="",
+        desc="",
+        upload_datetime=db.sql.func.now(),
+        endpoint_name=endpoint_name,
+        deployment_status=DeploymentStatusEnum.predictions_upload,
+        secret=secrets.token_hex(),
+    )
+
+    if task.is_decen_task:
+        path = "templates/decen_dataperf"
+        for name, upload in train_files.items():
+            if upload.content_type != "text/plain":
+                Email().send(
+                    contact=user.email,
+                    cc_contact="dynabench-site@mlcommons.org",
+                    template_name="model_train_failed.txt",
+                    msg_dict={"name": model_name, "model_id": model[1]},
+                    subject=f"Model {model_name} training failed. File type is wrong",
+                )
+                bottle.abort(400, "Unknown file type")
+
+            save_path = os.path.join(path, "submissions", upload.filename)
+            upload.save(save_path, overwrite=True)
+
+        mlsphere_config = task.mlsphere_json
+        with open(f"{path}/mlsphere.json", "w") as mlsphere:
+            json.dump(mlsphere_config, mlsphere)
+
+        shutil.make_archive(f"{path}/submission", "zip", path)
+
+        bucket_name = task.s3_bucket
+        s3_client.upload_file(
+            f"{path}/submission.zip",
+            bucket_name,
+            f"{task.task_code}/submissions/{model[1]}.zip",
+        )
+
+        decen_request = requests.post(
+            f"{task.lambda_model}s",
+            json={
+                "type": "general",
+                "payload": {
+                    "url": f"s3://{bucket_name}/{task.task_code}/submissions/{model[1]}.zip",
+                    "submission_id": str(model[1]),
+                },
+                "status": "submitted",
+                "source": bucket_name,
+            },
+        )
+
+        request_id = decen_request.json()["id"]
+        decen_response = requests.get(f"{task.lambda_model}/{request_id}")
+
+        while bool(decen_response.json()["returned_payload"]) is False:
+            print("This ID has no response yet")
+            time.sleep(600)
+            decen_response = requests.get(f"{task.lambda_model}/{request_id}")
+
+        score = decen_response.json()["returned_payload"]["results"][0]["auc_score"][
+            "random"
+        ]["fraction_fixes"]
+        score = 100 * np.round(score, 4)
+        new_score = {
+            str(task_config["perf_metric"]["type"]): score,
+            "perf": score,
+            "perf_std": 0.0,
+            "perf_by_tag": [
+                {
+                    "tag": dataset_names[0],
+                    "pretty_perf": f"{score} %",
+                    "perf": score,
+                    "perf_std": 0.0,
+                    "perf_dict": {"dataperf_f1": score},
+                }
+            ],
+        }
+
+        did = dm.getByName(name).id
+        r_realid = rm.getByTid(tid)[0].rid
+        new_score_string = json.dumps(new_score)
+
+        sm.create(
+            model_id=model[1],
+            r_realid=r_realid,
+            did=did,
+            pretty_perf=f"{score} %",
+            perf=score,
+            metadata_json=new_score_string,
+        )
+        Email().send(
+            contact=user.email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": model_name, "model_id": model[1]},
+            subject=f"Model {model_name} training succeeded.",
+        )
+
+        return util.json_encode({"success": "ok", "model_id": model[1]})
+
     for dataset in datasets:
         if (
             dataset.access_type == AccessTypeEnum.scoring
@@ -215,20 +331,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
     # accumulated_predictions = [] Implementation for accumulated labels instead of mean
     # accumulated_labels = [] Implementation for accumulated labels instead of mean
 
-    endpoint_name = f"ts{int(time.time())}-{model_name}"
-
-    model = m.create(
-        task_id=tid,
-        user_id=user_id,
-        name=model_name,
-        shortname="",
-        longdesc="",
-        desc="",
-        upload_datetime=db.sql.func.now(),
-        endpoint_name=endpoint_name,
-        deployment_status=DeploymentStatusEnum.predictions_upload,
-        secret=secrets.token_hex(),
-    )
     for name, upload in train_files.items():
 
         current_upload = json.loads(upload.file.read().decode("utf-8"))

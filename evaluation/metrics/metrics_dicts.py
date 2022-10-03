@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -15,6 +19,8 @@ eval_metrics_dict = {
     "chrf_pp": metrics.get_chrf_pp,
     "vqa_accuracy": metrics.get_vqa_accuracy,
     "dataperf_f1": metrics.get_dataperf_f1,
+    "dataperf_auc": metrics.get_dataperf_auc,
+    "dataperf_fraction_of_fixes": metrics.get_dataperf_fraction_of_fixes,
 }
 
 delta_metrics_dict = {
@@ -40,4 +46,6 @@ metrics_meta_dict = {
     "robustness": metrics.get_robustness_meta,
     "vqa_accuracy": metrics.get_vqa_accuracy_meta,
     "dataperf_f1": metrics.get_dataperf_f1_meta,
+    "dataperf_auc": metrics.get_dataperf_auc_meta,
+    "dataperf_fraction_of_fixes": metrics.get_dataperf_fraction_of_fixes_meta,
 }
