@@ -146,8 +146,69 @@ def get_latest_job_log(credentials, mid, did):
                 else:
                     break
             perturb_prefix_to_logs[perturb_prefix] = logs_from_latest_job
-
     return util.json_encode(perturb_prefix_to_logs)
+
+
+@bottle.get("/models/predictions/<mid:int>/<did:int>")
+@_auth.requires_auth
+def get_predictions_model(credentials, mid, did):
+    client = boto3.client(
+        "s3",
+        aws_access_key_id=config["aws_access_key_id"],
+        aws_secret_access_key=config["aws_secret_access_key"],
+        region_name=config["aws_region"],
+    )
+    u = UserModel()
+    uid = credentials["id"]
+    user = u.get(uid)
+    if not user:
+        logger.error("Invalid user detail for id (%s)" % (uid))
+        bottle.abort(404, "User information not found")
+
+    mm = ModelModel()
+    model = mm.get(mid)
+    if model.uid != uid:
+        ensure_owner_or_admin(model.tid, uid)
+
+    dm = DatasetModel()
+    dataset = dm.get(did)
+    if dataset.log_access_type == LogAccessTypeEnum.owner:
+        ensure_owner_or_admin(model.tid, uid)
+
+    tm = TaskModel()
+    task = tm.get(model.tid)
+
+    predictions_metrics = [
+        task_config["type"]
+        for task_config in yaml.load(task.config_yaml, yaml.SafeLoader).get(
+            "delta_metrics", []
+        )
+    ]
+    name_dataset = dataset.name.replace(" ", "-")
+    predictions_metrics = ["fairness", "robustness"]
+    predictions_metrics = [item + "-" + name_dataset for item in predictions_metrics]
+    predictions_metrics.append(name_dataset)
+    print(model.name.replace(" ", "-"))
+    predictions = {}
+    try:
+        for prediction in predictions_metrics:
+            file_to_read = "predictions/{}/{}/{}.jsonl.out".format(
+                task.task_code, model.name.replace(" ", "-"), prediction
+            )
+            result = (
+                client.get_object(
+                    Bucket=config["aws_s3_bucket_name"], Key=file_to_read
+                )["Body"]
+                .read()
+                .decode()
+            )
+            predictions[prediction] = result
+    except Exception as ex:
+        bottle.abort(
+            400,
+            f"""There are no predictions saved for this model. Log: {ex}""",
+        )
+    return util.json_encode(predictions)
 
 
 @bottle.post("/models/upload_train_files/<tid:int>/<model_name>")
@@ -208,7 +269,8 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 cc_contact="dynabench-site@mlcommons.org",
                 template_name="model_train_failed.txt",
                 msg_dict={"name": model_name},
-                subject=f"Model {model_name} training failed. You must include a training file for all classes",
+                subject=f"""Model {model_name} training failed. You must include
+                a training file for all classes""",
             )
             bottle.abort(400, "Need to upload train files for all leaderboard datasets")
 
@@ -244,7 +306,8 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 cc_contact="dynabench-site@mlcommons.org",
                 template_name="model_train_failed.txt",
                 msg_dict={"name": model_name},
-                subject=f"Model {model_name} training failed. You surpassed the maximum amount of samples.",
+                subject=f"""Model {model_name} training failed. You surpassed
+                the maximum amount of samples.""",
             )
             bottle.abort(400, "Invalid train file")
         request_packet = {
@@ -290,10 +353,13 @@ def do_upload_via_train_files(credentials, tid, model_name):
             metadata_json=new_score_string,
         )
 
-        # accumulated_predictions += predictions['predictions'] Implementation for accumulated labels instead of mean
-        # accumulated_labels += test_y Implementation for accumulated labels instead of mean
+        # accumulated_predictions += predictions['predictions']
+        # Implementation for accumulated labels instead of mean
+        # accumulated_labels += test_y Implementation for
+        # accumulated labels instead of mean
 
-    # f1_score = sklearn.metrics.f1_score(accumulated_labels, accumulated_predictions) Implementation for accumulated labels instead of mean
+    # f1_score = sklearn.metrics.f1_score(accumulated_labels, accumulated_predictions)
+    # Implementation for accumulated labels instead of mean
     Email().send(
         contact=user.email,
         cc_contact="dynabench-site@mlcommons.org",
