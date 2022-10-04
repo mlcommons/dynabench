@@ -40,7 +40,8 @@
         "react-text-annotate": "^0.3.0",
         "recharts": "^1.8.5",
         "set-value": "^4.0.1",
-        "style-loader": "^1.2.1"
+        "style-loader": "^1.2.1",
+        "sweetalert": "^2.1.2"
     },
     "devDependencies": {
         "@babel/core": "^7.10.5",
