@@ -329,50 +329,63 @@ def do_upload_via_train_files(credentials, tid, model_name):
         request_id = decen_request.json()["id"]
         decen_response = requests.get(f"{task.lambda_model}/{request_id}")
 
+        request_attempts = 0
         while bool(decen_response.json()["returned_payload"]) is False:
-            print("This ID has no response yet")
+            print(f"The ID {request_id} has no response yet")
             time.sleep(600)
             decen_response = requests.get(f"{task.lambda_model}/{request_id}")
+            request_attempts += 1
+            if request_attempts == 18:
+                break
 
-        score = decen_response.json()["returned_payload"]["results"][0]["auc_score"][
-            "random"
-        ]["fraction_fixes"]
-        score = 100 * np.round(score, 4)
-        new_score = {
-            str(task_config["perf_metric"]["type"]): score,
-            "perf": score,
-            "perf_std": 0.0,
-            "perf_by_tag": [
-                {
-                    "tag": dataset_names[0],
-                    "pretty_perf": f"{score} %",
-                    "perf": score,
-                    "perf_std": 0.0,
-                    "perf_dict": {"dataperf_f1": score},
-                }
-            ],
-        }
+        if decen_response:
+            score = decen_response.json()["returned_payload"]["results"][0][
+                "auc_score"
+            ]["random"]["fraction_fixes"]
+            score = 100 * np.round(score, 4)
+            new_score = {
+                str(task_config["perf_metric"]["type"]): score,
+                "perf": score,
+                "perf_std": 0.0,
+                "perf_by_tag": [
+                    {
+                        "tag": dataset_names[0],
+                        "pretty_perf": f"{score} %",
+                        "perf": score,
+                        "perf_std": 0.0,
+                        "perf_dict": {"dataperf_f1": score},
+                    }
+                ],
+            }
 
-        did = dm.getByName(name).id
-        r_realid = rm.getByTid(tid)[0].rid
-        new_score_string = json.dumps(new_score)
+            did = dm.getByName(name).id
+            r_realid = rm.getByTid(tid)[0].rid
+            new_score_string = json.dumps(new_score)
 
-        sm.create(
-            model_id=model[1],
-            r_realid=r_realid,
-            did=did,
-            pretty_perf=f"{score} %",
-            perf=score,
-            metadata_json=new_score_string,
-        )
-        Email().send(
-            contact=user.email,
-            cc_contact="dynabench-site@mlcommons.org",
-            template_name="model_train_successful.txt",
-            msg_dict={"name": model_name, "model_id": model[1]},
-            subject=f"Model {model_name} training succeeded.",
-        )
-
+            sm.create(
+                model_id=model[1],
+                r_realid=r_realid,
+                did=did,
+                pretty_perf=f"{score} %",
+                perf=score,
+                metadata_json=new_score_string,
+            )
+            Email().send(
+                contact=user.email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_train_successful.txt",
+                msg_dict={"name": model_name, "model_id": model[1]},
+                subject=f"Model {model_name} training succeeded.",
+            )
+        else:
+            Email().send(
+                contact=user.email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_train_failed.txt",
+                msg_dict={"name": model_name, "model_id": model[1]},
+                subject=f"Model {model_name} training failed as the server wasn't available",
+            )
+            bottle.abort(400, "Decentralized container isn't available")
         return util.json_encode({"success": "ok", "model_id": model[1]})
 
     for dataset in datasets:
