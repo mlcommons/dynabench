@@ -87,9 +87,10 @@ class Builder:
             registry=ecr_config["ecr_url"],
         )
         path = f"{folder_name}/{model_name}"
-        absolute_path = os.getenv("ABSOLUTE_PATH")
+        absolute_path = os.getcwd()
+        path = absolute_path + path.strip(".")
         image, _ = self.docker_client.images.build(
-            path=path, tag=tag, dockerfile=f"{absolute_path}/{path}/{docker_name}"
+            path=path, tag=tag, dockerfile=f"{path}/{docker_name}"
         )
         image.tag(repository=repository_name, tag=tag)
         self.docker_client.images.push(
@@ -197,14 +198,14 @@ class Builder:
             Role=os.getenv("ROLE_ARN_LAMBDA"),
             PackageType="Image",
             Timeout=800,
-            MemorySize=10240,
+            MemorySize=os.getenv("LAMBDA_MEMORY_SIZE"),
             EphemeralStorage={"Size": 10240},
         )
         return lambda_function
 
     def create_permission_lambda_function(self, function_name: str):
         self.lamda_.add_permission(
-            FunctionName="dynalab-albert-sentiment",
+            FunctionName=function_name,
             StatementId="FunctionURLAllowAccess",
             Action="lambda:InvokeFunctionUrl",
             Principal="*",

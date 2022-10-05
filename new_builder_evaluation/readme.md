@@ -489,7 +489,11 @@ pip3 install -r requirements.txt
 
 ### Creating .env file <a name="env"></a>
 
-At this point you have stored 9 variables, but you are missing just one called *CENTRALIZED_URL*. The value for this variable is http://builder.dynabench.org/
+At this point you have stored 10 variables, but you are missing just 3
+
+- *CENTRALIZED_URL* The value for this variable is http://builder.dynabench.org/
+- *CPU_UTILIZATION* add 1024 for each core you want to use. If you want to use 4 cores the value of this variable is going to be 4096
+- *MEMORY_UTILIZATION* add 1024 for each GB you want to use as ram. If you want to use 16 gb the value of this variable is going to be 16384
 
 Create the .env file by running the following command:
 

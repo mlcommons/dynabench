@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from app.domain.evaluation import Evaluation
 from app.infrastructure.repositories.dataset import DatasetRepository
+from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
@@ -64,3 +65,9 @@ def post_descentralized_scores(scores: dict):
 def get_by_id(id: int):
     task = TaskRepository()
     return task.get_by_id(id)
+
+
+@router.post("/update_light_model")
+def update_light_model(params):
+    model = ModelRepository()
+    model.update_light_model(params["model_id"], params["url_light_model"])

@@ -90,6 +90,14 @@ class Evaluation:
 
         return post.status_code
 
+    def update_light_model(self, model_id: int, url_light_model: str):
+        centralized_host = os.getenv("CENTRALIZED_URL")
+        post = requests.post(
+            f"{centralized_host}evaluation/update_light_model",
+            json={"model_id": model_id, "url_light_model": url_light_model},
+        )
+        return post.status_code
+
     def single_evaluation_ecs(self, ip: str, json_data: dict):
         headers = {
             "accept": "application/json",
@@ -270,7 +278,7 @@ class Evaluation:
     def get_throughput(self, num_samples: int, seconds_time_prediction: float):
         return round(num_samples / seconds_time_prediction, 2)
 
-    def test_eval(self, task: str, model_s3_zip: str, model_id: int) -> dict:
+    def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
         tasks = self.get_model_id_and_task_code(task)
         delta_metrics_task = self.get_task_configuration(tasks["id"])["delta_metrics"]
         delta_metrics_task = [
@@ -372,7 +380,6 @@ class Evaluation:
             )
 
             new_score = {
-                str(metric): main_metric["perf"],
                 "perf": main_metric["perf"],
                 "pretty_perf": main_metric["pretty_perf"],
                 "fairness": final_scores["fairness"],
@@ -383,111 +390,17 @@ class Evaluation:
                 "memory_utilization": final_scores["memory"],
                 "examples_per_second": final_scores["throughput"],
             }
-
-            new_score["metadata_json"] = json.dumps(new_score)
+            final_score = new_score.copy()
+            metric_name = str(metric)
+            final_score[metric_name] = main_metric["perf"]
+            new_score["metadata_json"] = json.dumps(final_score)
 
             self.post_descentralized_scores(new_score)
             new_scores.append(new_score)
+            url_light_model = self.builder.create_light_model(model_name, folder_name)
+            self.update_light_model(model_id, url_light_model)
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
-        return new_scores
-
-    def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
-        tasks = self.get_model_id_and_task_code(task)
-        delta_metrics = self.get_task_configuration(tasks["id"])["delta_metrics"]
-        delta_metrics = [delta_metric["type"] for delta_metric in delta_metrics]
-        jsonl_scoring_datasets = self.get_scoring_datasets(tasks["id"])
-        datasets = self.downloads_scoring_datasets(
-            jsonl_scoring_datasets,
-            self.s3_bucket,
-            tasks["task_code"],
-            delta_metrics,
-            model_s3_zip,
-        )
-        rounds = list(
-            map(
-                int, {round for rounds in datasets for round in str(rounds["round_id"])}
-            )
-        )
-        new_scores = []
-        for round in rounds:
-            round_datasets = [
-                dataset for dataset in datasets if dataset["round_id"] == round
-            ]
-            prediction_dict, dataset_id = self.heavy_prediction(
-                round_datasets, tasks["task_code"], model_s3_zip
-            )
-            data_dict = {}
-            for data_version, data_types in prediction_dict.items():
-                for data_type in data_types:
-                    data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
-                        prediction_dict[data_version][data_type]
-                    )
-            perturb_exists = (
-                "fairness_predictions" in data_dict
-                or "robustness_predictions" in data_dict
-            )
-
-            task_configuration = self.get_task_configuration(tasks["id"])["config_yaml"]
-            input_formatter = InputFormatter(task_configuration)
-
-            formatted_dict = {}
-            for data_type in data_dict:
-                formatted_key = f"formatted_{data_type}"
-                grouped_key = f"grouped_{data_type}"
-                if "dataset" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_labels(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_labels(
-                        formatted_dict[formatted_key]
-                    )
-                elif "predictions" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_predictions(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_predictions(
-                        formatted_dict[formatted_key]
-                    )
-
-            evaluator = Evaluator(task_configuration)
-            main_metric = evaluator.evaluate(
-                formatted_dict["formatted_base_predictions"],
-                formatted_dict["formatted_base_dataset"],
-            )
-            delta_metrics = {}
-            if perturb_exists:
-                delta_metrics = evaluator.evaluate_delta_metrics(
-                    formatted_dict.get("grouped_base_predictions"),
-                    formatted_dict.get("grouped_robustness_predictions"),
-                    formatted_dict.get("grouped_fairness_predictions"),
-                )
-
-            metric = task_configuration["perf_metric"]["type"]
-            final_scores = {
-                str(metric): main_metric,
-                "fairness": delta_metrics.get("fairness"),
-                "robustness": delta_metrics.get("robustness"),
-                "memory": 0,
-                "throughput": 0,
-            }
-            round_info = self.get_round_info_by_round_and_task(tasks["id"], round)
-            new_score = {
-                "perf": main_metric["perf"],
-                "pretty_perf": main_metric["pretty_perf"],
-                "fairness": final_scores["fairness"],
-                "robustness": final_scores["robustness"],
-                "mid": model_id,
-                "r_realid": round_info["id"],
-                "did": dataset_id,
-                "memory_utilization": final_scores["memory"],
-                "examples_per_second": final_scores["throughput"],
-            }
-
-            self.post_descentralized_scores(new_score)
-            new_scores.append(new_score)
-
-            shutil.rmtree("./app/{}".format(model_s3_zip.split(".")[0]))
         return new_scores
 
     def get_sqs_messages(self):
