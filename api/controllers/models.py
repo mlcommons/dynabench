@@ -286,6 +286,12 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
     if task.is_decen_task:
         path = "templates/decen_dataperf"
+
+        mlsphere_config = task.mlsphere_json
+        with open(f"{path}/mlsphere.json", "w") as mlsphere:
+            json.dump(mlsphere_config, mlsphere)
+
+        id_list = []
         for name, upload in train_files.items():
             if upload.content_type != "text/plain":
                 Email().send(
@@ -297,95 +303,44 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 )
                 bottle.abort(400, "Unknown file type")
 
-            save_path = os.path.join(path, "submissions", upload.filename)
+            save_path = os.path.join(path, "submissions", f"{name}_{model[1]}.txt")
             upload.save(save_path, overwrite=True)
+            shutil.make_archive(f"{path}/{name}_{model[1]}", "zip", path)
 
-        mlsphere_config = task.mlsphere_json
-        with open(f"{path}/mlsphere.json", "w") as mlsphere:
-            json.dump(mlsphere_config, mlsphere)
+            bucket_name = task.s3_bucket
+            s3_client.upload_file(
+                f"{path}/{name}_{model[1]}.zip",
+                bucket_name,
+                f"{task.task_code}/submissions/{name}_{model[1]}.zip",
+            )
 
-        shutil.make_archive(f"{path}/submission", "zip", path)
+            os.remove(f"{path}/submissions/{name}_{model[1]}.txt")
+            os.remove(f"{path}/{name}_{model[1]}.zip")
 
-        bucket_name = task.s3_bucket
-        s3_client.upload_file(
-            f"{path}/submission.zip",
-            bucket_name,
-            f"{task.task_code}/submissions/{model[1]}.zip",
-        )
-
-        decen_request = requests.post(
-            f"{task.lambda_model}s",
-            json={
-                "type": "general",
-                "payload": {
-                    "url": f"s3://{bucket_name}/{task.task_code}/submissions/{model[1]}.zip",
-                    "submission_id": str(model[1]),
+            decen_request = requests.post(
+                f"{task.lambda_model}s",
+                json={
+                    "type": "general",
+                    "payload": {
+                        "url": f"s3://{bucket_name}/{task.task_code}/submissions/{name}_{model[1]}.zip",
+                        "submission_id": f"{name}_{model[1]}",
+                    },
+                    "status": "submitted",
+                    "source": bucket_name,
                 },
-                "status": "submitted",
-                "source": bucket_name,
-            },
+            )
+            time.sleep(10)
+            id_list.append(decen_request.json()["id"])
+        print(id_list)
+
+        Email().send(
+            contact=user.email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": model_name, "model_id": model[1]},
+            subject=f"Model {model_name} training succeeded.",
         )
 
-        request_id = decen_request.json()["id"]
-        decen_response = requests.get(f"{task.lambda_model}/{request_id}")
-
-        request_attempts = 0
-        while bool(decen_response.json()["returned_payload"]) is False:
-            print(f"The ID {request_id} has no response yet")
-            time.sleep(600)
-            decen_response = requests.get(f"{task.lambda_model}/{request_id}")
-            request_attempts += 1
-            if request_attempts == 18:
-                break
-
-        if decen_response:
-            score = decen_response.json()["returned_payload"]["results"][0][
-                "auc_score"
-            ]["random"]["fraction_fixes"]
-            score = 100 * np.round(score, 4)
-            new_score = {
-                str(task_config["perf_metric"]["type"]): score,
-                "perf": score,
-                "perf_std": 0.0,
-                "perf_by_tag": [
-                    {
-                        "tag": dataset_names[0],
-                        "pretty_perf": f"{score} %",
-                        "perf": score,
-                        "perf_std": 0.0,
-                        "perf_dict": {"dataperf_f1": score},
-                    }
-                ],
-            }
-
-            did = dm.getByName(name).id
-            r_realid = rm.getByTid(tid)[0].rid
-            new_score_string = json.dumps(new_score)
-
-            sm.create(
-                model_id=model[1],
-                r_realid=r_realid,
-                did=did,
-                pretty_perf=f"{score} %",
-                perf=score,
-                metadata_json=new_score_string,
-            )
-            Email().send(
-                contact=user.email,
-                cc_contact="dynabench-site@mlcommons.org",
-                template_name="model_train_successful.txt",
-                msg_dict={"name": model_name, "model_id": model[1]},
-                subject=f"Model {model_name} training succeeded.",
-            )
-        else:
-            Email().send(
-                contact=user.email,
-                cc_contact="dynabench-site@mlcommons.org",
-                template_name="model_train_failed.txt",
-                msg_dict={"name": model_name, "model_id": model[1]},
-                subject=f"Model {model_name} training failed as the server wasn't available",
-            )
-            bottle.abort(400, "Decentralized container isn't available")
         return util.json_encode({"success": "ok", "model_id": model[1]})
 
     for dataset in datasets:
