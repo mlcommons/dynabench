@@ -17,6 +17,7 @@ import time
 
 import boto3
 import jsonlines
+import numpy as np
 import requests
 import yaml
 
@@ -366,6 +367,47 @@ class Evaluation:
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores
+
+    def evaluate_dataperf_decentralized(self, dataperf_response: dict):
+        model_id = dataperf_response["model_id"]
+        task_id = self.model_repository.get_by_id(model_id)["tid"]
+        task_config = self.get_task_configuration(task_id)
+
+        task_metric = task_config["perf_metric"]["type"]
+        dataset_name = list(dataperf_response["results"].keys())[0]
+
+        score = dataperf_response["results"][dataset_name]["auc_score"]["my_debug"][
+            "fraction_fixes"
+        ]
+        score = 100 * np.round(score, 4)
+
+        did = self.dataset_repository.get_by_name(dataset_name)["id"]
+        did = 263
+        r_realid = self.round_repository.get_by_id(task_id)["rid"]
+
+        new_score = {
+            "perf": score,
+            "pretty_perf": f"{score}%",
+            "mid": model_id,
+            "r_realid": r_realid,
+            "did": did,
+        }
+        final_score = new_score.copy()
+        metric_name = str(task_metric)
+        final_score[metric_name] = score
+        final_score["perf_by_tag"] = [
+            {
+                "tag": dataset_name,
+                "pretty_perf": f"{score} %",
+                "perf": score,
+                "perf_std": 0.0,
+                "perf_dict": {task_metric: score},
+            }
+        ]
+
+        new_score["metadata_json"] = json.dumps(final_score)
+        self.score_repository.add(new_score)
+        return new_score
 
     def get_sqs_messages(self):
         queue_url = self.sqs.get_queue_url(
