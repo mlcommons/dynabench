@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -24,3 +28,10 @@ class DatasetRepository(AbstractRepository):
             jsonl_scoring_datasets.append(jsonl_scoring_dataset)
 
         return jsonl_scoring_datasets
+
+    def get_by_name(self, dataset_name: str) -> dict:
+        instance = (
+            self.session.query(self.model).filter(self.model.name == dataset_name).one()
+        )
+        instance = self.instance_converter.instance_to_dict(instance)
+        return instance
