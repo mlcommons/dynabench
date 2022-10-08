@@ -376,7 +376,7 @@ class Evaluation:
         task_metric = task_config["perf_metric"]["type"]
         dataset_name = list(dataperf_response["results"].keys())[0]
 
-        score = dataperf_response["results"][dataset_name]["auc_score"]["my_debug"][
+        score = dataperf_response["results"][dataset_name]["auc_score"][model_id][
             "fraction_fixes"
         ]
         score = 100 * np.round(score, 4)
