@@ -156,13 +156,13 @@ class Evaluation:
                 final_datasets.append(final_dataset)
         return final_datasets
 
-    def get_no_scoring_datasets(self, task_id: int):
-        jsonl_no_scoring_datasets = self.dataset_repository.get_no_scoring_datasets(
+    def get_not_scoring_datasets(self, task_id: int):
+        jsonl_not_scoring_datasets = self.dataset_repository.get_not_scoring_datasets(
             task_id
         )
-        return jsonl_no_scoring_datasets
+        return jsonl_not_scoring_datasets
 
-    def downloads_no_scoring_datasets(
+    def downloads_not_scoring_datasets(
         self,
         jsonl_all_datasets: list,
         bucket_name: str,
@@ -289,9 +289,9 @@ class Evaluation:
             delta_metrics_task,
             model_s3_zip,
         )
-        jsonl_no_scoring_datasets = self.get_no_scoring_datasets(tasks.id)
-        no_scoring_datasets = self.downloads_no_scoring_datasets(
-            jsonl_no_scoring_datasets,
+        jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
+        not_scoring_datasets = self.downloads_not_scoring_datasets(
+            jsonl_not_scoring_datasets,
             self.s3_bucket,
             tasks.task_code,
             model_s3_zip,
@@ -316,171 +316,28 @@ class Evaluation:
                 for dataset in scoring_datasets
                 if dataset["round_id"] == current_round
             ]
-            (
-                prediction_dict,
-                dataset_id,
+            new_score = self.save_predictions_dataset(
+                round_datasets,
+                tasks,
+                ip,
                 model_name,
-                minutes_time_prediction,
-                num_samples,
                 folder_name,
-            ) = self.heavy_prediction(
-                round_datasets, tasks.task_code, ip, model_name, folder_name
+                model_id,
+                current_round,
             )
-            memory = self.get_memory_utilization(model_name)
-            throughput = self.get_throughput(num_samples, minutes_time_prediction)
-
-            data_dict = {}
-            for data_version, data_types in prediction_dict.items():
-                for data_type in data_types:
-                    data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
-                        prediction_dict[data_version][data_type]
-                    )
-            perturb_exists = (
-                "fairness_predictions" in data_dict
-                or "robustness_predictions" in data_dict
-            )
-
-            task_configuration = yaml.safe_load(
-                self.task_repository.get_by_id(tasks.id)["config_yaml"]
-            )
-            input_formatter = InputFormatter(task_configuration)
-            formatted_dict = {}
-            for data_type in data_dict:
-                formatted_key = f"formatted_{data_type}"
-                grouped_key = f"grouped_{data_type}"
-                if "dataset" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_labels(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_labels(
-                        formatted_dict[formatted_key]
-                    )
-                elif "predictions" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_predictions(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_predictions(
-                        formatted_dict[formatted_key]
-                    )
-            evaluator = Evaluator(task_configuration)
-            main_metric = evaluator.evaluate(
-                formatted_dict["formatted_base_predictions"],
-                formatted_dict["formatted_base_dataset"],
-            )
-            delta_metrics = {}
-            if perturb_exists:
-                delta_metrics = evaluator.evaluate_delta_metrics(
-                    formatted_dict.get("grouped_base_predictions"),
-                    formatted_dict.get("grouped_robustness_predictions"),
-                    formatted_dict.get("grouped_fairness_predictions"),
-                )
-            metric = task_configuration["perf_metric"]["type"]
-            final_scores = {
-                str(metric): main_metric,
-                "fairness": delta_metrics.get("fairness"),
-                "robustness": delta_metrics.get("robustness"),
-                "memory": memory,
-                "throughput": throughput,
-            }
-            round_info = self.round_repository.get_round_info_by_round_and_task(
-                tasks.id, current_round
-            )
-
-            new_score = {
-                "perf": main_metric["perf"],
-                "pretty_perf": main_metric["pretty_perf"],
-                "fairness": final_scores["fairness"],
-                "robustness": final_scores["robustness"],
-                "mid": model_id,
-                "r_realid": round_info.id,
-                "did": dataset_id,
-                "memory_utilization": final_scores["memory"],
-                "examples_per_second": final_scores["throughput"],
-            }
-            final_score = new_score.copy()
-            metric_name = str(metric)
-            final_score[metric_name] = main_metric["perf"]
-            new_score["metadata_json"] = json.dumps(final_score)
-
-            self.score_repository.add(new_score)
             new_scores.append(new_score)
-        for no_scoring_dataset in no_scoring_datasets:
-            send_no_scoring_dataset = []
-            memory = self.get_memory_utilization(model_name)
-            send_no_scoring_dataset.append(no_scoring_dataset)
-            (
-                prediction_dict,
-                dataset_id,
+        for not_scoring_dataset in not_scoring_datasets:
+            send_not_scoring_dataset = []
+            send_not_scoring_dataset.append(not_scoring_dataset)
+            new_score = self.save_predictions_dataset(
+                send_not_scoring_dataset,
+                tasks,
+                ip,
                 model_name,
-                minutes_time_prediction,
-                num_samples,
                 folder_name,
-            ) = self.heavy_prediction(
-                send_no_scoring_dataset, tasks.task_code, ip, model_name, folder_name
+                model_id,
+                current_round,
             )
-            memory = self.get_memory_utilization(model_name)
-            throughput = self.get_throughput(num_samples, minutes_time_prediction)
-
-            data_dict = {}
-            for data_version, data_types in prediction_dict.items():
-                for data_type in data_types:
-                    data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
-                        prediction_dict[data_version][data_type]
-                    )
-
-            task_configuration = yaml.safe_load(
-                self.task_repository.get_by_id(tasks.id)["config_yaml"]
-            )
-            input_formatter = InputFormatter(task_configuration)
-            formatted_dict = {}
-            for data_type in data_dict:
-                formatted_key = f"formatted_{data_type}"
-                grouped_key = f"grouped_{data_type}"
-                if "dataset" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_labels(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_labels(
-                        formatted_dict[formatted_key]
-                    )
-                elif "predictions" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_predictions(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_predictions(
-                        formatted_dict[formatted_key]
-                    )
-            evaluator = Evaluator(task_configuration)
-            main_metric = evaluator.evaluate(
-                formatted_dict["formatted_base_predictions"],
-                formatted_dict["formatted_base_dataset"],
-            )
-            metric = task_configuration["perf_metric"]["type"]
-            final_scores = {
-                str(metric): main_metric,
-                "fairness": None,
-                "robustness": None,
-                "memory": memory,
-                "throughput": throughput,
-            }
-
-            new_score = {
-                "perf": main_metric["perf"],
-                "pretty_perf": main_metric["pretty_perf"],
-                "fairness": final_scores["fairness"],
-                "robustness": final_scores["robustness"],
-                "mid": model_id,
-                "r_realid": 0,
-                "did": dataset_id,
-                "memory_utilization": final_scores["memory"],
-                "examples_per_second": final_scores["throughput"],
-            }
-            final_score = new_score.copy()
-            metric_name = str(metric)
-            final_score[metric_name] = main_metric["perf"]
-            new_score["metadata_json"] = json.dumps(final_score)
-
-            self.score_repository.add(new_score)
             new_scores.append(new_score)
 
         url_light_model = self.builder.create_light_model(model_name, folder_name)
@@ -488,6 +345,103 @@ class Evaluation:
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores
+
+    def save_predictions_dataset(
+        self,
+        dataset: dict,
+        tasks: dict,
+        ip: str,
+        model_name: str,
+        folder_name: str,
+        model_id: int,
+        current_round: int = 0,
+        scoring: bool = True,
+    ):
+        (
+            prediction_dict,
+            dataset_id,
+            model_name,
+            minutes_time_prediction,
+            num_samples,
+            folder_name,
+        ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_name, folder_name)
+        memory = self.get_memory_utilization(model_name)
+        throughput = self.get_throughput(num_samples, minutes_time_prediction)
+
+        data_dict = {}
+        for data_version, data_types in prediction_dict.items():
+            for data_type in data_types:
+                data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
+                    prediction_dict[data_version][data_type]
+                )
+        if scoring:
+            perturb_exists = (
+                "fairness_predictions" in data_dict
+                or "robustness_predictions" in data_dict
+            )
+        task_configuration = yaml.safe_load(
+            self.task_repository.get_by_id(tasks.id)["config_yaml"]
+        )
+        input_formatter = InputFormatter(task_configuration)
+        formatted_dict = {}
+        for data_type in data_dict:
+            formatted_key = f"formatted_{data_type}"
+            grouped_key = f"grouped_{data_type}"
+            if "dataset" in data_type:
+                formatted_dict[formatted_key] = input_formatter.format_labels(
+                    data_dict[data_type]
+                )
+                formatted_dict[grouped_key] = input_formatter.group_labels(
+                    formatted_dict[formatted_key]
+                )
+            elif "predictions" in data_type:
+                formatted_dict[formatted_key] = input_formatter.format_predictions(
+                    data_dict[data_type]
+                )
+                formatted_dict[grouped_key] = input_formatter.group_predictions(
+                    formatted_dict[formatted_key]
+                )
+        evaluator = Evaluator(task_configuration)
+        main_metric = evaluator.evaluate(
+            formatted_dict["formatted_base_predictions"],
+            formatted_dict["formatted_base_dataset"],
+        )
+        delta_metrics = {}
+        if perturb_exists:
+            delta_metrics = evaluator.evaluate_delta_metrics(
+                formatted_dict.get("grouped_base_predictions"),
+                formatted_dict.get("grouped_robustness_predictions"),
+                formatted_dict.get("grouped_fairness_predictions"),
+            )
+        metric = task_configuration["perf_metric"]["type"]
+        final_scores = {
+            str(metric): main_metric,
+            "fairness": delta_metrics.get("fairness"),
+            "robustness": delta_metrics.get("robustness"),
+            "memory": memory,
+            "throughput": throughput,
+        }
+        round_info = self.round_repository.get_round_info_by_round_and_task(
+            tasks.id, current_round
+        )
+
+        new_score = {
+            "perf": main_metric["perf"],
+            "pretty_perf": main_metric["pretty_perf"],
+            "fairness": final_scores["fairness"],
+            "robustness": final_scores["robustness"],
+            "mid": model_id,
+            "r_realid": round_info.id,
+            "did": dataset_id,
+            "memory_utilization": final_scores["memory"],
+            "examples_per_second": final_scores["throughput"],
+        }
+        final_score = new_score.copy()
+        metric_name = str(metric)
+        final_score[metric_name] = main_metric["perf"]
+        new_score["metadata_json"] = json.dumps(final_score)
+        self.score_repository.add(new_score)
+        return new_score
 
     def evaluate_dataperf_decentralized(self, dataperf_response: dict):
         model_id = dataperf_response["model_id"]
