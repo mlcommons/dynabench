@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -24,3 +28,25 @@ class DatasetRepository(AbstractRepository):
             jsonl_scoring_datasets.append(jsonl_scoring_dataset)
 
         return jsonl_scoring_datasets
+
+    def get_no_scoring_datasets(self, task_id: int) -> dict:
+        no_scoring_datasets = self.session.query(self.model).filter(
+            (self.model.access_type != "scoring") & (self.model.tid == task_id)
+        )
+
+        no_scoring_datasets = self.session.query(self.model).filter(
+            (self.model.access_type != "scoring")
+            & (self.model.tid == task_id)
+            & (self.model.id == 22)
+        )
+
+        jsonl_no_scoring_datasets = []
+
+        for no_scoring_dataset in no_scoring_datasets:
+            jsonl_no_scoring_dataset = {}
+            jsonl_no_scoring_dataset["dataset"] = no_scoring_dataset.name
+            jsonl_no_scoring_dataset["round_id"] = no_scoring_dataset.rid
+            jsonl_no_scoring_dataset["dataset_id"] = no_scoring_dataset.id
+            jsonl_no_scoring_datasets.append(jsonl_no_scoring_dataset)
+
+        return jsonl_no_scoring_datasets

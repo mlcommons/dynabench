@@ -16,7 +16,9 @@ class ModelRepository(AbstractRepository):
 
     def update_light_model(self, id: int, light_model: str) -> dict:
         instance = self.session.query(self.model).filter(self.model.id == id).first()
+        light_model = f"{light_model}/model/single_evaluation"
         instance.light_model = light_model
+        instance.deployment_status = "deployed"
         self.session.flush()
         self.session.commit()
         return

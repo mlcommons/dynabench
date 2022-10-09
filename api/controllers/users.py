@@ -487,6 +487,7 @@ def model_upload_s3_dynalab_2(credentials):
     user_name = bottle.request.forms.get("user_name")
     user_id = bottle.request.forms.get("user_id")
     task_code = bottle.request.forms.get("task_code")
+    file_name = file_name.lower()
 
     task_model = TaskModel()
     task = task_model.getByTaskCode(task_code)

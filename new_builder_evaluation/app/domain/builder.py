@@ -8,6 +8,7 @@
 
 import base64
 import os
+import shutil
 import time
 from zipfile import ZipFile
 
@@ -77,7 +78,6 @@ class Builder:
         repository_name: str,
         folder_name: str,
         tag: str,
-        model_name: str,
         docker_name: str = "Dockerfile",
     ) -> str:
         ecr_config = self.extract_ecr_configuration()
@@ -86,7 +86,8 @@ class Builder:
             password=ecr_config["ecr_password"],
             registry=ecr_config["ecr_url"],
         )
-        path = f"{folder_name}/{model_name}"
+        shutil.copyfile(f"./dockerfiles/{docker_name}", f"{folder_name}/{docker_name}")
+        path = f"{folder_name}"
         absolute_path = os.getcwd()
         path = absolute_path + path.strip(".")
         image, _ = self.docker_client.images.build(
@@ -176,7 +177,7 @@ class Builder:
         folder_name = self.unzip_file(zip_name)
         repo = self.create_repository(model_name)
         tag = "latest"
-        self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag, model_name)
+        self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)
         ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name, folder_name, arn_service
 
@@ -198,7 +199,7 @@ class Builder:
             Role=os.getenv("ROLE_ARN_LAMBDA"),
             PackageType="Image",
             Timeout=800,
-            MemorySize=os.getenv("LAMBDA_MEMORY_SIZE"),
+            MemorySize=int(os.getenv("LAMBDA_MEMORY_SIZE")),
             EphemeralStorage={"Size": 10240},
         )
         return lambda_function
@@ -235,8 +236,7 @@ class Builder:
             repo,
             f"./app/models/{folder_name}",
             tag,
-            model_name,
-            docker_name="Dockerfile.aws.lambda",
+            docker_name="Dockerfile.aws",
         )
         digest = self.get_digest_repo(model_name_light)
         repo = repo + "@" + digest

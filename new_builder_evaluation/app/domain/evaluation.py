@@ -48,10 +48,8 @@ class Evaluation:
         self.round_repository = RoundRepository()
         self.model_repository = ModelRepository()
 
-    def require_fields_task(self, folder_name: str, model_name: str):
-        input_location = (
-            f"./app/models/{folder_name}/{model_name}/app/api/schemas/model.py"
-        )
+    def require_fields_task(self, folder_name: str):
+        input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
         spec = importlib.util.spec_from_file_location(
             "ModelSingleInput", input_location
         )
@@ -157,6 +155,40 @@ class Evaluation:
                 final_datasets.append(final_dataset)
         return final_datasets
 
+    def get_no_scoring_datasets(self, task_id: int):
+        jsonl_no_scoring_datasets = self.dataset_repository.get_no_scoring_datasets(
+            task_id
+        )
+        return jsonl_no_scoring_datasets
+
+    def downloads_no_scoring_datasets(
+        self,
+        jsonl_all_datasets: list,
+        bucket_name: str,
+        task_code: str,
+        model: str,
+    ):
+        folder_name = model.split("/")[-1].split(".")[0]
+        final_datasets = []
+        for dataset in jsonl_all_datasets:
+            final_dataset = {}
+            base_dataset_name = "datasets/{}/{}.jsonl".format(
+                task_code, dataset["dataset"]
+            )
+            self.s3.download_file(
+                bucket_name,
+                base_dataset_name,
+                "./app/models/{}/datasets/{}.jsonl".format(
+                    folder_name, dataset["dataset"]
+                ),
+            )
+            final_dataset["dataset_type"] = "base"
+            final_dataset["round_id"] = dataset["round_id"]
+            final_dataset["dataset_id"] = dataset["dataset_id"]
+            final_dataset["dataset"] = "{}.jsonl".format(dataset["dataset"])
+            final_datasets.append(final_dataset)
+        return final_datasets
+
     def validate_input_schema(self, schema: list, dataset: list):
         for param in schema:
             if not (all([param in d for d in dataset])):
@@ -179,7 +211,7 @@ class Evaluation:
             ) as jsonl_f:
                 dataset_samples = [json.loads(json.dumps(obj)) for obj in jsonl_f]
             responses = []
-            schema = self.require_fields_task(folder_name, model_name)
+            schema = self.require_fields_task(folder_name)
             self.validate_input_schema(schema, dataset_samples)
             print(len(dataset_samples))
             responses = self.batch_evaluation_ecs(ip, dataset_samples)
@@ -233,8 +265,8 @@ class Evaluation:
                 Statistics=["Average"],
             )
             if len(memory_utilization["Datapoints"]) > 0:
-                return memory_utilization["Datapoints"][0]["Average"] * os.getenv(
-                    "MEMORY_UTILIZATION"
+                return (int(memory_utilization["Datapoints"][0]["Average"]) / 100) * (
+                    int(os.getenv("MEMORY_UTILIZATION")) / 1000
                 )
             else:
                 time.sleep(15)
@@ -249,11 +281,18 @@ class Evaluation:
             delta_metric_task["type"] for delta_metric_task in delta_metrics_task
         ]
         jsonl_scoring_datasets = self.get_scoring_datasets(tasks.id)
-        datasets = self.downloads_scoring_datasets(
+        scoring_datasets = self.downloads_scoring_datasets(
             jsonl_scoring_datasets,
             self.s3_bucket,
             tasks.task_code,
             delta_metrics_task,
+            model_s3_zip,
+        )
+        jsonl_no_scoring_datasets = self.get_no_scoring_datasets(tasks.id)
+        no_scoring_datasets = self.downloads_no_scoring_datasets(
+            jsonl_no_scoring_datasets,
+            self.s3_bucket,
+            tasks.task_code,
             model_s3_zip,
         )
         rounds = list(
@@ -261,7 +300,7 @@ class Evaluation:
                 int,
                 {
                     current_round
-                    for rounds in datasets
+                    for rounds in scoring_datasets
                     for current_round in str(rounds["round_id"])
                 },
             )
@@ -272,7 +311,9 @@ class Evaluation:
         )
         for current_round in rounds:
             round_datasets = [
-                dataset for dataset in datasets if dataset["round_id"] == current_round
+                dataset
+                for dataset in scoring_datasets
+                if dataset["round_id"] == current_round
             ]
             (
                 prediction_dict,
@@ -286,6 +327,7 @@ class Evaluation:
             )
             memory = self.get_memory_utilization(model_name)
             throughput = self.get_throughput(num_samples, minutes_time_prediction)
+
             data_dict = {}
             for data_version, data_types in prediction_dict.items():
                 for data_type in data_types:
@@ -361,8 +403,87 @@ class Evaluation:
 
             self.score_repository.add(new_score)
             new_scores.append(new_score)
-            url_light_model = self.builder.create_light_model(model_name, folder_name)
-            self.model_repository.update_light_model(model_id, url_light_model)
+        for no_scoring_dataset in no_scoring_datasets:
+            send_no_scoring_dataset = []
+            memory = self.get_memory_utilization(model_name)
+            send_no_scoring_dataset.append(no_scoring_dataset)
+            (
+                prediction_dict,
+                dataset_id,
+                model_name,
+                minutes_time_prediction,
+                num_samples,
+                folder_name,
+            ) = self.heavy_prediction(
+                send_no_scoring_dataset, tasks.task_code, ip, model_name, folder_name
+            )
+            memory = self.get_memory_utilization(model_name)
+            throughput = self.get_throughput(num_samples, minutes_time_prediction)
+
+            data_dict = {}
+            for data_version, data_types in prediction_dict.items():
+                for data_type in data_types:
+                    data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
+                        prediction_dict[data_version][data_type]
+                    )
+
+            task_configuration = yaml.safe_load(
+                self.task_repository.get_by_id(tasks.id)["config_yaml"]
+            )
+            input_formatter = InputFormatter(task_configuration)
+            formatted_dict = {}
+            for data_type in data_dict:
+                formatted_key = f"formatted_{data_type}"
+                grouped_key = f"grouped_{data_type}"
+                if "dataset" in data_type:
+                    formatted_dict[formatted_key] = input_formatter.format_labels(
+                        data_dict[data_type]
+                    )
+                    formatted_dict[grouped_key] = input_formatter.group_labels(
+                        formatted_dict[formatted_key]
+                    )
+                elif "predictions" in data_type:
+                    formatted_dict[formatted_key] = input_formatter.format_predictions(
+                        data_dict[data_type]
+                    )
+                    formatted_dict[grouped_key] = input_formatter.group_predictions(
+                        formatted_dict[formatted_key]
+                    )
+            evaluator = Evaluator(task_configuration)
+            main_metric = evaluator.evaluate(
+                formatted_dict["formatted_base_predictions"],
+                formatted_dict["formatted_base_dataset"],
+            )
+            metric = task_configuration["perf_metric"]["type"]
+            final_scores = {
+                str(metric): main_metric,
+                "fairness": None,
+                "robustness": None,
+                "memory": memory,
+                "throughput": throughput,
+            }
+
+            new_score = {
+                "perf": main_metric["perf"],
+                "pretty_perf": main_metric["pretty_perf"],
+                "fairness": final_scores["fairness"],
+                "robustness": final_scores["robustness"],
+                "mid": model_id,
+                "r_realid": 0,
+                "did": dataset_id,
+                "memory_utilization": final_scores["memory"],
+                "examples_per_second": final_scores["throughput"],
+            }
+            final_score = new_score.copy()
+            metric_name = str(metric)
+            final_score[metric_name] = main_metric["perf"]
+            new_score["metadata_json"] = json.dumps(final_score)
+
+            self.score_repository.add(new_score)
+            new_scores.append(new_score)
+
+        url_light_model = self.builder.create_light_model(model_name, folder_name)
+        self.model_repository.update_light_model(model_id, url_light_model)
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores
