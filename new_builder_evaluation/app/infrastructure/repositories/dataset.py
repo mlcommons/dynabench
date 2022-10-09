@@ -19,7 +19,6 @@ class DatasetRepository(AbstractRepository):
             (self.model.access_type == "scoring") & (self.model.tid == task_id)
         )
         jsonl_scoring_datasets = []
-
         for scoring_dataset in scoring_datasets:
             jsonl_scoring_dataset = {}
             jsonl_scoring_dataset["dataset"] = scoring_dataset.name
@@ -28,6 +27,21 @@ class DatasetRepository(AbstractRepository):
             jsonl_scoring_datasets.append(jsonl_scoring_dataset)
 
         return jsonl_scoring_datasets
+
+    def get_not_scoring_datasets(self, task_id: int) -> dict:
+        no_scoring_datasets = self.session.query(self.model).filter(
+            (self.model.access_type != "scoring") & (self.model.tid == task_id)
+        )
+
+        jsonl_no_scoring_datasets = []
+        for no_scoring_dataset in no_scoring_datasets:
+            jsonl_no_scoring_dataset = {}
+            jsonl_no_scoring_dataset["dataset"] = no_scoring_dataset.name
+            jsonl_no_scoring_dataset["round_id"] = no_scoring_dataset.rid
+            jsonl_no_scoring_dataset["dataset_id"] = no_scoring_dataset.id
+            jsonl_no_scoring_datasets.append(jsonl_no_scoring_dataset)
+
+        return jsonl_no_scoring_datasets
 
     def get_by_name(self, dataset_name: str) -> dict:
         instance = (
