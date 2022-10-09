@@ -50,3 +50,10 @@ class DatasetRepository(AbstractRepository):
             jsonl_no_scoring_datasets.append(jsonl_no_scoring_dataset)
 
         return jsonl_no_scoring_datasets
+
+    def get_by_name(self, dataset_name: str) -> dict:
+        instance = (
+            self.session.query(self.model).filter(self.model.name == dataset_name).one()
+        )
+        instance = self.instance_converter.instance_to_dict(instance)
+        return instance

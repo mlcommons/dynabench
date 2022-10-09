@@ -21,6 +21,10 @@ class ModelSingleInput(BaseModel):
     text: str
 
 
+class DictInput(BaseModel):
+    response: dict
+
+
 router = APIRouter()
 
 
@@ -71,3 +75,10 @@ def get_by_id(id: int):
 def update_light_model(params):
     model = ModelRepository()
     model.update_light_model(params["model_id"], params["url_light_model"])
+
+
+@router.post("/post_dataperf_response")
+def post_dataperf_response(response: DictInput):
+    evaluation = Evaluation()
+    score = evaluation.evaluate_dataperf_decentralized(response.response)
+    return score
