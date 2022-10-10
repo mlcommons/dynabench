@@ -105,6 +105,12 @@ class Builder:
         return f"{repository_name}:{tag}"
 
     def create_task_definition(self, name_task: str, repo: str) -> str:
+        launch_type = os.getenv("LAUNCH_TYPE")
+        if launch_type == "FARGATE":
+            network_mode = "awsvpc"
+        else:
+            network_mode = "bridge"
+
         task_definition = self.ecs.register_task_definition(
             containerDefinitions=[
                 {
@@ -114,8 +120,8 @@ class Builder:
             ],
             executionRoleArn=os.getenv("EXECUTION_ROLE_ARN"),
             family=name_task,
-            networkMode="awsvpc",
-            requiresCompatibilities=["FARGATE"],
+            networkMode=network_mode,
+            requiresCompatibilities=[launch_type],
             cpu=os.getenv("CPU_UTILIZATION"),
             memory=os.getenv("MEMORY_UTILIZATION"),
         )
@@ -123,23 +129,33 @@ class Builder:
 
     def create_ecs_endpoint(self, name_task: str, repo: str) -> str:
         task_definition = self.create_task_definition(name_task, repo)
-        run_service = self.ecs.create_service(
-            cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
-            serviceName=name_task,
-            taskDefinition=task_definition,
-            desiredCount=1,
-            networkConfiguration={
-                "awsvpcConfiguration": {
-                    "subnets": [
-                        os.getenv("SUBNET_1"),
-                        os.getenv("SUBNET_2"),
-                    ],
-                    "assignPublicIp": "ENABLED",
-                    "securityGroups": [os.getenv("SECURITY_GROUP")],
-                }
-            },
-            launchType="FARGATE",
-        )
+        launch_type = os.getenv("LAUNCH_TYPE")
+        if launch_type == "FARGATE":
+            run_service = self.ecs.create_service(
+                cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
+                serviceName=name_task,
+                taskDefinition=task_definition,
+                desiredCount=1,
+                networkConfiguration={
+                    "awsvpcConfiguration": {
+                        "subnets": [
+                            os.getenv("SUBNET_1"),
+                            os.getenv("SUBNET_2"),
+                        ],
+                        "assignPublicIp": "ENABLED",
+                        "securityGroups": [os.getenv("SECURITY_GROUP")],
+                    }
+                },
+                launchType=launch_type,
+            )
+        else:
+            run_service = self.ecs.create_service(
+                cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
+                serviceName=name_task,
+                taskDefinition=task_definition,
+                desiredCount=1,
+                launchType=launch_type,
+            )
         while True:
             describe_service = self.ecs.describe_services(
                 cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
