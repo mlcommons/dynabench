@@ -446,18 +446,18 @@ class Evaluation:
     def evaluate_dataperf_decentralized(self, dataperf_response: dict):
         model_id = dataperf_response["model_id"]
         task_id = self.model_repository.get_by_id(model_id)["tid"]
-        task_config = self.get_task_configuration(task_id)
+        print("Received a submission for model ID", model_id, "and task ID", task_id)
 
+        task_config = self.get_task_configuration(task_id)
         task_metric = task_config["perf_metric"]["type"]
         dataset_name = list(dataperf_response["results"].keys())[0]
 
-        score = dataperf_response["results"][dataset_name]["auc_score"][model_id][
+        score = dataperf_response["results"][dataset_name]["auc_score"][str(model_id)][
             "fraction_fixes"
         ]
         score = 100 * np.round(score, 4)
 
         did = self.dataset_repository.get_by_name(dataset_name)["id"]
-        did = 263
         r_realid = self.round_repository.get_by_id(task_id)["rid"]
 
         new_score = {
