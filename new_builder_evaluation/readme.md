@@ -207,6 +207,7 @@ Create an AWS user with an access key and secret access key with the following p
 - AmazonECS_FullAccess
 - AmazonS3FullAccess
 - AmazonSQSFullAccess
+- AWSLambda_FullAccess
 
 Make sure you store "AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" because you have to add them to a .env file.
 Example variable name:
@@ -243,6 +244,7 @@ Steps:
     - AmazonECS_FullAccess
     - AmazonS3FullAccess
     - AmazonSQSFullAccess
+    - AWSLambda_FullAccess
 
 6. Click next 2 times and then click on create group.
 
