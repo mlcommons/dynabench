@@ -34,10 +34,8 @@ class Evaluation:
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.builder = Builder()
 
-    def require_fields_task(self, folder_name: str, model_name: str):
-        input_location = (
-            f"./app/models/{folder_name}/{model_name}/app/api/schemas/model.py"
-        )
+    def require_fields_task(self, folder_name: str):
+        input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
         spec = importlib.util.spec_from_file_location(
             "ModelSingleInput", input_location
         )
@@ -218,7 +216,7 @@ class Evaluation:
             ) as jsonl_f:
                 dataset_samples = [json.loads(json.dumps(obj)) for obj in jsonl_f]
             responses = []
-            schema = self.require_fields_task(folder_name, model_name)
+            schema = self.require_fields_task(folder_name)
             self.validate_input_schema(schema, dataset_samples)
             responses = self.batch_evaluation_ecs(ip, dataset_samples)
             predictions = "./app/models/{}/datasets/{}.out".format(
