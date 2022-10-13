@@ -57,6 +57,37 @@ class Builder:
         os.remove(f"./app/models/{folder_name}/{zip_name}")
         return folder_name
 
+    def check_compression_method(self, folder_name):
+        files = os.listdir(f"./app/models/{folder_name}")
+        if "requirements.txt" and "README.md" not in files:
+            return True
+        else:
+            return False
+
+    def move_folder(self, folder_name):
+        folders = os.listdir(f"./app/models/{folder_name}")
+        for folder in folders:
+            print("folder")
+            print(folder)
+            if os.path.isdir(f"./app/models/{folder_name}/{folder}"):
+                files = os.listdir(f"./app/models/{folder_name}/{folder}")
+                if "requirements.txt" in files:
+                    for file in files:
+                        print("file")
+                        print(file)
+                        shutil.move(
+                            f"./app/models/{folder_name}/{folder}/{file}",
+                            f"./app/models/{folder_name}/{file}",
+                        )
+                    shutil.rmtree(f"./app/models/{folder_name}/{folder}")
+
+    def decompress(self, zip_name):
+        folder_name = self.unzip_file(zip_name)
+        compression_method = self.check_compression_method(folder_name)
+        if compression_method:
+            self.move_folder(folder_name)
+        return folder_name
+
     def extract_ecr_configuration(self) -> dict:
         ecr_credentials = self.ecr.get_authorization_token()["authorizationData"][0]
         ecr_password = (
@@ -190,7 +221,7 @@ class Builder:
 
     def get_ip_ecs_task(self, model: str):
         zip_name, model_name = self.download_zip(os.getenv("AWS_S3_BUCKET"), model)
-        folder_name = self.unzip_file(zip_name)
+        folder_name = self.decompress(zip_name)
         repo = self.create_repository(model_name)
         tag = "latest"
         self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)
