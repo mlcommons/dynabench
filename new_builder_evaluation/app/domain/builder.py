@@ -7,6 +7,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import base64
+import logging
 import os
 import shutil
 import time
@@ -219,12 +220,15 @@ class Builder:
             force=True,
         )
 
-    def get_ip_ecs_task(self, model: str):
+    def get_ip_ecs_task(self, model: str, logger: logging.Logger) -> str:
         zip_name, model_name = self.download_zip(os.getenv("AWS_S3_BUCKET"), model)
         folder_name = self.decompress(zip_name)
+        logger.info("Decompress model")
         repo = self.create_repository(model_name)
+        logger.info(f"Create repo: {repo}")
         tag = "latest"
         self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)
+        logger.info("Push image to ECR")
         ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name, folder_name, arn_service
 

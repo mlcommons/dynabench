@@ -9,6 +9,7 @@
 import datetime
 import importlib
 import json
+import logging
 import os
 import secrets
 import shutil
@@ -20,6 +21,7 @@ import jsonlines
 import numpy as np
 import requests
 import yaml
+from cloudwatch import cloudwatch
 
 from app.domain.builder import Builder
 from app.domain.eval_utils.evaluator import Evaluator
@@ -48,6 +50,8 @@ class Evaluation:
         self.dataset_repository = DatasetRepository()
         self.round_repository = RoundRepository()
         self.model_repository = ModelRepository()
+        self.logger = logging.getLogger("logger")
+        self.logger.setLevel(logging.INFO)
 
     def require_fields_task(self, folder_name: str):
         input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
@@ -205,6 +209,7 @@ class Evaluation:
         start_prediction = time.time()
         num_samples = 0
         for dataset in datasets:
+            self.logger.info(f"Evaluated {dataset}")
             dict_dataset_type = {}
             with jsonlines.open(
                 "./app/models/{}/datasets/{}".format(folder_name, dataset["dataset"]),
@@ -276,7 +281,18 @@ class Evaluation:
         return round(num_samples / seconds_time_prediction, 2)
 
     def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
+        logs_name = "logs-{}".format(model_s3_zip.split("/")[-1].split(".")[0])
+        handler = cloudwatch.CloudwatchHandler(
+            log_group="test_logging_new_builder",
+            log_stream=logs_name,
+            access_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        )
+        formatter = logging.Formatter("%(asctime)s : %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
         tasks = self.task_repository.get_model_id_and_task_code(task)
+        self.logger.info(f"Task: {tasks.id}")
         delta_metrics_task = self.get_task_configuration(tasks.id)["delta_metrics"]
         delta_metrics_task = [
             delta_metric_task["type"] for delta_metric_task in delta_metrics_task
@@ -296,6 +312,7 @@ class Evaluation:
             tasks.task_code,
             model_s3_zip,
         )
+        self.logger.info("Datasets downloaded")
         rounds = list(
             map(
                 int,
@@ -308,14 +325,16 @@ class Evaluation:
         )
         new_scores = []
         ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
-            model_s3_zip
+            model_s3_zip, self.logger
         )
+        self.logger.info(f"Create endpoint for evaluation: {ip}")
         for current_round in rounds:
             round_datasets = [
                 dataset
                 for dataset in scoring_datasets
                 if dataset["round_id"] == current_round
             ]
+            self.logger.info("Evaluate scoring datasets")
             new_score = self.save_predictions_dataset(
                 round_datasets,
                 tasks,
@@ -327,6 +346,7 @@ class Evaluation:
             )
             new_scores.append(new_score)
         for not_scoring_dataset in not_scoring_datasets:
+            self.logger.info("Evaluate non-scoring datasets")
             send_not_scoring_dataset = []
             send_not_scoring_dataset.append(not_scoring_dataset)
             new_score = self.save_predictions_dataset(
@@ -340,6 +360,7 @@ class Evaluation:
             )
             new_scores.append(new_score)
 
+        self.logger.info("Create light model")
         url_light_model = self.builder.create_light_model(model_name, folder_name)
         self.model_repository.update_light_model(model_id, url_light_model)
         self.builder.delete_ecs_service(arn_service)
@@ -365,9 +386,11 @@ class Evaluation:
             num_samples,
             folder_name,
         ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_name, folder_name)
+        self.logger.info("Calculate memory utilization")
         memory = self.get_memory_utilization(model_name)
+        self.logger.info("Calculate throughput")
         throughput = self.get_throughput(num_samples, minutes_time_prediction)
-
+        self.logger.info("Calculate score")
         data_dict = {}
         for data_version, data_types in prediction_dict.items():
             for data_type in data_types:
@@ -424,7 +447,6 @@ class Evaluation:
         round_info = self.round_repository.get_round_info_by_round_and_task(
             tasks.id, current_round
         )
-
         new_score = {
             "perf": main_metric["perf"],
             "pretty_perf": main_metric["pretty_perf"],
@@ -441,6 +463,7 @@ class Evaluation:
         final_score[metric_name] = main_metric["perf"]
         new_score["metadata_json"] = json.dumps(final_score)
         self.score_repository.add(new_score)
+        self.logger.info("Save score")
         return new_score
 
     def evaluate_dataperf_decentralized(self, dataperf_response: dict):
@@ -511,6 +534,7 @@ class Evaluation:
                     message_body["s3_uri"],
                     message_body["model_id"],
                 )
+                self.logger.info("Delete message")
                 self.delete_sqs_message(queue_url, message["ReceiptHandle"])
                 return new_score
             time.sleep(15)
