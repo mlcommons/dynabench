@@ -104,6 +104,7 @@ class Task(Base):
     unique_validators_for_example_tags = Column(TINYINT(1))
     train_file_upload_instructions_md = Column(Text)
     mlcube_tutorial_markdown = Column(Text)
+    accept_adversarial = Column(TINYINT(1))
     build_sqs_queue = Column(Text)
     eval_sqs_queue = Column(Text)
     is_decen_task = Column(TINYINT(1), server_default=text("'0'"))

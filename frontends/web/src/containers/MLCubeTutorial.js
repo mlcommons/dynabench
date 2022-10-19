@@ -62,7 +62,7 @@ const MLCubeTutorial = (props) => {
                         "/submit_train_files"
                       }
                     >
-                      <i className="fa fa-upload"></i> Submit Train Files
+                      <i className="fa fa-upload"></i> Submit Files
                     </Button>
                   </center>
                 </Container>

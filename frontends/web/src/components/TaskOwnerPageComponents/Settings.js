@@ -35,6 +35,7 @@ const Settings = (props) => {
               initialValues={{
                 hidden: props.task.hidden,
                 submitable: props.task.submitable,
+                accept_adversarial: props.task.accept_adversarial,
                 instructions_md: props.task.instructions_md,
                 unpublished_models_in_leaderboard:
                   props.task.unpublished_models_in_leaderboard,
@@ -255,6 +256,24 @@ const Settings = (props) => {
                       </Form.Group>
                       <Form.Group
                         as={Row}
+                        controlId="accept_adversarial"
+                        className="py-3 my-0 border-bottom"
+                      >
+                        <Form.Label column>
+                          Adversarial examples
+                          <Form.Text id="paramsHelpBlock" muted>
+                            Does this task accept adversarial examples?
+                          </Form.Text>
+                        </Form.Label>
+                        <Col sm="6">
+                          <Form.Check
+                            checked={values.accept_adversarial}
+                            onChange={handleChange}
+                          />
+                        </Col>
+                      </Form.Group>
+                      <Form.Group
+                        as={Row}
                         controlId="build_sqs_queue"
                         className="py-3 my-0 border-bottom"
                       >
@@ -293,73 +312,6 @@ const Settings = (props) => {
                           />
                         </Col>
                       </Form.Group>
-                      <Form.Group
-                        as={Row}
-                        controlId="is_decen_task"
-                        className="py-3 my-0 border-bottom"
-                      >
-                        <Form.Label column>
-                          Is this a Decentralized Task?
-                        </Form.Label>
-                        <Col sm="6">
-                          <Form.Check
-                            checked={values.is_decen_task}
-                            onChange={handleChange}
-                          />
-                        </Col>
-                      </Form.Group>
-                      <Form.Group
-                        as={Row}
-                        controlId="task_aws_account_id"
-                        className="py-3 my-0 border-bottom"
-                      >
-                        <Form.Label column>
-                          Task Owner AWS Account ID
-                          <Form.Text id="paramsHelpBlock" muted>
-                            AWS Account ID in your AWS Account (decentralized
-                            setting only)
-                          </Form.Text>
-                        </Form.Label>
-                        <Col sm="6">
-                          <Form.Control
-                            type="text"
-                            defaultValue={values.task_aws_account_id}
-                            onChange={handleChange}
-                          />
-                        </Col>
-                      </Form.Group>
-                      <Form.Group
-                        as={Row}
-                        controlId="task_gateway_predict_prefix"
-                        className="py-3 my-0 border-bottom"
-                      >
-                        <Form.Label column>
-                          Task Owner AWS API Gateway Predict URL
-                          <Form.Text id="paramsHelpBlock" muted>
-                            API Gateway ID to interact with Sagemaker Models
-                            (decentralized setting only)
-                          </Form.Text>
-                        </Form.Label>
-                        <Col sm="6">
-                          <Form.Control
-                            type="text"
-                            defaultValue={values.task_gateway_predict_prefix}
-                            onChange={handleChange}
-                          />
-                        </Col>
-                      </Form.Group>
-
-                      {values.is_decen_task && (
-                        <Form.Group
-                          as={Row}
-                          className="py-3 my-0 border-bottom"
-                        >
-                          <Form.Label column>Decen Eaas Token:</Form.Label>
-                          <Col sm="6">
-                            <Form.Control disabled value={decentoken} />
-                          </Col>
-                        </Form.Group>
-                      )}
                       <Form.Group
                         as={Row}
                         controlId="num_matching_validations"
@@ -425,6 +377,76 @@ const Settings = (props) => {
                           </Form.Control>
                         </Col>
                       </Form.Group>
+                      <Form.Group
+                        as={Row}
+                        controlId="is_decen_task"
+                        className="py-3 my-0 border-bottom"
+                      >
+                        <Form.Label column>
+                          Is this a Decentralized Task?
+                        </Form.Label>
+                        <Col sm="6">
+                          <Form.Check
+                            checked={values.is_decen_task}
+                            onChange={handleChange}
+                          />
+                        </Col>
+                      </Form.Group>
+                      {values.is_decen_task && (
+                        <>
+                          <Form.Group
+                            as={Row}
+                            className="py-3 my-0 border-bottom"
+                          >
+                            <Form.Label column>Decen Eaas Token:</Form.Label>
+                            <Col sm="6">
+                              <Form.Control disabled value={decentoken} />
+                            </Col>
+                          </Form.Group>
+                          <Form.Group
+                            as={Row}
+                            controlId="task_aws_account_id"
+                            className="py-3 my-0 border-bottom"
+                          >
+                            <Form.Label column>
+                              Task Owner AWS Account ID
+                              <Form.Text id="paramsHelpBlock" muted>
+                                AWS Account ID in your AWS Account
+                                (decentralized setting only)
+                              </Form.Text>
+                            </Form.Label>
+                            <Col sm="6">
+                              <Form.Control
+                                type="text"
+                                defaultValue={values.task_aws_account_id}
+                                onChange={handleChange}
+                              />
+                            </Col>
+                          </Form.Group>
+                          <Form.Group
+                            as={Row}
+                            controlId="task_gateway_predict_prefix"
+                            className="py-3 my-0 border-bottom"
+                          >
+                            <Form.Label column>
+                              Task Owner AWS API Gateway Predict URL
+                              <Form.Text id="paramsHelpBlock" muted>
+                                API Gateway ID to interact with Sagemaker Models
+                                (decentralized setting only)
+                              </Form.Text>
+                            </Form.Label>
+                            <Col sm="6">
+                              <Form.Control
+                                type="text"
+                                defaultValue={
+                                  values.task_gateway_predict_prefix
+                                }
+                                onChange={handleChange}
+                              />
+                            </Col>
+                          </Form.Group>
+                        </>
+                      )}
                       <Form.Group as={Row} className="py-3 my-0">
                         <Col sm="6">
                           <small className="form-text text-muted">

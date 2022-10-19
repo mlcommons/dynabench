@@ -439,6 +439,7 @@ def update(credentials, tid):
             "predictions_upload_instructions_md",
             "train_file_upload_instructions_md",
             "mlcube_tutorial_markdown",
+            "accept_adversarial",
             "hidden",
             "submitable",
             "create_endpoint",
@@ -456,7 +457,7 @@ def update(credentials, tid):
                 validate_non_fooling, num_matching_validations,
                 instructions_md, hidden, predictions_upload_instructions_md,
                 train_file_upload_instructions_md, mlcube_tutorial_markdown, submitable,
-                create_endpoint, config_yaml""",
+                accept_adversarial, create_endpoint, config_yaml""",
             )
 
     tm = TaskModel()
