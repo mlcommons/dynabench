@@ -35,7 +35,7 @@ const Settings = (props) => {
               initialValues={{
                 hidden: props.task.hidden,
                 submitable: props.task.submitable,
-                accept_adversarial: props.task.accept_adversarial,
+                dynamic_adversarial_data_collection: props.task.dynamic_adversarial_data_collection,
                 instructions_md: props.task.instructions_md,
                 unpublished_models_in_leaderboard:
                   props.task.unpublished_models_in_leaderboard,
@@ -256,7 +256,7 @@ const Settings = (props) => {
                       </Form.Group>
                       <Form.Group
                         as={Row}
-                        controlId="accept_adversarial"
+                        controlId="dynamic_adversarial_data_collection"
                         className="py-3 my-0 border-bottom"
                       >
                         <Form.Label column>
@@ -267,7 +267,7 @@ const Settings = (props) => {
                         </Form.Label>
                         <Col sm="6">
                           <Form.Check
-                            checked={values.accept_adversarial}
+                            checked={values.dynamic_adversarial_data_collection}
                             onChange={handleChange}
                           />
                         </Col>
@@ -278,7 +278,7 @@ const Settings = (props) => {
                         className="py-3 my-0 border-bottom"
                       >
                         <Form.Label column>
-                          Build queues
+                          Dynamic adversarial data collection
                           <Form.Text id="paramsHelpBlock" muted>
                             Name of your Build Queue in your AWS account
                             (Decentralized Task only)

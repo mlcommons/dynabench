@@ -126,7 +126,7 @@ const TaskActionButtons = (props) => {
 
   return (
     <Nav className="my-4">
-      {props.task.accept_adversarial && (
+      {props.task.dynamic_adversarial_data_collection && (
         <>
           <Nav.Item className="task-action-btn">
             <Annotation
@@ -613,7 +613,7 @@ class TaskPage extends React.Component {
                   )}
                   <Row>
                     {this.state.task.id &&
-                      this.state.task.accept_adversarial &&
+                      this.state.task.dynamic_adversarial_data_collection &&
                       this.state.task.round &&
                       this.state.task.cur_round && (
                         <Col xs={12} md={6}>

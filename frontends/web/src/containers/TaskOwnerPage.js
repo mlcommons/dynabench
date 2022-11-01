@@ -280,7 +280,7 @@ class TaskOwnerPage extends React.Component {
       "predictions_upload_instructions_md",
       "train_file_upload_instructions_md",
       "mlcube_tutorial_markdown",
-      "accept_adversarial",
+      "dynamic_adversarial_data_collection",
       "hidden",
       "submitable",
       "create_endpoint",
