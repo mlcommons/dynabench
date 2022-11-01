@@ -668,6 +668,7 @@ class Task(Base):
 
     unique_validators_for_example_tags = db.Column(db.Boolean, default=False)
     mlcube_tutorial_markdown = db.Column(db.Text)
+    dynamic_adversarial_data_collection = db.Column(db.Boolean, default=True)
     train_file_upload_instructions_md = db.Column(db.Text)
 
     def __repr__(self):

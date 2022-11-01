@@ -126,46 +126,50 @@ const TaskActionButtons = (props) => {
 
   return (
     <Nav className="my-4">
-      <Nav.Item className="task-action-btn">
-        <Annotation
-          placement="bottom"
-          tooltip="Click here to get creative and start writing examples that fool the model"
-        >
-          <OverlayTrigger
-            placement="bottom"
-            delay={{ show: 250, hide: 400 }}
-            overlay={renderCreateTooltip}
-          >
-            <Button
-              as={Link}
-              className="border-0 blue-color font-weight-bold light-gray-bg"
-              to={`/tasks/${props.taskCode}/create`}
+      {props.task.dynamic_adversarial_data_collection && (
+        <>
+          <Nav.Item className="task-action-btn">
+            <Annotation
+              placement="bottom"
+              tooltip="Click here to get creative and start writing examples that fool the model"
             >
-              <i className="fas fa-pen"></i> Create Examples
-            </Button>
-          </OverlayTrigger>
-        </Annotation>
-      </Nav.Item>
-      <Nav.Item className="task-action-btn">
-        <Annotation
-          placement="top"
-          tooltip="Click here to see examples created by others, and validate their correctness"
-        >
-          <OverlayTrigger
-            placement="bottom"
-            delay={{ show: 250, hide: 400 }}
-            overlay={renderVerifyTooltip}
-          >
-            <Button
-              as={Link}
-              className="border-0 blue-color font-weight-bold light-gray-bg"
-              to={`/tasks/${props.taskCode}/validate`}
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 250, hide: 400 }}
+                overlay={renderCreateTooltip}
+              >
+                <Button
+                  as={Link}
+                  className="border-0 blue-color font-weight-bold light-gray-bg"
+                  to={`/tasks/${props.taskCode}/create`}
+                >
+                  <i className="fas fa-pen"></i> Create Examples
+                </Button>
+              </OverlayTrigger>
+            </Annotation>
+          </Nav.Item>
+          <Nav.Item className="task-action-btn">
+            <Annotation
+              placement="top"
+              tooltip="Click here to see examples created by others, and validate their correctness"
             >
-              <i className="fas fa-search"></i> Validate Examples
-            </Button>
-          </OverlayTrigger>
-        </Annotation>
-      </Nav.Item>
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 250, hide: 400 }}
+                overlay={renderVerifyTooltip}
+              >
+                <Button
+                  as={Link}
+                  className="border-0 blue-color font-weight-bold light-gray-bg"
+                  to={`/tasks/${props.taskCode}/validate`}
+                >
+                  <i className="fas fa-search"></i> Validate Examples
+                </Button>
+              </OverlayTrigger>
+            </Annotation>
+          </Nav.Item>
+        </>
+      )}
       {props.task.submitable && (
         <Nav.Item className="task-action-btn">
           <Annotation
@@ -233,7 +237,7 @@ const TaskActionButtons = (props) => {
                     className="border-0 blue-color font-weight-bold light-gray-bg"
                     to={"/tasks/" + props.taskCode + "/submit_train_files"}
                   >
-                    <i className="fa fa-upload"></i> Submit Train Files
+                    <i className="fa fa-upload"></i> Submit Files
                   </Button>
                 </>
               </OverlayTrigger>
@@ -608,17 +612,18 @@ class TaskPage extends React.Component {
                     </Row>
                   )}
                   <Row>
-                    <Col xs={12} md={6}>
-                      {this.state.task.id &&
-                        this.state.task.round &&
-                        this.state.task.cur_round && (
+                    {this.state.task.id &&
+                      this.state.task.dynamic_adversarial_data_collection &&
+                      this.state.task.round &&
+                      this.state.task.cur_round && (
+                        <Col xs={12} md={6}>
                           <UserLeaderboardCard
                             taskId={this.state.task.id}
                             round={this.state.task.round}
                             cur_round={this.state.task.cur_round}
                           />
-                        )}
-                    </Col>
+                        </Col>
+                      )}
                     <Col xs={12} md={6}>
                       {this.state.trendScore.length > 0 && (
                         <Annotation
