@@ -35,7 +35,8 @@ const Settings = (props) => {
               initialValues={{
                 hidden: props.task.hidden,
                 submitable: props.task.submitable,
-                dynamic_adversarial_data_collection: props.task.dynamic_adversarial_data_collection,
+                dynamic_adversarial_data_collection:
+                  props.task.dynamic_adversarial_data_collection,
                 instructions_md: props.task.instructions_md,
                 unpublished_models_in_leaderboard:
                   props.task.unpublished_models_in_leaderboard,
