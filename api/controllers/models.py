@@ -309,7 +309,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
             )
             bottle.abort(400)
 
-        did = dm.getByName(name).id
+        dataset_id = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
         metric = task_config["perf_metric"]["type"]
 
@@ -333,7 +333,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
         sm.create(
             model_id=model[1],
             r_realid=r_realid,
-            did=did,
+            did=dataset_id,
             pretty_perf=f"{new_score} %",
             perf=new_score,
             metadata_json=new_score_string,
