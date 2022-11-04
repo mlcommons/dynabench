@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -99,7 +105,7 @@ class VerifyInterface extends React.Component {
           ) : null}
           <Card className="profile-card overflow-hidden">
             <div className="mb-1 p-3 light-gray-bg">
-              <h6 className="text-uppercase dark-blue-color spaced-header">
+              <h6 className="text-uppercase dark-principal-color spaced-header">
                 Context:
               </h6>
               {this.state.example.context &&
@@ -117,25 +123,25 @@ class VerifyInterface extends React.Component {
                         <Col xs={12} md={7}>
                           {this.state.task.type == "extract" ? (
                             <div className="mb-3">
-                              <h6 className="text-uppercase dark-blue-color spaced-header">
+                              <h6 className="text-uppercase dark-principal-color spaced-header">
                                 Question:
                               </h6>
                               <p>{this.state.example.text}</p>
-                              <h6 className="text-uppercase dark-blue-color spaced-header">
+                              <h6 className="text-uppercase dark-principal-color spaced-header">
                                 Answer:
                               </h6>
                               <p>{this.state.example.target_pred}</p>
                             </div>
                           ) : (
                             <div className="mb-3">
-                              <h6 className="text-uppercase dark-blue-color spaced-header">
+                              <h6 className="text-uppercase dark-principal-color spaced-header">
                                 {this.state.task.shortname === "NLI"
                                   ? "Hypothesis"
                                   : "Statement"}
                                 :
                               </h6>
                               <p>{this.state.example.text}</p>
-                              <h6 className="text-uppercase dark-blue-color spaced-header">
+                              <h6 className="text-uppercase dark-principal-color spaced-header">
                                 Label:
                               </h6>
                               <p>{this.state.example.target}</p>

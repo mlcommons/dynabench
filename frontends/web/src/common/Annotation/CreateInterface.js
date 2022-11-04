@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -762,7 +768,7 @@ class CreateInterface extends React.Component {
                                   <BootstrapSwitchButton
                                     checked={this.state.livemode}
                                     onlabel="Live Mode"
-                                    onstyle="primary blue-bg"
+                                    onstyle="primary principal-color-bg"
                                     offstyle="warning"
                                     offlabel="Sandbox"
                                     width={120}
@@ -790,7 +796,7 @@ class CreateInterface extends React.Component {
                                   tooltip="Don’t like this context? Try another one."
                                 >
                                   <Button
-                                    className="font-weight-bold blue-color light-gray-bg border-0 task-action-btn"
+                                    className="font-weight-bold principal-color light-gray-bg border-0 task-action-btn"
                                     onClick={this.getNewContext}
                                     disabled={this.state.refreshDisabled}
                                   >
@@ -805,7 +811,7 @@ class CreateInterface extends React.Component {
                           >
                             <Button
                               type="submit"
-                              className="font-weight-bold blue-bg border-0 task-action-btn"
+                              className="font-weight-bold principal-color-bg border-0 task-action-btn"
                               onClick={this.handleResponse}
                               disabled={this.state.submitDisabled}
                             >

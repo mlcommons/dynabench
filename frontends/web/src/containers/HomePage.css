@@ -13,6 +13,10 @@
     height: 100%;
 }
 
+h2 {
+    color: #344854 !important;
+}
+
 .task-card:hover {
     background-color: #f5f5f5;
 }
@@ -53,13 +57,19 @@
 }
 
 .home-cardgroup-header {
-    font-family: OpenSansLight;
-    font-size: 32px;
-    line-height: 44px;
+    font-size: 3rem;
+    line-height: 43px;
+    font-weight: 300 !important;
 }
 
 .home-readmore-btn {
-    padding: 10px 12px;
+    padding: 10px 16px;
+    color: #344854;
+}
+
+.home-readmore-btn:hover {
+    background-color: #ccebd4 !important;
+    color: #344854;
 }
 
 .task-page-header {
@@ -91,4 +101,12 @@
 .video-thumbnail:active {
     position: relative;
     top: 2px;
+}
+
+.dataperf {
+    border-color: #ff6d6a !important;
+}
+
+.no-dataperf {
+    border-color: #2088ef !important;
 }

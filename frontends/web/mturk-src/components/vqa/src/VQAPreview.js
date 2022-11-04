@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -83,13 +89,13 @@ class VQAPreview extends React.Component {
             <ol className="mx-5">
               <li>
                 Determine if the question is{" "}
-                <b className="dark-blue-color">valid</b>. A question is
+                <b className="dark-principal-color">valid</b>. A question is
                 considered to be valid if:
                 <ValidQuestionCharacteristics />
               </li>
               <li>
                 If the question is valid, determine whether the provided answer
-                is <b className="dark-blue-color">correct</b>.
+                is <b className="dark-principal-color">correct</b>.
               </li>
             </ol>
             <p>

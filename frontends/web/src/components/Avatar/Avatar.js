@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -42,7 +48,7 @@ export const Avatar = ({
           {isEditable ? (
             <div
               className={`editPic ${
-                theme === "light" ? "white-bg" : "blue-bg"
+                theme === "light" ? "white-bg" : "principal-color-bg"
               }`}
             >
               <img className="edit-pic-icon" src="/camera.png" alt="edit pic" />
@@ -58,18 +64,18 @@ export const Avatar = ({
       ) : (
         <div
           className={`avatar-circle ${
-            theme === "light" ? "white-bg" : "blue-bg"
+            theme === "light" ? "white-bg" : "principal-color-bg"
           } ${isThumbnail ? "sm inline-block mr-1" : null}`}
         >
           <span
             className={`initials ${
-              theme === "light" ? "blue-color" : "white-color"
+              theme === "light" ? "principal-color" : "white-color"
             }`}
           >
             {getInitial(username)}
           </span>
           {isEditable ? (
-            <div className="editPic blue-bg">
+            <div className="editPic principal-color-bg">
               <img className="edit-pic-icon" src="/camera.png" alt="edit pic" />
               <input
                 className="pic-file-upload"

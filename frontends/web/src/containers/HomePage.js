@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -28,8 +34,12 @@ class TaskCard extends React.Component {
     const task = this.props.task;
     return (
       <Col sm={6} lg={3} key={task.id} className="mb-3">
-        <Card key={task.id} className="task-card" onClick={this.props.onClick}>
-          <h2 className="task-header blue-color text-uppercase text-center">
+        <Card
+          key={task.id}
+          className={`${task.dataperf ? "dataperf" : "no-dataperf"} task-card`}
+          onClick={this.props.onClick}
+        >
+          <h2 className="task-header principal-color text-uppercase text-center">
             {task.name}
           </h2>
           <Card.Body>
@@ -112,70 +122,7 @@ class HomePage extends React.Component {
               "pb-0 bg-white jumbo-slider " +
               (this.state.showjumbo ? "" : "hide-jumbo")
             }
-          >
-            <Container>
-              <Row className="justify-content-center text-center">
-                <Col lg={8}>
-                  <h1 className="mb-4">Rethinking AI Benchmarking</h1>
-                  <p>
-                    Dynabench is a research platform for dynamic data collection
-                    and benchmarking. Static benchmarks have well-known issues:
-                    they saturate quickly, are susceptible to overfitting,
-                    contain exploitable annotator artifacts and have unclear or
-                    imperfect evaluation metrics.<br></br>
-                    <br></br> This platform in essence is a scientific
-                    experiment: can we make faster progress if we collect data
-                    dynamically, with humans and models in the loop, rather than
-                    in the old-fashioned static way?
-                  </p>
-                  <Modal
-                    show={this.state.showVideo}
-                    centered
-                    backdropClassName="badge-backdrop"
-                    onHide={() => {
-                      this.setState({ showVideo: false });
-                    }}
-                    dialogAs={({ children }) => (
-                      <div style={{ pointerEvents: "none" }}>{children}</div>
-                    )}
-                  >
-                    <ReactPlayer
-                      url="https://dynabench-us-west-1-096166425824.s3-us-west-1.amazonaws.com/public/explainer.mp4"
-                      controls
-                      playing
-                      width="80vw"
-                      height="80vh"
-                      style={{
-                        pointerEvents: "all",
-                        margin: "10vh auto 0",
-                        backgroundColor: "black",
-                      }}
-                    />
-                  </Modal>
-
-                  <img
-                    alt="video-thumbnail"
-                    onClick={() => {
-                      this.setState({ showVideo: true });
-                    }}
-                    src="/vid_thumb.png"
-                    className="video-thumbnail"
-                  />
-
-                  <div>
-                    <Button
-                      variant="primary"
-                      as={Link}
-                      className="button-ellipse blue-bg home-readmore-btn border-0"
-                      to="/about"
-                    >
-                      Read more
-                    </Button>
-                  </div>
-                </Col>
-              </Row>
-            </Container>
-          </Jumbotron>
+          ></Jumbotron>
           <Container className="pb-4 pb-sm-5">
             <h2 className="home-cardgroup-header text-reset mt-0 mb-4 font-weight-light d-block text-center">
               Tasks

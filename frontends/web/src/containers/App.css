@@ -21,8 +21,8 @@
     display: inline-block;
 }
 
-.blue-bg {
-    background-color: #1283d8;
+.principal-color-bg {
+    background-color: #ccebd4;
 }
 
 .white-bg {
@@ -49,11 +49,11 @@
     background-color: rgba(251, 229, 200, 0.65);
 }
 
-.blue-color {
-    color: #1283d8;
+.principal-color {
+    color: #344854;
 }
 
-.dark-blue-color {
+.dark-principal-color {
     color: #005798;
 }
 
@@ -75,12 +75,14 @@
 
 .button-ellipse {
     border-radius: 40px;
-    font-family: OpenSansSemiBold;
+    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif !important;
 }
 
 .navbar-dark .navbar-nav .nav-link {
-    color: #fff;
-    font-family: OpenSansSemiBold;
+    color: #344854;
+    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: 540;
 }
 
 .navbar-dark .dropdown-menu {
@@ -93,7 +95,17 @@
 .sidebar-wrapper .nav-link:hover,
 .sidebar-wrapper .nav-link.active {
     background-color: rgba(18, 131, 216, 0.1);
-    color: #1283d8;
+    color: #344854;
+}
+
+.navbar-dark .navbar-nav .nav-link:focus {
+    color: #344854 !important;
+    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: #344854 !important;
+    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif !important;
 }
 
 .table {
@@ -158,9 +170,17 @@
     }
 
     .signup-nav-link {
-        border: 1px solid #fff;
-        border-radius: 20px;
+        padding: 0.5rem 1rem 0.5rem 1rem !important;
+        cursor: pointer;
+        background-color: #fff;
+        color: #000;
+        border: 1px solid #000;
+        border-radius: 1.5rem;
     }
+}
+
+.login-fix-space {
+    margin-right: -22px !important;
 }
 
 div.recharts-wrapper .recharts-layer.recharts-cartesian-axis.recharts-yAxis.yAxis g.recharts-layer.recharts-cartesian-axis-tick:first-child {

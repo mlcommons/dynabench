@@ -4,6 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+
 /* STRUCTURE */
 
 .wrapper {
@@ -28,10 +29,11 @@
     padding: 0 30px;
 }
 
+
 /* FORM TYPOGRAPHY */
 
 .submit-btn {
-    background-color: #1283d8;
+    background-color: #ccebd4;
     border: none;
     font-size: 13px;
     padding: 15px 80px;
@@ -68,13 +70,16 @@
 }
 
 .login-form input:focus {
-    background-color: #fff;
+    background-color: #344854;
     border-bottom: 2px solid #5fbae9;
 }
 
+
 /* ANIMATIONS */
 
+
 /* Simple CSS3 Fade-in-down Animation */
+
 .fade-in-down {
     animation: fade-in-down 1s both;
 }
@@ -91,10 +96,17 @@
     }
 }
 
+
 /* Simple CSS3 Fade-in Animation */
+
 @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .fade-in {
@@ -118,7 +130,9 @@
     animation-delay: 1s;
 }
 
+
 /* Simple CSS3 Underline Animation */
+
 .underline-hover {
     display: inline-block;
 }

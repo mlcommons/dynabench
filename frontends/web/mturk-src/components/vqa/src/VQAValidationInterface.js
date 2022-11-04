@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -213,13 +219,13 @@ class VQAValidationInterface extends React.Component {
         <p>
           You will be shown an image and a question. The task consists of two
           rounds. First, you have to determine if the question is{" "}
-          <b className="dark-blue-color">valid</b>. Most of the questions should
-          be valid, as they are produced by hardworking turkers like you! Some
-          of the questions require digging into the image a bit more to assess
-          its validity. As a reminder, you can use the magnifying glass by
-          hovering your mouse over the image to zoom in! If we detect that you
-          are labeling really quickly and not investigating the images in great
-          detail, we will ban you.
+          <b className="dark-principal-color">valid</b>. Most of the questions
+          should be valid, as they are produced by hardworking turkers like you!
+          Some of the questions require digging into the image a bit more to
+          assess its validity. As a reminder, you can use the magnifying glass
+          by hovering your mouse over the image to zoom in! If we detect that
+          you are labeling really quickly and not investigating the images in
+          great detail, we will ban you.
         </p>
         <p>
           A question is considered <b>valid</b> if:
@@ -227,8 +233,8 @@ class VQAValidationInterface extends React.Component {
         <ValidQuestionCharacteristics />
         <p>
           If you deem the question as valid, next you will determine whether the
-          provided answer is <b className="dark-blue-color">correct</b>. If you
-          think the example should be reviewed, please click the <b>Flag</b>{" "}
+          provided answer is <b className="dark-principal-color">correct</b>. If
+          you think the example should be reviewed, please click the <b>Flag</b>{" "}
           button and explain why you flagged the example (try to use this
           sparingly). Please flag if you sense that the person asking the
           question has a bad intent.
@@ -337,7 +343,7 @@ class VQAValidationInterface extends React.Component {
                     <Card.Body className="p-3">
                       <Row>
                         <Col xs={12} md={7}>
-                          <h6 className="text-uppercase dark-blue-color spaced-header">
+                          <h6 className="text-uppercase dark-principal-color spaced-header">
                             Is the question below valid? (see instructions above
                             to see what we mean by "valid")
                           </h6>
@@ -381,7 +387,7 @@ class VQAValidationInterface extends React.Component {
                           {this.state.questionValidationState ===
                             this.VALIDATION_STATES.VALID && (
                             <div className="mt-3">
-                              <h6 className="text-uppercase dark-blue-color spaced-header">
+                              <h6 className="text-uppercase dark-principal-color spaced-header">
                                 Determine if the answer is correct:
                               </h6>
                               <p>

@@ -8,27 +8,11 @@ body {
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
     color: #6e6e6e;
-    font-family:
-        'OpenSansRegular',
-        'Segoe UI',
-        'Roboto',
-        'Oxygen',
-        'Ubuntu',
-        'Cantarell',
-        'Fira Sans',
-        'Droid Sans',
-        'Helvetica Neue',
-        sans-serif;
+    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif;
 }
 
 code {
-    font-family:
-        source-code-pro,
-        Menlo,
-        Monaco,
-        Consolas,
-        'Courier New',
-        monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 @font-face {
@@ -65,12 +49,13 @@ h2 {
 }
 
 a {
-    color: #1283d8;
+    color: #2088ef;
 }
 
 #icon {
     width: 60%;
 }
+
 
 /* TABS */
 
@@ -81,4 +66,32 @@ h2.inactive {
 h2.active {
     color: #0d0d0d;
     border-bottom: 2px solid #5fbae9;
+}
+
+.btn-outline-primary {
+    color: #000;
+    background-color: #eaeaea;
+    border-color: #0d0d0d;
+}
+
+.btn-outline-primary:hover {
+    color: #000;
+    background-color: #eaeaea;
+    border-color: #0d0d0d;
+}
+
+.btn-primary {
+    color: #344854;
+}
+
+.btn-primary:hover {
+    background-color: #2088ef;
+}
+
+.btn-link {
+    color: #344854;
+}
+
+.btn-link:hover {
+    color: #344854;
 }

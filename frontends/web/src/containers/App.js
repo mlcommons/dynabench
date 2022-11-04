@@ -163,7 +163,7 @@ class App extends React.Component {
               <Navbar
                 expand="lg"
                 variant="dark"
-                className="shadow blue-bg justify-content-start"
+                className="shadow principal-color-bg justify-content-start"
               >
                 <Navbar.Toggle
                   aria-controls="basic-navbar-nav"
@@ -171,7 +171,7 @@ class App extends React.Component {
                 />
                 <Navbar.Brand as={Link} to="/">
                   <img
-                    src="/logo_w.png"
+                    src="/logo_b.png"
                     style={{ width: 80, marginLeft: 5, marginRight: 20 }}
                     alt="Dynabench"
                   />
@@ -189,9 +189,17 @@ class App extends React.Component {
                       <NavDropdown.Item
                         as={HashLink}
                         to={"/#contributed-tasks"}
-                        className="py-3"
+                        className="py-3 "
                       >
                         Contributed Tasks
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        key={"FLoRes"}
+                        as={Link}
+                        to={"/flores"}
+                        className="py-3"
+                      >
+                        &nbsp;&nbsp;&nbsp;Flores
                       </NavDropdown.Item>
                       <div className="dropdown-divider my-0"></div>
                       <NavDropdown.Item
@@ -200,7 +208,31 @@ class App extends React.Component {
                         to={"/flores"}
                         className="py-3"
                       >
-                        Flores
+                        Dataperf
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        key={"Vision"}
+                        as={Link}
+                        to={"/tasks/vision-dataperf"}
+                        className="py-3"
+                      >
+                        &nbsp;&nbsp;&nbsp;Vision
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        key={"Debugging"}
+                        as={Link}
+                        to={"/tasks/vision-debugging"}
+                        className="py-3"
+                      >
+                        &nbsp;&nbsp;&nbsp;Debugging
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        key={"Debugging"}
+                        as={Link}
+                        to={"/tasks/speech-selection"}
+                        className="py-3"
+                      >
+                        &nbsp;&nbsp;&nbsp;Speech
                       </NavDropdown.Item>
                     </NavDropdown>
                   </Nav>
@@ -272,7 +304,11 @@ class App extends React.Component {
                     ) : (
                       <>
                         <Nav.Item>
-                          <Nav.Link as={Link} to="/login">
+                          <Nav.Link
+                            as={Link}
+                            to="/login"
+                            className="signup-nav-link login-fix-space"
+                          >
                             Login
                           </Nav.Link>
                         </Nav.Item>
