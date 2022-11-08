@@ -261,9 +261,10 @@ const Settings = (props) => {
                         className="py-3 my-0 border-bottom"
                       >
                         <Form.Label column>
-                          Adversarial examples
+                          Adversarial data collection
                           <Form.Text id="paramsHelpBlock" muted>
-                            Does this task accept adversarial examples?
+                            Does this task accept dynamic adversarial data
+                            collection?
                           </Form.Text>
                         </Form.Label>
                         <Col sm="6">
