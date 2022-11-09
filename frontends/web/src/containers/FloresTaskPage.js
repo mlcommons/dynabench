@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -23,14 +29,12 @@ import FloresTaskDescription from "../components/FloresComponents/FloresTaskDesc
 import FloresPairsLeaderBoard from "../components/FloresComponents/FloresPairsLeaderboard";
 
 const FLORES_TASK_NAMES = [
-  "Flores MT Evaluation (African)",
   "Flores MT Evaluation (FULL)",
   "Flores MT Evaluation (Small task 1)",
   "Flores MT Evaluation (Small task 2)",
 ];
 
 export const FLORES_TASK_CODES = [
-  "flores_african",
   "flores_full",
   "flores_small1",
   "flores_small2",

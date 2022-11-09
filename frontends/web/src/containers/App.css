@@ -8,12 +8,12 @@
     min-height: 88vh;
 }
 
-ul {
+.ul-nav {
     margin-bottom: 0;
     padding: 0;
 }
 
-li {
+.li-nav {
     list-style: none;
     padding: 1rem 1.5rem;
     margin-left: 2;

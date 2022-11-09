@@ -156,7 +156,7 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
         <Button variant="secondary" onClick={handleClose}>
           Close
         </Button>
-        <Button variant="primary" type="submit">
+        <Button variant="primary" type="submit" className="center-submit-model">
           Submit Model
         </Button>
       </Modal.Footer>

@@ -111,7 +111,7 @@ const UserLeaderboardCard = (props) => {
             >
               <DropdownButton
                 variant="light"
-                className="border-0 principal-color font-weight-bold light-gray-bg"
+                className="border-0 blue-color font-weight-bold light-gray-bg"
                 style={{ marginRight: 10 }}
                 id="dropdown-basic-button"
                 title={

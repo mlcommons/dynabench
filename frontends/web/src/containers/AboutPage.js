@@ -13,6 +13,7 @@
 import React, { useState } from "react";
 import { Button, Container, Col, Modal } from "react-bootstrap";
 import ReactPlayer from "react-player";
+import "./AboutPage.css";
 
 const AboutPage = () => {
   const [showVideo, setShowVideo] = useState(false);
@@ -53,7 +54,7 @@ const AboutPage = () => {
               }}
             />
           </Modal>
-          <div className="div_video-thumbnail ">
+          <div className="div-video-thumbnail">
             <img
               alt="video-thumbnail"
               onClick={() => {
@@ -545,7 +546,7 @@ const AboutPage = () => {
               Rodriguez, Rebecca Qian, Somya Jain, Guillaume Wenzek, Juan Felipe
               Cerón, Sahir Gomez, Anmol Gupta, Hannah Rose Kirk, Zoe Papakipos,
               Kok Rui Wong, Ishita Dasgupta, Anand Rajaram, Fatima Zahra Chriha,
-              and others.
+              Rafael Mosquera, Julián Eusse, Juan Ciro and others.
             </p>
             <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
               How can I help?

@@ -273,7 +273,7 @@ const SubmitModel = (props) => {
                             onClick={() => handleShow(true)}
                             className="center-submit-model"
                           >
-                            <i className="fas fa-edit"></i> Upload model
+                            <i className="fas fa-edit "></i> Upload model
                           </Button>
                           <Modal show={show} onHide={handleClose}>
                             <CreateModel
@@ -289,11 +289,11 @@ const SubmitModel = (props) => {
                       <Col className="text-center">
                         <center>
                           <Button
-                            variant="primary"
                             className="center-submit-model"
                             onClick={handleSubmitModel}
                           >
-                            <i className="fas fa-edit"></i> Submit model
+                            <i className="fas fa-edit center-submit-model"></i>{" "}
+                            Submit model
                           </Button>
                         </center>
                       </Col>
@@ -307,7 +307,7 @@ const SubmitModel = (props) => {
                 Have a question?
               </h2>
               <a href="mailto:dynabench-site@mlcommons.org">
-                <Button variant="primary">
+                <Button variant="primary" className="center-reach-button">
                   <i className="fas fa-edit"></i> Reach out to us
                 </Button>
               </a>

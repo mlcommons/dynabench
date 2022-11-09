@@ -174,15 +174,15 @@ class App extends React.Component {
                       </Nav.Link>
                     </Nav.Item>
                     <NavDropdown title="Tasks" id="basic-nav-dropdown">
-                      <ul className="cl-menu">
-                        <li id="original">
+                      <ul className="cl-menu ul-nav">
+                        <li id="original li-nav">
                           <span className="second-nav-a">Original Tasks</span>
-                          <ul>
+                          <ul className="ul-nav">
                             {this.state &&
                               this.state.tasks
                                 .filter((t) => t.official)
                                 .map((task, index) => (
-                                  <li key={task.task_code}>
+                                  <li className="li-nav" key={task.task_code}>
                                     <a href={`/tasks/${task.task_code}`}>
                                       {task.name}
                                     </a>
@@ -190,26 +190,29 @@ class App extends React.Component {
                                 ))}
                           </ul>
                         </li>
-                        <li id="contributed">
+                        <li className="li-nav" id="contributed">
                           <span className="second-nav-a">
                             Contributed Tasks
                           </span>
-                          <ul>
+                          <ul className="ul-nav">
                             {this.state &&
                               this.state.tasks
                                 .filter((t) => !t.official && !t.dataperf)
                                 .map((task, index) => (
-                                  <li key={task.task_code}>
+                                  <li className="li-nav" key={task.task_code}>
                                     <a href={`/tasks/${task.task_code}`}>
                                       {task.name}
                                     </a>
                                   </li>
                                 ))}
+                            <li className="li-nav">
+                              <a href="/flores">Flores</a>
+                            </li>
                           </ul>
                         </li>
-                        <li id="contributed">
+                        <li id="contributed" className="li-nav">
                           <span className="second-nav-a">Dataperf Tasks</span>
-                          <ul>
+                          <ul className="ul-nav">
                             {this.state &&
                               this.state.tasks
                                 .filter((t) => t.dataperf)
