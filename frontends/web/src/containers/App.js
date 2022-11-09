@@ -13,6 +13,7 @@ import React from "react";
 import "./App.css";
 import { Navbar, Nav, NavDropdown, Row, Container } from "react-bootstrap";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { HashLink } from "react-router-hash-link";
 import HomePage from "./HomePage";
 import LoginPage from "./LoginPage";
@@ -129,18 +130,7 @@ class App extends React.Component {
       ignoreQueryPrefix: true,
     });
     const showContentOnly = query.content_only === "true";
-    const NavItems = this.state.tasks
-      .filter((t) => t.official)
-      .map((task, index) => (
-        <NavDropdown.Item
-          key={task.task_code}
-          as={Link}
-          to={`/tasks/${task.task_code}`}
-          className="py-3"
-        >
-          {task.name}
-        </NavDropdown.Item>
-      ));
+
     return (
       <UserContext.Provider
         value={{
@@ -184,56 +174,56 @@ class App extends React.Component {
                       </Nav.Link>
                     </Nav.Item>
                     <NavDropdown title="Tasks" id="basic-nav-dropdown">
-                      {NavItems}
+                      <ul className="cl-menu">
+                        <li id="original">
+                          <span className="second-nav-a">Original Tasks</span>
+                          <ul>
+                            {this.state &&
+                              this.state.tasks
+                                .filter((t) => t.official)
+                                .map((task, index) => (
+                                  <li key={task.task_code}>
+                                    <a href={`/tasks/${task.task_code}`}>
+                                      {task.name}
+                                    </a>
+                                  </li>
+                                ))}
+                          </ul>
+                        </li>
+                        <li id="contributed">
+                          <span className="second-nav-a">
+                            Contributed Tasks
+                          </span>
+                          <ul>
+                            {this.state &&
+                              this.state.tasks
+                                .filter((t) => !t.official && !t.dataperf)
+                                .map((task, index) => (
+                                  <li key={task.task_code}>
+                                    <a href={`/tasks/${task.task_code}`}>
+                                      {task.name}
+                                    </a>
+                                  </li>
+                                ))}
+                          </ul>
+                        </li>
+                        <li id="contributed">
+                          <span className="second-nav-a">Dataperf Tasks</span>
+                          <ul>
+                            {this.state &&
+                              this.state.tasks
+                                .filter((t) => t.dataperf)
+                                .map((task, index) => (
+                                  <li key={task.task_code}>
+                                    <a href={`/tasks/${task.task_code}`}>
+                                      {task.name}
+                                    </a>
+                                  </li>
+                                ))}
+                          </ul>
+                        </li>
+                      </ul>
                       <div className="dropdown-divider my-0"></div>
-                      <NavDropdown.Item
-                        as={HashLink}
-                        to={"/#contributed-tasks"}
-                        className="py-3 "
-                      >
-                        Contributed Tasks
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        key={"FLoRes"}
-                        as={Link}
-                        to={"/flores"}
-                        className="py-3"
-                      >
-                        &nbsp;&nbsp;&nbsp;Flores
-                      </NavDropdown.Item>
-                      <div className="dropdown-divider my-0"></div>
-                      <NavDropdown.Item
-                        key={"FLoRes"}
-                        as={Link}
-                        to={"/flores"}
-                        className="py-3"
-                      >
-                        Dataperf
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        key={"Vision"}
-                        as={Link}
-                        to={"/tasks/vision-dataperf"}
-                        className="py-3"
-                      >
-                        &nbsp;&nbsp;&nbsp;Vision
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        key={"Debugging"}
-                        as={Link}
-                        to={"/tasks/vision-debugging"}
-                        className="py-3"
-                      >
-                        &nbsp;&nbsp;&nbsp;Debugging
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        key={"Debugging"}
-                        as={Link}
-                        to={"/tasks/speech-selection"}
-                        className="py-3"
-                      >
-                        &nbsp;&nbsp;&nbsp;Speech
-                      </NavDropdown.Item>
                     </NavDropdown>
                   </Nav>
                   <Nav className="justify-content-end">

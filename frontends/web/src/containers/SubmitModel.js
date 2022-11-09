@@ -306,7 +306,7 @@ const SubmitModel = (props) => {
               <h2 className="home-cardgroup-header d-block font-weight-light mb-4 text-uppercase text-reset">
                 Have a question?
               </h2>
-              <a href="mailto:dynabench@fb.com">
+              <a href="mailto:dynabench-site@mlcommons.org">
                 <Button variant="primary">
                   <i className="fas fa-edit"></i> Reach out to us
                 </Button>

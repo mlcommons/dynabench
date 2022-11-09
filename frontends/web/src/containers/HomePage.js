@@ -36,11 +36,17 @@ class TaskCard extends React.Component {
       <Col sm={6} lg={3} key={task.id} className="mb-3">
         <Card
           key={task.id}
-          className={`${task.dataperf ? "dataperf" : "no-dataperf"} task-card`}
+          className={`${
+            task.dataperf
+              ? "dataperf"
+              : !task.official
+              ? "contributed"
+              : "original"
+          } task-card`}
           onClick={this.props.onClick}
         >
           <h2 className="task-header principal-color text-uppercase text-center">
-            {task.name}
+            {task.name} {task.dataperf ? "🗃️" : !task.official ? "🦾" : "🤖"}
           </h2>
           <Card.Body>
             <Card.Text className="text-center">{task.desc}</Card.Text>

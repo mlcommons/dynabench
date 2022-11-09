@@ -107,6 +107,10 @@ h2 {
     border-color: #ff6d6a !important;
 }
 
-.no-dataperf {
+.contributed {
+    border-color: #ccebd4 !important;
+}
+
+.original {
     border-color: #2088ef !important;
 }
