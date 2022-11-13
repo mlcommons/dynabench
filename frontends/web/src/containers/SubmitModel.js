@@ -307,7 +307,7 @@ const SubmitModel = (props) => {
                 Have a question?
               </h2>
               <a href="mailto:dynabench-site@mlcommons.org">
-                <Button variant="primary" className="center-reach-button">
+                <Button variant="primary">
                   <i className="fas fa-edit"></i> Reach out to us
                 </Button>
               </a>
