@@ -13,8 +13,6 @@ import React from "react";
 import "./App.css";
 import { Navbar, Nav, NavDropdown, Row, Container } from "react-bootstrap";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { HashLink } from "react-router-hash-link";
 import HomePage from "./HomePage";
 import LoginPage from "./LoginPage";
 import ForgotPassword from "./ForgotPassword";
@@ -33,6 +31,7 @@ import TasksContext from "./TasksContext";
 import UserPage from "./UserPage";
 import ModelPage from "./ModelPage";
 import SubmitModel from "./SubmitModel";
+import DynabenchTaskPage from "./DynabenchTaskPage";
 import ApiService from "../common/ApiService";
 import ScrollToTop from "./ScrollToTop.js";
 import CreateInterface from "../common/Annotation/CreateInterface.js";
@@ -155,10 +154,7 @@ class App extends React.Component {
                 variant="dark"
                 className="shadow principal-color-bg justify-content-start"
               >
-                <Navbar.Toggle
-                  aria-controls="basic-navbar-nav"
-                  className="border-0 mr-2"
-                />
+                <Navbar.Toggle bsPrefix="text-nav-bar" />
                 <Navbar.Brand as={Link} to="/">
                   <img
                     src="/logo_b.png"
@@ -175,7 +171,7 @@ class App extends React.Component {
                     </Nav.Item>
                     <NavDropdown title="Tasks" id="basic-nav-dropdown">
                       <ul className="cl-menu ul-nav">
-                        <li id="original li-nav">
+                        <li id="original" className="li-nav">
                           <span className="second-nav-a">Original Tasks</span>
                           <ul className="ul-nav">
                             {this.state &&
@@ -217,7 +213,7 @@ class App extends React.Component {
                               this.state.tasks
                                 .filter((t) => t.dataperf)
                                 .map((task, index) => (
-                                  <li key={task.task_code}>
+                                  <li key={task.task_code} className="li-nav">
                                     <a href={`/tasks/${task.task_code}`}>
                                       {task.name}
                                     </a>
@@ -402,6 +398,10 @@ class App extends React.Component {
                 <Route
                   path="/flores/:taskShortName?"
                   component={FloresTaskPage}
+                />
+                <Route
+                  path="/dynabench/:taskShortName?"
+                  component={DynabenchTaskPage}
                 />
                 <Route path="/login" component={LoginPage} />
                 <Route

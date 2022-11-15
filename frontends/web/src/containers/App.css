@@ -339,3 +339,19 @@ table.inspectModel thead td {
         opacity: 1;
     }
 }
+
+.text-nav-bar {
+    background: none;
+    background-image: url("data:image/svg+xml;charset=utf8,<svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'><path stroke='rgba(52,72,84, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/></svg>") !important;
+    width: 7%;
+    border: none;
+    height: 25px;
+    outline: none !important;
+    margin-right: 5px;
+}
+
+@media all and (min-width: 480px) {
+    .text-nav-bar {
+        display: none;
+    }
+}
