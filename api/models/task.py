@@ -181,6 +181,7 @@ class PerfMetricEnum(enum.Enum):
     vqa_accuracy = "vqa_accuracy"
     dataperf_f1 = "dataperf_f1"
     dataperf_fraction_of_fixes = "dataperf_fraction_of_fixes"
+    dataperf_balanced_accuracy = "dataperf_balanced_accuracy"
 
 
 def verify_macro_f1_config(config_obj):
@@ -203,6 +204,13 @@ def verify_dataperf_f1_config(config_obj):
 
 def verify_dataperf_fraction_of_fixes_config(config_obj):
     prefixed_message = "in dataperf_fraction_of_fixes config: "
+    assert "reference_name" in config_obj, (
+        prefixed_message + "reference_name must be in config object"
+    )
+
+
+def verify_dataperf_balanced_accuracy_config(config_obj):
+    prefixed_message = "in dataperf_balanced_accuracy config: "
     assert "reference_name" in config_obj, (
         prefixed_message + "reference_name must be in config object"
     )
@@ -272,6 +280,7 @@ perf_metric_config_verifiers = {
     PerfMetricEnum.bleu.name: verify_bleu_config,
     PerfMetricEnum.chrf_pp.name: verify_chrf_pp_config,
     PerfMetricEnum.dataperf_fraction_of_fixes.name: verify_dataperf_fraction_of_fixes_config,
+    PerfMetricEnum.dataperf_balanced_accuracy.name: verify_dataperf_balanced_accuracy_config,
 }
 
 
@@ -668,6 +677,7 @@ class Task(Base):
 
     unique_validators_for_example_tags = db.Column(db.Boolean, default=False)
     mlcube_tutorial_markdown = db.Column(db.Text)
+    dynamic_adversarial_data_collection = db.Column(db.Boolean, default=True)
     train_file_upload_instructions_md = db.Column(db.Text)
 
     def __repr__(self):

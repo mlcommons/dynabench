@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -492,15 +498,16 @@ const AboutPage = () => (
           Sheng, Eric Wallace, Pedro Rodriguez, Rebecca Qian, Somya Jain,
           Guillaume Wenzek, Juan Felipe Cerón, Sahir Gomez, Anmol Gupta, Hannah
           Rose Kirk, Zoe Papakipos, Kok Rui Wong, Ishita Dasgupta, Anand
-          Rajaram, Fatima Zahra Chriha, and others.
+          Rajaram, Fatima Zahra Chriha, Rafael Mosquera, Julián Eusse, Juan Ciro
+          and others.
         </p>
         <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
           How can I help?
         </h2>
         <p>
           We need all the help we can get! Please{" "}
-          <a href="mailto:dynabench@fb.com">reach out to us</a>. The community
-          needs to have a say in what this platform becomes.
+          <a href="mailto:dynabench-site@mlcommons.org">reach out to us</a>. The
+          community needs to have a say in what this platform becomes.
         </p>
       </div>
       <hr />
@@ -508,7 +515,7 @@ const AboutPage = () => (
         <h2 className="home-cardgroup-header d-block font-weight-light mb-4 text-uppercase text-reset">
           Have a question?
         </h2>
-        <a href="mailto:dynabench@fb.com">
+        <a href="mailto:dynabench-site@mlcommons.org">
           <Button className="button-ellipse blue-bg home-readmore-btn border-0">
             Reach out to us
           </Button>

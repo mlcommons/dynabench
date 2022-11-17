@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -319,7 +325,10 @@ const DataPolicyPage = () => (
         active or as needed to provide you the services. If you would like to
         cancel your account or delete your personal information, you may do so
         by contacting us at{" "}
-        <a href="mailto:dynabench@fb.com">dynabench@fb.com</a>.
+        <a href="mailto:dynabench-site@mlcommons.org">
+          dynabench-site@mlcommons.org
+        </a>
+        .
       </p>
       <p>
         We take measures to delete your information or keep it in a form that
@@ -401,8 +410,11 @@ const DataPolicyPage = () => (
         verify your identity before processing your request. In some cases, we
         may need to collect additional information to verify your identity, such
         as a government issued ID. To exercise your rights under the GDPR, you
-        can email <a href="mailto:dynabench@fb.com">dynabench@fb.com</a> or
-        contact us by mail at the address provided below.
+        can email{" "}
+        <a href="mailto:dynabench-site@mlcommons.org">
+          dynabench-site@mlcommons.org
+        </a>{" "}
+        or contact us by mail at the address provided below.
       </p>
       <p>
         <strong>South Africa Privacy Notice</strong>
@@ -413,13 +425,15 @@ const DataPolicyPage = () => (
         (“POPIA”) may apply and supplements the rest of the Dynabench Data
         Policy. You have the right to access, rectify, and erase your personal
         information. To exercise such rights, you can contact us online at
-        dynabench@fb.com. In certain circumstances, you also have the right to
-        object to and restrict the processing of your personal information. To
-        exercise these rights you can email{" "}
-        <a href="mailto:dynabench@fb.com">dynabench@fb.com</a> or contact our
-        Data Protection Officer at the address provided below. We will not
-        transfer or transmit your personal information to third parties in
-        foreign countries (outside South Africa), unless (i) the recipient of
+        dynabench-site@mlcommons.org. In certain circumstances, you also have
+        the right to object to and restrict the processing of your personal
+        information. To exercise these rights you can email{" "}
+        <a href="mailto:dynabench-site@mlcommons.org">
+          dynabench-site@mlcommons.org
+        </a>{" "}
+        or contact our Data Protection Officer at the address provided below. We
+        will not transfer or transmit your personal information to third parties
+        in foreign countries (outside South Africa), unless (i) the recipient of
         your personal information is subject to a law, binding corporate rules
         or binding agreement that provides for an adequate level of protection;
         (ii) you consent to the transfer; (iii) the transfer is necessary to
@@ -447,7 +461,10 @@ const DataPolicyPage = () => (
         to delete the information as soon as possible. If you believe that we
         might have collected any personal information from a child under 18,
         please contact us at{" "}
-        <a href="mailto:dynabench@fb.com">dynabench@fb.com</a>.
+        <a href="mailto:dynabench-site@mlcommons.org">
+          dynabench-site@mlcommons.org
+        </a>
+        .
       </p>
       <p>
         <strong>Updates to this Data Policy</strong>
@@ -467,7 +484,10 @@ const DataPolicyPage = () => (
       <p>
         If you have any questions about this Data Policy or our practices,
         please contact us at{" "}
-        <a href="mailto:dynabench@fb.com">dynabench@fb.com</a> or by mail at:
+        <a href="mailto:dynabench-site@mlcommons.org">
+          dynabench-site@mlcommons.org
+        </a>{" "}
+        or by mail at:
         <br />
         <br />
         Facebook, Inc.

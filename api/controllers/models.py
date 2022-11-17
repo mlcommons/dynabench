@@ -284,6 +284,71 @@ def do_upload_via_train_files(credentials, tid, model_name):
         secret=secrets.token_hex(),
     )
 
+    if len(train_files) == 1:
+        submission = json.loads(train_files[name].file.read().decode("utf-8"))
+
+        payload = {
+            "id_json": submission,
+            "bucket_name": task.s3_bucket,
+            "key": task.task_code,
+        }
+
+        lambda_function = task.lambda_model
+        r = requests.post(lambda_function, json=payload)
+
+        try:
+            new_score = np.round(r.json()["predictions"] * 100, 3)
+        except Exception as ex:
+            logger.exception(ex)
+            Email().send(
+                contact=user.email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_train_failed.txt",
+                msg_dict={"name": model_name},
+                subject=f"""Model {model_name} failed training as {r.json()['detail']} """,
+            )
+            bottle.abort(400)
+
+        dataset_id = dm.getByName(name).id
+        r_realid = rm.getByTid(tid)[0].rid
+        metric = task_config["perf_metric"]["type"]
+
+        final_score = {
+            metric: new_score,
+            "perf": new_score,
+            "perf_std": 0.0,
+            "perf_by_tag": [
+                {
+                    "tag": str(name),
+                    "pretty_perf": f"{new_score} %",
+                    "perf": new_score,
+                    "perf_std": 0.0,
+                    "perf_dict": {metric: new_score},
+                }
+            ],
+        }
+
+        new_score_string = json.dumps(final_score)
+
+        sm.create(
+            model_id=model[1],
+            r_realid=r_realid,
+            did=dataset_id,
+            pretty_perf=f"{new_score} %",
+            perf=new_score,
+            metadata_json=new_score_string,
+        )
+
+        Email().send(
+            contact=user.email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": model_name, "model_id": model[1]},
+            subject=f"Model {model_name} training succeeded.",
+        )
+
+        return util.json_encode({"success": "ok", "model_id": model[1]})
+
     if task.is_decen_task:
         path = "templates/decen_dataperf"
 
@@ -292,6 +357,24 @@ def do_upload_via_train_files(credentials, tid, model_name):
             json.dump(mlsphere_config, mlsphere)
 
         id_list = []
+
+        for dataset in datasets:
+            if (
+                dataset.access_type == AccessTypeEnum.scoring
+                and dataset.name not in train_files.keys()
+            ):
+                Email().send(
+                    contact=user.email,
+                    cc_contact="dynabench-site@mlcommons.org",
+                    template_name="model_train_failed.txt",
+                    msg_dict={"name": model_name},
+                    subject=f"""Model {model_name} training failed. You must include
+                    a training file for all classes""",
+                )
+                bottle.abort(
+                    400, "Need to upload train files for all leaderboard datasets"
+                )
+
         for name, upload in train_files.items():
             if upload.content_type != "text/plain":
                 Email().send(
@@ -361,15 +444,19 @@ def do_upload_via_train_files(credentials, tid, model_name):
     # accumulated_predictions = [] Implementation for accumulated labels instead of mean
     # accumulated_labels = [] Implementation for accumulated labels instead of mean
 
+    print("Went through the dataset verification")
+
     for name, upload in train_files.items():
 
         current_upload = json.loads(upload.file.read().decode("utf-8"))
         current_upload = current_upload[list(current_upload.keys())[0]]
+        print("This is the name", name)
 
         id_count = 0
         for id, label in current_upload.items():
             id_count += 1
 
+        print("This is the id_count", id_count)
         if id_count > 1000:
             Email().send(
                 contact=user.email,
@@ -380,6 +467,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 the maximum amount of samples.""",
             )
             bottle.abort(400, "Invalid train file")
+        print("Preparing ", current_upload)
         request_packet = {
             "id_json": current_upload,
             "bucket_name": "vision-dataperf",

@@ -171,7 +171,7 @@ class SubmitInterface extends React.Component {
         <h1 className="my-4 pt-3 text-uppercase text-center">
           {this.state.submission_type === "predictions"
             ? "Submit Model Predictions"
-            : "Submit Train Files"}
+            : "Submit Files"}
         </h1>
         <Col>
           <Card className="my-4">

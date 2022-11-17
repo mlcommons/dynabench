@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import sacrebleu
 import sentencepiece
-from sklearn.metrics import auc, f1_score, roc_curve
+from sklearn.metrics import auc, balanced_accuracy_score, f1_score, roc_curve
 
 from metrics.instance_property import instance_property
 
@@ -114,6 +114,20 @@ def get_dataperf_auc_meta(task=None):
     }
 
 
+def get_dataperf_balanced_accuracy(predictions, labels):
+    score = balanced_accuracy_score(labels, predictions)
+    return score
+
+
+def get_dataperf_balanced_accuracy_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Balanced Accuracy",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
 def get_dataperf_fraction_of_fixes(required_fixes, total_fixes):
     fraction_of_fixes = required_fixes / total_fixes
     return fraction_of_fixes
@@ -123,7 +137,7 @@ def get_dataperf_fraction_of_fixes_meta(task=None):
     return {
         "unit": "%",
         "pretty_name": "Fraction of fixes",
-        "utility_direction": 1,
+        "utility_direction": -1,
         "offset": 0,
     }
 
