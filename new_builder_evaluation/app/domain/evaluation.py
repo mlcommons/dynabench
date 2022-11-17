@@ -281,7 +281,9 @@ class Evaluation:
         return round(num_samples / seconds_time_prediction, 2)
 
     def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
-        logs_name = "logs-{}".format(model_s3_zip.split("/")[-1].split(".")[0])
+        logs_name = "logs-{}".format(
+            (model_s3_zip.split("/")[-1].split(".")[0]).split("-")[0]
+        )
         handler = cloudwatch.CloudwatchHandler(
             log_group="test_logging_new_builder",
             log_stream=logs_name,

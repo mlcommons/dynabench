@@ -63,6 +63,12 @@ from metrics.metric_getters import get_job_metrics
 @bottle.get("/models/latest_job_log/<mid:int>/<did:int>")
 @_auth.requires_auth
 def get_latest_job_log(credentials, mid, did):
+    client = boto3.client(
+        "logs",
+        aws_access_key_id=config["aws_access_key_id"],
+        aws_secret_access_key=config["aws_secret_access_key"],
+        region_name=config["aws_region"],
+    )
     u = UserModel()
     uid = credentials["id"]
     user = u.get(uid)
@@ -80,75 +86,21 @@ def get_latest_job_log(credentials, mid, did):
     if dataset.log_access_type == LogAccessTypeEnum.owner:
         ensure_owner_or_admin(model.tid, uid)
 
-    tm = TaskModel()
-    task = tm.get(model.tid)
-
-    delta_metric_types = [
-        task_config["type"]
-        for task_config in yaml.load(task.config_yaml, yaml.SafeLoader).get(
-            "delta_metrics", []
+    try:
+        response = client.get_log_events(
+            logGroupName="test_logging_new_builder",
+            logStreamName=f"logs-{mid}",
         )
-    ]
-    delta_metric_types.append(None)
 
-    perturb_prefix_to_logs = {}
-    for perturb_prefix in delta_metric_types:
-
-        job_name_without_timestamp_suffix = generate_job_name(
-            model.endpoint_name, perturb_prefix, dataset.name, timestamp=""
+        log_events = response["events"]
+        final_results = {}
+        final_results["logs"] = log_events
+        return util.json_encode(final_results)
+    except Exception as ex:
+        bottle.abort(
+            400,
+            f"""There are no logs saved for this model. Log: {ex}""",
         )
-        client = boto3.client(
-            "logs",
-            aws_access_key_id=config["eval_aws_access_key_id"],
-            aws_secret_access_key=config["eval_aws_secret_access_key"],
-            region_name=config["eval_aws_region"],
-        )
-        log_streams = client.describe_log_streams(
-            logGroupName="/aws/sagemaker/TransformJobs",
-            logStreamNamePrefix=job_name_without_timestamp_suffix,
-            descending=True,
-        )["logStreams"]
-
-        logs_from_latest_job = {}
-        if log_streams:
-            latest_job_timestamp = (
-                log_streams[0]["logStreamName"].split("/")[0].split("-")[-1]
-            )
-            for log_stream in log_streams:
-                job_timestamp = log_stream["logStreamName"].split("/")[0].split("-")[-1]
-                if job_timestamp == latest_job_timestamp:
-                    log = client.get_log_events(
-                        logGroupName="/aws/sagemaker/TransformJobs",
-                        logStreamName=log_stream["logStreamName"],
-                    )
-                    if log_stream["logStreamName"].endswith("data-log"):
-                        if "sagemaker_log" in logs_from_latest_job:
-                            logger.error(
-                                """Too many logs for the same job.
-                                Not sure which one to choose."""
-                            )
-                            bottle.abort(
-                                400,
-                                """Too many logs for the same job.
-                                Not sure which one to choose.""",
-                            )
-                        logs_from_latest_job["sagemaker_log"] = log
-                    else:
-                        if "log" in logs_from_latest_job:
-                            logger.error(
-                                """Too many logs for the same job.
-                                Not sure which one to choose."""
-                            )
-                            bottle.abort(
-                                400,
-                                """Too many logs for the same job.
-                                Not sure which one to choose.""",
-                            )
-                        logs_from_latest_job["log"] = log
-                else:
-                    break
-            perturb_prefix_to_logs[perturb_prefix] = logs_from_latest_job
-    return util.json_encode(perturb_prefix_to_logs)
 
 
 @bottle.get("/models/predictions/<mid:int>/<did:int>")
@@ -190,7 +142,6 @@ def get_predictions_model(credentials, mid, did):
     predictions_metrics = ["fairness", "robustness"]
     predictions_metrics = [item + "-" + name_dataset for item in predictions_metrics]
     predictions_metrics.append(name_dataset)
-    print(model.name.replace(" ", "-"))
     predictions = {}
     try:
         for prediction in predictions_metrics:
@@ -300,12 +251,13 @@ def do_upload_via_train_files(credentials, tid, model_name):
             new_score = np.round(r.json()["predictions"] * 100, 3)
         except Exception as ex:
             logger.exception(ex)
+            subject = f"Model {model_name} failed training as {r.json()['detail']}"
             Email().send(
                 contact=user.email,
                 cc_contact="dynabench-site@mlcommons.org",
                 template_name="model_train_failed.txt",
                 msg_dict={"name": model_name},
-                subject=f"""Model {model_name} failed training as {r.json()['detail']} """,
+                subject=subject,
             )
             bottle.abort(400)
 
@@ -399,13 +351,13 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
             os.remove(f"{path}/submissions/{name}_{model[1]}.txt")
             os.remove(f"{path}/{name}_{model[1]}.zip")
-
+            url_name = f"s3://{bucket_name}/{task.task_code}/submissions/{name}_{model[1]}.zip"
             decen_request = requests.post(
                 f"{task.lambda_model}s",
                 json={
                     "type": "general",
                     "payload": {
-                        "url": f"s3://{bucket_name}/{task.task_code}/submissions/{name}_{model[1]}.zip",
+                        "url": url_name,
                         "submission_id": f"{name}_{model[1]}",
                     },
                     "status": "submitted",
