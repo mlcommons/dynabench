@@ -351,13 +351,13 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
             os.remove(f"{path}/submissions/{name}_{model[1]}.txt")
             os.remove(f"{path}/{name}_{model[1]}.zip")
-            url_name = f"s3://{bucket_name}/{task.task_code}/submissions/{name}_{model[1]}.zip"
+            prefix_s3 = f"s3://{bucket_name}/{task.task_code}/submissions/"
             decen_request = requests.post(
                 f"{task.lambda_model}s",
                 json={
                     "type": "general",
                     "payload": {
-                        "url": url_name,
+                        "url": f"{prefix_s3}/{name}_{model[1]}.zip",
                         "submission_id": f"{name}_{model[1]}",
                     },
                     "status": "submitted",
