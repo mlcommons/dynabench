@@ -845,6 +845,7 @@ class TaskModel(BaseModel):
         tasks = [x[0].to_dict() for x in rows]
         for ii, r in enumerate([x[1] for x in rows]):
             tasks[ii]["round"] = r.to_dict()
+        self.dbs.expunge_all()
         return tasks
 
     def listSubmitable(self):
