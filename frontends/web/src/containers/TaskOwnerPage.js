@@ -30,7 +30,7 @@ class TaskOwnerPage extends React.Component {
       task: null,
       rounds: null,
       owners: null,
-      model_identifiers_for_target_selection: null,
+      get_models_in_the_loop: null,
       model_identifiers: null,
       datasets: null,
       availableDatasetAccessTypes: null,
@@ -203,10 +203,7 @@ class TaskOwnerPage extends React.Component {
       .getModelIdentifiersForTargetSelection(this.state.task.id)
       .then(
         (result) => {
-          this.setState(
-            { model_identifiers_for_target_selection: result },
-            callback
-          );
+          this.setState({ get_models_in_the_loop: result }, callback);
         },
         (error) => {
           console.log(error);
@@ -396,7 +393,7 @@ class TaskOwnerPage extends React.Component {
     const model_ids = [];
 
     for (const model_identifier of values.model_identifiers) {
-      if (model_identifier.is_target) {
+      if (model_identifier.is_in_the_loop) {
         model_ids.push(model_identifier.model_id);
       }
     }
@@ -563,13 +560,11 @@ class TaskOwnerPage extends React.Component {
                 ) : null}
                 {this.props.location.hash === "#rounds" &&
                 this.state.rounds &&
-                this.state.model_identifiers_for_target_selection ? (
+                this.state.get_models_in_the_loop ? (
                   <Rounds
                     rounds={this.state.rounds}
                     task={this.state.task}
-                    model_identifiers_for_target_selection={
-                      this.state.model_identifiers_for_target_selection
-                    }
+                    get_models_in_the_loop={this.state.get_models_in_the_loop}
                     createRound={this.createRound}
                     handleRoundUpdate={this.handleRoundUpdate}
                     exportData={this.exportData}

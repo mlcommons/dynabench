@@ -148,6 +148,10 @@ class CreateInterface extends React.Component {
                 ? taskConfig.metadata.validate
                 : [];
 
+              getModelInTheLoop(this.state.task.id).then((res) => {
+                this.setState({ modelInTheLoop: res.data.light_model });
+              });
+
               this.setState({
                 taskConfig: taskConfig,
                 randomTargetModel: randomTargetModel,
@@ -322,16 +326,12 @@ class CreateInterface extends React.Component {
     this.setState({ submitWithoutFullExample: false });
     this.setState({ submitDisabled: true, refreshDisabled: true }, () => {
       this.manageTextInput("blur");
-
-      console.log(this.state);
-      // const url = this.state.modelInTheLoop
-      const url = "";
+      const url = this.state.modelInTheLoop;
       if (url === null) {
         // In this case, there is no target model. Just store the example without model data.
         this.storeExampleWrapper();
         return;
       }
-
       this.context.api
         .convertToModelIO(this.state.task.id, this.state.data)
         .then((model_io_result) => {
@@ -484,10 +484,6 @@ class CreateInterface extends React.Component {
         }
       );
     });
-
-    console.log(this.state.taskId);
-
-    this.setState({ modelInTheLoop: getModelInTheLoop(3) });
   }
 
   render() {
