@@ -406,40 +406,42 @@ class TaskOwnerPage extends React.Component {
       longdesc: values.longdesc,
     };
 
-    this.context.api.updateRound(this.state.task.id, values.rid, data).then(
-      () => {
-        if (values.contexts_file) {
-          this.handleContextsSubmit(values, {
-            setFieldError,
-            setFieldValue,
-            setSubmitting,
-            resetForm,
-          }).then(
+    this.context.api
+      .updateModelsInTheLoop(this.state.task.id, values.rid, data)
+      .then(
+        () => {
+          if (values.contexts_file) {
+            this.handleContextsSubmit(values, {
+              setFieldError,
+              setFieldValue,
+              setSubmitting,
+              resetForm,
+            }).then(
+              this.fetchRounds(() => {
+                resetForm({
+                  values: values,
+                });
+                setSubmitting(false);
+              })
+            );
+          } else {
             this.fetchRounds(() => {
               resetForm({
                 values: values,
               });
               setSubmitting(false);
-            })
-          );
-        } else {
-          this.fetchRounds(() => {
-            resetForm({
-              values: values,
             });
-            setSubmitting(false);
-          });
+          }
+        },
+        (error) => {
+          console.log(error);
+          setFieldError(
+            "accept",
+            "Round could not be updated (" + error.error + ")"
+          );
+          setSubmitting(false);
         }
-      },
-      (error) => {
-        console.log(error);
-        setFieldError(
-          "accept",
-          "Round could not be updated (" + error.error + ")"
-        );
-        setSubmitting(false);
-      }
-    );
+      );
   };
 
   createRound = () => {

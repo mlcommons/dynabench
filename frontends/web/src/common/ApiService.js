@@ -653,11 +653,14 @@ export default class ApiService {
     });
   }
 
-  updateRound(tid, rid, data) {
-    return this.fetch(`${this.domain}/tasks/update_round/${tid}/${rid}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
+  updateModelsInTheLoop(tid, rid, data) {
+    return this.fetch(
+      `${this.domain}/tasks/update_models_in_the_loop/${tid}/${rid}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }
+    );
   }
 
   createRound(tid) {
@@ -667,12 +670,9 @@ export default class ApiService {
   }
 
   getModelIdentifiersForTargetSelection(tid) {
-    return this.fetch(
-      `${this.domain}/tasks/get_model_identifiers_for_target_selection/${tid}`,
-      {
-        method: "GET",
-      }
-    );
+    return this.fetch(`${this.domain}/tasks/get_models_in_the_loop/${tid}`, {
+      method: "GET",
+    });
   }
 
   getModelIdentifiers(tid) {

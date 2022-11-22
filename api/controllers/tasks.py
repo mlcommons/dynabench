@@ -277,49 +277,19 @@ def create_round(credentials, tid):
     return util.json_encode({"success": "ok"})
 
 
-@bottle.put("/tasks/update_round/<tid:int>/<rid:int>")
+@bottle.put("/tasks/update_models_in_the_loop/<tid:int>/<rid:int>")
 @_auth.requires_auth
-def update_round(credentials, tid, rid):
+def update_models_in_the_loop(credentials, tid, rid):
     data = bottle.request.json
-
     ensure_owner_or_admin(tid, credentials["id"])
-
-    rm = RoundModel()
-    round = rm.getByTidAndRid(tid, rid)
-
     if "model_ids" in data:
-        tm = TaskModel()
-        task = tm.get(tid)
-        endpoint_urls = []
         for model_id in data["model_ids"]:
             mm = ModelModel()
             model = mm.get(model_id)
-            if not model.is_published:
-                bottle.abort(400, "Can't use an unpublished model as a target model")
-            if model.tid != tid:
-                bottle.abort(
-                    400, "Can't add a model for another task as a target model"
-                )
-
-            # TODO: store the endpoint url in the models table?
-            endpoint_url = (
-                "https://obws766r82.execute-api."
-                + task.aws_region
-                + ".amazonaws.com/predict?model="
-                + model.endpoint_name
-            )
-            endpoint_urls.append(endpoint_url)
-        if endpoint_urls == []:
-            round.url = None
-        else:
-            round.url = "|".join(endpoint_urls)
-
-    round.longdesc = data.get("longdesc", round.longdesc)
-    rm.dbs.add(round)
-    rm.dbs.flush()
-    rm.dbs.commit()
-    logger.info("Updated round (%s)" % (round.id))
-
+            model.is_in_the_loop = 1
+            mm.dbs.flush()
+            mm.dbs.commit()
+    logger.info("Updated models (%s)")
     return util.json_encode({"success": "ok"})
 
 
@@ -362,6 +332,36 @@ def get_model_identifiers_for_target_selection(credentials, tid):
                             "uid": model.uid,
                             "username": model.user.username,
                             "is_target": is_target,
+                        }
+                    )
+        rid_to_model_identifiers[round.rid] = model_identifiers
+
+    return util.json_encode(rid_to_model_identifiers)
+
+
+@bottle.get("/tasks/get_models_in_the_loop/<tid:int>")
+@_auth.requires_auth
+def get_models_in_the_loop(credentials, tid):
+    ensure_owner_or_admin(tid, credentials["id"])
+    mm = ModelModel()
+    models = mm.getByTid(tid)
+    rm = RoundModel()
+    rounds = rm.getByTid(tid)
+    rid_to_model_identifiers = {}
+    for round in rounds:
+        model_identifiers = []
+        for model in models:
+            if model.light_model is not None:
+                if (
+                    model.is_published
+                    and model.deployment_status == DeploymentStatusEnum.deployed
+                ):
+                    model_identifiers.append(
+                        {
+                            "model_name": model.name,
+                            "model_id": model.id,
+                            "uid": model.uid,
+                            "username": model.user.username,
                         }
                     )
         rid_to_model_identifiers[round.rid] = model_identifiers
