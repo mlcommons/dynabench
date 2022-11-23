@@ -10,21 +10,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useContext, useState } from "react";
-import { Container, Row, Form, Col, Card, Button } from "react-bootstrap";
-import Markdown from "react-markdown";
 import { Formik } from "formik";
-import UserContext from "../../containers/UserContext";
+import React from "react";
+import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
+import Markdown from "react-markdown";
 const yaml = require("js-yaml");
 
 const Settings = (props) => {
-  const context = useContext(UserContext);
-  const [decentoken, setDecenToken] = useState("");
-
-  context.api.getAPIToken().then((result) => {
-    setDecenToken(result.api_token);
-  });
-
+  console.log("Settings props", props.task);
   return (
     <Container className="mb-5 pb-5">
       <h1 className="my-4 pt-3 text-uppercase text-center">Settings</h1>
@@ -54,6 +47,9 @@ const Settings = (props) => {
                 train_file_upload_instructions_md:
                   props.task.train_file_upload_instructions_md,
                 context: props.task.context,
+                decen_queue: props.task.decen_queue,
+                decen_bucket: props.task.decen_bucket,
+                decen_aws_region: props.task.decen_aws_region,
               }}
               onSubmit={props.handleTaskUpdate}
             >
@@ -261,7 +257,7 @@ const Settings = (props) => {
                         className="py-3 my-0 border-bottom"
                       >
                         <Form.Label column>
-                          Adversarial data collection
+                          Dynamic adversarial data collection
                           <Form.Text id="paramsHelpBlock" muted>
                             Does this task accept dynamic adversarial data
                             collection?
@@ -270,46 +266,6 @@ const Settings = (props) => {
                         <Col sm="6">
                           <Form.Check
                             checked={values.dynamic_adversarial_data_collection}
-                            onChange={handleChange}
-                          />
-                        </Col>
-                      </Form.Group>
-                      <Form.Group
-                        as={Row}
-                        controlId="build_sqs_queue"
-                        className="py-3 my-0 border-bottom"
-                      >
-                        <Form.Label column>
-                          Dynamic adversarial data collection
-                          <Form.Text id="paramsHelpBlock" muted>
-                            Name of your Build Queue in your AWS account
-                            (Decentralized Task only)
-                          </Form.Text>
-                        </Form.Label>
-                        <Col sm="6">
-                          <Form.Control
-                            type="text"
-                            defaultValue={values.build_sqs_queue}
-                            onChange={handleChange}
-                          />
-                        </Col>
-                      </Form.Group>
-                      <Form.Group
-                        as={Row}
-                        controlId="eval_sqs_queue"
-                        className="py-3 my-0 border-bottom"
-                      >
-                        <Form.Label column>
-                          Eval queues
-                          <Form.Text id="paramsHelpBlock" muted>
-                            Name of your Evaluation Queue in your AWS account
-                            (Decentralized Task only)
-                          </Form.Text>
-                        </Form.Label>
-                        <Col sm="6">
-                          <Form.Control
-                            type="text"
-                            defaultValue={values.eval_sqs_queue}
                             onChange={handleChange}
                           />
                         </Col>
@@ -398,51 +354,57 @@ const Settings = (props) => {
                         <>
                           <Form.Group
                             as={Row}
-                            className="py-3 my-0 border-bottom"
-                          >
-                            <Form.Label column>Decen Eaas Token:</Form.Label>
-                            <Col sm="6">
-                              <Form.Control disabled value={decentoken} />
-                            </Col>
-                          </Form.Group>
-                          <Form.Group
-                            as={Row}
-                            controlId="task_aws_account_id"
+                            controlId="bucket_name"
                             className="py-3 my-0 border-bottom"
                           >
                             <Form.Label column>
-                              Task Owner AWS Account ID
+                              Bucket name
                               <Form.Text id="paramsHelpBlock" muted>
-                                AWS Account ID in your AWS Account
-                                (decentralized setting only)
+                                Name of your bucket in your AWS account
                               </Form.Text>
                             </Form.Label>
                             <Col sm="6">
                               <Form.Control
                                 type="text"
-                                defaultValue={values.task_aws_account_id}
+                                defaultValue={values.decen_bucket}
                                 onChange={handleChange}
                               />
                             </Col>
                           </Form.Group>
                           <Form.Group
                             as={Row}
-                            controlId="task_gateway_predict_prefix"
+                            controlId="aws_region"
                             className="py-3 my-0 border-bottom"
                           >
                             <Form.Label column>
-                              Task Owner AWS API Gateway Predict URL
+                              AWS region
                               <Form.Text id="paramsHelpBlock" muted>
-                                API Gateway ID to interact with Sagemaker Models
-                                (decentralized setting only)
+                                Region of your bucket in your AWS account
                               </Form.Text>
                             </Form.Label>
                             <Col sm="6">
                               <Form.Control
                                 type="text"
-                                defaultValue={
-                                  values.task_gateway_predict_prefix
-                                }
+                                defaultValue={values.decen_aws_region}
+                                onChange={handleChange}
+                              />
+                            </Col>
+                          </Form.Group>
+                          <Form.Group
+                            as={Row}
+                            controlId="sqs_queue"
+                            className="py-3 my-0 border-bottom"
+                          >
+                            <Form.Label column>
+                              Queue
+                              <Form.Text id="paramsHelpBlock" muted>
+                                Name of your Queue in your AWS account
+                              </Form.Text>
+                            </Form.Label>
+                            <Col sm="6">
+                              <Form.Control
+                                type="text"
+                                defaultValue={values.decen_queue}
                                 onChange={handleChange}
                               />
                             </Col>

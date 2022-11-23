@@ -33,6 +33,7 @@ class Evaluation:
         self.cloud_watch = self.session.client("cloudwatch")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.builder = Builder()
+        self.centralized_host = os.getenv("CENTRALIZED_URL")
 
     def require_fields_task(self, folder_name: str):
         input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
@@ -45,53 +46,46 @@ class Evaluation:
         return module.ModelSingleInput.schema().get("required")
 
     def get_task_configuration(self, task_id: int):
-        centralized_host = os.getenv("CENTRALIZED_URL")
         task_configuration = requests.get(
-            f"{centralized_host}evaluation/get_task_configuration",
+            f"{self.centralized_host}evaluation/get_task_configuration",
             params={"id": task_id},
         ).json()
 
         return task_configuration
 
     def get_model_id_and_task_code(self, task_code: str):
-        centralized_host = os.getenv("CENTRALIZED_URL")
         task = requests.get(
-            f"{centralized_host}evaluation/get_model_id_and_task_code",
+            f"{self.centralized_host}evaluation/get_model_id_and_task_code",
             params={"task_code": task_code},
         ).json()
 
         return task
 
     def get_round_info_by_round_and_task(self, task_id: int, round_id: int):
-        centralized_host = os.getenv("CENTRALIZED_URL")
         round_info = requests.get(
-            f"{centralized_host}evaluation/get_round_info_by_round_and_task",
+            f"{self.centralized_host}evaluation/get_round_info_by_round_and_task",
             params={"task_id": task_id, "round_id": round_id},
         ).json()
 
         return round_info
 
     def get_by_id(self, id: int):
-        centralized_host = os.getenv("CENTRALIZED_URL")
         round_info = requests.get(
-            f"{centralized_host}evaluation/get_by_id",
+            f"{self.centralized_host}evaluation/get_by_id",
             params={"id": id},
         ).json()
         return round_info
 
     def post_descentralized_scores(self, scores: dict):
-        centralized_host = os.getenv("CENTRALIZED_URL")
         post = requests.post(
-            f"{centralized_host}evaluation/descentralized_scores",
+            f"{self.centralized_host}evaluation/descentralized_scores",
             json=scores,
         )
-
         return post.status_code
 
     def update_light_model(self, model_id: int, url_light_model: str):
-        centralized_host = os.getenv("CENTRALIZED_URL")
         post = requests.post(
-            f"{centralized_host}evaluation/update_light_model",
+            f"{self.centralized_host}evaluation/update_light_model",
             json={"model_id": model_id, "url_light_model": url_light_model},
         )
         return post.status_code
@@ -135,13 +129,10 @@ class Evaluation:
         return final_predictions
 
     def get_scoring_datasets(self, task_id: int):
-        centralized_host = os.getenv("CENTRALIZED_URL")
-
         jsonl_scoring_datasets = requests.get(
-            f"{centralized_host}evaluation/get_scoring_datasets",
+            f"{self.centralized_host}evaluation/get_scoring_datasets",
             params={"task_id": task_id},
         ).json()
-
         return jsonl_scoring_datasets
 
     def downloads_scoring_datasets(
