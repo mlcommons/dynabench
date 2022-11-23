@@ -207,7 +207,7 @@ def create(credentials, tid, name):
                 "s3",
                 aws_access_key_id=config["eval_aws_access_key_id"],
                 aws_secret_access_key=config["eval_aws_secret_access_key"],
-                region_name=task.region,
+                region_name=task.aws_region,
             )
 
             with tempfile.NamedTemporaryFile(mode="w+", delete=False) as tmp:
@@ -216,7 +216,7 @@ def create(credentials, tid, name):
                 tmp.close()
                 response = s3_client.upload_file(
                     tmp.name,
-                    task.bucket,
+                    task.s3_bucket,
                     get_data_s3_path(task.task_code, name + ".jsonl", perturb_prefix),
                 )
                 if task.is_decen_task:
@@ -247,45 +247,6 @@ def create(credentials, tid, name):
             logger.info(f"Registered {name} in datasets db.")
     else:
         updated_existing_dataset = True
-
-    if task.is_decen_task:
-
-        # Evaluate all models
-        eval_config = {
-            "aws_access_key_id": config["aws_access_key_id"],
-            "aws_secret_access_key": config["aws_secret_access_key"],
-            "aws_region": task.region,
-        }
-
-        # send download dataset requests for all datasets first
-        dataset_decen = d.getByName(name)
-        decen_send_eval_download_dataset_request(
-            dataset_id=dataset_decen.id,
-            dataset_name=name,
-            config=eval_config,
-            eval_server_id=task.eval_server_id,
-            delta_metric_types=delta_metric_types,
-            s3_paths=s3_paths,
-            queue_name=task.eval_sqs_queue,
-            task_aws_account_id=task.task_aws_account_id,
-            logger=logger,
-        )
-    else:
-        # Evaluate all models
-        eval_config = {
-            "aws_access_key_id": config["eval_aws_access_key_id"],
-            "aws_secret_access_key": config["eval_aws_secret_access_key"],
-            "aws_region": config["eval_aws_region"],
-            "evaluation_sqs_queue": config["evaluation_sqs_queue"],
-        }
-        send_eval_request(
-            model_id="*",
-            dataset_name=name,
-            config=eval_config,
-            eval_server_id=task.eval_server_id,
-            logger=logger,
-            reload_datasets=True,
-        )
 
     return util.json_encode(
         {"success": "ok", "updated_existing_dataset": updated_existing_dataset}
