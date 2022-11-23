@@ -62,7 +62,7 @@ class Model(Base):
     # deployment
     endpoint_name = db.Column(db.Text)
     light_model = db.Column(db.Text)
-    is_in_the_loop = db.Column(db.Integer(), default=0)
+    is_in_the_loop = db.Column(db.BOOLEAN, default=False)
 
     deployment_status = db.Column(
         db.Enum(DeploymentStatusEnum), default=DeploymentStatusEnum.unknown

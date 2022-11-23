@@ -288,8 +288,9 @@ def update_models_in_the_loop(credentials, tid, rid):
         for model_id in data["model_ids"]:
             model = mm.get(model_id)
             model.is_in_the_loop = 1
-            mm.dbs.flush()
             mm.dbs.commit()
+            mm.dbs.flush()
+
     logger.info("Updated models")
     return util.json_encode({"success": "ok"})
 
@@ -306,7 +307,7 @@ def get_models_in_the_loop(credentials, tid):
     for round in rounds:
         model_identifiers = []
         for model in models:
-            if model.light_model is not None:
+            if model.light_model:
                 if (
                     model.is_published
                     and model.deployment_status == DeploymentStatusEnum.deployed
