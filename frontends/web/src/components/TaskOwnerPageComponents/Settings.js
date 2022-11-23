@@ -10,14 +10,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { Formik } from "formik";
-import React from "react";
-import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
-import Markdown from "react-markdown";
-const yaml = require("js-yaml");
+import { Formik } from 'formik'
+import React from 'react'
+import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap'
+import Markdown from 'react-markdown'
+const yaml = require('js-yaml')
 
 const Settings = (props) => {
-  console.log("Settings props", props.task);
   return (
     <Container className="mb-5 pb-5">
       <h1 className="my-4 pt-3 text-uppercase text-center">Settings</h1>
@@ -66,7 +65,7 @@ const Settings = (props) => {
                     <Container>
                       {!!!props.task.active && (
                         <div>
-                          <span style={{ color: "red" }}>BETA Notice</span>:
+                          <span style={{ color: 'red' }}>BETA Notice</span>:
                           Your task is not yet active. Please go to the Advanced
                           settings first to configure your task.
                         </div>
@@ -124,7 +123,7 @@ const Settings = (props) => {
                       {props.task.config_yaml &&
                         yaml
                           .load(props.task.config_yaml)
-                          .hasOwnProperty("train_file_metric") && (
+                          .hasOwnProperty('train_file_metric') && (
                           <>
                             <Form.Group
                               as={Row}
@@ -311,8 +310,8 @@ const Settings = (props) => {
                             <p>
                               “least_fooled”: samples from contexts where the
                               crowdworkers have had the hardest time fooling the
-                              model{" "}
-                            </p>{" "}
+                              model{' '}
+                            </p>{' '}
                             <p>
                               “validation_failed” samples from the contexts that
                               were used in examples that failed crowdworker
@@ -441,7 +440,7 @@ const Settings = (props) => {
         </Card>
       </Col>
     </Container>
-  );
-};
+  )
+}
 
-export default Settings;
+export default Settings
