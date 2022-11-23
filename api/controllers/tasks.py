@@ -282,61 +282,16 @@ def create_round(credentials, tid):
 def update_models_in_the_loop(credentials, tid, rid):
     data = bottle.request.json
     ensure_owner_or_admin(tid, credentials["id"])
+    mm = ModelModel()
+    mm.clean_models_in_the_loop(tid)
     if "model_ids" in data:
         for model_id in data["model_ids"]:
-            mm = ModelModel()
             model = mm.get(model_id)
             model.is_in_the_loop = 1
             mm.dbs.flush()
             mm.dbs.commit()
-    logger.info("Updated models (%s)")
+    logger.info("Updated models")
     return util.json_encode({"success": "ok"})
-
-
-@bottle.get("/tasks/get_model_identifiers_for_target_selection/<tid:int>")
-@_auth.requires_auth
-def get_model_identifiers_for_target_selection(credentials, tid):
-    ensure_owner_or_admin(tid, credentials["id"])
-    tm = TaskModel()
-    task = tm.get(tid)
-    mm = ModelModel()
-    models = mm.getByTid(tid)
-    rm = RoundModel()
-    rounds = rm.getByTid(tid)
-    rid_to_model_identifiers = {}
-    for round in rounds:
-        model_identifiers = []
-        for model in models:
-            if (
-                model.endpoint_name is not None
-            ):  # This if-statement is needed for models that predate dynalab
-                # TODO: store the endpoint url in the models table?
-                endpoint_url = (
-                    "https://obws766r82.execute-api."
-                    + task.aws_region
-                    + ".amazonaws.com/predict?model="
-                    + model.endpoint_name
-                )
-                is_target = False
-                if round.url is not None and endpoint_url in round.url:
-                    is_target = True
-
-                if is_target or (
-                    model.is_published
-                    and model.deployment_status == DeploymentStatusEnum.deployed
-                ):
-                    model_identifiers.append(
-                        {
-                            "model_name": model.name,
-                            "model_id": model.id,
-                            "uid": model.uid,
-                            "username": model.user.username,
-                            "is_target": is_target,
-                        }
-                    )
-        rid_to_model_identifiers[round.rid] = model_identifiers
-
-    return util.json_encode(rid_to_model_identifiers)
 
 
 @bottle.get("/tasks/get_models_in_the_loop/<tid:int>")
@@ -362,6 +317,7 @@ def get_models_in_the_loop(credentials, tid):
                             "model_id": model.id,
                             "uid": model.uid,
                             "username": model.user.username,
+                            "is_in_the_loop": model.is_in_the_loop,
                         }
                     )
         rid_to_model_identifiers[round.rid] = model_identifiers
