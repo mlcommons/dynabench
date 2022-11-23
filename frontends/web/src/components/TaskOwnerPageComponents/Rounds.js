@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -32,7 +38,9 @@ const Rounds = (props) => {
   }
 
   const toggleIsTarget = (model_identifiers, index, setFieldValue) => {
-    model_identifiers[index].is_target = !model_identifiers[index].is_target;
+    model_identifiers[index].is_in_the_loop =
+      !model_identifiers[index].is_in_the_loop;
+    console.log(model_identifiers[index]);
     setFieldValue("model_identifiers", model_identifiers);
   };
 
@@ -87,8 +95,7 @@ const Rounds = (props) => {
                     contexts_file: null,
                     rid: round.rid,
                     longdesc: round.longdesc,
-                    model_identifiers:
-                      props.model_identifiers_for_target_selection[round.rid],
+                    model_identifiers: props.get_models_in_the_loop[round.rid],
                   }}
                   onSubmit={props.handleRoundUpdate}
                 >
@@ -190,7 +197,7 @@ const Rounds = (props) => {
                           </Form.Group>
                           {showModelSelectRound[round.rid - 1] ? (
                             <Container>
-                              <Form.Group controlId="is_target">
+                              <Form.Group controlId="is_in_the_loop">
                                 {values.model_identifiers.map(
                                   (model_identifier, index) => (
                                     <Row key={model_identifier.model_id}>
@@ -210,8 +217,10 @@ const Rounds = (props) => {
                                       </Col>
                                       <Col>
                                         <Form.Check
-                                          name="is_target"
-                                          checked={model_identifier.is_target}
+                                          name="is_in_the_loop"
+                                          checked={
+                                            model_identifier.is_in_the_loop
+                                          }
                                           onClick={() =>
                                             toggleIsTarget(
                                               values.model_identifiers,

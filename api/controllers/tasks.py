@@ -277,58 +277,28 @@ def create_round(credentials, tid):
     return util.json_encode({"success": "ok"})
 
 
-@bottle.put("/tasks/update_round/<tid:int>/<rid:int>")
+@bottle.put("/tasks/update_models_in_the_loop/<tid:int>/<rid:int>")
 @_auth.requires_auth
-def update_round(credentials, tid, rid):
+def update_models_in_the_loop(credentials, tid, rid):
     data = bottle.request.json
-
     ensure_owner_or_admin(tid, credentials["id"])
-
-    rm = RoundModel()
-    round = rm.getByTidAndRid(tid, rid)
-
+    mm = ModelModel()
+    mm.clean_models_in_the_loop(tid)
     if "model_ids" in data:
-        tm = TaskModel()
-        task = tm.get(tid)
-        endpoint_urls = []
         for model_id in data["model_ids"]:
-            mm = ModelModel()
             model = mm.get(model_id)
-            if not model.is_published:
-                bottle.abort(400, "Can't use an unpublished model as a target model")
-            if model.tid != tid:
-                bottle.abort(
-                    400, "Can't add a model for another task as a target model"
-                )
+            model.is_in_the_loop = 1
+            mm.dbs.commit()
+            mm.dbs.flush()
 
-            # TODO: store the endpoint url in the models table?
-            endpoint_url = (
-                "https://obws766r82.execute-api."
-                + task.aws_region
-                + ".amazonaws.com/predict?model="
-                + model.endpoint_name
-            )
-            endpoint_urls.append(endpoint_url)
-        if endpoint_urls == []:
-            round.url = None
-        else:
-            round.url = "|".join(endpoint_urls)
-
-    round.longdesc = data.get("longdesc", round.longdesc)
-    rm.dbs.add(round)
-    rm.dbs.flush()
-    rm.dbs.commit()
-    logger.info("Updated round (%s)" % (round.id))
-
+    logger.info("Updated models")
     return util.json_encode({"success": "ok"})
 
 
-@bottle.get("/tasks/get_model_identifiers_for_target_selection/<tid:int>")
+@bottle.get("/tasks/get_models_in_the_loop/<tid:int>")
 @_auth.requires_auth
-def get_model_identifiers_for_target_selection(credentials, tid):
+def get_models_in_the_loop(credentials, tid):
     ensure_owner_or_admin(tid, credentials["id"])
-    tm = TaskModel()
-    task = tm.get(tid)
     mm = ModelModel()
     models = mm.getByTid(tid)
     rm = RoundModel()
@@ -337,21 +307,8 @@ def get_model_identifiers_for_target_selection(credentials, tid):
     for round in rounds:
         model_identifiers = []
         for model in models:
-            if (
-                model.endpoint_name is not None
-            ):  # This if-statement is needed for models that predate dynalab
-                # TODO: store the endpoint url in the models table?
-                endpoint_url = (
-                    "https://obws766r82.execute-api."
-                    + task.aws_region
-                    + ".amazonaws.com/predict?model="
-                    + model.endpoint_name
-                )
-                is_target = False
-                if round.url is not None and endpoint_url in round.url:
-                    is_target = True
-
-                if is_target or (
+            if model.light_model:
+                if (
                     model.is_published
                     and model.deployment_status == DeploymentStatusEnum.deployed
                 ):
@@ -361,7 +318,7 @@ def get_model_identifiers_for_target_selection(credentials, tid):
                             "model_id": model.id,
                             "uid": model.uid,
                             "username": model.user.username,
-                            "is_target": is_target,
+                            "is_in_the_loop": model.is_in_the_loop,
                         }
                     )
         rid_to_model_identifiers[round.rid] = model_identifiers
