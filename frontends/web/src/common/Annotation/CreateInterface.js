@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -32,6 +38,7 @@ import AnnotationComponent from "./AnnotationComponent.js";
 import Explainer from "./Explainer.js";
 import initializeData from "./InitializeAnnotationData.js";
 import ResponseInfo from "./ResponseInfo.js";
+import { getModelInTheLoop } from "../../services/ModelServices";
 const yaml = require("js-yaml");
 
 function deepCopyJSON(obj) {
@@ -57,6 +64,7 @@ class CreateInterface extends React.Component {
       taskConfig: null,
       data: {},
       loading: true,
+      modelInTheLoop: null,
     };
     this.getNewContext = this.getNewContext.bind(this);
     this.handleResponse = this.handleResponse.bind(this);
@@ -139,6 +147,10 @@ class CreateInterface extends React.Component {
               taskConfig.metadata.validate = taskConfig.metadata.validate
                 ? taskConfig.metadata.validate
                 : [];
+
+              getModelInTheLoop(this.state.task.id).then((res) => {
+                this.setState({ modelInTheLoop: res.data.light_model });
+              });
 
               this.setState({
                 taskConfig: taskConfig,
@@ -314,19 +326,12 @@ class CreateInterface extends React.Component {
     this.setState({ submitWithoutFullExample: false });
     this.setState({ submitDisabled: true, refreshDisabled: true }, () => {
       this.manageTextInput("blur");
-      const url = this.state.selectedModel
-        ? this.state.selectedModel.endpointUrl
-        : this.state.randomTargetModel;
-
+      const url = this.state.modelInTheLoop;
       if (url === null) {
         // In this case, there is no target model. Just store the example without model data.
         this.storeExampleWrapper();
         return;
       }
-
-      // Begin hack that can be removed upon full dynalab integration
-      const endpoint = url;
-      // End hack that can be removed upon full dynalab integration
       this.context.api
         .convertToModelIO(this.state.task.id, this.state.data)
         .then((model_io_result) => {

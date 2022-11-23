@@ -62,6 +62,7 @@ class Model(Base):
     # deployment
     endpoint_name = db.Column(db.Text)
     light_model = db.Column(db.Text)
+    is_in_the_loop = db.Column(db.BOOLEAN, default=False)
 
     deployment_status = db.Column(
         db.Enum(DeploymentStatusEnum), default=DeploymentStatusEnum.unknown
@@ -210,3 +211,15 @@ class ModelModel(BaseModel):
             else:
                 model_dict[c.name] = getattr(model, c.name)
         return model_dict
+
+    def clean_models_in_the_loop(self, task_id: int):
+        all_models_for_task = (
+            self.dbs.query(Model)
+            .filter(Model.tid == task_id)
+            .filter(Model.is_in_the_loop is True)
+            .all()
+        )
+        for model in all_models_for_task:
+            model.is_in_the_loop = False
+            self.dbs.flush()
+        self.dbs.commit()
