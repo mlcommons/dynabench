@@ -8,3 +8,6 @@ from app.infrastructure.repositories.task import TaskRepository
 class TaskService:
     def __init__(self):
         self.task_repository = TaskRepository()
+
+    def update_last_activity_date(self, task_id: int):
+        self.task_repository.update_last_activity_date(task_id)
