@@ -25,6 +25,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 Base = declarative_base()
@@ -80,7 +81,7 @@ class Task(Base):
     config_yaml = Column(Text)
     instructions_md = Column(Text)
     desc = Column(String(255))
-    last_updated = Column(DateTime)
+    last_updated = Column(DateTime, onupdate=func.now())
     cur_round = Column(Integer, nullable=False)
     hidden = Column(TINYINT(1))
     official = Column(TINYINT(1))
@@ -333,7 +334,7 @@ class Context(Base):
     tag = Column(Text)
     metadata_json = Column(Text)
     total_used = Column(Integer)
-    last_used = Column(DateTime)
+    last_used = Column(DateTime, onupdate=func.now())
 
     round = relationship("Round")
 
@@ -344,9 +345,9 @@ class RoundUserExampleInfo(Base):
     id = Column(Integer, primary_key=True)
     uid = Column(ForeignKey("users.id"), index=True)
     r_realid = Column(ForeignKey("rounds.id"), index=True)
-    total_verified_not_correct_fooled = Column(Integer)
-    total_fooled = Column(Integer)
-    examples_submitted = Column(Integer)
+    total_verified_not_correct_fooled = Column(Integer, default=0)
+    total_fooled = Column(Integer, default=0)
+    examples_submitted = Column(Integer, default=0)
 
     round = relationship("Round")
     user = relationship("User")
@@ -391,7 +392,7 @@ class Example(Base):
     model_wrong = Column(TINYINT(1))
     retracted = Column(TINYINT(1))
     flagged = Column(TINYINT(1))
-    generated_datetime = Column(DateTime)
+    generated_datetime = Column(DateTime, server_default=func.now())
     time_elapsed = Column(Time)
     total_verified = Column(Integer)
 

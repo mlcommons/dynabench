@@ -21,3 +21,15 @@ class RoundRepository(AbstractRepository):
             .first()
         )
         return round_info
+
+    def increment_counter_examples_collected(self, round_id: int, task_id: int):
+        self.session.query(self.model).filter(
+            (self.model.rid == round_id) & (self.model.tid == task_id)
+        ).update({self.model.total_samples: self.model.total_samples + 1})
+        self.session.commit()
+
+    def increment_counter_examples_fooled(self, round_id: int, task_id: int):
+        self.session.query(self.model).filter(
+            (self.model.rid == round_id) & (self.model.tid == task_id)
+        ).update({self.model.total_fooled: self.model.total_fooled + 1})
+        self.session.commit()

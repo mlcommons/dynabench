@@ -23,3 +23,9 @@ class UserRepository(AbstractRepository):
 
     def create_user(self, email: str, password: str, username: str) -> dict:
         return self.add({"email": email, "password": password, "username": username})
+
+    def increment_examples_fooled(self, user_id: int):
+        self.session.query(self.model).filter(self.model.id == user_id).update(
+            {self.model.total_fooled: self.model.total_fooled + 1}
+        )
+        self.session.commit()
