@@ -38,5 +38,9 @@ class ExampleRepository(AbstractRepository):
                 "output_json": output_json,
                 "metadata": metadata,
                 "tag": tag,
+                "retracted": 0,
+                "split": "undecided",
+                "flagged": 0,
+                "total_verified": 0,
             }
         )

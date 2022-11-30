@@ -23,7 +23,15 @@ class RoundUserExampleInfoRepository(AbstractRepository):
         )
 
     def create_user_and_round_example_info(self, round_id: int, user_id: int) -> None:
-        self.session.add(self.model(r_realid=round_id, uid=user_id))
+        self.session.add(
+            self.model(
+                r_realid=round_id,
+                uid=user_id,
+                examples_submitted=0,
+                total_fooled=0,
+                total_correct=0,
+            )
+        )
         self.session.commit()
 
     def increment_counter_examples_submitted(self, round_id: int, user_id: int):

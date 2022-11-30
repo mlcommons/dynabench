@@ -16,7 +16,7 @@ def load_json_lines(jsonl_file: UploadFile) -> list:
 
 
 def transform_list_to_csv(data: list, filename: str) -> str:
-    df_data = pd.DataFrame(data, columns=["prediction"])
+    df_data = pd.DataFrame(data)
     csv_location = f"app/resources/{filename}.csv"
     df_data.to_csv(csv_location, index=False)
     return csv_location

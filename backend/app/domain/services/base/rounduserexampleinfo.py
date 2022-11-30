@@ -19,7 +19,8 @@ class RoundUserExampleInfo:
     def increment_counter_examples_submitted(self, round_id: int, user_id: int):
         if not self.verify_user_and_round(user_id, round_id):
             self.rounds_user_example_info_repository.create_user_and_round_example_info(
-                round_id, user_id
+                round_id,
+                user_id,
             )
         self.rounds_user_example_info_repository.increment_counter_examples_submitted(
             round_id, user_id

@@ -28,7 +28,7 @@ CONNECTION_URI = (
 
 class Connection:
     def __init__(self) -> None:
-        self.engine = create_engine(CONNECTION_URI, echo=True)
+        self.engine = create_engine(CONNECTION_URI, echo=False)
         self.Session = sessionmaker(bind=self.engine, expire_on_commit=False)
         self.session = self.Session()
         self.metadata = MetaData()

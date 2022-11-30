@@ -345,9 +345,9 @@ class RoundUserExampleInfo(Base):
     id = Column(Integer, primary_key=True)
     uid = Column(ForeignKey("users.id"), index=True)
     r_realid = Column(ForeignKey("rounds.id"), index=True)
-    total_verified_not_correct_fooled = Column(Integer, default=0)
-    total_fooled = Column(Integer, default=0)
-    examples_submitted = Column(Integer, default=0)
+    total_verified_not_correct_fooled = Column(Integer)
+    total_fooled = Column(Integer)
+    examples_submitted = Column(Integer)
 
     round = relationship("Round")
     user = relationship("User")
@@ -392,7 +392,7 @@ class Example(Base):
     model_wrong = Column(TINYINT(1))
     retracted = Column(TINYINT(1))
     flagged = Column(TINYINT(1))
-    generated_datetime = Column(DateTime, server_default=func.now())
+    generated_datetime = Column(DateTime, server_default=func.now(), default=func.now())
     time_elapsed = Column(Time)
     total_verified = Column(Integer)
 
