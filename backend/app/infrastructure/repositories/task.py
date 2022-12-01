@@ -19,3 +19,7 @@ class TaskRepository(AbstractRepository):
             self.session.query(self.model).filter(self.model.task_code == task).first()
         )
         return instance
+
+    def update_last_activity_date(self, task_id: int):
+        self.session.query(self.model).filter(self.model.id == task_id).update({})
+        self.session.commit()
