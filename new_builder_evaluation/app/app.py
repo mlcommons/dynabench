@@ -8,7 +8,7 @@
 
 from fastapi import FastAPI
 
-from app.api.endpoints import builder, evaluation
+from app.api.endpoints import aimodels, builder, evaluation
 
 
 app = FastAPI()
@@ -21,3 +21,4 @@ def read_root():
 
 app.include_router(builder.router, prefix="/builder", tags=["builder"])
 app.include_router(evaluation.router, prefix="/evaluation", tags=["evaluation"])
+app.include_router(aimodels.router, prefix="/aimodels", tags=["aimodels"])

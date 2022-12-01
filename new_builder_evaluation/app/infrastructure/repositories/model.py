@@ -22,3 +22,11 @@ class ModelRepository(AbstractRepository):
         self.session.flush()
         self.session.commit()
         return
+
+    def get_lambda_models(self) -> list:
+        models = (
+            self.session.query(self.model)
+            .filter(self.model.light_model is not None)
+            .all()
+        )
+        return models
