@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Any, Union
 
 from jose import jwt
-from passlib.context import CryptContext
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.domain.helpers.exceptions import (
     password_is_incorrect,
@@ -19,19 +19,19 @@ from app.infrastructure.repositories.user import UserRepository
 
 class Login:
     def __init__(self) -> None:
-        self.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-        self.JWT_REFRESH_SECRET_KEY = os.getenv("JWT_REFRESH_SECRET_KEY")
-        self.ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
-        self.REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES")
-        self.ALGORITHM = os.getenv("ALGORITHM")
+        self.AUTH_JWT_SECRET_KEY = os.getenv("AUTH_JWT_SECRET_KEY")
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("AUTH_ACCESS_TOKEN_EXPIRE_MINUTES")
+        self.REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv(
+            "AUTH_REFRESH_TOKEN_EXPIRE_MINUTES"
+        )
+        self.AUTH_HASH_ALGORITHM = os.getenv("AUTH_HASH_ALGORITHM")
         self.users_repository = UserRepository()
-        self.password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def get_hashed_password(self, password: str) -> str:
-        return self.password_context.hash(password)
+        return generate_password_hash(password)
 
     def verify_password(self, password: str, hashed_pass: str) -> bool:
-        return self.password_context.verify(password, hashed_pass)
+        return check_password_hash(hashed_pass, password)
 
     def create_token(
         self,
@@ -56,15 +56,15 @@ class Login:
         return self.create_token(
             subject,
             self.ACCESS_TOKEN_EXPIRE_MINUTES,
-            self.JWT_SECRET_KEY,
-            self.ALGORITHM,
+            self.AUTH_JWT_SECRET_KEY,
+            self.AUTH_HASH_ALGORITHM,
             expires_delta,
         )
 
     def create_user(self, email: str, password: str, username: str) -> dict:
         user = self.users_repository.get_by_email(email)
         if user:
-            return user_with_email_already_exists(email)
+            user_with_email_already_exists(email)
         return self.users_repository.create_user(
             email, self.get_hashed_password(password), username
         )
@@ -72,10 +72,10 @@ class Login:
     def login(self, email: str, password: str) -> dict:
         user = self.users_repository.get_by_email(email)
         if user is None:
-            return user_does_not_exist()
+            user_does_not_exist()
         hashed_pass = user["password"]
         if not self.verify_password(password, hashed_pass):
-            return password_is_incorrect()
+            password_is_incorrect()
         return {
             "access_token": self.create_access_token(user["email"]),
             "token_type": "bearer",

@@ -14,7 +14,7 @@ class ContextRepository(AbstractRepository):
     def __init__(self) -> None:
         super().__init__(Context)
 
-    def increment_total_samples_and_update_date(self, context_id: int) -> None:
+    def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
         self.session.query(self.model).filter(self.model.id == context_id).update(
             {self.model.total_used: self.model.total_used + 1}
         )

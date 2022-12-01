@@ -17,7 +17,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 async def verify_token(token: str = Depends(oauth2_scheme)):
     try:
         return jwt.decode(
-            token, os.getenv("JWT_SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")]
+            token,
+            os.getenv("AUTH_JWT_SECRET_KEY"),
+            algorithms=[os.getenv("AUTH_HASH_ALGORITHM")],
         )
     except Exception:
-        return credentials_exception()
+        credentials_exception()

@@ -4,7 +4,7 @@
 from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi.responses import FileResponse
 
-# from app.api.middleware.verify_token import verify_token
+from app.api.middleware.verify_token import verify_token
 from app.api.schemas.model_centric import (
     BatchCreateExampleRequest,
     CreateExampleRequest,
@@ -12,8 +12,7 @@ from app.api.schemas.model_centric import (
 from app.domain.services.model_centric import ModelCentricService
 
 
-# router = APIRouter(dependencies=[Depends(verify_token)])
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(verify_token)])
 
 
 @router.post("/single_model_prediction", response_model={})

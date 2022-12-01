@@ -56,6 +56,7 @@ class ModelCentricService:
             tag,
         )
         self.round_service.increment_counter_examples_collected(round_id, task_id)
+        self.context_service.increment_counter_total_samples_and_update_date(context_id)
         self.task_service.update_last_activity_date(task_id)
         real_round_id = self.context_service.get_real_round_id(context_id)
         self.round_user_example_info.increment_counter_examples_submitted(
