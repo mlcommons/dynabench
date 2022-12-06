@@ -6,7 +6,7 @@ import time
 
 import requests
 
-from app.domain.evaluation import Evaluation
+from app.domain.services.builder_and_evaluation.evaluation import Evaluation
 from app.infrastructure.repositories.model import ModelRepository
 
 

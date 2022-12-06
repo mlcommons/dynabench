@@ -1,8 +1,34 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from app.domain.eval_utils.metrics import *
+from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
+    get_accuracy,
+    get_accuracy_meta,
+    get_bleu,
+    get_bleu_meta,
+    get_dataperf_f1,
+    get_dataperf_f1_meta,
+    get_examples_per_second,
+    get_examples_per_second_meta,
+    get_fairness_meta,
+    get_macro_f1,
+    get_macro_f1_meta,
+    get_memory_utilization,
+    get_memory_utilization_meta,
+    get_robustness_meta,
+    get_sp_bleu,
+    get_sp_bleu_meta,
+    get_squad_f1,
+    get_squad_f1_meta,
+    get_unperturbed_percent,
+    get_vqa_accuracy,
+    get_vqa_accuracy_meta,
+)
 
 
 # all eval_metrics takes predictions and targets as input, and output a metric number

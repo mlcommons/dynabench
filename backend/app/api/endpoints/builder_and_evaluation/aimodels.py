@@ -4,7 +4,7 @@
 
 from fastapi import APIRouter
 
-from app.domain.aimodels import AIModels
+from app.domain.services.builder_and_evaluation.aimodels import AIModels
 
 
 router = APIRouter()

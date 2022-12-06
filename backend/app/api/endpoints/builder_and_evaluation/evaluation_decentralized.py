@@ -3,13 +3,10 @@
 # LICENSE file in the root directory of this source tree.
 
 from fastapi import APIRouter
-from pydantic import BaseModel
 
-from app.domain.evaluation_decentralized import Evaluation
-
-
-class ModelSingleInput(BaseModel):
-    text: str
+from app.domain.services.builder_and_evaluation.evaluation_decentralized import (
+    Evaluation,
+)
 
 
 router = APIRouter()

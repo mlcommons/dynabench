@@ -7,11 +7,6 @@
 # LICENSE file in the root directory of this source tree.
 
 from fastapi import APIRouter
-from pydantic import BaseModel
-
-
-class ModelSingleInput(BaseModel):
-    text: str
 
 
 router = APIRouter()

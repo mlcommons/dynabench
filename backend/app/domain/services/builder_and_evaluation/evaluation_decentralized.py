@@ -16,9 +16,11 @@ import jsonlines
 import requests
 import yaml
 
-from app.domain.builder import Builder
-from app.domain.eval_utils.evaluator import Evaluator
-from app.domain.eval_utils.input_formatter import InputFormatter
+from app.domain.services.builder_and_evaluation.builder import Builder
+from app.domain.services.builder_and_evaluation.eval_utils.evaluator import Evaluator
+from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
+    InputFormatter,
+)
 
 
 class Evaluation:
@@ -32,7 +34,7 @@ class Evaluation:
         self.sqs = self.session.client("sqs")
         self.cloud_watch = self.session.client("cloudwatch")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
-        self.builder = Builder()
+        self.builder_service = Builder()
         self.centralized_host = os.getenv("CENTRALIZED_URL")
 
     def require_fields_task(self, folder_name: str):
@@ -292,7 +294,7 @@ class Evaluation:
             )
         )
         new_scores = []
-        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
+        ip, model_name, folder_name, arn_service = self.builder_service.get_ip_ecs_task(
             model_s3_zip
         )
         for current_round in rounds:
@@ -386,9 +388,11 @@ class Evaluation:
 
             self.post_descentralized_scores(new_score)
             new_scores.append(new_score)
-            url_light_model = self.builder.create_light_model(model_name, folder_name)
+            url_light_model = self.builder_service.create_light_model(
+                model_name, folder_name
+            )
             self.update_light_model(model_id, url_light_model)
-        self.builder.delete_ecs_service(arn_service)
+        self.builder_service.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
         return new_scores
 

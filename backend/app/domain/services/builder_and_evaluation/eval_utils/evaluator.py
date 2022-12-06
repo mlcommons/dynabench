@@ -1,8 +1,15 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from app.domain.eval_utils.metrics_dicts import delta_metrics_dict, eval_metrics_dict
+from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import (
+    delta_metrics_dict,
+    eval_metrics_dict,
+)
 
 
 class Evaluator:

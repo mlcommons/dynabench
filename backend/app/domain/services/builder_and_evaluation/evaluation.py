@@ -23,9 +23,11 @@ import requests
 import yaml
 from cloudwatch import cloudwatch
 
-from app.domain.builder import Builder
-from app.domain.eval_utils.evaluator import Evaluator
-from app.domain.eval_utils.input_formatter import InputFormatter
+from app.domain.services.builder_and_evaluation.builder import Builder
+from app.domain.services.builder_and_evaluation.eval_utils.evaluator import Evaluator
+from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
+    InputFormatter,
+)
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.round import RoundRepository

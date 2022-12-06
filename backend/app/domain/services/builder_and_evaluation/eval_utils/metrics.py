@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -12,7 +16,9 @@ import sacrebleu
 import sentencepiece
 from sklearn.metrics import f1_score
 
-from app.domain.eval_utils.instance_property import instance_property
+from app.domain.services.builder_and_evaluation.eval_utils.instance_property import (
+    instance_property,
+)
 
 from .vqa_accuracy import VQAEval
 

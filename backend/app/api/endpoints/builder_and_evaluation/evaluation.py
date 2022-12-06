@@ -7,22 +7,13 @@
 # LICENSE file in the root directory of this source tree.
 
 from fastapi import APIRouter
-from pydantic import BaseModel
 
-from app.domain.evaluation import Evaluation
+from app.domain.services.builder_and_evaluation.evaluation import Evaluation
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
-
-
-class ModelSingleInput(BaseModel):
-    text: str
-
-
-class DictInput(BaseModel):
-    response: dict
 
 
 router = APIRouter()
@@ -78,7 +69,7 @@ def update_light_model(params):
 
 
 @router.post("/post_dataperf_response")
-def post_dataperf_response(response: DictInput):
+def post_dataperf_response(response: {}):
     evaluation = Evaluation()
     score = evaluation.evaluate_dataperf_decentralized(response.response)
     return score
