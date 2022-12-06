@@ -49,3 +49,6 @@ class DatasetRepository(AbstractRepository):
         )
         instance = self.instance_converter.instance_to_dict(instance)
         return instance
+
+    def get_datasets_by_task_id(self, task_id: int) -> dict:
+        return self.session.query(self.model).filter(self.model.tid == task_id).all()

@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.endpoints import auth, model_centric
-from app.api.endpoints.base import model
+from app.api.endpoints.base import model, task
 
 
 load_dotenv()
@@ -38,6 +38,7 @@ def read_root():
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(model.router, prefix="/model", tags=["model"])
+app.include_router(task.router, prefix="/task", tags=["task"])
 app.include_router(
     model_centric.router, prefix="/model_centric", tags=["model_centric"]
 )
