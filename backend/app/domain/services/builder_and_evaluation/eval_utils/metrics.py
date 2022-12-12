@@ -271,7 +271,7 @@ def get_memory_utilization(job, dataset):
     mem = (
         sum(job.aws_metrics["MemoryUtilization"])
         / 100
-        * instance_property[dataset.task.instance_type]["memory_gb"]
+        * instance_property[dataset.task["instance_type"]]["memory_gb"]
     )
     return round(mem, 2)
 
@@ -281,7 +281,7 @@ def get_memory_utilization_meta(task):
         "unit": "GiB",
         "pretty_name": "Memory",
         "utility_direction": -1,
-        "offset": instance_property[task.instance_type]["memory_gb"],
+        "offset": instance_property[task["instance_type"]]["memory_gb"],
     }
 
 

@@ -27,7 +27,7 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import UserContext from "./UserContext";
-import { LineRechart } from "../components/Rechart";
+import { LineRechart } from "../components/Charts/Rechart";
 import Moment from "react-moment";
 import { OverlayProvider, Annotation, OverlayContext } from "./Overlay";
 import {
@@ -71,7 +71,7 @@ const TaskTrend = ({ data }) => {
     <>
       <Card className="my-4">
         <Card.Header className="p-3 light-gray-bg">
-          <h2 className="text-uppercase m-0 text-reset">
+          <h2 className="m-0 text-uppercase text-reset">
             Model Performance vs. Round{" "}
           </h2>
         </Card.Header>
@@ -484,7 +484,10 @@ class TaskPage extends React.Component {
         .hasOwnProperty("train_file_metric");
     return (
       <OverlayProvider initiallyHide={true} delayMs="1700">
+        {console.log("Hi")}
+        {console.log(this.state.task)}
         <Container>
+          {console.log(this.state.task)}
           <Row>
             <Col />
             <Col className="text-center">

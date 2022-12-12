@@ -4,3 +4,4 @@ logs/
 __pycache__/
 env/
 .env
+backend/app/models

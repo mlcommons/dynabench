@@ -50,5 +50,19 @@ class DatasetRepository(AbstractRepository):
         instance = self.instance_converter.instance_to_dict(instance)
         return instance
 
-    def get_datasets_by_task_id(self, task_id: int) -> dict:
-        return self.session.query(self.model).filter(self.model.tid == task_id).all()
+    def get_order_datasets_by_task_id(self, task_id: int) -> dict:
+        return (
+            self.session.query(self.model)
+            .order_by(self.model.id)
+            .filter(self.model.tid == task_id)
+            .all()
+        )
+
+    def get_order_scoring_datasets_by_task_id(self, task_id: int) -> dict:
+        return (
+            self.session.query(self.model)
+            .order_by(self.model.id)
+            .filter(self.model.tid == task_id)
+            .filter(self.model.access_type == "scoring")
+            .all()
+        )

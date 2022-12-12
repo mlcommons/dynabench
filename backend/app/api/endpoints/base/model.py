@@ -3,7 +3,7 @@
 # LICENSE file in the root directory of this source tree.
 from fastapi import APIRouter
 
-from app.api.schemas.model import ModelInTheLoopRequest, ModelInTheLoopResponse
+from app.domain.schemas.base.model import ModelInTheLoopRequest, ModelInTheLoopResponse
 from app.domain.services.base.model import ModelService
 
 

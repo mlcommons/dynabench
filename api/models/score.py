@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -201,14 +205,12 @@ class ScoreModel(BaseModel):
         offsets,
         delta_cutoff_proportion=0.0001,
     ):
-
         converted_data = data.copy(deep=True)
         converted_data.sort_values(perf_metric_field_name, inplace=True)
         for metric in list(data):
             converted_data[metric] = (
                 direction_multipliers[metric] * converted_data[metric] + offsets[metric]
             )
-
         converted_data["dynascore"] = 0
 
         denominator = sum(weights.values())
@@ -341,10 +343,12 @@ class ScoreModel(BaseModel):
 
         # Average the results accross datasets.
         averaged_dataset_results = None
+        print(ordered_dids_with_weight)
         did_to_weight = {
             did_and_weight["did"]: did_and_weight["weight"]
             for did_and_weight in ordered_dids_with_weight
         }
+        print(did_to_weight)
         for key, value in dataset_results_dict.items():
             df = pd.DataFrame.from_dict(value)
             dataset_results_dict[key] = df
@@ -370,7 +374,6 @@ class ScoreModel(BaseModel):
                 for metric_info in ordered_metrics_with_weight_and_conversion
             },
         )
-
         # Convert the Pandas results into an output json.
         uid_to_username = {}
         for user in users:

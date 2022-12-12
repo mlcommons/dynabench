@@ -45,6 +45,7 @@ import { Avatar } from "../components/Avatar/Avatar";
 import ReactGA from "react-ga";
 import SubmitInterface from "./SubmitInterface.js";
 import MLCubeTutorial from "./MLCubeTutorial";
+import DataperfTaskPage from "./DataperfTaskPage";
 import qs from "qs";
 
 class RouterMonitor extends React.Component {
@@ -374,6 +375,11 @@ class App extends React.Component {
                   path="/flores/:taskShortName?"
                   component={FloresTaskPage}
                 />
+                <Route
+                  path="/dataperf/:taskShortName?"
+                  component={DataperfTaskPage}
+                />
+
                 <Route path="/login" component={LoginPage} />
                 <Route
                   path="/generate_api_token"

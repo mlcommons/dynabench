@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -185,7 +191,7 @@ const TaskModelLeaderboardCard = (props) => {
   return (
     <Card className="my-4">
       <Card.Header className="light-gray-bg d-flex align-items-center">
-        <h2 className="text-uppercase m-0 text-reset">
+        <h2 className="m-0 text-uppercase text-reset">
           {props.title || "Model Leaderboard"}
         </h2>
         {description && description.length !== 0 && (
@@ -201,7 +207,7 @@ const TaskModelLeaderboardCard = (props) => {
             <div className="d-inline-block">
               <i
                 style={{ lineHeight: "inherit" }}
-                className="fa fa-info-circle ml-1 align-middle"
+                className="ml-1 align-middle fa fa-info-circle"
                 aria-hidden="true"
               />
             </div>
@@ -326,7 +332,7 @@ const TaskModelLeaderboardCard = (props) => {
                 overlay={<Tooltip id="tip-leaderboard-fork">Snapshot</Tooltip>}
               >
                 <Button
-                  className="btn bg-transparent border-0"
+                  className="bg-transparent border-0 btn"
                   onClick={() => {
                     if (context.api.loggedIn()) {
                       setShowSnapshotModal(true);
@@ -355,7 +361,7 @@ const TaskModelLeaderboardCard = (props) => {
                 overlay={<Tooltip id="tip-leaderboard-fork">Fork</Tooltip>}
               >
                 <Button
-                  className="btn bg-transparent border-0"
+                  className="bg-transparent border-0 btn"
                   onClick={() => {
                     if (context.api.loggedIn()) {
                       setShowForkModal(true);
@@ -381,7 +387,7 @@ const TaskModelLeaderboardCard = (props) => {
             overlay={<Tooltip id="tip-metric-weights">Help</Tooltip>}
           >
             <Button
-              className="btn bg-transparent border-0"
+              className="bg-transparent border-0 btn"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -402,7 +408,7 @@ const TaskModelLeaderboardCard = (props) => {
                 }
               >
                 <Button
-                  className="btn bg-transparent border-0"
+                  className="bg-transparent border-0 btn"
                   onClick={() => {
                     setEnableWeights(!enableWeights);
                     setEnableDatasetWeights(false);
@@ -420,7 +426,7 @@ const TaskModelLeaderboardCard = (props) => {
                 }
               >
                 <Button
-                  className="btn bg-transparent border-0"
+                  className="bg-transparent border-0 btn"
                   onClick={() => {
                     setEnableDatasetWeights(!enableDatasetWeights);
                     setEnableWeights(false);
@@ -450,7 +456,7 @@ const TaskModelLeaderboardCard = (props) => {
         />
       </Card.Body>
       <Card.Footer className="text-center">
-        <Pagination className="mb-0 float-right" size="sm">
+        <Pagination className="float-right mb-0" size="sm">
           {props.disablePagination ? (
             <img
               src="/Powered_by_Dynabench-Logo.svg"
