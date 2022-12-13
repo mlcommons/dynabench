@@ -17,7 +17,6 @@ class Evaluator:
         self.config = config
         self.metric = config["perf_metric"]["type"]
         self.metric_func = eval_metrics_dict[self.metric]
-        self.perturb_prefixes = [metric["type"] for metric in config["delta_metrics"]]
 
     def evaluate(self, formatted_predictions: list, formatted_labels: list) -> dict:
         """
@@ -42,7 +41,15 @@ class Evaluator:
             predictions.append(prediction_labels_dict[ids])
             labels.append(target_label)
 
+        print("predictions: ", predictions)
+        print("labels: ", labels)
+
         perf, perf_dict = self._compute_metric(predictions, labels)
+        print("predictions", predictions)
+        print("labels", labels)
+        print(perf, perf_dict)
+        print(self.metric_func)
+        print(self.metric)
 
         score_obj = {}
         score_obj["perf"] = perf
@@ -93,7 +100,9 @@ class Evaluator:
         """
         delta_metrics = {}
 
-        for prefix in self.perturb_prefixes:
+        perturb_prefixes = [metric["type"] for metric in self.config["delta_metrics"]]
+
+        for prefix in perturb_prefixes:
             if prefix == "robustness":
                 delta_metric = self._compute_delta_metrics(
                     grouped_robusts, grouped_predictions, prefix

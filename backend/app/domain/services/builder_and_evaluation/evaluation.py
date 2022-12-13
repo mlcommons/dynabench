@@ -19,6 +19,7 @@ import time
 import boto3
 import jsonlines
 import numpy as np
+import pandas as pd
 import requests
 import yaml
 from cloudwatch import cloudwatch
@@ -72,16 +73,14 @@ class Evaluation:
         return task_configuration
 
     def single_evaluation_ecs(self, ip: str, json_data: dict):
-        headers = {
-            "accept": "application/json",
-        }
-        response = requests.post(
-            f"http://{ip}/model/single_evaluation", headers=headers, json=json_data
-        )
+        response = requests.post(f"http://{ip}/model/single_evaluation", json=json_data)
         return json.loads(response.text)
 
-    def batch_evaluation_ecs(self, ip: str, data: list, batch_size: int = 128):
+    def batch_evaluation_ecs(
+        self, ip: str, data: list, schema: list, batch_size: int = 64
+    ):
         final_predictions = []
+        print("start prediction")
         for i in range(0, len(data), batch_size):
             uid = [
                 (x)
@@ -93,13 +92,11 @@ class Evaluation:
                 print(i)
             dataset_samples = {}
             dataset_samples["dataset_samples"] = data[i : batch_size + i]
-            headers = {
-                "accept": "application/json",
-            }
+            dataset_samples_df = pd.DataFrame(dataset_samples["dataset_samples"])
+            dataset_samples_df = dataset_samples_df[schema]
             responses = requests.post(
                 f"http://{ip}/model/batch_evaluation",
-                headers=headers,
-                json=dataset_samples,
+                json=dataset_samples_df.to_dict(orient="records"),
             )
             responses = json.loads(responses.text)
             for i, response in enumerate(responses):
@@ -109,8 +106,7 @@ class Evaluation:
         return final_predictions
 
     def get_scoring_datasets(self, task_id: int):
-        jsonl_scoring_datasets = self.dataset_repository.get_scoring_datasets(task_id)
-        return jsonl_scoring_datasets
+        return self.dataset_repository.get_scoring_datasets(task_id)
 
     def downloads_scoring_datasets(
         self,
@@ -121,8 +117,8 @@ class Evaluation:
         model: str,
     ):
         folder_name = model.split("/")[-1].split(".")[0]
-        os.mkdir(f"./app/models/{folder_name}")
-        os.mkdir(f"./app/models/{folder_name}/datasets/")
+        # os.mkdir(f"./app/models/{folder_name}")
+        # os.mkdir(f"./app/models/{folder_name}/datasets/")
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
             final_dataset = {}
@@ -222,7 +218,7 @@ class Evaluation:
             schema = self.require_fields_task(folder_name)
             self.validate_input_schema(schema, dataset_samples)
             print(len(dataset_samples))
-            responses = self.batch_evaluation_ecs(ip, dataset_samples)
+            responses = self.batch_evaluation_ecs(ip, dataset_samples, schema)
             predictions = "./app/models/{}/datasets/{}.out".format(
                 folder_name, dataset["dataset"]
             )
@@ -297,7 +293,9 @@ class Evaluation:
         self.logger.addHandler(handler)
         tasks = self.task_repository.get_model_id_and_task_code(task)
         self.logger.info(f"Task: {tasks.id}")
-        delta_metrics_task = self.get_task_configuration(tasks.id)["delta_metrics"]
+        delta_metrics_task = self.get_task_configuration(tasks.id).get(
+            "delta_metrics", []
+        )
         delta_metrics_task = [
             delta_metric_task["type"] for delta_metric_task in delta_metrics_task
         ]
@@ -354,13 +352,7 @@ class Evaluation:
             send_not_scoring_dataset = []
             send_not_scoring_dataset.append(not_scoring_dataset)
             new_score = self.save_predictions_dataset(
-                send_not_scoring_dataset,
-                tasks,
-                ip,
-                model_name,
-                folder_name,
-                model_id,
-                current_round,
+                send_not_scoring_dataset, tasks, ip, model_name, folder_name, model_id
             )
             new_scores.append(new_score)
 
@@ -379,7 +371,7 @@ class Evaluation:
         model_name: str,
         folder_name: str,
         model_id: int,
-        current_round: int = 0,
+        current_round: int = 1,
         scoring: bool = True,
     ):
         (
@@ -429,10 +421,16 @@ class Evaluation:
                     formatted_dict[formatted_key]
                 )
         evaluator = Evaluator(task_configuration)
+        import json
+
+        with open("./app/models/data.json", "w") as f:
+            json.dump(formatted_dict, f)
         main_metric = evaluator.evaluate(
             formatted_dict["formatted_base_predictions"],
             formatted_dict["formatted_base_dataset"],
         )
+        print(main_metric)
+        return
         delta_metrics = {}
         if perturb_exists:
             delta_metrics = evaluator.evaluate_delta_metrics(
@@ -462,6 +460,7 @@ class Evaluation:
             "memory_utilization": final_scores["memory"],
             "examples_per_second": final_scores["throughput"],
         }
+        print(new_score)
         final_score = new_score.copy()
         metric_name = str(metric)
         final_score[metric_name] = main_metric["perf"]
@@ -511,37 +510,8 @@ class Evaluation:
         self.score_repository.add(new_score)
         return new_score
 
-    def get_sqs_messages(self):
-        queue_url = self.sqs.get_queue_url(
-            QueueName=os.getenv("SQS_NEW_BUILDER"),
-        )["QueueUrl"]
-        response = self.sqs.receive_message(
-            QueueUrl=queue_url,
-            MaxNumberOfMessages=1,
-            WaitTimeSeconds=10,
-        )
-        return response.get("Messages", []), queue_url
-
-    def delete_sqs_message(self, queue_url, receipt_handle):
-        self.sqs.delete_message(
-            QueueUrl=queue_url,
-            ReceiptHandle=receipt_handle,
-        )
-
-    def trigger_sqs(self):
-        while True:
-            messages, queue_url = self.get_sqs_messages()
-            for message in messages:
-                message_body = json.loads(message["Body"])
-                new_score = self.evaluation(
-                    message_body["task_code"],
-                    message_body["s3_uri"],
-                    message_body["model_id"],
-                )
-                self.logger.info("Delete message")
-                self.delete_sqs_message(queue_url, message["ReceiptHandle"])
-                return new_score
-            time.sleep(15)
+    def initialize_model_evaluation(self, task_code: str, s3_url: str, model_id: int):
+        return self.evaluation(task_code, s3_url, model_id)
 
     @staticmethod
     def _load_dataset(path: str):

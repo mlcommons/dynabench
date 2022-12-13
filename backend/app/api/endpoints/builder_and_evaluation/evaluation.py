@@ -6,8 +6,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 
+from app.domain.schemas.builder_and_evaluation.evaluation import (
+    InitializeModelEvaluationRequest,
+)
 from app.domain.services.builder_and_evaluation.evaluation import Evaluation
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
@@ -19,11 +22,18 @@ from app.infrastructure.repositories.task import TaskRepository
 router = APIRouter()
 
 
-@router.get("/")
-async def hello():
-    model = Evaluation()
-    api = model.trigger_sqs()
-    return {"api": api}
+@router.post("/initialize_model_evaluation")
+async def initialize_model_evaluation(
+    model: InitializeModelEvaluationRequest, background_tasks: BackgroundTasks
+):
+    evaluation = Evaluation()
+    background_tasks.add_task(
+        evaluation.initialize_model_evaluation,
+        model.task_code,
+        model.s3_url,
+        model.model_id,
+    )
+    return {"response": "The model will be evaluated in the background"}
 
 
 @router.get("/get_task_configuration")
@@ -69,7 +79,7 @@ def update_light_model(params):
 
 
 @router.post("/post_dataperf_response")
-def post_dataperf_response(response: {}):
+def post_dataperf_response(response: dict):
     evaluation = Evaluation()
     score = evaluation.evaluate_dataperf_decentralized(response.response)
     return score
