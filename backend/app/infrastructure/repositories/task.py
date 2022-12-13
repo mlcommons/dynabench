@@ -69,3 +69,11 @@ class TaskRepository(AbstractRepository):
             .filter(self.model.id == task_id)
             .first()
         )
+
+    def get_active_dataperf_tasks(self):
+        return (
+            self.session.query(self.model)
+            .filter(self.model.hidden.is_(False))
+            .filter(self.model.challenge_type == 2)
+            .all()
+        )

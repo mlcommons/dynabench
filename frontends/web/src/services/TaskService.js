@@ -18,8 +18,6 @@ export const getTaskWithRoundInfoByTaskId = async (task_id) => {
   );
 };
 
-export const getTaskWithRoundInfoByTaskCode = async (task_code) => {
-  return await axios.get(
-    `${BASE_URL_2}/task/get_task_with_round_and_dataset_info_by_task_code/${task_code}`
-  );
+export const getActiveDataperfTasks = async () => {
+  return await axios.get(`${BASE_URL_2}/task/get_active_dataperf_tasks`);
 };

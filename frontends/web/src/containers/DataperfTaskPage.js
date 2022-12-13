@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
   Row,
@@ -15,27 +15,34 @@ import {
 } from "react-bootstrap";
 import { OverlayProvider, Annotation, OverlayContext } from "./Overlay";
 import TaskPage from "../containers/TaskPage/TaskPage";
+import useFetch from "use-http";
+import { getActiveDataperfTasks } from "../services/TaskService";
 
 const DataperfTaskPage = () => {
+  const { data: dataperfTasks = [] } = useFetch(
+    "/task/get_active_dataperf_tasks",
+    []
+  );
+  const [taskId, setTaskId] = useState(1);
+
   return (
     <OverlayProvider initiallyHide={true} delayMs="1700">
-      <Container fluid>
-        <Row>
-          <Col lg={2} className="p-0 border">
-            <Nav defaultActiveKey="/home" className="flex-column">
-              <Nav.Link href="/home">Active</Nav.Link>
-              <Nav.Link eventKey="link-1">Link</Nav.Link>
-              <Nav.Link eventKey="link-2">Link</Nav.Link>
-              <Nav.Link eventKey="disabled" disabled>
-                Disabled
-              </Nav.Link>
-            </Nav>
-          </Col>
-          <Col lg={10} className="px-4 px-lg-5">
-            <TaskPage props />
-          </Col>
-        </Row>
-      </Container>
+      {dataperfTasks && (
+        <Container fluid>
+          <Row>
+            <Col lg={2} className="p-0 border">
+              <Nav defaultActiveKey="/" className="flex-column">
+                {dataperfTasks.map((task) => (
+                  <Nav.Link>{task.name}</Nav.Link>
+                ))}
+              </Nav>
+            </Col>
+            <Col lg={10} className="px-4 px-lg-5">
+              <TaskPage taskId={1} />
+            </Col>
+          </Row>
+        </Container>
+      )}
     </OverlayProvider>
   );
 };

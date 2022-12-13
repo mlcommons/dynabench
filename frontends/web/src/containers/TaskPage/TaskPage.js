@@ -23,14 +23,14 @@ import { Annotation, OverlayContext, OverlayProvider } from "../Overlay";
 import OverallTaskStats from "./OverallTaskStats";
 import TaskActionButtons from "./TaskActionButtons";
 import TaskTrend from "./TaskTrend";
-import { getTaskWithRoundInfoByTaskCode } from "../../services/TaskService";
+import { getTaskWithRoundInfoByTaskId } from "../../services/TaskService";
 import useGetInfoAxios from "../../hooks/useGetInfoAxios";
 import UserContext from "../UserContext";
 
-const TaskPage = () => {
+const TaskPage = ({ taskId }) => {
   const context = React.useContext(UserContext);
   const { response: task, loading: isLoadingTask } = useGetInfoAxios(
-    async () => await getTaskWithRoundInfoByTaskCode("nli")
+    async () => await getTaskWithRoundInfoByTaskId(taskId)
   );
   const name_to_pwc_links = ["sentiment"];
   const admin_or_owner = true;

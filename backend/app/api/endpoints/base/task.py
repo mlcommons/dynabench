@@ -40,6 +40,11 @@ async def get_order_metrics_by_task_id(task_id: int):
     return TaskService().get_order_metrics_by_task_id(task_id)
 
 
+@router.get("/get_active_dataperf_tasks", response_model={})
+async def get_active_dataperf_tasks():
+    return TaskService().get_active_dataperf_tasks()
+
+
 @router.post("/get_dynaboard_info_by_task_id/", response_model={})
 async def get_dynaboard_info_by_task_id(model: GetDynaboardInfoByTaskIdRequest):
     return TaskService().get_dynaboard_info_by_task_id(

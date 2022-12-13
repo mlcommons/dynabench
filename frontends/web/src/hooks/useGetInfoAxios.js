@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from "react";
 
-const useGetInfoAxios = (getInfoFunction) => {
+const useGetInfoAxios = async (getInfoFunction) => {
   const [response, setResponse] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);

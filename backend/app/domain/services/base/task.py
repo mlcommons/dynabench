@@ -155,3 +155,6 @@ class TaskService:
     def get_task_trends_score(self, task_id: int, dataset_id: int):
         task_info = self.get_task_with_round_and_dataset_info(task_id)
         return task_info
+
+    def get_active_dataperf_tasks(self):
+        return self.task_repository.get_active_dataperf_tasks()
