@@ -41,7 +41,11 @@
         "recharts": "^1.8.5",
         "set-value": "^4.0.1",
         "style-loader": "^1.2.1",
+<<<<<<< Updated upstream
         "sweetalert": "^2.1.2"
+=======
+        "sweetalert2": "^11.6.15"
+>>>>>>> Stashed changes
     },
     "devDependencies": {
         "@babel/core": "^7.10.5",
