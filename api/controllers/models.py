@@ -214,6 +214,8 @@ def do_upload_via_train_files(credentials, tid, model_name):
     for name in dataset_names:
         train_files[name] = bottle.request.files.get(name)
 
+
+
     # Users don't need to upload train sets for all datasets.
     train_files = {
         name: train_files[name]
@@ -233,6 +235,15 @@ def do_upload_via_train_files(credentials, tid, model_name):
         endpoint_name=endpoint_name,
         deployment_status=DeploymentStatusEnum.predictions_upload,
         secret=secrets.token_hex(),
+    )
+
+    print("Testing")
+    Email().send(
+        contact=user.email,
+        cc_contact="dynabench-site@mlcommons.org",
+        template_name="model_train_successful.txt",
+        msg_dict={"name": model_name, "model_id": model[1]},
+        subject=f"Model {model_name} training succeeded.",
     )
 
     if len(train_files) == 1:
