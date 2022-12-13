@@ -45,7 +45,11 @@ import { Avatar } from "../components/Avatar/Avatar";
 import ReactGA from "react-ga";
 import SubmitInterface from "./SubmitInterface.js";
 import MLCubeTutorial from "./MLCubeTutorial";
+import DataperfTaskPage from "./DataperfTaskPage";
 import qs from "qs";
+import { Provider as FetchProvider } from "use-http";
+
+const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
 
 class RouterMonitor extends React.Component {
   constructor(props) {
@@ -142,289 +146,296 @@ class App extends React.Component {
         </NavDropdown.Item>
       ));
     return (
-      <UserContext.Provider
-        value={{
-          user: this.state.user,
-          updateState: this.updateState,
-          api: this.api,
-        }}
-      >
-        <TasksContext.Provider
+      <FetchProvider url={BASE_URL_2}>
+        <UserContext.Provider
           value={{
-            tasks: this.state.tasks,
+            user: this.state.user,
+            updateState: this.updateState,
+            api: this.api,
           }}
         >
-          <BrowserRouter>
-            <ScrollToTop />
-            <Route
-              render={(props) => <RouterMonitor {...props} api={this.api} />}
-            />
-            {!showContentOnly && (
-              <Navbar
-                expand="lg"
-                variant="dark"
-                className="shadow blue-bg justify-content-start"
-              >
-                <Navbar.Toggle
-                  aria-controls="basic-navbar-nav"
-                  className="border-0 mr-2"
-                />
-                <Navbar.Brand as={Link} to="/">
-                  <img
-                    src="/logo_w.png"
-                    style={{ width: 80, marginLeft: 5, marginRight: 20 }}
-                    alt="Dynabench"
+          <TasksContext.Provider
+            value={{
+              tasks: this.state.tasks,
+            }}
+          >
+            <BrowserRouter>
+              <ScrollToTop />
+              <Route
+                render={(props) => <RouterMonitor {...props} api={this.api} />}
+              />
+              {!showContentOnly && (
+                <Navbar
+                  expand="lg"
+                  variant="dark"
+                  className="shadow blue-bg justify-content-start"
+                >
+                  <Navbar.Toggle
+                    aria-controls="basic-navbar-nav"
+                    className="mr-2 border-0"
                   />
-                </Navbar.Brand>
-                <Navbar.Collapse>
-                  <Nav className="mr-auto">
-                    <Nav.Item>
-                      <Nav.Link as={Link} to="/about">
-                        About
-                      </Nav.Link>
-                    </Nav.Item>
-                    <NavDropdown title="Tasks" id="basic-nav-dropdown">
-                      {NavItems}
-                      <div className="dropdown-divider my-0"></div>
-                      <NavDropdown.Item
-                        as={HashLink}
-                        to={"/#contributed-tasks"}
-                        className="py-3"
-                      >
-                        Contributed Tasks
-                      </NavDropdown.Item>
-                      <div className="dropdown-divider my-0"></div>
-                      <NavDropdown.Item
-                        key={"FLoRes"}
-                        as={Link}
-                        to={"/flores"}
-                        className="py-3"
-                      >
-                        Flores
-                      </NavDropdown.Item>
-                    </NavDropdown>
-                  </Nav>
-                  <Nav className="justify-content-end">
-                    {this.state.user.id ? (
-                      <>
-                        <NavDropdown
-                          onToggle={this.refreshData}
-                          alignRight
-                          className="no-chevron"
-                          title={
-                            <Avatar
-                              avatar_url={this.state.user.avatar_url}
-                              username={this.state.user.username}
-                              isThumbnail={true}
-                              theme="light"
-                            />
-                          }
-                          id="collasible-nav-dropdown"
+                  <Navbar.Brand as={Link} to="/">
+                    <img
+                      src="/logo_w.png"
+                      style={{ width: 80, marginLeft: 5, marginRight: 20 }}
+                      alt="Dynabench"
+                    />
+                  </Navbar.Brand>
+                  <Navbar.Collapse>
+                    <Nav className="mr-auto">
+                      <Nav.Item>
+                        <Nav.Link as={Link} to="/about">
+                          About
+                        </Nav.Link>
+                      </Nav.Item>
+                      <NavDropdown title="Tasks" id="basic-nav-dropdown">
+                        {NavItems}
+                        <div className="my-0 dropdown-divider"></div>
+                        <NavDropdown.Item
+                          as={HashLink}
+                          to={"/#contributed-tasks"}
+                          className="py-3"
                         >
-                          <NavDropdown.Item as={Link} to="/account#profile">
-                            Profile
-                          </NavDropdown.Item>
-                          <NavDropdown.Divider />
-                          <NavDropdown.Item
-                            as={Link}
-                            to="/account#notifications"
+                          Contributed Tasks
+                        </NavDropdown.Item>
+                        <div className="my-0 dropdown-divider"></div>
+                        <NavDropdown.Item
+                          key={"FLoRes"}
+                          as={Link}
+                          to={"/flores"}
+                          className="py-3"
+                        >
+                          Flores
+                        </NavDropdown.Item>
+                      </NavDropdown>
+                    </Nav>
+                    <Nav className="justify-content-end">
+                      {this.state.user.id ? (
+                        <>
+                          <NavDropdown
+                            onToggle={this.refreshData}
+                            alignRight
+                            className="no-chevron"
+                            title={
+                              <Avatar
+                                avatar_url={this.state.user.avatar_url}
+                                username={this.state.user.username}
+                                isThumbnail={true}
+                                theme="light"
+                              />
+                            }
+                            id="collasible-nav-dropdown"
                           >
-                            Notifications{" "}
-                            {this.state.user &&
-                            this.state.user.unseen_notifications
-                              ? "(" +
-                                this.state.user?.unseen_notifications +
-                                ")"
-                              : ""}
-                          </NavDropdown.Item>
-                          <NavDropdown.Item as={Link} to="/account#stats">
-                            Stats &amp; Badges
-                          </NavDropdown.Item>
-                          <NavDropdown.Item as={Link} to="/account#models">
-                            Models
-                          </NavDropdown.Item>
-                          <NavDropdown.Item
-                            as={Link}
-                            to="/account#forks-and-snapshots"
-                          >
-                            Forks &amp; Snapshots
-                          </NavDropdown.Item>
-                          <NavDropdown.Item as={Link} to="/account#tasks">
-                            Tasks
-                          </NavDropdown.Item>
-                          {this.state.user?.admin && (
-                            <>
-                              <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                as={Link}
-                                to="/account#admin_task_proposals"
-                              >
-                                Admin Task Proposals
-                              </NavDropdown.Item>
-                            </>
-                          )}
-                          <NavDropdown.Divider />
-                          <NavDropdown.Item as={Link} to="/logout">
-                            Logout
-                          </NavDropdown.Item>
-                        </NavDropdown>
-                      </>
-                    ) : (
-                      <>
-                        <Nav.Item>
-                          <Nav.Link as={Link} to="/login">
-                            Login
-                          </Nav.Link>
-                        </Nav.Item>
-                        <Nav.Item>
-                          <Nav.Link
-                            as={Link}
-                            to="/register"
-                            className="signup-nav-link"
-                          >
-                            Sign up
-                          </Nav.Link>
-                        </Nav.Item>
-                      </>
+                            <NavDropdown.Item as={Link} to="/account#profile">
+                              Profile
+                            </NavDropdown.Item>
+                            <NavDropdown.Divider />
+                            <NavDropdown.Item
+                              as={Link}
+                              to="/account#notifications"
+                            >
+                              Notifications{" "}
+                              {this.state.user &&
+                              this.state.user.unseen_notifications
+                                ? "(" +
+                                  this.state.user?.unseen_notifications +
+                                  ")"
+                                : ""}
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/account#stats">
+                              Stats &amp; Badges
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/account#models">
+                              Models
+                            </NavDropdown.Item>
+                            <NavDropdown.Item
+                              as={Link}
+                              to="/account#forks-and-snapshots"
+                            >
+                              Forks &amp; Snapshots
+                            </NavDropdown.Item>
+                            <NavDropdown.Item as={Link} to="/account#tasks">
+                              Tasks
+                            </NavDropdown.Item>
+                            {this.state.user?.admin && (
+                              <>
+                                <NavDropdown.Divider />
+                                <NavDropdown.Item
+                                  as={Link}
+                                  to="/account#admin_task_proposals"
+                                >
+                                  Admin Task Proposals
+                                </NavDropdown.Item>
+                              </>
+                            )}
+                            <NavDropdown.Divider />
+                            <NavDropdown.Item as={Link} to="/logout">
+                              Logout
+                            </NavDropdown.Item>
+                          </NavDropdown>
+                        </>
+                      ) : (
+                        <>
+                          <Nav.Item>
+                            <Nav.Link as={Link} to="/login">
+                              Login
+                            </Nav.Link>
+                          </Nav.Item>
+                          <Nav.Item>
+                            <Nav.Link
+                              as={Link}
+                              to="/register"
+                              className="signup-nav-link"
+                            >
+                              Sign up
+                            </Nav.Link>
+                          </Nav.Item>
+                        </>
+                      )}
+                    </Nav>
+                  </Navbar.Collapse>
+                </Navbar>
+              )}
+              <div id={showContentOnly ? "" : "content"}>
+                <Switch>
+                  <Route path="/about" component={AboutPage} />
+                  <Route path="/contact" component={ContactPage} />
+                  <Route path="/termsofuse" component={TermsPage} />
+                  <Route path="/datapolicy" component={DataPolicyPage} />
+                  <Route
+                    path="/tasks/top/:taskCode"
+                    component={TaskModelLeaderboardPage}
+                  />
+                  <Route
+                    path="/tasks/:taskCode/create"
+                    component={CreateInterface}
+                  />
+                  <Route
+                    path="/tasks/:taskCode/validate"
+                    component={ValidateInterface}
+                  />
+                  <Route
+                    path="/tasks/:taskCode/uploadModel"
+                    component={SubmitModel}
+                  />
+                  <Route
+                    path="/tasks/:taskCode/models/:modelId/updateModelInfo"
+                    component={UpdateModelInfoInterface}
+                  />
+                  <Route
+                    path="/tasks/:taskId/submit_predictions"
+                    render={(props) => (
+                      <SubmitInterface
+                        history={props.history}
+                        location={props.location}
+                        staticContext={props.staticContext}
+                        match={props.match}
+                        submission_type="predictions"
+                      />
                     )}
-                  </Nav>
-                </Navbar.Collapse>
-              </Navbar>
-            )}
-            <div id={showContentOnly ? "" : "content"}>
-              <Switch>
-                <Route path="/about" component={AboutPage} />
-                <Route path="/contact" component={ContactPage} />
-                <Route path="/termsofuse" component={TermsPage} />
-                <Route path="/datapolicy" component={DataPolicyPage} />
-                <Route
-                  path="/tasks/top/:taskCode"
-                  component={TaskModelLeaderboardPage}
-                />
-                <Route
-                  path="/tasks/:taskCode/create"
-                  component={CreateInterface}
-                />
-                <Route
-                  path="/tasks/:taskCode/validate"
-                  component={ValidateInterface}
-                />
-                <Route
-                  path="/tasks/:taskCode/uploadModel"
-                  component={SubmitModel}
-                />
-                <Route
-                  path="/tasks/:taskCode/models/:modelId/updateModelInfo"
-                  component={UpdateModelInfoInterface}
-                />
-                <Route
-                  path="/tasks/:taskId/submit_predictions"
-                  render={(props) => (
-                    <SubmitInterface
-                      history={props.history}
-                      location={props.location}
-                      staticContext={props.staticContext}
-                      match={props.match}
-                      submission_type="predictions"
-                    />
-                  )}
-                />
-                <Route
-                  path="/tasks/:taskId/submit_train_files"
-                  render={(props) => (
-                    <SubmitInterface
-                      history={props.history}
-                      location={props.location}
-                      staticContext={props.staticContext}
-                      match={props.match}
-                      submission_type="train_files"
-                    />
-                  )}
-                />
-                <Route
-                  path="/tasks/:taskId/mlcube_tutorial"
-                  render={(props) => (
-                    <MLCubeTutorial
-                      history={props.history}
-                      location={props.location}
-                      staticContext={props.staticContext}
-                      match={props.match}
-                      submission_type="train_files"
-                    />
-                  )}
-                />
-                <Route
-                  path="/tasks/:taskCode/models/:modelId"
-                  component={ModelPage}
-                />
-                <Route
-                  path="/tasks/:taskCode/round/:roundId"
-                  component={TaskPage}
-                />
-                <Route
-                  path="/tasks/:taskCode/:forkOrSnapshotName"
-                  component={ForkAndSnapshotRouter}
-                />
-                <Route path="/tasks/:taskCode" component={TaskPage} />
-                <Route
-                  path="/flores/top5/:taskShortName"
-                  component={FloresTop5Page}
-                />
-                <Route
-                  path="/flores/:taskShortName?"
-                  component={FloresTaskPage}
-                />
-                <Route path="/login" component={LoginPage} />
-                <Route
-                  path="/generate_api_token"
-                  component={GenerateAPITokenPage}
-                />
-                <Route path="/forgot-password" component={ForgotPassword} />
-                <Route
-                  path="/reset-password/:token"
-                  component={ResetPassword}
-                />
-                <Route path="/logout" component={Logout} />
-                <Route path="/account" component={ProfilePage} />
-                <Route
-                  path="/task-owner-interface/:taskCode"
-                  component={TaskOwnerPage}
-                />
-                <Route path="/register" component={RegisterPage} />
-                <Route path="/users/:userId" component={UserPage} />
-                <Route path="/models/:modelId" component={ModelPage} />
-                <Route path="/" component={HomePage} />
-              </Switch>
-            </div>
-            {!showContentOnly && (
-              <footer className="footer text-white">
-                <Container fluid>
-                  <Row>
-                    <div className="footer-nav-link">
-                      Copyright © 2022 MLCommons, Inc.
-                    </div>
-                    <div className="footer-nav-link">
-                      <Link to="/contact" className="text-reset">
-                        Contact
-                      </Link>
-                    </div>
-                    <div className="footer-nav-link">
-                      <Link to="/termsofuse" className="text-reset">
-                        Terms of Use
-                      </Link>
-                    </div>
-                    <div className="footer-nav-link">
-                      <Link to="/datapolicy" className="text-reset">
-                        Data Policy
-                      </Link>
-                    </div>
-                  </Row>
-                </Container>
-              </footer>
-            )}
-          </BrowserRouter>
-        </TasksContext.Provider>
-      </UserContext.Provider>
+                  />
+                  <Route
+                    path="/tasks/:taskId/submit_train_files"
+                    render={(props) => (
+                      <SubmitInterface
+                        history={props.history}
+                        location={props.location}
+                        staticContext={props.staticContext}
+                        match={props.match}
+                        submission_type="train_files"
+                      />
+                    )}
+                  />
+                  <Route
+                    path="/tasks/:taskId/mlcube_tutorial"
+                    render={(props) => (
+                      <MLCubeTutorial
+                        history={props.history}
+                        location={props.location}
+                        staticContext={props.staticContext}
+                        match={props.match}
+                        submission_type="train_files"
+                      />
+                    )}
+                  />
+                  <Route
+                    path="/tasks/:taskCode/models/:modelId"
+                    component={ModelPage}
+                  />
+                  <Route
+                    path="/tasks/:taskCode/round/:roundId"
+                    component={TaskPage}
+                  />
+                  <Route
+                    path="/tasks/:taskCode/:forkOrSnapshotName"
+                    component={ForkAndSnapshotRouter}
+                  />
+                  <Route path="/tasks/:taskCode" component={TaskPage} />
+                  <Route
+                    path="/flores/top5/:taskShortName"
+                    component={FloresTop5Page}
+                  />
+                  <Route
+                    path="/flores/:taskShortName?"
+                    component={FloresTaskPage}
+                  />
+                  <Route
+                    path="/dataperf/:taskShortName?"
+                    component={DataperfTaskPage}
+                  />
+
+                  <Route path="/login" component={LoginPage} />
+                  <Route
+                    path="/generate_api_token"
+                    component={GenerateAPITokenPage}
+                  />
+                  <Route path="/forgot-password" component={ForgotPassword} />
+                  <Route
+                    path="/reset-password/:token"
+                    component={ResetPassword}
+                  />
+                  <Route path="/logout" component={Logout} />
+                  <Route path="/account" component={ProfilePage} />
+                  <Route
+                    path="/task-owner-interface/:taskCode"
+                    component={TaskOwnerPage}
+                  />
+                  <Route path="/register" component={RegisterPage} />
+                  <Route path="/users/:userId" component={UserPage} />
+                  <Route path="/models/:modelId" component={ModelPage} />
+                  <Route path="/" component={HomePage} />
+                </Switch>
+              </div>
+              {!showContentOnly && (
+                <footer className="text-white footer">
+                  <Container fluid>
+                    <Row>
+                      <div className="footer-nav-link">
+                        Copyright © 2022 MLCommons, Inc.
+                      </div>
+                      <div className="footer-nav-link">
+                        <Link to="/contact" className="text-reset">
+                          Contact
+                        </Link>
+                      </div>
+                      <div className="footer-nav-link">
+                        <Link to="/termsofuse" className="text-reset">
+                          Terms of Use
+                        </Link>
+                      </div>
+                      <div className="footer-nav-link">
+                        <Link to="/datapolicy" className="text-reset">
+                          Data Policy
+                        </Link>
+                      </div>
+                    </Row>
+                  </Container>
+                </footer>
+              )}
+            </BrowserRouter>
+          </TasksContext.Provider>
+        </UserContext.Provider>
+      </FetchProvider>
     );
   }
 }

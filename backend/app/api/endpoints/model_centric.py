@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi.responses import FileResponse
 
 from app.api.middleware.verify_token import verify_token
-from app.api.schemas.model_centric import (
+from app.domain.schemas.model_centric import (
     BatchCreateExampleRequest,
     CreateExampleRequest,
 )
