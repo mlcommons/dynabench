@@ -28,7 +28,7 @@ import {
 import Markdown from "react-markdown";
 import Moment from "react-moment";
 import { Link } from "react-router-dom";
-import swal from "sweetalert";
+import Swal from "sweetalert2";
 import ChevronExpandButton from "../components/Buttons/ChevronExpandButton";
 import FloresGrid from "../components/FloresComponents/FloresGrid";
 import { FLORES_TASK_CODES } from "./FloresTaskPage";
@@ -238,7 +238,7 @@ const ScoreRow = ({
                       (error) => {
                         console.log(error);
                         setShowSpinner(false);
-                        swal({
+                        Swal.fire({
                           title: "Oh no!!",
                           text: error.error,
                           icon: "warning",
@@ -269,7 +269,7 @@ const ScoreRow = ({
                       (error) => {
                         console.log(error);
                         setShowSpinner(false);
-                        swal({
+                        Swal.fire({
                           title: "Oh no!!",
                           text: error.error,
                           icon: "warning",

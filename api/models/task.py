@@ -679,6 +679,9 @@ class Task(Base):
     mlcube_tutorial_markdown = db.Column(db.Text)
     dynamic_adversarial_data_collection = db.Column(db.Boolean, default=True)
     train_file_upload_instructions_md = db.Column(db.Text)
+    decen_queue = db.Column(db.Text)
+    decen_bucket = db.Column(db.Text)
+    decen_aws_region = db.Column(db.Text)
 
     def __repr__(self):
         return f"<Task {self.name}>"
@@ -845,6 +848,7 @@ class TaskModel(BaseModel):
         tasks = [x[0].to_dict() for x in rows]
         for ii, r in enumerate([x[1] for x in rows]):
             tasks[ii]["round"] = r.to_dict()
+        self.dbs.expunge_all()
         return tasks
 
     def listSubmitable(self):

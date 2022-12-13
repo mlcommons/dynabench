@@ -38,6 +38,8 @@ import AnnotationComponent from "./AnnotationComponent.js";
 import Explainer from "./Explainer.js";
 import initializeData from "./InitializeAnnotationData.js";
 import ResponseInfo from "./ResponseInfo.js";
+import BatchCreateSamples from "../../components/Forms/BatchCreateSamples";
+import { getModelInTheLoop } from "../../services/ModelServices";
 const yaml = require("js-yaml");
 
 function deepCopyJSON(obj) {
@@ -63,6 +65,7 @@ class CreateInterface extends React.Component {
       taskConfig: null,
       data: {},
       loading: true,
+      modelInTheLoop: null,
     };
     this.getNewContext = this.getNewContext.bind(this);
     this.handleResponse = this.handleResponse.bind(this);
@@ -146,20 +149,26 @@ class CreateInterface extends React.Component {
                 ? taskConfig.metadata.validate
                 : [];
 
-              this.setState({
-                taskConfig: taskConfig,
-                randomTargetModel: randomTargetModel,
-                data: Object.assign(
-                  {},
-                  initializeData(taskConfig.input),
-                  JSON.parse(result.context_json)
-                ),
-                context: result,
-                content: [],
-                submitDisabled: false,
-                refreshDisabled: false,
-                loading: false,
-              });
+              getModelInTheLoop(this.state.task.id)
+                .then((res) => {
+                  this.setState({ modelInTheLoop: res.data.light_model });
+                })
+                .then(() => {
+                  this.setState({
+                    taskConfig: taskConfig,
+                    randomTargetModel: randomTargetModel,
+                    data: Object.assign(
+                      {},
+                      initializeData(taskConfig.input),
+                      JSON.parse(result.context_json)
+                    ),
+                    context: result,
+                    content: [],
+                    submitDisabled: false,
+                    refreshDisabled: false,
+                    loading: false,
+                  });
+                });
             },
             (error) => {
               this.setState({
@@ -320,19 +329,12 @@ class CreateInterface extends React.Component {
     this.setState({ submitWithoutFullExample: false });
     this.setState({ submitDisabled: true, refreshDisabled: true }, () => {
       this.manageTextInput("blur");
-      const url = this.state.selectedModel
-        ? this.state.selectedModel.endpointUrl
-        : this.state.randomTargetModel;
-
+      const url = this.state.modelInTheLoop;
       if (url === null) {
         // In this case, there is no target model. Just store the example without model data.
         this.storeExampleWrapper();
         return;
       }
-
-      // Begin hack that can be removed upon full dynalab integration
-      const endpoint = url;
-      // End hack that can be removed upon full dynalab integration
       this.context.api
         .convertToModelIO(this.state.task.id, this.state.data)
         .then((model_io_result) => {
@@ -784,6 +786,44 @@ class CreateInterface extends React.Component {
                       </Col>
                       <Col xs={6}>
                         <InputGroup className="d-flex justify-content-end">
+                          <Annotation
+                            placement="top"
+                            tooltip="When you’re done, you can submit the example and we’ll find out what the model thinks!"
+                          >
+                            <Button
+                              type="submit"
+                              className="font-weight-bold blue-bg border-0 task-action-btn"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                this.setState({ showCreateBatchModal: true });
+                              }}
+                            >
+                              {"Batch submissions "}
+                              <i
+                                className={
+                                  this.state.submitDisabled
+                                    ? "fa fa-cog fa-spin"
+                                    : ""
+                                }
+                              />
+                            </Button>
+                          </Annotation>
+                          {this.state.showCreateBatchModal && (
+                            <>
+                              <Modal
+                                show={this.state.showCreateBatchModal}
+                                onHide={() => {
+                                  this.setState({
+                                    showCreateBatchModal: false,
+                                  });
+                                }}
+                              >
+                                <BatchCreateSamples
+                                  modelUrl={this.state.modelInTheLoop}
+                                />
+                              </Modal>
+                            </>
+                          )}
                           {this.state.taskConfig &&
                             this.state.taskConfig.context.length !== 0 && (
                               <OverlayTrigger
