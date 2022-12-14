@@ -112,6 +112,10 @@ class Task(Base):
     task_aws_account_id = Column(Text)
     task_gateway_predict_prefix = Column(Text)
     context = Column(String(20), server_default=text("'min'"))
+    challenge_type = Column(Integer, server_default=text("'1'"))
+    decen_queue = Column(Text)
+    decen_bucket = Column(Text)
+    decen_aws_region = Column(Text)
 
 
 class User(Base):
@@ -412,3 +416,10 @@ class Validation(Base):
 
     example = relationship("Example")
     user = relationship("User")
+
+
+class TaskChallengeType(Base):
+    __tablename__ = "task_challenge_type"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False, unique=True)

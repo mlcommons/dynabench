@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -13,7 +19,7 @@ import {
   Button,
 } from "react-bootstrap";
 import Select from "react-select";
-import { PieRechart } from "../../components/Rechart.js";
+import { PieRechart } from "../../components/Charts/Rechart.js";
 import { useState } from "react";
 import { TokenAnnotator } from "react-text-annotate";
 import AtomicImage from "./AtomicImage";
@@ -110,7 +116,7 @@ const Multiclass = ({
             className={inputReminder ? "p-2 border rounded border-danger" : ""}
           >
             <InputGroup className="align-items-center">
-              <i className="fas fa-flag-checkered mr-1"></i>
+              <i className="mr-1 fas fa-flag-checkered"></i>
               Your goal: enter {indefiniteArticle}
               <DropdownButton variant="light" className="p-1" title={choice}>
                 {labels
@@ -259,7 +265,7 @@ const ContextStringSelection = ({
             {configObj.reference_name}:
           </h6>
           <TokenAnnotator
-            className="mb-1 p-3 light-gray-bg token-annotator"
+            className="p-3 mb-1 light-gray-bg token-annotator"
             tokens={data[configObj.reference_name].split(
               /\b|(?<=[\s\(\)])|(?=[\s\(\)])/
             )}

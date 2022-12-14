@@ -24,3 +24,20 @@ class ModelRepository(AbstractRepository):
             .first()
         )
         return models_in_the_loop
+
+    def update_light_model(self, id: int, light_model: str) -> dict:
+        instance = self.session.query(self.model).filter(self.model.id == id).first()
+        light_model = f"{light_model}/model/single_evaluation"
+        instance.light_model = light_model
+        instance.deployment_status = "deployed"
+        self.session.flush()
+        self.session.commit()
+        return
+
+    def get_lambda_models(self) -> list:
+        models = (
+            self.session.query(self.model)
+            .filter(self.model.light_model is not None)
+            .all()
+        )
+        return models

@@ -121,7 +121,10 @@ const loadDefaultData = (
         orderedDatasetWeights
       )
       .then(
-        (result) => updateResultCallback(result),
+        (result) => {
+          console.log(result);
+          updateResultCallback(result);
+        },
         (error) => {
           console.log(error);
           updateResultCallback(null);
