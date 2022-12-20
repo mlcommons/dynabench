@@ -232,7 +232,7 @@ class Model(Base):
     params = Column(BigInteger)
     languages = Column(Text)
     license = Column(Text)
-    upload_datetime = Column(DateTime)
+    upload_datetime = Column(DateTime, server_default=func.now(), default=func.now())
     model_card = Column(Text)
     source_url = Column(Text)
     is_published = Column(TINYINT(1))

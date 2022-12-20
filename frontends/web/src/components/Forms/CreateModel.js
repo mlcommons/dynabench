@@ -13,12 +13,12 @@ import "./CreateModel.css";
 
 const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
   const initState = {
-    modelName: "",
-    desc: "",
-    numParams: "",
-    languages: "",
-    license: "",
-    modelCard: "",
+    modelName: " ",
+    desc: " ",
+    numParams: 0,
+    languages: " ",
+    license: " ",
+    modelCard: " ",
   };
 
   const [initialValues, setInitialValues] = useState(initState);

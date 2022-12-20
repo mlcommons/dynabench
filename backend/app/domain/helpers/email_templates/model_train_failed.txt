@@ -1,0 +1,5 @@
+Your model $name has failed to train. This is likely due to an issue with the train file(s) that you uploaded.
+
+Thanks,
+
+The Dynabench Team

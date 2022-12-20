@@ -66,3 +66,10 @@ class DatasetRepository(AbstractRepository):
             .filter(self.model.access_type == "scoring")
             .all()
         )
+
+    def get_dataset_name_by_id(self, dataset_id: int) -> dict:
+        return (
+            self.session.query(self.model.name)
+            .filter(self.model.id == dataset_id)
+            .one()
+        )

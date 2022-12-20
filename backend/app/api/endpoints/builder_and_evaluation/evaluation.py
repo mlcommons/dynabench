@@ -11,7 +11,7 @@ from fastapi import APIRouter, BackgroundTasks
 from app.domain.schemas.builder_and_evaluation.evaluation import (
     InitializeModelEvaluationRequest,
 )
-from app.domain.services.builder_and_evaluation.evaluation import Evaluation
+from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.round import RoundRepository
@@ -26,19 +26,20 @@ router = APIRouter()
 async def initialize_model_evaluation(
     model: InitializeModelEvaluationRequest, background_tasks: BackgroundTasks
 ):
-    evaluation = Evaluation()
+    evaluation = EvaluationService()
     background_tasks.add_task(
         evaluation.initialize_model_evaluation,
         model.task_code,
         model.s3_url,
         model.model_id,
+        model.user_id,
     )
     return {"response": "The model will be evaluated in the background"}
 
 
 @router.get("/get_task_configuration")
 def get_task_configuration(id: int) -> dict:
-    evaluation = Evaluation()
+    evaluation = EvaluationService()
     return evaluation.get_task_configuration(id)
 
 
@@ -80,6 +81,6 @@ def update_light_model(params):
 
 @router.post("/post_dataperf_response")
 def post_dataperf_response(response: dict):
-    evaluation = Evaluation()
+    evaluation = EvaluationService()
     score = evaluation.evaluate_dataperf_decentralized(response.response)
     return score

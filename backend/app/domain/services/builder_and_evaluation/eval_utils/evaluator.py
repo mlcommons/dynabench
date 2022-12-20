@@ -41,15 +41,7 @@ class Evaluator:
             predictions.append(prediction_labels_dict[ids])
             labels.append(target_label)
 
-        print("predictions: ", predictions)
-        print("labels: ", labels)
-
         perf, perf_dict = self._compute_metric(predictions, labels)
-        print("predictions", predictions)
-        print("labels", labels)
-        print(perf, perf_dict)
-        print(self.metric_func)
-        print(self.metric)
 
         score_obj = {}
         score_obj["perf"] = perf

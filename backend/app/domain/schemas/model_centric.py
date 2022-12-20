@@ -3,8 +3,10 @@
 # LICENSE file in the root directory of this source tree.
 from typing import Optional
 
-from fastapi import Form
+from fastapi import File, UploadFile
 from pydantic import BaseModel
+
+from app.domain.schemas.utils.parsing_data import form_body
 
 
 class CreateExampleRequest(BaseModel):
@@ -12,10 +14,12 @@ class CreateExampleRequest(BaseModel):
     sample: dict
 
 
+@form_body
 class BatchCreateExampleRequest(BaseModel):
-    model_url: str = Form(...)
-    context_id: int = Form(...)
-    user_id: int = Form(...)
-    round_id: int = Form(...)
-    task_id: int = Form(...)
-    tag: Optional[str] = Form(...)
+    model_url: str
+    context_id: int
+    user_id: int
+    round_id: int
+    task_id: int
+    tag: Optional[str]
+    file: UploadFile = File(...)
