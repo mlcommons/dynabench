@@ -54,7 +54,7 @@ const SubmitModel = (props) => {
       }
     };
     fetchTaskData();
-  }, []);
+  }, [props.match.params.taskCode, context.api, props.history]);
 
   const handleSubmitModel = (modelData) => {
     if (modelData.file.length !== 0) {

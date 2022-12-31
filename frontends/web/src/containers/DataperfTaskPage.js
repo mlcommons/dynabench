@@ -4,20 +4,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  ButtonGroup,
-  Nav,
-  Spinner,
-} from "react-bootstrap";
-import { OverlayProvider, Annotation, OverlayContext } from "./Overlay";
-import TaskPage from "../containers/TaskPage/TaskPage";
+import React, { useEffect, useState } from "react";
+import { Col, Container, Nav, Row, Spinner } from "react-bootstrap";
 import useFetch from "use-http";
-import { useEffect } from "react";
+import TaskPage from "../containers/TaskPage/TaskPage";
 import Dataperf from "./CommunitiesLandingPages/Dataperf";
+import { OverlayProvider } from "./Overlay";
 
 const DataperfTaskPage = () => {
   const { data: dataperfTasks = [] } = useFetch(
@@ -27,8 +19,6 @@ const DataperfTaskPage = () => {
   const [taskId, setTaskId] = useState();
 
   useEffect(() => {}, [taskId]);
-
-  console.log(taskId);
 
   return (
     <OverlayProvider initiallyHide={true} delayMs="1700">

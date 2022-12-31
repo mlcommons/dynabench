@@ -1,13 +1,18 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
 import React from "react";
-import { Button, Nav, Tooltip, OverlayTrigger } from "react-bootstrap";
+import { Button, Nav, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Annotation } from "../../containers/Overlay";
-import { Link } from "react-router-dom";
 
 const FloresActionButtons = ({ taskId }) => {
   function renderTooltip(props, text) {

@@ -4,8 +4,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useEffect } from "react";
-import { Button, Col, Container, Row, Card } from "react-bootstrap";
+import React, { useState } from "react";
+import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import { useForm } from "react-hook-form";
@@ -21,21 +21,15 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
     modelCard: " ",
   };
 
-  const [initialValues, setInitialValues] = useState(initState);
-
   const onSubmit = (values) => {
     handleSubmitModel(values);
     handleClose();
   };
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const { register, handleSubmit } = useForm({
     mode: "onTouched",
     reValidateMode: "onSubmit",
-    defaultValues: initialValues,
+    defaultValues: initState,
   });
 
   const [fileName, setFileName] = useState();

@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -100,6 +106,7 @@ class ValidateInterface extends React.Component {
                 .then((result) => {
                   this.setState({ admin_or_owner: result.admin_or_owner });
                 });
+              // eslint-disable-next-line react/no-direct-mutation-state
               this.state.task.selected_round = this.state.task.cur_round;
               this.getNewExample();
               if (params.taskCode !== this.state.taskCode) {

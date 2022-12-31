@@ -27,7 +27,6 @@ import useFetch from "use-http";
 import UserContext from "../UserContext";
 
 const TaskPage = ({ taskId }) => {
-  console.log("task id", taskId);
   const context = useContext(UserContext);
   const [task, setTask] = useState({});
 
@@ -50,6 +49,7 @@ const TaskPage = ({ taskId }) => {
 
   useEffect(() => {
     loadTask();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
 
   const name_to_pwc_links = ["sentiment"];
@@ -152,7 +152,7 @@ const TaskPage = ({ taskId }) => {
                 ></div>
               </Col>
             </Row>
-            {true ? (
+            {task ? (
               <>
                 {task?.active ? (
                   <>
