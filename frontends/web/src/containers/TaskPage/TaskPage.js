@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Button,
   ButtonGroup,
@@ -23,15 +23,35 @@ import { Annotation, OverlayContext, OverlayProvider } from "../Overlay";
 import OverallTaskStats from "./OverallTaskStats";
 import TaskActionButtons from "./TaskActionButtons";
 import TaskTrend from "./TaskTrend";
-import { getTaskWithRoundInfoByTaskId } from "../../services/TaskService";
-import useGetInfoAxios from "../../hooks/useGetInfoAxios";
+import useFetch from "use-http";
 import UserContext from "../UserContext";
 
 const TaskPage = ({ taskId }) => {
-  const context = React.useContext(UserContext);
-  const { response: task, loading: isLoadingTask } = useGetInfoAxios(
-    async () => await getTaskWithRoundInfoByTaskId(taskId)
-  );
+  console.log("task id", taskId);
+  const context = useContext(UserContext);
+  const [task, setTask] = useState({});
+
+  const { get } = useFetch();
+
+  const loadTask = async () => {
+    const orderMetrics = await get(
+      `/task/get_order_metrics_by_task_id/${taskId}`
+    );
+    const orderScoringDatasets = await get(
+      `/task/get_order_scoring_datasets_by_task_id/${taskId}`
+    );
+    const task = await get(
+      `/task/get_task_with_round_info_by_task_id/${taskId}`
+    );
+    task.ordered_metrics = orderMetrics;
+    task.ordered_scoring_datasets = orderScoringDatasets;
+    setTask(task);
+  };
+
+  useEffect(() => {
+    loadTask();
+  }, [taskId]);
+
   const name_to_pwc_links = ["sentiment"];
   const admin_or_owner = true;
   const hasTrainFileUpload = true;
@@ -39,7 +59,9 @@ const TaskPage = ({ taskId }) => {
 
   return (
     <>
-      {task && (
+      {!task ? (
+        <Spinner animation="border" role="status" />
+      ) : (
         <OverlayProvider initiallyHide={true} delayMs="1700">
           <Container>
             <Row>

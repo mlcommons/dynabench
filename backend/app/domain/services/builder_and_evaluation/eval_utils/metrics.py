@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import sacrebleu
 import sentencepiece
-from sklearn.metrics import f1_score
+from sklearn.metrics import auc, balanced_accuracy_score, f1_score, roc_curve
 
 from app.domain.services.builder_and_evaluation.eval_utils.instance_property import (
     instance_property,
@@ -120,6 +120,61 @@ def get_accuracy(predictions: list, targets: list):
 
     acc = sum([equality(p, t) for p, t in zip(predictions, targets)]) / len(targets)
     return round(acc * 100, 2)
+
+
+def get_dataperf_auc(predictions, labels):
+    fpt, tpr, thresholds = roc_curve(labels, predictions)
+    return auc(fpt, tpr)
+
+
+def get_dataperf_auc_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "AUC",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
+def get_dataperf_balanced_accuracy(predictions, labels):
+    score = balanced_accuracy_score(labels, predictions)
+    return score
+
+
+def get_dataperf_balanced_accuracy_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Balanced Accuracy",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
+def get_chrf_pp(predictions: list, targets: list):
+    """Chrf++ metric.
+
+    Note: word_order=2 is important otherwise we only get chrf
+    """
+    chrf = sacrebleu.corpus_chrf(predictions, [targets], word_order=2)
+    return chrf.score
+
+
+def get_chrf_pp_meta(task=None):
+    return {"unit": "", "pretty_name": "ᴄʜʀF++", "utility_direction": 1, "offset": 0}
+
+
+def get_dataperf_fraction_of_fixes(required_fixes, total_fixes):
+    fraction_of_fixes = required_fixes / total_fixes
+    return fraction_of_fixes
+
+
+def get_dataperf_fraction_of_fixes_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Fraction of fixes",
+        "utility_direction": -1,
+        "offset": 0,
+    }
 
 
 def get_accuracy_meta(task=None):

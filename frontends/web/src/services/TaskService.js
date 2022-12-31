@@ -14,7 +14,7 @@ export const getActiveTasksWithRoundInfo = async () => {
 
 export const getTaskWithRoundInfoByTaskId = async (task_id) => {
   return await axios.get(
-    `${BASE_URL_2}/task/get_task_with_round_and_dataset_info_by_task_id/${task_id}`
+    `${BASE_URL_2}/task/get_task_with_round_info_by_task_id/${task_id}`
   );
 };
 
