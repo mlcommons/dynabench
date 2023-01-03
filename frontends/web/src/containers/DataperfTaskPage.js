@@ -26,7 +26,7 @@ const DataperfTaskPage = () => {
         <Container fluid>
           <Row>
             <Col lg={2} className="p-0 border">
-              <Nav defaultActiveKey="/" className="flex-column ">
+              <Nav defaultActiveKey="/" className="flex-sm-row">
                 <Nav.Link
                   onClick={() => setTaskId(null)}
                   className="active gray-color p-3 px-lg-5 flores-nav-item nav-link active"

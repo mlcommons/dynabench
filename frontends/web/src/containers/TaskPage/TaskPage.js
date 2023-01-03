@@ -30,7 +30,7 @@ const TaskPage = ({ taskId }) => {
   const context = useContext(UserContext);
   const [task, setTask] = useState({});
 
-  const { get } = useFetch();
+  const { get, loading } = useFetch();
 
   const loadTask = async () => {
     const orderMetrics = await get(
@@ -56,11 +56,12 @@ const TaskPage = ({ taskId }) => {
   const admin_or_owner = true;
   const hasTrainFileUpload = true;
   const trendScore = [];
-
   return (
     <>
-      {!task ? (
-        <Spinner animation="border" role="status" />
+      {loading ? (
+        <Row className="justify-content-center">
+          <Spinner animation="border" />{" "}
+        </Row>
       ) : (
         <OverlayProvider initiallyHide={true} delayMs="1700">
           <Container>
