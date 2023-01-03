@@ -15,12 +15,12 @@ router = APIRouter()
 
 
 @router.post("/get_model_in_the_loop", response_model=ModelInTheLoopResponse)
-def get_model_in_the_loop(model: ModelInTheLoopRequest):
+async def get_model_in_the_loop(model: ModelInTheLoopRequest):
     return ModelService().get_model_in_the_loop(model.task_id)
 
 
 @router.post("/upload_model_to_s3_and_evaluate")
-def upload_model_to_s3_and_evaluate(
+async def upload_model_to_s3_and_evaluate(
     background_tasks: BackgroundTasks,
     model: UploadModelToS3AndEvaluateRequest = Depends(
         UploadModelToS3AndEvaluateRequest
