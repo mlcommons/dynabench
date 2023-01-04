@@ -96,7 +96,8 @@ class EvaluationService:
             dataset_samples = {}
             dataset_samples["dataset_samples"] = data[i : batch_size + i]
             dataset_samples = [
-                {col: row[col] for col in schema} for row in dataset_samples
+                {col: row[col] for col in schema}
+                for row in dataset_samples["dataset_samples"]
             ]
             responses = requests.post(
                 f"http://{ip}/model/batch_evaluation",
