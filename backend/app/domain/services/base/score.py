@@ -4,6 +4,7 @@
 
 import pandas as pd
 
+from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
 
@@ -12,8 +13,55 @@ class ScoreService:
     def __init__(self):
         self.score_repository = ScoreRepository()
         self.task_repository = TaskRepository()
+        self.dataset_repository = DatasetRepository()
+
+    def get_scores_by_dataset_and_model_id(self, dataset_id: int, model_id: int):
+        scores_by_dataset_and_model_id = (
+            self.score_repository.get_scores_by_dataset_and_model_id(
+                dataset_id, model_id
+            )[0]
+        )
+        final_scores_by_dataset_and_model_id = {}
+        dataset_id = scores_by_dataset_and_model_id.__dict__["did"]
+        dataset_name = self.dataset_repository.get_dataset_name_by_id(dataset_id)[0]
+        final_scores_by_dataset_and_model_id["id"] = dataset_id
+        final_scores_by_dataset_and_model_id["name"] = dataset_name
+        return final_scores_by_dataset_and_model_id
+
+    def get_scores_by_datasets_and_model_id(self, dataset_ids: list, model_id: int):
+        scores_by_datasets_and_model_id = []
+        for dataset_id in dataset_ids:
+            scores_by_datasets_and_model_id.append(
+                self.score_repository.get_scores_by_dataset_and_model_id(
+                    dataset_id, model_id
+                )[0]
+            )
+        return scores_by_datasets_and_model_id
+
+    def get_averaged_scores(self, scores: list):
+        scores = pd.DataFrame([score.__dict__ for score in scores])
+        scores = scores.groupby("did").mean()
+        return scores
+
+    def get_averaded_variance_scores(self, scores: list):
+        scores = pd.DataFrame([score.__dict__ for score in scores])
+        scores = scores.groupby("did").var()
+        return scores
 
     def get_dynaboard_score_by_task_id(
+        self,
+        task_id: int,
+        perf_metric_field_name: str,
+        order_metric_with_weight: list,
+        order_datasets_with_weight: list,
+        sort_by: str = "dynascore",
+        sort: str = "desc",
+        limit: int = 10,
+        offset: int = 0,
+    ):
+        return
+
+    def get_dynaboard_score_by_task_id_1(
         self,
         task_id: int,
         perf_metric_field_name: str,
@@ -36,6 +84,7 @@ class ScoreService:
                 task_id, ordered_datasets_id, unpublished_models_in_leaderboard
             )
         )
+
         scores, users, datasets, models = zip(*scores_users_dataset_and_model_info)
         scores, users, datasets, models = (
             set(scores),
@@ -68,6 +117,7 @@ class ScoreService:
                 filtered_models.append(model)
 
         # TODO: more refactoring
+        return filtered_scores
         model_id_and_dataset_id_to_scores = {}
         for filter_score in filtered_scores:
             model_id_and_dataset_id_to_scores[

@@ -41,3 +41,35 @@ class ModelRepository(AbstractRepository):
             .all()
         )
         return models
+
+    def create_new_model(
+        self,
+        task_id: int,
+        user_id: int,
+        model_name: str,
+        shortname: str,
+        longdesc: str,
+        desc: str,
+        languages: str,
+        license: str,
+        params: str,
+        deployment_status: str,
+        secret: str,
+    ) -> dict:
+        model = self.model(
+            tid=task_id,
+            uid=user_id,
+            name=model_name,
+            shortname=shortname,
+            longdesc=longdesc,
+            desc=desc,
+            languages=languages,
+            license=license,
+            params=params,
+            deployment_status=deployment_status,
+            secret=secret,
+        )
+        self.session.add(model)
+        self.session.flush()
+        self.session.commit()
+        return model.__dict__

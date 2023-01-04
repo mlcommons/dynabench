@@ -9,3 +9,4 @@ class InitializeModelEvaluationRequest(BaseModel):
     task_code: str
     s3_url: str
     model_id: int
+    user_id: int

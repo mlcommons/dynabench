@@ -19,12 +19,12 @@ import time
 import boto3
 import jsonlines
 import numpy as np
-import pandas as pd
 import requests
 import yaml
 from cloudwatch import cloudwatch
 
-from app.domain.services.builder_and_evaluation.builder import Builder
+from app.domain.helpers.email import EmailHelper
+from app.domain.services.builder_and_evaluation.builder import BuilderService
 from app.domain.services.builder_and_evaluation.eval_utils.evaluator import Evaluator
 from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
     InputFormatter,
@@ -34,9 +34,10 @@ from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
+from app.infrastructure.repositories.user import UserRepository
 
 
-class Evaluation:
+class EvaluationService:
     def __init__(self):
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -47,12 +48,14 @@ class Evaluation:
         self.sqs = self.session.client("sqs")
         self.cloud_watch = self.session.client("cloudwatch")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
-        self.builder = Builder()
+        self.builder = BuilderService()
         self.task_repository = TaskRepository()
         self.score_repository = ScoreRepository()
         self.dataset_repository = DatasetRepository()
         self.round_repository = RoundRepository()
         self.model_repository = ModelRepository()
+        self.user_repository = UserRepository()
+        self.email_helper = EmailHelper()
         self.logger = logging.getLogger("logger")
         self.logger.setLevel(logging.INFO)
 
@@ -92,11 +95,13 @@ class Evaluation:
                 print(i)
             dataset_samples = {}
             dataset_samples["dataset_samples"] = data[i : batch_size + i]
-            dataset_samples_df = pd.DataFrame(dataset_samples["dataset_samples"])
-            dataset_samples_df = dataset_samples_df[schema]
+            dataset_samples = [
+                {col: row[col] for col in schema}
+                for row in dataset_samples["dataset_samples"]
+            ]
             responses = requests.post(
                 f"http://{ip}/model/batch_evaluation",
-                json=dataset_samples_df.to_dict(orient="records"),
+                json=dataset_samples,
             )
             responses = json.loads(responses.text)
             for i, response in enumerate(responses):
@@ -278,7 +283,9 @@ class Evaluation:
     def get_throughput(self, num_samples: int, seconds_time_prediction: float):
         return round(num_samples / seconds_time_prediction, 2)
 
-    def evaluation(self, task: str, model_s3_zip: str, model_id: int) -> dict:
+    def evaluation(
+        self, task: str, model_s3_zip: str, model_id: int, user_id: int
+    ) -> dict:
         logs_name = "logs-{}".format(
             (model_s3_zip.split("/")[-1].split(".")[0]).split("-")[0]
         )
@@ -287,6 +294,7 @@ class Evaluation:
             log_stream=logs_name,
             access_id=os.getenv("AWS_ACCESS_KEY_ID"),
             access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region=os.getenv("AWS_REGION"),
         )
         formatter = logging.Formatter("%(asctime)s : %(levelname)s - %(message)s")
         handler.setFormatter(formatter)
@@ -329,6 +337,12 @@ class Evaluation:
         ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
             model_s3_zip, self.logger
         )
+        ip, model_name, folder_name, arn_service = (
+            "54.67.32.170",
+            "deberta-base",
+            "1675-deberta-base",
+            "arn:aws:iam::877755283837:service/deberta-base",
+        )
         self.logger.info(f"Create endpoint for evaluation: {ip}")
         for current_round in rounds:
             round_datasets = [
@@ -361,6 +375,14 @@ class Evaluation:
         self.model_repository.update_light_model(model_id, url_light_model)
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        self.email_helper.send(
+            contact=user_email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": model_name, "model_id": model_id},
+            subject=f"Model {model_name} training succeeded.",
+        )
         return new_scores
 
     def save_predictions_dataset(
@@ -420,17 +442,12 @@ class Evaluation:
                 formatted_dict[grouped_key] = input_formatter.group_predictions(
                     formatted_dict[formatted_key]
                 )
-        evaluator = Evaluator(task_configuration)
-        import json
 
-        with open("./app/models/data.json", "w") as f:
-            json.dump(formatted_dict, f)
+        evaluator = Evaluator(task_configuration)
         main_metric = evaluator.evaluate(
             formatted_dict["formatted_base_predictions"],
             formatted_dict["formatted_base_dataset"],
         )
-        print(main_metric)
-        return
         delta_metrics = {}
         if perturb_exists:
             delta_metrics = evaluator.evaluate_delta_metrics(
@@ -510,8 +527,10 @@ class Evaluation:
         self.score_repository.add(new_score)
         return new_score
 
-    def initialize_model_evaluation(self, task_code: str, s3_url: str, model_id: int):
-        return self.evaluation(task_code, s3_url, model_id)
+    def initialize_model_evaluation(
+        self, task_code: str, s3_url: str, model_id: int, user_id: int
+    ):
+        return self.evaluation(task_code, s3_url, model_id, user_id)
 
     @staticmethod
     def _load_dataset(path: str):

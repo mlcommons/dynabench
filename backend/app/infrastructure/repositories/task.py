@@ -77,3 +77,10 @@ class TaskRepository(AbstractRepository):
             .filter(self.model.challenge_type == 2)
             .all()
         )
+
+    def get_task_is_decen_task(self, task_id: int):
+        return (
+            self.session.query(self.model.is_decen_task)
+            .filter(self.model.id == task_id)
+            .first()
+        )

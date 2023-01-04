@@ -141,16 +141,20 @@ class TaskService:
             )
         ]
         perf_metric_field_name = self.get_perf_metric_field_name_by_task_id(task_id)
-        return self.score_services.get_dynaboard_score_by_task_id(
-            task_id,
-            perf_metric_field_name,
-            order_metric_with_weight,
-            order_scoring_datasets_with_weight,
-            sort_by,
-            sort_direction,
-            offset,
-            limit,
-        )
+        print(order_metric_with_weight)
+        print(perf_metric_field_name)
+        print(order_scoring_datasets_with_weight)
+        return self.score_services.get_scores_by_dataset_and_model_id(241, 58)
+        # return self.score_services.get_dynaboard_score_by_task_id(
+        #     task_id,
+        #     perf_metric_field_name,
+        #     order_metric_with_weight,
+        #     order_scoring_datasets_with_weight,
+        #     sort_by,
+        #     sort_direction,
+        #     offset,
+        #     limit,
+        # )
 
     def get_task_trends_score(self, task_id: int, dataset_id: int):
         task_info = self.get_task_with_round_and_dataset_info(task_id)

@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class Builder:
+class BuilderService:
     def __init__(self):
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -223,10 +223,6 @@ class Builder:
         logger.info(f"Create repo: {repo}")
         tag = "latest"
         self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)
-        zip_name = model.split("/")[-1]
-        folder_name = model.split("/")[-1].split(".")[0]
-        model_name = "-".join(zip_name.split(".")[0].replace(" ", "").split("-")[1:])
-        repo = "877755283837.dkr.ecr.us-west-1.amazonaws.com/deberta-base"
         logger.info("Push image to ECR")
         ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name, folder_name, arn_service
