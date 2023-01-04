@@ -293,6 +293,7 @@ class EvaluationService:
             log_stream=logs_name,
             access_id=os.getenv("AWS_ACCESS_KEY_ID"),
             access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.getenv("AWS_REGION"),
         )
         formatter = logging.Formatter("%(asctime)s : %(levelname)s - %(message)s")
         handler.setFormatter(formatter)
