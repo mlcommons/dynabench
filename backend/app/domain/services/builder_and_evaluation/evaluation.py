@@ -121,8 +121,8 @@ class EvaluationService:
         model: str,
     ):
         folder_name = model.split("/")[-1].split(".")[0]
-        os.mkdir(f"./app/models/{folder_name}")
-        os.mkdir(f"./app/models/{folder_name}/datasets/")
+        # os.mkdir(f"./app/models/{folder_name}")
+        # os.mkdir(f"./app/models/{folder_name}/datasets/")
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
             final_dataset = {}
@@ -333,8 +333,14 @@ class EvaluationService:
             )
         )
         new_scores = []
-        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
-            model_s3_zip, self.logger
+        # ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
+        #     model_s3_zip, self.logger
+        # )
+        ip, model_name, folder_name, arn_service = (
+            "54.67.32.170",
+            "deberta-base",
+            "1675-deberta-base",
+            "arn:aws:iam::877755283837:service/deberta-base",
         )
         self.logger.info(f"Create endpoint for evaluation: {ip}")
         for current_round in rounds:
