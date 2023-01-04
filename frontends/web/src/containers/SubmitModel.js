@@ -15,9 +15,72 @@ import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import CreateModel from "../components/Forms/CreateModel";
 import UserContext from "../containers/UserContext";
-import { uploadModelToS3AndEvaluate } from "../services/ModelServices";
 import Swal from "sweetalert2";
+import axios from "axios";
 import "./SubmitModel.css";
+
+const useUploadFile = () => {
+  const [progress, setProgress] = useState(0);
+
+  const sendModelData = (formData) => {
+    return axios
+      .request({
+        method: "post",
+        url: `${process.env.REACT_APP_API_HOST_2}/model/upload_model_to_s3_and_evaluate`,
+        data: formData,
+        onUploadProgress: (p) => {
+          setProgress(p.loaded / p.total);
+        },
+      })
+      .then(() => {
+        setProgress(1);
+        return true;
+      })
+      .catch(() => {
+        setProgress(0);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+      });
+  };
+
+  return { progress, sendModelData };
+};
+
+const ProgressBar = ({ progress, text }) => {
+  return (
+    <>
+      <div
+        className="center-loading"
+        style={{
+          width: "50%",
+        }}
+      >
+        <h3> Please do not close this window</h3>
+        <p>
+          The upload depends on the size of the model and your internet
+          connection, please be patient 😊
+        </p>
+        <div className="progress">
+          <div
+            className="progress-bar progress-bar-striped progress-bar-animated"
+            role="progressbar"
+            style={{ width: `${progress * 100}%` }}
+          ></div>
+        </div>
+        <h6>
+          {progress > 0 && progress < 0.5
+            ? text
+            : progress >= 0.5
+            ? "We are processing your model"
+            : ""}
+        </h6>
+      </div>
+    </>
+  );
+};
 
 const SubmitModel = (props) => {
   const context = useContext(UserContext);
@@ -32,6 +95,8 @@ const SubmitModel = (props) => {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const { progress, sendModelData } = useUploadFile();
 
   useEffect(() => {
     const fetchTaskData = async () => {
@@ -63,6 +128,10 @@ const SubmitModel = (props) => {
       if (file.type !== "application/zip") {
         return alert("Please upload a zip file");
       }
+      setLoading({
+        loading: false,
+        text: "Your model is being uploaded.",
+      });
       const formData = new FormData();
       formData.append("model_name", modelData.modelName);
       formData.append("description", modelData.desc);
@@ -73,7 +142,7 @@ const SubmitModel = (props) => {
       formData.append("user_id", user.id);
       formData.append("task_code", props.match.params.taskCode);
       formData.append("file_to_upload", file);
-      uploadModelToS3AndEvaluate(formData).then(() => {
+      sendModelData(formData).then(() => {
         setLoading({ loading: true, text: "Done" });
         Swal.fire({
           title: "Good job!",
@@ -242,7 +311,7 @@ const SubmitModel = (props) => {
           </Col>
         </Container>
       ) : (
-        <Spinner animation="border" />
+        <ProgressBar progress={progress} text={loading.text} />
       )}
     </>
   );
