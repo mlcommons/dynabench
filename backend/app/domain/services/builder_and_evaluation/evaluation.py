@@ -334,9 +334,9 @@ class EvaluationService:
             )
         )
         new_scores = []
-        # ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
-        #     model_s3_zip, self.logger
-        # )
+        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
+            model_s3_zip, self.logger
+        )
         ip, model_name, folder_name, arn_service = (
             "54.67.32.170",
             "deberta-base",
