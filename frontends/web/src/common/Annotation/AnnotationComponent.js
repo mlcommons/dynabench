@@ -10,21 +10,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import {
-  FormControl,
-  DropdownButton,
-  Dropdown,
-  InputGroup,
   Button,
+  Dropdown,
+  DropdownButton,
+  FormControl,
+  InputGroup,
 } from "react-bootstrap";
 import Select from "react-select";
-import { PieRechart } from "../../components/Charts/Rechart.js";
-import { useState } from "react";
 import { TokenAnnotator } from "react-text-annotate";
-import AtomicImage from "./AtomicImage";
-import "./AnnotationComponent.css";
+import { PieRechart } from "../../components/Charts/Rechart.js";
 import Player from "../../components/Player/Player.js";
+import "./AnnotationComponent.css";
+import AtomicImage from "./AtomicImage";
 
 const Multilabel = ({
   displayName,
@@ -267,7 +266,7 @@ const ContextStringSelection = ({
           <TokenAnnotator
             className="p-3 mb-1 light-gray-bg token-annotator"
             tokens={data[configObj.reference_name].split(
-              /\b|(?<=[\s\(\)])|(?=[\s\(\)])/
+              /\b|(?<=[\s(\\)])|(?=[\s()])/
             )}
             value={selectionInfo}
             onChange={(value) => {

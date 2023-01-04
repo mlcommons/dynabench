@@ -122,8 +122,8 @@ class EvaluationService:
         model: str,
     ):
         folder_name = model.split("/")[-1].split(".")[0]
-        # os.mkdir(f"./app/models/{folder_name}")
-        # os.mkdir(f"./app/models/{folder_name}/datasets/")
+        os.mkdir(f"./app/models/{folder_name}")
+        os.mkdir(f"./app/models/{folder_name}/datasets/")
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
             final_dataset = {}
