@@ -118,13 +118,10 @@ class BuilderService:
         path = f"{folder_name}"
         absolute_path = os.getcwd()
         path = absolute_path + path.strip(".")
-        self.docker_client.images.build(
-            path=path,
-            tag=tag,
-            dockerfile=f"{path}/{docker_name}",
-            rm=True,
-            forcerm=True,
+        image, _ = self.docker_client.images.build(
+            path=path, tag=tag, dockerfile=f"{path}/{docker_name}"
         )
+        image.tag(repository=repository_name, tag=tag)
         self.docker_client.images.push(
             repository=repository_name,
             tag=tag,

@@ -44,7 +44,7 @@ class ModelService:
         file_to_upload: UploadFile,
     ) -> str:
         file_name = file_name.lower()
-        task_id = self.task_repository.get_task_id_by_task_code(task_code)
+        task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
         user_email = self.user_repository.get_user_email(user_id)[0]
         task_is_decen_task = self.task_repository.get_task_is_decen_task(task_id)[0]
         model = self.model_repository.create_new_model(
