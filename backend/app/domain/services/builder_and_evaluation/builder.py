@@ -118,10 +118,13 @@ class BuilderService:
         path = f"{folder_name}"
         absolute_path = os.getcwd()
         path = absolute_path + path.strip(".")
-        image, _ = self.docker_client.images.build(
-            path=path, tag=tag, dockerfile=f"{path}/{docker_name}"
+        self.docker_client.images.build(
+            path=path,
+            tag=tag,
+            dockerfile=f"{path}/{docker_name}",
+            rm=True,
+            forcerm=True,
         )
-        image.tag(repository=repository_name, tag=tag)
         self.docker_client.images.push(
             repository=repository_name,
             tag=tag,
@@ -130,6 +133,8 @@ class BuilderService:
                 "password": ecr_config["ecr_password"],
             },
         )
+        self.docker_client.containers.prune()
+        self.docker_client.images.prune()
         return f"{repository_name}:{tag}"
 
     def create_task_definition(self, name_task: str, repo: str) -> str:

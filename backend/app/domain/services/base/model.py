@@ -70,12 +70,13 @@ class ModelService:
                 ContentType=file_to_upload.content_type,
             )
             decentralize_host = os.getenv("DECENTRALIZED_HOST")
-            url = f"{decentralize_host}/evaluation/initialize_model_evaluation"
+            endpoint = "/builder_evaluation/evaluation/initialize_model_evaluation"
+            url = f"{decentralize_host}{endpoint}"
             requests.post(
                 url,
                 json={
                     "task_code": task_code,
-                    "model_path": model_path,
+                    "s3_url": model_path,
                     "model_id": model["id"],
                     "user_id": user_id,
                 },
@@ -83,7 +84,7 @@ class ModelService:
             self.email_helper.send(
                 contact=user_email,
                 cc_contact="dynabench-site@mlcommons.org",
-                template_name="model_train_successful.txt",
+                template_name="model_upload_successful.txt",
                 msg_dict={"name": model_name},
                 subject=f"Model {model_name} upload succeeded.",
             )
@@ -96,12 +97,13 @@ class ModelService:
                 ContentType=file_to_upload.content_type,
             )
             centralize_host = os.getenv("CENTRALIZED_HOST")
-            url = f"{centralize_host}/evaluation/initialize_model_evaluation"
+            endpoint = "/builder_evaluation/evaluation/initialize_model_evaluation"
+            url = f"{centralize_host}{endpoint}"
             requests.post(
                 url,
                 json={
                     "task_code": task_code,
-                    "model_path": model_path,
+                    "s3_url": model_path,
                     "model_id": model["id"],
                     "user_id": user_id,
                 },
@@ -109,7 +111,7 @@ class ModelService:
             self.email_helper.send(
                 contact=user_email,
                 cc_contact="dynabench-site@mlcommons.org",
-                template_name="model_train_successful.txt",
+                template_name="model_upload_successful.txt",
                 msg_dict={"name": model_name},
                 subject=f"Model {model_name} upload succeeded.",
             )
