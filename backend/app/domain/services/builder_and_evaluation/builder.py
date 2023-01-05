@@ -273,6 +273,12 @@ class BuilderService:
                 "AllowOrigins": [
                     "*",
                 ],
+                "ExposeHeaders": [
+                    "*",
+                ],
+                "AllowHeaders": [
+                    "*",
+                ],
             },
         )["FunctionUrl"]
 
