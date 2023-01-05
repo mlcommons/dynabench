@@ -30,6 +30,8 @@ class ModelRepository(AbstractRepository):
         light_model = f"{light_model}/model/single_evaluation"
         instance.light_model = light_model
         instance.deployment_status = "deployed"
+        instance.is_publish = 0
+        instance.is_in_the_loop = 0
         self.session.flush()
         self.session.commit()
         return
