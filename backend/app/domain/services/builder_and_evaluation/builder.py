@@ -101,6 +101,13 @@ class BuilderService:
         )
         return response["repository"]["repositoryUri"]
 
+    def clean_docker_images(self):
+        self.docker_client.images.prune()
+        self.docker_client.containers.prune()
+        images = self.docker_client.images.list()
+        for image in images:
+            self.docker_client.images.remove(image.id, force=True)
+
     def push_image_to_ECR(
         self,
         repository_name: str,
@@ -130,8 +137,7 @@ class BuilderService:
                 "password": ecr_config["ecr_password"],
             },
         )
-        self.docker_client.containers.prune()
-        self.docker_client.images.prune()
+        self.clean_docker_images()
         return f"{repository_name}:{tag}"
 
     def create_task_definition(self, name_task: str, repo: str) -> str:
