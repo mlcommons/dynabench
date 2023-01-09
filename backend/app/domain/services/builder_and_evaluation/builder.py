@@ -102,8 +102,8 @@ class BuilderService:
         return response["repository"]["repositoryUri"]
 
     def clean_docker_images(self):
-        self.docker_client.images.prune()
         self.docker_client.containers.prune()
+        self.docker_client.images.prune()
         images = self.docker_client.images.list()
         for image in images:
             self.docker_client.images.remove(image.id, force=True)

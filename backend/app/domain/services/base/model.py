@@ -2,14 +2,21 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import json
 import os
 import secrets
 
 import boto3
 import requests
 from fastapi import UploadFile
+from pydantic import Json
 
 from app.domain.helpers.email import EmailHelper
+from app.domain.helpers.transform_data_objects import (
+    load_json_lines,
+    transform_list_to_csv,
+)
+from app.domain.services.base.example import ExampleService
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.user import UserRepository
@@ -20,6 +27,7 @@ class ModelService:
         self.model_repository = ModelRepository()
         self.task_repository = TaskRepository()
         self.user_repository = UserRepository()
+        self.example_service = ExampleService()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
@@ -116,3 +124,45 @@ class ModelService:
                 subject=f"Model {model_name} upload succeeded.",
             )
         return "Model evaluate successfully"
+
+    def single_model_prediction(self, model_url: str, sample: dict) -> str:
+        response = requests.post(model_url, json=sample)
+        return response.json()
+
+    def evaluate_model_in_the_loop(self, prediction: str, ground_truth: str) -> int:
+        return int(prediction != ground_truth)
+
+    def batch_prediction(
+        self,
+        model_url: str,
+        context_id: int,
+        user_id: int,
+        round_id: int,
+        task_id: int,
+        metadata: Json,
+        tag: str,
+        batch_samples: UploadFile,
+    ) -> dict:
+        batch_samples_data = load_json_lines(batch_samples.file)
+        predictions = []
+        for example in batch_samples_data:
+            prediction = self.single_model_prediction(model_url, example)
+            model_wrong = self.evaluate_model_in_the_loop(
+                prediction["label"], example["label"]
+            )
+            prediction["model_wrong"] = model_wrong
+            self.example_service.create_example_and_increment_counters(
+                context_id,
+                user_id,
+                model_wrong,
+                model_url,
+                json.dumps(example),
+                json.dumps(prediction),
+                metadata,
+                tag,
+                round_id,
+                task_id,
+            )
+            predictions.append(prediction)
+        csv_location = transform_list_to_csv(predictions, batch_samples.filename)
+        return csv_location
