@@ -367,6 +367,7 @@ class EvaluationService:
         self.logger.info("Create light model")
         url_light_model = self.builder.create_light_model(model_name, folder_name)
         self.model_repository.update_light_model(model_id, url_light_model)
+        self.model_repository.update_model_status(model_id)
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
         user_email = self.user_repository.get_user_email(user_id)[0]
