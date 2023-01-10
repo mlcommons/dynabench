@@ -3,5 +3,6 @@ logs/
 *.DS_Store
 __pycache__/
 env/
+envs/
 .env
 backend/app/models
