@@ -9,7 +9,7 @@ import axios from "axios";
 const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
 
 export const createBatchSamples = (formData, modelUrl) => {
-  return axios.post(`${BASE_URL_2}/model_centric/batch_prediction`, formData, {
+  return axios.post(`${BASE_URL_2}/model/batch_prediction`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

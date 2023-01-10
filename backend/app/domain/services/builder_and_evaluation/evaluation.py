@@ -337,12 +337,6 @@ class EvaluationService:
         ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
             model_s3_zip, self.logger
         )
-        ip, model_name, folder_name, arn_service = (
-            "54.67.32.170",
-            "deberta-base",
-            "1675-deberta-base",
-            "arn:aws:iam::877755283837:service/deberta-base",
-        )
         self.logger.info(f"Create endpoint for evaluation: {ip}")
         for current_round in rounds:
             round_datasets = [
@@ -373,6 +367,7 @@ class EvaluationService:
         self.logger.info("Create light model")
         url_light_model = self.builder.create_light_model(model_name, folder_name)
         self.model_repository.update_light_model(model_id, url_light_model)
+        self.model_repository.update_model_status(model_id)
         self.builder.delete_ecs_service(arn_service)
         shutil.rmtree(f"./app/models/{folder_name}")
         user_email = self.user_repository.get_user_email(user_id)[0]

@@ -28,3 +28,14 @@ class UploadModelToS3AndEvaluateRequest(BaseModel):
     user_id: int
     task_code: str
     file_to_upload: UploadFile = File(...)
+
+
+@form_body
+class BatchCreateExampleRequest(BaseModel):
+    model_url: str
+    context_id: int
+    user_id: int
+    round_id: int
+    task_id: int
+    tag: Optional[str]
+    file: UploadFile = File(...)

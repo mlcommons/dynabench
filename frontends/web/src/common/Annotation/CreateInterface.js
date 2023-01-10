@@ -240,8 +240,7 @@ class CreateInterface extends React.Component {
             modelWrong: modelWrong,
             input: this.getInputData(),
             output: output,
-            modelInTheLoop:
-              this.state.randomTargetModel || this.state.selectedModel,
+            modelInTheLoop: this.state.modelInTheLoop,
             retracted: false,
           },
         ],
@@ -358,7 +357,9 @@ class CreateInterface extends React.Component {
                     fetchPredictionError: false,
                   });
                 }
+                console.log(modelResponseResult);
                 const output = deepCopyJSON(modelResponseResult);
+                console.log(output);
                 const target = {};
                 for (const taskConfigObj of this.state.taskConfig.output) {
                   if (this.state.data.hasOwnProperty(taskConfigObj.name)) {
@@ -490,6 +491,7 @@ class CreateInterface extends React.Component {
   }
 
   render() {
+    console.log(this.state);
     const responseContent = this.state.content
       .map((item, index) => (
         <ResponseInfo
@@ -527,7 +529,7 @@ class CreateInterface extends React.Component {
           taskConfigObj.type === "multiclass" && taskConfigObj.as_goal_message
       )
       .map((taskConfigObj) => (
-        <div key={taskConfigObj.name} className="mb-1 mt-1">
+        <div key={taskConfigObj.name} className="mt-1 mb-1">
           <AnnotationComponent
             displayName={taskConfigObj.display_name}
             className="user-input-primary"
@@ -565,7 +567,7 @@ class CreateInterface extends React.Component {
         (taskConfigObj) => !selectableContexts.includes(taskConfigObj.name)
       )
       .map((taskConfigObj) => (
-        <div key={taskConfigObj.name} className="mb-1 mt-1">
+        <div key={taskConfigObj.name} className="mt-1 mb-1">
           <AnnotationComponent
             displayName={taskConfigObj.display_name}
             className={"name-display-primary"}
@@ -595,7 +597,7 @@ class CreateInterface extends React.Component {
           )
       )
       .map((taskConfigObj) => (
-        <div key={taskConfigObj.name} className="mb-1 mt-1">
+        <div key={taskConfigObj.name} className="mt-1 mb-1">
           <AnnotationComponent
             displayName={taskConfigObj.display_name}
             className="user-input-primary"
@@ -621,7 +623,7 @@ class CreateInterface extends React.Component {
           show={!!this.state.showBadges}
           onHide={() => this.setState({ showBadges: "" })}
         ></BadgeOverlay>
-        <Container className="mb-5 pb-5">
+        <Container className="pb-5 mb-5">
           <Col className="m-auto" lg={12}>
             <div style={{ float: "right" }}>
               <ButtonGroup>
@@ -707,10 +709,10 @@ class CreateInterface extends React.Component {
             <div className={"mb-3"}>
               {(this.state.taskConfig?.goal_message ||
                 (goalMessageInterface && goalMessageInterface.length) > 0) && (
-                <div className="mb-1 p-3 rounded light-gray-bg">
+                <div className="p-3 mb-1 rounded light-gray-bg">
                   {this.state.taskConfig.goal_message && (
                     <InputGroup className="align-items-center">
-                      <i className="fas fa-flag-checkered mr-1"></i>
+                      <i className="mr-1 fas fa-flag-checkered"></i>
                       Your goal: {this.state.taskConfig.goal_message}
                     </InputGroup>
                   )}
@@ -737,12 +739,12 @@ class CreateInterface extends React.Component {
               ) : (
                 <>
                   {contextInterface && contextInterface.length > 0 && (
-                    <div className="mb-1 p-3 rounded light-gray-bg">
+                    <div className="p-3 mb-1 rounded light-gray-bg">
                       {contextInterface}
                     </div>
                   )}
                   <Card.Body
-                    className="overflow-auto pt-2"
+                    className="pt-2 overflow-auto"
                     style={{
                       height: tooTallForResponseInfoPlaceholder ? "auto" : 385,
                     }}
@@ -751,7 +753,7 @@ class CreateInterface extends React.Component {
                     {responseContent}
                     <div className="bottom-anchor" ref={this.bottomAnchorRef} />
                   </Card.Body>
-                  <div className="mb-1 p-3">{belowModelResponseInterface}</div>
+                  <div className="p-3 mb-1">{belowModelResponseInterface}</div>
                   <Form>
                     <Row className="p-3">
                       <Col xs={6}>
@@ -792,7 +794,7 @@ class CreateInterface extends React.Component {
                           >
                             <Button
                               type="submit"
-                              className="font-weight-bold blue-bg border-0 task-action-btn"
+                              className="border-0 font-weight-bold blue-bg task-action-btn"
                               onClick={(e) => {
                                 e.preventDefault();
                                 this.setState({ showCreateBatchModal: true });
@@ -836,7 +838,7 @@ class CreateInterface extends React.Component {
                                   tooltip="Don’t like this context? Try another one."
                                 >
                                   <Button
-                                    className="font-weight-bold blue-color light-gray-bg border-0 task-action-btn"
+                                    className="border-0 font-weight-bold blue-color light-gray-bg task-action-btn"
                                     onClick={this.getNewContext}
                                     disabled={this.state.refreshDisabled}
                                   >
@@ -851,7 +853,7 @@ class CreateInterface extends React.Component {
                           >
                             <Button
                               type="submit"
-                              className="font-weight-bold blue-bg border-0 task-action-btn"
+                              className="border-0 font-weight-bold blue-bg task-action-btn"
                               onClick={this.handleResponse}
                               disabled={this.state.submitDisabled}
                             >
