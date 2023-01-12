@@ -263,7 +263,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         dataset_id = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
-        metric = task_config["perf_metric"]["type"]
+        metric =task_config.get('perf_metric').get('type')
 
         final_score = {
             metric: new_score,
@@ -400,54 +400,63 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
     for name, upload in train_files.items():
 
-        current_upload = json.loads(upload.file.read().decode("utf-8"))
-        current_upload = current_upload[list(current_upload.keys())[0]]
-        print("This is the name", name)
+        if upload.content_type == "text/plain":
+            with tempfile.NamedTemporaryFile() as tf:
+                upload.save(tf, overwrite = True)
+                tf.seek(0)
+                string = (tf.read()).decode('utf-8')
+                sub =  [int(s) for s in string.split(',')]
+                payload = {"submission": {str(name[-1]): sub}}
+                light_model_endpoint = task.lambda_model
+                r = requests.post(light_model_endpoint, json=payload)
+                score = r.json()
+        else:
+            current_upload = json.loads(upload.file.read().decode("utf-8"))
+            current_upload = current_upload[list(current_upload.keys())[0]]
 
-        id_count = 0
-        for id, label in current_upload.items():
-            id_count += 1
+            id_count = 0
+            for id, label in current_upload.items():
+                id_count += 1
 
-        print("This is the id_count", id_count)
-        if id_count > 1000:
-            Email().send(
-                contact=user.email,
-                cc_contact="dynabench-site@mlcommons.org",
-                template_name="model_train_failed.txt",
-                msg_dict={"name": model_name},
-                subject=f"""Model {model_name} training failed. You surpassed
-                the maximum amount of samples.""",
-            )
-            bottle.abort(400, "Invalid train file")
-        print("Preparing ", current_upload)
-        request_packet = {
-            "id_json": current_upload,
-            "bucket_name": "vision-dataperf",
-            "key": f"{name}.parquet",
-        }
-        light_model_endpoint = task.lambda_model
+            if id_count > 1000:
+                Email().send(
+                    contact=user.email,
+                    cc_contact="dynabench-site@mlcommons.org",
+                    template_name="model_train_failed.txt",
+                    msg_dict={"name": model_name},
+                    subject=f"""Model {model_name} training failed. You surpassed
+                    the maximum amount of samples.""",
+                )
+                bottle.abort(400, "Invalid train file")
+            request_packet = {
+                "id_json": current_upload,
+                "bucket_name": "vision-dataperf",
+                "key": f"{name}.parquet",
+            }
+            light_model_endpoint = task.lambda_model
 
-        r = requests.post(light_model_endpoint, json=request_packet)
+            r = requests.post(light_model_endpoint, json=request_packet)
 
-        predictions = r.json()["predictions"]
+            predictions = r.json()["predictions"]
 
-        test_y = get_test_dataframe(task.task_code, f"{name}.parquet")
+            test_y = get_test_dataframe(task.task_code, f"{name}.parquet")
 
-        f1_score = np.round(sklearn.metrics.f1_score(test_y, predictions) * 100, 1)
+            score = np.round(sklearn.metrics.f1_score(test_y, predictions) * 100, 1)
 
         did = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
+        metric = task_config.get('perf_metric').get('type')
         new_score = {
-            "dataperf_f1": f1_score,
-            "perf": f1_score,
+            metric: score,
+            "perf": score,
             "perf_std": 0.0,
             "perf_by_tag": [
                 {
                     "tag": str(name.lstrip("test-")),
-                    "pretty_perf": f"{f1_score} %",
-                    "perf": f1_score,
+                    "pretty_perf": f"{score} %",
+                    "perf": score,
                     "perf_std": 0.0,
-                    "perf_dict": {"dataperf_f1": f1_score},
+                    "perf_dict": {metric: score},
                 }
             ],
         }
@@ -458,18 +467,19 @@ def do_upload_via_train_files(credentials, tid, model_name):
             model_id=model[1],
             r_realid=r_realid,
             did=did,
-            pretty_perf=f"{f1_score} %",
-            perf=f1_score,
+            pretty_perf=f"{score} %",
+            perf=score,
             metadata_json=new_score_string,
         )
 
-        # accumulated_predictions += predictions['predictions']
-        # Implementation for accumulated labels instead of mean
-        # accumulated_labels += test_y Implementation for
-        # accumulated labels instead of mean
+            # accumulated_predictions += predictions['predictions']
+            # Implementation for accumulated labels instead of mean
+            # accumulated_labels += test_y Implementation for
+            # accumulated labels instead of mean
 
     # f1_score = sklearn.metrics.f1_score(accumulated_labels, accumulated_predictions)
     # Implementation for accumulated labels instead of mean
+
     Email().send(
         contact=user.email,
         cc_contact="dynabench-site@mlcommons.org",
