@@ -263,7 +263,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         dataset_id = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
-        metric =task_config.get('perf_metric').get('type')
+        metric = task_config.get("perf_metric").get("type")
 
         final_score = {
             metric: new_score,
@@ -402,10 +402,10 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         if upload.content_type == "text/plain":
             with tempfile.NamedTemporaryFile() as tf:
-                upload.save(tf, overwrite = True)
+                upload.save(tf, overwrite=True)
                 tf.seek(0)
-                string = (tf.read()).decode('utf-8')
-                sub =  [int(s) for s in string.split(',')]
+                string = (tf.read()).decode("utf-8")
+                sub = [int(s) for s in string.split(",")]
                 payload = {"submission": {str(name[-1]): sub}}
                 light_model_endpoint = task.lambda_model
                 r = requests.post(light_model_endpoint, json=payload)
@@ -445,7 +445,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         did = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
-        metric = task_config.get('perf_metric').get('type')
+        metric = task_config.get("perf_metric").get("type")
         new_score = {
             metric: score,
             "perf": score,
@@ -472,10 +472,10 @@ def do_upload_via_train_files(credentials, tid, model_name):
             metadata_json=new_score_string,
         )
 
-            # accumulated_predictions += predictions['predictions']
-            # Implementation for accumulated labels instead of mean
-            # accumulated_labels += test_y Implementation for
-            # accumulated labels instead of mean
+        # accumulated_predictions += predictions['predictions']
+        # Implementation for accumulated labels instead of mean
+        # accumulated_labels += test_y Implementation for
+        # accumulated labels instead of mean
 
     # f1_score = sklearn.metrics.f1_score(accumulated_labels, accumulated_predictions)
     # Implementation for accumulated labels instead of mean
