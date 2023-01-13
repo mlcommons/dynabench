@@ -396,8 +396,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
     # accumulated_predictions = [] Implementation for accumulated labels instead of mean
     # accumulated_labels = [] Implementation for accumulated labels instead of mean
 
-    print("Went through the dataset verification")
-
     for name, upload in train_files.items():
 
         if upload.content_type == "text/plain":
@@ -409,7 +407,21 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 payload = {"submission": {str(name[-1]): sub}}
                 light_model_endpoint = task.lambda_model
                 r = requests.post(light_model_endpoint, json=payload)
-                score = r.json()
+                if r.status_code == 200:
+                    score = r.json()
+                else:
+                    subject = (
+                        f"Model {model_name} failed training as {r.json()['detail']}"
+                    )
+                    Email().send(
+                        contact=user.email,
+                        cc_contact="dynabench-site@mlcommons.org",
+                        template_name="model_train_failed.txt",
+                        msg_dict={"name": model_name},
+                        subject=subject,
+                    )
+                    bottle.abort(400)
+
         else:
             current_upload = json.loads(upload.file.read().decode("utf-8"))
             current_upload = current_upload[list(current_upload.keys())[0]]
