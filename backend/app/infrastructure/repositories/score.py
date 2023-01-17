@@ -31,3 +31,11 @@ class ScoreRepository(AbstractRepository):
         if unpublished_models_in_leaderboard:
             query = query.filter(Model.is_published)
         return query.all()
+
+    def get_scores_by_dataset_and_model_id(self, dataset_id: int, model_id: int):
+        return (
+            self.session.query(Score)
+            .filter(Score.did == dataset_id)
+            .filter(Score.mid == model_id)
+            .all()
+        )

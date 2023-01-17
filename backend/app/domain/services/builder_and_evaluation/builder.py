@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class Builder:
+class BuilderService:
     def __init__(self):
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -101,6 +101,13 @@ class Builder:
         )
         return response["repository"]["repositoryUri"]
 
+    def clean_docker_images(self):
+        self.docker_client.containers.prune()
+        self.docker_client.images.prune()
+        images = self.docker_client.images.list()
+        for image in images:
+            self.docker_client.images.remove(image.id, force=True)
+
     def push_image_to_ECR(
         self,
         repository_name: str,
@@ -130,6 +137,7 @@ class Builder:
                 "password": ecr_config["ecr_password"],
             },
         )
+        self.clean_docker_images()
         return f"{repository_name}:{tag}"
 
     def create_task_definition(self, name_task: str, repo: str) -> str:
@@ -223,10 +231,6 @@ class Builder:
         logger.info(f"Create repo: {repo}")
         tag = "latest"
         self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)
-        zip_name = model.split("/")[-1]
-        folder_name = model.split("/")[-1].split(".")[0]
-        model_name = "-".join(zip_name.split(".")[0].replace(" ", "").split("-")[1:])
-        repo = "877755283837.dkr.ecr.us-west-1.amazonaws.com/deberta-base"
         logger.info("Push image to ECR")
         ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
         return ip, model_name, folder_name, arn_service
@@ -273,6 +277,12 @@ class Builder:
                     "*",
                 ],
                 "AllowOrigins": [
+                    "*",
+                ],
+                "ExposeHeaders": [
+                    "*",
+                ],
+                "AllowHeaders": [
                     "*",
                 ],
             },

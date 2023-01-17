@@ -1,0 +1,9 @@
+Hi there
+
+Your model $name has been successfully uploaded.
+The next step will be to evaluate its performance in the different datasets.
+When this happens you will receive a new email
+
+Thanks,
+
+The Dynabench Team

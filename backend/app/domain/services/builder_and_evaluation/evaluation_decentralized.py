@@ -16,7 +16,7 @@ import jsonlines
 import requests
 import yaml
 
-from app.domain.services.builder_and_evaluation.builder import Builder
+from app.domain.services.builder_and_evaluation.builder import BuilderService
 from app.domain.services.builder_and_evaluation.eval_utils.evaluator import Evaluator
 from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
     InputFormatter,
@@ -34,7 +34,7 @@ class Evaluation:
         self.sqs = self.session.client("sqs")
         self.cloud_watch = self.session.client("cloudwatch")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
-        self.builder_service = Builder()
+        self.builder_service = BuilderService()
         self.centralized_host = os.getenv("CENTRALIZED_URL")
 
     def require_fields_task(self, folder_name: str):

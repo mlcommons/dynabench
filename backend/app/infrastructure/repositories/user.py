@@ -29,3 +29,16 @@ class UserRepository(AbstractRepository):
             {self.model.total_fooled: self.model.total_fooled + 1}
         )
         self.session.commit()
+
+    def increment_model_submitted_count(self, user_id: int):
+        self.session.query(self.model).filter(self.model.id == user_id).update(
+            {self.model.models_submitted: self.model.models_submitted + 1}
+        )
+        self.session.commit()
+
+    def get_user_email(self, user_id: int) -> str:
+        return (
+            self.session.query(self.model.email)
+            .filter(self.model.id == user_id)
+            .first()
+        )

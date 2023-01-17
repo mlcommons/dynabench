@@ -10,79 +10,75 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import CreateModel from "../components/Forms/CreateModel";
 import UserContext from "../containers/UserContext";
+import Swal from "sweetalert2";
+import axios from "axios";
 import "./SubmitModel.css";
 
 const useUploadFile = () => {
-  const context = useContext(UserContext);
-
   const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    if (progress === 0.5) {
-      const interval = setInterval(() => {
-        const tick = 0.05;
-        console.log(progress);
-        setProgress((p) => p + tick);
-        console.log(progress);
-        if (progress >= 1) {
-          clearInterval(interval);
-        }
-      }, 60000);
-    }
-  }, [progress]);
-
-  const send = (formData, url) => {
-    const token = context.api.getToken();
+  const sendModelData = (formData) => {
     return axios
       .request({
         method: "post",
-        url: `${context.api.domain}${url}`,
+        url: `${process.env.REACT_APP_API_HOST_2}/model/upload_model_to_s3_and_evaluate`,
         data: formData,
-        headers: {
-          Authorization: token ? "Bearer " + token : "None",
-        },
         onUploadProgress: (p) => {
-          setProgress(p.loaded / p.total / 2);
+          setProgress(p.loaded / p.total);
         },
       })
-      .then((data) => {
+      .then(() => {
         setProgress(1);
         return true;
+      })
+      .catch(() => {
+        setProgress(0);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       });
   };
 
-  return { progress, send };
+  return { progress, sendModelData };
 };
 
 const ProgressBar = ({ progress, text }) => {
   return (
-    <div
-      className="center-loading"
-      style={{
-        width: "50%",
-      }}
-    >
-      <div className="progress">
-        <div
-          className="progress-bar progress-bar-striped progress-bar-animated"
-          role="progressbar"
-          style={{ width: `${progress * 100}%` }}
-        ></div>
+    <>
+      <div
+        className="center-loading"
+        style={{
+          width: "50%",
+        }}
+      >
+        <h3> Please do not close this window</h3>
+        <p>
+          The upload depends on the size of the model and your internet
+          connection, please be patient 😊
+        </p>
+        <div className="progress">
+          <div
+            className="progress-bar progress-bar-striped progress-bar-animated"
+            role="progressbar"
+            style={{ width: `${progress * 100}%` }}
+          ></div>
+        </div>
+        <h6>
+          {progress > 0 && progress < 0.5
+            ? text
+            : progress >= 0.5
+            ? "We are processing your model"
+            : ""}
+        </h6>
       </div>
-      <h6>
-        {progress > 0 && progress < 0.5
-          ? text
-          : progress >= 0.5
-          ? "We are processing your model"
-          : ""}
-      </h6>
-    </div>
+    </>
   );
 };
 
@@ -100,7 +96,7 @@ const SubmitModel = (props) => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const { progress, send } = useUploadFile();
+  const { progress, sendModelData } = useUploadFile();
 
   useEffect(() => {
     const fetchTaskData = async () => {
@@ -125,16 +121,13 @@ const SubmitModel = (props) => {
     fetchTaskData();
   }, []);
 
-  useEffect(() => {
-    console.log(progress);
-  }, [progress]);
-
   const handleSubmitModel = (modelData) => {
-    console.log(modelData);
-
     if (modelData.file.length !== 0) {
       const user = context.api.getCredentials();
       const file = modelData.file[0];
+      if (file.type !== "application/zip") {
+        return alert("Please upload a zip file");
+      }
       setLoading({
         loading: false,
         text: "Your model is being uploaded.",
@@ -145,15 +138,18 @@ const SubmitModel = (props) => {
       formData.append("num_paramaters", modelData.numParams);
       formData.append("languages", modelData.languages);
       formData.append("license", modelData.license);
-      formData.append("file", file);
       formData.append("file_name", file.name);
-      formData.append("file_type", file.type);
-      formData.append("user_name", user.username);
       formData.append("user_id", user.id);
       formData.append("task_code", props.match.params.taskCode);
-      send(formData, "/users/model/upload").then((data) => {
+      formData.append("file_to_upload", file);
+      sendModelData(formData).then(() => {
         setLoading({ loading: true, text: "Done" });
-        alert("Your model has been successfully uploaded");
+        Swal.fire({
+          title: "Good job!",
+          text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
+          icon: "success",
+          confirmButtonColor: "#007bff",
+        });
       });
     } else {
       setLoadingFile(true);
@@ -165,13 +161,13 @@ const SubmitModel = (props) => {
   return (
     <>
       {loading.loading ? (
-        <Container className="mb-5 pb-5">
+        <Container className="pb-5 mb-5">
           <Col className="m-auto" lg={9}>
             <div className="mb-5 text-center">
-              <h1 className="my-4 pt-3 text-uppercase">
+              <h1 className="pt-3 my-4 text-uppercase">
                 Upload your own model
               </h1>
-              <h2 className="task-page-header d-block font-weight-normal m-0 text-reset">
+              <h2 className="m-0 task-page-header d-block font-weight-normal text-reset">
                 The instructions for model uploads are as follows:
               </h2>
             </div>
@@ -303,7 +299,7 @@ const SubmitModel = (props) => {
               </ul>
             </div>
             <div className="text-center">
-              <h2 className="home-cardgroup-header d-block font-weight-light mb-4 text-uppercase text-reset">
+              <h2 className="mb-4 home-cardgroup-header d-block font-weight-light text-uppercase text-reset">
                 Have a question?
               </h2>
               <a href="mailto:dynabench-site@mlcommons.org">

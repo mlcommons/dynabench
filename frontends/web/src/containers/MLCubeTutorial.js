@@ -13,10 +13,7 @@ import UserContext from "../containers/UserContext";
 const MLCubeTutorial = (props) => {
   const context = useContext(UserContext);
   const [tutorial, setTutorial] = useState("");
-  const [loading, setLoading] = useState({
-    loading: true,
-    text: "",
-  });
+
   useEffect(() => {
     const fetchTaskData = async () => {
       const taskData = await context.api.getTask(props.match.params.taskId);
@@ -33,11 +30,11 @@ const MLCubeTutorial = (props) => {
             )
         );
       } else {
-        setLoading({ loading: true, text: "Loading" });
+        console.log("logged in");
       }
     };
     fetchTaskData();
-  }, [tutorial]);
+  }, [props.match.params.taskId, context.api, props.history]);
   return (
     <Container className="mb-5 pb-5">
       <h1 className="my-4 pt-3 text-uppercase text-center">MLCube Tutorial</h1>
