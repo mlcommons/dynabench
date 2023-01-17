@@ -36,7 +36,7 @@ class ModelRepository(AbstractRepository):
     def update_model_status(self, id: int) -> None:
         instance = self.session.query(self.model).filter(self.model.id == id).first()
         instance.deployment_status = "deployed"
-        instance.is_publish = 0
+        instance.is_published = 0
         self.session.flush()
         self.session.commit()
 
@@ -79,3 +79,21 @@ class ModelRepository(AbstractRepository):
         self.session.flush()
         self.session.commit()
         return model.__dict__
+
+    def get_active_models_by_task_id(self, task_id: int) -> list:
+        models = (
+            self.session.query(self.model)
+            .filter(
+                self.model.tid == task_id,
+                self.model.is_published == 1,
+                self.model.deployment_status == "deployed",
+            )
+            .all()
+        )
+        return models
+
+    def get_model_name_by_id(self, id: int) -> str:
+        return self.session.query(self.model.name).filter(self.model.id == id).first()
+
+    def get_user_id_by_model_id(self, id: int) -> int:
+        return self.session.query(self.model.uid).filter(self.model.id == id).first()

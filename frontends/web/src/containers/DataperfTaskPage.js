@@ -25,17 +25,23 @@ const DataperfTaskPage = () => {
       {dataperfTasks ? (
         <Container fluid>
           <Row>
-            <Col lg={2} className="p-0 border">
+            <Col
+              lg={2}
+              className="p-0 border"
+              style={{
+                maxWidth: "300px",
+              }}
+            >
               <Nav defaultActiveKey="/" className="flex-sm-row">
                 <Nav.Link
                   onClick={() => setTaskId(null)}
-                  className="active gray-color p-3 px-lg-5 flores-nav-item nav-link active"
+                  className="p-3 active gray-color px-lg-5 flores-nav-item nav-link"
                 >
                   Dataperf
                 </Nav.Link>
                 {dataperfTasks.map((task) => (
                   <Nav.Link
-                    className="active gray-color p-3 px-lg-5 flores-nav-item nav-link active"
+                    className="p-3 active gray-color px-lg-5 flores-nav-item nav-link"
                     onClick={(e) => {
                       setTaskId(task.id);
                     }}

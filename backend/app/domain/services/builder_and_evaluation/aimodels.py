@@ -12,7 +12,7 @@ from app.infrastructure.repositories.model import ModelRepository
 
 class AIModels:
     def __init__(self):
-        self._model_repository = ModelRepository()
+        self.model_repository = ModelRepository()
         self.evaluation = Evaluation()
 
     def create_input_for_lambda(self, task_id: str):
@@ -26,7 +26,7 @@ class AIModels:
         return input_data
 
     def initiate_lambda_models(self):
-        models = self._model_repository.get_lambda_models()
+        models = self.model_repository.get_lambda_models()
         while True:
             for model in models:
                 input_data = self.create_input_for_lambda(model.tid)
