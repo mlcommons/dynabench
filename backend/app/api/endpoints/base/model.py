@@ -61,3 +61,8 @@ async def upload_model_to_s3_and_evaluate(
         model.file_to_upload,
     )
     return "The model will be evaluated in the background"
+
+
+@router.get("/initiate_lambda_models")
+def initiate_lambda_models() -> None:
+    return ModelService().initiate_lambda_models()

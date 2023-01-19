@@ -43,7 +43,7 @@ class ModelRepository(AbstractRepository):
     def get_lambda_models(self) -> list:
         models = (
             self.session.query(self.model)
-            .filter(self.model.light_model is not None)
+            .filter(self.model.light_model.is_not(None))
             .all()
         )
         return models

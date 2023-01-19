@@ -5,6 +5,7 @@
 import json
 import os
 import secrets
+import time
 
 import boto3
 import requests
@@ -17,6 +18,7 @@ from app.domain.helpers.transform_data_objects import (
     transform_list_to_csv,
 )
 from app.domain.services.base.example import ExampleService
+from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.user import UserRepository
@@ -28,6 +30,7 @@ class ModelService:
         self.task_repository = TaskRepository()
         self.user_repository = UserRepository()
         self.example_service = ExampleService()
+        self.evaluation_service = EvaluationService()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
@@ -166,3 +169,24 @@ class ModelService:
             predictions.append(prediction)
         csv_location = transform_list_to_csv(predictions, batch_samples.filename)
         return csv_location
+
+    def create_input_for_lambda(self, task_id: str):
+        task_config = self.evaluation_service.get_task_configuration(task_id)
+        inputs = task_config["input"]
+        input_data = {}
+        for input in inputs:
+            name_input = input["name"]
+            input_data[name_input] = "test"
+        input_data["context"] = "test"
+        return input_data
+
+    def initiate_lambda_models(self):
+        models = self.model_repository.get_lambda_models()
+        while True:
+            for model in models:
+                print(model.light_model)
+                print(model.tid)
+                input_data = self.create_input_for_lambda(model.tid)
+                requests.post(f"{model.light_model}", json=input_data)
+            print("Finished")
+            time.sleep(320)
