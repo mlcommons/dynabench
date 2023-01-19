@@ -794,7 +794,7 @@ class CreateInterface extends React.Component {
                           >
                             <Button
                               type="submit"
-                              className="border-0 font-weight-bold blue-bg task-action-btn"
+                              className="border-0 font-weight-bold light-gray-bg task-action-btn"
                               onClick={(e) => {
                                 e.preventDefault();
                                 this.setState({ showCreateBatchModal: true });
@@ -853,7 +853,7 @@ class CreateInterface extends React.Component {
                           >
                             <Button
                               type="submit"
-                              className="border-0 font-weight-bold blue-bg task-action-btn"
+                              className="border-0 font-weight-bold light-gray-bg task-action-btn"
                               onClick={this.handleResponse}
                               disabled={this.state.submitDisabled}
                             >
