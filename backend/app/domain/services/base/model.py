@@ -184,8 +184,6 @@ class ModelService:
         models = self.model_repository.get_lambda_models()
         while True:
             for model in models:
-                print(model.light_model)
-                print(model.tid)
                 input_data = self.create_input_for_lambda(model.tid)
                 requests.post(f"{model.light_model}", json=input_data)
             print("Finished")
