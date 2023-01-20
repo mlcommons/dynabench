@@ -33,15 +33,12 @@ const TaskPage = ({ taskId }) => {
   const { get, loading } = useFetch();
 
   const loadTask = async () => {
-    const orderMetrics = await get(
-      `/task/get_order_metrics_by_task_id/${taskId}`
-    );
-    const orderScoringDatasets = await get(
-      `/task/get_order_scoring_datasets_by_task_id/${taskId}`
-    );
-    const task = await get(
-      `/task/get_task_with_round_info_by_task_id/${taskId}`
-    );
+    const [orderMetrics, orderScoringDatasets, task] = await Promise.all([
+      get(`/task/get_order_metrics_by_task_id/${taskId}`),
+      get(`/task/get_order_scoring_datasets_by_task_id/${taskId}`),
+      get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
+    ]);
+
     task.ordered_metrics = orderMetrics;
     task.ordered_scoring_datasets = orderScoringDatasets;
     setTask(task);

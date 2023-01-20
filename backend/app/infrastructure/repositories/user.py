@@ -42,3 +42,10 @@ class UserRepository(AbstractRepository):
             .filter(self.model.id == user_id)
             .first()
         )
+
+    def get_user_name_by_id(self, user_id: int) -> str:
+        return (
+            self.session.query(self.model.username)
+            .filter(self.model.id == user_id)
+            .first()
+        )
