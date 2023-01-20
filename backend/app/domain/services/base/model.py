@@ -175,8 +175,8 @@ class ModelService:
         inputs = task_config["input"]
         input_data = {}
         for input in inputs:
-            name_input = input["name"]
-            input_data[name_input] = "test"
+            input_name = input["name"]
+            input_data[input_name] = "test"
         input_data["context"] = "test"
         return input_data
 
