@@ -12,6 +12,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import 
     meta_metrics_dict,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
+from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
 
 
@@ -19,6 +20,7 @@ class TaskService:
     def __init__(self):
         self.task_repository = TaskRepository()
         self.dataset_repository = DatasetRepository()
+        self.model_repository = ModelRepository()
         self.score_services = ScoreService()
 
     def update_last_activity_date(self, task_id: int):
@@ -127,6 +129,7 @@ class TaskService:
         offset: int = 0,
         limit: int = 5,
     ):
+        dynaboard_info = {}
         ordered_metrics = self.get_order_metrics_by_task_id(task_id)
         ordered_scoring_datasets = self.get_order_scoring_datasets_by_task_id(task_id)
         order_metric_with_weight = [
@@ -140,21 +143,18 @@ class TaskService:
                 [dataset["id"] for dataset in ordered_scoring_datasets],
             )
         ]
+        models = self.model_repository.get_active_models_by_task_id(task_id)
+        models_id = [model.id for model in models]
         perf_metric_field_name = self.get_perf_metric_field_name_by_task_id(task_id)
-        print(order_metric_with_weight)
-        print(perf_metric_field_name)
-        print(order_scoring_datasets_with_weight)
-        return self.score_services.get_scores_by_dataset_and_model_id(241, 58)
-        # return self.score_services.get_dynaboard_score_by_task_id(
-        #     task_id,
-        #     perf_metric_field_name,
-        #     order_metric_with_weight,
-        #     order_scoring_datasets_with_weight,
-        #     sort_by,
-        #     sort_direction,
-        #     offset,
-        #     limit,
-        # )
+        dynaboard_info["count"] = len(models_id)
+        data = self.score_services.get_dynaboard_info_for_all_the_models(
+            models_id,
+            order_scoring_datasets_with_weight,
+            order_metric_with_weight,
+            perf_metric_field_name,
+        )
+        dynaboard_info["data"] = data
+        return dynaboard_info
 
     def get_task_trends_score(self, task_id: int, dataset_id: int):
         task_info = self.get_task_with_round_and_dataset_info(task_id)

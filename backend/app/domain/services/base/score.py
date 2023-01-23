@@ -2,11 +2,13 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import pandas as pd
+import numpy as np
 
 from app.infrastructure.repositories.dataset import DatasetRepository
+from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
+from app.infrastructure.repositories.user import UserRepository
 
 
 class ScoreService:
@@ -14,234 +16,122 @@ class ScoreService:
         self.score_repository = ScoreRepository()
         self.task_repository = TaskRepository()
         self.dataset_repository = DatasetRepository()
+        self.model_repository = ModelRepository()
+        self.user_repository = UserRepository()
 
-    def get_scores_by_dataset_and_model_id(self, dataset_id: int, model_id: int):
+    def get_scores_by_dataset_and_model_id(
+        self,
+        scores_by_dataset_and_model_id: list,
+        order_metric_with_weight: dict,
+        perf_metric_field_name: str,
+    ):
+
+        scores_by_dataset_and_model_id[
+            perf_metric_field_name
+        ] = scores_by_dataset_and_model_id.pop("perf")
+        metrics_with_score_and_weight = [
+            {col: row[col] for col in ["field_name", "weight"]}
+            for row in order_metric_with_weight
+        ]
+        for metric_with_score_and_weight in metrics_with_score_and_weight:
+            score = scores_by_dataset_and_model_id[
+                metric_with_score_and_weight["field_name"]
+            ]
+            metric_with_score_and_weight["score"] = score
+        return metrics_with_score_and_weight
+
+    def get_score_info_by_dataset_and_model_id(
+        self,
+        dataset_id: int,
+        model_id: int,
+        order_metric_with_weight: dict,
+        perf_metric_field_name: str,
+    ):
         scores_by_dataset_and_model_id = (
             self.score_repository.get_scores_by_dataset_and_model_id(
                 dataset_id, model_id
             )[0]
-        )
+        ).__dict__
         final_scores_by_dataset_and_model_id = {}
-        dataset_id = scores_by_dataset_and_model_id.__dict__["did"]
+        dataset_id = scores_by_dataset_and_model_id["did"]
         dataset_name = self.dataset_repository.get_dataset_name_by_id(dataset_id)[0]
         final_scores_by_dataset_and_model_id["id"] = dataset_id
         final_scores_by_dataset_and_model_id["name"] = dataset_name
+        metrics_with_score_and_weight = self.get_scores_by_dataset_and_model_id(
+            scores_by_dataset_and_model_id,
+            order_metric_with_weight,
+            perf_metric_field_name,
+        )
+        scores = [
+            metric_score["score"] for metric_score in metrics_with_score_and_weight
+        ]
+        final_scores_by_dataset_and_model_id["scores"] = scores
+        final_scores_by_dataset_and_model_id["variances"] = [0] * len(scores)
         return final_scores_by_dataset_and_model_id
 
-    def get_scores_by_datasets_and_model_id(self, dataset_ids: list, model_id: int):
-        scores_by_datasets_and_model_id = []
-        for dataset_id in dataset_ids:
-            scores_by_datasets_and_model_id.append(
-                self.score_repository.get_scores_by_dataset_and_model_id(
-                    dataset_id, model_id
-                )[0]
-            )
-        return scores_by_datasets_and_model_id
-
-    def get_averaged_scores(self, scores: list):
-        scores = pd.DataFrame([score.__dict__ for score in scores])
-        scores = scores.groupby("did").mean()
-        return scores
-
-    def get_averaded_variance_scores(self, scores: list):
-        scores = pd.DataFrame([score.__dict__ for score in scores])
-        scores = scores.groupby("did").var()
-        return scores
-
-    def get_dynaboard_score_by_task_id(
+    def get_dynaboard_info_for_all_the_models(
         self,
-        task_id: int,
+        model_ids: list,
+        order_scoring_datasets_with_weight: list,
+        order_metric_with_weight: dict,
         perf_metric_field_name: str,
-        order_metric_with_weight: list,
-        order_datasets_with_weight: list,
-        sort_by: str = "dynascore",
-        sort: str = "desc",
-        limit: int = 10,
-        offset: int = 0,
     ):
-        return
+        models_dynaboard_info = []
+        for model_id in model_ids:
+            model_dynaboard_info = self.get_model_dynaboard_info(
+                model_id,
+                order_scoring_datasets_with_weight,
+                order_metric_with_weight,
+                perf_metric_field_name,
+            )
+            models_dynaboard_info.append(model_dynaboard_info)
+        return models_dynaboard_info
 
-    def get_dynaboard_score_by_task_id_1(
+    def get_model_dynaboard_info(
         self,
-        task_id: int,
+        model_id: int,
+        order_scoring_datasets_with_weight: list,
+        order_metric_with_weight: dict,
         perf_metric_field_name: str,
-        order_metric_with_weight: list,
-        order_datasets_with_weight: list,
-        sort_by: str = "dynascore",
-        sort: str = "desc",
-        limit: int = 10,
-        offset: int = 0,
-    ):
-        unpublished_models_in_leaderboard = (
-            self.task_repository.get_unpublished_models_in_leaderboard(task_id)
-        )
-        unpublished_models_in_leaderboard = unpublished_models_in_leaderboard[0]
-        ordered_datasets_id = [
-            did_and_weight["did"] for did_and_weight in order_datasets_with_weight
-        ]
-        scores_users_dataset_and_model_info = (
-            self.score_repository.get_scores_users_dataset_and_model_by_task_id(
-                task_id, ordered_datasets_id, unpublished_models_in_leaderboard
+    ) -> dict:
+        model_dynaboard_info = {}
+        datasets_id = [dataset["did"] for dataset in order_scoring_datasets_with_weight]
+        model_dynaboard_info["model_id"] = model_id
+        model_dynaboard_info["model_name"] = self.model_repository.get_model_name_by_id(
+            model_id
+        )[0]
+        user_id = self.model_repository.get_user_id_by_model_id(model_id)[0]
+        model_dynaboard_info["uid"] = user_id
+        model_dynaboard_info["username"] = self.user_repository.get_user_name_by_id(
+            user_id
+        )[0]
+        datasets_info = []
+        for dataset_id in datasets_id:
+            dataset_info = self.get_score_info_by_dataset_and_model_id(
+                dataset_id, model_id, order_metric_with_weight, perf_metric_field_name
             )
+            datasets_info.append(dataset_info)
+        averaged_scores = self.get_averaged_scores(
+            datasets_info, order_scoring_datasets_with_weight
         )
+        model_dynaboard_info["datasets"] = datasets_info
+        model_dynaboard_info["averaged_scores"] = averaged_scores
+        model_dynaboard_info["averaged_variances"] = [0] * len(averaged_scores)
+        model_dynaboard_info["dynascore"] = 0
+        return model_dynaboard_info
 
-        scores, users, datasets, models = zip(*scores_users_dataset_and_model_info)
-        scores, users, datasets, models = (
-            set(scores),
-            set(users),
-            set(datasets),
-            set(models),
-        )
-        order_datasets = sorted(datasets, key=lambda dataset: dataset.__dict__["id"])
-        model_id_to_unique_dataset_ids = {}
-        for score in scores:
-            if score.__dict__["mid"] in model_id_to_unique_dataset_ids:
-                model_id_to_unique_dataset_ids[score.__dict__["mid"]].add(
-                    score.__dict__["did"]
-                )
-            else:
-                model_id_to_unique_dataset_ids[score.__dict__["mid"]] = {
-                    score.__dict__["did"]
-                }
-        filtered_scores = []
-        for score in scores:
-            if model_id_to_unique_dataset_ids.get(score.__dict__["mid"], set()) == set(
-                ordered_datasets_id
-            ):
-                filtered_scores.append(score)
-        filtered_models = []
-        for model in models:
-            if model_id_to_unique_dataset_ids.get(model.__dict__["id"], set()) == set(
-                ordered_datasets_id
-            ):
-                filtered_models.append(model)
-
-        # TODO: more refactoring
-        return filtered_scores
-        model_id_and_dataset_id_to_scores = {}
-        for filter_score in filtered_scores:
-            model_id_and_dataset_id_to_scores[
-                (filter_score.__dict__.get("mid"), filter_score.__dict__.get("did"))
-            ] = filter_score
-        dataset_results_dict = {}
-        for order_dataset in order_datasets:
-            dataset_results_dict[order_dataset.__dict__.get("id")] = {
-                metric_info["field_name"]: []
-                for metric_info in order_metric_with_weight
-            }
-            for model in models:
-                score = model_id_and_dataset_id_to_scores[
-                    (model.__dict__.get("id"), order_dataset.__dict__.get("id"))
-                ]
-                for field_name in dataset_results_dict[
-                    order_dataset.__dict__.get("id")
-                ]:
-                    result = score.__dict__.get(field_name, None)
-                    dataset_results_dict[order_dataset.__dict__.get("id")][
-                        field_name
-                    ].append(result)
-
-        datasets_id_with_weight = {
-            did_and_weight["did"]: did_and_weight["weight"]
-            for did_and_weight in order_datasets_with_weight
-        }
-        for key, value in dataset_results_dict.items():
-            df = pd.DataFrame.from_dict(value)
-            dataset_results_dict[key] = df
-            averaged_dataset_results = datasets_id_with_weight[key] * df
-
-        converted_dataset_results = self.calculate_dynascore(
-            perf_metric_field_name,
-            averaged_dataset_results,
-            weights={
-                metric_info["field_name"]: metric_info["weight"]
-                for metric_info in order_metric_with_weight
-            },
-            direction_multipliers={
-                metric_info["field_name"]: metric_info["utility_direction"]
-                for metric_info in order_metric_with_weight
-            },
-            offsets={
-                metric_info["field_name"]: metric_info["offset"]
-                for metric_info in order_metric_with_weight
-            },
-        )
-
-        # All the re factoring is still needed
-        uid_to_username = {}
-        for user in users:
-            uid_to_username[user.__dict__.get("id")] = user.__dict__.get("username")
-        data_list = []
-        model_index = 0
-        ordered_metric_field_names = [
-            metric_info["field_name"] for metric_info in order_metric_with_weight
-        ]
-        for model in models:
-            datasets_list = []
-            for dataset in datasets:
-                scores = []
-                for field_name in ordered_metric_field_names:
-                    scores.append(
-                        dataset_results_dict[dataset.id][field_name][model_index]
-                    )
-                variances = [0] * len(scores)  # TODO
-                datasets_list.append(
-                    {
-                        "id": dataset.__dict__.get("id"),
-                        "name": dataset.__dict__.get("name"),
-                        "scores": scores,
-                        "variances": variances,
-                    }
-                )
-            averaged_scores = []
-            for field_name in ordered_metric_field_names:
-                averaged_scores.append(
-                    averaged_dataset_results[field_name][model_index]
-                )
-            averaged_variances = [0] * len(averaged_scores)  # TODO
-            dynascore = converted_dataset_results["dynascore"][model_index]
-            data_list.append(
-                {
-                    "model_id": model.__dict__.get("id"),
-                    "model_name": model.name if model.is_published else None,
-                    # Don't give away the users for unpublished models.
-                    "uid": model.__dict__.get("uid")
-                    if model.__dict__.get("is_published")
-                    and not model.__dict__.get("is_anonymous")
-                    else None,
-                    "username": uid_to_username[model.__dict__.get("uid")]
-                    if model.is_published and not model.is_anonymous
-                    else None,
-                    "averaged_scores": averaged_scores,
-                    "averaged_variances": averaged_variances,
-                    "dynascore": dynascore,
-                    "dynavariance": 0,
-                    "datasets": datasets_list,
-                }
-            )
-            model_index += 1
-
-        ordered_metric_pretty_names = [
-            metric_info["pretty_name"] for metric_info in order_metric_with_weight
-        ]
-        if sort_by == "dynascore":
-            data_list.sort(reverse=sort, key=lambda model: model["dynascore"])
-        elif sort_by in ordered_metric_pretty_names:
-            data_list.sort(
-                reverse=sort,
-                key=lambda model: model["averaged_scores"][
-                    ordered_metric_pretty_names.index(sort_by)
-                ],
-            )
-        elif sort_by == "model_name":
-            data_list.sort(reverse=sort, key=lambda model: model["model_name"])
-
-        return {"result": data_list}
+    def get_averaged_scores(self, datasets_info: list, weights: list) -> list:
+        datasets_info = sorted(datasets_info, key=lambda i: i["id"])
+        weights = sorted(weights, key=lambda i: i["did"])
+        scores = [dataset_info["scores"] for dataset_info in datasets_info]
+        weights = [weight["weight"] for weight in weights]
+        averaged_scores = np.array(scores).T
+        return list(np.dot(averaged_scores, weights))
 
     def calculate_dynascore(
         self,
         perf_metric_field_name: str,
-        averaged_dataset_results: pd.DataFrame,
+        averaged_dataset_results: dict,
         weights: dict,
         direction_multipliers: dict,
         offsets: dict,
