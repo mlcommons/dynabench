@@ -484,10 +484,7 @@ class TaskPage extends React.Component {
         .hasOwnProperty("train_file_metric");
     return (
       <OverlayProvider initiallyHide={true} delayMs="1700">
-        {console.log("Hi")}
-        {console.log(this.state.task)}
         <Container>
-          {console.log(this.state.task)}
           <Row>
             <Col />
             <Col className="text-center">

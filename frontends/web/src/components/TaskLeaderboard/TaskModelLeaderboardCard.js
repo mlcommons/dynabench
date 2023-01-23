@@ -3,13 +3,6 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 import React from "react";
 import { useEffect, useState, useContext } from "react";
 import {
@@ -26,24 +19,19 @@ import TaskModelLeaderboardTable from "./TaskModelLeaderboardTable";
 import { SortDirection } from "./SortContainer";
 import { ForkModal, SnapshotModal } from "./ForkAndSnapshotModalWrapper";
 
-/**
- * Represents the leader board for a task. i.e. Dynaboard
- *
- * @param {Object} props React props de-structured.
- * @param {Object} props.task The task
- * @param {string} props.taskCode The task code
- * @param {boolean} props.disableToggleSort Whether or not changing sort field/direction is allowed
- * @param {boolean} props.disableAdjustWeights Whether or not changing metric/dataset weights is allowed
- * @param {boolean} props.disableForkAndSnapshot Whether or not forking and snapshotting is allowed
- * @param {function} props.getInitialWeights Fn to initialize weights for metrics and datasets
- * @param {function} props.fetchLeaderboardData Fn to load leaderboard data
- * @param {string} props.history navigation API
- * @param {string} props.location navigation location
- * @param {boolean} props.disablePagination Whether or not to show pagination buttons in footer
- * @param {string} props.title Override the table title
- */
-const TaskModelLeaderboardCard = (props) => {
-  const { task, taskCode, getInitialWeights, fetchLeaderboardData } = props;
+const TaskModelLeaderboardCard = ({
+  title,
+  task,
+  history,
+  taskCode,
+  disableForkAndSnapshot,
+  disableToggleSort,
+  disableAdjustWeights,
+  disablePagination,
+  modelColumnTitle,
+  getInitialWeights,
+  fetchLeaderboardData,
+}) => {
   const taskId = task.id;
 
   const [data, setData] = useState([]);
@@ -51,10 +39,8 @@ const TaskModelLeaderboardCard = (props) => {
   const [enableWeights, setEnableWeights] = useState(false);
   const [enableDatasetWeights, setEnableDatasetWeights] = useState(false);
 
-  // Map task metrics to include weights for UI
   const [metrics, setMetrics] = useState();
 
-  // Dataset Weights Array of a set of dataset id and corresponding weight.
   const [datasetWeights, setDatasetWeights] = useState();
 
   const [sort, setSort] = useState({
@@ -119,7 +105,7 @@ const TaskModelLeaderboardCard = (props) => {
    * @param {string} field
    */
   const toggleSort = (field) => {
-    if (props.disableToggleSort) {
+    if (disableToggleSort) {
       return;
     }
 
@@ -192,7 +178,7 @@ const TaskModelLeaderboardCard = (props) => {
     <Card className="my-4">
       <Card.Header className="light-gray-bg d-flex align-items-center">
         <h2 className="m-0 text-uppercase text-reset">
-          {props.title || "Model Leaderboard"}
+          {title || "Model Leaderboard"}
         </h2>
         {description && description.length !== 0 && (
           <OverlayTrigger
@@ -221,7 +207,7 @@ const TaskModelLeaderboardCard = (props) => {
             taskCode={taskCode}
             showModal={showForkModal}
             setShowModal={setShowForkModal}
-            history={props.history}
+            history={history}
           />
           <SnapshotModal
             metricWeights={metrics}
@@ -230,7 +216,7 @@ const TaskModelLeaderboardCard = (props) => {
             taskCode={taskCode}
             showModal={showSnapshotModal}
             setShowModal={setShowSnapshotModal}
-            history={props.history}
+            history={history}
             sort={sort}
             total={total}
           />
@@ -326,7 +312,7 @@ const TaskModelLeaderboardCard = (props) => {
           </Modal>
           {(process.env.REACT_APP_ENABLE_LEADERBOARD_SNAPSHOT === "true" ||
             context.user.admin) &&
-            !props.disableForkAndSnapshot && (
+            !disableForkAndSnapshot && (
               <OverlayTrigger
                 placement="top"
                 overlay={<Tooltip id="tip-leaderboard-fork">Snapshot</Tooltip>}
@@ -337,7 +323,7 @@ const TaskModelLeaderboardCard = (props) => {
                     if (context.api.loggedIn()) {
                       setShowSnapshotModal(true);
                     } else {
-                      props.history.push(
+                      history.push(
                         "/login?msg=" +
                           encodeURIComponent(
                             "You need to login to create a leaderboard snapshot."
@@ -355,7 +341,7 @@ const TaskModelLeaderboardCard = (props) => {
             )}
           {(process.env.REACT_APP_ENABLE_LEADERBOARD_FORK === "true" ||
             context.user.admin) &&
-            !props.disableForkAndSnapshot && (
+            !disableForkAndSnapshot && (
               <OverlayTrigger
                 placement="top"
                 overlay={<Tooltip id="tip-leaderboard-fork">Fork</Tooltip>}
@@ -366,7 +352,7 @@ const TaskModelLeaderboardCard = (props) => {
                     if (context.api.loggedIn()) {
                       setShowForkModal(true);
                     } else {
-                      props.history.push(
+                      history.push(
                         "/login?msg=" +
                           encodeURIComponent(
                             "You need to login to fork a leaderboard."
@@ -399,7 +385,7 @@ const TaskModelLeaderboardCard = (props) => {
               </span>
             </Button>
           </OverlayTrigger>
-          {!props.disableAdjustWeights && (
+          {!disableAdjustWeights && (
             <>
               <OverlayTrigger
                 placement="top"
@@ -452,12 +438,12 @@ const TaskModelLeaderboardCard = (props) => {
           setDatasetWeight={setDatasetWeight}
           sort={sort}
           toggleSort={toggleSort}
-          modelColumnTitle={props.modelColumnTitle}
+          modelColumnTitle={modelColumnTitle}
         />
       </Card.Body>
       <Card.Footer className="text-center">
         <Pagination className="float-right mb-0" size="sm">
-          {props.disablePagination ? (
+          {disablePagination ? (
             <img
               src="/Powered_by_Dynabench-Logo.svg"
               style={{ height: "24px" }}

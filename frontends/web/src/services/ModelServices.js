@@ -15,8 +15,6 @@ export const getModelInTheLoop = (task_id) => {
 };
 
 export const uploadModelToS3AndEvaluate = (formData) => {
-  console.log("formData", formData);
-
   return axios.post(
     `${BASE_URL_2}/model/upload_model_to_s3_and_evaluate`,
     formData,

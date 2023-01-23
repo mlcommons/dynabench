@@ -4,51 +4,35 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 import React from "react";
 import TaskModelLeaderboardCard from "./TaskModelLeaderboardCard";
-import { useParams } from "react-router-dom";
 
-/**
- *
- * This is a wrapper around TaskModelLeaderboardCard.js which allows to extract out the logic for initializing weights
- * and fetching leaderboard data. A custom task leaderboard can be created simply by passing in custom functions for
- * initializing weights and fetching data.
- *
- * @param getInitialWeights Function that defines how weights for metrics and datasets are to be initialized
- * @param fetchLeaderboardData Function that defines how the leaderboard data is to be fetched
- * @returns {function(*)} A functional component that uses the custom function passed to taskModelLeaderboardCardWrapper
- * and renders the TaskModelLeaderboardCard.
- */
-const taskModelLeaderboardCardWrapper = (
-  getInitialWeights,
-  fetchLeaderboardData
-) => {
-  return (props) => {
-    const { forkOrSnapshotName } = useParams();
-    const dataFromProps = {
-      leaderboardName: forkOrSnapshotName,
-      history: props.history,
-      snapshotData: props.snapshotData,
-    };
-
-    return (
-      <TaskModelLeaderboardCard
-        {...props}
-        getInitialWeights={(...args) =>
-          getInitialWeights(...args, dataFromProps)
-        }
-        fetchLeaderboardData={(...args) =>
-          fetchLeaderboardData(...args, dataFromProps)
-        }
-      />
+const taskModelLeaderboardCardWrapper = () => {
+  const getInitialWeights = (task, setWeightsCallback) => {
+    const metricIdToDataObj = {};
+    const datasetIdToDataObj = {};
+    console.log(task.ordered_metrics);
+    loadDefaultWeights(metricIdToDataObj, datasetIdToDataObj, task);
+    setWeightsCallback(
+      getOrderedWeightObjects(metricIdToDataObj, datasetIdToDataObj, task)
     );
   };
+  const fetchLeaderboardData = loadDefaultData;
+  return (props) => (
+    <TaskModelLeaderboardCard
+      title={props.title}
+      task={props.task}
+      history={props.history}
+      taskCode={props.taskCode}
+      disableForkAndSnapshot={props.disableForkAndSnapshot}
+      disableToggleSort={props.disableToggleSort}
+      disableAdjustWeights={props.disableAdjustWeights}
+      disablePagination={props.disablePagination}
+      modelColumnTitle={props.modelColumnTitle}
+      getInitialWeights={getInitialWeights}
+      fetchLeaderboardData={fetchLeaderboardData}
+    />
+  );
 };
 
 const loadDefaultWeights = (metricIdToDataObj, datasetIdToDataObj, task) => {
@@ -68,6 +52,20 @@ const loadDefaultWeights = (metricIdToDataObj, datasetIdToDataObj, task) => {
       name: ds.name,
     };
   });
+};
+
+const getOrderedWeightObjects = (
+  metricIdToDataObj,
+  datasetIdToDataObj,
+  task
+) => {
+  const orderedMetricWeights = task.ordered_metrics.map(
+    (m) => metricIdToDataObj[m.name]
+  );
+  const orderedDatasetWeights = task.ordered_scoring_datasets.map(
+    (ds) => datasetIdToDataObj[ds.id]
+  );
+  return { orderedMetricWeights, orderedDatasetWeights };
 };
 
 export const getOrderedWeights = (metricWeights, datasetWeights) => {
@@ -133,32 +131,7 @@ const loadDefaultData = (
   }
 };
 
-const getOrderedWeightObjects = (
-  metricIdToDataObj,
-  datasetIdToDataObj,
-  task
-) => {
-  const orderedMetricWeights = task.ordered_metrics.map(
-    (m) => metricIdToDataObj[m.name]
-  );
-  const orderedDatasetWeights = task.ordered_scoring_datasets.map(
-    (ds) => datasetIdToDataObj[ds.id]
-  );
-  return { orderedMetricWeights, orderedDatasetWeights };
-};
-
-export const TaskModelDefaultLeaderboard = taskModelLeaderboardCardWrapper(
-  (task, api, setWeightsCallback) => {
-    const metricIdToDataObj = {};
-    const datasetIdToDataObj = {};
-
-    loadDefaultWeights(metricIdToDataObj, datasetIdToDataObj, task);
-    setWeightsCallback(
-      getOrderedWeightObjects(metricIdToDataObj, datasetIdToDataObj, task)
-    );
-  },
-  loadDefaultData
-);
+export const TaskModelDefaultLeaderboard = taskModelLeaderboardCardWrapper();
 
 export const TaskModelForkLeaderboard = taskModelLeaderboardCardWrapper(
   (task, api, setWeightsCallback, dataFromProps) => {
