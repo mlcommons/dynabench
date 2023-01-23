@@ -57,9 +57,9 @@
     cursor: not-allowed;
 }
 
-.login-form input[type=text],
-.login-form input[type=email],
-.login-form input[type=password] {
+.login-form input[type='text'],
+.login-form input[type='email'],
+.login-form input[type='password'] {
     background-color: #f6f6f6;
     border: 2px solid #f6f6f6;
     border-radius: 5px;
@@ -70,8 +70,8 @@
 }
 
 .login-form input:focus {
-    background-color: #344854;
-    border-bottom: 2px solid #5fbae9;
+    background-color: #fff;
+    border-bottom: 2px solid #344854;
 }
 
 
@@ -139,7 +139,7 @@
 
 .underline-hover::after {
     background-color: #56baed;
-    content: "";
+    content: '';
     display: block;
     height: 2px;
     transition: width 0.2s;
