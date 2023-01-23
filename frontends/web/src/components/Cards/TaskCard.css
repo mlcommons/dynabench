@@ -1,0 +1,8 @@
+.task-card {
+    cursor: pointer;
+    border: 1px solid #ddd !important;
+    border-radius: 5px !important;
+    box-shadow: 2px 2px 5px 0 #b3b3b3c7;
+    margin-bottom: 30px;
+    height: 100%;
+}
