@@ -8,26 +8,38 @@ body {
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
     color: #6e6e6e;
-    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif;
 }
 
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif;
 }
 
 @font-face {
-    font-family: 'OpenSansSemiBold';
-    src: url(./fonts/OpenSans-SemiBold.ttf);
+    font-family: 'nb_international';
+    src: url('./fonts/nb_international_pro_light-webfont.eot');
+    src: url('./fonts/nb_international_pro_light-webfont.eot?#iefix') format('embedded-opentype'), url('./fonts/nb_international_pro_light-webfont.woff2') format('woff2'), url('./fonts/nb_international_pro_light-webfont.woff') format('woff'), url('./fonts/nb_international_pro_light-webfont.ttf') format('truetype');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
-    font-family: 'OpenSansLight';
-    src: url(./fonts/OpenSans-Light.ttf);
+    font-family: 'nb_international';
+    src: url('./fonts/nb_international_pro_regular-webfont.eot');
+    src: url('./fonts/nb_international_pro_regular-webfont.eot?#iefix') format('embedded-opentype'), url('./fonts/nb_international_pro_regular-webfont.woff2') format('woff2'), url('./fonts/nb_international_pro_regular-webfont.woff') format('woff'), url('./fonts/nb_international_pro_regular-webfont.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
-    font-family: 'OpenSansRegular';
-    src: url(./fonts/OpenSans-Regular.ttf);
+    font-family: 'nb_international_mono';
+    src: url('./fonts/nb_international_pro_mono-webfont.eot');
+    src: url('./fonts/nb_international_pro_mono-webfont.eot?#iefix') format('embedded-opentype'), url('./fonts/nb_international_pro_mono-webfont.woff2') format('woff2'), url('./fonts/nb_international_pro_mono-webfont.woff') format('woff'), url('./fonts/nb_international_pro_mono-webfont.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
 }
 
 *:focus {
@@ -35,7 +47,7 @@ code {
 }
 
 h1 {
-    font-family: OpenSansLight;
+    font-family: 'nb_international', 'Helvetica Neue', Helvetica, sans-serif;
     font-size: 32px;
     line-height: 44px;
 }
