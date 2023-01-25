@@ -143,12 +143,12 @@
 
 .button-ellipse {
     border-radius: 40px;
-    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif !important;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif !important;
 }
 
 .navbar-dark .navbar-nav .nav-link {
     color: #344854;
-    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif !important;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif !important;
     font-size: 1rem !important;
     font-weight: 540;
 }
@@ -168,12 +168,12 @@
 
 .navbar-dark .navbar-nav .nav-link:focus {
     color: #344854 !important;
-    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif !important;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif !important;
 }
 
 .navbar-dark .navbar-nav .nav-link:hover {
     color: #344854 !important;
-    font-family: "nb_international", Helvetica Neue, Helvetica, sans-serif !important;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif !important;
 }
 
 .table {
@@ -298,10 +298,18 @@ table.inspectModel thead td {
 .modal-open {
     overflow-y: scroll !important;
     padding: 0 !important;
+    background: none;
 }
 
 .btn-help-info {
+    background: none !important;
     font-size: 10px !important;
+    border-radius: 6px !important;
+    margin-right: 3px;
+}
+
+.btn-help-info :active {
+    color: #344854 !important;
 }
 
 .badge-overlay {

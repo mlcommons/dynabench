@@ -94,10 +94,15 @@ h2.active {
 
 .btn-primary {
     color: #344854;
+    border-radius: 6px !important;
 }
 
 .btn-primary:hover {
-    background-color: #2088ef;
+    background-color: #ccebd4 !important;
+    color: #344854 !important;
+    border-color: inherit !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
 }
 
 .btn-link {

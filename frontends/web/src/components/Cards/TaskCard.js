@@ -1,20 +1,16 @@
-import { Badge, Card, CardGroup, Col, Container, Table } from "react-bootstrap";
-import React, { FC } from "react";
+/*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import React from "react";
+import { Card, Table } from "react-bootstrap";
 import Moment from "react-moment";
+import { useHistory } from "react-router-dom";
 import "./TaskCard.css";
 
-type TaskCardProps = {
-  id: number;
-  name: string;
-  description: string;
-  curRound: number;
-  totalCollected: number;
-  totalFooled: number;
-  lastUpdated: string;
-  taskCode: string;
-};
-
-const TaskCard: FC<TaskCardProps> = ({
+const TaskCard = ({
   id,
   name,
   description,
@@ -24,14 +20,19 @@ const TaskCard: FC<TaskCardProps> = ({
   lastUpdated,
   taskCode,
 }) => {
+  const history = useHistory();
   return (
-    <Card key={id} className={`task-card`}>
+    <Card
+      key={id}
+      className={`task-card`}
+      onClick={() => history.push(`/tasks/${taskCode}`)}
+    >
       <h2 className="task-header principal-color text-uppercase text-center">
         {name}
       </h2>
       <Card.Body>
         <Card.Text className="text-center">{description}</Card.Text>
-        <Table>
+        <Table size="sm">
           <thead></thead>
           <tbody>
             <tr>

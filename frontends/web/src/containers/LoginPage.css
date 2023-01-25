@@ -33,16 +33,18 @@
 /* FORM TYPOGRAPHY */
 
 .submit-btn {
-    background-color: #ccebd4;
+    background-color: #f0f2f5;
     border: none;
     font-size: 13px;
     padding: 15px 80px;
     transition: all 0.3s ease-in-out;
+    border-radius: 99px !important;
     width: 100%;
 }
 
 .submit-btn:hover {
-    background-color: #39ace7;
+    background-color: #ccebd4;
+    color: #344854;
 }
 
 .submit-btn:active {

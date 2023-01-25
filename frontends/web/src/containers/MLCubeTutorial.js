@@ -52,7 +52,7 @@ const MLCubeTutorial = (props) => {
                   <center>
                     <Button
                       as={Link}
-                      className="text-center border-0 blue-color font-weight-bold light-gray-bg"
+                      className="text-center border-0 font-weight-bold light-gray-bg"
                       to={
                         "/tasks/" +
                         props.match.params.taskId +

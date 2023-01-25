@@ -838,7 +838,7 @@ class CreateInterface extends React.Component {
                                   tooltip="Don’t like this context? Try another one."
                                 >
                                   <Button
-                                    className="border-0 font-weight-bold blue-color light-gray-bg task-action-btn"
+                                    className="border-0 font-weight-bold light-gray-bg task-action-btn"
                                     onClick={this.getNewContext}
                                     disabled={this.state.refreshDisabled}
                                   >
