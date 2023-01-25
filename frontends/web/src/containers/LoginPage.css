@@ -4,9 +4,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-
-/* STRUCTURE */
-
 .wrapper {
     align-items: center;
     display: flex;
@@ -28,9 +25,6 @@
 .login-form .msg {
     padding: 0 30px;
 }
-
-
-/* FORM TYPOGRAPHY */
 
 .submit-btn {
     background-color: #f0f2f5;
@@ -76,12 +70,6 @@
     border-bottom: 2px solid #344854;
 }
 
-
-/* ANIMATIONS */
-
-
-/* Simple CSS3 Fade-in-down Animation */
-
 .fade-in-down {
     animation: fade-in-down 1s both;
 }
@@ -97,9 +85,6 @@
         transform: none;
     }
 }
-
-
-/* Simple CSS3 Fade-in Animation */
 
 @keyframes fade-in {
     from {
@@ -131,9 +116,6 @@
 .fade-in.fourth {
     animation-delay: 1s;
 }
-
-
-/* Simple CSS3 Underline Animation */
 
 .underline-hover {
     display: inline-block;
