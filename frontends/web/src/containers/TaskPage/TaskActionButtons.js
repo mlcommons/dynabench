@@ -40,7 +40,7 @@ const TaskActionButtons = ({
               >
                 <Button
                   as={Link}
-                  className="border-0 blue-color font-weight-bold light-gray-bg"
+                  className="border-0 font-weight-bold light-gray-bg"
                   to={`/tasks/${taskCode}/create`}
                 >
                   <i className="fas fa-pen"></i> Create Examples
@@ -62,7 +62,7 @@ const TaskActionButtons = ({
               >
                 <Button
                   as={Link}
-                  className="border-0 blue-color font-weight-bold light-gray-bg"
+                  className="border-0 font-weight-bold light-gray-bg"
                   to={`/tasks/${taskCode}/validate`}
                 >
                   <i className="fas fa-search"></i> Validate Examples
@@ -85,7 +85,7 @@ const TaskActionButtons = ({
             >
               <Button
                 as={Link}
-                className="border-0 blue-color font-weight-bold light-gray-bg"
+                className="border-0 font-weight-bold light-gray-bg"
                 to={`/tasks/${taskCode}/uploadModel`}
               >
                 <i className="fas fa-upload"></i> Submit Models
@@ -111,7 +111,7 @@ const TaskActionButtons = ({
             >
               <Button
                 as={Link}
-                className="border-0 blue-color font-weight-bold light-gray-bg"
+                className="border-0 font-weight-bold light-gray-bg"
                 to={"/tasks/" + taskCode + "/submit_predictions"}
               >
                 <i className="fa fa-upload"></i> Submit Prediction Files
@@ -140,7 +140,7 @@ const TaskActionButtons = ({
                 <>
                   <Button
                     as={Link}
-                    className="border-0 blue-color font-weight-bold light-gray-bg"
+                    className="border-0 font-weight-bold light-gray-bg"
                     to={"/tasks/" + taskCode + "/submit_train_files"}
                   >
                     <i className="fa fa-upload"></i> Submit Files
@@ -167,7 +167,7 @@ const TaskActionButtons = ({
                 <>
                   <Button
                     as={Link}
-                    className="border-0 blue-color font-weight-bold light-gray-bg"
+                    className="border-0 font-weight-bold light-gray-bg"
                     to={"/tasks/" + taskCode + "/mlcube_tutorial"}
                   >
                     <i className="fa fa-upload"></i> MLCube Tutorial

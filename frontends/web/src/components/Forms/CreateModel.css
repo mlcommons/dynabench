@@ -9,7 +9,7 @@
 }
 
 .label-upload-file {
-    color: #1283d8;
+    color: #ccebd4;
 }
 
 .input-upload-file {
@@ -21,4 +21,14 @@
     left: 0;
     right: 0;
     width: 100%;
+}
+
+.center-submit-model {
+    background-color: #f0f2f5 !important;
+    border-color: #f0f2f5 !important;
+}
+
+.center-submit-model:hover {
+    color: white !important;
+    background-color: #2088ef !important;
 }

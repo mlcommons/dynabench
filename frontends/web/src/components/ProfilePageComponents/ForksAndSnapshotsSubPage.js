@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -60,7 +66,7 @@ const ForkOrSnapshotTable = (props) => {
       <Card className="profile-card">
         <Card.Body className="overflow-auto">
           <Table className="mb-0">
-            <thead className="blue-color border-bottom">
+            <thead className="principal-color border-bottom">
               <tr>
                 <td>
                   <b>Link to {isForkList ? "Fork" : "Snapshot"}</b>

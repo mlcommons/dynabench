@@ -653,7 +653,7 @@ ${latexTableContent}
               <Card.Body>
                 <div className="d-flex justify-content-between mx-4 mt-4">
                   <Button
-                    className={`blue-bg border-0 font-weight-bold ${
+                    className={`principal-color-bg border-0 font-weight-bold ${
                       isModelOwner ? "mr-2" : null
                     }`}
                     aria-label="Back"

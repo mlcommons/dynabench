@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -17,7 +23,7 @@ class ExampleCard extends React.Component {
       >
         <Card.Header className="mb-4">
           {this.props.example.isValid ? (
-            <h5 className="text-uppercase dark-blue-color spaced-header">
+            <h5 className="text-uppercase dark-principal-color spaced-header">
               {this.props.example.isValid
                 ? "Valid Question"
                 : "Invalid Question"}
@@ -46,13 +52,13 @@ class ExampleCard extends React.Component {
             <Card.Body className="p-3">
               <Row>
                 <Col>
-                  <h6 className="text-uppercase dark-blue-color spaced-header">
+                  <h6 className="text-uppercase dark-principal-color spaced-header">
                     Question:
                   </h6>
                   <p>
                     <small>{this.props.example["question"]}</small>
                   </p>
-                  <h6 className="text-uppercase dark-blue-color spaced-header">
+                  <h6 className="text-uppercase dark-principal-color spaced-header">
                     Why is this{" "}
                     {this.props.example.isValid ? "a valid" : "an invalid"}{" "}
                     question?
@@ -62,7 +68,7 @@ class ExampleCard extends React.Component {
                   </p>
                   {this.props.example.isValid && (
                     <>
-                      <h6 className="text-uppercase dark-blue-color spaced-header">
+                      <h6 className="text-uppercase dark-principal-color spaced-header">
                         {this.props.onboardingMode === "creation" ? "AI " : ""}{" "}
                         Answer:
                       </h6>
@@ -73,7 +79,7 @@ class ExampleCard extends React.Component {
                   )}
                   {this.props.example.isValid && (
                     <>
-                      <h6 className="text-uppercase dark-blue-color spaced-header">
+                      <h6 className="text-uppercase dark-principal-color spaced-header">
                         Determine if{" "}
                         {this.props.onboardingMode === "creation"
                           ? "AI"
@@ -86,7 +92,7 @@ class ExampleCard extends React.Component {
                       {this.props.example["userFeedback"][0] === "Incorrect" &&
                         this.props.onboardingMode === "creation" && (
                           <>
-                            <h6 className="text-uppercase dark-blue-color spaced-header">
+                            <h6 className="text-uppercase dark-principal-color spaced-header">
                               Provide the correct answer:
                             </h6>
                             <p>

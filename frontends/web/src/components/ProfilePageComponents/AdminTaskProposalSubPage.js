@@ -59,7 +59,7 @@ const AdminTaskProposalTable = (props) => {
       <Card className="profile-card">
         <Card.Body className="overflow-auto">
           <Table hover className="mb-0">
-            <thead className="blue-color border-bottom">
+            <thead className="principal-color border-bottom">
               <tr>
                 <td>
                   <b>Name</b>

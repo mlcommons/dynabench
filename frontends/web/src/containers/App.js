@@ -168,7 +168,7 @@ class App extends React.Component {
                 <Navbar
                   expand="lg"
                   variant="dark"
-                  className="shadow blue-bg justify-content-start"
+                  className="shadow principal-color-bg justify-content-start"
                 >
                   <Navbar.Toggle
                     aria-controls="basic-navbar-nav"
@@ -176,8 +176,20 @@ class App extends React.Component {
                   />
                   <Navbar.Brand as={Link} to="/">
                     <img
-                      src="/logo_w.png"
-                      style={{ width: 80, marginLeft: 5, marginRight: 20 }}
+                      src={"https://mlcommons.github.io/mlcube/assets/logo.png"}
+                      // src={
+                      //   'https://insidebigdata.com/wp-content/uploads/2022/06/MLCommons_logo.png'
+                      // }
+                      style={{
+                        width: 28,
+                        marginLeft: 1,
+                        marginRight: 10,
+                      }}
+                      alt="MLCommons Logo"
+                    />
+                    <img
+                      src="/logo_b.png"
+                      style={{ width: 80, marginLeft: 5, marginRight: 25 }}
                       alt="Dynabench"
                     />
                   </Navbar.Brand>
@@ -189,24 +201,59 @@ class App extends React.Component {
                         </Nav.Link>
                       </Nav.Item>
                       <NavDropdown title="Tasks" id="basic-nav-dropdown">
-                        {NavItems}
-                        <div className="my-0 dropdown-divider"></div>
-                        <NavDropdown.Item
-                          as={HashLink}
-                          to={"/#contributed-tasks"}
-                          className="py-3"
-                        >
-                          Contributed Tasks
-                        </NavDropdown.Item>
-                        <div className="my-0 dropdown-divider"></div>
-                        <NavDropdown.Item
-                          key={"FLoRes"}
-                          as={Link}
-                          to={"/flores"}
-                          className="py-3"
-                        >
-                          Flores
-                        </NavDropdown.Item>
+                        <ul className="cl-menu ul-nav">
+                          <li id="original" className="li-nav">
+                            <span className="second-nav-a">DADC</span>
+                            <ul className="ul-nav">
+                              {this.state &&
+                                this.state.tasks
+                                  .filter((t) => t.official)
+                                  .map((task, index) => (
+                                    <li key={task.task_code} className="li-nav">
+                                      <a href={`/tasks/${task.task_code}`}>
+                                        {task.name}
+                                      </a>
+                                    </li>
+                                  ))}
+                            </ul>
+                          </li>
+                          <li id="dataperf" className="li-nav">
+                            <span
+                              className="second-nav-a"
+                              onClick={console.log()}
+                            >
+                              Dataperf
+                            </span>
+                            <ul className="ul-nav">
+                              {this.state &&
+                                this.state.tasks
+                                  .filter((t) => t.dataperf)
+                                  .map((task, index) => (
+                                    <li key={task.task_code} className="li-nav">
+                                      <a href={`/tasks/${task.task_code}`}>
+                                        {task.name}
+                                      </a>
+                                    </li>
+                                  ))}
+                            </ul>
+                          </li>
+                          <li id="contributed" className="li-nav">
+                            <span className="second-nav-a">Others</span>
+                            <ul className="ul-nav">
+                              {this.state &&
+                                this.state.tasks
+                                  .filter((t) => !t.official && !t.dataperf)
+                                  .map((task, index) => (
+                                    <li className="li-nav" key={task.task_code}>
+                                      <a href={`/tasks/${task.task_code}`}>
+                                        {task.name}
+                                      </a>
+                                    </li>
+                                  ))}
+                            </ul>
+                          </li>
+                        </ul>
+                        <div className="dropdown-divider my-0"></div>
                       </NavDropdown>
                     </Nav>
                     <Nav className="justify-content-end">
@@ -277,7 +324,11 @@ class App extends React.Component {
                       ) : (
                         <>
                           <Nav.Item>
-                            <Nav.Link as={Link} to="/login">
+                            <Nav.Link
+                              as={Link}
+                              to="/login"
+                              className="signup-nav-link login-fix-space"
+                            >
                               Login
                             </Nav.Link>
                           </Nav.Item>
@@ -289,6 +340,22 @@ class App extends React.Component {
                             >
                               Sign up
                             </Nav.Link>
+                          </Nav.Item>
+                          <Nav.Item>
+                            {/* <img
+                              // src={
+                              //   'https://mlcommons.github.io/mlcube/assets/logo.png'
+                              // }
+                              src={
+                                'https://insidebigdata.com/wp-content/uploads/2022/06/MLCommons_logo.png'
+                              }
+                              style={{
+                                width: 90,
+                                marginLeft: 1,
+                                marginRight: 25,
+                              }}
+                              alt="MLCommons Logo"
+                            /> */}
                           </Nav.Item>
                         </>
                       )}
@@ -411,7 +478,7 @@ class App extends React.Component {
                   <Container fluid>
                     <Row>
                       <div className="footer-nav-link">
-                        Copyright © 2022 MLCommons, Inc.
+                        Copyright © 2023 MLCommons, Inc.
                       </div>
                       <div className="footer-nav-link">
                         <Link to="/contact" className="text-reset">

@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -24,7 +30,7 @@ const TaskTable = (props) => {
       <Card className="profile-card">
         <Card.Body>
           <Table className="taskTable mb-0">
-            <thead className="blue-color border-bottom">
+            <thead className="principal-color border-bottom">
               <tr>
                 <td>
                   <b>Name</b>
@@ -49,7 +55,7 @@ const TaskTable = (props) => {
                     key={task.id}
                     onClick={() => history.push(`/tasks/${task.id}`)}
                   >
-                    <td className="blue-color">{task.name}</td>
+                    <td className="principal-color">{task.name}</td>
                     <td>{task.desc || "No description provided"}</td>
                   </tr>
                 );

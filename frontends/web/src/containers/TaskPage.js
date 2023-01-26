@@ -140,7 +140,7 @@ const TaskActionButtons = (props) => {
               >
                 <Button
                   as={Link}
-                  className="border-0 blue-color font-weight-bold light-gray-bg"
+                  className="border-0 font-weight-bold light-gray-bg"
                   to={`/tasks/${props.taskCode}/create`}
                 >
                   <i className="fas fa-pen"></i> Create Examples
@@ -160,7 +160,7 @@ const TaskActionButtons = (props) => {
               >
                 <Button
                   as={Link}
-                  className="border-0 blue-color font-weight-bold light-gray-bg"
+                  className="border-0 font-weight-bold light-gray-bg"
                   to={`/tasks/${props.taskCode}/validate`}
                 >
                   <i className="fas fa-search"></i> Validate Examples
@@ -183,7 +183,7 @@ const TaskActionButtons = (props) => {
             >
               <Button
                 as={Link}
-                className="border-0 blue-color font-weight-bold light-gray-bg"
+                className="border-0 font-weight-bold light-gray-bg"
                 to={`/tasks/${props.taskCode}/uploadModel`}
               >
                 <i className="fas fa-upload"></i> Submit Models
@@ -207,7 +207,7 @@ const TaskActionButtons = (props) => {
             >
               <Button
                 as={Link}
-                className="border-0 blue-color font-weight-bold light-gray-bg"
+                className="border-0 font-weight-bold light-gray-bg"
                 to={"/tasks/" + props.taskCode + "/submit_predictions"}
               >
                 <i className="fa fa-upload"></i> Submit Prediction Files
@@ -234,7 +234,7 @@ const TaskActionButtons = (props) => {
                 <>
                   <Button
                     as={Link}
-                    className="border-0 blue-color font-weight-bold light-gray-bg"
+                    className="border-0 font-weight-bold light-gray-bg"
                     to={"/tasks/" + props.taskCode + "/submit_train_files"}
                   >
                     <i className="fa fa-upload"></i> Submit Files
@@ -259,7 +259,7 @@ const TaskActionButtons = (props) => {
                 <>
                   <Button
                     as={Link}
-                    className="border-0 blue-color font-weight-bold light-gray-bg"
+                    className="border-0 font-weight-bold light-gray-bg"
                     to={"/tasks/" + props.taskCode + "/mlcube_tutorial"}
                   >
                     <i className="fa fa-upload"></i> MLCube Tutorial
