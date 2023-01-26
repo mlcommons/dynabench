@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -34,7 +40,7 @@ class VQAFeedbackCard extends React.Component {
         <Card.Body className="p-3">
           <Row>
             <Col xs={12}>
-              <h3 className="text-uppercase dark-blue-color spaced-header">
+              <h3 className="text-uppercase dark-principal-color spaced-header">
                 Feedback and comments are welcome:
               </h3>
               <InputGroup>

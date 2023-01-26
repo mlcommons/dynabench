@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -105,7 +111,7 @@ const UserLeaderboardCard = (props) => {
             >
               <DropdownButton
                 variant="light"
-                className="border-0 blue-color font-weight-bold light-gray-bg"
+                className="border-0 font-weight-bold light-gray-bg"
                 style={{ marginRight: 10 }}
                 id="dropdown-basic-button"
                 title={

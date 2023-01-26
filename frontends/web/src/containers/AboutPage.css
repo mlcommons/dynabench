@@ -1,0 +1,18 @@
+.video-thumbnail {
+    width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
+    cursor: pointer;
+    text-align: center !important;
+}
+
+.video-thumbnail:active {
+    position: relative;
+    top: 2px;
+}
+
+.div-video-thumbnail {
+    justify-content: center !important;
+    text-align: center !important;
+}

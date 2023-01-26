@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -48,7 +54,7 @@ const ModelSubPage = (props) => {
         <Card className="profile-card">
           <Card.Body>
             <Table className="modelTable mb-0">
-              <thead className="blue-color border-bottom">
+              <thead className="principal-color border-bottom">
                 <tr>
                   <td>
                     <b>Name</b>
@@ -78,7 +84,9 @@ const ModelSubPage = (props) => {
                       key={model.id}
                       onClick={() => history.push(`/models/${model.id}`)}
                     >
-                      <td className="blue-color">{model.name || "Unknown"}</td>
+                      <td className="principal-color">
+                        {model.name || "Unknown"}
+                      </td>
                       <td>{model.task.task_code}</td>
                       {isSelfModelsTable && (
                         <td className="text-center" width="200px">

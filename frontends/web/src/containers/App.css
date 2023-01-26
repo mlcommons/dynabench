@@ -8,6 +8,74 @@
     min-height: 88vh;
 }
 
+.ul-nav {
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.li-nav {
+    list-style: none;
+    padding: 1rem 1.5rem;
+    margin-left: 2;
+}
+
+.second-nav-a {
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.cl-menu li {
+    position: relative;
+}
+
+.cl-menu li a {
+    display: block;
+    color: #212529;
+    white-space: nowrap;
+}
+
+.cl-menu li:hover a {
+    color: #212529;
+}
+
+.cl-menu li ul {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.25rem;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    display: none;
+}
+
+.cl-menu li ul li {
+    white-space: nowrap;
+    background: white;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+.cl-menu > li:hover {
+    background-color: rgba(18, 131, 216, 0.1);
+    color: #344854;
+}
+
+.cl-menu li:hover > ul {
+    display: block;
+    color: #344854;
+}
+
+.cl-menu li ul li:hover {
+    color: #344854;
+    cursor: pointer;
+}
+
+.cl-menu li ul li:last-child {
+    border-bottom: none;
+}
+
 .sidebar-wrapper {
     padding: 0;
     z-index: 2;
@@ -21,8 +89,8 @@
     display: inline-block;
 }
 
-.blue-bg {
-    background-color: #1283d8;
+.principal-color-bg {
+    background-color: #ccebd4;
 }
 
 .white-bg {
@@ -49,11 +117,11 @@
     background-color: rgba(251, 229, 200, 0.65);
 }
 
-.blue-color {
-    color: #1283d8;
+.principal-color {
+    color: #344854;
 }
 
-.dark-blue-color {
+.dark-principal-color {
     color: #005798;
 }
 
@@ -75,12 +143,14 @@
 
 .button-ellipse {
     border-radius: 40px;
-    font-family: OpenSansSemiBold;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif !important;
 }
 
 .navbar-dark .navbar-nav .nav-link {
-    color: #fff;
-    font-family: OpenSansSemiBold;
+    color: #344854;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: 540;
 }
 
 .navbar-dark .dropdown-menu {
@@ -93,7 +163,17 @@
 .sidebar-wrapper .nav-link:hover,
 .sidebar-wrapper .nav-link.active {
     background-color: rgba(18, 131, 216, 0.1);
-    color: #1283d8;
+    color: #344854;
+}
+
+.navbar-dark .navbar-nav .nav-link:focus {
+    color: #344854 !important;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: #344854 !important;
+    font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif !important;
 }
 
 .table {
@@ -158,9 +238,17 @@
     }
 
     .signup-nav-link {
-        border: 1px solid #fff;
-        border-radius: 20px;
+        padding: 0.5rem 1rem 0.5rem 1rem !important;
+        cursor: pointer;
+        background-color: #fff;
+        color: #000;
+        border: 1px solid #000;
+        border-radius: 1.5rem;
     }
+}
+
+.login-fix-space {
+    margin-right: -22px !important;
 }
 
 div.recharts-wrapper .recharts-layer.recharts-cartesian-axis.recharts-yAxis.yAxis g.recharts-layer.recharts-cartesian-axis-tick:first-child {
@@ -210,10 +298,18 @@ table.inspectModel thead td {
 .modal-open {
     overflow-y: scroll !important;
     padding: 0 !important;
+    background: none;
 }
 
 .btn-help-info {
+    background: none !important;
     font-size: 10px !important;
+    border-radius: 6px !important;
+    margin-right: 3px;
+}
+
+.btn-help-info :active {
+    color: #344854 !important;
 }
 
 .badge-overlay {
@@ -249,5 +345,21 @@ table.inspectModel thead td {
     100% {
         transform: scale(1);
         opacity: 1;
+    }
+}
+
+.text-nav-bar {
+    background: none;
+    background-image: url("data:image/svg+xml;charset=utf8,<svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'><path stroke='rgba(52,72,84, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/></svg>") !important;
+    width: 7%;
+    border: none;
+    height: 25px;
+    outline: none !important;
+    margin-right: 5px;
+}
+
+@media all and (min-width: 480px) {
+    .text-nav-bar {
+        display: none;
     }
 }

@@ -4,8 +4,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-/* STRUCTURE */
-
 .wrapper {
     align-items: center;
     display: flex;
@@ -28,19 +26,19 @@
     padding: 0 30px;
 }
 
-/* FORM TYPOGRAPHY */
-
 .submit-btn {
-    background-color: #1283d8;
+    background-color: #f0f2f5;
     border: none;
     font-size: 13px;
     padding: 15px 80px;
     transition: all 0.3s ease-in-out;
+    border-radius: 99px !important;
     width: 100%;
 }
 
 .submit-btn:hover {
-    background-color: #39ace7;
+    background-color: #ccebd4;
+    color: #344854;
 }
 
 .submit-btn:active {
@@ -55,9 +53,9 @@
     cursor: not-allowed;
 }
 
-.login-form input[type=text],
-.login-form input[type=email],
-.login-form input[type=password] {
+.login-form input[type='text'],
+.login-form input[type='email'],
+.login-form input[type='password'] {
     background-color: #f6f6f6;
     border: 2px solid #f6f6f6;
     border-radius: 5px;
@@ -69,12 +67,9 @@
 
 .login-form input:focus {
     background-color: #fff;
-    border-bottom: 2px solid #5fbae9;
+    border-bottom: 2px solid #344854;
 }
 
-/* ANIMATIONS */
-
-/* Simple CSS3 Fade-in-down Animation */
 .fade-in-down {
     animation: fade-in-down 1s both;
 }
@@ -91,10 +86,14 @@
     }
 }
 
-/* Simple CSS3 Fade-in Animation */
 @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .fade-in {
@@ -118,14 +117,13 @@
     animation-delay: 1s;
 }
 
-/* Simple CSS3 Underline Animation */
 .underline-hover {
     display: inline-block;
 }
 
 .underline-hover::after {
     background-color: #56baed;
-    content: "";
+    content: '';
     display: block;
     height: 2px;
     transition: width 0.2s;

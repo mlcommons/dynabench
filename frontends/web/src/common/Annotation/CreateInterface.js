@@ -772,7 +772,7 @@ class CreateInterface extends React.Component {
                                   <BootstrapSwitchButton
                                     checked={this.state.livemode}
                                     onlabel="Live Mode"
-                                    onstyle="primary blue-bg"
+                                    onstyle="primary principal-color-bg"
                                     offstyle="warning"
                                     offlabel="Sandbox"
                                     width={120}
@@ -794,7 +794,7 @@ class CreateInterface extends React.Component {
                           >
                             <Button
                               type="submit"
-                              className="border-0 font-weight-bold blue-bg task-action-btn"
+                              className="border-0 font-weight-bold light-gray-bg task-action-btn"
                               onClick={(e) => {
                                 e.preventDefault();
                                 this.setState({ showCreateBatchModal: true });
@@ -838,7 +838,7 @@ class CreateInterface extends React.Component {
                                   tooltip="Don’t like this context? Try another one."
                                 >
                                   <Button
-                                    className="border-0 font-weight-bold blue-color light-gray-bg task-action-btn"
+                                    className="border-0 font-weight-bold light-gray-bg task-action-btn"
                                     onClick={this.getNewContext}
                                     disabled={this.state.refreshDisabled}
                                   >
@@ -853,7 +853,7 @@ class CreateInterface extends React.Component {
                           >
                             <Button
                               type="submit"
-                              className="border-0 font-weight-bold blue-bg task-action-btn"
+                              className="border-0 font-weight-bold light-gray-bg task-action-btn"
                               onClick={this.handleResponse}
                               disabled={this.state.submitDisabled}
                             >

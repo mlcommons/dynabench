@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -29,13 +35,13 @@ class VQAQuizCard extends React.Component {
               <Row>
                 <Col xs={12} md={7}>
                   <div className="mb-3">
-                    <h6 className="text-uppercase dark-blue-color spaced-header">
+                    <h6 className="text-uppercase dark-principal-color spaced-header">
                       Question:
                     </h6>
                     <p>{this.props.question}</p>
                     {this.props.isAnswer && (
                       <>
-                        <h6 className="text-uppercase dark-blue-color spaced-header">
+                        <h6 className="text-uppercase dark-principal-color spaced-header">
                           {this.props.onboardingMode === "creation"
                             ? "AI's "
                             : ""}{" "}

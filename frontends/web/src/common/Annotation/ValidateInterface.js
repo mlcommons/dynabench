@@ -488,7 +488,7 @@ class ValidateInterface extends React.Component {
                       <Row>
                         <Col xs={12} md={7}>
                           {inputMetadataInterface}
-                          <h6 className="text-uppercase dark-blue-color spaced-header">
+                          <h6 className="text-uppercase dark-principal-color spaced-header">
                             Actions:
                           </h6>
                           <InputGroup className="align-items-center">
@@ -534,7 +534,7 @@ class ValidateInterface extends React.Component {
                             validatorMetadataInterface.length > 0 && (
                               <>
                                 <div>
-                                  <h6 className="text-uppercase dark-blue-color spaced-header">
+                                  <h6 className="text-uppercase dark-principal-color spaced-header">
                                     You can enter more information:
                                   </h6>
                                   {validatorMetadataInterface}
@@ -547,7 +547,7 @@ class ValidateInterface extends React.Component {
                       <InputGroup className="align-items-center">
                         <Button
                           type="button"
-                          className="font-weight-bold blue-bg border-0 task-action-btn"
+                          className="font-weight-bold principal-color-bg border-0 task-action-btn"
                           onClick={() => this.handleResponse()}
                         >
                           {" "}
@@ -557,7 +557,7 @@ class ValidateInterface extends React.Component {
                           data-index={this.props.index}
                           onClick={this.getNewExample}
                           type="button"
-                          className="font-weight-bold blue-color light-gray-bg border-0 task-action-btn"
+                          className="font-weight-bold principal-color light-gray-bg border-0 task-action-btn"
                         >
                           <i className="fas fa-undo-alt"></i> Skip and load new
                           example
