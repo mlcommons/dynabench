@@ -176,7 +176,6 @@ const TaskPage = ({ taskId }) => {
                           ) : (
                             <TaskModelDefaultLeaderboard
                               task={task}
-                              api={context.api}
                               taskCode={task.task_code}
                               title={
                                 hasTrainFileUpload

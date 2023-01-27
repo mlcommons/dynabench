@@ -19,7 +19,6 @@ const TaskTrend = ({ trendScore }) => {
           </h2>
         </Card.Header>
         <Card.Body className="px-1 py-5">
-          {/* Mobile / Tablet / Desktop charts */}
           <Col xs={12} className="d-block d-sm-none">
             <LineRechart size={chartSizesLineRechart.xs} data={trendScore} />
           </Col>

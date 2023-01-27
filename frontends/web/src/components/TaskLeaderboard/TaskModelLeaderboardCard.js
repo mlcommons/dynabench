@@ -3,6 +3,13 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+/*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React from "react";
 import { useEffect, useState, useContext } from "react";
 import {
@@ -39,8 +46,10 @@ const TaskModelLeaderboardCard = ({
   const [enableWeights, setEnableWeights] = useState(false);
   const [enableDatasetWeights, setEnableDatasetWeights] = useState(false);
 
+  // Map task metrics to include weights for UI
   const [metrics, setMetrics] = useState();
 
+  // Dataset Weights Array of a set of dataset id and corresponding weight.
   const [datasetWeights, setDatasetWeights] = useState();
 
   const [sort, setSort] = useState({

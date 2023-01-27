@@ -27,7 +27,6 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import UserContext from "./UserContext";
-import { LineRechart } from "../components/Charts/Rechart";
 import Moment from "react-moment";
 import { OverlayProvider, Annotation, OverlayContext } from "./Overlay";
 import {
@@ -35,296 +34,11 @@ import {
   TaskModelForkLeaderboard,
 } from "../components/TaskLeaderboard/TaskModelLeaderboardCardWrapper";
 import UserLeaderboardCard from "../components/TaskPageComponents/UserLeaderboardCard";
+import TaskTrend from "./TaskPage/TaskTrend";
+import TaskActionButtons from "./TaskPage/TaskActionButtons";
+import OverallTaskStats from "./TaskPage/OverallTaskStats";
+
 const yaml = require("js-yaml");
-
-const chartSizes = {
-  xs: { fontSize: 10 },
-  sm: {
-    fontSize: 14,
-    height: 300,
-    left: -30,
-    xAxisLeftPadding: 30,
-  },
-  md: {
-    fontSize: 14,
-    height: 300,
-    left: -20,
-    xAxisLeftPadding: 30,
-  },
-  lg: {
-    align: "center",
-    fontSize: 14,
-    height: 302,
-    left: -20,
-    xAxisLeftPadding: 50,
-  },
-  xl: {
-    fontSize: 14,
-    height: 300,
-    left: -20,
-    xAxisLeftPadding: 50,
-  },
-};
-
-const TaskTrend = ({ data }) => {
-  return (
-    <>
-      <Card className="my-4">
-        <Card.Header className="p-3 light-gray-bg">
-          <h2 className="m-0 text-uppercase text-reset">
-            Model Performance vs. Round{" "}
-          </h2>
-        </Card.Header>
-        <Card.Body className="px-1 py-5">
-          {/* Mobile / Tablet / Desktop charts */}
-          <Col xs={12} className="d-block d-sm-none">
-            <LineRechart size={chartSizes.xs} data={data} />
-          </Col>
-          <Col sm={12} className="d-none d-sm-block d-md-none">
-            <LineRechart size={chartSizes.sm} data={data} />
-          </Col>
-          <Col md={12} className="d-none d-md-block d-lg-none">
-            <LineRechart size={chartSizes.md} data={data} />
-          </Col>
-          <Col lg={12} className="d-none d-lg-block d-xl-none">
-            <LineRechart size={chartSizes.lg} data={data} />
-          </Col>
-          <Col xl={12} className="d-none d-xl-block">
-            <LineRechart size={chartSizes.xl} data={data} />
-          </Col>
-        </Card.Body>
-      </Card>
-    </>
-  );
-};
-
-const TaskActionButtons = (props) => {
-  function renderTooltip(props, text) {
-    return (
-      <Tooltip id="button-tooltip" {...props}>
-        {text}
-      </Tooltip>
-    );
-  }
-
-  function renderCreateTooltip(props) {
-    return renderTooltip(props, "Create new examples where the model fails");
-  }
-  function renderVerifyTooltip(props) {
-    return renderTooltip(
-      props,
-      "Verify examples where the model may have failed"
-    );
-  }
-  function renderSubmitTooltip(props) {
-    return renderTooltip(props, "Submit models for this task");
-  }
-
-  const hasTrainFileUpload =
-    props.task.config_yaml &&
-    yaml.load(props.task.config_yaml).hasOwnProperty("train_file_metric");
-
-  return (
-    <Nav className="my-4">
-      {props.task.dynamic_adversarial_data_collection && (
-        <>
-          <Nav.Item className="task-action-btn">
-            <Annotation
-              placement="bottom"
-              tooltip="Click here to get creative and start writing examples that fool the model"
-            >
-              <OverlayTrigger
-                placement="bottom"
-                delay={{ show: 250, hide: 400 }}
-                overlay={renderCreateTooltip}
-              >
-                <Button
-                  as={Link}
-                  className="border-0 font-weight-bold light-gray-bg"
-                  to={`/tasks/${props.taskCode}/create`}
-                >
-                  <i className="fas fa-pen"></i> Create Examples
-                </Button>
-              </OverlayTrigger>
-            </Annotation>
-          </Nav.Item>
-          <Nav.Item className="task-action-btn">
-            <Annotation
-              placement="top"
-              tooltip="Click here to see examples created by others, and validate their correctness"
-            >
-              <OverlayTrigger
-                placement="bottom"
-                delay={{ show: 250, hide: 400 }}
-                overlay={renderVerifyTooltip}
-              >
-                <Button
-                  as={Link}
-                  className="border-0 font-weight-bold light-gray-bg"
-                  to={`/tasks/${props.taskCode}/validate`}
-                >
-                  <i className="fas fa-search"></i> Validate Examples
-                </Button>
-              </OverlayTrigger>
-            </Annotation>
-          </Nav.Item>
-        </>
-      )}
-      {props.task.submitable && (
-        <Nav.Item className="task-action-btn">
-          <Annotation
-            placement="right"
-            tooltip="Click here to upload your models for this task."
-          >
-            <OverlayTrigger
-              placement="bottom"
-              delay={{ show: 250, hide: 400 }}
-              overlay={renderSubmitTooltip}
-            >
-              <Button
-                as={Link}
-                className="border-0 font-weight-bold light-gray-bg"
-                to={`/tasks/${props.taskCode}/uploadModel`}
-              >
-                <i className="fas fa-upload"></i> Submit Models
-              </Button>
-            </OverlayTrigger>
-          </Annotation>
-        </Nav.Item>
-      )}
-      {props.task.has_predictions_upload && (
-        <Nav.Item className="task-action-btn">
-          <Annotation
-            placement="top"
-            tooltip={
-              "Click here to submit your model-generated prediction files"
-            }
-          >
-            <OverlayTrigger
-              placement="bottom"
-              delay={{ show: 250, hide: 400 }}
-              overlay={renderVerifyTooltip}
-            >
-              <Button
-                as={Link}
-                className="border-0 font-weight-bold light-gray-bg"
-                to={"/tasks/" + props.taskCode + "/submit_predictions"}
-              >
-                <i className="fa fa-upload"></i> Submit Prediction Files
-              </Button>
-            </OverlayTrigger>
-          </Annotation>
-        </Nav.Item>
-      )}
-      {hasTrainFileUpload && (
-        <>
-          <Nav.Item className="task-action-btn">
-            <Annotation
-              placement="top"
-              tooltip={
-                "Click here to submit your train files to trigger the training of" +
-                " a model and evaluation on our datasets"
-              }
-            >
-              <OverlayTrigger
-                placement="bottom"
-                delay={{ show: 250, hide: 400 }}
-                overlay={renderVerifyTooltip}
-              >
-                <>
-                  <Button
-                    as={Link}
-                    className="border-0 font-weight-bold light-gray-bg"
-                    to={"/tasks/" + props.taskCode + "/submit_train_files"}
-                  >
-                    <i className="fa fa-upload"></i> Submit Files
-                  </Button>
-                </>
-              </OverlayTrigger>
-            </Annotation>
-          </Nav.Item>
-          <Nav.Item className="task-action-btn">
-            <Annotation
-              placement="top"
-              tooltip={
-                "Click here to submit your train files to trigger the training of" +
-                " a model and evaluation on our datasets"
-              }
-            >
-              <OverlayTrigger
-                placement="bottom"
-                delay={{ show: 250, hide: 400 }}
-                overlay={renderVerifyTooltip}
-              >
-                <>
-                  <Button
-                    as={Link}
-                    className="border-0 font-weight-bold light-gray-bg"
-                    to={"/tasks/" + props.taskCode + "/mlcube_tutorial"}
-                  >
-                    <i className="fa fa-upload"></i> MLCube Tutorial
-                  </Button>
-                </>
-              </OverlayTrigger>
-            </Annotation>
-          </Nav.Item>
-        </>
-      )}
-    </Nav>
-  );
-};
-
-const OverallTaskStats = (props) => {
-  return (
-    <Table className="w-50 font-weight-bold ml-n2">
-      <thead />
-      <tbody>
-        <tr>
-          <td>Current round:</td>
-          <td className="text-right">{props.task.cur_round}</td>
-        </tr>
-        <tr>
-          <td>Fooled/Collected (Model Error rate)</td>
-          <td className="text-right">
-            {props.task.round?.total_fooled}/{props.task.round?.total_collected}{" "}
-            (
-            {props.task.round?.total_collected > 0
-              ? (
-                  (100 * props.task.round?.total_fooled) /
-                  props.task.round?.total_collected
-                ).toFixed(2)
-              : "0.00"}
-            % )
-          </td>
-        </tr>
-        {props.task.round && (
-          <tr>
-            <td>Verified Fooled/Collected (Verified Model Error Rate)</td>
-            <td className="text-right">
-              {props.task.round?.total_verified_fooled}/
-              {props.task.round?.total_collected} (
-              {props.task.round?.total_collected > 0
-                ? (
-                    (100 * props.task.round?.total_verified_fooled) /
-                    props.task.round?.total_collected
-                  ).toFixed(2)
-                : "0.00"}
-              % )
-            </td>
-          </tr>
-        )}
-        <tr>
-          <td>Last activity:</td>
-          <td className="text-right">
-            <Moment utc fromNow>
-              {props.task.last_updated}
-            </Moment>
-          </td>
-        </tr>
-      </tbody>
-    </Table>
-  );
-};
 
 class RoundDescription extends React.Component {
   constructor(props) {
@@ -544,16 +258,23 @@ class TaskPage extends React.Component {
               placement="right"
               tooltip="This shows the statistics of the currently active round."
             >
-              <OverallTaskStats task={this.state.task} />
+              <OverallTaskStats
+                curRound={this.state.task.cur_round}
+                round={this.state.task.round}
+                lastUpdated={this.state.task.last_updated}
+              />
             </Annotation>
           </Row>
           <Row className="justify-content-center">
             {this.state.task?.active && (
               <TaskActionButtons
-                api={this.context.api}
-                taskCode={this.state.taskCode}
-                user={this.context.user}
-                task={this.state.task}
+                config_yaml={this.state.task.config_yaml}
+                dynamicAdversarialDataCollection={
+                  this.state.task.dynamic_adversarial_data_collection
+                }
+                submitable={this.state.task.submitable}
+                hasPredictionsUpload={this.state.task.has_predictions_upload}
+                taskCode={this.state.task.task_code}
               />
             )}
           </Row>
@@ -626,12 +347,16 @@ class TaskPage extends React.Component {
                       )}
                     <Col xs={12} md={6}>
                       {this.state.trendScore.length > 0 && (
-                        <Annotation
-                          placement="top-end"
-                          tooltip="As tasks progress over time, we can follow their trend, which is shown here"
-                        >
-                          <TaskTrend data={this.state.trendScore} />
-                        </Annotation>
+                        <>
+                          <Annotation
+                            placement="top-end"
+                            tooltip="As tasks progress over time, we can follow their trend, which is shown here"
+                          >
+                            <>
+                              <TaskTrend trendScore={this.state.trendScore} />
+                            </>
+                          </Annotation>
+                        </>
                       )}
                     </Col>
                   </Row>

@@ -8,14 +8,14 @@ import React from "react";
 import Moment from "react-moment";
 import { Table } from "react-bootstrap";
 
-const OverallTaskStats = ({ cur_round, round, last_updated }) => {
+const OverallTaskStats = ({ curRound, round, lastUpdated }) => {
   return (
     <Table className="w-50 font-weight-bold ml-n2">
       <thead />
       <tbody>
         <tr>
           <td>Current round:</td>
-          <td className="text-right">{cur_round}</td>
+          <td className="text-right">{curRound}</td>
         </tr>
         <tr>
           <td>Fooled/Collected (Model Error rate)</td>
@@ -48,7 +48,7 @@ const OverallTaskStats = ({ cur_round, round, last_updated }) => {
           <td>Last activity:</td>
           <td className="text-right">
             <Moment utc fromNow>
-              {last_updated}
+              {lastUpdated}
             </Moment>
           </td>
         </tr>
