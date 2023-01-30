@@ -39,7 +39,15 @@ const taskModelLeaderboardCardWrapper = (
 
     return (
       <TaskModelLeaderboardCard
-        {...props}
+        title={props.title}
+        task={props.task}
+        history={props.history}
+        taskCode={props.taskCode}
+        disableForkAndSnapshot={props.disableForkAndSnapshot}
+        disableToggleSort={props.disableToggleSort}
+        disableAdjustWeights={props.disableAdjustWeights}
+        disablePagination={props.disablePagination}
+        modelColumnTitle={props.modelColumnTitle}
         getInitialWeights={(...args) =>
           getInitialWeights(...args, dataFromProps)
         }

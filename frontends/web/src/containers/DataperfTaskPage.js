@@ -4,57 +4,56 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useState } from "react";
-import { Col, Container, Nav, Row, Spinner } from "react-bootstrap";
+import React from "react";
+import { Col, Container, Row, Spinner } from "react-bootstrap";
 import useFetch from "use-http";
-import TaskPage from "../containers/TaskPage/TaskPage";
 import Dataperf from "./CommunitiesLandingPages/Dataperf";
 import { OverlayProvider } from "./Overlay";
+import TaskCard from "../components/Cards/TaskCard";
 
 const DataperfTaskPage = () => {
-  const { data: dataperfTasks = [] } = useFetch(
-    "/task/get_active_dataperf_tasks",
+  const { data: tasksInfo = [] } = useFetch(
+    "/task/get_active_tasks_with_round_info",
     []
   );
-  const [taskId, setTaskId] = useState();
-
-  useEffect(() => {}, [taskId]);
 
   return (
     <OverlayProvider initiallyHide={true} delayMs="1700">
-      {dataperfTasks ? (
+      {tasksInfo ? (
         <Container fluid>
           <Row>
-            <Col
-              lg={2}
-              className="p-0 border"
-              style={{
-                maxWidth: "300px",
-              }}
-            >
-              <Nav defaultActiveKey="/" className="flex-sm-row">
-                <Nav.Link
-                  onClick={() => setTaskId(null)}
-                  className="p-3 active gray-color px-lg-5 flores-nav-item nav-link"
-                >
-                  Dataperf
-                </Nav.Link>
-                {dataperfTasks.map((task) => (
-                  <Nav.Link
-                    className="p-3 active gray-color px-lg-5 flores-nav-item nav-link"
-                    onClick={(e) => {
-                      setTaskId(task.id);
-                    }}
-                  >
-                    {task.name.replace("Dataperf", "")}
-                  </Nav.Link>
-                ))}
-              </Nav>
-            </Col>
-            <Col lg={10} className="px-4 px-lg-5">
-              {taskId ? <TaskPage taskId={taskId} /> : <Dataperf />}
+            <Col className="px-4 px-lg-5">
+              <Dataperf />
             </Col>
           </Row>
+          <Row className="py-4">
+            <Col className="px-4 px-lg-5">
+              <p className="heroe-description d-block text-center">
+                Dataperf invites you to demonstrate the power of your algorithms
+                on these data-centric benchmarks
+              </p>
+            </Col>
+          </Row>
+          <Container>
+            <Row key="Dataperf" className="py-4">
+              {tasksInfo
+                .filter((t) => t.challenge_type === 2)
+                .map((task) => (
+                  <Col sm={6} lg={3} className="mb-3" key={task.id}>
+                    <TaskCard
+                      id={task.id}
+                      name={task.name}
+                      description={task.desc}
+                      curRound={task.round.cur_round}
+                      totalCollected={task.round.total_collected}
+                      totalFooled={task.round.total_fooled}
+                      lastUpdated={task.last_updated}
+                      taskCode={task.task_code}
+                    />
+                  </Col>
+                ))}
+            </Row>
+          </Container>
         </Container>
       ) : (
         <Spinner />

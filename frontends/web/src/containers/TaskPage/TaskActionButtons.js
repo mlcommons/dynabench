@@ -12,9 +12,9 @@ const yaml = require("js-yaml");
 
 const TaskActionButtons = ({
   config_yaml,
-  dynamic_adversarial_data_collection,
+  dynamicAdversarialDataCollection,
   submitable,
-  has_predictions_upload,
+  hasPredictionsUpload,
   taskCode,
 }) => {
   const showToolTip = (text) => <Tooltip id="button-tooltip">{text}</Tooltip>;
@@ -24,7 +24,7 @@ const TaskActionButtons = ({
 
   return (
     <Nav className="my-4">
-      {dynamic_adversarial_data_collection && (
+      {dynamicAdversarialDataCollection && (
         <>
           <Nav.Item className="task-action-btn">
             <Annotation
@@ -94,7 +94,7 @@ const TaskActionButtons = ({
           </Annotation>
         </Nav.Item>
       )}
-      {has_predictions_upload && (
+      {hasPredictionsUpload && (
         <Nav.Item className="task-action-btn">
           <Annotation
             placement="top"

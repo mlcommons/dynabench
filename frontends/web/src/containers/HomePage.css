@@ -47,6 +47,12 @@
     padding-top: 25px;
 }
 
+.heroe-description {
+    font-size: 20px;
+    font-weight: 500;
+    padding-top: 25px;
+}
+
 .tag-community-button {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
