@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -27,6 +33,23 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        "at-rule-no-unknown": [
+          true,
+          {
+            ignoreAtRules: [
+              "@tailwind",
+              "tailwind",
+              "apply",
+              "variants",
+              "responsive",
+              "screen",
+            ],
+          },
+        ],
+        "declaration-block-trailing-semicolon": null,
+        "no-descending-specificity": null,
+      },
       {
         test: /\.(js|jsx)$/,
         loader: "babel-loader",
