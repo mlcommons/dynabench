@@ -9,45 +9,44 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+import qs from "qs";
 import React from "react";
-import "./App.css";
-import { Navbar, Nav, NavDropdown, Row, Container } from "react-bootstrap";
-import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
-import { HashLink } from "react-router-hash-link";
-import HomePage from "./HomePage";
-import LoginPage from "./LoginPage";
-import ForgotPassword from "./ForgotPassword";
-import ResetPassword from "./ResetPassword";
-import RegisterPage from "./RegisterPage";
-import ProfilePage from "./ProfilePage";
+import { Container, Nav, Navbar, NavDropdown, Row } from "react-bootstrap";
+import ReactGA from "react-ga";
+import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
+import { Provider as FetchProvider } from "use-http";
+import CreateInterface from "../common/Annotation/CreateInterface.js";
+import ValidateInterface from "../common/Annotation/ValidateInterface.js";
+import ApiService from "../common/ApiService";
+import { Avatar } from "../components/Avatar/Avatar";
+import ForkAndSnapshotRouter from "../components/TaskLeaderboard/ForkAndSnapshotRouter";
 import AboutPage from "./AboutPage";
-import TaskPage from "./TaskPage";
+import "./App.css";
+import ContactPage from "./ContactPage";
+import DataperfTaskPage from "./DataperfTaskPage";
+import DataPolicyPage from "./DataPolicyPage";
 import FloresTaskPage from "./FloresTaskPage";
 import FloresTop5Page from "./FloresTop5Page";
-import ContactPage from "./ContactPage";
-import TermsPage from "./TermsPage";
-import DataPolicyPage from "./DataPolicyPage";
-import UserContext from "./UserContext";
-import TasksContext from "./TasksContext";
-import UserPage from "./UserPage";
-import ModelPage from "./ModelPage";
-import SubmitModel from "./SubmitModel";
-import ApiService from "../common/ApiService";
-import ScrollToTop from "./ScrollToTop.js";
-import CreateInterface from "../common/Annotation/CreateInterface.js";
-import TaskOwnerPage from "./TaskOwnerPage";
-import ValidateInterface from "../common/Annotation/ValidateInterface.js";
-import UpdateModelInfoInterface from "./UpdateModelInfoInterface.js";
+import ForgotPassword from "./ForgotPassword";
 import GenerateAPITokenPage from "./GenerateAPITokenPage.js";
-import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
-import ForkAndSnapshotRouter from "../components/TaskLeaderboard/ForkAndSnapshotRouter";
-import { Avatar } from "../components/Avatar/Avatar";
-import ReactGA from "react-ga";
-import SubmitInterface from "./SubmitInterface.js";
+import HomePage from "./HomePage";
+import LoginPage from "./LoginPage";
 import MLCubeTutorial from "./MLCubeTutorial";
-import DataperfTaskPage from "./DataperfTaskPage";
-import qs from "qs";
-import { Provider as FetchProvider } from "use-http";
+import ModelPage from "./ModelPage";
+import ProfilePage from "./ProfilePage";
+import RegisterPage from "./RegisterPage";
+import ResetPassword from "./ResetPassword";
+import ScrollToTop from "./ScrollToTop.js";
+import SubmitInterface from "./SubmitInterface.js";
+import SubmitModel from "./SubmitModel";
+import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
+import TaskOwnerPage from "./TaskOwnerPage";
+import TaskPage from "./TaskPage";
+import TasksContext from "./TasksContext";
+import TermsPage from "./TermsPage";
+import UpdateModelInfoInterface from "./UpdateModelInfoInterface.js";
+import UserContext from "./UserContext";
+import UserPage from "./UserPage";
 
 const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
 
@@ -168,7 +167,7 @@ class App extends React.Component {
                 <Navbar
                   expand="lg"
                   variant="dark"
-                  className="shadow principal-color-bg justify-content-start"
+                  className="px-12 shadow principal-color-bg justify-content-start"
                 >
                   <Navbar.Toggle
                     aria-controls="basic-navbar-nav"
@@ -177,9 +176,6 @@ class App extends React.Component {
                   <Navbar.Brand as={Link} to="/">
                     <img
                       src={"https://mlcommons.github.io/mlcube/assets/logo.png"}
-                      // src={
-                      //   'https://insidebigdata.com/wp-content/uploads/2022/06/MLCommons_logo.png'
-                      // }
                       style={{
                         width: 28,
                         marginLeft: 1,
@@ -187,6 +183,8 @@ class App extends React.Component {
                       }}
                       alt="MLCommons Logo"
                     />
+                  </Navbar.Brand>
+                  <Navbar.Brand as={Link} to="/">
                     <img
                       src="/logo_b.png"
                       style={{ width: 80, marginLeft: 5, marginRight: 25 }}
@@ -253,7 +251,7 @@ class App extends React.Component {
                             </ul>
                           </li>
                         </ul>
-                        <div className="dropdown-divider my-0"></div>
+                        <div className="my-0 dropdown-divider"></div>
                       </NavDropdown>
                     </Nav>
                     <Nav className="justify-content-end">
