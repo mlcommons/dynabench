@@ -117,6 +117,7 @@ class Task(Base):
     decen_bucket = Column(Text)
     decen_aws_region = Column(Text)
     image_url = Column(Text)
+    documentation_url = Column(Text)
 
 
 class User(Base):
