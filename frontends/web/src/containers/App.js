@@ -23,13 +23,12 @@ import ForkAndSnapshotRouter from "../components/TaskLeaderboard/ForkAndSnapshot
 import AboutPage from "./AboutPage";
 import "./App.css";
 import ContactPage from "./ContactPage";
-import DataperfTaskPage from "./DataperfTaskPage";
 import DataPolicyPage from "./DataPolicyPage";
 import FloresTaskPage from "./FloresTaskPage";
 import FloresTop5Page from "./FloresTop5Page";
 import ForgotPassword from "./ForgotPassword";
 import GenerateAPITokenPage from "./GenerateAPITokenPage.js";
-import HomePage from "./HomePage";
+import TasksPage from "../new_front/pages/Task/TasksPage";
 import LoginPage from "./LoginPage";
 import MLCubeTutorial from "./MLCubeTutorial";
 import ModelPage from "./ModelPage";
@@ -47,6 +46,11 @@ import TermsPage from "./TermsPage";
 import UpdateModelInfoInterface from "./UpdateModelInfoInterface.js";
 import UserContext from "./UserContext";
 import UserPage from "./UserPage";
+import DataperfLanding from "../new_front/pages/CommunitiesLandingPages/DataperfLanding";
+import DADCLanding from "../new_front/pages/CommunitiesLandingPages/DADCLanding";
+import OthersTaskLanding from "../new_front/pages/CommunitiesLandingPages/OthersTaskLanding";
+import logoBlack from "../new_front/assets/logo_black.png";
+import logoWhite from "../new_front/assets/logo_mlcommos_white.png";
 
 const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
 
@@ -175,19 +179,18 @@ class App extends React.Component {
                   />
                   <Navbar.Brand as={Link} to="/">
                     <img
-                      src={"https://mlcommons.github.io/mlcube/assets/logo.png"}
+                      src={logoWhite}
                       style={{
                         width: 28,
                         marginLeft: 1,
-                        marginRight: 10,
                       }}
                       alt="MLCommons Logo"
                     />
                   </Navbar.Brand>
                   <Navbar.Brand as={Link} to="/">
                     <img
-                      src="/logo_b.png"
-                      style={{ width: 80, marginLeft: 5, marginRight: 25 }}
+                      src={logoBlack}
+                      style={{ width: 80, marginRight: 25 }}
                       alt="Dynabench"
                     />
                   </Navbar.Brand>
@@ -444,11 +447,11 @@ class App extends React.Component {
                     path="/flores/:taskShortName?"
                     component={FloresTaskPage}
                   />
-                  <Route
-                    path="/dataperf/:taskShortName?"
-                    component={DataperfTaskPage}
-                  />
+                  <Route path="/dataperf" component={DataperfLanding} />
+                  <Route path="/dadc" component={DADCLanding} />
+                  <Route path="/others_tasks" component={OthersTaskLanding} />
 
+                  <Route path="/test" component={TasksPage} />
                   <Route path="/login" component={LoginPage} />
                   <Route
                     path="/generate_api_token"
@@ -468,7 +471,7 @@ class App extends React.Component {
                   <Route path="/register" component={RegisterPage} />
                   <Route path="/users/:userId" component={UserPage} />
                   <Route path="/models/:modelId" component={ModelPage} />
-                  <Route path="/" component={HomePage} />
+                  <Route path="/" component={TasksPage} />
                 </Switch>
               </div>
               {!showContentOnly && (
