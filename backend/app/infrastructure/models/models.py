@@ -116,6 +116,7 @@ class Task(Base):
     decen_queue = Column(Text)
     decen_bucket = Column(Text)
     decen_aws_region = Column(Text)
+    image_url = Column(Text)
 
 
 class User(Base):
@@ -302,6 +303,25 @@ class Round(Base):
     end_datetime = Column(DateTime)
 
     task = relationship("Task")
+
+
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+
+
+class TaskCategories(Base):
+    __tablename__ = "task_categories"
+
+    id_task = Column(ForeignKey("tasks.id"), primary_key=True, nullable=False)
+    id_category = Column(
+        ForeignKey("categories.id"), primary_key=True, nullable=False, index=True
+    )
+
+    task = relationship("Task")
+    category = relationship("Category")
 
 
 class TaskProposal(Base):

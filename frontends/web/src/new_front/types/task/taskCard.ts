@@ -1,3 +1,5 @@
+import { TaskCategories } from "./taskCategories";
+
 export type TaskCardProps = {
   id: number;
   name: string;
@@ -5,6 +7,7 @@ export type TaskCardProps = {
   curRound: number;
   totalCollected: number;
   totalFooled: number;
-  lastUpdated: string;
   taskCode: string;
+  imageUrl: string;
+  tasksCategories: TaskCategories[];
 };

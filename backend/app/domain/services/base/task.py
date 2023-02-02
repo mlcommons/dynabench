@@ -14,6 +14,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import 
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
+from app.infrastructure.repositories.taskcategories import TaskCategoriesRepository
 
 
 class TaskService:
@@ -22,6 +23,7 @@ class TaskService:
         self.dataset_repository = DatasetRepository()
         self.model_repository = ModelRepository()
         self.score_services = ScoreService()
+        self.task_categories_repository = TaskCategoriesRepository()
 
     def update_last_activity_date(self, task_id: int):
         self.task_repository.update_last_activity_date(task_id)
@@ -162,3 +164,6 @@ class TaskService:
 
     def get_active_dataperf_tasks(self):
         return self.task_repository.get_active_dataperf_tasks()
+
+    def get_tasks_categories(self):
+        return self.task_categories_repository.get_tasks_categories()
