@@ -15,6 +15,11 @@ async def get_active_tasks_with_round_info():
     return TaskService().get_active_tasks_with_round_info()
 
 
+@router.get("/get_tasks_categories", response_model={})
+async def get_tasks_categories():
+    return TaskService().get_tasks_categories()
+
+
 @router.get("/get_task_id_by_task_code/{task_code}", response_model={})
 async def get_task_id_by_task_code(task_code: str):
     return TaskService().get_task_id_by_task_code(task_code)
