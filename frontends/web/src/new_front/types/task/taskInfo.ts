@@ -41,6 +41,7 @@ export type TaskInfoType = {
   unique_validators_for_example_tags: number;
   unpublished_models_in_leaderboard: number;
   validate_non_fooling: number;
+  image_url: string;
 };
 
 type roundInfoType = {
