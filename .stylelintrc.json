@@ -11,6 +11,12 @@
           "OpenSansSemiBold"
         ]
       }
+    ],
+    "at-rule-no-unknown": [
+        true,
+        {
+            "ignoreAtRules": ["tailwind"]
+        }
     ]
   }
 }
