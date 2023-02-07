@@ -772,16 +772,16 @@ ${latexTableContent}
                           </tr>
                         )}
                         <tr style={{ border: `none` }}>
-                          <td>Deployment Status</td>
-                          <td>
+                          <td className="text-base p-6">Deployment Status</td>
+                          <td className="text-base p-6">
                             <DeploymentStatus
                               deploymentStatus={model.deployment_status}
                             />
                           </td>
                         </tr>
                         <tr style={{ border: `none` }}>
-                          <td>Owner</td>
-                          <td>
+                          <td className="text-base p-6">Owner</td>
+                          <td className="text-base p-6">
                             {model.uid ? (
                               <span>
                                 <Link to={`/users/${model.uid}`}>
@@ -802,35 +802,46 @@ ${latexTableContent}
                         </tr>
                         {!isFlores && (
                           <tr style={{ border: `none` }}>
-                            <td>Task</td>
-                            <td>
+                            <td className="text-base p-6">Task</td>
+                            <td className="text-base p-6">
                               <Link to={`/tasks/${taskCode}`}>{taskCode}</Link>
                             </td>
                           </tr>
                         )}
                         <tr style={{ border: `none` }}>
-                          <td>Summary</td>
-                          <td>{model.longdesc}</td>
+                          <td className="text-base p-6">Summary</td>
+                          <td className="text-base p-6">{model.longdesc}</td>
                         </tr>
                         <tr style={{ border: `none` }}>
-                          <td style={{ whiteSpace: "nowrap" }}># Parameters</td>
-                          <td>{model.params}</td>
+                          <td
+                            className="text-base p-6"
+                            style={{ whiteSpace: "nowrap" }}
+                          >
+                            # Parameters
+                          </td>
+                          <td className="text-base p-6">{model.params}</td>
                         </tr>
                         {!isFlores && (
                           <tr style={{ border: `none` }}>
-                            <td>Language(s)</td>
-                            <td>{model.languages}</td>
+                            <td className="text-base p-6">Language(s)</td>
+                            <td className="text-base p-6">
+                              {" "}
+                              {model.languages}
+                            </td>
                           </tr>
                         )}
                         <tr style={{ border: `none` }}>
-                          <td>License(s)</td>
-                          <td>{model.license}</td>
+                          <td className="text-base p-6">License(s)</td>
+                          <td className="text-base p-6">{model.license}</td>
                         </tr>
                         <tr style={{ border: `none` }}>
-                          <td style={{ verticalAlign: "middle" }}>
+                          <td
+                            className="text-base p-6"
+                            style={{ verticalAlign: "middle" }}
+                          >
                             Model Card
                           </td>
-                          <td className="modelCard">
+                          <td className="modelCard text-base p-6">
                             <Markdown>{model.model_card}</Markdown>
                           </td>
                         </tr>
@@ -842,7 +853,7 @@ ${latexTableContent}
                         <DropdownButton
                           alignRight={true}
                           variant="outline-primary"
-                          className="mr-2 float-right"
+                          className="mr-2 float-right border-0 font-weight-bold light-gray-bg"
                           title={"Export"}
                         >
                           <Dropdown.Item onClick={this.downloadCsv}>
@@ -861,12 +872,12 @@ ${latexTableContent}
                       <Table>
                         <tbody>
                           <tr>
-                            <td colSpan={2}>
+                            <td className="text-base p-6" colSpan={2}>
                               <h5>Leaderboard Datasets</h5>
                             </td>
                           </tr>
                           <tr>
-                            <td>
+                            <td className="text-base p-6">
                               <div className="parent">
                                 <label className="child2">
                                   <b>{perf_metric_metric_configs.type}</b>
@@ -906,7 +917,7 @@ ${latexTableContent}
                       <Table>
                         <tbody>
                           <tr>
-                            <td colSpan={3}>
+                            <td className="text-base p-6" colSpan={3}>
                               <h5>Non-Leaderboard Datasets</h5>
                             </td>
                           </tr>
@@ -943,7 +954,7 @@ ${latexTableContent}
                       <Table>
                         <tbody>
                           <tr>
-                            <td colSpan={2}>
+                            <td className="text-base p-6" colSpan={2}>
                               <h5>
                                 Hidden Dataset Incomplete Evaluation Statuses
                               </h5>
