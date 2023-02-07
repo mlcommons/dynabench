@@ -4,11 +4,16 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { FC } from "react";
 import Moment from "react-moment";
 import { Table } from "react-bootstrap";
+import { OverallTaskStatsProps } from "../../types/task/overallTaskStats";
 
-const OverallTaskStats = ({ curRound, round, lastUpdated }) => {
+const OverallTaskStats: FC<OverallTaskStatsProps> = ({
+  curRound,
+  round,
+  lastUpdated,
+}) => {
   return (
     <Table className="w-50 font-weight-bold ml-n2">
       <thead />

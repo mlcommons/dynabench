@@ -4,12 +4,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { FC } from "react";
 import { Card, Col } from "react-bootstrap";
-import { LineRechart } from "../../components/Charts/Rechart";
-import { chartSizesLineRechart } from "./chartSizes";
+import { LineRechart } from "../../../components/Charts/Rechart";
+import { chartSizesLineRechart } from "../Graphs/chartSizes";
+import { TaskTrendProps } from "../../types/task/taskTrend";
 
-const TaskTrend = ({ trendScore }) => {
+const TaskTrend: FC<TaskTrendProps> = ({ trendScore }) => {
   return (
     <>
       <Card className="my-4">

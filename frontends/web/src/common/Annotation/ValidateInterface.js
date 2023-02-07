@@ -465,7 +465,7 @@ class ValidateInterface extends React.Component {
               <p className="text-uppercase mb-0 spaced-header">
                 {this.state.task.name}
               </p>
-              <h2 className="task-page-header d-block ml-0 mt-0 text-reset">
+              <h2 className="text-2xl task-page-header d-block ml-0 mt-0 text-reset">
                 Validate examples
               </h2>
             </div>
@@ -557,7 +557,7 @@ class ValidateInterface extends React.Component {
                           data-index={this.props.index}
                           onClick={this.getNewExample}
                           type="button"
-                          className="font-weight-bold principal-color light-gray-bg border-0 task-action-btn"
+                          className="ml-2 font-weight-bold principal-color light-gray-bg border-0 task-action-btn"
                         >
                           <i className="fas fa-undo-alt"></i> Skip and load new
                           example

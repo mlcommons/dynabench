@@ -4,21 +4,22 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from "react";
-import { Button, Nav, OverlayTrigger, Tooltip } from "react-bootstrap";
+import React, { FC } from "react";
+import { Button, Nav, OverlayTrigger } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { Annotation } from "../Overlay";
+import { Annotation } from "../../../containers/Overlay";
+import { TaskActionButtonsProps } from "../../types/buttons/taskActionButtons";
+import ShowToolTip from "../Utils/ShowToolTip";
 const yaml = require("js-yaml");
 
-const TaskActionButtons = ({
+const TaskActionButtons: FC<TaskActionButtonsProps> = ({
   config_yaml,
   dynamicAdversarialDataCollection,
   submitable,
   hasPredictionsUpload,
   taskCode,
+  taskDocumentationUrl,
 }) => {
-  const showToolTip = (text) => <Tooltip id="button-tooltip">{text}</Tooltip>;
-
   const hasTrainFileUpload =
     config_yaml && yaml.load(config_yaml).hasOwnProperty("train_file_metric");
 
@@ -35,12 +36,12 @@ const TaskActionButtons = ({
                 placement="bottom"
                 delay={{ show: 250, hide: 400 }}
                 overlay={() =>
-                  showToolTip("Create new examples where the model fails")
+                  ShowToolTip("Create new examples where the model fails")
                 }
               >
                 <Button
                   as={Link}
-                  className="border-0 font-weight-bold light-gray-bg"
+                  className="mr-2 border-0 font-weight-bold light-gray-bg"
                   to={`/tasks/${taskCode}/create`}
                 >
                   <i className="fas fa-pen"></i> Create Examples
@@ -57,12 +58,12 @@ const TaskActionButtons = ({
                 placement="bottom"
                 delay={{ show: 250, hide: 400 }}
                 overlay={() =>
-                  showToolTip("Verify examples where the model may have failed")
+                  ShowToolTip("Verify examples where the model may have failed")
                 }
               >
                 <Button
                   as={Link}
-                  className="border-0 font-weight-bold light-gray-bg"
+                  className="mr-2 border-0 font-weight-bold light-gray-bg"
                   to={`/tasks/${taskCode}/validate`}
                 >
                   <i className="fas fa-search"></i> Validate Examples
@@ -81,11 +82,11 @@ const TaskActionButtons = ({
             <OverlayTrigger
               placement="bottom"
               delay={{ show: 250, hide: 400 }}
-              overlay={() => showToolTip("")}
+              overlay={() => ShowToolTip("")}
             >
               <Button
                 as={Link}
-                className="border-0 font-weight-bold light-gray-bg"
+                className="mr-2 border-0 font-weight-bold light-gray-bg"
                 to={`/tasks/${taskCode}/uploadModel`}
               >
                 <i className="fas fa-upload"></i> Submit Models
@@ -106,15 +107,38 @@ const TaskActionButtons = ({
               placement="bottom"
               delay={{ show: 250, hide: 400 }}
               overlay={() =>
-                showToolTip("Verify examples where the model may have failed")
+                ShowToolTip("Verify examples where the model may have failed")
               }
             >
               <Button
                 as={Link}
-                className="border-0 font-weight-bold light-gray-bg"
+                className="mr-2 border-0 font-weight-bold light-gray-bg"
                 to={"/tasks/" + taskCode + "/submit_predictions"}
               >
                 <i className="fa fa-upload"></i> Submit Prediction Files
+              </Button>
+            </OverlayTrigger>
+          </Annotation>
+        </Nav.Item>
+      )}
+      {taskDocumentationUrl && (
+        <Nav.Item className="task-action-btn">
+          <Annotation
+            placement="top"
+            tooltip={"Click here to get more information about the task"}
+          >
+            <OverlayTrigger
+              placement="bottom"
+              delay={{ show: 250, hide: 400 }}
+              overlay={() =>
+                ShowToolTip("Click here to get more information about the task")
+              }
+            >
+              <Button
+                onClick={() => window.open(taskDocumentationUrl, "_blank")}
+                className="mr-2 border-0 font-weight-bold light-gray-bg"
+              >
+                <i className="fa fa-file"></i> Documentation
               </Button>
             </OverlayTrigger>
           </Annotation>
@@ -134,13 +158,13 @@ const TaskActionButtons = ({
                 placement="bottom"
                 delay={{ show: 250, hide: 400 }}
                 overlay={() =>
-                  showToolTip("Verify examples where the model may have failed")
+                  ShowToolTip("Verify examples where the model may have failed")
                 }
               >
                 <>
                   <Button
                     as={Link}
-                    className="border-0 font-weight-bold light-gray-bg"
+                    className="mr-2 border-0 font-weight-bold light-gray-bg"
                     to={"/tasks/" + taskCode + "/submit_train_files"}
                   >
                     <i className="fa fa-upload"></i> Submit Files
@@ -161,13 +185,13 @@ const TaskActionButtons = ({
                 placement="bottom"
                 delay={{ show: 250, hide: 400 }}
                 overlay={() =>
-                  showToolTip("Verify examples where the model may have failed")
+                  ShowToolTip("Verify examples where the model may have failed")
                 }
               >
                 <>
                   <Button
                     as={Link}
-                    className="border-0 font-weight-bold light-gray-bg"
+                    className="mr-2 border-0 font-weight-bold light-gray-bg"
                     to={"/tasks/" + taskCode + "/mlcube_tutorial"}
                   >
                     <i className="fa fa-upload"></i> MLCube Tutorial

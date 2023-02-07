@@ -49,3 +49,10 @@ class UserRepository(AbstractRepository):
             .filter(self.model.id == user_id)
             .first()
         )
+
+    def get_is_admin(self, user_id: int) -> bool:
+        return (
+            self.session.query(self.model.admin)
+            .filter(self.model.id == user_id)
+            .first()
+        )

@@ -147,10 +147,18 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
         </Form.Group>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <Button
+          variant="primary"
+          onClick={handleClose}
+          className="border-0 font-weight-bold light-gray-bg"
+        >
           Close
         </Button>
-        <Button variant="primary" type="submit" className="center-submit-model">
+        <Button
+          variant="primary"
+          type="submit"
+          className="border-0 font-weight-bold light-gray-bg"
+        >
           Submit Model
         </Button>
       </Modal.Footer>
