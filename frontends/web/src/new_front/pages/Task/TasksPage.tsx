@@ -39,23 +39,21 @@ const TasksPage = () => {
           <h2 className="pt-6 text-2xl font-semibold text-center d-block text-letter-color">
             TASKS
           </h2>
-          <div className="pb-2 container-fluid">
-            <span className="inline-flex items-center px-3 py-1 m-2 rounded-full bg-primary-color ">
+          <div className="pb-2">
+            <span className="inline-flex items-center px-3 py-1 m-3 rounded-full bg-primary-color">
               <Link
                 className="text-lg font-medium text-[#6e6e6e] hover:text-letter-color"
-                to="/dataperf"
+                to="/dadc"
               >
-                Dataperf
+                DADC
               </Link>
             </span>
-          </div>
-          <div>
             <div
               className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-4"
-              key="Dataperf"
+              key="DADC"
             >
               {tasksData
-                .filter((t) => t.challenge_type === 2)
+                .filter((t) => t.challenge_type === 1)
                 .map((task) => (
                   <div key={task.id}>
                     <TaskCard
@@ -73,21 +71,23 @@ const TasksPage = () => {
                 ))}
             </div>
           </div>
-          <div className="pb-2">
-            <span className="inline-flex items-center px-3 py-1 m-3 rounded-full bg-primary-color">
+          <div className="pb-2 container-fluid">
+            <span className="inline-flex items-center px-3 py-1 m-2 rounded-full bg-primary-color ">
               <Link
                 className="text-lg font-medium text-[#6e6e6e] hover:text-letter-color"
-                to="/dadc"
+                to="/dataperf"
               >
-                DADC
+                Dataperf
               </Link>
             </span>
+          </div>
+          <div>
             <div
               className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-4"
-              key="DADC"
+              key="Dataperf"
             >
               {tasksData
-                .filter((t) => t.challenge_type === 1)
+                .filter((t) => t.challenge_type === 2)
                 .map((task) => (
                   <div key={task.id}>
                     <TaskCard
