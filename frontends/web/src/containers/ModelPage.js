@@ -653,7 +653,7 @@ ${latexTableContent}
               <Card.Body>
                 <div className="d-flex justify-content-between mx-4 mt-4">
                   <Button
-                    className={`principal-color-bg border-0 font-weight-bold ${
+                    className={`border-0 font-weight-bold light-gray-bg ${
                       isModelOwner ? "mr-2" : null
                     }`}
                     aria-label="Back"
@@ -666,19 +666,22 @@ ${latexTableContent}
                     {(isModelOwner || model.is_published) &&
                     model.deployment_status === "deployed" ? (
                       <Button
-                        variant="outline-primary mr-2"
+                        variant="border-0 font-weight-bold light-gray-bg"
                         onClick={() => this.handleInteract()}
                       >
                         <i className="fas fa-pen"></i> Interact
                       </Button>
                     ) : this.state.modelDeployed ? (
-                      <Button variant="outline-primary mr-2" disabled={true}>
+                      <Button
+                        variant="border-0 font-weight-bold light-gray-bg"
+                        disabled={true}
+                      >
                         <i className="fas fa-upload"></i> Model Deployed!
                       </Button>
                     ) : (isModelOwner || model.is_published) &&
                       model.deployment_status === "takendownnonactive" ? (
                       <Button
-                        variant="outline-primary mr-2"
+                        variant="border-0 font-weight-bold light-gray-bg"
                         onClick={() => this.handleDeployModel()}
                       >
                         <i className="fas fa-upload"></i> Deploy Model
@@ -688,7 +691,7 @@ ${latexTableContent}
                     )}
                     {model.source_url && model.source_url !== "" ? (
                       <Button
-                        variant="outline-primary mr-2"
+                        variant="border-0 font-weight-bold light-gray-bg"
                         href={model.source_url}
                       >
                         <i className="fas fa-newspaper"></i> Read Paper
@@ -698,7 +701,7 @@ ${latexTableContent}
                     )}
                     {isModelOwner && (
                       <Button
-                        variant="outline-primary mr-2"
+                        variant="border-0 font-weight-bold light-gray-bg"
                         onClick={() => this.handleEdit()}
                       >
                         Edit

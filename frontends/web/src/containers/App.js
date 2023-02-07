@@ -41,6 +41,7 @@ import SubmitModel from "./SubmitModel";
 import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
 import TaskPage from "./TaskPage";
+// import TaskPage from "../new_front/pages/Task/TaskPage";
 import TasksContext from "./TasksContext";
 import TermsPage from "./TermsPage";
 import UpdateModelInfoInterface from "./UpdateModelInfoInterface.js";

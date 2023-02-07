@@ -14,17 +14,36 @@ import React from "react";
 import TaskModelLeaderboardCard from "./TaskModelLeaderboardCard";
 import { useParams } from "react-router-dom";
 
-/**
- *
- * This is a wrapper around TaskModelLeaderboardCard.js which allows to extract out the logic for initializing weights
- * and fetching leaderboard data. A custom task leaderboard can be created simply by passing in custom functions for
- * initializing weights and fetching data.
- *
- * @param getInitialWeights Function that defines how weights for metrics and datasets are to be initialized
- * @param fetchLeaderboardData Function that defines how the leaderboard data is to be fetched
- * @returns {function(*)} A functional component that uses the custom function passed to taskModelLeaderboardCardWrapper
- * and renders the TaskModelLeaderboardCard.
- */
+const taskModelLeaderboardCardWrapper2 = (
+  title,
+  task,
+  history,
+  taskCode,
+  disableForkAndSnapshot,
+  disableToggleSort,
+  disableAdjustWeights,
+  disablePagination,
+  modelColumnTitle,
+  getInitialWeights,
+  fetchLeaderboardData
+) => {
+  return (
+    <TaskModelLeaderboardCard
+      title={title}
+      task={task}
+      history={history}
+      taskCode={taskCode}
+      disableForkAndSnapshot={disableForkAndSnapshot}
+      disableToggleSort={disableToggleSort}
+      disableAdjustWeights={disableAdjustWeights}
+      disablePagination={disablePagination}
+      modelColumnTitle={modelColumnTitle}
+      getInitialWeights={getInitialWeights}
+      fetchLeaderboardData={fetchLeaderboardData}
+    />
+  );
+};
+
 const taskModelLeaderboardCardWrapper = (
   getInitialWeights,
   fetchLeaderboardData
@@ -36,7 +55,6 @@ const taskModelLeaderboardCardWrapper = (
       history: props.history,
       snapshotData: props.snapshotData,
     };
-
     return (
       <TaskModelLeaderboardCard
         title={props.title}

@@ -11,78 +11,28 @@
  */
 
 import React from "react";
-import "./TaskPage.css";
 import {
-  Container,
-  Row,
-  Col,
-  Card,
   Button,
   ButtonGroup,
-  Nav,
-  Table,
+  Col,
+  Container,
+  Row,
   Spinner,
-  Tooltip,
-  OverlayTrigger,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import UserContext from "./UserContext";
-import Moment from "react-moment";
-import { OverlayProvider, Annotation, OverlayContext } from "./Overlay";
 import {
   TaskModelDefaultLeaderboard,
   TaskModelForkLeaderboard,
 } from "../components/TaskLeaderboard/TaskModelLeaderboardCardWrapper";
 import UserLeaderboardCard from "../components/TaskPageComponents/UserLeaderboardCard";
-import TaskTrend from "./TaskPage/TaskTrend";
-import TaskActionButtons from "./TaskPage/TaskActionButtons";
-import OverallTaskStats from "./TaskPage/OverallTaskStats";
+import TaskActionButtons from "../new_front/components/Buttons/TaskActionButtons";
+import OverallTaskStats from "../new_front/components/TaskPage/OverallTaskStats";
+import TaskTrend from "../new_front/components/TaskPage/TaskTrend";
+import { Annotation, OverlayContext, OverlayProvider } from "./Overlay";
+import "./TaskPage.css";
+import UserContext from "./UserContext";
 
 const yaml = require("js-yaml");
-
-class RoundDescription extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this.getRoundInfo = this.getRoundInfo.bind(this);
-  }
-  componentDidMount() {
-    this.getRoundInfo();
-  }
-  getRoundInfo() {
-    if (this.props.round_id) {
-      this.props.api.getTaskRound(this.props.task_id, this.props.round_id).then(
-        (result) => {
-          this.setState({ round: result });
-        },
-        (error) => {
-          console.log(error);
-          if (
-            (error.status_code === 404 || error.status_code === 405) &&
-            this.props.history
-          ) {
-            this.props.history.push("/");
-          }
-        }
-      );
-    }
-  }
-  componentDidUpdate(prevProps) {
-    if (
-      prevProps.task_id !== this.props.task_id ||
-      prevProps.round_id !== this.props.round_id
-    ) {
-      this.getRoundInfo();
-    }
-  }
-  render() {
-    return (
-      <div
-        dangerouslySetInnerHTML={{ __html: this.state.round?.longdesc }}
-      ></div>
-    );
-  }
-}
 
 class TaskPage extends React.Component {
   static contextType = UserContext;
@@ -169,28 +119,6 @@ class TaskPage extends React.Component {
   }
 
   render() {
-    const pwc_logo = (
-      <svg height="30" width="30" viewBox="0 0 512 512">
-        <path
-          fill="#21cbce"
-          d="M88 128h48v256H88zm144 0h48v256h-48zm-72 16h48v224h-48zm144 0h48v224h-48zm72-16h48v256h-48z"
-        ></path>
-        <path
-          fill="#21cbce"
-          d="M104 104V56H16v400h88v-48H64V104zm304-48v48h40v304h-40v48h88V56z"
-        ></path>
-      </svg>
-    );
-    const name_to_pwc_links = {
-      "Question Answering":
-        "https://paperswithcode.com/task/question-answering/latest",
-      "Natural Language Inference":
-        "https://paperswithcode.com/task/natural-language-inference/latest",
-      "Hate Speech":
-        "https://paperswithcode.com/task/hate-speech-detection/latest",
-      "Sentiment Analysis":
-        "https://paperswithcode.com/task/sentiment-analysis/latest",
-    };
     const hasTrainFileUpload =
       this.state.task.config_yaml &&
       yaml
@@ -202,17 +130,8 @@ class TaskPage extends React.Component {
           <Row>
             <Col />
             <Col className="text-center">
-              <h2 className="task-page-header text-reset">
-                <nobr>
-                  {this.state.task.name}{" "}
-                  {this.state.task.name in name_to_pwc_links ? (
-                    <a href={name_to_pwc_links[this.state.task.name]}>
-                      {pwc_logo}
-                    </a>
-                  ) : (
-                    ""
-                  )}
-                </nobr>
+              <h2 className="pt-6 text-2xl font-medium text-center d-block text-letter-color">
+                <nobr>{this.state.task.name} </nobr>
               </h2>
             </Col>
             <Col>
@@ -275,17 +194,17 @@ class TaskPage extends React.Component {
                 submitable={this.state.task.submitable}
                 hasPredictionsUpload={this.state.task.has_predictions_upload}
                 taskCode={this.state.task.task_code}
+                taskDocumentationUrl={this.state.task.documentation_url}
               />
             )}
           </Row>
           <Row className="justify-content-center">
             <Col xs={12} md={12}>
-              <RoundDescription
-                api={this.context.api}
-                task_id={this.state.task.id}
-                cur_round={this.state.task.cur_round}
-                round_id={this.state.task.cur_round}
-              />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: this.state.task.round?.longdesc,
+                }}
+              ></div>
             </Col>
           </Row>
           {this.state.loading ? (
