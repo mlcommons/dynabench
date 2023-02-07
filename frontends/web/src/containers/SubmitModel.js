@@ -167,13 +167,13 @@ const SubmitModel = (props) => {
               <h1 className="pt-3 my-4 text-uppercase">
                 Upload your own model
               </h1>
-              <h2 className="m-0 task-page-header d-block font-weight-normal text-reset">
+              <h2 className="m-0 task-page-header d-block font-weight-normal text-reset text-2xl ">
                 The instructions for model uploads are as follows:
               </h2>
             </div>
             <div className="mt-5">
               <ul>
-                <li>
+                <li className="mb-2">
                   <strong>Download Dynalab 2.0</strong>
                   <p>
                     Please download{" "}
@@ -184,7 +184,7 @@ const SubmitModel = (props) => {
                     project, and unzip in your own computer.
                   </p>
                 </li>
-                <li>
+                <li className="mb-2">
                   <strong>Understand the folders</strong>
                   <p>
                     Inside the repository you will find a folder called app.
@@ -197,7 +197,7 @@ const SubmitModel = (props) => {
                     look for the model.py file.
                   </p>
                 </li>
-                <li>
+                <li className="mb-2">
                   <strong>Single and batch evaluation functions</strong>
                   <p>
                     In model script you will find a class called
@@ -207,7 +207,7 @@ const SubmitModel = (props) => {
                     update in order to make inferences using your model.
                   </p>
                 </li>
-                <li>
+                <li className="mb-2">
                   <strong>More classes, functions, ...</strong>
                   <p>
                     It is important to mention that you can create as many
@@ -217,7 +217,7 @@ const SubmitModel = (props) => {
                     "ModelController" class.
                   </p>
                 </li>
-                <li>
+                <li className="mb-2">
                   <strong>Include the dependencies</strong>
                   <p>
                     Don't forget to include the dependencies required to run
@@ -225,7 +225,7 @@ const SubmitModel = (props) => {
                     any of the libraries already included there.
                   </p>
                 </li>
-                <li>
+                <li className="mb-2">
                   <strong>Test your model</strong>
                   <br />
                   <span>
@@ -267,7 +267,7 @@ const SubmitModel = (props) => {
                         <center>
                           <Button
                             onClick={() => handleShow(true)}
-                            className="center-submit-model"
+                            className="border-0 font-weight-bold light-gray-bg btn-primary"
                           >
                             <i className="fas fa-edit "></i> Upload model
                           </Button>
@@ -288,7 +288,7 @@ const SubmitModel = (props) => {
                             className="center-submit-model"
                             onClick={handleSubmitModel}
                           >
-                            <i className="fas fa-edit center-submit-model"></i>{" "}
+                            <i className="border-0 font-weight-bold light-gray-bg btn-primary"></i>{" "}
                             Submit model
                           </Button>
                         </center>
@@ -303,7 +303,10 @@ const SubmitModel = (props) => {
                 Have a question?
               </h2>
               <a href="mailto:dynabench-site@mlcommons.org">
-                <Button variant="primary">
+                <Button
+                  variant="primary"
+                  className="border-0 font-weight-bold light-gray-bg btn-primary"
+                >
                   <i className="fas fa-edit"></i> Reach out to us
                 </Button>
               </a>
