@@ -45,7 +45,7 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
       </Modal.Header>
       <Modal.Body>
         <Form.Group className="mb-3" controlId="modelName">
-          <Form.Label>Model name</Form.Label>
+          <Form.Label className="text-base">Model name</Form.Label>
           <Form.Control
             placeholder="Model name"
             autoFocus
@@ -53,7 +53,7 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="desc">
-          <Form.Label>Description</Form.Label>
+          <Form.Label className="text-base">Description</Form.Label>
           <Form.Control
             placeholder="Description"
             autoFocus
@@ -61,7 +61,7 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="numParams">
-          <Form.Label>Num parameters</Form.Label>
+          <Form.Label className="text-base">Num parameters</Form.Label>
           <Form.Control
             placeholder="Num parameters"
             autoFocus
@@ -69,7 +69,7 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="languages">
-          <Form.Label>Languages</Form.Label>
+          <Form.Label className="text-base">Languages</Form.Label>
           <Form.Control
             placeholder="Languages"
             autoFocus
@@ -77,7 +77,7 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="license">
-          <Form.Label>License</Form.Label>
+          <Form.Label className="text-base">License</Form.Label>
           <Form.Control
             placeholder="License"
             autoFocus
@@ -131,7 +131,7 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
             </>
           ) : (
             <>
-              <Form.Label className="label-upload-file">
+              <Form.Label className="text-base label-upload-file">
                 Drag & drop your zip model here
               </Form.Label>
               <Form.Control

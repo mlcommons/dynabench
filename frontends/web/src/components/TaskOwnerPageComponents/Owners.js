@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -35,7 +41,9 @@ const Owners = (props) => {
                   <form className="px-4" onSubmit={handleSubmit}>
                     <Container>
                       <Form.Group as={Row} className="py-3 my-0 border-bottom">
-                        <Form.Label column>Owners</Form.Label>
+                        <Form.Label className="text-base" column>
+                          Owners
+                        </Form.Label>
                         <Col sm="8" style={{ margin: 0, padding: 15 }}>
                           {values.owners.map((value, index) => (
                             <Link
@@ -53,7 +61,9 @@ const Owners = (props) => {
                         controlId="owner_to_toggle"
                         className="py-3 my-0"
                       >
-                        <Form.Label column>Add/Remove Owner</Form.Label>
+                        <Form.Label className="text-base" column>
+                          Add/Remove Owner
+                        </Form.Label>
                         <Col sm="8">
                           <Form.Control
                             defaultValue={values.owner_to_toggle}

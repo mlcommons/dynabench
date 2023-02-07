@@ -1,36 +1,17 @@
-/*
- * Copyright (c) MLCommons and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/*
- * Copyright (c) MLCommons and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/*
- * Copyright (c) Facebook, Inc. and its affiliates.
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-import React, { useState } from "react";
-import { Button, Container, Col, Modal } from "react-bootstrap";
+import React, { FC, useState } from "react";
+import { Modal } from "react-bootstrap";
 import ReactPlayer from "react-player";
-import "./AboutPage.css";
+import videoThumbnail from "../../assets/vid_thumb.png";
 
-const AboutPage = () => {
+const About: FC = () => {
   const [showVideo, setShowVideo] = useState(false);
-
   return (
     <>
-      <Container className="mb-5 pb-5">
-        <Col className="m-auto" lg={9}>
+      <div className="max-w-4xl items-center m-auto">
+        <div className="m-auto">
           <div className="mb-5 text-center">
-            <h1 className="my-4 pt-3 text-uppercase">About</h1>
-            <h2 className="task-page-header d-block font-weight-normal m-0 text-reset">
+            <h1 className="my-4 pt-3 text-uppercase font-normal">About</h1>
+            <h2 className="text-xl d-block font-weight-normal m-0 text-reset text-center">
               Dynabench is a platform for dynamic data collection and
               benchmarking. Static benchmarks have many issues. Dynabench offers
               a more accurate and sustainable way for evaluating progress in AI.
@@ -60,14 +41,14 @@ const AboutPage = () => {
               }}
             />
           </Modal>
-          <div className="div-video-thumbnail">
+          <div className="items-center m-auto justify-evenly flex">
             <img
               alt="video-thumbnail"
               onClick={() => {
                 setShowVideo(true);
               }}
-              src="/vid_thumb.png"
-              className="video-thumbnail"
+              src={videoThumbnail}
+              className="w-60 border border-gray-300 rounded-lg cursor-pointer"
             />
           </div>
           <div className="mt-5">
@@ -127,9 +108,9 @@ const AboutPage = () => {
               that can automatically fix annotation artifacts and other biases
               over time. This is meant to address the following challenges:
             </p>
-            <ul>
-              <li>
-                <strong>Benchmarks saturate.</strong>
+            <ul className="list-disc pl-12">
+              <li className="my-3">
+                <h4 className="font-bold text-lg">Benchmarks saturate.</h4>
                 <p>
                   Our field is moving so quickly that benchmarks can saturate
                   rather quickly. This is problematic, because benchmarks are
@@ -139,8 +120,10 @@ const AboutPage = () => {
                   saturates, we have to go in search of a new, better benchmark.
                 </p>
               </li>
-              <li>
-                <strong>Benchmarks have artifacts.</strong>
+              <li className="my-3">
+                <h4 className="font-bold text-lg">
+                  Benchmarks have artifacts.
+                </h4>
                 <p>
                   There are well-documented cases of inadvertent biases that may
                   be present in datasets. For example, you can get decent
@@ -174,8 +157,10 @@ const AboutPage = () => {
                   side-effects.
                 </p>
               </li>
-              <li>
-                <strong>Researchers overfit on benchmarks.</strong>
+              <li className="my-3">
+                <h4 className="font-bold text-lg">
+                  Researchers overfit on benchmarks.
+                </h4>
                 <p>
                   Benchmarks provide a useful common goal for the community to
                   focus on, but that also means researchers may collectively
@@ -186,8 +171,10 @@ const AboutPage = () => {
                   established benchmarks.
                 </p>
               </li>
-              <li>
-                <strong>Benchmarks can be deceiving.</strong>
+              <li className="my-3">
+                <h4 className="font-bold text-lg">
+                  Benchmarks can be deceiving.
+                </h4>
                 <p>
                   Progress can be made in science by making sure we measure the
                   right thing. High accuracy on a subfield's main benchmark may
@@ -197,8 +184,8 @@ const AboutPage = () => {
                   Comprehension is solved.
                 </p>
               </li>
-              <li>
-                <strong>Aligning with humans.</strong>
+              <li className="my-3">
+                <h4 className="font-bold text-lg">Aligning with humans.</h4>
                 <p>
                   Usually, we ultimately care not about a single benchmark, but
                   about how well AI systems can work together with humans. It is
@@ -214,8 +201,8 @@ const AboutPage = () => {
                   when interacting with a human.{" "}
                 </p>
               </li>
-              <li>
-                <strong>Embracing the loop.</strong>
+              <li className="my-3">
+                <h4 className="font-bold text-lg">Embracing the loop.</h4>
                 <p>
                   Valuable time is lost when fields need to go in search of new
                   benchmarks. The cyclical process of benchmarks saturating and
@@ -226,8 +213,10 @@ const AboutPage = () => {
                   leads to the birth of a new, challenging benchmark.
                 </p>
               </li>
-              <li>
-                <strong>Models are now good enough.</strong>
+              <li className="my-3">
+                <h4 className="font-bold text-lg">
+                  Models are now good enough.
+                </h4>
                 <p>
                   Benchmarks are static for historical reasons. Up until
                   recently, we did not have crowdsourcing platforms and the
@@ -250,12 +239,12 @@ const AboutPage = () => {
           </div>
           <hr />
           <div className="mt-5 text-center">
-            <h2 className="home-cardgroup-header d-block font-weight-light text-uppercase text-reset">
+            <h2 className="text-xl font-weight-normal d-block font-light text-uppercase text-reset">
               Frequently Asked Questions
             </h2>
           </div>
           <div className="mb-5">
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               Wait, what does this do exactly?
             </h2>
             <p>
@@ -271,7 +260,7 @@ const AboutPage = () => {
               dataset where they fail. Datasets will be released periodically as
               new examples are collected.
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               Where can I read more?
             </h2>
             <p>
@@ -387,7 +376,7 @@ const AboutPage = () => {
             </p>
             <p>
               The following papers directly came out of the Dynabench project:
-              <ul>
+              <ul className="list-disc pl-12 pt-3">
                 <li>
                   <a href="https://arxiv.org/abs/2104.14337">
                     Dynabench: Rethinking Benchmarking in NLP
@@ -445,7 +434,7 @@ const AboutPage = () => {
                 </li>
               </ul>
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               Won't this lead to unnatural distributions and distributional
               shift?
             </h2>
@@ -464,7 +453,7 @@ const AboutPage = () => {
               That said, it is unclear to what extent a statically collected
               crowdsourced datasets are more "natural".
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               Will this actually work?
             </h2>
             <p>
@@ -473,7 +462,7 @@ const AboutPage = () => {
               making progress. If anything, we might discover that we still have
               a long way to go.
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               How do we compare results if the benchmark keeps changing?
             </h2>
             <p>
@@ -485,7 +474,7 @@ const AboutPage = () => {
               </a>
               .
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               Where will this lead?
             </h2>
             <p>
@@ -493,14 +482,14 @@ const AboutPage = () => {
               a more well-defined objective, and a better understanding of our
               current limitations.
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               Can I add my own task?
             </h2>
             <p>
               Absolutely! Please submit your proposal under "Tasks" in your user
               profile.
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               Do you have a data statement?
             </h2>
             <p>
@@ -518,7 +507,7 @@ const AboutPage = () => {
               making sure nobody is excluded, when collecting our data. We
               encourage task owners to take this very seriously.
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               What about other languages? Other modalities?
             </h2>
             <p>
@@ -528,7 +517,7 @@ const AboutPage = () => {
               We would love to have more tasks in different languages and
               different modalities.
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-0 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-0 text-reset">
               What about annotators?
             </h2>
             <p>
@@ -538,7 +527,7 @@ const AboutPage = () => {
               easy for crowdworkers to generate additional data, and to validate
               examples, in the same manner.
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               Who is on the team?
             </h2>
             <p>
@@ -554,7 +543,7 @@ const AboutPage = () => {
               Kok Rui Wong, Ishita Dasgupta, Anand Rajaram, Fatima Zahra Chriha,
               Rafael Mosquera, Julián Eusse, Juan Ciro and others.
             </p>
-            <h2 className="task-page-header d-block ml-0 mt-4 text-reset">
+            <h2 className="text-xl d-block ml-0 mt-4 text-reset">
               How can I help?
             </h2>
             <p>
@@ -565,19 +554,19 @@ const AboutPage = () => {
           </div>
           <hr />
           <div className="text-center">
-            <h2 className="home-cardgroup-header d-block font-weight-light mb-4 text-uppercase text-reset">
+            <h2 className="text-xl d-block font-light mb-4 text-uppercase text-reset">
               Have a question?
             </h2>
             <a href="mailto:dynabench-site@mlcommons.org">
-              <Button className="button-ellipse principal-color-bg home-readmore-btn border-0">
+              <button className="text-letter-color border-0 font-bold light-gray-bg m-8 p-3 rounded-full mb-32">
                 Reach out to us
-              </Button>
+              </button>
             </a>
           </div>
-        </Col>
-      </Container>
+        </div>
+      </div>
     </>
   );
 };
 
-export default AboutPage;
+export default About;

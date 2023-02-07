@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -90,7 +96,7 @@ const Datasets = (props) => {
                   <form className="px-4" onSubmit={handleSubmit}>
                     <Container>
                       <Form.Group as={Row} className="py-3 my-0 border-bottom">
-                        <Form.Label column>
+                        <Form.Label className="text-base" column>
                           Add a new dataset by uploading it here. Files should
                           be a jsonl where each line has fields that match the
                           model inputs and outputs for your task. There should
@@ -125,7 +131,9 @@ const Datasets = (props) => {
                         controlId="name"
                         className="py-3 my-0 border-bottom"
                       >
-                        <Form.Label column>Name</Form.Label>
+                        <Form.Label className="text-base" column>
+                          Name
+                        </Form.Label>
                         <Col sm={8}>
                           <Form.Control
                             value={values.name}
@@ -135,7 +143,9 @@ const Datasets = (props) => {
                         </Col>
                       </Form.Group>
                       <Form.Group as={Row} className="py-3 my-0">
-                        <Form.Label column>File</Form.Label>
+                        <Form.Label className="text-base" column>
+                          File
+                        </Form.Label>
                         <Col sm={8}>
                           <FileUpload
                             values={values}
@@ -150,7 +160,9 @@ const Datasets = (props) => {
                           as={Row}
                           className="py-3 my-0 border-top"
                         >
-                          <Form.Label column>File for {config.type}</Form.Label>
+                          <Form.Label className="text-base" column>
+                            File for {config.type}
+                          </Form.Label>
                           <Col sm={8}>
                             <FileUpload
                               values={values}
@@ -236,7 +248,9 @@ const Datasets = (props) => {
                             as={Row}
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>Name</Form.Label>
+                            <Form.Label className="text-base" column>
+                              Name
+                            </Form.Label>
                             <Col sm="6">
                               <Form.Control
                                 disabled
@@ -261,7 +275,9 @@ const Datasets = (props) => {
                             controlId="source_url"
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>Link to Paper</Form.Label>
+                            <Form.Label className="text-base" column>
+                              Link to Paper
+                            </Form.Label>
                             <Col sm="8">
                               <Form.Control
                                 onChange={handleChange}
@@ -274,7 +290,9 @@ const Datasets = (props) => {
                             controlId="access_type"
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>Access Type</Form.Label>
+                            <Form.Label className="text-base" column>
+                              Access Type
+                            </Form.Label>
                             <Col sm="8">
                               <Form.Control
                                 as="select"
@@ -296,7 +314,9 @@ const Datasets = (props) => {
                             controlId="log_access_type"
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>Log Access Type</Form.Label>
+                            <Form.Label className="text-base" column>
+                              Log Access Type
+                            </Form.Label>
                             <Col sm="8">
                               <Form.Control
                                 as="select"
@@ -326,7 +346,9 @@ const Datasets = (props) => {
                             controlId="rid"
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>Round</Form.Label>
+                            <Form.Label className="text-base" column>
+                              Round
+                            </Form.Label>
                             <Col sm="8">
                               <Form.Control
                                 as="select"
@@ -353,7 +375,9 @@ const Datasets = (props) => {
                             controlId="longdesc"
                             className="py-3 my-0"
                           >
-                            <Form.Label column>Description</Form.Label>
+                            <Form.Label className="text-base" column>
+                              Description
+                            </Form.Label>
                             <Form.Control
                               rows="6"
                               as="textarea"

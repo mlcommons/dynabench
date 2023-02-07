@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import useFetch from "use-http";
 import TaskCard from "../../components/Cards/TaskCard";
@@ -36,7 +35,7 @@ const TasksPage = () => {
   return (
     <>
       {!loading ? (
-        <Container>
+        <div className="container">
           <h2 className="pt-6 text-2xl font-semibold text-center d-block text-letter-color">
             TASKS
           </h2>
@@ -138,7 +137,7 @@ const TasksPage = () => {
                 ))}
             </div>
           </div>
-        </Container>
+        </div>
       ) : (
         <div className="flex items-center justify-center h-screen">
           <PacmanLoader color="#ccebd4" loading={loading} size={50} />
