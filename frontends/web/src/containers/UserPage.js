@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -148,7 +154,12 @@ class UserPage extends React.Component {
                           </Container>
                           <Card.Body>
                             <Form.Group as={Row}>
-                              <Form.Label column sm="6" className="text-right">
+                              <Form.Label
+                                className="text-xl"
+                                column
+                                sm="6"
+                                className="text-right"
+                              >
                                 Username:
                               </Form.Label>
                               <Col sm="4">
@@ -161,7 +172,12 @@ class UserPage extends React.Component {
                               </Col>
                             </Form.Group>
                             <Form.Group as={Row}>
-                              <Form.Label column sm="6" className="text-right">
+                              <Form.Label
+                                className="text-xl"
+                                column
+                                sm="6"
+                                className="text-right"
+                              >
                                 Affiliation:
                               </Form.Label>
                               <Col sm="4">
@@ -174,7 +190,12 @@ class UserPage extends React.Component {
                               </Col>
                             </Form.Group>
                             <Form.Group as={Row}>
-                              <Form.Label column sm="6" className="text-right">
+                              <Form.Label
+                                className="text-xl"
+                                column
+                                sm="6"
+                                className="text-right"
+                              >
                                 Model error rate (verified/unverified):
                               </Form.Label>
                               <Col sm="4">
@@ -227,7 +248,12 @@ class UserPage extends React.Component {
                               </Col>
                             </Form.Group>
                             <Form.Group as={Row}>
-                              <Form.Label column sm="6" className="text-right">
+                              <Form.Label
+                                className="text-xl"
+                                column
+                                sm="6"
+                                className="text-right"
+                              >
                                 Rejection rate:
                               </Form.Label>
                               <Col sm="4">
@@ -263,7 +289,12 @@ class UserPage extends React.Component {
                               </Col>
                             </Form.Group>
                             <Form.Group as={Row}>
-                              <Form.Label column sm="6" className="text-right">
+                              <Form.Label
+                                className="text-xl"
+                                column
+                                sm="6"
+                                className="text-right"
+                              >
                                 Retraction rate:
                               </Form.Label>
                               <Col sm="4">

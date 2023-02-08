@@ -137,7 +137,7 @@ class PublishInterface extends React.Component {
                       <>
                         <form onSubmit={handleSubmit} className="ml-2">
                           <Form.Group>
-                            <Form.Label>
+                            <Form.Label className="text-base">
                               <b>Model Name</b>
                             </Form.Label>
                             <Form.Control
@@ -152,7 +152,7 @@ class PublishInterface extends React.Component {
                             />
                           </Form.Group>
                           <Form.Group>
-                            <Form.Label>
+                            <Form.Label className="text-base">
                               <b>Summary</b>
                             </Form.Label>
                             <Form.Control
@@ -167,7 +167,7 @@ class PublishInterface extends React.Component {
                             />
                           </Form.Group>
                           <Form.Group>
-                            <Form.Label>
+                            <Form.Label className="text-base">
                               <b>Number of Parameters</b>
                             </Form.Label>
                             <Form.Control
@@ -189,7 +189,7 @@ class PublishInterface extends React.Component {
                             </Form.Text>
                           </Form.Group>
                           <Form.Group>
-                            <Form.Label>
+                            <Form.Label className="text-base">
                               <b>Language(s)</b>
                             </Form.Label>
                             <Form.Control
@@ -204,7 +204,7 @@ class PublishInterface extends React.Component {
                             />
                           </Form.Group>
                           <Form.Group>
-                            <Form.Label>
+                            <Form.Label className="text-base">
                               <b>License(s)</b>
                             </Form.Label>
                             <Form.Control
@@ -219,7 +219,7 @@ class PublishInterface extends React.Component {
                             />
                           </Form.Group>
                           <Form.Group>
-                            <Form.Label>
+                            <Form.Label className="text-base">
                               <b>Paper Link</b>
                             </Form.Label>
                             <Form.Control
@@ -231,7 +231,7 @@ class PublishInterface extends React.Component {
                             />
                           </Form.Group>
                           <Form.Group>
-                            <Form.Label>
+                            <Form.Label className="text-base">
                               <b>Model Card</b>
                             </Form.Label>
                             <Form.Control

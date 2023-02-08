@@ -242,7 +242,9 @@ class SubmitInterface extends React.Component {
                           controlId="modelName"
                           className="py-3 my-0 border-top"
                         >
-                          <Form.Label column>Model Name</Form.Label>
+                          <Form.Label className="text-base" column>
+                            Model Name
+                          </Form.Label>
                           <Col sm={8}>
                             <Form.Control
                               disabled={isSubmitting}
@@ -286,7 +288,9 @@ class SubmitInterface extends React.Component {
                               as={Row}
                               className="py-3 my-0 border-top"
                             >
-                              <Form.Label column>Dataset</Form.Label>
+                              <Form.Label className="text-base" column>
+                                Dataset
+                              </Form.Label>
                               <Col sm={8}>
                                 <span
                                   className="btn-link dataset-link"
@@ -304,7 +308,9 @@ class SubmitInterface extends React.Component {
                               </Col>
                             </Form.Group>
                             <Form.Group as={Row} className="py-3 my-0">
-                              <Form.Label column>Files</Form.Label>
+                              <Form.Label className="text-base" column>
+                                Files
+                              </Form.Label>
                               <Col sm={8}>
                                 <FileUpload
                                   disabled={isSubmitting}

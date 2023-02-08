@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -20,13 +26,13 @@ const Models = (props) => {
             <form className="px-4">
               <Container>
                 <Form.Group as={Row} className="py-3 my-0 border-bottom">
-                  <Form.Label column>
+                  <Form.Label className="text-base" column>
                     <b>Model</b>
                   </Form.Label>
-                  <Form.Label column>
+                  <Form.Label className="text-base" column>
                     <b>Publication Status</b>
                   </Form.Label>
-                  <Form.Label column>
+                  <Form.Label className="text-base" column>
                     <b>Deployment Status</b>
                   </Form.Label>
                 </Form.Group>
@@ -36,7 +42,7 @@ const Models = (props) => {
                     as={Row}
                     className="py-3 my-0 border-bottom"
                   >
-                    <Form.Label column>
+                    <Form.Label className="text-base" column>
                       <Link
                         to={`/models/${model_identifier.model_id}`}
                         className="btn-link"
@@ -50,7 +56,7 @@ const Models = (props) => {
                         ({model_identifier.username})
                       </Link>
                     </Form.Label>
-                    <Form.Label column>
+                    <Form.Label className="text-base" column>
                       {model_identifier.is_published ? (
                         <Badge variant="success" className="modelStatus">
                           Published
@@ -61,7 +67,7 @@ const Models = (props) => {
                         </Badge>
                       )}
                     </Form.Label>
-                    <Form.Label column>
+                    <Form.Label className="text-base" column>
                       <DeploymentStatus
                         deploymentStatus={model_identifier.deployment_status}
                       />

@@ -565,7 +565,11 @@ class ProfilePage extends React.Component {
                                     controlId="username"
                                     className="py-3 my-0 border-bottom"
                                   >
-                                    <Form.Label column sm="4">
+                                    <Form.Label
+                                      className="text-xl"
+                                      column
+                                      sm="4"
+                                    >
                                       Username
                                     </Form.Label>
                                     <Col sm="8">
@@ -581,7 +585,11 @@ class ProfilePage extends React.Component {
                                     controlId="email"
                                     className="py-3 my-0 border-bottom"
                                   >
-                                    <Form.Label column sm="4">
+                                    <Form.Label
+                                      className="text-xl"
+                                      column
+                                      sm="4"
+                                    >
                                       Email
                                     </Form.Label>
                                     <Col sm="8">
@@ -597,7 +605,11 @@ class ProfilePage extends React.Component {
                                     controlId="realname"
                                     className="py-3 my-0 border-bottom"
                                   >
-                                    <Form.Label column sm="4">
+                                    <Form.Label
+                                      className="text-xl"
+                                      column
+                                      sm="4"
+                                    >
                                       Real name
                                     </Form.Label>
                                     <Col sm="8">
@@ -613,7 +625,11 @@ class ProfilePage extends React.Component {
                                     controlId="affiliation"
                                     className="py-3 my-0"
                                   >
-                                    <Form.Label column sm="4">
+                                    <Form.Label
+                                      className="text-xl"
+                                      column
+                                      sm="4"
+                                    >
                                       Affiliation
                                     </Form.Label>
                                     <Col sm="8">

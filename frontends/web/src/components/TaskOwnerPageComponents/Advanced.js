@@ -50,7 +50,9 @@ const Advanced = (props) => {
                         className="py-3 my-0"
                       >
                         <Row>
-                          <Form.Label column>Task Configuration</Form.Label>
+                          <Form.Label className="text-base" column>
+                            Task Configuration
+                          </Form.Label>
                           <Col sm="12">
                             <Form.Text id="paramsHelpBlock" muted>
                               <span style={{ color: "red" }}>Note</span>:

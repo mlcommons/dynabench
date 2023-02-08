@@ -69,7 +69,7 @@ const TaskProposalForm = (props) => {
                       controlId="name"
                       className="py-3 my-0 border-bottom"
                     >
-                      <Form.Label column>
+                      <Form.Label className="text-base" column>
                         <b>Name</b>
                       </Form.Label>
                       <Col sm="8">
@@ -84,7 +84,7 @@ const TaskProposalForm = (props) => {
                       controlId="task_code"
                       className="py-3 my-0 border-bottom"
                     >
-                      <Form.Label column>
+                      <Form.Label className="text-base" column>
                         <b>Task Code</b>
                       </Form.Label>
                       <Col sm="8">
@@ -103,7 +103,7 @@ const TaskProposalForm = (props) => {
                       controlId="desc"
                       className="py-3 my-0 border-bottom"
                     >
-                      <Form.Label column>
+                      <Form.Label className="text-base" column>
                         <b>Short Description</b>
                       </Form.Label>
                       <Col sm="8">
@@ -118,7 +118,7 @@ const TaskProposalForm = (props) => {
                       controlId="longdesc"
                       className="py-3 my-0"
                     >
-                      <Form.Label column>
+                      <Form.Label className="text-base" column>
                         <b>Long Description</b>
                       </Form.Label>
                       <Col sm="8">
@@ -243,7 +243,7 @@ const TaskProposalTable = (props) => {
                             as={Row}
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>
+                            <Form.Label className="text-base" column>
                               <b>Name</b>
                             </Form.Label>
                             <Col sm="8">
@@ -254,7 +254,7 @@ const TaskProposalTable = (props) => {
                             as={Row}
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>
+                            <Form.Label className="text-base" column>
                               <b>Task Code</b>
                             </Form.Label>
                             <Col sm="8">
@@ -265,7 +265,7 @@ const TaskProposalTable = (props) => {
                             as={Row}
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>
+                            <Form.Label className="text-base" column>
                               <b>Short Description</b>
                             </Form.Label>
                             <Col sm="8">
@@ -273,7 +273,7 @@ const TaskProposalTable = (props) => {
                             </Col>
                           </Form.Group>
                           <Form.Group as={Row} className="py-3 my-0">
-                            <Form.Label column>
+                            <Form.Label className="text-base" column>
                               <b>Long Description</b>
                             </Form.Label>
                             <Col sm="8">

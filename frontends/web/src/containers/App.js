@@ -20,7 +20,7 @@ import ValidateInterface from "../common/Annotation/ValidateInterface.js";
 import ApiService from "../common/ApiService";
 import { Avatar } from "../components/Avatar/Avatar";
 import ForkAndSnapshotRouter from "../components/TaskLeaderboard/ForkAndSnapshotRouter";
-import AboutPage from "./AboutPage";
+import About from "../new_front/pages/About/About";
 import "./App.css";
 import ContactPage from "./ContactPage";
 import DataPolicyPage from "./DataPolicyPage";
@@ -367,7 +367,7 @@ class App extends React.Component {
               )}
               <div id={showContentOnly ? "" : "content"}>
                 <Switch>
-                  <Route path="/about" component={AboutPage} />
+                  <Route path="/about" component={About} />
                   <Route path="/contact" component={ContactPage} />
                   <Route path="/termsofuse" component={TermsPage} />
                   <Route path="/datapolicy" component={DataPolicyPage} />

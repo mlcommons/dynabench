@@ -114,7 +114,7 @@ const BatchCreateSamples = (modelUrl) => {
             </>
           ) : (
             <>
-              <Form.Label className="label-upload-file">
+              <Form.Label className="text-base label-upload-file">
                 Drag & drop your jsonl file here
               </Form.Label>
               <Form.Control

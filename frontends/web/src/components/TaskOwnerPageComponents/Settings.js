@@ -68,7 +68,9 @@ const Settings = (props) => {
                         controlId="instructions_md"
                         className="py-3 my-0"
                       >
-                        <Form.Label column>Instructions</Form.Label>
+                        <Form.Label column className="text-base">
+                          Instructions
+                        </Form.Label>
                         <Col sm="12">
                           <Form.Control
                             as="textarea"
@@ -91,7 +93,7 @@ const Settings = (props) => {
                           controlId="predictions_upload_instructions_md"
                           className="py-3 my-0"
                         >
-                          <Form.Label column>
+                          <Form.Label column className="text-base">
                             Instructions For Prediction Uploads
                           </Form.Label>
                           <Col sm="12">
@@ -123,7 +125,7 @@ const Settings = (props) => {
                               controlId="train_file_upload_instructions_md"
                               className="py-3 my-0"
                             >
-                              <Form.Label column>
+                              <Form.Label column className="text-base">
                                 Instructions For Train File Uploads
                               </Form.Label>
                               <Col sm="12">
@@ -149,7 +151,7 @@ const Settings = (props) => {
                               controlId="mlcube_tutorial_markdown"
                               className="py-3 my-0"
                             >
-                              <Form.Label column>
+                              <Form.Label column className="text-base">
                                 Instructions For MLCube Tutorial
                               </Form.Label>
                               <Col sm="12">
@@ -175,7 +177,7 @@ const Settings = (props) => {
                         controlId="hidden"
                         className="py-3 my-0 border-bottom"
                       >
-                        <Form.Label column>
+                        <Form.Label column className="text-base">
                           Hidden
                           <Form.Text id="paramsHelpBlock" muted>
                             Is this task publicly visible?
@@ -193,7 +195,7 @@ const Settings = (props) => {
                         controlId="validate_non_fooling"
                         className="py-3 my-0 border-bottom"
                       >
-                        <Form.Label column>
+                        <Form.Label column className="text-base">
                           Validate Non-Fooling Examples
                           <Form.Text id="paramsHelpBlock" muted>
                             Do we only validate examples that fooled the model,
@@ -212,7 +214,7 @@ const Settings = (props) => {
                         controlId="unpublished_models_in_leaderboard"
                         className="py-3 my-0 border-bottom"
                       >
-                        <Form.Label column>
+                        <Form.Label column className="text-base">
                           Show Anonymized Unpublished Models in Leaderboard
                           <Form.Text id="paramsHelpBlock" muted>
                             Display all models, or only published ones?
@@ -230,7 +232,7 @@ const Settings = (props) => {
                         controlId="submitable"
                         className="py-3 my-0 border-bottom"
                       >
-                        <Form.Label column>
+                        <Form.Label column className="text-base">
                           Submitable
                           <Form.Text id="paramsHelpBlock" muted>
                             Does this task accept model submissions?
@@ -248,7 +250,7 @@ const Settings = (props) => {
                         controlId="dynamic_adversarial_data_collection"
                         className="py-3 my-0 border-bottom"
                       >
-                        <Form.Label column>
+                        <Form.Label column className="text-base">
                           Dynamic adversarial data collection
                           <Form.Text id="paramsHelpBlock" muted>
                             Does this task accept dynamic adversarial data
@@ -267,7 +269,7 @@ const Settings = (props) => {
                         controlId="num_matching_validations"
                         className="py-3 my-0 border-bottom"
                       >
-                        <Form.Label column>
+                        <Form.Label column className="text-base">
                           Validation Consensus Minimum
                           <Form.Text id="paramsHelpBlock" muted>
                             Number of agreeing validations for an example to be
@@ -289,7 +291,7 @@ const Settings = (props) => {
                         controlId="context"
                         className="py-3 my-0 border-bottom"
                       >
-                        <Form.Label column>
+                        <Form.Label column className="text-base">
                           Sampling of Contexts In the Create Interface
                           <Form.Text id="paramsHelpBlock" muted>
                             <p>
@@ -332,7 +334,7 @@ const Settings = (props) => {
                         controlId="is_decen_task"
                         className="py-3 my-0 border-bottom"
                       >
-                        <Form.Label column>
+                        <Form.Label column className="text-base">
                           Is this a Decentralized Task?
                         </Form.Label>
                         <Col sm="6">
@@ -349,7 +351,7 @@ const Settings = (props) => {
                             controlId="bucket_name"
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>
+                            <Form.Label column className="text-base">
                               Bucket name
                               <Form.Text id="paramsHelpBlock" muted>
                                 Name of your bucket in your AWS account
@@ -368,7 +370,7 @@ const Settings = (props) => {
                             controlId="aws_region"
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>
+                            <Form.Label column className="text-base">
                               AWS region
                               <Form.Text id="paramsHelpBlock" muted>
                                 Region of your bucket in your AWS account
@@ -387,7 +389,7 @@ const Settings = (props) => {
                             controlId="sqs_queue"
                             className="py-3 my-0 border-bottom"
                           >
-                            <Form.Label column>
+                            <Form.Label column className="text-base">
                               Queue
                               <Form.Text id="paramsHelpBlock" muted>
                                 Name of your Queue in your AWS account

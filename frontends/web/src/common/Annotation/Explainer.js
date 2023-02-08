@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -12,11 +18,11 @@ const Explainer = (props) => (
       {props.taskName || <span>&nbsp;</span>}
     </p>
     {props.selectedModel ? (
-      <h2 className="task-page-header d-block ml-0 mt-0 text-reset">
+      <h2 className="text-xl d-block ml-0 mt-0 text-reset">
         Find examples that fool <i>{props.selectedModel.name}</i>
       </h2>
     ) : (
-      <h2 className="task-page-header d-block ml-0 mt-0 text-reset">
+      <h2 className="text-xl d-block ml-0 mt-0 text-reset">
         {props.randomTargetModel
           ? "Find examples that fool the model"
           : "Find examples"}
