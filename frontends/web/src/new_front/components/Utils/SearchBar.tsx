@@ -9,7 +9,7 @@ const Search: FC = () => {
     if (e.key === "Enter") {
       params.append("task", e.target.value);
       history.push({
-        pathname: "/test",
+        pathname: "/filter_tasks",
         search: params.toString(),
       });
     }

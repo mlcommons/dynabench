@@ -440,7 +440,7 @@ class App extends React.Component {
                   <Route path="/dataperf" component={DataperfLanding} />
                   <Route path="/dadc" component={DADCLanding} />
                   <Route path="/others_tasks" component={OthersTaskLanding} />
-
+                  <Route path="/filter_tasks" component={FilterTasks} />
                   <Route path="/test" component={FilterTasks} />
                   <Route path="/login" component={LoginPage} />
                   <Route
