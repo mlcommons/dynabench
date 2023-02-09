@@ -36,7 +36,7 @@ const TasksPage = () => {
     <>
       {!loading ? (
         <div className="container">
-          <h2 className="pt-6 text-2xl font-semibold text-center d-block text-letter-color">
+          <h2 className="text-2xl font-semibold text-center d-block text-letter-color">
             TASKS
           </h2>
           <div className="pb-2">

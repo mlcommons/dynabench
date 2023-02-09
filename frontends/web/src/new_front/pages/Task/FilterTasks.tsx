@@ -1,25 +1,23 @@
 import React, { FC } from "react";
-import useTasks from "../../hooks/useTasks";
 import TaskCard from "../../components/Cards/TaskCard";
+import useTasks from "../../hooks/useTasks";
+import { useLocation } from "react-router-dom";
 
-const DADCLanding: FC = () => {
+const FilterTasks: FC = () => {
+  const search = useLocation().search;
+  const searchParams = new URLSearchParams(search);
+
+  const tasksFilter = searchParams.get("task")?.toLowerCase() || "";
   const { tasksData, tasksCategories } = useTasks();
 
   return (
     <div className="container text-center d-block">
-      <div className="h-64">
-        <h2 className="pt-8 text-6xl font-thin text-letter-color">DADC</h2>
-        <h5 className="pt-2 text-2xl font-thin text-letter-color">
-          Dynamic Adversarial Data Collection
-        </h5>
+      <div>
+        <h2 className="text-2xl font-semibold text-center d-block text-letter-color">
+          TASKS
+        </h2>
       </div>
       <div>
-        <div>
-          <p className="text-xl font-normal text-letter-color">
-            DADC invites you to find weaknesses in existing state of the art AI
-            models so that we can make them even better.
-          </p>
-        </div>
         <div className="pt-4">
           <div>
             <div
@@ -27,7 +25,9 @@ const DADCLanding: FC = () => {
               key="Dataperf"
             >
               {tasksData
-                .filter((t) => t.challenge_type === 1)
+                .filter((t) =>
+                  t.name.toString().toLowerCase().includes(tasksFilter)
+                )
                 .map((task) => (
                   <div key={task.id}>
                     <TaskCard
@@ -51,4 +51,4 @@ const DADCLanding: FC = () => {
   );
 };
 
-export default DADCLanding;
+export default FilterTasks;
