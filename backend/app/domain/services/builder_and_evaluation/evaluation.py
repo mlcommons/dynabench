@@ -95,7 +95,7 @@ class EvaluationService:
                 print(i)
             dataset_samples = {}
             dataset_samples["dataset_samples"] = data[i : batch_size + i]
-            dataset_samples = [
+            dataset_samples["dataset_samples"] = [
                 {col: row[col] for col in schema}
                 for row in dataset_samples["dataset_samples"]
             ]
