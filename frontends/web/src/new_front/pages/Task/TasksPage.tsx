@@ -11,6 +11,9 @@ import TaskCard from "../../components/Cards/TaskCard";
 import { TaskInfoType } from "../../types/task/taskInfo";
 import { TaskCategories } from "../../types/task/taskCategories";
 import { PacmanLoader } from "react-spinners";
+import Carousel from "react-multi-carousel";
+import { responsiveCarousel } from "../../utils/constants";
+import "react-multi-carousel/lib/styles.css";
 
 const TasksPage = () => {
   const [tasksData, setTasksData] = useState([] as TaskInfoType[]);
@@ -49,26 +52,28 @@ const TasksPage = () => {
               </Link>
             </span>
             <div
-              className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-4"
+              className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
               key="DADC"
             >
-              {tasksData
-                .filter((t) => t.challenge_type === 1)
-                .map((task) => (
-                  <div key={task.id}>
-                    <TaskCard
-                      id={task.id}
-                      name={task.name}
-                      description={task.desc}
-                      curRound={task.cur_round}
-                      totalCollected={task.round.total_collected}
-                      totalFooled={task.round.total_fooled}
-                      taskCode={task.task_code}
-                      imageUrl={task.image_url}
-                      tasksCategories={tasksCategories}
-                    />
-                  </div>
-                ))}
+              <Carousel responsive={responsiveCarousel}>
+                {tasksData
+                  .filter((t) => t.challenge_type === 1)
+                  .map((task) => (
+                    <div key={task.id} className="px-2 py-2">
+                      <TaskCard
+                        id={task.id}
+                        name={task.name}
+                        description={task.desc}
+                        curRound={task.cur_round}
+                        totalCollected={task.round.total_collected}
+                        totalFooled={task.round.total_fooled}
+                        taskCode={task.task_code}
+                        imageUrl={task.image_url}
+                        tasksCategories={tasksCategories}
+                      />
+                    </div>
+                  ))}
+              </Carousel>
             </div>
           </div>
           <div className="pb-2 container-fluid">
@@ -83,26 +88,28 @@ const TasksPage = () => {
           </div>
           <div>
             <div
-              className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-4"
+              className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
               key="Dataperf"
             >
-              {tasksData
-                .filter((t) => t.challenge_type === 2)
-                .map((task) => (
-                  <div key={task.id}>
-                    <TaskCard
-                      id={task.id}
-                      name={task.name}
-                      description={task.desc}
-                      curRound={task.cur_round}
-                      totalCollected={task.round.total_collected}
-                      totalFooled={task.round.total_fooled}
-                      taskCode={task.task_code}
-                      imageUrl={task.image_url}
-                      tasksCategories={tasksCategories}
-                    />
-                  </div>
-                ))}
+              <Carousel responsive={responsiveCarousel}>
+                {tasksData
+                  .filter((t) => t.challenge_type === 2)
+                  .map((task) => (
+                    <div key={task.id} className="px-2 py-2">
+                      <TaskCard
+                        id={task.id}
+                        name={task.name}
+                        description={task.desc}
+                        curRound={task.cur_round}
+                        totalCollected={task.round.total_collected}
+                        totalFooled={task.round.total_fooled}
+                        taskCode={task.task_code}
+                        imageUrl={task.image_url}
+                        tasksCategories={tasksCategories}
+                      />
+                    </div>
+                  ))}
+              </Carousel>
             </div>
           </div>
           <div className="pb-2">
@@ -115,26 +122,28 @@ const TasksPage = () => {
               </Link>
             </span>
             <div
-              className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-4"
+              className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
               key="others"
             >
-              {tasksData
-                .filter((t) => t.challenge_type === 4)
-                .map((task) => (
-                  <div key={task.id}>
-                    <TaskCard
-                      id={task.id}
-                      name={task.name}
-                      description={task.desc}
-                      curRound={task.cur_round}
-                      totalCollected={task.round.total_collected}
-                      totalFooled={task.round.total_fooled}
-                      taskCode={task.task_code}
-                      imageUrl={task.image_url}
-                      tasksCategories={tasksCategories}
-                    />
-                  </div>
-                ))}
+              <Carousel responsive={responsiveCarousel}>
+                {tasksData
+                  .filter((t) => t.challenge_type === 4)
+                  .map((task) => (
+                    <div key={task.id} className="px-2 py-2">
+                      <TaskCard
+                        id={task.id}
+                        name={task.name}
+                        description={task.desc}
+                        curRound={task.cur_round}
+                        totalCollected={task.round.total_collected}
+                        totalFooled={task.round.total_fooled}
+                        taskCode={task.task_code}
+                        imageUrl={task.image_url}
+                        tasksCategories={tasksCategories}
+                      />
+                    </div>
+                  ))}
+              </Carousel>
             </div>
           </div>
         </div>
