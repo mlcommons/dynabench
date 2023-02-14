@@ -1,18 +1,16 @@
-import React, { MouseEvent, FC, useState, useEffect } from "react";
+import React, { ChangeEvent, FC } from "react";
 import { useHistory } from "react-router-dom";
 
 const Search: FC = () => {
   const history = useHistory();
 
-  const onSearchInputChange = (e: any) => {
+  const onSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const params = new URLSearchParams();
-    if (e.key === "Enter") {
-      params.append("task", e.target.value);
-      history.push({
-        pathname: "/filter_tasks",
-        search: params.toString(),
-      });
-    }
+    params.append("task", event.target.value);
+    history.push({
+      pathname: "/tasks",
+      search: params.toString(),
+    });
   };
 
   return (
@@ -21,7 +19,7 @@ const Search: FC = () => {
         type="search"
         name="serch"
         placeholder="Search"
-        onKeyPress={onSearchInputChange}
+        onChange={onSearchInputChange}
         className="pl-4 pr-12 text-sm bg-white rounded-full h-11 focus:outline-none"
       />
       <button type="submit" className="absolute top-0 right-0 mt-3 mr-4">
