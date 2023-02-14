@@ -42,6 +42,9 @@ import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
 import TaskPage from "./TaskPage";
 // import TaskPage from "../new_front/pages/Task/TaskPage";
+// import Test from '../new_front/pages/CommunitiesLandingPages/Test'
+import Test from "../new_front/pages/Task/Test";
+import CreateInterface2 from "../new_front/pages/CreateSamples/CreateInterface";
 import SearchBar from "../new_front/components/Utils/SearchBar";
 import FilterTasks from "../new_front/pages/Task/FilterTasks";
 import TasksContext from "./TasksContext";
@@ -440,8 +443,8 @@ class App extends React.Component {
                   <Route path="/dataperf" component={DataperfLanding} />
                   <Route path="/dadc" component={DADCLanding} />
                   <Route path="/others_tasks" component={OthersTaskLanding} />
-                  <Route path="/filter_tasks" component={FilterTasks} />
-                  <Route path="/test" component={FilterTasks} />
+                  <Route path="/tasks" component={FilterTasks} />
+                  <Route path="/test" component={CreateInterface2} />
                   <Route path="/login" component={LoginPage} />
                   <Route
                     path="/generate_api_token"

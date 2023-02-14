@@ -23,7 +23,7 @@ const TaskCard: FC<TaskCardProps> = ({
   return (
     <>
       <div
-        className="max-w-sm transition duration-500 transform bg-white shadow-lg h-[30rem] rounded-xl hover:scale-105 cursor-pointer"
+        className="max-w-sm transition duration-500 transform bg-white shadow-md h-[30rem] rounded-xl hover:scale-105 cursor-pointer"
         onClick={() => history.push(`/tasks/${taskCode}`)}
       >
         <div className="relative">
