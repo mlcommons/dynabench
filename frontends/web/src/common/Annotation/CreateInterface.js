@@ -35,7 +35,7 @@ import {
 } from "../../containers/Overlay";
 import UserContext from "../../containers/UserContext";
 import AnnotationComponent from "./AnnotationComponent.js";
-import AnnotationTitle from "../../new_front/components/CreateSamples/AnnotationTitle";
+import AnnotationTitle from "../../new_front/components/CreateSamples/CreateSamples/AnnotationTitle";
 import initializeData from "./InitializeAnnotationData.js";
 import ResponseInfo from "./ResponseInfo.js";
 import BatchCreateSamples from "../../components/Forms/BatchCreateSamples";
