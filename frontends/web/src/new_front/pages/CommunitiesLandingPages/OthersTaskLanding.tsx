@@ -3,7 +3,7 @@ import useTasks from "../../hooks/useTasks";
 import TaskCard from "../../components/Cards/TaskCard";
 
 const OthersTaskLanding: FC = () => {
-  const [tasksData, tasksCategories] = useTasks();
+  const { tasksData, tasksCategories } = useTasks();
 
   return (
     <div className="container text-center d-block">

@@ -23,7 +23,7 @@ const useTasks = () => {
     getTaskData();
   }, []);
 
-  return [tasksData, tasksCategories] as const;
+  return { tasksData, tasksCategories };
 };
 
 export default useTasks;

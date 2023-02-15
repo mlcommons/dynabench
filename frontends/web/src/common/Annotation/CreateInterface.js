@@ -35,7 +35,7 @@ import {
 } from "../../containers/Overlay";
 import UserContext from "../../containers/UserContext";
 import AnnotationComponent from "./AnnotationComponent.js";
-import Explainer from "./Explainer.js";
+import AnnotationTitle from "../../new_front/components/CreateSamples/AnnotationTitle";
 import initializeData from "./InitializeAnnotationData.js";
 import ResponseInfo from "./ResponseInfo.js";
 import BatchCreateSamples from "../../components/Forms/BatchCreateSamples";
@@ -357,9 +357,7 @@ class CreateInterface extends React.Component {
                     fetchPredictionError: false,
                   });
                 }
-                console.log(modelResponseResult);
                 const output = deepCopyJSON(modelResponseResult);
-                console.log(output);
                 const target = {};
                 for (const taskConfigObj of this.state.taskConfig.output) {
                   if (this.state.data.hasOwnProperty(taskConfigObj.name)) {
@@ -701,7 +699,7 @@ class CreateInterface extends React.Component {
                 </Modal.Body>
               </Modal>
             </div>
-            <Explainer
+            <AnnotationTitle
               taskName={this.state.task.name}
               selectedModel={this.state.selectedModel}
               randomTargetModel={this.state.randomTargetModel}
