@@ -351,22 +351,22 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
             os.remove(f"{path}/submissions/{name}_{model[1]}.txt")
             os.remove(f"{path}/{name}_{model[1]}.zip")
-            prefix_s3 = f"s3://{bucket_name}/{task.task_code}/submissions/"
+            prefix_s3 = f"s3://{bucket_name}/{task.task_code}/submissions"
             decen_request = requests.post(
-                f"{task.lambda_model}s",
+                f"{task.lambda_model}",
                 json={
                     "type": "general",
                     "payload": {
                         "url": f"{prefix_s3}/{name}_{model[1]}.zip",
                         "submission_id": f"{name}_{model[1]}",
                     },
+                    "returned_payload": {},
                     "status": "submitted",
                     "source": bucket_name,
                 },
             )
             time.sleep(10)
             id_list.append(decen_request.json()["id"])
-        print(id_list)
 
         Email().send(
             contact=user.email,
@@ -397,7 +397,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
     # accumulated_labels = [] Implementation for accumulated labels instead of mean
 
     for name, upload in train_files.items():
-
         if upload.content_type == "text/plain":
             with tempfile.NamedTemporaryFile() as tf:
                 upload.save(tf, overwrite=True)
@@ -405,6 +404,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 string = (tf.read()).decode("utf-8")
                 sub = [int(s) for s in string.split(",")]
                 payload = {"submission": {str(name[-1]): sub}}
+                print(payload)
                 light_model_endpoint = task.lambda_model
                 r = requests.post(light_model_endpoint, json=payload)
                 if r.status_code == 200:
