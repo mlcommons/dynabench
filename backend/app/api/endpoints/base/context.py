@@ -12,5 +12,5 @@ router = APIRouter()
 
 @router.get("/get_contexts", response_model={})
 async def get_contexts(task_id: int, round_id: int, method: str, n: int, tags=None):
-    a = ContextService().get_contexts(task_id, round_id, method, n, tags)
-    return a[0].context_json
+    context = ContextService().get_contexts(task_id, round_id, method, n, tags)
+    return context[0].context_json

@@ -22,13 +22,18 @@ class ContextService:
         return self.context_repository.get_real_round_id(context_id)
 
     def get_contexts(
-        self, tid: int, rid: int, method: str = "least_used", n: int = 1, tags=None
+        self,
+        task_id: int,
+        round_id: int,
+        method: str = "least_used",
+        n: int = 1,
+        tags=None,
     ):
         """Get a context for annotation
 
         Args:
-            tid (int): The ID of the task
-            rid (int): The ID of the current round being run
+            task_id (int): The ID of the task
+            round_id (int): The ID of the current round being run
             method (str, optional): How to choose the context. Possible options are:
             1. 'uniform': selects at random from possible contexts
             2. 'least_fooled': selects contexts that least fool the model
@@ -45,7 +50,7 @@ class ContextService:
         """
 
         real_round_id = self.round_repository.get_round_info_by_round_and_task(
-            tid, rid
+            task_id, round_id
         ).id
         print("This is the method", method)
         if method == "uniform":
