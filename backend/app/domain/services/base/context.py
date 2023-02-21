@@ -26,7 +26,6 @@ class ContextService:
         task_id: int,
         round_id: int,
         method: str = "least_used",
-        n: int = 1,
         tags=None,
     ):
         """Get a context for annotation
@@ -39,7 +38,6 @@ class ContextService:
             2. 'least_fooled': selects contexts that least fool the model
             3. 'least_used': selects contexts that have been annotated the least
             Defaults to 'least_used'.
-            n (int, optional): How many contexts to bring. Defaults to 1.
             tags (_type_, optional): _description_. Defaults to None.
 
         Raises:
@@ -54,11 +52,11 @@ class ContextService:
         ).id
         print("This is the method", method)
         if method == "uniform":
-            context = self.context_repository.get_random(real_round_id, n)
+            context = self.context_repository.get_random(real_round_id)
         elif method == "least_used":
-            context = self.context_repository.get_least_used(real_round_id, n)
+            context = self.context_repository.get_least_used(real_round_id)
         elif method == "least_fooled":
-            context = self.context_repository.get_least_fooled(real_round_id, n)
+            context = self.context_repository.get_least_fooled(real_round_id)
         if not context:
             raise HTTPException(500, f"No contexts available ({real_round_id})")
         return context

@@ -29,27 +29,25 @@ class ContextRepository(AbstractRepository):
         )
         return instance.r_realid
 
-    def get_random(self, real_round_id: int, n: int = 1, tags=None):
+    def get_random(self, real_round_id: int, tags=None):
         instance = (
             self.session.query(self.model)
             .filter(self.model.r_realid == real_round_id)
             .order_by(func.rand())
-            .limit(n)
-            .all()
+            .first()
         )
         return instance
 
-    def get_least_used(self, real_round_id: int, n: int = 1, tags=None):
+    def get_least_used(self, real_round_id: int, tags=None):
         instance = (
             self.session.query(self.model)
             .filter(self.model.r_realid == real_round_id)
             .order_by(self.model.total_used.asc(), func.rand())
-            .limit(n)
-            .all()
+            .first()
         )
         return instance
 
-    def get_least_fooled(self, real_round_id: int, n: int = 1, tags=None):
+    def get_least_fooled(self, real_round_id: int, tags=None):
         query = (
             self.session.query(self.model)
             .join(Example, self.model.id == Example.cid, isouter=True)
@@ -65,7 +63,7 @@ class ContextRepository(AbstractRepository):
             .with_entities(self.model)
         )
 
-        return query.limit(n).all()
+        return query.first()
 
-    def get_validation_failed(self, real_round_id: int, n: int = 1, tags=None):
+    def get_validation_failed(self, real_round_id: int, tags=None):
         return None
