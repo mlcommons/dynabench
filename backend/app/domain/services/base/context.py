@@ -32,7 +32,7 @@ class ContextService:
             method (str, optional): How to choose the context. Possible options are:
             1. 'uniform': selects at random from possible contexts
             2. 'least_fooled': selects contexts that least fool the model
-            3. 'least_used': selects contexts that hae been annotated the least
+            3. 'least_used': selects contexts that have been annotated the least
             Defaults to 'least_used'.
             n (int, optional): How many contexts to bring. Defaults to 1.
             tags (_type_, optional): _description_. Defaults to None.
