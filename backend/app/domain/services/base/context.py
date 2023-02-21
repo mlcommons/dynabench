@@ -31,18 +31,13 @@ class ContextService:
         """Get a context for annotation
 
         Args:
-            task_id (int): The ID of the task
-            round_id (int): The ID of the current round being run
             method (str, optional): How to choose the context. Possible options are:
             1. 'uniform': selects at random from possible contexts
             2. 'least_fooled': selects contexts that least fool the model
             3. 'least_used': selects contexts that have been annotated the least
             Defaults to 'least_used'.
-            tags (_type_, optional): _description_. Defaults to None.
-
         Raises:
             HTTPException: There are no contexts available
-
         Returns:
             list: A list of context objects, each of which has different attributes.
         """
