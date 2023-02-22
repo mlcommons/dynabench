@@ -5,8 +5,9 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
+from sqlalchemy import case, func
 
-from app.infrastructure.models.models import Context
+from app.infrastructure.models.models import Context, Example
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -27,3 +28,42 @@ class ContextRepository(AbstractRepository):
             .first()
         )
         return instance.r_realid
+
+    def get_random(self, real_round_id: int, tags=None):
+        instance = (
+            self.session.query(self.model)
+            .filter(self.model.r_realid == real_round_id)
+            .order_by(func.rand())
+            .first()
+        )
+        return instance
+
+    def get_least_used(self, real_round_id: int, tags=None):
+        instance = (
+            self.session.query(self.model)
+            .filter(self.model.r_realid == real_round_id)
+            .order_by(self.model.total_used.asc(), func.rand())
+            .first()
+        )
+        return instance
+
+    def get_least_fooled(self, real_round_id: int, tags=None):
+        query = (
+            self.session.query(self.model)
+            .join(Example, self.model.id == Example.cid, isouter=True)
+            .filter(self.model.r_realid == real_round_id)
+        )
+
+        query = (
+            query.group_by(self.model.id)
+            .order_by(
+                func.sum(case(value=Example.model_wrong, whens={1: 1}, else_=0)),
+                func.rand(),
+            )
+            .with_entities(self.model)
+        )
+
+        return query.first()
+
+    def get_validation_failed(self, real_round_id: int, tags=None):
+        return None
