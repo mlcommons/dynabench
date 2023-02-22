@@ -10,7 +10,7 @@ from app.domain.services.base.context import ContextService
 router = APIRouter()
 
 
-@router.get("/get_contexts", response_model={})
-async def get_contexts(task_id: int, round_id: int, method: str, tags=None):
-    context = ContextService().get_contexts(task_id, round_id, method, tags)
-    return context.context_json
+@router.get("/get_context", response_model={})
+async def get_context(task_id: int, method: str = "least_used", tags=None):
+    context = ContextService().get_context(task_id, method, tags)
+    return context
