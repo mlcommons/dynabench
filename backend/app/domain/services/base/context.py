@@ -72,7 +72,7 @@ class ContextService:
             "context_info": context_info,
             "current_context": json.loads(context.context_json),
             "context_id": context.id,
-            "round_id": context.r_realid,
+            "real_round_id": context.r_realid,
             "tags": tags,
         }
 
