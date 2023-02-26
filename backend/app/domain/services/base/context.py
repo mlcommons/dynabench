@@ -60,17 +60,20 @@ class ContextService:
         ).id
 
         if method == "uniform":
-            context = self.context_repository.get_random(real_round_id)
+            context = self.context_repository.get_random(real_round_id, tags)
         elif method == "least_used":
-            context = self.context_repository.get_least_used(real_round_id)
+            context = self.context_repository.get_least_used(real_round_id, tags)
         elif method == "least_fooled":
-            context = self.context_repository.get_least_fooled(real_round_id)
+            context = self.context_repository.get_least_fooled(real_round_id, tags)
         if not context:
             raise HTTPException(500, f"No contexts available ({real_round_id})")
 
         return {
             "context_info": context_info,
             "current_context": json.loads(context.context_json),
+            "context_id": context.id,
+            "real_round_id": context.r_realid,
+            "tags": tags,
         }
 
     def _get_context_info(self, task_config) -> dict:
