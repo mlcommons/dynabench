@@ -4,13 +4,14 @@
 
 from fastapi import APIRouter
 
+from app.domain.schemas.base.context import GetContextRequest
 from app.domain.services.base.context import ContextService
 
 
 router = APIRouter()
 
 
-@router.get("/get_context", response_model={})
-async def get_context(task_id: int, method: str = "least_used", tags=None):
-    context = ContextService().get_context(task_id, method, tags)
+@router.post("/get_context", response_model={})
+async def get_context(model: GetContextRequest):
+    context = ContextService().get_context(model.task_id, model.method, model.tags)
     return context

@@ -207,7 +207,7 @@ class EvaluationService:
         return {param: sample_dataset.get(param) for param in schema}
 
     def heavy_prediction(
-        self, datasets: list, task_code: str, ip: str, model_name: str, folder_name: str
+        self, datasets: list, task_code: str, ip: str, model_id: int, folder_name: str
     ):
         final_dict_prediction = {}
         start_prediction = time.time()
@@ -235,7 +235,7 @@ class EvaluationService:
             self.s3.upload_file(
                 predictions,
                 self.s3_bucket,
-                f"predictions/{task_code}/{model_name}/{name_prediction}",
+                f"predictions/{task_code}/{model_id}/{name_prediction}",
             )
             dict_dataset_type["dataset"] = "./app/models/{}/datasets/{}".format(
                 folder_name, dataset["dataset"]
@@ -251,7 +251,7 @@ class EvaluationService:
         return (
             final_dict_prediction,
             dataset_id,
-            model_name,
+            model_id,
             seconds_time_prediction,
             num_samples,
             folder_name,
@@ -285,7 +285,12 @@ class EvaluationService:
         return round(num_samples / seconds_time_prediction, 2)
 
     def evaluation(
-        self, task: str, model_s3_zip: str, model_id: int, user_id: int
+        self,
+        task: str,
+        model_s3_zip: str,
+        model_id: int,
+        user_id: int,
+        evaluate_no_scoring_datasets: bool = False,
     ) -> dict:
         logs_name = "logs-{}".format(
             (model_s3_zip.split("/")[-1].split(".")[0]).split("-")[0]
@@ -356,15 +361,20 @@ class EvaluationService:
                 current_round,
             )
             new_scores.append(new_score)
-        for not_scoring_dataset in not_scoring_datasets:
-            self.logger.info("Evaluate non-scoring datasets")
-            send_not_scoring_dataset = []
-            send_not_scoring_dataset.append(not_scoring_dataset)
-            new_score = self.save_predictions_dataset(
-                send_not_scoring_dataset, tasks, ip, model_name, folder_name, model_id
-            )
-            new_scores.append(new_score)
-
+        if evaluate_no_scoring_datasets:
+            for not_scoring_dataset in not_scoring_datasets:
+                self.logger.info("Evaluate non-scoring datasets")
+                send_not_scoring_dataset = []
+                send_not_scoring_dataset.append(not_scoring_dataset)
+                new_score = self.save_predictions_dataset(
+                    send_not_scoring_dataset,
+                    tasks,
+                    ip,
+                    model_name,
+                    folder_name,
+                    model_id,
+                )
+                new_scores.append(new_score)
         self.logger.info("Create light model")
         url_light_model = self.builder.create_light_model(model_name, folder_name)
         self.model_repository.update_light_model(model_id, url_light_model)
@@ -395,11 +405,11 @@ class EvaluationService:
         (
             prediction_dict,
             dataset_id,
-            model_name,
+            model_id,
             minutes_time_prediction,
             num_samples,
             folder_name,
-        ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_name, folder_name)
+        ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_id, folder_name)
         self.logger.info("Calculate memory utilization")
         memory = self.get_memory_utilization(model_name)
         self.logger.info("Calculate throughput")
@@ -496,7 +506,7 @@ class EvaluationService:
         ]
         score = 100 * np.round(score, 4)
 
-        did = self.dataset_repository.get_by_name(dataset_name)["id"]
+        did = self.dataset_repository.get_dataset_info_by_name(dataset_name)["id"]
         r_realid = self.round_repository.get_by_id(task_id)["rid"]
 
         new_score = {

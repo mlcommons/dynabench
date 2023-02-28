@@ -298,6 +298,8 @@ const Prob = ({ create, data, setData, name, configObj }) => {
     const probs = configObj.single_prob
       ? [data[name], 1 - data[name]]
       : labels.map((key) => data[name][key]);
+    console.log("probs", probs);
+    console.log("labels", labels);
     return <PieRechart data={probs} labels={labels} />;
   }
   return null;
@@ -462,6 +464,8 @@ const AnnotationComponent = ({
   showName = true,
   inputReminder = false,
 }) => {
+  console.log("configObj", configObj);
+  console.log("type", type);
   switch (type) {
     case "image":
       return (

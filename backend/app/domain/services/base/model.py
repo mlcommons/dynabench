@@ -19,6 +19,7 @@ from app.domain.helpers.transform_data_objects import (
 )
 from app.domain.services.base.example import ExampleService
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
+from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.user import UserRepository
@@ -29,6 +30,7 @@ class ModelService:
         self.model_repository = ModelRepository()
         self.task_repository = TaskRepository()
         self.user_repository = UserRepository()
+        self.dataset_repository = DatasetRepository()
         self.example_service = ExampleService()
         self.evaluation_service = EvaluationService()
         self.session = boto3.Session(
@@ -37,6 +39,7 @@ class ModelService:
             region_name=os.getenv("AWS_REGION"),
         )
         self.s3 = self.session.client("s3")
+        self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.email_helper = EmailHelper()
 
     def get_model_in_the_loop(self, task_id: str) -> str:
@@ -128,11 +131,49 @@ class ModelService:
             )
         return "Model evaluate successfully"
 
-    def single_model_prediction(self, model_url: str, sample: dict) -> str:
-        response = requests.post(model_url, json=sample)
-        return response.json()
+    def single_model_prediction(self, model_url: str, model_input: dict):
+        return requests.post(model_url, json=model_input).json()
 
-    def evaluate_model_in_the_loop(self, prediction: str, ground_truth: str) -> int:
+    def single_model_prediction_submit(
+        self,
+        model_url: str,
+        model_input: dict,
+        context_id: int,
+        user_id: int,
+        tag: str,
+        round_id: int,
+        task_id: int,
+        sandbox_mode: bool,
+    ) -> str:
+        response = {}
+        prediction = self.single_model_prediction(model_url, model_input)
+        response["prediction"] = prediction["label"]
+        response["probabilities"] = prediction["prob"]
+        response["label"] = model_input["label"]
+        response["input"] = model_input["input_by_user"]
+        model_wrong = self.evaluate_model_in_the_loop(
+            response["prediction"], response["label"]
+        )
+        response["fooled"] = model_wrong
+        if not sandbox_mode:
+            self.example_service.create_example_and_increment_counters(
+                context_id,
+                user_id,
+                model_wrong,
+                model_url,
+                json.dumps(model_input),
+                json.dumps(prediction),
+                {},
+                tag,
+                round_id,
+                task_id,
+            )
+        return response
+
+    def evaluate_model_in_the_loop(
+        self, prediction: str, ground_truth: str, metric: str = ""
+    ) -> int:
+
         return int(prediction != ground_truth)
 
     def batch_prediction(
@@ -188,3 +229,19 @@ class ModelService:
                 requests.post(f"{model.light_model}", json=input_data)
             print("Finished")
             time.sleep(320)
+
+    def get_model_prediction_per_dataset(
+        self, user_id: int, model_id: int, dataset_id: int
+    ):
+        model_info = self.model_repository.get_model_info_by_id(model_id)
+        dataset_name = self.dataset_repository.get_dataset_name_by_id(dataset_id)[0]
+        task_code = self.task_repository.get_task_code_by_task_id(model_info["tid"])[0]
+        if model_info["uid"] != user_id:
+            return None
+        model_id = "dynalab-base-qa"
+        predictions = self.s3.download_file(
+            self.s3_bucket,
+            f"predictions/{task_code}/{model_id}/{dataset_name}.jsonl.out",
+            f"./app/resources/predictions/{model_id}-{dataset_name}.jsonl.out",
+        )
+        return predictions

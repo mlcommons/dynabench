@@ -819,7 +819,7 @@ class CreateInterface extends React.Component {
                                 }}
                               >
                                 <BatchCreateSamples
-                                  modelUrl={this.state.modelInTheLoop}
+                                  modelInTheLoop={this.state.modelInTheLoop}
                                 />
                               </Modal>
                             </>
