@@ -1,23 +1,27 @@
 aggregation_metric:
   type: dynascore
-context:
-- name: context
-  placeholder: Enter context...
-  type: string
-delta_metrics:
-- type: fairness
-- type: robustness
-input:
-- name: statement
-  placeholder: Enter statement...
-  type: string
-- as_goal_message: true
-  labels:
+goal:
+  type: multioptions
+  options:
   - negative
   - positive
   - neutral
-  name: label
-  type: multiclass
+  field_name_for_the_model: label
+context:
+  type: plain-text
+  field_names_for_the_model: 
+    context: context
+user_input:
+- type: text
+  placeholder: Enter an statement
+  field_name_for_the_model: statement
+model_input:
+  statement: statement
+response_fields:
+  input_by_user: statement
+delta_metrics:
+- type: fairness
+- type: robustness
 metadata:
   create:
   - display_name: example explanation
