@@ -38,7 +38,7 @@ class Evaluation:
         self.centralized_host = os.getenv("CENTRALIZED_URL")
 
     def require_fields_task(self, folder_name: str):
-        input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
+        input_location = f"./app/models/{folder_name}/app/domain/schemas/model.py"
         spec = importlib.util.spec_from_file_location(
             "ModelSingleInput", input_location
         )
