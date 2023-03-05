@@ -5,4 +5,5 @@ export type GoalConfigType = {
   text: string;
   options: string[];
   field_name_for_the_model?: string;
+  evaluation_label?: string;
 };

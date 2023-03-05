@@ -10,7 +10,7 @@ const PlainText: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
 }) => {
   useEffect(() => {
     onInputChange({
-      [field_names_for_the_model.context ?? "context"]: context.context,
+      [field_names_for_the_model.context]: context.context,
     });
   }, []);
 

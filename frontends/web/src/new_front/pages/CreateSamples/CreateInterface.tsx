@@ -8,16 +8,49 @@ import AnnotationButtonActions from "../../components/CreateSamples/CreateSample
 import useFetch from "use-http";
 import ResponseInfo from "new_front/components/CreateSamples/CreateSamples/ResponseInfo";
 import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
-import { ConfigurationTask } from "new_front/types/createSamples/configurationTask";
+import { InfoContextTask } from "new_front/types/createSamples/configurationTask";
+import SelectBetweenImages from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/SelectBetweenImages";
 
 const CreateInterface = (taskId: number) => {
-  taskId = 2;
+  taskId = 1;
   const [modelInputs, setModelInputs] = useState<object>({});
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
-  const [taskInfo, setTaskInfo] = useState<any>({});
+  const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
+  const [taskInfoName, setTaskInfoName] = useState<string>("");
+  const { get, post, response, loading } = useFetch();
 
-  const { post, response, loading } = useFetch();
+  // const taskDefinitionDummy = {
+  //   context_id: 0,
+  //   context_info: {
+  //     goal: {
+  //       type: 'plain-text',
+  //       text: 'lorem',
+  //     },
+  //     context: {
+  //       type: 'select-images',
+  //       field_names_for_the_model: {
+  //         context: 'image',
+  //       },
+  //     },
+  //     user_input: [
+  //       {
+  //         type: 'text',
+  //         placeholder: 'type...',
+  //         field_name_for_the_model: 'input',
+  //       },
+  //     ],
+  //     model_input: {},
+  //     response_fields: {
+  //       input_by_user: '',
+  //     },
+  //   },
+  //   current_context: {
+  //     context: '',
+  //   },
+  //   real_round_id: 0,
+  //   tags: '',
+  // }
 
   const updateModelInputs = (input: object) => {
     setModelInputs((prevModelInputs) => {
@@ -26,18 +59,19 @@ const CreateInterface = (taskId: number) => {
   };
 
   const loadTaskContextData = async () => {
-    const [taskContextInfo, modelInTheLoop] = await Promise.all([
+    const [taskContextInfo, modelInTheLoop, taskInfo] = await Promise.all([
       post(`/context/get_context`, {
         task_id: taskId,
       }),
       post(`/model/get_model_in_the_loop`, {
         task_id: taskId,
       }),
-    ]);
+      get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
+    ]).then();
     if (response.ok) {
-      setTaskInfo(taskContextInfo.context_info);
+      setTaskContextInfo(taskContextInfo);
       setModelInTheLoop(modelInTheLoop.light_model);
-      console.log(taskInfo);
+      setTaskInfoName(taskInfo.name);
     }
   };
 
@@ -45,28 +79,16 @@ const CreateInterface = (taskId: number) => {
     loadTaskContextData();
   }, []);
 
-  const context = {
-    context: {
-      question: "I am a question",
-      answer: "I am an answer",
-      context:
-        "Captain Nasim Salem Al Mashawi, Director of Innovation and Future Prospects said that, since its establishment three years ago, Leadership Innovation Section has completed 25 workshops and training courses on innovation, prospecting and project management, with the participation of police and various government departments and agencies in Sharjah. The Innovation and Future Prospects Department is keen to participate actively in the UAE Innovation Month, with the aim of spreading the culture of innovation among government employees and visitors to innovation platforms.",
-    },
-    id: 1,
-    tag: "",
-    real_round_id: 1,
-  };
-
   return (
     <>
-      {loading ? (
+      {loading || !taskContextInfo ? (
         <div>Loading...</div>
       ) : (
         <div className="container">
           <div id="title">
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
-                <AnnotationTitle taskName="Hate speech" />
+                <AnnotationTitle taskName="CAT" />
               </div>
               <div>
                 <div className="grid grid-cols-3 gap-2">
@@ -77,7 +99,7 @@ const CreateInterface = (taskId: number) => {
           </div>
           <div id="goal" className="mb-3 ">
             <AnnotationGoalStrategy
-              config={taskInfo.goal as any}
+              config={taskContextInfo?.context_info.goal as any}
               task={{}}
               onInputChange={updateModelInputs}
             />
@@ -87,16 +109,18 @@ const CreateInterface = (taskId: number) => {
               <h6 className="text-xs text-[#005798] font-bold pl-2">
                 CONTEXT:
               </h6>
-              <AnnotationContextStrategy
-                config={taskInfo.context as any}
+              <SelectBetweenImages />
+
+              {/* <AnnotationContextStrategy
+                config={taskContextInfo.context_info.context as any}
                 task={{}}
-                context={context.context}
+                context={taskContextInfo?.current_context}
                 onInputChange={updateModelInputs}
-              />
+              /> */}
             </div>
             <div id="inputUser" className="p-3">
               <AnnotationUserInputStrategy
-                config={taskInfo.user_input as any}
+                config={taskContextInfo?.context_info.user_input as any}
                 task={{}}
                 onInputChange={updateModelInputs}
               />
@@ -113,14 +137,22 @@ const CreateInterface = (taskId: number) => {
               )}
             </div>
             <div id="buttons">
-              {/* <AnnotationButtonActions
-              modelInTheLoop={modelInTheLoop}
-              context={context}
-              modelInputs={modelInputs}
-              taskID={3}
-              inputByUser={taskInfo.response_fields.input_by_user}
-              setModelOutput={setModelOutput}
-            /> */}
+              {taskContextInfo && (
+                <AnnotationButtonActions
+                  modelInTheLoop={modelInTheLoop}
+                  context_id={taskContextInfo?.context_id}
+                  tags={taskContextInfo?.tags}
+                  real_round_id={taskContextInfo?.real_round_id}
+                  current_context={taskContextInfo?.current_context}
+                  modelInputs={modelInputs}
+                  taskID={3}
+                  inputByUser={
+                    taskContextInfo?.context_info?.response_fields
+                      ?.input_by_user
+                  }
+                  setModelOutput={setModelOutput}
+                />
+              )}
             </div>
           </div>
         </div>

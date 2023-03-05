@@ -9,7 +9,7 @@ import React, {
   LazyExoticComponent,
 } from "react";
 import { AnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
-import { AnnotationUserInputs } from "new_front/types/createSamples/annotationUserInputs";
+import { AnnotationUserInput } from "new_front/types/createSamples/annotationUserInputs";
 import { BarLoader } from "react-spinners";
 
 const Import = (
@@ -18,7 +18,7 @@ const Import = (
   React.lazy(() => import(`./${module}`).catch(() => import(`./GoalFallback`)));
 
 type Props = {
-  config: AnnotationUserInputs;
+  config: AnnotationUserInput[];
 };
 
 const AnnotationUserInputStrategy: FC<Props & AnnotationFactoryType> = ({
@@ -27,12 +27,12 @@ const AnnotationUserInputStrategy: FC<Props & AnnotationFactoryType> = ({
   onInputChange,
 }) => {
   const [goalRenders, setGoalRenders] = useState<
-    ReactElement<AnnotationUserInputs & AnnotationFactoryType>[]
+    ReactElement<AnnotationUserInput & AnnotationFactoryType>[]
   >([]);
 
   useEffect(() => {
     const getView = async () => {
-      config.options.map((option, index) => {
+      config.map((option, index) => {
         const View = Import(ModulesRegistry.input[option.type]);
         setGoalRenders((prev) => [
           ...prev,

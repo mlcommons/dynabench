@@ -8,7 +8,10 @@ import UserContext from "containers/UserContext";
 
 type Props = {
   modelInTheLoop: string;
-  context: any;
+  context_id: number;
+  tags: string | undefined;
+  real_round_id: number;
+  current_context: any;
   modelInputs: any;
   taskID: number;
   inputByUser: string;
@@ -17,7 +20,10 @@ type Props = {
 
 const AnnotationButtonActions: FC<Props> = ({
   modelInTheLoop,
-  context,
+  context_id,
+  tags,
+  real_round_id,
+  current_context,
   modelInputs,
   taskID,
   inputByUser,
@@ -41,9 +47,9 @@ const AnnotationButtonActions: FC<Props> = ({
       model_input: modelInputs,
       sandbox_mode: sandboxMode,
       user_id: 1675,
-      context_id: context.id,
-      tag: context.tag,
-      round_id: context.real_round_id,
+      context_id: context_id,
+      tag: tags,
+      round_id: real_round_id,
       task_id: taskID,
       model_url: modelInTheLoop,
     };
@@ -94,7 +100,7 @@ const AnnotationButtonActions: FC<Props> = ({
               )}
             </div>
             <div className="col-span-1 pl-2" id="switchContext">
-              {context && (
+              {current_context && (
                 <Button
                   className="border-0 font-weight-bold light-gray-bg task-action-btn"
                   onClick={() => {
