@@ -150,6 +150,9 @@ const CreateInterface = (taskId: number) => {
                     taskContextInfo?.context_info?.response_fields
                       ?.input_by_user
                   }
+                  labelForTheModelPrediction={
+                    taskContextInfo?.context_info.model_output?.label
+                  }
                   setModelOutput={setModelOutput}
                 />
               )}

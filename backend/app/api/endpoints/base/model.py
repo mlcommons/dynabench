@@ -32,6 +32,7 @@ def single_model_prediction_submit(model: SingleModelEvaluationRequest):
         model.round_id,
         model.task_id,
         model.sandbox_mode,
+        model.label_for_the_model_prediction,
     )
 
 

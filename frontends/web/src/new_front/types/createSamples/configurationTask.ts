@@ -12,6 +12,11 @@ type ConfigurationTask = {
   user_input: object[];
   model_input: object;
   response_fields: ResponseFields;
+  model_output: ModelOutput;
+};
+
+type ModelOutput = {
+  label: string;
 };
 
 type ResponseFields = {
