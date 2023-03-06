@@ -321,13 +321,7 @@ class EvaluationService:
             delta_metrics_task,
             model_s3_zip,
         )
-        jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
-        not_scoring_datasets = self.downloads_not_scoring_datasets(
-            jsonl_not_scoring_datasets,
-            self.s3_bucket,
-            tasks.task_code,
-            model_s3_zip,
-        )
+
         self.logger.info("Datasets downloaded")
         rounds = list(
             map(
@@ -363,6 +357,13 @@ class EvaluationService:
             )
             new_scores.append(new_score)
         if evaluate_no_scoring_datasets:
+            jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
+            not_scoring_datasets = self.downloads_not_scoring_datasets(
+                jsonl_not_scoring_datasets,
+                self.s3_bucket,
+                tasks.task_code,
+                model_s3_zip,
+            )
             for not_scoring_dataset in not_scoring_datasets:
                 self.logger.info("Evaluate non-scoring datasets")
                 send_not_scoring_dataset = []
@@ -411,6 +412,7 @@ class EvaluationService:
         scoring: bool = True,
     ):
         # try:
+        print("dataset", dataset)
         (
             prediction_dict,
             dataset_id,
