@@ -74,3 +74,5 @@ output:
 perf_metric:
   reference_name: label
   type: macro_f1
+model_output:
+  model_prediction_label: label

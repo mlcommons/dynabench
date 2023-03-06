@@ -5,7 +5,7 @@ goal:
   text: "Your goal: enter a question and select an answer in the context, such that the model is fooled."
 context:
   type: selectable-text
-  field_names_for_the_model: 
+  field_names_for_the_model:
     context: context
     answer: label
 user_input:
@@ -70,3 +70,5 @@ output:
 perf_metric:
   reference_name: answer
   type: squad_f1
+model_output:
+  model_prediction_label: answer

@@ -9,7 +9,7 @@ goal:
   field_name_for_the_model: label
 context:
   type: plain-text
-  field_names_for_the_model: 
+  field_names_for_the_model:
     context: context
 user_input:
 - type: text
@@ -74,3 +74,5 @@ output:
 perf_metric:
   reference_name: label
   type: macro_f1
+model_output:
+  model_prediction_label: label
