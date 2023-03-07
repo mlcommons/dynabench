@@ -1,27 +1,21 @@
 aggregation_metric:
   type: dynascore
-goal:
-  type: multioptions
-  options:
-  - entailed
-  - neutral
-  - contradictory
-  field_name_for_the_model: label
 context:
-  type: plain-text
-  field_names_for_the_model:
-    context: context
-user_input:
-- type: text
-  placeholder: Enter hypothesis
-  field_name_for_the_model: hypothesis
-model_input:
-  statement: hypothesis
-response_fields:
-  input_by_user: hypothesis
+- name: context
+  placeholder: Enter context...
+  type: string
 delta_metrics:
 - type: fairness
 - type: robustness
+goal_message: enter a question and select an answer in the context, such that the
+  model is fooled.
+input:
+- name: question
+  placeholder: Enter question...
+  type: string
+- name: answer
+  reference_name: context
+  type: context_string_selection
 metadata:
   create:
   - display_name: example explanation
@@ -39,13 +33,9 @@ metadata:
     placeholder: Explain why you think the model made a mistake...
     type: string
   validate:
-  - labels:
-    - entailed
-    - neutral
-    - contradictory
-    name: corrected_label
-    placeholder: Enter corrected label
-    type: multiclass
+  - name: corrected_answer
+    reference_name: context
+    type: context_string_selection
     validated_label_condition: incorrect
   - name: target_explanation
     placeholder: Explain why your proposed target is correct...
@@ -63,16 +53,14 @@ metadata:
     placeholder: Enter what you think was done to try to trick the model...
     type: string
 model_wrong_metric:
-  reference_names:
-  - label
-  type: exact_match
+  reference_name: answer
+  threshold: 0.4
+  type: string_f1
 output:
-- name: label
-- name: prob
-  reference_name: label
+- name: answer
+- name: conf
+  single_prob: true
   type: prob
 perf_metric:
-  reference_name: label
-  type: accuracy
-model_output:
-  model_prediction_label: label
+  reference_name: answer
+  type: squad_f1

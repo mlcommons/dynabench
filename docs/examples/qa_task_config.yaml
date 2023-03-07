@@ -1,21 +1,27 @@
 aggregation_metric:
   type: dynascore
+goal:
+  type: plain-text
+  text: "Your goal: enter a question and select an answer in the context, such that the model is fooled."
 context:
-- name: context
-  placeholder: Enter context...
-  type: string
+  type: selectable-text
+  field_names_for_the_model:
+    context: context
+    answer: label
+user_input:
+- type: text
+  placeholder: Enter an statement
+  field_name_for_the_model: question
+model_input:
+  question: question
+  context: context
+response_fields:
+  input_by_user: question
 delta_metrics:
 - type: fairness
 - type: robustness
 goal_message: enter a question and select an answer in the context, such that the
   model is fooled.
-input:
-- name: question
-  placeholder: Enter question...
-  type: string
-- name: answer
-  reference_name: context
-  type: context_string_selection
 metadata:
   create:
   - display_name: example explanation
@@ -64,3 +70,5 @@ output:
 perf_metric:
   reference_name: answer
   type: squad_f1
+model_output:
+  model_prediction_label: answer
