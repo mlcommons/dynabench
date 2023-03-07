@@ -151,7 +151,7 @@ class ModelService:
         response["prediction"] = prediction[label_for_the_model_prediction]
         response["probabilities"] = prediction["prob"]
         response["label"] = model_input["label"]
-        response["input"] = model_input["input_by_user"]
+        response["input"] = model_input[model_input["input_by_user"]]
         model_wrong = self.evaluate_model_in_the_loop(
             response["prediction"], response["label"]
         )

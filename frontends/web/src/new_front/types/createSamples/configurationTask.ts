@@ -16,7 +16,7 @@ type ConfigurationTask = {
 };
 
 type ModelOutput = {
-  label: string;
+  model_prediction_label: string;
 };
 
 type ResponseFields = {

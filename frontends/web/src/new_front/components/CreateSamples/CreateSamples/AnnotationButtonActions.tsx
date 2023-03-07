@@ -5,13 +5,14 @@ import useFetch from "use-http";
 import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import UserContext from "containers/UserContext";
+import { PacmanLoader } from "react-spinners";
 
 type Props = {
   modelInTheLoop: string;
-  context_id: number;
+  contextId: number;
   tags: string | undefined;
-  real_round_id: number;
-  current_context: any;
+  realRoundId: number;
+  currentContext: any;
   modelInputs: any;
   taskID: number;
   inputByUser: string;
@@ -21,10 +22,10 @@ type Props = {
 
 const AnnotationButtonActions: FC<Props> = ({
   modelInTheLoop,
-  context_id,
+  contextId,
   tags,
-  real_round_id,
-  current_context,
+  realRoundId,
+  currentContext,
   modelInputs,
   taskID,
   inputByUser,
@@ -37,7 +38,6 @@ const AnnotationButtonActions: FC<Props> = ({
 
   const userContext = useContext(UserContext);
   const { user } = userContext;
-
   const { post, loading } = useFetch();
 
   const onSubmission = async () => {
@@ -48,10 +48,10 @@ const AnnotationButtonActions: FC<Props> = ({
     const finaModelInputs = {
       model_input: modelInputs,
       sandbox_mode: sandboxMode,
-      user_id: 1675,
-      context_id: context_id,
+      user_id: user.id,
+      context_id: contextId,
       tag: tags,
-      round_id: real_round_id,
+      round_id: realRoundId,
       task_id: taskID,
       model_url: modelInTheLoop,
       label_for_the_model_prediction: labelForTheModelPrediction,
@@ -65,66 +65,72 @@ const AnnotationButtonActions: FC<Props> = ({
 
   return (
     <>
-      <div className="col-span-1 py-4">
-        <div className="grid grid-cols-6">
-          <div className="col-span-3 px-3">
-            <BootstrapSwitchButton
-              checked={!sandboxMode}
-              onlabel="Live Mode"
-              offstyle="warning"
-              offlabel="Sandbox"
-              width={120}
-              onChange={(checked: boolean) => {
-                setSandboxMode(checked);
-              }}
-            />
-          </div>
-          <div className="flex justify-end col-span-3 ">
-            <div className="col-span-1 pl-2" id="batchSubmission">
-              <Button
-                className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                onClick={() => {
-                  setShowCreateBatchModal(true);
+      {!loading ? (
+        <div className="col-span-1 py-4">
+          <div className="grid grid-cols-6">
+            <div className="col-span-3 px-3">
+              <BootstrapSwitchButton
+                checked={!sandboxMode}
+                onlabel="Live Mode"
+                offstyle="warning"
+                offlabel="Sandbox"
+                width={120}
+                onChange={(checked: boolean) => {
+                  setSandboxMode(checked);
                 }}
-              >
-                Batch submissions
-              </Button>
-              {showCreateBatchModal && (
-                <>
-                  <Modal
-                    show={showCreateBatchModal}
-                    onHide={() => {
-                      setShowCreateBatchModal(false);
-                    }}
-                  >
-                    <BatchCreateSamples modelInTheLoop={modelInTheLoop} />
-                  </Modal>
-                </>
-              )}
+              />
             </div>
-            <div className="col-span-1 pl-2" id="switchContext">
-              {current_context && (
+            <div className="flex justify-end col-span-3 ">
+              <div className="col-span-1 pl-2" id="batchSubmission">
                 <Button
                   className="border-0 font-weight-bold light-gray-bg task-action-btn"
                   onClick={() => {
-                    window.location.reload();
+                    setShowCreateBatchModal(true);
                   }}
                 >
-                  Switch to next context
+                  Batch submissions
                 </Button>
-              )}
-            </div>
-            <div className="col-span-1 pl-2 pr-3" id="submit">
-              <Button
-                className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                onClick={onSubmission}
-              >
-                Submit
-              </Button>
+                {showCreateBatchModal && (
+                  <>
+                    <Modal
+                      show={showCreateBatchModal}
+                      onHide={() => {
+                        setShowCreateBatchModal(false);
+                      }}
+                    >
+                      <BatchCreateSamples modelInTheLoop={modelInTheLoop} />
+                    </Modal>
+                  </>
+                )}
+              </div>
+              <div className="col-span-1 pl-2" id="switchContext">
+                {currentContext && (
+                  <Button
+                    className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                    onClick={() => {
+                      window.location.reload();
+                    }}
+                  >
+                    Switch to next context
+                  </Button>
+                )}
+              </div>
+              <div className="col-span-1 pl-2 pr-3" id="submit">
+                <Button
+                  className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                  onClick={onSubmission}
+                >
+                  Submit
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center justify-center h-32">
+          <PacmanLoader color="#ccebd4" loading={loading} size={50} />
+        </div>
+      )}
     </>
   );
 };

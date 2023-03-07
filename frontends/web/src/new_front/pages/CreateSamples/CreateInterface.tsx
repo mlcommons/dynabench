@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
 import AnnotationHelperButtons from "../../components/CreateSamples/CreateSamples/AnnotationHelperButtons";
 import AnnotationGoalStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Goals/AnnotationGoalStrategy";
@@ -9,48 +9,22 @@ import useFetch from "use-http";
 import ResponseInfo from "new_front/components/CreateSamples/CreateSamples/ResponseInfo";
 import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
 import { InfoContextTask } from "new_front/types/createSamples/configurationTask";
-import SelectBetweenImages from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/SelectBetweenImages";
+import { useHistory, useParams } from "react-router-dom";
+import { PacmanLoader } from "react-spinners";
+import UserContext from "containers/UserContext";
 
-const CreateInterface = (taskId: number) => {
-  taskId = 1;
+const CreateInterface = () => {
   const [modelInputs, setModelInputs] = useState<object>({});
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
   const [taskInfoName, setTaskInfoName] = useState<string>("");
   const { get, post, response, loading } = useFetch();
+  let { taskCode } = useParams<{ taskCode: string }>();
 
-  // const taskDefinitionDummy = {
-  //   context_id: 0,
-  //   context_info: {
-  //     goal: {
-  //       type: 'plain-text',
-  //       text: 'lorem',
-  //     },
-  //     context: {
-  //       type: 'select-images',
-  //       field_names_for_the_model: {
-  //         context: 'image',
-  //       },
-  //     },
-  //     user_input: [
-  //       {
-  //         type: 'text',
-  //         placeholder: 'type...',
-  //         field_name_for_the_model: 'input',
-  //       },
-  //     ],
-  //     model_input: {},
-  //     response_fields: {
-  //       input_by_user: '',
-  //     },
-  //   },
-  //   current_context: {
-  //     context: '',
-  //   },
-  //   real_round_id: 0,
-  //   tags: '',
-  // }
+  const userContext = useContext(UserContext);
+  const history = useHistory();
+  const { user } = userContext;
 
   const updateModelInputs = (input: object) => {
     setModelInputs((prevModelInputs) => {
@@ -59,6 +33,7 @@ const CreateInterface = (taskId: number) => {
   };
 
   const loadTaskContextData = async () => {
+    const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
     const [taskContextInfo, modelInTheLoop, taskInfo] = await Promise.all([
       post(`/context/get_context`, {
         task_id: taskId,
@@ -76,19 +51,32 @@ const CreateInterface = (taskId: number) => {
   };
 
   useEffect(() => {
+    if (!user.id) {
+      console.log("user not logged in");
+      history.push(
+        "/login?msg=" +
+          encodeURIComponent(
+            "Please sign up or log in so that you can upload a model"
+          ) +
+          "&src=" +
+          encodeURIComponent(`/tasks/${taskCode}/create`)
+      );
+    }
     loadTaskContextData();
   }, []);
 
   return (
     <>
       {loading || !taskContextInfo ? (
-        <div>Loading...</div>
+        <div className="flex items-center justify-center h-screen">
+          <PacmanLoader color="#ccebd4" loading={loading} size={50} />
+        </div>
       ) : (
         <div className="container">
           <div id="title">
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
-                <AnnotationTitle taskName="CAT" />
+                <AnnotationTitle taskName={taskInfoName} />
               </div>
               <div>
                 <div className="grid grid-cols-3 gap-2">
@@ -109,14 +97,13 @@ const CreateInterface = (taskId: number) => {
               <h6 className="text-xs text-[#005798] font-bold pl-2">
                 CONTEXT:
               </h6>
-              <SelectBetweenImages />
-
-              {/* <AnnotationContextStrategy
+              {/* <SelectBetweenImages /> */}
+              <AnnotationContextStrategy
                 config={taskContextInfo.context_info.context as any}
                 task={{}}
                 context={taskContextInfo?.current_context}
                 onInputChange={updateModelInputs}
-              /> */}
+              />
             </div>
             <div id="inputUser" className="p-3">
               <AnnotationUserInputStrategy
@@ -140,10 +127,10 @@ const CreateInterface = (taskId: number) => {
               {taskContextInfo && (
                 <AnnotationButtonActions
                   modelInTheLoop={modelInTheLoop}
-                  context_id={taskContextInfo?.context_id}
+                  contextId={taskContextInfo?.context_id}
                   tags={taskContextInfo?.tags}
-                  real_round_id={taskContextInfo?.real_round_id}
-                  current_context={taskContextInfo?.current_context}
+                  realRoundId={taskContextInfo?.real_round_id}
+                  currentContext={taskContextInfo?.current_context}
                   modelInputs={modelInputs}
                   taskID={3}
                   inputByUser={
@@ -151,7 +138,8 @@ const CreateInterface = (taskId: number) => {
                       ?.input_by_user
                   }
                   labelForTheModelPrediction={
-                    taskContextInfo?.context_info.model_output?.label
+                    taskContextInfo?.context_info.model_output
+                      ?.model_prediction_label
                   }
                   setModelOutput={setModelOutput}
                 />
