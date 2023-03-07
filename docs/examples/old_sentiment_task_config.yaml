@@ -1,27 +1,23 @@
 aggregation_metric:
   type: dynascore
-goal:
-  type: multioptions
-  options:
-  - entailed
-  - neutral
-  - contradictory
-  field_name_for_the_model: label
 context:
-  type: plain-text
-  field_names_for_the_model:
-    context: context
-user_input:
-- type: text
-  placeholder: Enter hypothesis
-  field_name_for_the_model: hypothesis
-model_input:
-  statement: hypothesis
-response_fields:
-  input_by_user: hypothesis
+- name: context
+  placeholder: Enter context...
+  type: string
 delta_metrics:
 - type: fairness
 - type: robustness
+input:
+- name: statement
+  placeholder: Enter statement...
+  type: string
+- as_goal_message: true
+  labels:
+  - negative
+  - positive
+  - neutral
+  name: label
+  type: multiclass
 metadata:
   create:
   - display_name: example explanation
@@ -40,9 +36,9 @@ metadata:
     type: string
   validate:
   - labels:
+    - negative
+    - positive
     - entailed
-    - neutral
-    - contradictory
     name: corrected_label
     placeholder: Enter corrected label
     type: multiclass
@@ -73,6 +69,4 @@ output:
   type: prob
 perf_metric:
   reference_name: label
-  type: accuracy
-model_output:
-  model_prediction_label: label
+  type: macro_f1

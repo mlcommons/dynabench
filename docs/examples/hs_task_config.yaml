@@ -2,23 +2,27 @@ aggregation_metric:
   type: dynascore
 content_warning: This is sensitive content! If you do not want to see any hateful
   examples, please switch to another task.
+goal:
+  type: multioptions
+  options:
+  - hateful
+  - non-hateful
+  field_name_for_the_model: label
 context:
-- name: context
-  placeholder: Enter context...
-  type: string
+  type: plain-text
+  field_names_for_the_model:
+    context: context
+user_input:
+- type: text
+  placeholder: Enter statement
+  field_name_for_the_model: statement
+model_input:
+  statement: statement
+response_fields:
+  input_by_user: statement
 delta_metrics:
 - type: fairness
 - type: robustness
-input:
-- name: statement
-  placeholder: Enter statement...
-  type: string
-- as_goal_message: true
-  labels:
-  - not-hateful
-  - hateful
-  name: label
-  type: multiclass
 metadata:
   create:
   - display_name: example explanation
@@ -70,3 +74,5 @@ output:
 perf_metric:
   reference_name: label
   type: macro_f1
+model_output:
+  model_prediction_label: label

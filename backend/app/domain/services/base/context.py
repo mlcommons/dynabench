@@ -77,13 +77,14 @@ class ContextService:
         }
 
     def _get_context_info(self, task_config) -> dict:
+        print(task_config)
         config_yaml = yaml.safe_load(task_config.config_yaml)
         context_info = {
             "goal": config_yaml.get("goal"),
             "context": config_yaml.get("context"),
-            "user_input": config_yaml.get("user_input"),
-            "response_fields": config_yaml.get("response_fields"),
+            "input": config_yaml.get("input"),
             "model_input": config_yaml.get("model_input"),
+            "response_fields": config_yaml.get("response_fields"),
             "model_output": config_yaml.get("model_output"),
         }
         return context_info
