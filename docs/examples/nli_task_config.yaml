@@ -18,7 +18,7 @@ user_input:
 model_input:
   statement: hypothesis
 response_fields:
-  input_by_user: statement
+  input_by_user: hypothesis
 delta_metrics:
 - type: fairness
 - type: robustness
