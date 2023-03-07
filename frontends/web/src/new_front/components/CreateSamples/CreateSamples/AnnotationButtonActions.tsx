@@ -16,7 +16,7 @@ type Props = {
   modelInputs: any;
   taskID: number;
   inputByUser: string;
-  labelForTheModelPrediction: string;
+  modelPredictionLabel: string;
   setModelOutput: (modelOutput: ModelOutputType) => void;
 };
 
@@ -29,7 +29,7 @@ const AnnotationButtonActions: FC<Props> = ({
   modelInputs,
   taskID,
   inputByUser,
-  labelForTheModelPrediction,
+  modelPredictionLabel,
   setModelOutput,
 }) => {
   const [showCreateBatchModal, setShowCreateBatchModal] =
@@ -54,7 +54,7 @@ const AnnotationButtonActions: FC<Props> = ({
       round_id: realRoundId,
       task_id: taskID,
       model_url: modelInTheLoop,
-      label_for_the_model_prediction: labelForTheModelPrediction,
+      model_prediction_label: modelPredictionLabel,
     };
     const modelOutput = await post(
       `/model/single_model_prediction_submit`,

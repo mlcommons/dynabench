@@ -137,7 +137,7 @@ const CreateInterface = () => {
                     taskContextInfo?.context_info?.response_fields
                       ?.input_by_user
                   }
-                  labelForTheModelPrediction={
+                  modelPredictionLabel={
                     taskContextInfo?.context_info.model_output
                       ?.model_prediction_label
                   }

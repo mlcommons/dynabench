@@ -144,11 +144,11 @@ class ModelService:
         round_id: int,
         task_id: int,
         sandbox_mode: bool,
-        label_for_the_model_prediction: str,
+        model_prediction_label: str,
     ) -> str:
         response = {}
         prediction = self.single_model_prediction(model_url, model_input)
-        response["prediction"] = prediction[label_for_the_model_prediction]
+        response["prediction"] = prediction[model_prediction_label]
         response["probabilities"] = prediction["prob"]
         response["label"] = model_input["label"]
         response["input"] = model_input[model_input["input_by_user"]]

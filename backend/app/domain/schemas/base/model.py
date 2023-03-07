@@ -18,7 +18,7 @@ class SingleModelEvaluationRequest(BaseModel):
     round_id: int
     task_id: int
     sandbox_mode: bool
-    label_for_the_model_prediction: str
+    model_prediction_label: str
 
 
 class SingleModelEvaluationResponse(BaseModel):
