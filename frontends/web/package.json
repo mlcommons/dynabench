@@ -41,6 +41,7 @@
         "react-scripts": "5.0.1",
         "react-select": "^5.2.1",
         "react-spinners": "^0.13.8",
+        "react-string-diff": "^0.2.0",
         "react-table": "^7.7.0",
         "react-text-annotate": "^0.3.0",
         "recharts": "^1.8.5",

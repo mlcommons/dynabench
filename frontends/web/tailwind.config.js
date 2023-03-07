@@ -16,7 +16,7 @@ module.exports = {
       // you can configure the container to be centered
       center: true,
       screens: {
-        xl: "1300px",
+        xl: "1240px",
       },
     },
     extend: {

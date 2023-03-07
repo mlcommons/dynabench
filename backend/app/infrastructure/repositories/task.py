@@ -21,6 +21,13 @@ class TaskRepository(AbstractRepository):
             .first()
         )
 
+    def get_task_code_by_task_id(self, task_id: int):
+        return (
+            self.session.query(self.model.task_code)
+            .filter(self.model.id == task_id)
+            .first()
+        )
+
     def get_model_id_and_task_code(self, task):
         instance = (
             self.session.query(self.model).filter(self.model.task_code == task).first()

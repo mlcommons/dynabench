@@ -15,7 +15,7 @@ import { Container, Nav, Navbar, NavDropdown, Row } from "react-bootstrap";
 import ReactGA from "react-ga";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import { Provider as FetchProvider } from "use-http";
-import CreateInterface from "../common/Annotation/CreateInterface.js";
+import CreateInterface from "new_front/pages/CreateSamples/CreateInterface";
 import ValidateInterface from "../common/Annotation/ValidateInterface.js";
 import ApiService from "../common/ApiService";
 import { Avatar } from "../components/Avatar/Avatar";
@@ -41,10 +41,7 @@ import SubmitModel from "./SubmitModel";
 import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
 import TaskPage from "./TaskPage";
-// import TaskPage from "../new_front/pages/Task/TaskPage";
-// import Test from '../new_front/pages/CommunitiesLandingPages/Test'
 import Test from "../new_front/pages/Task/Test";
-import CreateInterface2 from "../new_front/pages/CreateSamples/CreateInterface";
 import SearchBar from "../new_front/components/Utils/SearchBar";
 import FilterTasks from "../new_front/pages/Task/FilterTasks";
 import TasksContext from "./TasksContext";
@@ -444,7 +441,6 @@ class App extends React.Component {
                   <Route path="/dadc" component={DADCLanding} />
                   <Route path="/others_tasks" component={OthersTaskLanding} />
                   <Route path="/tasks" component={FilterTasks} />
-                  <Route path="/test" component={CreateInterface2} />
                   <Route path="/login" component={LoginPage} />
                   <Route
                     path="/generate_api_token"

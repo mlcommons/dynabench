@@ -43,7 +43,7 @@ class DatasetRepository(AbstractRepository):
 
         return jsonl_no_scoring_datasets
 
-    def get_by_name(self, dataset_name: str) -> dict:
+    def get_dataset_info_by_name(self, dataset_name: str) -> dict:
         instance = (
             self.session.query(self.model).filter(self.model.name == dataset_name).one()
         )
@@ -73,3 +73,10 @@ class DatasetRepository(AbstractRepository):
             .filter(self.model.id == dataset_id)
             .one()
         )
+
+    def get_dataset_info_by_id(self, dataset_id: int) -> dict:
+        instance = (
+            self.session.query(self.model).filter(self.model.id == dataset_id).one()
+        )
+        instance = self.instance_converter.instance_to_dict(instance)
+        return instance

@@ -1,0 +1,18 @@
+{
+    "goal": {
+        "plain-text": "PlainText",
+        "multioptions": "Multioptions"
+    },
+    "context": {
+        "plain-text": "PlainText",
+        "selectable-text": "SelectableText",
+        "zoom_image": "ZoomImage",
+        "audio": "Audio",
+        "modify-original-text": "ModifyOriginalText",
+        "select-multiple-images": "SelectMultipleImages"
+    },
+    "input": {
+        "text": "Text",
+        "audio": "Audio"
+    }
+}

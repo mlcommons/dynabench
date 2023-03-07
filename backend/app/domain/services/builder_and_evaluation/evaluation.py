@@ -60,7 +60,7 @@ class EvaluationService:
         self.logger.setLevel(logging.INFO)
 
     def require_fields_task(self, folder_name: str):
-        input_location = f"./app/models/{folder_name}/app/api/schemas/model.py"
+        input_location = f"./app/models/{folder_name}/app/domain/schemas/model.py"
         spec = importlib.util.spec_from_file_location(
             "ModelSingleInput", input_location
         )
@@ -207,7 +207,7 @@ class EvaluationService:
         return {param: sample_dataset.get(param) for param in schema}
 
     def heavy_prediction(
-        self, datasets: list, task_code: str, ip: str, model_name: str, folder_name: str
+        self, datasets: list, task_code: str, ip: str, model_id: int, folder_name: str
     ):
         final_dict_prediction = {}
         start_prediction = time.time()
@@ -235,7 +235,7 @@ class EvaluationService:
             self.s3.upload_file(
                 predictions,
                 self.s3_bucket,
-                f"predictions/{task_code}/{model_name}/{name_prediction}",
+                f"predictions/{task_code}/{model_id}/{name_prediction}",
             )
             dict_dataset_type["dataset"] = "./app/models/{}/datasets/{}".format(
                 folder_name, dataset["dataset"]
@@ -251,7 +251,7 @@ class EvaluationService:
         return (
             final_dict_prediction,
             dataset_id,
-            model_name,
+            model_id,
             seconds_time_prediction,
             num_samples,
             folder_name,
@@ -285,7 +285,12 @@ class EvaluationService:
         return round(num_samples / seconds_time_prediction, 2)
 
     def evaluation(
-        self, task: str, model_s3_zip: str, model_id: int, user_id: int
+        self,
+        task: str,
+        model_s3_zip: str,
+        model_id: int,
+        user_id: int,
+        evaluate_no_scoring_datasets: bool = False,
     ) -> dict:
         logs_name = "logs-{}".format(
             (model_s3_zip.split("/")[-1].split(".")[0]).split("-")[0]
@@ -316,13 +321,7 @@ class EvaluationService:
             delta_metrics_task,
             model_s3_zip,
         )
-        jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
-        not_scoring_datasets = self.downloads_not_scoring_datasets(
-            jsonl_not_scoring_datasets,
-            self.s3_bucket,
-            tasks.task_code,
-            model_s3_zip,
-        )
+
         self.logger.info("Datasets downloaded")
         rounds = list(
             map(
@@ -354,23 +353,37 @@ class EvaluationService:
                 folder_name,
                 model_id,
                 current_round,
+                arn_service,
             )
             new_scores.append(new_score)
-        for not_scoring_dataset in not_scoring_datasets:
-            self.logger.info("Evaluate non-scoring datasets")
-            send_not_scoring_dataset = []
-            send_not_scoring_dataset.append(not_scoring_dataset)
-            new_score = self.save_predictions_dataset(
-                send_not_scoring_dataset, tasks, ip, model_name, folder_name, model_id
+        if evaluate_no_scoring_datasets:
+            jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
+            not_scoring_datasets = self.downloads_not_scoring_datasets(
+                jsonl_not_scoring_datasets,
+                self.s3_bucket,
+                tasks.task_code,
+                model_s3_zip,
             )
-            new_scores.append(new_score)
-
+            for not_scoring_dataset in not_scoring_datasets:
+                self.logger.info("Evaluate non-scoring datasets")
+                send_not_scoring_dataset = []
+                send_not_scoring_dataset.append(not_scoring_dataset)
+                new_score = self.save_predictions_dataset(
+                    send_not_scoring_dataset,
+                    tasks,
+                    ip,
+                    model_name,
+                    folder_name,
+                    model_id,
+                    arn_service,
+                )
+                new_scores.append(new_score)
         self.logger.info("Create light model")
         url_light_model = self.builder.create_light_model(model_name, folder_name)
         self.model_repository.update_light_model(model_id, url_light_model)
         self.model_repository.update_model_status(model_id)
-        self.builder.delete_ecs_service(arn_service)
-        shutil.rmtree(f"./app/models/{folder_name}")
+        self.logger.info("Clean folder and service")
+        self.clean_folder_and_service(folder_name, arn_service)
         user_email = self.user_repository.get_user_email(user_id)[0]
         self.email_helper.send(
             contact=user_email,
@@ -381,6 +394,11 @@ class EvaluationService:
         )
         return new_scores
 
+    def clean_folder_and_service(self, folder_name: str, arn_service: str):
+        print("arn_service", arn_service)
+        self.builder.delete_ecs_service(str(arn_service))
+        shutil.rmtree(f"./app/models/{folder_name}")
+
     def save_predictions_dataset(
         self,
         dataset: dict,
@@ -389,17 +407,20 @@ class EvaluationService:
         model_name: str,
         folder_name: str,
         model_id: int,
+        arn_service: str,
         current_round: int = 1,
         scoring: bool = True,
     ):
+        # try:
+        print("dataset", dataset)
         (
             prediction_dict,
             dataset_id,
-            model_name,
+            model_id,
             minutes_time_prediction,
             num_samples,
             folder_name,
-        ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_name, folder_name)
+        ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_id, folder_name)
         self.logger.info("Calculate memory utilization")
         memory = self.get_memory_utilization(model_name)
         self.logger.info("Calculate throughput")
@@ -482,6 +503,9 @@ class EvaluationService:
         self.logger.info("Save score")
         return new_score
 
+    # except Exception:
+    #     self.clean_folder_and_service(folder_name, arn_service)
+
     def evaluate_dataperf_decentralized(self, dataperf_response: dict):
         model_id = dataperf_response["model_id"]
         task_id = self.model_repository.get_by_id(model_id)["tid"]
@@ -496,7 +520,7 @@ class EvaluationService:
         ]
         score = 100 * np.round(score, 4)
 
-        did = self.dataset_repository.get_by_name(dataset_name)["id"]
+        did = self.dataset_repository.get_dataset_info_by_name(dataset_name)["id"]
         r_realid = self.round_repository.get_by_id(task_id)["rid"]
 
         new_score = {

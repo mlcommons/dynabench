@@ -11,6 +11,7 @@ import logging
 import os
 import shutil
 import time
+from secrets import randbelow
 from zipfile import ZipFile
 
 import boto3
@@ -78,7 +79,7 @@ class BuilderService:
                         )
                     shutil.rmtree(f"./app/models/{folder_name}/{folder}")
 
-    def decompress(self, zip_name):
+    def decompress_zip_to_folder(self, zip_name):
         folder_name = self.unzip_file(zip_name)
         compression_method = self.check_compression_method(folder_name)
         if compression_method:
@@ -96,6 +97,7 @@ class BuilderService:
         return {"ecr_username": "AWS", "ecr_password": ecr_password, "ecr_url": ecr_url}
 
     def create_repository(self, repo_name: str) -> str:
+        repo_name = "{}-{}".format(repo_name, randbelow(100000))
         response = self.ecr.create_repository(
             repositoryName=repo_name, imageScanningConfiguration={"scanOnPush": True}
         )
@@ -225,9 +227,9 @@ class BuilderService:
 
     def get_ip_ecs_task(self, model: str, logger: logging.Logger) -> str:
         zip_name, model_name = self.download_zip(os.getenv("AWS_S3_BUCKET"), model)
-        folder_name = self.decompress(zip_name)
+        folder_name = self.decompress_zip_to_folder(zip_name)
         logger.info("Decompress model")
-        repo = self.create_repository(model_name)
+        repo = self.create_repository(folder_name)
         logger.info(f"Create repo: {repo}")
         tag = "latest"
         self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)

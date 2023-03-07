@@ -19,7 +19,7 @@ import { createBatchSamples } from "../../services/ModelCentricServices";
 import { CSVDownload } from "react-csv";
 import Swal from "sweetalert2";
 
-const BatchCreateSamples = (modelUrl) => {
+const BatchCreateSamples = (modelInTheLoop) => {
   const [csvPrediction, setCsvPrediction] = useState();
   const [loading, setLoading] = useState(false);
 
@@ -34,19 +34,21 @@ const BatchCreateSamples = (modelUrl) => {
     const file = modelData.file[0];
     const formData = new FormData();
     formData.append("file", file);
-    createBatchSamples(formData, modelUrl.modelUrl).then((response) => {
-      setCsvPrediction(response.data);
-      setLoading(false);
-      Swal.fire({
-        title: "Success!",
-        text: "Here are your predictions",
-        icon: "success",
-        showConfirmButton: false,
-        timer: 2500,
-      }).then(() => {
-        window.location.reload();
-      });
-    });
+    createBatchSamples(formData, modelInTheLoop.modelInTheLoop).then(
+      (response) => {
+        setCsvPrediction(response.data);
+        setLoading(false);
+        Swal.fire({
+          title: "Success!",
+          text: "Here are your predictions",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 2500,
+        }).then(() => {
+          window.location.reload();
+        });
+      }
+    );
   };
 
   const { register, handleSubmit } = useForm({

@@ -8,12 +8,32 @@ from app.domain.schemas.base.model import (
     BatchCreateExampleRequest,
     ModelInTheLoopRequest,
     ModelInTheLoopResponse,
+    ModelPredictionPerDatasetRequest,
+    SingleModelEvaluationRequest,
+    SingleModelEvaluationResponse,
     UploadModelToS3AndEvaluateRequest,
 )
 from app.domain.services.base.model import ModelService
 
 
 router = APIRouter()
+
+
+@router.post(
+    "/single_model_prediction_submit", response_model=SingleModelEvaluationResponse
+)
+def single_model_prediction_submit(model: SingleModelEvaluationRequest):
+    return ModelService().single_model_prediction_submit(
+        model.model_url,
+        model.model_input,
+        model.context_id,
+        model.user_id,
+        model.tag,
+        model.round_id,
+        model.task_id,
+        model.sandbox_mode,
+        model.model_prediction_label,
+    )
 
 
 @router.post("/batch_prediction", response_class=FileResponse)
@@ -66,3 +86,10 @@ async def upload_model_to_s3_and_evaluate(
 @router.get("/initiate_lambda_models")
 def initiate_lambda_models() -> None:
     return ModelService().initiate_lambda_models()
+
+
+@router.post("/get_model_prediction_per_dataset")
+def get_model_prediction_per_dataset(model: ModelPredictionPerDatasetRequest):
+    return ModelService().get_model_prediction_per_dataset(
+        model.user_id, model.model_id, model.dataset_id
+    )

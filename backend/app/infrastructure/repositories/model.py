@@ -16,6 +16,13 @@ class ModelRepository(AbstractRepository):
     def __init__(self) -> None:
         super().__init__(Model)
 
+    def get_model_info_by_id(self, model_id: int) -> dict:
+        instance = (
+            self.session.query(self.model).filter(self.model.id == model_id).one()
+        )
+        instance = self.instance_converter.instance_to_dict(instance)
+        return instance
+
     def get_model_in_the_loop(self, task_id: int) -> dict:
         models_in_the_loop = (
             self.session.query(self.model.light_model)
