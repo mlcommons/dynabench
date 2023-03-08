@@ -11,6 +11,7 @@ import TaskCard from "../../components/Cards/TaskCard";
 import { TaskInfoType } from "../../types/task/taskInfo";
 import { TaskCategories } from "../../types/task/taskCategories";
 import { PacmanLoader } from "react-spinners";
+import TasksSkeleton from "new_front/components/Skeletons/TasksSkeleton";
 import Carousel from "react-multi-carousel";
 import { responsiveCarousel } from "../../utils/constants";
 import "react-multi-carousel/lib/styles.css";
@@ -148,8 +149,9 @@ const TasksPage = () => {
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-center h-screen">
+        <div>
           <PacmanLoader color="#ccebd4" loading={loading} size={50} />
+          {/* <TasksSkeleton /> */}
         </div>
       )}
     </>
