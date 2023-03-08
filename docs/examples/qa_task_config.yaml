@@ -72,3 +72,7 @@ perf_metric:
   type: squad_f1
 model_output:
   model_prediction_label: answer
+model_evaluation_metric:
+  metric_name: string_f1
+  metric_parameters:
+    threshold: 0.4

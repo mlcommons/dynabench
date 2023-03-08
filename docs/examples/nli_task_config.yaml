@@ -76,3 +76,5 @@ perf_metric:
   type: accuracy
 model_output:
   model_prediction_label: label
+model_evaluation_metric:
+  metric_name: exact_match
