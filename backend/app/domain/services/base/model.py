@@ -183,7 +183,7 @@ class ModelService:
             prediction,
             ground_truth,
             model_evaluation_metric_info["metric_name"],
-            model_evaluation_metric_info["metric_parameters"],
+            model_evaluation_metric_info.get("metric_parameters", {}),
         )
         return model_evaluation_strategy.evaluate_model()
 

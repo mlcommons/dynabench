@@ -12,6 +12,7 @@ import { InfoContextTask } from "new_front/types/createSamples/configurationTask
 import { useHistory, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import UserContext from "containers/UserContext";
+import { isLogin } from "new_front/utils/helpers/functions/LoginFunctions";
 
 const CreateInterface = () => {
   const [modelInputs, setModelInputs] = useState<object>({});
@@ -50,9 +51,9 @@ const CreateInterface = () => {
     }
   };
 
-  useEffect(() => {
-    if (!user.id) {
-      console.log("user not logged in");
+  const userIsLoggedIn = async () => {
+    const login = await isLogin();
+    if (!login) {
       history.push(
         "/login?msg=" +
           encodeURIComponent(
@@ -62,6 +63,10 @@ const CreateInterface = () => {
           encodeURIComponent(`/tasks/${taskCode}/create`)
       );
     }
+  };
+
+  useEffect(() => {
+    userIsLoggedIn();
     loadTaskContextData();
   }, []);
 
