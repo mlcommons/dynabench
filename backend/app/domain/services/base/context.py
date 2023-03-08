@@ -82,7 +82,7 @@ class ContextService:
         context_info = {
             "goal": config_yaml.get("goal"),
             "context": config_yaml.get("context"),
-            "input": config_yaml.get("input"),
+            "user_input": config_yaml.get("user_input"),
             "model_input": config_yaml.get("model_input"),
             "response_fields": config_yaml.get("response_fields"),
             "model_output": config_yaml.get("model_output"),
