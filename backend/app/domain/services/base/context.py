@@ -86,5 +86,6 @@ class ContextService:
             "model_input": config_yaml.get("model_input"),
             "response_fields": config_yaml.get("response_fields"),
             "model_output": config_yaml.get("model_output"),
+            "model_evaluation_metric": config_yaml.get("model_evaluation_metric"),
         }
         return context_info

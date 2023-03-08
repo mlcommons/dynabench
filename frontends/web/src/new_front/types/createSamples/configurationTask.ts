@@ -13,10 +13,16 @@ type ConfigurationTask = {
   model_input: object;
   response_fields: ResponseFields;
   model_output: ModelOutput;
+  model_evaluation_metric: ModelEvaluationMetric;
 };
 
 type ModelOutput = {
   model_prediction_label: string;
+};
+
+export type ModelEvaluationMetric = {
+  metric_name: string;
+  artifacts?: object;
 };
 
 type ResponseFields = {

@@ -7,6 +7,8 @@
 import React, { FC } from "react";
 import { useHistory } from "react-router-dom";
 import { TaskCardProps } from "../../types/task/taskCard";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
 
 const TaskCard: FC<TaskCardProps> = ({
   id,
@@ -27,10 +29,12 @@ const TaskCard: FC<TaskCardProps> = ({
         onClick={() => history.push(`/tasks/${taskCode}`)}
       >
         <div className="relative">
-          <img
+          <LazyLoadImage
             className="w-full h-48 rounded-t-xl"
             src={imageUrl}
-            alt="Colors"
+            alt="blur"
+            effect="blur"
+            width={"100%"}
           />
         </div>
         <div className="px-4">

@@ -141,6 +141,9 @@ const CreateInterface = () => {
                     taskContextInfo?.context_info.model_output
                       ?.model_prediction_label
                   }
+                  modelEvaluationMetricInfo={
+                    taskContextInfo?.context_info?.model_evaluation_metric
+                  }
                   setModelOutput={setModelOutput}
                 />
               )}
