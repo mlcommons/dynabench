@@ -640,7 +640,8 @@ class Task(Base):
     cur_round = db.Column(db.Integer, nullable=False)
 
     hidden = db.Column(db.Boolean, default=True)
-    official = db.Column(db.Boolean, default=False)
+    is_building = db.Column(db.Integer, default=False)
+    challenge_type = db.Column(db.Integer)
     submitable = db.Column(db.Boolean, default=False)
 
     validate_non_fooling = db.Column(db.Boolean, default=False, nullable=False)

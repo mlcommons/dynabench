@@ -20,7 +20,7 @@ type TaskCardProps = {
   taskCode: string;
   imageUrl: string;
   tasksCategories: TaskCategories[];
-  isBuilding: number;
+  isBuilding?: number;
 };
 
 const TaskCard: FC<TaskCardProps> = ({
@@ -40,10 +40,12 @@ const TaskCard: FC<TaskCardProps> = ({
     <>
       <div
         className="max-w-sm transition duration-500 transform bg-white shadow-md h-[30rem] rounded-xl hover:scale-105 cursor-pointer"
-        onClick={() => history.push(`/tasks/${taskCode}`)}
+        onClick={
+          isBuilding === 0 ? () => history.push(`/tasks/${taskCode}`) : () => {}
+        }
       >
         <div className="relative">
-          {isBuilding && (
+          {isBuilding === 1 && (
             <span className="rotate-[-35deg] absolute top-0 left-0 z-10 inline-flex px-3 py-1 mt-[21px] text-sm font-medium text-white rounded-lg select-none bg-secondary-color">
               Building
             </span>

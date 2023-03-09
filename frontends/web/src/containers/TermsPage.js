@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) MLCommons, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
@@ -22,12 +22,12 @@ const TermsPage = () => (
       <p>
         These Terms of Use (“Terms”) govern the use of the Dynabench website
         (the “Website”). These Terms constitute an agreement between you and
-        Facebook, Inc. (“Facebook,” “us,”, “we”, “our”) so it is important that
-        you review them carefully. We reserve the right to change these Terms at
-        any time. Your continued use of the Website following the posting of
-        changes will confirm that you accept the changed Terms. If you do not
-        agree to (or cannot comply with) the changed Terms, you must stop using
-        the Website.
+        MLCommons, Inc. (“MLCommons,” “us,”, “we”, “our”) so it is important
+        that you review them carefully. We reserve the right to change these
+        Terms at any time. Your continued use of the Website following the
+        posting of changes will confirm that you accept the changed Terms. If
+        you do not agree to (or cannot comply with) the changed Terms, you must
+        stop using the Website.
       </p>
       <p>
         <strong>Content</strong>
@@ -297,7 +297,7 @@ const TermsPage = () => (
           or by mail at:
           <br />
           <br />
-          Facebook, Inc.
+          MLCommons, Inc.
           <br />
           ATTN: Privacy Operations
           <br />
