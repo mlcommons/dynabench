@@ -641,7 +641,6 @@ class Task(Base):
 
     hidden = db.Column(db.Boolean, default=True)
     is_building = db.Column(db.Integer, default=False)
-    challenge_type = db.Column(db.Integer)
     submitable = db.Column(db.Boolean, default=False)
 
     validate_non_fooling = db.Column(db.Boolean, default=False, nullable=False)

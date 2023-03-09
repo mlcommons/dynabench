@@ -48,6 +48,7 @@ class ContextService:
         task_config = self.task_repository.get_task_info_by_task_id(task_id)
         try:
             context_info = self._get_context_info(task_config)
+            print(context_info)
         except AttributeError:
             raise HTTPException(
                 500,
@@ -69,15 +70,14 @@ class ContextService:
             raise HTTPException(500, f"No contexts available ({real_round_id})")
 
         return {
-            "context_info": context_info,
             "current_context": json.loads(context.context_json),
             "context_id": context.id,
             "real_round_id": context.r_realid,
             "tags": tags,
         }
 
-    def _get_context_info(self, task_config) -> dict:
-        print(task_config)
+    def get_context_configuration(self, task_id) -> dict:
+        task_config = self.task_repository.get_task_info_by_task_id(task_id)
         config_yaml = yaml.safe_load(task_config.config_yaml)
         context_info = {
             "goal": config_yaml.get("goal"),

@@ -15,3 +15,9 @@ router = APIRouter()
 async def get_context(model: GetContextRequest):
     context = ContextService().get_context(model.task_id, model.method, model.tags)
     return context
+
+
+@router.get("/get_context_configuration")
+async def get_context_configuration(task_id: int):
+    context_config = ContextService().get_context_configuration(task_id=task_id)
+    return context_config
