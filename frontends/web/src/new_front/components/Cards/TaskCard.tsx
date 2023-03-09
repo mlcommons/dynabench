@@ -6,7 +6,22 @@
 
 import React, { FC } from "react";
 import { useHistory } from "react-router-dom";
-import { TaskCardProps } from "../../types/task/taskCard";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/blur.css";
+import { TaskCategories } from "new_front/types/task/taskCategories";
+
+type TaskCardProps = {
+  id: number;
+  name: string;
+  description: string;
+  curRound: number;
+  totalCollected: number;
+  totalFooled: number;
+  taskCode: string;
+  imageUrl: string;
+  tasksCategories: TaskCategories[];
+  isBuilding?: number;
+};
 
 const TaskCard: FC<TaskCardProps> = ({
   id,
@@ -18,19 +33,31 @@ const TaskCard: FC<TaskCardProps> = ({
   taskCode,
   imageUrl,
   tasksCategories,
+  isBuilding,
 }) => {
   const history = useHistory();
   return (
     <>
       <div
         className="max-w-sm transition duration-500 transform bg-white shadow-md h-[30rem] rounded-xl hover:scale-105 cursor-pointer"
-        onClick={() => history.push(`/tasks/${taskCode}`)}
+        onClick={
+          isBuilding === 0 ? () => history.push(`/tasks/${taskCode}`) : () => {}
+        }
       >
         <div className="relative">
-          <img
+          {isBuilding === 1 && (
+            <span className="rotate-[-35deg] absolute top-0 left-0 z-10 inline-flex px-3 py-1 mt-[21px] text-sm font-medium text-white rounded-lg select-none bg-secondary-color">
+              Building
+            </span>
+          )}
+
+          <LazyLoadImage
             className="w-full h-48 rounded-t-xl"
             src={imageUrl}
-            alt="Colors"
+            alt="blur"
+            effect="blur"
+            width={"100%"}
+            height={"100%"}
           />
         </div>
         <div className="px-4">

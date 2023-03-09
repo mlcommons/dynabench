@@ -19,6 +19,7 @@ class SingleModelEvaluationRequest(BaseModel):
     task_id: int
     sandbox_mode: bool
     model_prediction_label: str
+    model_evaluation_metric_info: dict
 
 
 class SingleModelEvaluationResponse(BaseModel):

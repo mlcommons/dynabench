@@ -6,6 +6,7 @@ import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import UserContext from "containers/UserContext";
 import { PacmanLoader } from "react-spinners";
+import { ModelEvaluationMetric } from "new_front/types/createSamples/configurationTask";
 
 type Props = {
   modelInTheLoop: string;
@@ -17,6 +18,7 @@ type Props = {
   taskID: number;
   inputByUser: string;
   modelPredictionLabel: string;
+  modelEvaluationMetricInfo: ModelEvaluationMetric;
   setModelOutput: (modelOutput: ModelOutputType) => void;
 };
 
@@ -30,6 +32,7 @@ const AnnotationButtonActions: FC<Props> = ({
   taskID,
   inputByUser,
   modelPredictionLabel,
+  modelEvaluationMetricInfo,
   setModelOutput,
 }) => {
   const [showCreateBatchModal, setShowCreateBatchModal] =
@@ -55,6 +58,7 @@ const AnnotationButtonActions: FC<Props> = ({
       task_id: taskID,
       model_url: modelInTheLoop,
       model_prediction_label: modelPredictionLabel,
+      model_evaluation_metric_info: modelEvaluationMetricInfo,
     };
     const modelOutput = await post(
       `/model/single_model_prediction_submit`,

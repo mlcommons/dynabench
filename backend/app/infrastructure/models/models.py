@@ -84,7 +84,7 @@ class Task(Base):
     last_updated = Column(DateTime, onupdate=func.now())
     cur_round = Column(Integer, nullable=False)
     hidden = Column(TINYINT(1))
-    official = Column(TINYINT(1))
+    is_building = Column(TINYINT(1))
     submitable = Column(TINYINT(1))
     validate_non_fooling = Column(TINYINT(1), nullable=False)
     num_matching_validations = Column(Integer, nullable=False)

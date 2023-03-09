@@ -139,18 +139,6 @@ class App extends React.Component {
       ignoreQueryPrefix: true,
     });
     const showContentOnly = query.content_only === "true";
-    const NavItems = this.state.tasks
-      .filter((t) => t.official)
-      .map((task, index) => (
-        <NavDropdown.Item
-          key={task.task_code}
-          as={Link}
-          to={`/tasks/${task.task_code}`}
-          className="py-3"
-        >
-          {task.name}
-        </NavDropdown.Item>
-      ));
     return (
       <FetchProvider url={BASE_URL_2}>
         <UserContext.Provider
@@ -211,7 +199,7 @@ class App extends React.Component {
                             <ul className="ul-nav">
                               {this.state &&
                                 this.state.tasks
-                                  .filter((t) => t.official)
+                                  .filter((t) => t.challenge_type === 1)
                                   .map((task, index) => (
                                     <li key={task.task_code} className="li-nav">
                                       <a href={`/tasks/${task.task_code}`}>
@@ -231,7 +219,7 @@ class App extends React.Component {
                             <ul className="ul-nav">
                               {this.state &&
                                 this.state.tasks
-                                  .filter((t) => t.dataperf)
+                                  .filter((t) => t.challenge_type === 2)
                                   .map((task, index) => (
                                     <li key={task.task_code} className="li-nav">
                                       <a href={`/tasks/${task.task_code}`}>
@@ -246,7 +234,7 @@ class App extends React.Component {
                             <ul className="ul-nav">
                               {this.state &&
                                 this.state.tasks
-                                  .filter((t) => !t.official && !t.dataperf)
+                                  .filter((t) => t.challenge_type === 4)
                                   .map((task, index) => (
                                     <li className="li-nav" key={task.task_code}>
                                       <a href={`/tasks/${task.task_code}`}>

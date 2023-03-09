@@ -33,6 +33,7 @@ def single_model_prediction_submit(model: SingleModelEvaluationRequest):
         model.task_id,
         model.sandbox_mode,
         model.model_prediction_label,
+        model.model_evaluation_metric_info,
     )
 
 
