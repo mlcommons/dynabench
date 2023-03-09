@@ -6,9 +6,22 @@
 
 import React, { FC } from "react";
 import { useHistory } from "react-router-dom";
-import { TaskCardProps } from "../../types/task/taskCard";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { TaskCategories } from "new_front/types/task/taskCategories";
+
+type TaskCardProps = {
+  id: number;
+  name: string;
+  description: string;
+  curRound: number;
+  totalCollected: number;
+  totalFooled: number;
+  taskCode: string;
+  imageUrl: string;
+  tasksCategories: TaskCategories[];
+  isBuilding: number;
+};
 
 const TaskCard: FC<TaskCardProps> = ({
   id,
@@ -20,6 +33,7 @@ const TaskCard: FC<TaskCardProps> = ({
   taskCode,
   imageUrl,
   tasksCategories,
+  isBuilding,
 }) => {
   const history = useHistory();
   return (
@@ -29,12 +43,19 @@ const TaskCard: FC<TaskCardProps> = ({
         onClick={() => history.push(`/tasks/${taskCode}`)}
       >
         <div className="relative">
+          {isBuilding && (
+            <span className="rotate-[-35deg] absolute top-0 left-0 z-10 inline-flex px-3 py-1 mt-[21px] text-sm font-medium text-white rounded-lg select-none bg-secondary-color">
+              Building
+            </span>
+          )}
+
           <LazyLoadImage
             className="w-full h-48 rounded-t-xl"
             src={imageUrl}
             alt="blur"
             effect="blur"
             width={"100%"}
+            height={"100%"}
           />
         </div>
         <div className="px-4">

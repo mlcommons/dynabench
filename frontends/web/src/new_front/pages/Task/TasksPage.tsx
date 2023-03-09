@@ -71,6 +71,7 @@ const TasksPage = () => {
                         taskCode={task.task_code}
                         imageUrl={task.image_url}
                         tasksCategories={tasksCategories}
+                        isBuilding={task.is_building}
                       />
                     </div>
                   ))}
@@ -107,6 +108,7 @@ const TasksPage = () => {
                         taskCode={task.task_code}
                         imageUrl={task.image_url}
                         tasksCategories={tasksCategories}
+                        isBuilding={task.is_building}
                       />
                     </div>
                   ))}
@@ -141,6 +143,7 @@ const TasksPage = () => {
                         taskCode={task.task_code}
                         imageUrl={task.image_url}
                         tasksCategories={tasksCategories}
+                        isBuilding={task.is_building}
                       />
                     </div>
                   ))}
@@ -149,7 +152,7 @@ const TasksPage = () => {
           </div>
         </div>
       ) : (
-        <div>
+        <div className="flex items-center justify-center h-screen">
           <PacmanLoader color="#ccebd4" loading={loading} size={50} />
           {/* <TasksSkeleton /> */}
         </div>

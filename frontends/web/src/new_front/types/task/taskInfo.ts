@@ -29,7 +29,7 @@ export type TaskInfoType = {
   mlcube_tutorial_markdown: string;
   name: string;
   num_matching_validations: number;
-  official: number;
+  is_building: number;
   predictions_upload_instructions_md: string;
   round: roundInfoType;
   s3_bucket: string;
