@@ -292,7 +292,7 @@ class BuilderService:
 
     def create_light_model(self, model_name: str, folder_name: str):
         model_name_light = model_name + "-light"
-        repo = self.create_light_repository(model_name_light)
+        repo = self.create_repository(model_name_light)
         tag = "latest"
         self.push_image_to_ECR(
             repo,
