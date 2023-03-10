@@ -8,7 +8,10 @@ import AnnotationButtonActions from "../../components/CreateSamples/CreateSample
 import useFetch from "use-http";
 import ResponseInfo from "new_front/components/CreateSamples/CreateSamples/ResponseInfo";
 import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
-import { InfoContextTask } from "new_front/types/createSamples/configurationTask";
+import {
+  ConfigurationTask,
+  InfoContextTask,
+} from "new_front/types/createSamples/configurationTask";
 import { useHistory, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import UserContext from "containers/UserContext";
@@ -18,6 +21,8 @@ const CreateInterface = () => {
   const [modelInputs, setModelInputs] = useState<object>({});
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
+  const [taskConfiguration, setTaskConfiguration] =
+    useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
   const [taskInfoName, setTaskInfoName] = useState<string>("");
   const { get, post, response, loading } = useFetch();
@@ -35,18 +40,21 @@ const CreateInterface = () => {
 
   const loadTaskContextData = async () => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
-    const [taskContextInfo, modelInTheLoop, taskInfo] = await Promise.all([
-      post(`/context/get_context`, {
-        task_id: taskId,
-      }),
-      post(`/model/get_model_in_the_loop`, {
-        task_id: taskId,
-      }),
-      get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
-    ]).then();
+    const [taskContextInfo, taskConfiguration, modelInTheLoop, taskInfo] =
+      await Promise.all([
+        post(`/context/get_context`, {
+          task_id: taskId,
+        }),
+        get(`/context/get_context_configuration/${taskId}`),
+        post(`/model/get_model_in_the_loop`, {
+          task_id: taskId,
+        }),
+        get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
+      ]).then();
     if (response.ok) {
       setTaskContextInfo(taskContextInfo);
-      setModelInTheLoop(modelInTheLoop.light_model);
+      setTaskConfiguration(taskConfiguration);
+      setModelInTheLoop(modelInTheLoop);
       setTaskInfoName(taskInfo.name);
     }
   };
@@ -92,7 +100,7 @@ const CreateInterface = () => {
           </div>
           <div id="goal" className="mb-3 ">
             <AnnotationGoalStrategy
-              config={taskContextInfo?.context_info.goal as any}
+              config={taskConfiguration?.goal as any}
               task={{}}
               onInputChange={updateModelInputs}
             />
@@ -104,7 +112,7 @@ const CreateInterface = () => {
               </h6>
               {/* <SelectBetweenImages /> */}
               <AnnotationContextStrategy
-                config={taskContextInfo.context_info.context as any}
+                config={taskConfiguration?.context as any}
                 task={{}}
                 context={taskContextInfo?.current_context}
                 onInputChange={updateModelInputs}
@@ -112,7 +120,7 @@ const CreateInterface = () => {
             </div>
             <div id="inputUser" className="p-3">
               <AnnotationUserInputStrategy
-                config={taskContextInfo?.context_info.user_input as any}
+                config={taskConfiguration?.user_input as any}
                 task={{}}
                 onInputChange={updateModelInputs}
               />
@@ -129,7 +137,7 @@ const CreateInterface = () => {
               )}
             </div>
             <div id="buttons">
-              {taskContextInfo && (
+              {taskContextInfo && taskConfiguration && (
                 <AnnotationButtonActions
                   modelInTheLoop={modelInTheLoop}
                   contextId={taskContextInfo?.context_id}
@@ -139,15 +147,13 @@ const CreateInterface = () => {
                   modelInputs={modelInputs}
                   taskID={3}
                   inputByUser={
-                    taskContextInfo?.context_info?.response_fields
-                      ?.input_by_user
+                    taskConfiguration?.response_fields?.input_by_user
                   }
                   modelPredictionLabel={
-                    taskContextInfo?.context_info.model_output
-                      ?.model_prediction_label
+                    taskConfiguration?.model_output?.model_prediction_label
                   }
                   modelEvaluationMetricInfo={
-                    taskContextInfo?.context_info?.model_evaluation_metric
+                    taskConfiguration?.model_evaluation_metric
                   }
                   setModelOutput={setModelOutput}
                 />

@@ -7,7 +7,6 @@ from fastapi.responses import FileResponse
 from app.domain.schemas.base.model import (
     BatchCreateExampleRequest,
     ModelInTheLoopRequest,
-    ModelInTheLoopResponse,
     ModelPredictionPerDatasetRequest,
     SingleModelEvaluationRequest,
     SingleModelEvaluationResponse,
@@ -57,7 +56,7 @@ async def batch_prediction(
     return {"response": "The model will be evaluated in the background"}
 
 
-@router.post("/get_model_in_the_loop", response_model=ModelInTheLoopResponse)
+@router.post("/get_model_in_the_loop", response_model=str)
 async def get_model_in_the_loop(model: ModelInTheLoopRequest):
     return ModelService().get_model_in_the_loop(model.task_id)
 
