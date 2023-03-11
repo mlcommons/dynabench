@@ -235,7 +235,7 @@ class BuilderService:
         self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)
         logger.info("Push image to ECR")
         ip, arn_service = self.create_ecs_endpoint(model_name, f"{repo}")
-        return ip, model_name, folder_name, arn_service
+        return ip, model_name, folder_name, arn_service, repo_name
 
     def create_light_repository(self, repo_name: str) -> str:
         response = self.ecr.create_repository(
@@ -305,4 +305,10 @@ class BuilderService:
         lambda_function_name = "{}-{}".format(model_name, randbelow(100000))
         self.light_model_deployment(lambda_function_name, repo)
         self.create_permission_lambda_function(lambda_function_name)
-        return self.create_url_light_model(lambda_function_name)
+        return self.create_url_light_model(lambda_function_name), repo_name
+
+    def delete_repository(self, repo_name: str):
+        self.ecr.delete_repository(
+            repositoryName=repo_name,
+            force=True,
+        )
