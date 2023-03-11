@@ -302,6 +302,7 @@ class BuilderService:
         )
         digest = self.get_digest_repo(model_name_light)
         repo = repo + "@" + digest
-        self.light_model_deployment(model_name, repo)
-        self.create_permission_lambda_function(model_name)
-        return self.create_url_light_model(model_name)
+        lambda_function_name = "{}-{}".format(model_name, randbelow(100000))
+        self.light_model_deployment(lambda_function_name, repo)
+        self.create_permission_lambda_function(lambda_function_name)
+        return self.create_url_light_model(lambda_function_name)
