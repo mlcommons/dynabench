@@ -334,9 +334,13 @@ class EvaluationService:
             )
         )
         new_scores = []
-        ip, model_name, folder_name, arn_service = self.builder.get_ip_ecs_task(
-            model_s3_zip, self.logger
-        )
+        (
+            ip,
+            model_name,
+            folder_name,
+            arn_service,
+            repo_name,
+        ) = self.builder.get_ip_ecs_task(model_s3_zip, self.logger)
         self.logger.info(f"Create endpoint for evaluation: {ip}")
         for current_round in rounds:
             round_datasets = [
@@ -378,9 +382,13 @@ class EvaluationService:
                     arn_service,
                 )
                 new_scores.append(new_score)
+        self.builder.delete_repository(repo_name)
         self.logger.info("Create light model")
-        url_light_model = self.builder.create_light_model(model_name, folder_name)
+        url_light_model, light_repo_name = self.builder.create_light_model(
+            model_name, folder_name
+        )
         self.model_repository.update_light_model(model_id, url_light_model)
+        self.builder.delete_repository(light_repo_name)
         self.model_repository.update_model_status(model_id)
         self.logger.info("Clean folder and service")
         self.clean_folder_and_service(folder_name, arn_service)
