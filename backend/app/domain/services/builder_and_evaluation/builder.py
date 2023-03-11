@@ -97,7 +97,6 @@ class BuilderService:
         return {"ecr_username": "AWS", "ecr_password": ecr_password, "ecr_url": ecr_url}
 
     def create_repository(self, repo_name: str) -> str:
-        repo_name = "{}-{}".format(repo_name, randbelow(100000))
         response = self.ecr.create_repository(
             repositoryName=repo_name, imageScanningConfiguration={"scanOnPush": True}
         )
@@ -229,7 +228,8 @@ class BuilderService:
         zip_name, model_name = self.download_zip(os.getenv("AWS_S3_BUCKET"), model)
         folder_name = self.decompress_zip_to_folder(zip_name)
         logger.info("Decompress model")
-        repo = self.create_repository(folder_name)
+        repo_name = "{}-{}".format(folder_name, randbelow(100000))
+        repo = self.create_repository(repo_name)
         logger.info(f"Create repo: {repo}")
         tag = "latest"
         self.push_image_to_ECR(repo, f"./app/models/{folder_name}", tag)
@@ -291,8 +291,8 @@ class BuilderService:
         )["FunctionUrl"]
 
     def create_light_model(self, model_name: str, folder_name: str):
-        model_name_light = model_name + "-light"
-        repo = self.create_repository(model_name_light)
+        repo_name = "{}-{}-{}".format(model_name, "light", randbelow(100000))
+        repo = self.create_repository(repo_name)
         tag = "latest"
         self.push_image_to_ECR(
             repo,
@@ -300,7 +300,7 @@ class BuilderService:
             tag,
             docker_name="Dockerfile.aws",
         )
-        digest = self.get_digest_repo(model_name_light)
+        digest = self.get_digest_repo(repo_name)
         repo = repo + "@" + digest
         lambda_function_name = "{}-{}".format(model_name, randbelow(100000))
         self.light_model_deployment(lambda_function_name, repo)
