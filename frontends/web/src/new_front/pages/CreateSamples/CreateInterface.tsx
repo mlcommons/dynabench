@@ -45,7 +45,7 @@ const CreateInterface = () => {
         post(`/context/get_context`, {
           task_id: taskId,
         }),
-        get(`/context/get_context_configuration/${taskId}`),
+        get(`/context/get_context_configuration?task_id=${taskId}`),
         post(`/model/get_model_in_the_loop`, {
           task_id: taskId,
         }),
@@ -80,7 +80,7 @@ const CreateInterface = () => {
 
   return (
     <>
-      {loading || !taskContextInfo ? (
+      {loading || !taskContextInfo || !taskConfiguration ? (
         <div className="flex items-center justify-center h-screen">
           <PacmanLoader color="#ccebd4" loading={loading} size={50} />
         </div>
@@ -125,17 +125,6 @@ const CreateInterface = () => {
                 onInputChange={updateModelInputs}
               />
             </div>
-            <div id="responseInfo" className="max-h-96">
-              {modelOutput && (
-                <ResponseInfo
-                  label={modelOutput.label}
-                  input={modelOutput.input}
-                  prediction={modelOutput.prediction}
-                  probabilities={modelOutput.probabilities}
-                  fooled={modelOutput.fooled}
-                />
-              )}
-            </div>
             <div id="buttons">
               {taskContextInfo && taskConfiguration && (
                 <AnnotationButtonActions
@@ -156,6 +145,17 @@ const CreateInterface = () => {
                     taskConfiguration?.model_evaluation_metric
                   }
                   setModelOutput={setModelOutput}
+                />
+              )}
+            </div>
+            <div id="responseInfo" className="max-h-96">
+              {modelOutput && (
+                <ResponseInfo
+                  label={modelOutput.label}
+                  input={modelOutput.input}
+                  prediction={modelOutput.prediction}
+                  probabilities={modelOutput.probabilities}
+                  fooled={modelOutput.fooled}
                 />
               )}
             </div>

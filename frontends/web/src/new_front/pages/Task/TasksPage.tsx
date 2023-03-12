@@ -56,7 +56,7 @@ const TasksPage = () => {
               className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
               key="DADC"
             >
-              <Carousel responsive={responsiveCarousel}>
+              <Carousel responsive={responsiveCarousel} key="DADC">
                 {tasksData
                   .filter((t) => t.challenge_type === 1)
                   .map((task) => (
@@ -93,7 +93,7 @@ const TasksPage = () => {
               className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
               key="Dataperf"
             >
-              <Carousel responsive={responsiveCarousel}>
+              <Carousel responsive={responsiveCarousel} key="Dataperf">
                 {tasksData
                   .filter((t) => t.challenge_type === 2)
                   .map((task) => (
@@ -128,7 +128,7 @@ const TasksPage = () => {
               className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
               key="others"
             >
-              <Carousel responsive={responsiveCarousel}>
+              <Carousel responsive={responsiveCarousel} key="others">
                 {tasksData
                   .filter((t) => t.challenge_type === 4)
                   .map((task) => (
