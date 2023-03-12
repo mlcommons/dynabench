@@ -47,8 +47,7 @@ class ContextService:
         """
         task_config = self.task_repository.get_task_info_by_task_id(task_id)
         try:
-            context_info = self.get_context_configuration(task_id)
-            print(context_info)
+            self.get_context_configuration(task_id)
         except AttributeError:
             raise HTTPException(
                 500,
