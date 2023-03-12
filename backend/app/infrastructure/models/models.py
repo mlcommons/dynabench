@@ -118,6 +118,8 @@ class Task(Base):
     decen_aws_region = Column(Text)
     image_url = Column(Text)
     documentation_url = Column(Text)
+    lambda_model = Column(Text)
+    dataperf = Column(TINYINT(1))
 
 
 class User(Base):
