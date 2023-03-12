@@ -24,4 +24,5 @@ gunicorn==20.1.0
 transformers==4.12.5
 torch==1.11.0
 python-jose
+openai==0.27.2
 #json==2.0.9

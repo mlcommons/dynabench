@@ -4,7 +4,7 @@
 
 from fastapi import APIRouter
 
-from app.domain.schemas.base.context import GetContextRequest
+from app.domain.schemas.base.context import GetContextRequest, GetNibblers
 from app.domain.services.base.context import ContextService
 
 
@@ -21,3 +21,9 @@ async def get_context(model: GetContextRequest):
 async def get_context_configuration(task_id: int):
     context_config = ContextService().get_context_configuration(task_id=task_id)
     return context_config
+
+
+@router.post("/get_nibbler_contexts")
+async def get_nibbler_contexts(model: GetNibblers):
+    image_dict = ContextService().get_nibbler_contexts(model.prompt, model.task_id)
+    return image_dict

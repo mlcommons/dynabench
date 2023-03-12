@@ -3,7 +3,10 @@
 # LICENSE file in the root directory of this source tree.
 
 import json
+import os
 
+import openai
+import requests
 import yaml
 from fastapi import HTTPException
 
@@ -88,3 +91,34 @@ class ContextService:
             "model_evaluation_metric": config_yaml.get("model_evaluation_metric"),
         }
         return context_info
+
+    def get_nibbler_contexts(self, prompt: str, task_id: int) -> dict:
+        task_config = self.task_repository.get_task_info_by_task_id(task_id)
+        endpoint = task_config.lambda_model
+        res = requests.post(
+            endpoint,
+            json={"model": "StableDiffusion", "prompt": prompt, "n": 1, "steps": 20},
+            headers={"Authorization": "Bearer ", "User-Agent": ""},
+        )
+        if res.status_code == 200:
+            image_response = res.json()
+        else:
+            openai.api_key = os.getenv("OPENAI")
+            response = openai.Image.create(
+                prompt=prompt, n=1, size="256x256", response_format="b64_json"
+            )
+            image_response = response["data"][0]["b64_json"]
+
+        base_dict = {
+            "a": image_response,
+            "b": image_response,
+            "c": image_response,
+            "d": image_response,
+            "e": image_response,
+            "f": image_response,
+            "g": image_response,
+            "h": image_response,
+            "i": image_response,
+        }
+
+        return base_dict
