@@ -14,6 +14,8 @@
     },
     "input": {
         "text": "Text",
-        "audio": "Audio"
+        "audio": "Audio",
+        "multioptions": "Multioptions",
+        "radio-button-options": "RadioButtonOptions"
     }
 }
