@@ -388,7 +388,6 @@ class EvaluationService:
             model_name, folder_name
         )
         self.model_repository.update_light_model(model_id, url_light_model)
-        self.builder.delete_repository(light_repo_name)
         self.model_repository.update_model_status(model_id)
         self.logger.info("Clean folder and service")
         self.clean_folder_and_service(folder_name, arn_service)
