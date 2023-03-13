@@ -123,4 +123,4 @@ class ContextService:
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibler":
-            self.get_nibbler_contexts(artifacts["prompt"], artifacts["endpoint"])
+            return self.get_nibbler_contexts(artifacts["prompt"], artifacts["endpoint"])
