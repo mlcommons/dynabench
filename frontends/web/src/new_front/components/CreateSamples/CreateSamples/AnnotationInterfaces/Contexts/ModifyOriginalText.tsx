@@ -17,11 +17,11 @@ const ModifyOriginalText: FC<ContextAnnotationFactoryType & ContextConfigType> =
             <p>Answer: {context.answer}</p>
           </div>
           <div className="grid grid-cols-2 gap-4 py-4">
-            <textarea value={initValue} className="p-4" />
+            <textarea value={initValue} className="p-4 h-72" />
             <textarea
               onChange={({ target: { value } }) => setNewValue(value)}
               value={newValue}
-              className="p-4"
+              className="p-4 h-72"
             />
           </div>
 

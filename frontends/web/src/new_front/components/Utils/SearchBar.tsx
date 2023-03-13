@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC } from "react";
 import { useHistory } from "react-router-dom";
 
-const Search: FC = () => {
+const SearchBar: FC = () => {
   const history = useHistory();
 
   const onSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -40,4 +40,4 @@ const Search: FC = () => {
   );
 };
 
-export default Search;
+export default SearchBar;
