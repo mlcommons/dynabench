@@ -1,7 +1,8 @@
 {
     "goal": {
         "plain-text": "PlainText",
-        "multioptions": "Multioptions"
+        "multioptions": "Multioptions",
+        "radio-button-options": "RadioButtonOptions"
     },
     "context": {
         "plain-text": "PlainText",
@@ -9,10 +10,12 @@
         "zoom_image": "ZoomImage",
         "audio": "Audio",
         "modify-original-text": "ModifyOriginalText",
-        "select-multiple-images": "SelectMultipleImages"
+        "select-multiple-images-generative": "SelectBetweenImagesGenerative"
     },
     "input": {
         "text": "Text",
-        "audio": "Audio"
+        "audio": "Audio",
+        "multioptions": "Multioptions",
+        "radio-button-options": "RadioButtonOptions"
     }
 }

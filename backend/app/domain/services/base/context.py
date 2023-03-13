@@ -3,7 +3,10 @@
 # LICENSE file in the root directory of this source tree.
 
 import json
+import os
 
+import openai
+import requests
 import yaml
 from fastapi import HTTPException
 
@@ -47,8 +50,7 @@ class ContextService:
         """
         task_config = self.task_repository.get_task_info_by_task_id(task_id)
         try:
-            context_info = self.get_context_configuration(task_id)
-            print(context_info)
+            self.get_context_configuration(task_id)
         except AttributeError:
             raise HTTPException(
                 500,
@@ -89,3 +91,35 @@ class ContextService:
             "model_evaluation_metric": config_yaml.get("model_evaluation_metric"),
         }
         return context_info
+
+    def get_nibbler_contexts(self, prompt: str, endpoint: str) -> dict:
+        res = requests.post(
+            endpoint,
+            json={"model": "StableDiffusion", "prompt": prompt, "n": 1, "steps": 20},
+            headers={"Authorization": "Bearer ", "User-Agent": ""},
+        )
+        if res.status_code == 200:
+            image_response = res.json()
+        else:
+            openai.api_key = os.getenv("OPENAI")
+            response = openai.Image.create(
+                prompt=prompt, n=1, size="256x256", response_format="b64_json"
+            )
+            image_response = response["data"][0]["b64_json"]
+
+        base_dict = [
+            {
+                "image": image_response,
+            },
+            {
+                "image": image_response,
+            },
+            {
+                "image": image_response,
+            },
+        ]
+        return base_dict
+
+    def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
+        if type == "nibler":
+            return self.get_nibbler_contexts(artifacts["prompt"], artifacts["endpoint"])

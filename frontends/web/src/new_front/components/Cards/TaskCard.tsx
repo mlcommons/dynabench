@@ -43,6 +43,7 @@ const TaskCard: FC<TaskCardProps> = ({
         onClick={
           isBuilding === 0 ? () => history.push(`/tasks/${taskCode}`) : () => {}
         }
+        key={id}
       >
         <div className="relative">
           {isBuilding === 1 && (

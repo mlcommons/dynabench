@@ -44,7 +44,12 @@ class ModelService:
         self.email_helper = EmailHelper()
 
     def get_model_in_the_loop(self, task_id: str) -> str:
-        return self.model_repository.get_model_in_the_loop(task_id)
+        model_in_the_loop_info = self.model_repository.get_model_in_the_loop(task_id)
+        if model_in_the_loop_info is None:
+            model_in_the_loop = ""
+        else:
+            model_in_the_loop = model_in_the_loop_info.light_model
+        return model_in_the_loop
 
     def upload_model_to_s3_and_evaluate(
         self,

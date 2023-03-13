@@ -11,3 +11,8 @@ class GetContextRequest(BaseModel):
     task_id: int
     method: str = "least_used"
     tags: Optional[str] = None
+
+
+class GetGenerativeContextRequest(BaseModel):
+    type: str
+    artifacts: dict

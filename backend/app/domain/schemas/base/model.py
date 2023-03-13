@@ -34,10 +34,6 @@ class ModelInTheLoopRequest(BaseModel):
     task_id: int
 
 
-class ModelInTheLoopResponse(BaseModel):
-    light_model: str
-
-
 @form_body
 class UploadModelToS3AndEvaluateRequest(BaseModel):
     model_name: Optional[str]

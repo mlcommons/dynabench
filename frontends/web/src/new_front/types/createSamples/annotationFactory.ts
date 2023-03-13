@@ -4,5 +4,6 @@ export type AnnotationFactoryType = {
 };
 
 export type ContextAnnotationFactoryType = AnnotationFactoryType & {
+  setIsGenerativeContext: (isGenerative: boolean) => void;
   context: any;
 };

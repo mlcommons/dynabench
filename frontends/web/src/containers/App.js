@@ -251,6 +251,7 @@ class App extends React.Component {
                     <Nav className="justify-content-end">
                       {this.state.user.id ? (
                         <>
+                          <SearchBar />
                           <NavDropdown
                             onToggle={this.refreshData}
                             alignRight

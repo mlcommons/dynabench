@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
 import AnnotationHelperButtons from "../../components/CreateSamples/CreateSamples/AnnotationHelperButtons";
 import AnnotationGoalStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Goals/AnnotationGoalStrategy";
@@ -8,24 +8,28 @@ import AnnotationButtonActions from "../../components/CreateSamples/CreateSample
 import useFetch from "use-http";
 import ResponseInfo from "new_front/components/CreateSamples/CreateSamples/ResponseInfo";
 import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
-import { InfoContextTask } from "new_front/types/createSamples/configurationTask";
+import {
+  ConfigurationTask,
+  InfoContextTask,
+} from "new_front/types/createSamples/configurationTask";
 import { useHistory, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
-import UserContext from "containers/UserContext";
 import { isLogin } from "new_front/utils/helpers/functions/LoginFunctions";
 
 const CreateInterface = () => {
   const [modelInputs, setModelInputs] = useState<object>({});
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
+  const [taskConfiguration, setTaskConfiguration] =
+    useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
   const [taskInfoName, setTaskInfoName] = useState<string>("");
+  const [taskId, setTaskId] = useState<number>(0);
+  const [isGenerativeContext, setIsGenerativeContext] =
+    useState<boolean>(false);
   const { get, post, response, loading } = useFetch();
   let { taskCode } = useParams<{ taskCode: string }>();
-
-  const userContext = useContext(UserContext);
   const history = useHistory();
-  const { user } = userContext;
 
   const updateModelInputs = (input: object) => {
     setModelInputs((prevModelInputs) => {
@@ -35,19 +39,26 @@ const CreateInterface = () => {
 
   const loadTaskContextData = async () => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
-    const [taskContextInfo, modelInTheLoop, taskInfo] = await Promise.all([
-      post(`/context/get_context`, {
-        task_id: taskId,
-      }),
-      post(`/model/get_model_in_the_loop`, {
-        task_id: taskId,
-      }),
-      get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
-    ]).then();
+    const [taskContextInfo, taskConfiguration, modelInTheLoop, taskInfo] =
+      await Promise.all([
+        post(`/context/get_context`, {
+          task_id: taskId,
+        }),
+        get(`/context/get_context_configuration?task_id=${taskId}`),
+        post(`/model/get_model_in_the_loop`, {
+          task_id: taskId,
+        }),
+        get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
+      ]).then();
     if (response.ok) {
       setTaskContextInfo(taskContextInfo);
-      setModelInTheLoop(modelInTheLoop.light_model);
+      setTaskConfiguration(taskConfiguration);
+      setModelInTheLoop(modelInTheLoop);
       setTaskInfoName(taskInfo.name);
+      setTaskId(taskId);
+      setIsGenerativeContext(
+        taskConfiguration.context.generative_context?.is_generative
+      );
     }
   };
 
@@ -72,7 +83,7 @@ const CreateInterface = () => {
 
   return (
     <>
-      {loading || !taskContextInfo ? (
+      {loading || !taskContextInfo || !taskConfiguration ? (
         <div className="flex items-center justify-center h-screen">
           <PacmanLoader color="#ccebd4" loading={loading} size={50} />
         </div>
@@ -92,7 +103,7 @@ const CreateInterface = () => {
           </div>
           <div id="goal" className="mb-3 ">
             <AnnotationGoalStrategy
-              config={taskContextInfo?.context_info.goal as any}
+              config={taskConfiguration?.goal as any}
               task={{}}
               onInputChange={updateModelInputs}
             />
@@ -102,20 +113,44 @@ const CreateInterface = () => {
               <h6 className="text-xs text-[#005798] font-bold pl-2">
                 CONTEXT:
               </h6>
-              {/* <SelectBetweenImages /> */}
               <AnnotationContextStrategy
-                config={taskContextInfo.context_info.context as any}
+                config={taskConfiguration?.context as any}
                 task={{}}
                 context={taskContextInfo?.current_context}
                 onInputChange={updateModelInputs}
+                setIsGenerativeContext={setIsGenerativeContext}
               />
             </div>
             <div id="inputUser" className="p-3">
               <AnnotationUserInputStrategy
-                config={taskContextInfo?.context_info.user_input as any}
+                config={taskConfiguration?.user_input as any}
                 task={{}}
                 onInputChange={updateModelInputs}
               />
+            </div>
+            <div id="buttons">
+              {taskContextInfo && taskConfiguration && (
+                <AnnotationButtonActions
+                  modelInTheLoop={modelInTheLoop}
+                  contextId={taskContextInfo?.context_id}
+                  tags={taskContextInfo?.tags}
+                  realRoundId={taskContextInfo?.real_round_id}
+                  currentContext={taskContextInfo?.current_context}
+                  modelInputs={modelInputs}
+                  taskID={taskId}
+                  inputByUser={
+                    taskConfiguration?.response_fields?.input_by_user
+                  }
+                  modelPredictionLabel={
+                    taskConfiguration?.model_output?.model_prediction_label
+                  }
+                  modelEvaluationMetricInfo={
+                    taskConfiguration?.model_evaluation_metric
+                  }
+                  isGenerativeContext={isGenerativeContext}
+                  setModelOutput={setModelOutput}
+                />
+              )}
             </div>
             <div id="responseInfo" className="max-h-96">
               {modelOutput && (
@@ -125,31 +160,6 @@ const CreateInterface = () => {
                   prediction={modelOutput.prediction}
                   probabilities={modelOutput.probabilities}
                   fooled={modelOutput.fooled}
-                />
-              )}
-            </div>
-            <div id="buttons">
-              {taskContextInfo && (
-                <AnnotationButtonActions
-                  modelInTheLoop={modelInTheLoop}
-                  contextId={taskContextInfo?.context_id}
-                  tags={taskContextInfo?.tags}
-                  realRoundId={taskContextInfo?.real_round_id}
-                  currentContext={taskContextInfo?.current_context}
-                  modelInputs={modelInputs}
-                  taskID={3}
-                  inputByUser={
-                    taskContextInfo?.context_info?.response_fields
-                      ?.input_by_user
-                  }
-                  modelPredictionLabel={
-                    taskContextInfo?.context_info.model_output
-                      ?.model_prediction_label
-                  }
-                  modelEvaluationMetricInfo={
-                    taskContextInfo?.context_info?.model_evaluation_metric
-                  }
-                  setModelOutput={setModelOutput}
                 />
               )}
             </div>
