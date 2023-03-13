@@ -107,18 +107,17 @@ class ContextService:
             )
             image_response = response["data"][0]["b64_json"]
 
-        base_dict = {
-            "a": image_response,
-            "b": image_response,
-            "c": image_response,
-            "d": image_response,
-            "e": image_response,
-            "f": image_response,
-            "g": image_response,
-            "h": image_response,
-            "i": image_response,
-        }
-
+        base_dict = [
+            {
+                "image": image_response,
+            },
+            {
+                "image": image_response,
+            },
+            {
+                "image": image_response,
+            },
+        ]
         return base_dict
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
