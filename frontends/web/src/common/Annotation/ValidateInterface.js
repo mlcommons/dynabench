@@ -324,7 +324,7 @@ class ValidateInterface extends React.Component {
         </div>
       ));
 
-    const contextInterface = this.state.taskConfig?.context.map(
+    const contextInterface = this.state.taskConfig?.old_context.map(
       (taskConfigObj) => (
         <AnnotationComponent
           displayName={taskConfigObj.display_name}
@@ -345,7 +345,7 @@ class ValidateInterface extends React.Component {
           taskConfigObj.validated_label_condition === this.state.validatorAction
       )
       .map((taskConfigObj) => (
-        <div key={taskConfigObj.name} className="mb-1 mt-1">
+        <div key={taskConfigObj.name} className="mt-1 mb-1">
           <AnnotationComponent
             displayName={taskConfigObj.display_name}
             className="user-input-secondary"
@@ -367,7 +367,7 @@ class ValidateInterface extends React.Component {
           show={!!this.state.showBadges}
           onHide={() => this.setState({ showBadges: "" })}
         ></BadgeOverlay>
-        <Container className="mb-5 pb-5">
+        <Container className="pb-5 mb-5">
           <Col className="m-auto" lg={12}>
             {this.state.admin_or_owner && (
               <div style={{ float: "right" }}>
@@ -461,16 +461,16 @@ class ValidateInterface extends React.Component {
                 </Modal>
               </div>
             )}
-            <div className="mt-4 pt-3">
-              <p className="text-uppercase mb-0 spaced-header">
+            <div className="pt-3 mt-4">
+              <p className="mb-0 text-uppercase spaced-header">
                 {this.state.task.name}
               </p>
-              <h2 className="text-2xl task-page-header d-block ml-0 mt-0 text-reset">
+              <h2 className="mt-0 ml-0 text-2xl task-page-header d-block text-reset">
                 Validate examples
               </h2>
             </div>
             {this.state.taskConfig?.content_warning && (
-              <p className="mt-3 p-3 light-red-bg rounded white-color">
+              <p className="p-3 mt-3 rounded light-red-bg white-color">
                 <strong>WARNING</strong>:{" "}
                 {this.state.taskConfig.content_warning}
               </p>
@@ -480,7 +480,7 @@ class ValidateInterface extends React.Component {
                 this.state.example ? (
                   <>
                     {contextInterface && contextInterface.length > 0 && (
-                      <div className="mb-1 p-3 rounded light-gray-bg">
+                      <div className="p-3 mb-1 rounded light-gray-bg">
                         {contextInterface}
                       </div>
                     )}
@@ -547,7 +547,7 @@ class ValidateInterface extends React.Component {
                       <InputGroup className="align-items-center">
                         <Button
                           type="button"
-                          className="font-weight-bold principal-color-bg border-0 task-action-btn"
+                          className="border-0 font-weight-bold principal-color-bg task-action-btn"
                           onClick={() => this.handleResponse()}
                         >
                           {" "}
@@ -557,7 +557,7 @@ class ValidateInterface extends React.Component {
                           data-index={this.props.index}
                           onClick={this.getNewExample}
                           type="button"
-                          className="ml-2 font-weight-bold principal-color light-gray-bg border-0 task-action-btn"
+                          className="ml-2 border-0 font-weight-bold principal-color light-gray-bg task-action-btn"
                         >
                           <i className="fas fa-undo-alt"></i> Skip and load new
                           example

@@ -29,6 +29,7 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
   task,
   context,
   onInputChange,
+  setIsGenerativeContext,
 }) => {
   const [goalRender, setGoalRender] =
     useState<ReactElement<ContextConfigType & ContextAnnotationFactoryType>>();
@@ -36,7 +37,17 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
   useEffect(() => {
     const getView = async () => {
       const View = await Import(ModulesRegistry.context[config.type]);
-      setGoalRender(<View {...{ onInputChange, task, context, ...config }} />);
+      setGoalRender(
+        <View
+          {...{
+            onInputChange,
+            setIsGenerativeContext,
+            task,
+            context,
+            ...config,
+          }}
+        />
+      );
     };
     getView();
   }, []);

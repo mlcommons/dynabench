@@ -44,6 +44,8 @@ const AnnotationButtonActions: FC<Props> = ({
   const { user } = userContext;
   const { post, loading } = useFetch();
 
+  console.log("isGenerativeContext", isGenerativeContext);
+
   const onSubmission = async () => {
     modelInputs = {
       ...modelInputs,

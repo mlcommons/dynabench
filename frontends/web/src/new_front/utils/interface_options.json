@@ -1,7 +1,8 @@
 {
     "goal": {
         "plain-text": "PlainText",
-        "multioptions": "Multioptions"
+        "multioptions": "Multioptions",
+        "radio-button-options": "RadioButtonOptions"
     },
     "context": {
         "plain-text": "PlainText",
