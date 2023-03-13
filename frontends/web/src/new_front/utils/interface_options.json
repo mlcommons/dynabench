@@ -9,7 +9,7 @@
         "zoom_image": "ZoomImage",
         "audio": "Audio",
         "modify-original-text": "ModifyOriginalText",
-        "select-multiple-images": "SelectMultipleImages"
+        "select-multiple-images-generative": "SelectBetweenImagesGenerative"
     },
     "input": {
         "text": "Text",

@@ -92,9 +92,7 @@ class ContextService:
         }
         return context_info
 
-    def get_nibbler_contexts(self, prompt: str, task_id: int) -> dict:
-        task_config = self.task_repository.get_task_info_by_task_id(task_id)
-        endpoint = task_config.lambda_model
+    def get_nibbler_contexts(self, prompt: str, endpoint: str) -> dict:
         res = requests.post(
             endpoint,
             json={"model": "StableDiffusion", "prompt": prompt, "n": 1, "steps": 20},
@@ -122,3 +120,7 @@ class ContextService:
         }
 
         return base_dict
+
+    def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
+        if type == "nibler":
+            self.get_nibbler_contexts(artifacts["prompt"], artifacts["endpoint"])

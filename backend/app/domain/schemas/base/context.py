@@ -13,6 +13,6 @@ class GetContextRequest(BaseModel):
     tags: Optional[str] = None
 
 
-class GetNibblers(BaseModel):
-    prompt: str
-    task_id: int = 45
+class GetGenerativeContextRequest(BaseModel):
+    type: str
+    artifacts: dict

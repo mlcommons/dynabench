@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
 import AnnotationHelperButtons from "../../components/CreateSamples/CreateSamples/AnnotationHelperButtons";
 import AnnotationGoalStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Goals/AnnotationGoalStrategy";
@@ -14,7 +14,6 @@ import {
 } from "new_front/types/createSamples/configurationTask";
 import { useHistory, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
-import UserContext from "containers/UserContext";
 import { isLogin } from "new_front/utils/helpers/functions/LoginFunctions";
 
 const CreateInterface = () => {
@@ -25,12 +24,12 @@ const CreateInterface = () => {
     useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
   const [taskInfoName, setTaskInfoName] = useState<string>("");
+  const [taskId, setTaskId] = useState<number>(0);
+  const [isGenerativeContext, setIsGenerativeContext] =
+    useState<boolean>(false);
   const { get, post, response, loading } = useFetch();
   let { taskCode } = useParams<{ taskCode: string }>();
-
-  const userContext = useContext(UserContext);
   const history = useHistory();
-  const { user } = userContext;
 
   const updateModelInputs = (input: object) => {
     setModelInputs((prevModelInputs) => {
@@ -56,6 +55,10 @@ const CreateInterface = () => {
       setTaskConfiguration(taskConfiguration);
       setModelInTheLoop(modelInTheLoop);
       setTaskInfoName(taskInfo.name);
+      setTaskId(taskId);
+      setIsGenerativeContext(
+        taskConfiguration.context.generative_context?.is_generative
+      );
     }
   };
 
@@ -110,12 +113,12 @@ const CreateInterface = () => {
               <h6 className="text-xs text-[#005798] font-bold pl-2">
                 CONTEXT:
               </h6>
-              {/* <SelectBetweenImages /> */}
               <AnnotationContextStrategy
                 config={taskConfiguration?.context as any}
                 task={{}}
                 context={taskContextInfo?.current_context}
                 onInputChange={updateModelInputs}
+                setIsGenerativeContext={setIsGenerativeContext}
               />
             </div>
             <div id="inputUser" className="p-3">
@@ -134,7 +137,7 @@ const CreateInterface = () => {
                   realRoundId={taskContextInfo?.real_round_id}
                   currentContext={taskContextInfo?.current_context}
                   modelInputs={modelInputs}
-                  taskID={3}
+                  taskID={taskId}
                   inputByUser={
                     taskConfiguration?.response_fields?.input_by_user
                   }
@@ -144,6 +147,7 @@ const CreateInterface = () => {
                   modelEvaluationMetricInfo={
                     taskConfiguration?.model_evaluation_metric
                   }
+                  isGenerativeContext={isGenerativeContext}
                   setModelOutput={setModelOutput}
                 />
               )}
