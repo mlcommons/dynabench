@@ -3,11 +3,16 @@
 # LICENSE file in the root directory of this source tree.
 
 import io
+import os
+import pickle
+import tempfile
 
 import boto3
 import numpy as np
+import pandas as pd
+import yaml
 from dotenv import load_dotenv
-from fastapi import HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from tqdm import tqdm
 
 
@@ -20,36 +25,39 @@ class Helper:
         self.s3_client = boto3.client("s3")
 
     def load_samples(
-        self, sample_ids, allowed_training_ids, train_set_size_limit, route
+        self, language, sample_ids, allowed_training_ids, train_set_size_limit, bucket
     ):
         self._validate_selected_ids(
             sample_ids, allowed_training_ids, train_set_size_limit
         )
-
         embeddings_dict = dict(targets={}, nontargets=[])
-
         for target, id_list in tqdm(sample_ids["targets"].items()):
-            embeddings_dict["targets"][target] = []
-            for ids in id_list:
-                fixed_id = ids.replace("/", "_").rstrip(".wav")
-                new_req = self.s3_client.get_object(
-                    Bucket="dataperf", Key=f"speech-selection/{route}/{fixed_id}.npy"
+            with tempfile.NamedTemporaryFile() as tf:
+                final_key = (
+                    f"speech-selection/{language}/train_embeddings/{target}.parquet"
                 )
-                with io.BytesIO(new_req["Body"].read()) as f:
-                    f.seek(0)
-                    array = np.load(f)
-                embeddings_dict["targets"][target].append(array)
-            print(target, "is done")
+                self.s3_client.download_fileobj(
+                    Bucket=bucket, Key=final_key, Fileobj=tf
+                )
+                df = pd.read_parquet(tf, engine="pyarrow")
+                embeddings_dict["targets"][target] = []
+                for ids in id_list:
+                    array = (df[df["clip_id"] == ids]["mswc_embedding_vector"]).values[
+                        0
+                    ]
+                    embeddings_dict["targets"][target].append(array)
+                print(target, "is done")
 
         for ident in tqdm(sample_ids["nontargets"]):
-            fixed_id = ident.replace("/", "_").rstrip(".wav")
-            new_req = self.s3_client.get_object(
-                Bucket="dataperf", Key=f"speech-selection/{route}/{fixed_id}.npy"
-            )
-            with io.BytesIO(new_req["Body"].read()) as f:
-                f.seek(0)
-                array = np.load(f)
-            embeddings_dict["nontargets"].append(array)
+            cur_class = ident.split("/")
+            with tempfile.NamedTemporaryFile() as tf:
+                final_key = f"speech-selection/{language}/train_embeddings/{cur_class[0]}.parquet"
+                self.s3_client.download_fileobj(
+                    Bucket=bucket, Key=final_key, Fileobj=tf
+                )
+                df = pd.read_parquet(tf, engine="pyarrow")
+                array = (df[df["clip_id"] == ident]["mswc_embedding_vector"]).values[0]
+                embeddings_dict["nontargets"].append(array)
 
         return embeddings_dict
 
@@ -83,6 +91,20 @@ class Helper:
 
         return Xs, ys
 
+    def load_allowed_training_set(self, bucket, language):
+        final_key = f"speech-selection/{language}/allowed_training_set.yaml"
+        response = self.s3_client.get_object(Bucket=bucket, Key=final_key)
+        yaml_bytes = response["Body"].read()
+        allowed = yaml.safe_load(yaml_bytes)
+        return allowed
+
+    def load_testing_embeddings(self, bucket, language):
+        final_key = f"speech-selection/{language}/testing_embeddings.pickle"
+        response = self.s3_client.get_object(Bucket=bucket, Key=final_key)
+        embeddings_bytes = response["Body"].read()
+        testing_embeddings = pickle.loads(embeddings_bytes)
+        return testing_embeddings
+
     def _validate_selected_ids(
         self, selected_ids, allowed_training_ids, train_set_size_limit
     ):
@@ -94,12 +116,10 @@ class Helper:
                 raise HTTPException(
                     status_code=400, detail=f"target {target} not in allowed set"
                 )
-
         groundtruth_target_ids = {
             target: set(samples)
             for target, samples in allowed_training_ids["targets"].items()
         }
-
         n_training_samples = sum(
             [len(samples) for samples in selected_ids["targets"].values()]
         ) + len(selected_ids["nontargets"])

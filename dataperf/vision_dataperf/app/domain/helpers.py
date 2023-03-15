@@ -3,6 +3,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import io
+import os
 import tempfile
 
 import boto3
@@ -32,10 +33,14 @@ class Helper:
 
     def get_test_dataframe(self, bucket_name, key):
         with tempfile.NamedTemporaryFile() as tf:
-            self.s3_client.download_fileobj(Bucket=bucket_name, Key=key, Fileobj=tf)
+            final_key = f"vision-selection/{key}.parquet"
+            self.s3_client.download_fileobj(
+                Bucket=bucket_name, Key=final_key, Fileobj=tf
+            )
             print("Test file object downloaded")
             dataframe = pd.read_parquet(
                 tf, columns=["target_label", "Embedding", "ImageID"], engine="pyarrow"
             )
             test_X = [list(x) for x in dataframe["Embedding"].to_list()]
-            return test_X
+            test_y = [float(x) for x in dataframe["target_label"].to_list()]
+            return test_X, test_y

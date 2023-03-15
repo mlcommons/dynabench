@@ -2,10 +2,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import numpy as np
 import sklearn.ensemble
 import sklearn.linear_model
 import sklearn.svm
-from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import balanced_accuracy_score, confusion_matrix, f1_score
 
 
 class Model:
