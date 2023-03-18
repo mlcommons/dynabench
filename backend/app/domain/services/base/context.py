@@ -2,6 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import hashlib
 import json
 import os
 
@@ -93,33 +94,36 @@ class ContextService:
         return context_info
 
     def get_nibbler_contexts(self, prompt: str, endpoint: str) -> dict:
+        print(prompt)
+        context_config = self.task_repository.get_task_info_by_task_id(45)
         res = requests.post(
-            endpoint,
-            json={"model": "StableDiffusion", "prompt": prompt, "n": 1, "steps": 20},
+            context_config.lambda_model,
+            json={
+                "model": "runwayml-stable-diffusion-v1-5",
+                "prompt": prompt,
+                "n": 9,
+                "steps": 20,
+            },
             headers={"Authorization": "Bearer ", "User-Agent": ""},
         )
         if res.status_code == 200:
-            image_response = res.json()
+            image_response = res.json()["output"]["choices"]
         else:
             openai.api_key = os.getenv("OPENAI")
             response = openai.Image.create(
-                prompt=prompt, n=1, size="256x256", response_format="b64_json"
+                prompt=prompt, n=9, size="256x256", response_format="b64_json"
             )
             image_response = response["data"][0]["b64_json"]
+        image_list = []
+        for i in image_response:
+            new_dict = {
+                "image": i["image_base64"],
+                "id": hashlib.md5(i["image_base64"].encode()).hexdigest(),
+            }
+            image_list.append(new_dict)
 
-        base_dict = [
-            {
-                "image": image_response,
-            },
-            {
-                "image": image_response,
-            },
-            {
-                "image": image_response,
-            },
-        ]
-        return base_dict
+        return image_list
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
-        if type == "nibler":
+        if type == "nibbler":
             return self.get_nibbler_contexts(artifacts["prompt"], artifacts["endpoint"])

@@ -28,5 +28,5 @@ async def get_context_configuration(task_id: int):
 
 @router.post("/get_generative_contexts")
 async def get_generative_contexts(model: GetGenerativeContextRequest):
-    image_dict = ContextService().get_generative_contexts(model.type, model.artifacts)
-    return image_dict
+    image_list = ContextService().get_generative_contexts(model.type, model.artifacts)
+    return image_list

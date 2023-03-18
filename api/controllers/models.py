@@ -16,10 +16,7 @@ import time
 
 import boto3
 import bottle
-import numpy as np
-import pandas as pd
 import requests
-import sklearn
 import sqlalchemy as db
 import ujson
 import yaml
@@ -234,72 +231,20 @@ def do_upload_via_train_files(credentials, tid, model_name):
         deployment_status=DeploymentStatusEnum.predictions_upload,
         secret=secrets.token_hex(),
     )
-
-    if len(train_files) == 1:
-        submission = json.loads(train_files[name].file.read().decode("utf-8"))
-
-        payload = {
-            "id_json": submission,
-            "bucket_name": task.s3_bucket,
-            "key": task.task_code,
-        }
-
-        lambda_function = task.lambda_model
-        r = requests.post(lambda_function, json=payload)
-
-        try:
-            new_score = np.round(r.json()["predictions"] * 100, 3)
-        except Exception as ex:
-            logger.exception(ex)
-            subject = f"Model {model_name} failed training as {r.json()['detail']}"
+    for dataset in datasets:
+        if (
+            dataset.access_type == AccessTypeEnum.scoring
+            and dataset.name not in train_files.keys()
+        ):
             Email().send(
                 contact=user.email,
                 cc_contact="dynabench-site@mlcommons.org",
                 template_name="model_train_failed.txt",
                 msg_dict={"name": model_name},
-                subject=subject,
+                subject=f"""Model {model_name} training failed. You must include
+                a training file for all classes""",
             )
-            bottle.abort(400)
-
-        dataset_id = dm.getByName(name).id
-        r_realid = rm.getByTid(tid)[0].rid
-        metric = task_config.get("perf_metric").get("type")
-
-        final_score = {
-            metric: new_score,
-            "perf": new_score,
-            "perf_std": 0.0,
-            "perf_by_tag": [
-                {
-                    "tag": str(name),
-                    "pretty_perf": f"{new_score} %",
-                    "perf": new_score,
-                    "perf_std": 0.0,
-                    "perf_dict": {metric: new_score},
-                }
-            ],
-        }
-
-        new_score_string = json.dumps(final_score)
-
-        sm.create(
-            model_id=model[1],
-            r_realid=r_realid,
-            did=dataset_id,
-            pretty_perf=f"{new_score} %",
-            perf=new_score,
-            metadata_json=new_score_string,
-        )
-
-        Email().send(
-            contact=user.email,
-            cc_contact="dynabench-site@mlcommons.org",
-            template_name="model_train_successful.txt",
-            msg_dict={"name": model_name, "model_id": model[1]},
-            subject=f"Model {model_name} training succeeded.",
-        )
-
-        return util.json_encode({"success": "ok", "model_id": model[1]})
+            bottle.abort(400, "Need to upload train files for all leaderboard datasets")
 
     if task.is_decen_task:
         path = "templates/decen_dataperf"
@@ -307,26 +252,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
         mlsphere_config = task.mlsphere_json
         with open(f"{path}/mlsphere.json", "w") as mlsphere:
             json.dump(mlsphere_config, mlsphere)
-
         id_list = []
-
-        for dataset in datasets:
-            if (
-                dataset.access_type == AccessTypeEnum.scoring
-                and dataset.name not in train_files.keys()
-            ):
-                Email().send(
-                    contact=user.email,
-                    cc_contact="dynabench-site@mlcommons.org",
-                    template_name="model_train_failed.txt",
-                    msg_dict={"name": model_name},
-                    subject=f"""Model {model_name} training failed. You must include
-                    a training file for all classes""",
-                )
-                bottle.abort(
-                    400, "Need to upload train files for all leaderboard datasets"
-                )
-
         for name, upload in train_files.items():
             if upload.content_type != "text/plain":
                 Email().send(
@@ -348,25 +274,24 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 bucket_name,
                 f"{task.task_code}/submissions/{name}_{model[1]}.zip",
             )
-
             os.remove(f"{path}/submissions/{name}_{model[1]}.txt")
             os.remove(f"{path}/{name}_{model[1]}.zip")
-            prefix_s3 = f"s3://{bucket_name}/{task.task_code}/submissions/"
+            prefix_s3 = f"s3://{bucket_name}/{task.task_code}/submissions"
             decen_request = requests.post(
-                f"{task.lambda_model}s",
+                f"{task.lambda_model}",
                 json={
                     "type": "general",
                     "payload": {
                         "url": f"{prefix_s3}/{name}_{model[1]}.zip",
                         "submission_id": f"{name}_{model[1]}",
                     },
+                    "returned_payload": {},
                     "status": "submitted",
                     "source": bucket_name,
                 },
             )
             time.sleep(10)
             id_list.append(decen_request.json()["id"])
-        print(id_list)
 
         Email().send(
             contact=user.email,
@@ -378,26 +303,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         return util.json_encode({"success": "ok", "model_id": model[1]})
 
-    for dataset in datasets:
-        if (
-            dataset.access_type == AccessTypeEnum.scoring
-            and dataset.name not in train_files.keys()
-        ):
-            Email().send(
-                contact=user.email,
-                cc_contact="dynabench-site@mlcommons.org",
-                template_name="model_train_failed.txt",
-                msg_dict={"name": model_name},
-                subject=f"""Model {model_name} training failed. You must include
-                a training file for all classes""",
-            )
-            bottle.abort(400, "Need to upload train files for all leaderboard datasets")
-
-    # accumulated_predictions = [] Implementation for accumulated labels instead of mean
-    # accumulated_labels = [] Implementation for accumulated labels instead of mean
-
     for name, upload in train_files.items():
-
         if upload.content_type == "text/plain":
             with tempfile.NamedTemporaryFile() as tf:
                 upload.save(tf, overwrite=True)
@@ -424,36 +330,28 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         else:
             current_upload = json.loads(upload.file.read().decode("utf-8"))
-            current_upload = current_upload[list(current_upload.keys())[0]]
+            payload = {
+                "id_json": current_upload,
+                "bucket_name": task.s3_bucket,
+                "key": name,
+            }
 
-            id_count = 0
-            for id, label in current_upload.items():
-                id_count += 1
+            light_model_endpoint = task.lambda_model
+            r = requests.post(light_model_endpoint, json=payload)
 
-            if id_count > 1000:
+            try:
+                score = r.json()["score"]
+            except Exception as ex:
+                logger.exception(ex)
+                subject = f"Model {model_name} failed training as {r.json()['detail']}"
                 Email().send(
                     contact=user.email,
                     cc_contact="dynabench-site@mlcommons.org",
                     template_name="model_train_failed.txt",
                     msg_dict={"name": model_name},
-                    subject=f"""Model {model_name} training failed. You surpassed
-                    the maximum amount of samples.""",
+                    subject=subject,
                 )
-                bottle.abort(400, "Invalid train file")
-            request_packet = {
-                "id_json": current_upload,
-                "bucket_name": "vision-dataperf",
-                "key": f"{name}.parquet",
-            }
-            light_model_endpoint = task.lambda_model
-
-            r = requests.post(light_model_endpoint, json=request_packet)
-
-            predictions = r.json()["predictions"]
-
-            test_y = get_test_dataframe(task.task_code, f"{name}.parquet")
-
-            score = np.round(sklearn.metrics.f1_score(test_y, predictions) * 100, 1)
+                bottle.abort(400)
 
         did = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
@@ -464,7 +362,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
             "perf_std": 0.0,
             "perf_by_tag": [
                 {
-                    "tag": str(name.lstrip("test-")),
+                    "tag": str(name),
                     "pretty_perf": f"{score} %",
                     "perf": score,
                     "perf_std": 0.0,
@@ -484,14 +382,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
             metadata_json=new_score_string,
         )
 
-        # accumulated_predictions += predictions['predictions']
-        # Implementation for accumulated labels instead of mean
-        # accumulated_labels += test_y Implementation for
-        # accumulated labels instead of mean
-
-    # f1_score = sklearn.metrics.f1_score(accumulated_labels, accumulated_predictions)
-    # Implementation for accumulated labels instead of mean
-
     Email().send(
         contact=user.email,
         cc_contact="dynabench-site@mlcommons.org",
@@ -501,22 +391,6 @@ def do_upload_via_train_files(credentials, tid, model_name):
     )
 
     return util.json_encode({"success": "ok", "model_id": model[1]})
-
-
-def get_test_dataframe(bucket_name, key):
-    s3_client = boto3.client(
-        "s3",
-        aws_access_key_id=config["aws_access_key_id"],
-        aws_secret_access_key=config["aws_secret_access_key"],
-        region_name="eu-west-3",
-    )
-    with tempfile.NamedTemporaryFile() as tf:
-        s3_client.download_fileobj(Bucket=bucket_name, Key=key, Fileobj=tf)
-        dataframe = pd.read_parquet(
-            tf, columns=["target_label", "Embedding", "ImageID"]
-        )
-        test_y = [float(x) for x in dataframe["target_label"].to_list()]
-        return test_y
 
 
 @bottle.post("/models/upload_predictions/<tid:int>/<model_name>")
