@@ -1,7 +1,7 @@
 import { ContextConfigType } from "new_front/types/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
 import React, { FC, useState } from "react";
-import { StringDiff } from "react-string-diff";
+import { StringDiff, DiffMethod } from "react-string-diff";
 
 const ModifyOriginalText: FC<ContextAnnotationFactoryType & ContextConfigType> =
   ({ context }) => {
@@ -13,8 +13,15 @@ const ModifyOriginalText: FC<ContextAnnotationFactoryType & ContextConfigType> =
       <>
         <div>
           <div>
-            <p>Question: {context.question}</p>
-            <p>Answer: {context.answer}</p>
+            <h3 className="p-2 text-lg">
+              {" "}
+              <strong>Question:</strong> {context.question}
+            </h3>
+            {context.answers.text.length > 0 && (
+              <h3 className="p-2 text-lg">
+                <strong>Answer:</strong> {context.answers.text[0]}
+              </h3>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4 py-4">
             <textarea value={initValue} className="p-4 h-72" />
@@ -25,10 +32,12 @@ const ModifyOriginalText: FC<ContextAnnotationFactoryType & ContextConfigType> =
             />
           </div>
 
-          <h6>Difference: </h6>
-          <StringDiff newValue={initValue} oldValue={newValue} />
-
-          <input></input>
+          <h6 className="pb-2 text-base font-bold">Difference: </h6>
+          <StringDiff
+            newValue={newValue}
+            oldValue={initValue}
+            method={DiffMethod.WordsWithSpace}
+          />
         </div>
       </>
     );

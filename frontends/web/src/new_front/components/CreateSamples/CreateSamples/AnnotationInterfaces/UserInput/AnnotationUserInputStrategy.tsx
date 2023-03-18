@@ -19,12 +19,14 @@ const Import = (
 
 type Props = {
   config: AnnotationUserInput[];
+  isGenerativeContext: boolean;
 };
 
 const AnnotationUserInputStrategy: FC<Props & AnnotationFactoryType> = ({
   config,
   task,
   onInputChange,
+  isGenerativeContext,
 }) => {
   const [goalRenders, setGoalRenders] = useState<
     ReactElement<AnnotationUserInput & AnnotationFactoryType>[]
@@ -44,7 +46,13 @@ const AnnotationUserInputStrategy: FC<Props & AnnotationFactoryType> = ({
   }, []);
 
   return (
-    <Suspense fallback={<BarLoader color="#ccebd4" />}>{goalRenders}</Suspense>
+    <>
+      {!isGenerativeContext && (
+        <Suspense fallback={<BarLoader color="#ccebd4" />}>
+          {goalRenders}
+        </Suspense>
+      )}
+    </>
   );
 };
 

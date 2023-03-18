@@ -11,46 +11,34 @@
  */
 
 import React from "react";
-import {
-  Button,
-  ButtonGroup,
-  Col,
-  Container,
-  Row,
-  Spinner,
-} from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Col, Container, Row, Spinner } from "react-bootstrap";
 import {
   TaskModelDefaultLeaderboard,
   TaskModelForkLeaderboard,
-} from "../components/TaskLeaderboard/TaskModelLeaderboardCardWrapper";
-import UserLeaderboardCard from "../components/TaskPageComponents/UserLeaderboardCard";
-import TaskActionButtons from "../new_front/components/Buttons/TaskActionButtons";
-import OverallTaskStats from "../new_front/components/TaskPage/OverallTaskStats";
-import TaskTrend from "../new_front/components/TaskPage/TaskTrend";
-import { Annotation, OverlayContext, OverlayProvider } from "./Overlay";
-import "./TaskPage.css";
-import UserContext from "./UserContext";
+} from "components/TaskLeaderboard/TaskModelLeaderboardCardWrapper";
+import UserLeaderboardCard from "components/TaskPageComponents/UserLeaderboardCard";
+import TaskTrend from "new_front/components/TaskPage/TaskTrend";
+import { Annotation, OverlayProvider } from "containers/Overlay";
+import UserContext from "containers/UserContext";
 
 const yaml = require("js-yaml");
 
-class TaskPage extends React.Component {
+class Leaderboard extends React.Component {
   static contextType = UserContext;
   constructor(props) {
     super(props);
     this.state = {
       admin_or_owner: false,
-      taskCode: props.match.params.taskCode,
       task: {},
       trendScore: [],
       numMatchingValidations: 3,
     };
-
+    this.taskCode = this.props.taskCode;
     this.getCurrentTaskData = this.getCurrentTaskData.bind(this);
   }
 
   getCurrentTaskData() {
-    this.setState({ taskCode: this.props.match.params.taskCode }, function () {
+    this.setState({ taskCode: this.taskCode }, function () {
       this.context.api.getTask(this.state.taskCode).then(
         (result) => {
           this.setState(
@@ -61,10 +49,10 @@ class TaskPage extends React.Component {
               loading: false,
             },
             function () {
-              if (this.props.match.params.taskCode !== this.state.taskCode) {
+              if (this.taskCode !== this.state.taskCode) {
                 this.props.history.replace({
                   pathname: this.props.location.pathname.replace(
-                    `/tasks/${this.props.match.params.taskCode}`,
+                    `/tasks/${this.taskCode}`,
                     `/tasks/${this.state.taskCode}`
                   ),
                   search: this.props.location.search,
@@ -100,7 +88,7 @@ class TaskPage extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.match.params.taskCode !== this.state.taskCode) {
+    if (this.taskCode !== this.state.taskCode) {
       this.getCurrentTaskData();
     }
   }
@@ -127,85 +115,6 @@ class TaskPage extends React.Component {
     return (
       <OverlayProvider initiallyHide={true} delayMs="1700">
         <Container>
-          <Row>
-            <Col />
-            <Col className="text-center">
-              <h2 className="pt-6 text-2xl font-medium text-center d-block text-letter-color">
-                <nobr>{this.state.task.name} </nobr>
-              </h2>
-            </Col>
-            <Col>
-              <div style={{ float: "right", marginTop: 30 }}>
-                <ButtonGroup>
-                  <Annotation
-                    placement="left"
-                    tooltip="Click to show help overlay"
-                  >
-                    <OverlayContext.Consumer>
-                      {({ hidden, setHidden }) => (
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary btn-sm btn-help-info"
-                          onClick={() => {
-                            setHidden(!hidden);
-                          }}
-                        >
-                          <i className="fas fa-question"></i>
-                        </button>
-                      )}
-                    </OverlayContext.Consumer>
-                  </Annotation>
-                  {this.state.admin_or_owner && (
-                    <Button
-                      as={Link}
-                      to={`/task-owner-interface/${this.state.task.task_code}#settings`}
-                      type="button"
-                      className="btn btn-light btn-outline-primary btn-sm btn-help-info"
-                    >
-                      <i className="fas fa-cog"></i>
-                    </Button>
-                  )}
-                </ButtonGroup>
-              </div>
-            </Col>
-          </Row>
-          <Row className="justify-content-center">
-            <p>{this.state.task.desc}</p>
-          </Row>
-          <Row className="justify-content-center">
-            <Annotation
-              placement="right"
-              tooltip="This shows the statistics of the currently active round."
-            >
-              <OverallTaskStats
-                curRound={this.state.task.cur_round}
-                round={this.state.task.round}
-                lastUpdated={this.state.task.last_updated}
-              />
-            </Annotation>
-          </Row>
-          <Row className="justify-content-center">
-            {this.state.task?.active && (
-              <TaskActionButtons
-                configYaml={this.state.task.config_yaml}
-                dynamicAdversarialDataCollection={
-                  this.state.task.dynamic_adversarial_data_collection
-                }
-                submitable={this.state.task.submitable}
-                hasPredictionsUpload={this.state.task.has_predictions_upload}
-                taskCode={this.state.task.task_code}
-              />
-            )}
-          </Row>
-          <Row className="justify-content-center">
-            <Col xs={12} md={12}>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: this.state.task.round?.longdesc,
-                }}
-              ></div>
-            </Col>
-          </Row>
           {this.state.loading ? (
             <>
               {this.state.task?.active ? (
@@ -296,4 +205,4 @@ class TaskPage extends React.Component {
   }
 }
 
-export default TaskPage;
+export default Leaderboard;

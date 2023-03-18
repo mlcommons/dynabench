@@ -1,9 +1,9 @@
-import MultiSelect from "new_front/components/Lists/MultiSelect";
+import MultiSelectImages from "new_front/components/Lists/MultiSelectImages";
 import { AnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
 import { AnnotationUserInput } from "new_front/types/createSamples/annotationUserInputs";
 import React, { FC } from "react";
 
-const Multioptions: FC<AnnotationFactoryType & AnnotationUserInput> = ({
+const SelectMultipleImages: FC<AnnotationFactoryType & AnnotationUserInput> = ({
   instructions,
   options,
   field_name_for_the_model,
@@ -11,16 +11,15 @@ const Multioptions: FC<AnnotationFactoryType & AnnotationUserInput> = ({
 }) => {
   return (
     <>
-      {options && instructions && (
-        <MultiSelect
-          options={options}
+      {options && instructions && onInputChange && (
+        <MultiSelectImages
           instructions={instructions}
-          field_name_for_the_model={field_name_for_the_model}
-          onInputChange={onInputChange}
+          images={options}
+          handleSelectImage={onInputChange}
         />
       )}
     </>
   );
 };
 
-export default Multioptions;
+export default SelectMultipleImages;

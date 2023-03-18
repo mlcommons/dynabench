@@ -1,12 +1,11 @@
-import BatchCreateSamples from "components/Forms/BatchCreateSamples";
-import React, { FC, useState, useContext } from "react";
-import { Button, Modal } from "react-bootstrap";
-import useFetch from "use-http";
-import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import UserContext from "containers/UserContext";
-import { PacmanLoader } from "react-spinners";
 import { ModelEvaluationMetric } from "new_front/types/createSamples/configurationTask";
+import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
+import React, { FC, useContext, useState } from "react";
+import { Button } from "react-bootstrap";
+import { PacmanLoader } from "react-spinners";
+import useFetch from "use-http";
 
 type Props = {
   modelInTheLoop: string;
@@ -43,8 +42,6 @@ const AnnotationButtonActions: FC<Props> = ({
   const userContext = useContext(UserContext);
   const { user } = userContext;
   const { post, loading } = useFetch();
-
-  console.log("isGenerativeContext", isGenerativeContext);
 
   const onSubmission = async () => {
     modelInputs = {
@@ -91,30 +88,6 @@ const AnnotationButtonActions: FC<Props> = ({
                     />
                   </div>
                   <div className="flex justify-end col-span-3 ">
-                    <div className="col-span-1 pl-2" id="batchSubmission">
-                      <Button
-                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                        onClick={() => {
-                          setShowCreateBatchModal(true);
-                        }}
-                      >
-                        Batch submissions
-                      </Button>
-                      {showCreateBatchModal && (
-                        <>
-                          <Modal
-                            show={showCreateBatchModal}
-                            onHide={() => {
-                              setShowCreateBatchModal(false);
-                            }}
-                          >
-                            <BatchCreateSamples
-                              modelInTheLoop={modelInTheLoop}
-                            />
-                          </Modal>
-                        </>
-                      )}
-                    </div>
                     <div className="col-span-1 pl-2" id="switchContext">
                       {currentContext && (
                         <Button
@@ -123,7 +96,7 @@ const AnnotationButtonActions: FC<Props> = ({
                             window.location.reload();
                           }}
                         >
-                          Switch to next context
+                          New context
                         </Button>
                       )}
                     </div>

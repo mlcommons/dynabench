@@ -42,6 +42,7 @@ export type TaskInfoType = {
   unpublished_models_in_leaderboard: number;
   validate_non_fooling: number;
   image_url: string;
+  documentation_url: string;
 };
 
 type roundInfoType = {

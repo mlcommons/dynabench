@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
-import AnnotationHelperButtons from "../../components/CreateSamples/CreateSamples/AnnotationHelperButtons";
+import CreateInterfaceHelpersButton from "new_front/components/Buttons/CreateInterfaceHelpersButton";
 import AnnotationGoalStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Goals/AnnotationGoalStrategy";
 import AnnotationContextStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/AnnotationContextStrategy";
 import AnnotationUserInputStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/UserInput/AnnotationUserInputStrategy";
@@ -15,6 +15,7 @@ import {
 import { useHistory, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import { isLogin } from "new_front/utils/helpers/functions/LoginFunctions";
+import { useOverlayContext } from "new_front/components/OverlayInstructions/Provider";
 
 const CreateInterface = () => {
   const [modelInputs, setModelInputs] = useState<object>({});
@@ -27,6 +28,8 @@ const CreateInterface = () => {
   const [taskId, setTaskId] = useState<number>(0);
   const [isGenerativeContext, setIsGenerativeContext] =
     useState<boolean>(false);
+  const [generalInstructions, setGeneralInstructions] = useState<string>("");
+  const { hidden, setHidden } = useOverlayContext();
   const { get, post, response, loading } = useFetch();
   let { taskCode } = useParams<{ taskCode: string }>();
   const history = useHistory();
@@ -55,6 +58,7 @@ const CreateInterface = () => {
       setTaskConfiguration(taskConfiguration);
       setModelInTheLoop(modelInTheLoop);
       setTaskInfoName(taskInfo.name);
+      setGeneralInstructions(taskInfo.instructions_md);
       setTaskId(taskId);
       setIsGenerativeContext(
         taskConfiguration.context.generative_context?.is_generative
@@ -94,10 +98,12 @@ const CreateInterface = () => {
               <div className="col-span-2">
                 <AnnotationTitle taskName={taskInfoName} />
               </div>
-              <div>
-                <div className="grid grid-cols-3 gap-2">
-                  {/* <AnnotationHelperButtons /> */}
-                </div>
+              <div className="flex items-start justify-end pr-4 pt-14">
+                <CreateInterfaceHelpersButton
+                  generalInstructions={generalInstructions}
+                  hidden={hidden}
+                  setHidden={setHidden}
+                />
               </div>
             </div>
           </div>
@@ -126,6 +132,7 @@ const CreateInterface = () => {
                 config={taskConfiguration?.user_input as any}
                 task={{}}
                 onInputChange={updateModelInputs}
+                isGenerativeContext={isGenerativeContext}
               />
             </div>
             <div id="buttons">
@@ -152,7 +159,7 @@ const CreateInterface = () => {
                 />
               )}
             </div>
-            <div id="responseInfo" className="max-h-96">
+            <div id="responseInfo">
               {modelOutput && (
                 <ResponseInfo
                   label={modelOutput.label}

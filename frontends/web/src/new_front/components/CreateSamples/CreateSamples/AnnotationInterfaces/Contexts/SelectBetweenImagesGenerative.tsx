@@ -1,5 +1,7 @@
-import SelectImage from "new_front/components/Images/SelectImage";
-import MultiSelect from "new_front/components/Lists/MultiSelect";
+import GeneralButton from "new_front/components/Buttons/GeneralButton";
+import BasicInput from "new_front/components/Inputs/BasicInput";
+import MultiSelectImage from "new_front/components/Lists/MultiSelectImage";
+import MultiSelectImages from "new_front/components/Lists/MultiSelectImages";
 import { ContextConfigType } from "new_front/types/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
 import React, { FC, useState } from "react";
@@ -8,15 +10,18 @@ import useFetch from "use-http";
 
 const SelectBetweenImagesGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
-> = ({ onInputChange, setIsGenerativeContext }) => {
+> = ({ field_names_for_the_model, onInputChange, setIsGenerativeContext }) => {
   const type = "nibler";
   const artifacts = {
     endpoint: "https://www.google.com",
   };
   const [generatedImages, setGeneratedImages] = useState<any[]>([]);
+  const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<object>(artifacts);
   const [prompt, setPrompt] = useState<string>("");
-  const [selectImage, setSelectImage] = useState<string>();
+  const [selectImage, setSelectImage] = useState<string>("");
+  const [showOtherImages, setShowOtherImages] = useState<boolean>(false);
+  const [otherSelectImages, setOtherSelectImages] = useState<string[]>([]);
   const { post, response } = useFetch();
 
   const generateImages = async () => {
@@ -27,6 +32,7 @@ const SelectBetweenImagesGenerative: FC<
     // if (response.ok) {
     //   setGeneratedImages(generatedImages)
     // }
+
     const images = [
       {
         image:
@@ -42,53 +48,70 @@ const SelectBetweenImagesGenerative: FC<
       },
     ];
     setGeneratedImages(images);
+    setShowImages(images);
+  };
+
+  const handlePromptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setArtifactsInput({ ...artifactsInput, prompt: event.target.value });
+    setPrompt(event.target.value);
+    onInputChange({
+      [field_names_for_the_model.prompt ?? "original_prompt"]:
+        event.target.value,
+    });
+  };
+
+  const handleSelectImage = (image: string) => {
+    setSelectImage(image);
     setIsGenerativeContext(false);
+    setShowImages([
+      {
+        image: image,
+      },
+    ]);
+    setShowOtherImages(true);
+    onInputChange({
+      [field_names_for_the_model.select_image ?? "select_image"]: image,
+    });
+  };
+
+  const handleSelectOtherImages = (images: string[]) => {
+    onInputChange({
+      [field_names_for_the_model.select_other_images ?? "select_other_images"]:
+        images,
+    });
   };
 
   return (
     <div>
       {generatedImages.length === 0 ? (
         <>
-          <FormControl
-            className="p-3 h-12 rounded-1 thick-border bg-[#f0f2f5]"
-            placeholder="Enter prompt"
-            onChange={(e) => {
-              setArtifactsInput({ ...artifactsInput, prompt: e.target.value });
-              setPrompt(e.target.value);
-            }}
-            required={true}
-          />
           <div className="grid col-span-1 py-3 justify-items-end">
-            <Button
-              className="bg-white border-0 font-weight-bold light-gray-bg task-action-btn"
-              onClick={generateImages}
-            >
-              Generate images
-            </Button>
+            <BasicInput onChange={handlePromptChange} placeholder="Prompt" />
+            <GeneralButton onClick={generateImages} text="Generate Images" />
           </div>
         </>
       ) : (
         <>
-          <FormControl
-            className="p-3 h-12 rounded-1 thick-border bg-[#f0f2f5]"
-            placeholder={prompt}
-            disabled={true}
-          />
+          <BasicInput placeholder={prompt} disabled={true} />
           <div className="grid grid-cols-3 gap-3 p-4">
-            {generatedImages.map((image, index) => (
-              <SelectImage
-                image={image.image}
-                index={index}
-                setSelectImage={setSelectImage}
-              />
-            ))}
+            <MultiSelectImage
+              images={showImages.map(({ image }) => image)}
+              handleFunction={handleSelectImage}
+            />
           </div>
         </>
       )}
-      {selectImage && (
+      {showOtherImages && (
         <>
-          <MultiSelect />
-          <MultiSelect />
+          <div className="grid grid-cols-3 gap-3 p-4">
+            {console.log("selectImage", selectImage)}
+            <MultiSelectImages
+              images={generatedImages
+                .map(({ image }) => image)
+                .filter((image) => image !== selectImage)}
+              handleFunction={handleSelectOtherImages}
+            />
+          </div>
         </>
       )}
     </div>

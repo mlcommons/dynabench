@@ -154,14 +154,19 @@ class ModelService:
         model_evaluation_metric_info: dict,
     ) -> str:
         response = {}
-        prediction = self.single_model_prediction(model_url, model_input)
-        response["prediction"] = prediction[model_prediction_label]
-        response["probabilities"] = prediction["prob"]
+        if model_url:
+            prediction = self.single_model_prediction(model_url, model_input)
+            response["prediction"] = prediction[model_prediction_label]
+            response["probabilities"] = prediction["prob"]
+            model_wrong = self.evaluate_model_in_the_loop(
+                response["prediction"], response["label"], model_evaluation_metric_info
+            )
+        else:
+            response["prediction"] = model_input["label"]
+            response["probabilities"] = {}
+            model_wrong = False
         response["label"] = model_input["label"]
         response["input"] = model_input[model_input["input_by_user"]]
-        model_wrong = self.evaluate_model_in_the_loop(
-            response["prediction"], response["label"], model_evaluation_metric_info
-        )
         response["fooled"] = model_wrong
         if not sandbox_mode:
             self.example_service.create_example_and_increment_counters(
