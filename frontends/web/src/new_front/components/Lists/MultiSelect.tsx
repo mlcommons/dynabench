@@ -46,7 +46,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
                 onChange={(event) => handleChange(event, option)}
                 className="w-4 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 "
               />
-              <label className="w-full pt-2 ml-2 text-base font-medium text-gray-900 dark:text-gray-300">
+              <label className="w-full pt-2 ml-2 text-base font-medium dark:text-gray-300">
                 {option}
               </label>
             </div>

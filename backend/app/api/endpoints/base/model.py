@@ -36,6 +36,16 @@ def single_model_prediction_submit(model: SingleModelEvaluationRequest):
     )
 
 
+@router.post("/", response_model={})
+def partially_creation_example(model: SingleModelEvaluationRequest):
+    return ModelService().partially_creation_example()
+
+
+@router.post("/", response_model={})
+def update_creation_example_by_creation_id(model: SingleModelEvaluationRequest):
+    return ModelService().update_creation_example_by_creation_id()
+
+
 @router.post("/batch_prediction", response_class=FileResponse)
 async def batch_prediction(
     background_tasks: BackgroundTasks,

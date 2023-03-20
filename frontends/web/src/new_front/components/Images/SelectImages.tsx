@@ -3,18 +3,30 @@ import React, { FC, useState } from "react";
 type SelectImageProps = {
   image: string;
   index: number;
-  handleSelectImage: (image: string) => void;
+  selectedImages: string[];
+  handleSelectImages: (images: string[]) => void;
 };
 
-const SelectImage: FC<SelectImageProps> = ({
+const SelectImages: FC<SelectImageProps> = ({
   image,
   index,
-  handleSelectImage,
+  selectedImages,
+  handleSelectImages,
 }) => {
   const [expandImage, setExpandImage] = useState<boolean>(false);
 
+  const handleOnClicked = (image: string) => {
+    if (selectedImages.includes(image)) {
+      selectedImages.splice(selectedImages.indexOf(image), 1);
+    } else {
+      selectedImages.push(image);
+    }
+    console.log("selectedImages", selectedImages);
+    handleSelectImages(selectedImages);
+  };
+
   return (
-    <div key={index}>
+    <div key={index} className="grid grid-flow-col grid-rows-2 ">
       <img
         height={240}
         width={240}
@@ -22,20 +34,22 @@ const SelectImage: FC<SelectImageProps> = ({
         onClick={() => {
           setExpandImage(!expandImage);
         }}
-        className={expandImage ? "relative scale-[2.7] z-50" : "scale-[1]"}
+        className={expandImage ? "relative scale-[2.7] z-50 " : "scale-[1]"}
         alt="src"
       ></img>
-      <input
-        id="checkbox"
-        type="checkbox"
-        value=""
-        className="items-center"
-        onClick={(e) => {
-          handleSelectImage(image);
-        }}
-      />
+      <div>
+        <input
+          id="checkbox"
+          type="checkbox"
+          value=""
+          className="items-center"
+          onClick={() => {
+            handleOnClicked(image);
+          }}
+        />
+      </div>
     </div>
   );
 };
 
-export default SelectImage;
+export default SelectImages;

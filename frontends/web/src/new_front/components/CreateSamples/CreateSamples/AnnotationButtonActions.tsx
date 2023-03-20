@@ -36,8 +36,6 @@ const AnnotationButtonActions: FC<Props> = ({
   isGenerativeContext,
   setModelOutput,
 }) => {
-  const [showCreateBatchModal, setShowCreateBatchModal] =
-    useState<boolean>(false);
   const [sandboxMode, setSandboxMode] = useState<boolean>(true);
   const userContext = useContext(UserContext);
   const { user } = userContext;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
 import CreateInterfaceHelpersButton from "new_front/components/Buttons/CreateInterfaceHelpersButton";
 import AnnotationGoalStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Goals/AnnotationGoalStrategy";
@@ -15,7 +15,7 @@ import {
 import { useHistory, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import { isLogin } from "new_front/utils/helpers/functions/LoginFunctions";
-import { useOverlayContext } from "new_front/components/OverlayInstructions/Provider";
+import { OverlayContext } from "new_front/components/OverlayInstructions/Provider";
 
 const CreateInterface = () => {
   const [modelInputs, setModelInputs] = useState<object>({});
@@ -29,7 +29,7 @@ const CreateInterface = () => {
   const [isGenerativeContext, setIsGenerativeContext] =
     useState<boolean>(false);
   const [generalInstructions, setGeneralInstructions] = useState<string>("");
-  const { hidden, setHidden } = useOverlayContext();
+  const { hidden, setHidden } = useContext(OverlayContext);
   const { get, post, response, loading } = useFetch();
   let { taskCode } = useParams<{ taskCode: string }>();
   const history = useHistory();
@@ -112,6 +112,7 @@ const CreateInterface = () => {
               config={taskConfiguration?.goal as any}
               task={{}}
               onInputChange={updateModelInputs}
+              hidden={hidden}
             />
           </div>
           <div className="border-2 ">
@@ -125,6 +126,7 @@ const CreateInterface = () => {
                 context={taskContextInfo?.current_context}
                 onInputChange={updateModelInputs}
                 setIsGenerativeContext={setIsGenerativeContext}
+                hidden={hidden}
               />
             </div>
             <div id="inputUser" className="p-3">
@@ -133,6 +135,7 @@ const CreateInterface = () => {
                 task={{}}
                 onInputChange={updateModelInputs}
                 isGenerativeContext={isGenerativeContext}
+                hidden={hidden}
               />
             </div>
             <div id="buttons">

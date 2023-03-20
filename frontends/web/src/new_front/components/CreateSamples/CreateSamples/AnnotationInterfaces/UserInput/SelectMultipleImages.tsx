@@ -9,13 +9,19 @@ const SelectMultipleImages: FC<AnnotationFactoryType & AnnotationUserInput> = ({
   field_name_for_the_model,
   onInputChange,
 }) => {
+  const handleFunction = (value: any) => {
+    onInputChange({
+      [field_name_for_the_model]: value,
+    });
+  };
+
   return (
     <>
-      {options && instructions && onInputChange && (
+      {options && instructions && (
         <MultiSelectImages
           instructions={instructions}
           images={options}
-          handleSelectImage={onInputChange}
+          handleFunction={handleFunction}
         />
       )}
     </>

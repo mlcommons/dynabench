@@ -31,6 +31,4 @@ const OverlayProvider: FC<ProviderProps> = ({ children }) => {
   );
 };
 
-const useOverlayContext = () => useContext(OverlayContext);
-
-export { OverlayProvider, OverlayContext, useOverlayContext };
+export { OverlayProvider, OverlayContext };

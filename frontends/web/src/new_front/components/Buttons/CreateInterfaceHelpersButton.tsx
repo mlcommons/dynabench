@@ -14,7 +14,6 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
   setHidden,
 }) => {
   const [showInstructions, setShowInstructions] = useState(false);
-
   return (
     <div>
       <button

@@ -9,7 +9,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import TabOption from "new_front/components/Buttons/TabOption";
 import TaskActionButtons from "new_front/components/Buttons/TaskActionButtons_new";
 import { TaskInfoType } from "new_front/types/task/taskInfo";
@@ -18,14 +18,14 @@ import { useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import TaskHelpersButton from "new_front/components/Buttons/TaskHelpersButton";
 import useFetch from "use-http";
-import { useOverlayContext } from "new_front/components/OverlayInstructions/Provider";
+import { OverlayContext } from "new_front/components/OverlayInstructions/Provider";
 
 const TaskPage = () => {
   const [task, setTask] = useState<TaskInfoType>();
   const [adminOrOwner, setAdminOrOwner] = useState(false);
   const [openTab, setOpenTab] = React.useState(1);
   const { get, loading } = useFetch();
-  const { hidden, setHidden } = useOverlayContext();
+  const { hidden, setHidden } = useContext(OverlayContext);
 
   const { taskCode } = useParams<{ taskCode: string }>();
 

@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import SelectImage from "new_front/components/Images/SelectImage";
+import SelectImages from "new_front/components/Images/SelectImages";
 
 export type MultiSelectImagesProps = {
   instructions?: string;
@@ -12,20 +12,27 @@ const MultiSelectImages: FC<MultiSelectImagesProps> = ({
   images,
   handleFunction,
 }) => {
+  const selectedImages: string[] = [];
+
   return (
     <>
-      {instructions && (
-        <h3 className="mb-1 font-semibold text-gray-900 ">{instructions}</h3>
-      )}
-      {images.map((image, index) => (
-        <div key={index}>
-          <SelectImage
-            image={image}
-            index={index}
-            handleSelectImage={handleFunction}
-          />
+      <div>
+        {instructions && (
+          <h3 className="mb-1 font-semibold text-gray-900 ">{instructions}</h3>
+        )}
+        <div className="grid grid-cols-3">
+          {images.map((image, index) => (
+            <div key={index} className="max-h-72">
+              <SelectImages
+                image={image}
+                index={index}
+                selectedImages={selectedImages}
+                handleSelectImages={handleFunction}
+              />
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </>
   );
 };

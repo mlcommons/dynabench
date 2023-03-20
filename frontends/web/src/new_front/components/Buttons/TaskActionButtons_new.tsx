@@ -8,7 +8,7 @@ import React, { FC } from "react";
 import { Button, Nav, OverlayTrigger } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { OverlayProvider } from "new_front/components/OverlayInstructions/Provider";
-import Annotation from "new_front/components/OverlayInstructions/Annotation";
+import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 
 const yaml = require("js-yaml");
 
@@ -38,7 +38,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
         {dynamicAdversarialDataCollection && (
           <>
             <Nav.Item className="task-action-btn">
-              <Annotation
+              <AnnotationInstruction
                 placement="bottom"
                 tooltip="Click here to get creative and start writing examples that fool the model"
                 hidden={hidden}
@@ -50,7 +50,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
                 >
                   <i className="fas fa-pen"></i> Create Examples
                 </Button>
-              </Annotation>
+              </AnnotationInstruction>
             </Nav.Item>
             <Nav.Item className="task-action-btn">
               <Button

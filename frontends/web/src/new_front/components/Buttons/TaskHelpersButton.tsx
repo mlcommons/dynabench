@@ -1,5 +1,4 @@
 import React, { FC } from "react";
-import { useOverlayContext } from "new_front/components/OverlayInstructions/Provider";
 import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 

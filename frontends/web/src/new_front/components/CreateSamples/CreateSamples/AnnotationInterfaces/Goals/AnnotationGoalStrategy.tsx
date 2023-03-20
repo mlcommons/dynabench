@@ -25,6 +25,7 @@ const AnnotationGoalStrategy: FC<Props & AnnotationFactoryType> = ({
   config,
   task,
   onInputChange,
+  hidden,
 }) => {
   const [goalRender, setGoalRender] =
     useState<ReactElement<GoalConfigType & AnnotationFactoryType>>();
@@ -32,10 +33,10 @@ const AnnotationGoalStrategy: FC<Props & AnnotationFactoryType> = ({
   useEffect(() => {
     const getView = async () => {
       const View = await Import(ModulesRegistry.goal[config.type]);
-      setGoalRender(<View {...{ onInputChange, task, ...config }} />);
+      setGoalRender(<View {...{ onInputChange, task, hidden, ...config }} />);
     };
     getView();
-  }, []);
+  }, [hidden]);
 
   return (
     <Suspense fallback={<BarLoader color="#ccebd4" />}>{goalRender}</Suspense>

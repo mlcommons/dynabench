@@ -16,6 +16,7 @@ import ReactGA from "react-ga";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import { Provider as FetchProvider } from "use-http";
 import { OverlayProvider } from "new_front/components/OverlayInstructions/Provider";
+
 import CreateInterface from "new_front/pages/CreateSamples/CreateInterface";
 import ValidateInterface from "../common/Annotation/ValidateInterface.js";
 import ApiService from "../common/ApiService";
@@ -41,7 +42,7 @@ import SubmitInterface from "./SubmitInterface.js";
 import SubmitModel from "./SubmitModel";
 import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
-// import TaskPage from './TaskPage'
+//import TaskPage from './TaskPage'
 import TaskPage from "new_front/pages/Task/TaskPage";
 import Test from "new_front/pages/CommunitiesLandingPages/Test";
 import SearchBar from "../new_front/components/Utils/SearchBar";
@@ -143,20 +144,20 @@ class App extends React.Component {
     const showContentOnly = query.content_only === "true";
     return (
       <FetchProvider url={BASE_URL_2}>
-        <OverlayProvider>
-          <UserContext.Provider
+        <UserContext.Provider
+          value={{
+            user: this.state.user,
+            updateState: this.updateState,
+            api: this.api,
+          }}
+        >
+          <TasksContext.Provider
             value={{
-              user: this.state.user,
-              updateState: this.updateState,
-              api: this.api,
+              tasks: this.state.tasks,
             }}
           >
-            <TasksContext.Provider
-              value={{
-                tasks: this.state.tasks,
-              }}
-            >
-              <BrowserRouter>
+            <BrowserRouter>
+              <OverlayProvider>
                 <ScrollToTop />
                 <Route
                   render={(props) => (
@@ -493,10 +494,10 @@ class App extends React.Component {
                     </Container>
                   </footer>
                 )}
-              </BrowserRouter>
-            </TasksContext.Provider>
-          </UserContext.Provider>
-        </OverlayProvider>
+              </OverlayProvider>
+            </BrowserRouter>
+          </TasksContext.Provider>
+        </UserContext.Provider>
       </FetchProvider>
     );
   }
