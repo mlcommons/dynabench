@@ -1,8 +1,9 @@
 import React, { FC } from "react";
-import { FormControl } from "react-bootstrap";
+import { Collapse, FormControl } from "react-bootstrap";
 
 type BasicInputProps = {
   placeholder: string | undefined;
+  open?: boolean;
   disabled?: boolean;
   required?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -11,17 +12,20 @@ type BasicInputProps = {
 const BasicInput: FC<BasicInputProps> = ({
   onChange,
   placeholder,
+  open = true,
   disabled = false,
   required = true,
 }) => {
   return (
-    <FormControl
-      className="p-3 h-12 rounded-1 thick-border bg-[#f0f2f5]"
-      placeholder={placeholder}
-      onChange={onChange}
-      required={required}
-      disabled={disabled}
-    />
+    <Collapse in={open}>
+      <FormControl
+        className="p-3 h-12 rounded-1 thick-border bg-[#f0f2f5]"
+        placeholder={placeholder}
+        onChange={onChange}
+        disabled={disabled}
+        required={required}
+      />
+    </Collapse>
   );
 };
 

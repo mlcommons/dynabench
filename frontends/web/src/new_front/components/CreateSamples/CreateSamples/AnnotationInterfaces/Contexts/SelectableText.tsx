@@ -1,5 +1,5 @@
-import { ContextConfigType } from "new_front/types/createSamples/annotationContext";
-import { ContextAnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
+import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
+import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import React, { FC, useEffect, useState } from "react";
 import { TokenAnnotator } from "react-text-annotate";
 

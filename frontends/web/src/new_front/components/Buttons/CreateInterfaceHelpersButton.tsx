@@ -1,30 +1,19 @@
 import React, { FC, useState } from "react";
 import { Modal } from "react-bootstrap";
 import Markdown from "react-markdown";
+import ShowInstructionsButton from "new_front/components/Buttons/ShowInstructionsButton";
 
 type CreateInterfaceHelpersButtonProps = {
   generalInstructions: string;
-  hidden: boolean;
-  setHidden: (hidden: boolean) => void;
 };
 
 const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
   generalInstructions,
-  hidden,
-  setHidden,
 }) => {
   const [showInstructions, setShowInstructions] = useState(false);
   return (
     <div>
-      <button
-        type="button"
-        className="mr-1 btn btn-outline-primary btn-sm btn-help-info"
-        onClick={() => {
-          setHidden(!hidden);
-        }}
-      >
-        <i className="fas fa-question"></i>
-      </button>
+      <ShowInstructionsButton />
       <button
         type="button"
         className="btn btn-outline-primary btn-sm btn-help-info"

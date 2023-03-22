@@ -18,7 +18,7 @@ const SelectImage: FC<SelectImageProps> = ({
   };
 
   return (
-    <div key={index} className="grid grid-flow-col grid-rows-2 gap-2">
+    <div key={index}>
       <img
         height={240}
         width={240}
@@ -29,17 +29,15 @@ const SelectImage: FC<SelectImageProps> = ({
         className={expandImage ? "relative scale-[2.7] z-50" : "scale-[1]"}
         alt="src"
       ></img>
-      <div>
-        <input
-          id="checkbox"
-          type="checkbox"
-          value=""
-          className="items-center"
-          onClick={() => {
-            handleOnClicked(image);
-          }}
-        />
-      </div>
+      <input
+        id="checkbox"
+        type="checkbox"
+        value=""
+        className="items-center"
+        onClick={() => {
+          handleOnClicked(image);
+        }}
+      />
     </div>
   );
 };

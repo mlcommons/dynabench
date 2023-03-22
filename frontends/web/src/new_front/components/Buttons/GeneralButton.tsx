@@ -3,15 +3,17 @@ import { Button } from "react-bootstrap";
 
 type GeneralButtonProps = {
   text: string;
+  className: string;
   onClick: () => void;
 };
 
-const GeneralButton: FC<GeneralButtonProps> = ({ text, onClick }) => {
+const GeneralButton: FC<GeneralButtonProps> = ({
+  text,
+  className,
+  onClick,
+}) => {
   return (
-    <Button
-      className="bg-white border-0 font-weight-bold light-gray-bg task-action-btn"
-      onClick={onClick}
-    >
+    <Button className={className} onClick={onClick}>
       {text}
     </Button>
   );

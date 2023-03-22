@@ -9,23 +9,22 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import React, { useContext, useEffect, useState } from "react";
 import TabOption from "new_front/components/Buttons/TabOption";
 import TaskActionButtons from "new_front/components/Buttons/TaskActionButtons_new";
+import TaskHelpersButton from "new_front/components/Buttons/TaskHelpersButton";
 import { TaskInfoType } from "new_front/types/task/taskInfo";
+import React, { useEffect, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
-import TaskHelpersButton from "new_front/components/Buttons/TaskHelpersButton";
 import useFetch from "use-http";
-import { OverlayContext } from "new_front/components/OverlayInstructions/Provider";
+import Leaderboard from "new_front/pages/Task/LeaderBoard";
 
 const TaskPage = () => {
   const [task, setTask] = useState<TaskInfoType>();
   const [adminOrOwner, setAdminOrOwner] = useState(false);
   const [openTab, setOpenTab] = React.useState(1);
   const { get, loading } = useFetch();
-  const { hidden, setHidden } = useContext(OverlayContext);
 
   const { taskCode } = useParams<{ taskCode: string }>();
 
@@ -48,34 +47,32 @@ const TaskPage = () => {
           {task && (
             <>
               <div className="container ">
-                <div className="border border-gray-200 rounded-lg mt-4">
+                <div className="mt-4 border border-gray-200 rounded-lg">
                   <div className="grid grid-cols-3 gap-1 relative bg-opacity-25 bg-no-repeat bg-cover bg-[url(https://d2p5o30oix33cf.cloudfront.net/assets/sentiment-analysis.jpg)]">
                     <div className="col-span-2">
                       <div className="">
-                        <h2 className="text-2xl text-white font-medium">
+                        <h2 className="text-2xl font-medium text-white">
                           {task.name}{" "}
                         </h2>
                       </div>
-                      <p className="text-base pb-4 pl-3 text-white">
+                      <p className="pb-4 pl-3 text-base text-white">
                         {task.desc}
                       </p>
-                      <p className="text-base pb-4 pl-3 text-white">
+                      <p className="pb-4 pl-3 text-base text-white">
                         Some metrics are not available for this task.
                       </p>
                     </div>
-                    <div className="flex justify-end pr-4 items-start	pt-2">
+                    <div className="flex items-start justify-end pt-2 pr-4">
                       <TaskHelpersButton
                         taskCode={taskCode}
                         adminOrOwner={adminOrOwner}
-                        hidden={hidden}
-                        setHidden={setHidden}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2">
                     <div>
                       <ul
-                        className="flex list-none flex-wrap flex-row border-t-2"
+                        className="flex flex-row flex-wrap list-none border-t-2"
                         role="tablist"
                       >
                         <TabOption
@@ -107,20 +104,19 @@ const TaskPage = () => {
                         submitable={task.submitable}
                         hasPredictionsUpload={task.has_predictions_upload}
                         taskCode={task.task_code}
-                        hidden={hidden}
                       />
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap  mt-3">
-                  <div className="px-4 flex-auto">
+                <div className="flex flex-wrap mt-3">
+                  <div className="flex-auto px-4">
                     <div className="tab-content tab-space">
                       <div className={openTab === 1 ? "block" : "hidden"}>
-                        {/* <Leaderboard taskCode={task.task_code} /> */}
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        <Leaderboard taskCode={task.task_code} />
+                        {/* Lorem ipsum dolor sit amet consectetur adipisicing elit.
                         Nesciunt, dolores, pariatur nisi sit eveniet commodi
                         tenetur error laboriosam similique rerum atque eum sequi
-                        quasi. Quis explicabo delectus in enim quam!
+                        quasi. Quis explicabo delectus in enim quam! */}
                       </div>
                       <div className={openTab === 2 ? "block" : "hidden"}>
                         <Row className="justify-content-center">

@@ -13,3 +13,14 @@ from app.infrastructure.repositories.abstract import AbstractRepository
 class ValidationRepository(AbstractRepository):
     def __init__(self) -> None:
         super().__init__(Validation)
+
+    def create_validation(
+        self, example_id: int, user_id: int, label: str, mode: str, metadata_json: dict
+    ):
+        return self.create(
+            example_id=example_id,
+            user_id=user_id,
+            label=label,
+            mode=mode,
+            metadata_json=metadata_json,
+        )

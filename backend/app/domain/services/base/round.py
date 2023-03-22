@@ -14,3 +14,8 @@ class RoundService:
 
     def increment_counter_examples_fooled(self, round_id: int, task_id: int):
         self.round_repository.increment_counter_examples_fooled(round_id, task_id)
+
+    def increment_counter_examples_verified_fooled(self, round_id: int, task_id: int):
+        self.round_repository.increment_counter_examples_verified_fooled(
+            round_id, task_id
+        )

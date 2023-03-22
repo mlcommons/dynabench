@@ -1,4 +1,4 @@
-import ModulesRegistry from "new_front/utils/interface_options.json";
+import ModulesRegistry from "new_front/utils/creation_interface_options.json";
 
 export type ContextConfigType = {
   type: keyof typeof ModulesRegistry.context;

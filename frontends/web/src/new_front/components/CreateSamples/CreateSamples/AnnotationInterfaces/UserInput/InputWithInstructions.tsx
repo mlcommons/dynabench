@@ -1,10 +1,12 @@
 import BasicInput from "new_front/components/Inputs/BasicInput";
-import { AnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
-import { AnnotationUserInput } from "new_front/types/createSamples/annotationUserInputs";
-import React, { FC } from "react";
+import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
+import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
+import React, { FC, useState } from "react";
+import { Collapse } from "react-bootstrap";
 
 const InputWithInstructions: FC<AnnotationFactoryType & AnnotationUserInput> =
   ({ onInputChange, placeholder, instructions, field_name_for_the_model }) => {
+    const [open, setOpen] = useState(true);
     const handleChanges = (event: React.ChangeEvent<HTMLInputElement>) => {
       onInputChange({
         [field_name_for_the_model]: event.target.value,
@@ -14,11 +16,18 @@ const InputWithInstructions: FC<AnnotationFactoryType & AnnotationUserInput> =
     return (
       <div className="py-3">
         {instructions && (
-          <h3 className="pl-4 mb-2 font-semibold text-gray-900 ">
-            {instructions}
+          <h3
+            className="mb-2 font-semibold text-letter-color pointer"
+            onClick={() => setOpen(!open)}
+          >
+            {instructions} ↆ
           </h3>
         )}
-        <BasicInput placeholder={placeholder} onChange={handleChanges} />
+        <BasicInput
+          placeholder={placeholder}
+          onChange={handleChanges}
+          open={open}
+        />
       </div>
     );
   };

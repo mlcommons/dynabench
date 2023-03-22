@@ -13,7 +13,9 @@ from fastapi import UploadFile
 from pydantic import Json
 
 from app.domain.helpers.email import EmailHelper
-from app.domain.helpers.task.model_evaluation_metric import ModelEvaluationStrategy
+from app.domain.helpers.task.model_evaluation_metrics.model_evaluation_metric import (
+    ModelEvaluationStrategy,
+)
 from app.domain.helpers.transform_data_objects import (
     load_json_lines,
     transform_list_to_csv,
@@ -158,6 +160,7 @@ class ModelService:
             prediction = self.single_model_prediction(model_url, model_input)
             response["prediction"] = prediction[model_prediction_label]
             response["probabilities"] = prediction["prob"]
+            print("response", response)
             model_wrong = self.evaluate_model_in_the_loop(
                 response["prediction"], response["label"], model_evaluation_metric_info
             )
@@ -237,13 +240,12 @@ class ModelService:
         ground_truth: str,
         model_evaluation_metric_info: dict = {},
     ) -> int:
-        model_evaluation_strategy = ModelEvaluationStrategy(
+        return ModelEvaluationStrategy(
             prediction,
             ground_truth,
             model_evaluation_metric_info["metric_name"],
             model_evaluation_metric_info.get("metric_parameters", {}),
-        )
-        return model_evaluation_strategy.evaluate_model()
+        ).evaluate_model()
 
     def batch_prediction(
         self,

@@ -1,7 +1,7 @@
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import UserContext from "containers/UserContext";
-import { ModelEvaluationMetric } from "new_front/types/createSamples/configurationTask";
-import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
+import { ModelEvaluationMetric } from "new_front/types/createSamples/createSamples/configurationTask";
+import { ModelOutputType } from "new_front/types/createSamples/createSamples/modelOutput";
 import React, { FC, useContext, useState } from "react";
 import { Button } from "react-bootstrap";
 import { PacmanLoader } from "react-spinners";

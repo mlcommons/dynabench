@@ -26,7 +26,7 @@ const SelectImages: FC<SelectImageProps> = ({
   };
 
   return (
-    <div key={index} className="grid grid-flow-col grid-rows-2 ">
+    <div key={index}>
       <img
         height={240}
         width={240}

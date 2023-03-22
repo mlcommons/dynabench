@@ -1,4 +1,4 @@
-import ModulesRegistry from "new_front/utils/interface_options.json";
+import ModulesRegistry from "new_front/utils/creation_interface_options.json";
 import React, {
   FC,
   ReactElement,
@@ -8,8 +8,8 @@ import React, {
   ComponentType,
   LazyExoticComponent,
 } from "react";
-import { AnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
-import { AnnotationUserInput } from "new_front/types/createSamples/annotationUserInputs";
+import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
+import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
 import { BarLoader } from "react-spinners";
 
 const Import = (
@@ -28,15 +28,15 @@ const AnnotationUserInputStrategy: FC<Props & AnnotationFactoryType> = ({
   onInputChange,
   isGenerativeContext,
 }) => {
-  const [goalRenders, setGoalRenders] = useState<
+  const [userInputRenders, setUserInputRenders] = useState<
     ReactElement<AnnotationUserInput & AnnotationFactoryType>[]
   >([]);
 
   useEffect(() => {
-    const getView = async () => {
+    const getView = () => {
       config.map((option, index) => {
-        const View = Import(ModulesRegistry.input[option.type]);
-        setGoalRenders((prev) => [
+        const View = Import(ModulesRegistry.user_input[option.type]);
+        setUserInputRenders((prev) => [
           ...prev,
           <View {...{ onInputChange, task, ...option }} key={index} />,
         ]);
@@ -49,7 +49,7 @@ const AnnotationUserInputStrategy: FC<Props & AnnotationFactoryType> = ({
     <>
       {!isGenerativeContext && (
         <Suspense fallback={<BarLoader color="#ccebd4" />}>
-          {goalRenders}
+          {userInputRenders}
         </Suspense>
       )}
     </>

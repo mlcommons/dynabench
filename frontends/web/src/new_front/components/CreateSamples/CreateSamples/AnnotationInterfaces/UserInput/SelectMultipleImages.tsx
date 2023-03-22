@@ -1,6 +1,6 @@
 import MultiSelectImages from "new_front/components/Lists/MultiSelectImages";
-import { AnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
-import { AnnotationUserInput } from "new_front/types/createSamples/annotationUserInputs";
+import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
+import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
 import React, { FC } from "react";
 
 const SelectMultipleImages: FC<AnnotationFactoryType & AnnotationUserInput> = ({

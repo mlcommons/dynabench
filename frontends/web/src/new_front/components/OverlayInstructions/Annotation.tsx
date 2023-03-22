@@ -1,23 +1,19 @@
-import React, { FC, ReactElement, useContext, useEffect } from "react";
+import { OverlayInstructionsContext } from "new_front/context/OverlayInstructions/Context";
+import React, { FC, ReactElement, useContext } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import {
-  OverlayProvider,
-  OverlayContext,
-} from "new_front/components/OverlayInstructions/Provider";
 
 type AnnotationInstructionWrapperProps = {
   children: ReactElement;
   tooltip: string;
   placement?: "top" | "right" | "bottom" | "left";
-  hidden: boolean;
 };
 
 const AnnotationInstruction: FC<AnnotationInstructionWrapperProps> = ({
   children,
   tooltip,
   placement,
-  hidden,
 }) => {
+  const { hidden } = useContext(OverlayInstructionsContext);
   return (
     <OverlayTrigger
       placement={placement || "top"}

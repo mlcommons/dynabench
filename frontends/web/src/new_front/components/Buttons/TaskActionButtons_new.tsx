@@ -4,11 +4,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { FC } from "react";
-import { Button, Nav, OverlayTrigger } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import { OverlayProvider } from "new_front/components/OverlayInstructions/Provider";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
+import React, { FC } from "react";
+import { Button, Nav } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 const yaml = require("js-yaml");
 
@@ -18,7 +17,6 @@ type TaskActionButtonsProps = {
   submitable: number;
   hasPredictionsUpload: number;
   taskCode: string;
-  hidden: boolean;
 };
 
 const TaskActionButtons: FC<TaskActionButtonsProps> = ({
@@ -27,92 +25,88 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
   submitable,
   hasPredictionsUpload,
   taskCode,
-  hidden,
 }) => {
   const hasTrainFileUpload =
     configYaml && yaml.load(configYaml).hasOwnProperty("train_file_metric");
 
   return (
-    <OverlayProvider>
-      <Nav className="my-2">
-        {dynamicAdversarialDataCollection && (
-          <>
-            <Nav.Item className="task-action-btn">
-              <AnnotationInstruction
-                placement="bottom"
-                tooltip="Click here to get creative and start writing examples that fool the model"
-                hidden={hidden}
-              >
-                <Button
-                  as={Link}
-                  className="mr-2 border-0 font-weight-bold light-gray-bg"
-                  to={`/tasks/${taskCode}/create`}
-                >
-                  <i className="fas fa-pen"></i> Create Examples
-                </Button>
-              </AnnotationInstruction>
-            </Nav.Item>
-            <Nav.Item className="task-action-btn">
+    <Nav className="my-2">
+      {dynamicAdversarialDataCollection && (
+        <>
+          <Nav.Item className="task-action-btn">
+            <AnnotationInstruction
+              placement="bottom"
+              tooltip="Click here to get creative and start writing examples that fool the model"
+            >
               <Button
                 as={Link}
                 className="mr-2 border-0 font-weight-bold light-gray-bg"
-                to={`/tasks/${taskCode}/validate`}
+                to={`/tasks/${taskCode}/create`}
               >
-                <i className="fas fa-search"></i> Validate Examples
+                <i className="fas fa-pen"></i> Create Examples
               </Button>
-            </Nav.Item>
-          </>
-        )}
-        {submitable && (
+            </AnnotationInstruction>
+          </Nav.Item>
           <Nav.Item className="task-action-btn">
             <Button
               as={Link}
               className="mr-2 border-0 font-weight-bold light-gray-bg"
-              to={`/tasks/${taskCode}/uploadModel`}
+              to={`/tasks/${taskCode}/validate`}
             >
-              <i className="fas fa-upload"></i> Submit Models
+              <i className="fas fa-search"></i> Validate Examples
             </Button>
           </Nav.Item>
-        )}
-        {hasPredictionsUpload !== 0 && (
+        </>
+      )}
+      {submitable && (
+        <Nav.Item className="task-action-btn">
+          <Button
+            as={Link}
+            className="mr-2 border-0 font-weight-bold light-gray-bg"
+            to={`/tasks/${taskCode}/uploadModel`}
+          >
+            <i className="fas fa-upload"></i> Submit Models
+          </Button>
+        </Nav.Item>
+      )}
+      {hasPredictionsUpload !== 0 && (
+        <Nav.Item className="task-action-btn">
+          <Button
+            as={Link}
+            className="mr-2 border-0 font-weight-bold light-gray-bg"
+            to={"/tasks/" + taskCode + "/submit_predictions"}
+          >
+            <i className="fa fa-upload"></i> Submit Prediction Files
+          </Button>
+        </Nav.Item>
+      )}
+      {hasTrainFileUpload && (
+        <>
           <Nav.Item className="task-action-btn">
-            <Button
-              as={Link}
-              className="mr-2 border-0 font-weight-bold light-gray-bg"
-              to={"/tasks/" + taskCode + "/submit_predictions"}
-            >
-              <i className="fa fa-upload"></i> Submit Prediction Files
-            </Button>
+            <>
+              <Button
+                as={Link}
+                className="mr-2 border-0 font-weight-bold light-gray-bg"
+                to={"/tasks/" + taskCode + "/submit_train_files"}
+              >
+                <i className="fa fa-upload"></i> Submit Files
+              </Button>
+            </>
           </Nav.Item>
-        )}
-        {hasTrainFileUpload && (
-          <>
-            <Nav.Item className="task-action-btn">
-              <>
-                <Button
-                  as={Link}
-                  className="mr-2 border-0 font-weight-bold light-gray-bg"
-                  to={"/tasks/" + taskCode + "/submit_train_files"}
-                >
-                  <i className="fa fa-upload"></i> Submit Files
-                </Button>
-              </>
-            </Nav.Item>
-            <Nav.Item className="task-action-btn">
-              <>
-                <Button
-                  as={Link}
-                  className="mr-2 border-0 font-weight-bold light-gray-bg"
-                  to={"/tasks/" + taskCode + "/mlcube_tutorial"}
-                >
-                  <i className="fa fa-upload"></i> MLCube Tutorial
-                </Button>
-              </>
-            </Nav.Item>
-          </>
-        )}
-      </Nav>
-    </OverlayProvider>
+          <Nav.Item className="task-action-btn">
+            <>
+              <Button
+                as={Link}
+                className="mr-2 border-0 font-weight-bold light-gray-bg"
+                to={"/tasks/" + taskCode + "/mlcube_tutorial"}
+              >
+                <i className="fa fa-upload"></i> MLCube Tutorial
+              </Button>
+            </>
+          </Nav.Item>
+        </>
+      )}
+    </Nav>
   );
 };
 

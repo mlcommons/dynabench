@@ -1,8 +1,7 @@
 import RadioButton from "new_front/components/Lists/RadioButton";
-import { AnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
-import { AnnotationUserInput } from "new_front/types/createSamples/annotationUserInputs";
+import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
+import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
 import React, { FC, useState } from "react";
-import { InputGroup } from "react-bootstrap";
 
 const RadioButtonOptions: FC<AnnotationFactoryType & AnnotationUserInput> = ({
   instructions,

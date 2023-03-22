@@ -4,6 +4,9 @@
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.responses import FileResponse
 
+from app.domain.helpers.task.model_evaluation_metrics.model_evaluation_metric import (
+    ModelEvaluationStrategy,
+)
 from app.domain.schemas.base.model import (
     BatchCreateExampleRequest,
     ModelInTheLoopRequest,

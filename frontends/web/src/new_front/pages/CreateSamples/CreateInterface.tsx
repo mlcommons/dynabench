@@ -7,11 +7,11 @@ import AnnotationUserInputStrategy from "new_front/components/CreateSamples/Crea
 import AnnotationButtonActions from "../../components/CreateSamples/CreateSamples/AnnotationButtonActions";
 import useFetch from "use-http";
 import ResponseInfo from "new_front/components/CreateSamples/CreateSamples/ResponseInfo";
-import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
+import { ModelOutputType } from "new_front/types/createSamples/createSamples/modelOutput";
 import {
   ConfigurationTask,
   InfoContextTask,
-} from "new_front/types/createSamples/configurationTask";
+} from "new_front/types/createSamples/createSamples/configurationTask";
 import { useHistory, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import { isLogin } from "new_front/utils/helpers/functions/LoginFunctions";
@@ -96,27 +96,29 @@ const CreateInterface = () => {
           <div id="title">
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
-                <AnnotationTitle taskName={taskInfoName} />
+                <AnnotationTitle
+                  taskName={taskInfoName}
+                  subtitle="Find examples that fool the model
+"
+                />
               </div>
               <div className="flex items-start justify-end pr-4 pt-14">
                 <CreateInterfaceHelpersButton
                   generalInstructions={generalInstructions}
-                  hidden={hidden}
-                  setHidden={setHidden}
                 />
               </div>
             </div>
           </div>
-          <div id="goal" className="mb-3 ">
-            <AnnotationGoalStrategy
-              config={taskConfiguration?.goal as any}
-              task={{}}
-              onInputChange={updateModelInputs}
-              hidden={hidden}
-            />
-          </div>
-          <div className="border-2 ">
-            <div id="context" className="p-3 mb-1 rounded light-gray-bg">
+          <div className="border p-2">
+            <div id="goal">
+              <AnnotationGoalStrategy
+                config={taskConfiguration?.goal as any}
+                task={{}}
+                onInputChange={updateModelInputs}
+                hidden={hidden}
+              />
+            </div>
+            <div id="context" className="p-3 mb-1 rounded">
               <h6 className="text-xs text-[#005798] font-bold pl-2">
                 CONTEXT:
               </h6>

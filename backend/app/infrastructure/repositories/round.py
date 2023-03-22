@@ -33,3 +33,11 @@ class RoundRepository(AbstractRepository):
             (self.model.rid == round_id) & (self.model.tid == task_id)
         ).update({self.model.total_fooled: self.model.total_fooled + 1})
         self.session.commit()
+
+    def increment_counter_examples_verified_fooled(self, round_id: int, task_id: int):
+        self.session.query(self.model).filter(
+            (self.model.rid == round_id) & (self.model.tid == task_id)
+        ).update(
+            {self.model.total_verified_fooled: self.model.total_verified_fooled + 1}
+        )
+        self.session.commit()
