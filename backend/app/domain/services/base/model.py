@@ -160,9 +160,10 @@ class ModelService:
             prediction = self.single_model_prediction(model_url, model_input)
             response["prediction"] = prediction[model_prediction_label]
             response["probabilities"] = prediction["prob"]
-            print("response", response)
             model_wrong = self.evaluate_model_in_the_loop(
-                response["prediction"], response["label"], model_evaluation_metric_info
+                response["prediction"],
+                prediction["label"],
+                model_evaluation_metric_info,
             )
         else:
             response["prediction"] = model_input["label"]
