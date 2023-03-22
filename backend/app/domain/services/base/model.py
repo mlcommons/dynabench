@@ -162,7 +162,7 @@ class ModelService:
             response["probabilities"] = prediction["prob"]
             model_wrong = self.evaluate_model_in_the_loop(
                 response["prediction"],
-                prediction["label"],
+                model_input["label"],
                 model_evaluation_metric_info,
             )
         else:
