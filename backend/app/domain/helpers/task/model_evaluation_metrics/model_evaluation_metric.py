@@ -8,19 +8,20 @@ import importlib
 class ModelEvaluationStrategy:
     def __init__(
         self,
-        model_evaluation_metric: str,
-        ground_truth: str,
         prediction: str,
+        ground_truth: str,
+        model_evaluation_metric: str,
         evaluation_artifacts: dict = {},
     ):
         self.prediction = prediction
         self.ground_truth = ground_truth
         self.model_evaluation_metric = model_evaluation_metric
         self.evaluation_artifacts = evaluation_artifacts
+        self.ubication = "app.domain.helpers.task.model_evaluation_metrics"
 
     def evaluate_model(self) -> int:
         module = importlib.import_module(
-            f"app.domain.helpers.task.model_evaluation_metrics.{self.model_evaluation_metric}"
+            f"{self.ubication}.{self.model_evaluation_metric}"
         )
         class_instance = getattr(
             module, self._get_model_evaluation_metric_class_name_()
