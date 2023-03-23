@@ -444,48 +444,46 @@ class EvaluationService:
                 data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
                     prediction_dict[data_version][data_type]
                 )
-        print( "data_dict", data_dict)
-        # if scoring:
-        #     perturb_exists = (
-        #         "fairness_predictions" in data_dict
-        #         or "robustness_predictions" in data_dict
-        #     )
-        # task_configuration = yaml.safe_load(
-        #     self.task_repository.get_by_id(tasks.id)["config_yaml"]
-        # )
-        # input_formatter = InputFormatter(task_configuration)
-        # formatted_dict = {}
-        # for data_type in data_dict:
-        #     formatted_key = f"formatted_{data_type}"
-        #     grouped_key = f"grouped_{data_type}"
-        #     if "dataset" in data_type:
-        #         formatted_dict[formatted_key] = input_formatter.format_labels(
-        #             data_dict[data_type]
-        #         )
-        #         formatted_dict[grouped_key] = input_formatter.group_labels(
-        #             formatted_dict[formatted_key]
-        #         )
-        #     elif "predictions" in data_type:
-        #         formatted_dict[formatted_key] = input_formatter.format_predictions(
-        #             data_dict[data_type]
-        #         )
-        #         formatted_dict[grouped_key] = input_formatter.group_predictions(
-        #             formatted_dict[formatted_key]
-        #         )
+        if scoring:
+            perturb_exists = (
+                "fairness_predictions" in data_dict
+                or "robustness_predictions" in data_dict
+            )
+        task_configuration = yaml.safe_load(
+            self.task_repository.get_by_id(tasks.id)["config_yaml"]
+        )
+        input_formatter = InputFormatter(task_configuration)
+        formatted_dict = {}
+        for data_type in data_dict:
+            formatted_key = f"formatted_{data_type}"
+            grouped_key = f"grouped_{data_type}"
+            if "dataset" in data_type:
+                formatted_dict[formatted_key] = input_formatter.format_labels(
+                    data_dict[data_type]
+                )
+                formatted_dict[grouped_key] = input_formatter.group_labels(
+                    formatted_dict[formatted_key]
+                )
+            elif "predictions" in data_type:
+                formatted_dict[formatted_key] = input_formatter.format_predictions(
+                    data_dict[data_type]
+                )
+                formatted_dict[grouped_key] = input_formatter.group_predictions(
+                    formatted_dict[formatted_key]
+                )
 
-        # evaluator = Evaluator(task_configuration)
-        # main_metric = evaluator.evaluate(
-        #     formatted_dict["formatted_base_predictions"],
-        #     formatted_dict["formatted_base_dataset"],
-        # )
-        # delta_metrics = {}
+        evaluator = Evaluator(task_configuration)
+        main_metric = evaluator.evaluate(
+            formatted_dict["formatted_base_predictions"],
+            formatted_dict["formatted_base_dataset"],
+        )
+        delta_metrics = {}
         if perturb_exists:
             delta_metrics = evaluator.evaluate_delta_metrics(
                 formatted_dict.get("grouped_base_predictions"),
                 formatted_dict.get("grouped_robustness_predictions"),
                 formatted_dict.get("grouped_fairness_predictions"),
             )
-        return
         metric = task_configuration["perf_metric"]["type"]
         final_scores = {
             str(metric): main_metric,

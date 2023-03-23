@@ -127,5 +127,4 @@ class Evaluator:
                 grouped_predictions, grouped_labels, perf_metric
             )
         }
-        return
         return delta_metrics_scores
