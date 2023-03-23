@@ -256,6 +256,8 @@ def get_squad_f1_meta(task=None):
 
 # TODO: split into different functions for fairness and robustness.
 def get_unperturbed_percent(predictions: dict, targets: dict, metric_function):
+    print("predictions", predictions)
+    print("targets", targets)
     total_unperturbed_weights, total = 0, 0
     for target in targets:
         if target in predictions:
