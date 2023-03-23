@@ -124,6 +124,12 @@ class Evaluator:
         targets: a list of labels
         """
         perf_metric = eval_metrics_dict[self.metric]
+        with open("./app/models/predictions.txt", 'w') as output:
+            for row in grouped_predictions:
+                output.write(str(row) + '\n')
+        with open("./app/models/targets.txt", 'w') as output:
+            for row in grouped_labels:
+                output.write(str(row) + '\n')
         delta_metrics_scores = {
             perturb_prefix: delta_metrics_dict[perturb_prefix](
                 grouped_predictions, grouped_labels, perf_metric

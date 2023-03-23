@@ -217,13 +217,6 @@ def get_vqa_accuracy_meta(task=None):
 
 
 def get_macro_f1(predictions: list, targets: list):
-    with open("./app/models/predictions.txt", 'w') as output:
-        for row in predictions:
-            output.write(str(row) + '\n')
-    with open("./app/models/targets.txt", 'w') as output:
-        for row in targets:
-            output.write(str(row) + '\n')
-
     macro_f1 = f1_score(targets, predictions, average="macro")
     return round(float(macro_f1) * 100, 2)
 
