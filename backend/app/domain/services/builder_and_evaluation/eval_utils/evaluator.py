@@ -104,10 +104,8 @@ class Evaluator:
                 delta_metric = self._compute_delta_metrics(
                     grouped_predictions, grouped_fairs, prefix
                 )
-                return
-        return
-        #         delta_metrics["fairness"] = delta_metric.get("fairness")
-        # return delta_metrics
+                delta_metrics["fairness"] = delta_metric.get("fairness")
+        return delta_metrics
 
     def _compute_metric(self, predictions: list, targets: list) -> tuple:
         metric_result = self.metric_func(predictions, targets)
@@ -125,13 +123,10 @@ class Evaluator:
         predictions must be concatenated by id.
         targets: a list of labels
         """
-        try:
-            perf_metric = eval_metrics_dict[self.metric]
-            delta_metrics_scores = {
-                perturb_prefix: delta_metrics_dict[perturb_prefix](
-                    grouped_predictions, grouped_labels, perf_metric
-                )
-            }
-        except:
-            pass
-        # return delta_metrics_scores
+        perf_metric = eval_metrics_dict[self.metric]
+        delta_metrics_scores = {
+            perturb_prefix: delta_metrics_dict[perturb_prefix](
+                grouped_predictions, grouped_labels, perf_metric
+            )
+        }
+        return delta_metrics_scores
