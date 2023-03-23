@@ -488,12 +488,9 @@ class EvaluationService:
             "memory": memory,
             "throughput": throughput,
         }
-        print("current_round", current_round)
-        print("tasks.id", tasks.id)
         round_info = self.round_repository.get_round_info_by_round_and_task(
             tasks.id, current_round
         )
-        print("round_info", round_info)
         new_score = {
             "perf": main_metric["perf"],
             "pretty_perf": main_metric["pretty_perf"],

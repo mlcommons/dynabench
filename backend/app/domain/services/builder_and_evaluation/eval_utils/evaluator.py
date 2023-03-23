@@ -101,6 +101,9 @@ class Evaluator:
                 )
                 delta_metrics["robustness"] = delta_metric.get("robustness")
             else:
+                print("grouped_fairs", grouped_fairs)
+                print("grouped_predictions", grouped_predictions)
+                print("prefix", prefix)
                 delta_metric = self._compute_delta_metrics(
                     grouped_fairs, grouped_predictions, prefix
                 )
