@@ -98,8 +98,7 @@ const CreateInterface = () => {
               <div className="col-span-2">
                 <AnnotationTitle
                   taskName={taskInfoName}
-                  subtitle="Find examples that fool the model
-"
+                  subtitle="Find examples that fool the model"
                 />
               </div>
               <div className="flex items-start justify-end pr-4 pt-14">
@@ -111,34 +110,40 @@ const CreateInterface = () => {
           </div>
           <div className="border p-2">
             <div id="goal">
-              <AnnotationGoalStrategy
-                config={taskConfiguration?.goal as any}
-                task={{}}
-                onInputChange={updateModelInputs}
-                hidden={hidden}
-              />
+              {taskConfiguration?.goal && (
+                <AnnotationGoalStrategy
+                  config={taskConfiguration?.goal as any}
+                  task={{}}
+                  onInputChange={updateModelInputs}
+                  hidden={hidden}
+                />
+              )}
             </div>
             <div id="context" className="p-3 mb-1 rounded">
               <h6 className="text-xs text-[#005798] font-bold pl-2">
                 CONTEXT:
               </h6>
-              <AnnotationContextStrategy
-                config={taskConfiguration?.context as any}
-                task={{}}
-                context={taskContextInfo?.current_context}
-                onInputChange={updateModelInputs}
-                setIsGenerativeContext={setIsGenerativeContext}
-                hidden={hidden}
-              />
+              {taskConfiguration?.context && (
+                <AnnotationContextStrategy
+                  config={taskConfiguration?.context as any}
+                  task={{}}
+                  context={taskContextInfo?.current_context}
+                  onInputChange={updateModelInputs}
+                  setIsGenerativeContext={setIsGenerativeContext}
+                  hidden={hidden}
+                />
+              )}
             </div>
             <div id="inputUser" className="p-3">
-              <AnnotationUserInputStrategy
-                config={taskConfiguration?.user_input as any}
-                task={{}}
-                onInputChange={updateModelInputs}
-                isGenerativeContext={isGenerativeContext}
-                hidden={hidden}
-              />
+              {taskConfiguration?.user_input && (
+                <AnnotationUserInputStrategy
+                  config={taskConfiguration?.user_input as any}
+                  task={{}}
+                  onInputChange={updateModelInputs}
+                  isGenerativeContext={isGenerativeContext}
+                  hidden={hidden}
+                />
+              )}
             </div>
             <div id="buttons">
               {taskContextInfo && taskConfiguration && (

@@ -4,6 +4,7 @@
 
 import ast
 
+import yaml
 from pydantic import Json
 
 from app.domain.services.base.context import ContextService
@@ -135,3 +136,12 @@ class ExampleService:
             self.example_repository.increment_counter_total_flagged(example_id)
         if not validate_non_fooling:
             self.round_service.increment_counter_examples_verified_fooled(task_id)
+
+    def get_validate_configuration(self, task_id: int) -> dict:
+        task_config = self.task_service.get_task_info_by_task_id(task_id)
+        config_yaml = yaml.safe_load(task_config.config_yaml)
+        context_info = {
+            "validation_user_input": config_yaml.get("validation_user_input"),
+            "validation_context": config_yaml.get("validation_context"),
+        }
+        return context_info

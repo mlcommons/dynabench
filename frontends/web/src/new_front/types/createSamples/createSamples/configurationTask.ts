@@ -15,6 +15,11 @@ export type ConfigurationTask = {
   model_evaluation_metric: ModelEvaluationMetric;
 };
 
+export type ValidationConfigurationTask = {
+  validation_user_input: object[];
+  validation_context: object[];
+};
+
 type ModelOutput = {
   model_prediction_label: string;
 };
