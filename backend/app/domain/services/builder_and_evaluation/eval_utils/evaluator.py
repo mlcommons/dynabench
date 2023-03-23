@@ -104,6 +104,7 @@ class Evaluator:
                 delta_metric = self._compute_delta_metrics(
                     grouped_predictions, grouped_fairs, prefix
                 )
+                return
                 delta_metrics["fairness"] = delta_metric.get("fairness")
         return delta_metrics
 

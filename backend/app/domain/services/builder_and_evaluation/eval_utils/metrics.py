@@ -217,8 +217,11 @@ def get_vqa_accuracy_meta(task=None):
 
 
 def get_macro_f1(predictions: list, targets: list):
-    macro_f1 = f1_score(targets, predictions, average="macro")
-    return round(float(macro_f1) * 100, 2)
+    print('predictions', predictions)
+    print('targets', targets)
+    return
+    # macro_f1 = f1_score(targets, predictions, average="macro")
+    # return round(float(macro_f1) * 100, 2)
 
 
 def get_macro_f1_meta(task=None):
