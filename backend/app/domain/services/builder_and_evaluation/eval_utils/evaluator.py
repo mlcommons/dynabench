@@ -91,9 +91,9 @@ class Evaluator:
         calculate alternative metrics from the yaml one.
         """
         delta_metrics = {}
-
+        print('grouped_fairs', grouped_fairs)
         perturb_prefixes = [metric["type"] for metric in self.config["delta_metrics"]]
-
+        return
         for prefix in perturb_prefixes:
             if prefix == "robustness":
                 delta_metric = self._compute_delta_metrics(
@@ -124,8 +124,6 @@ class Evaluator:
         targets: a list of labels
         """
         perf_metric = eval_metrics_dict[self.metric]
-        print(grouped_predictions[:5])
-        print(grouped_labels[:5])
         delta_metrics_scores = {
             perturb_prefix: delta_metrics_dict[perturb_prefix](
                 grouped_predictions, grouped_labels, perf_metric

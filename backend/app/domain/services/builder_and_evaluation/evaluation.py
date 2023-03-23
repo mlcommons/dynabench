@@ -476,8 +476,6 @@ class EvaluationService:
             formatted_dict["formatted_base_dataset"],
         )
         delta_metrics = {}
-        print('fairness', formatted_dict.get("grouped_fairness_predictions"))
-        return
         if perturb_exists:
             delta_metrics = evaluator.evaluate_delta_metrics(
                 formatted_dict.get("grouped_base_predictions"),
