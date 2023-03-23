@@ -92,7 +92,6 @@ class Evaluator:
         """
         delta_metrics = {}
         perturb_prefixes = [metric["type"] for metric in self.config["delta_metrics"]]
-        return
         for prefix in perturb_prefixes:
             if prefix == "robustness":
                 delta_metric = self._compute_delta_metrics(
@@ -128,4 +127,5 @@ class Evaluator:
                 grouped_predictions, grouped_labels, perf_metric
             )
         }
+        return
         return delta_metrics_scores
