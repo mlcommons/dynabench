@@ -333,7 +333,7 @@ class EvaluationService:
                 },
             )
         )
-        new_scores = []
+        # new_scores = []
         (
             ip,
             model_name,
@@ -349,7 +349,7 @@ class EvaluationService:
                 if dataset["round_id"] == current_round
             ]
             self.logger.info("Evaluate scoring datasets")
-            new_score = self.save_predictions_dataset(
+            self.save_predictions_dataset(
                 round_datasets,
                 tasks,
                 ip,
@@ -359,45 +359,47 @@ class EvaluationService:
                 arn_service,
                 current_round,
             )
-            new_scores.append(new_score)
-        if evaluate_no_scoring_datasets:
-            jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
-            not_scoring_datasets = self.downloads_not_scoring_datasets(
-                jsonl_not_scoring_datasets,
-                self.s3_bucket,
-                tasks.task_code,
-                model_s3_zip,
-            )
-            for not_scoring_dataset in not_scoring_datasets:
-                self.logger.info("Evaluate non-scoring datasets")
-                send_not_scoring_dataset = []
-                send_not_scoring_dataset.append(not_scoring_dataset)
-                new_score = self.save_predictions_dataset(
-                    send_not_scoring_dataset,
-                    tasks,
-                    ip,
-                    model_name,
-                    folder_name,
-                    model_id,
-                    arn_service,
-                )
-                new_scores.append(new_score)
-        self.builder.delete_repository(repo_name)
-        self.logger.info("Create light model")
-        url_light_model = self.builder.create_light_model(model_name, folder_name)
-        self.model_repository.update_light_model(model_id, url_light_model)
-        self.model_repository.update_model_status(model_id)
-        self.logger.info("Clean folder and service")
-        self.clean_folder_and_service(folder_name, arn_service)
-        user_email = self.user_repository.get_user_email(user_id)[0]
-        self.email_helper.send(
-            contact=user_email,
-            cc_contact="dynabench-site@mlcommons.org",
-            template_name="model_train_successful.txt",
-            msg_dict={"name": model_name, "model_id": model_id},
-            subject=f"Model {model_name} training succeeded.",
-        )
-        return new_scores
+            break
+        return
+        #     new_scores.append(new_score)
+        # if evaluate_no_scoring_datasets:
+        #     jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
+        #     not_scoring_datasets = self.downloads_not_scoring_datasets(
+        #         jsonl_not_scoring_datasets,
+        #         self.s3_bucket,
+        #         tasks.task_code,
+        #         model_s3_zip,
+        #     )
+        #     for not_scoring_dataset in not_scoring_datasets:
+        #         self.logger.info("Evaluate non-scoring datasets")
+        #         send_not_scoring_dataset = []
+        #         send_not_scoring_dataset.append(not_scoring_dataset)
+        #         new_score = self.save_predictions_dataset(
+        #             send_not_scoring_dataset,
+        #             tasks,
+        #             ip,
+        #             model_name,
+        #             folder_name,
+        #             model_id,
+        #             arn_service,
+        #         )
+        #         new_scores.append(new_score)
+        # self.builder.delete_repository(repo_name)
+        # self.logger.info("Create light model")
+        # url_light_model = self.builder.create_light_model(model_name, folder_name)
+        # self.model_repository.update_light_model(model_id, url_light_model)
+        # self.model_repository.update_model_status(model_id)
+        # self.logger.info("Clean folder and service")
+        # self.clean_folder_and_service(folder_name, arn_service)
+        # user_email = self.user_repository.get_user_email(user_id)[0]
+        # self.email_helper.send(
+        #     contact=user_email,
+        #     cc_contact="dynabench-site@mlcommons.org",
+        #     template_name="model_train_successful.txt",
+        #     msg_dict={"name": model_name, "model_id": model_id},
+        #     subject=f"Model {model_name} training succeeded.",
+        # )
+        # return new_scores
 
     def clean_folder_and_service(self, folder_name: str, arn_service: str):
         print("arn_service", arn_service)
@@ -480,6 +482,7 @@ class EvaluationService:
                 formatted_dict.get("grouped_robustness_predictions"),
                 formatted_dict.get("grouped_fairness_predictions"),
             )
+        return
         metric = task_configuration["perf_metric"]["type"]
         final_scores = {
             str(metric): main_metric,

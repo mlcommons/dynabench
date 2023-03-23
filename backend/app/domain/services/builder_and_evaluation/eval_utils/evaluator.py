@@ -103,7 +103,7 @@ class Evaluator:
             else:
                 print("grouped_fairs", grouped_fairs)
                 print("grouped_predictions", grouped_predictions)
-                print("prefix", prefix)
+                return
                 delta_metric = self._compute_delta_metrics(
                     grouped_fairs, grouped_predictions, prefix
                 )
