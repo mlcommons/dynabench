@@ -92,6 +92,7 @@ class Evaluator:
         """
         delta_metrics = {}
         print('grouped_fairs', grouped_fairs)
+        print('grouped_predictions', grouped_predictions)
         perturb_prefixes = [metric["type"] for metric in self.config["delta_metrics"]]
         return
         for prefix in perturb_prefixes:
