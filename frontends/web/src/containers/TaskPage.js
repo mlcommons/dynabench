@@ -187,14 +187,13 @@ class TaskPage extends React.Component {
           <Row className="justify-content-center">
             {this.state.task?.active && (
               <TaskActionButtons
-                config_yaml={this.state.task.config_yaml}
+                configYaml={this.state.task.config_yaml}
                 dynamicAdversarialDataCollection={
                   this.state.task.dynamic_adversarial_data_collection
                 }
                 submitable={this.state.task.submitable}
                 hasPredictionsUpload={this.state.task.has_predictions_upload}
                 taskCode={this.state.task.task_code}
-                taskDocumentationUrl={this.state.task.documentation_url}
               />
             )}
           </Row>

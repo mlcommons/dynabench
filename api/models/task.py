@@ -683,6 +683,7 @@ class Task(Base):
     decen_bucket = db.Column(db.Text)
     decen_aws_region = db.Column(db.Text)
     image_url = db.Column(db.Text)
+    challenge_type = db.Column(db.Text)
     documentation_url = db.Column(db.Text)
 
     def __repr__(self):

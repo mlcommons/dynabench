@@ -4,6 +4,9 @@
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.responses import FileResponse
 
+from app.domain.helpers.task.model_evaluation_metrics.model_evaluation_metric import (
+    ModelEvaluationStrategy,
+)
 from app.domain.schemas.base.model import (
     BatchCreateExampleRequest,
     ModelInTheLoopRequest,
@@ -34,6 +37,16 @@ def single_model_prediction_submit(model: SingleModelEvaluationRequest):
         model.model_prediction_label,
         model.model_evaluation_metric_info,
     )
+
+
+@router.post("/", response_model={})
+def partially_creation_example(model: SingleModelEvaluationRequest):
+    return ModelService().partially_creation_example()
+
+
+@router.post("/", response_model={})
+def update_creation_example_by_creation_id(model: SingleModelEvaluationRequest):
+    return ModelService().update_creation_example_by_creation_id()
 
 
 @router.post("/batch_prediction", response_class=FileResponse)

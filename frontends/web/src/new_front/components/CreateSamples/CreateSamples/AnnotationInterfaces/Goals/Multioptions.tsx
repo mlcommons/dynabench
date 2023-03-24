@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from "react";
 import { InputGroup, DropdownButton, Dropdown } from "react-bootstrap";
-import { GoalConfigType } from "new_front/types/createSamples/annotationGoal";
-import { AnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
+import { GoalConfigType } from "new_front/types/createSamples/createSamples/annotationGoal";
+import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 
 const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
   onInputChange,

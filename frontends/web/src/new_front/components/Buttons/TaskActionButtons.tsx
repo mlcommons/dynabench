@@ -8,12 +8,20 @@ import React, { FC } from "react";
 import { Button, Nav, OverlayTrigger } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { Annotation } from "../../../containers/Overlay";
-import { TaskActionButtonsProps } from "../../types/buttons/taskActionButtons";
 import ShowToolTip from "../Utils/ShowToolTip";
 const yaml = require("js-yaml");
 
+type TaskActionButtonsProps = {
+  configYaml: string;
+  dynamicAdversarialDataCollection: number;
+  submitable: number;
+  hasPredictionsUpload: number;
+  taskCode: string;
+  taskDocumentationUrl: string;
+};
+
 const TaskActionButtons: FC<TaskActionButtonsProps> = ({
-  config_yaml,
+  configYaml,
   dynamicAdversarialDataCollection,
   submitable,
   hasPredictionsUpload,
@@ -21,7 +29,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
   taskDocumentationUrl,
 }) => {
   const hasTrainFileUpload =
-    config_yaml && yaml.load(config_yaml).hasOwnProperty("train_file_metric");
+    configYaml && yaml.load(configYaml).hasOwnProperty("train_file_metric");
 
   return (
     <Nav className="my-4">

@@ -1,67 +1,83 @@
-import React from "react";
+import React, { FC, useState } from "react";
+import { Collapse } from "react-bootstrap";
 
-import { useState } from "react";
+type MultiSelectProps = {
+  options: string[];
+  instructions: string;
+  field_name_for_the_model?: string;
+  onInputChange?: (value: any) => void;
+};
 
-const MultiSelect = () => {
+const MultiSelect: FC<MultiSelectProps> = ({
+  options,
+  instructions,
+  field_name_for_the_model,
+  onInputChange,
+}) => {
+  const selected: string[] = [];
+  const [open, setOpen] = useState(false);
+  const [addExplanation, setAddExplanation] = useState(false);
+
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    option: string
+  ) => {
+    setAddExplanation(!addExplanation);
+    if (field_name_for_the_model && onInputChange) {
+      if (event.target.checked) {
+        selected.push(option);
+      } else {
+        const index = selected.indexOf(option);
+        if (index > -1) {
+          selected.splice(index, 1);
+        }
+      }
+      onInputChange({
+        [field_name_for_the_model]: selected,
+      });
+    }
+  };
+
   return (
-    <div>
-      <h3 className="mb-4 font-semibold text-gray-900 ">
-        Select all policy violations represented in the image
+    <div className="py-2  ">
+      <h3
+        className="mb-1 font-semibold text-letter-color pointer"
+        onClick={() => setOpen(!open)}
+      >
+        {instructions} ↆ
       </h3>
-      <ul className="w-48 text-sm font-medium text-gray-900 border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 ">
-        <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-          <div className="flex items-center pl-3">
-            <input
-              id="vue-checkbox"
-              type="checkbox"
-              value=""
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-            />
-            <label className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-              Violent
-            </label>
-          </div>
-        </li>
-        <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-          <div className="flex items-center pl-3">
-            <input
-              id="react-checkbox"
-              type="checkbox"
-              value=""
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-            />
-            <label className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-              Sexually
-            </label>
-          </div>
-        </li>
-        <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-          <div className="flex items-center pl-3">
-            <input
-              id="angular-checkbox"
-              type="checkbox"
-              value=""
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-            />
-            <label className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-              Negative
-            </label>
-          </div>
-        </li>
-        <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-          <div className="flex items-center pl-3">
-            <input
-              id="laravel-checkbox"
-              type="checkbox"
-              value=""
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-            />
-            <label className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-              Hate
-            </label>
-          </div>
-        </li>
-      </ul>
+      <Collapse in={open}>
+        <ul className="w-full text-sm font-medium text-letter-color ">
+          {options.map((option, index) => (
+            <li
+              className="w-full rounded-t-lg dark:border-gray-600"
+              key={index}
+            >
+              <div className="flex items-center pl-3">
+                <input
+                  id="vue-checkbox"
+                  type="checkbox"
+                  onChange={(event) => handleChange(event, option)}
+                  className="w-4 h-5 text-third-color bg-gray-100 border-gray-300 rounded focus:ring-third-color"
+                />
+                <label className="w-full pt-2 ml-2 text-base font-medium dark:text-gray-300">
+                  {option}
+                </label>
+                <input
+                  placeholder="Please specify"
+                  className={`${
+                    addExplanation ? "block" : "hidden"
+                  } px-2 py-1 text-base text-letter-color border border-gray-300 rounded-md w-2/4  `}
+                  type="text"
+                  onChange={(event) => {
+                    setAddExplanation(true);
+                  }}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Collapse>
     </div>
   );
 };

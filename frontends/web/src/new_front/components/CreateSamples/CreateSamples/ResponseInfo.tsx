@@ -1,5 +1,5 @@
 import { PieRechart } from "components/Charts/Rechart";
-import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
+import { ModelOutputType } from "new_front/types/createSamples/createSamples/modelOutput";
 import React, { FC } from "react";
 
 const ResponseInfo: FC<ModelOutputType> = ({

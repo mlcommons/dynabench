@@ -2,17 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-
-def exact_match(prediction: str, ground_truth: str) -> int:
-    return int(prediction != ground_truth)
-
-
-def string_f1(
-    prediction: str, ground_truth: str, evaluation_artifacts: dict = {}
-) -> int:
-    from transformers.data.metrics.squad_metrics import compute_f1
-
-    return int(compute_f1(prediction, ground_truth) < evaluation_artifacts["threshold"])
+import importlib
 
 
 class ModelEvaluationStrategy:
@@ -27,13 +17,21 @@ class ModelEvaluationStrategy:
         self.ground_truth = ground_truth
         self.model_evaluation_metric = model_evaluation_metric
         self.evaluation_artifacts = evaluation_artifacts
+        self.ubication = "app.domain.helpers.task.model_evaluation_metrics"
 
     def evaluate_model(self) -> int:
-        if self.model_evaluation_metric == "exact_match":
-            return exact_match(self.prediction, self.ground_truth)
-        elif self.model_evaluation_metric == "string_f1":
-            return string_f1(
+        module = importlib.import_module(
+            f"{self.ubication}.{self.model_evaluation_metric}"
+        )
+        class_instance = getattr(
+            module, self._get_model_evaluation_metric_class_name_()
+        )
+        if class_instance:
+            return class_instance().model_evaluation(
                 self.prediction, self.ground_truth, self.evaluation_artifacts
             )
         else:
             raise ValueError("Invalid model_evaluation_metric")
+
+    def _get_model_evaluation_metric_class_name_(self) -> str:
+        return "".join([m.title() for m in self.model_evaluation_metric.split("_")])

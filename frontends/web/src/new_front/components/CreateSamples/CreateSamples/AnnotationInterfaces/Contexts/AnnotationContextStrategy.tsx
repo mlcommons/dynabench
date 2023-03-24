@@ -1,4 +1,4 @@
-import ModulesRegistry from "new_front/utils/interface_options.json";
+import ModulesRegistry from "new_front/utils/creation_interface_options.json";
 import React, {
   FC,
   ReactElement,
@@ -11,8 +11,8 @@ import React, {
 import {
   AnnotationFactoryType,
   ContextAnnotationFactoryType,
-} from "new_front/types/createSamples/annotationFactory";
-import { ContextConfigType } from "new_front/types/createSamples/annotationContext";
+} from "new_front/types/createSamples/createSamples/annotationFactory";
+import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { BarLoader } from "react-spinners";
 
 const Import = (
@@ -31,13 +31,13 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
   onInputChange,
   setIsGenerativeContext,
 }) => {
-  const [goalRender, setGoalRender] =
+  const [contextRender, setContextRender] =
     useState<ReactElement<ContextConfigType & ContextAnnotationFactoryType>>();
 
   useEffect(() => {
     const getView = async () => {
       const View = await Import(ModulesRegistry.context[config.type]);
-      setGoalRender(
+      setContextRender(
         <View
           {...{
             onInputChange,
@@ -53,7 +53,9 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
   }, []);
 
   return (
-    <Suspense fallback={<BarLoader color="#ccebd4" />}>{goalRender}</Suspense>
+    <Suspense fallback={<BarLoader color="#ccebd4" />}>
+      {contextRender}
+    </Suspense>
   );
 };
 

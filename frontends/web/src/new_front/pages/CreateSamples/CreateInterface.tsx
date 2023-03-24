@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
-import AnnotationHelperButtons from "../../components/CreateSamples/CreateSamples/AnnotationHelperButtons";
+import CreateInterfaceHelpersButton from "new_front/components/Buttons/CreateInterfaceHelpersButton";
 import AnnotationGoalStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Goals/AnnotationGoalStrategy";
 import AnnotationContextStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/AnnotationContextStrategy";
 import AnnotationUserInputStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/UserInput/AnnotationUserInputStrategy";
 import AnnotationButtonActions from "../../components/CreateSamples/CreateSamples/AnnotationButtonActions";
 import useFetch from "use-http";
 import ResponseInfo from "new_front/components/CreateSamples/CreateSamples/ResponseInfo";
-import { ModelOutputType } from "new_front/types/createSamples/modelOutput";
+import { ModelOutputType } from "new_front/types/createSamples/createSamples/modelOutput";
 import {
   ConfigurationTask,
   InfoContextTask,
-} from "new_front/types/createSamples/configurationTask";
+} from "new_front/types/createSamples/createSamples/configurationTask";
 import { useHistory, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import { isLogin } from "new_front/utils/helpers/functions/LoginFunctions";
+import { OverlayContext } from "new_front/components/OverlayInstructions/Provider";
 
 const CreateInterface = () => {
   const [modelInputs, setModelInputs] = useState<object>({});
@@ -27,6 +28,8 @@ const CreateInterface = () => {
   const [taskId, setTaskId] = useState<number>(0);
   const [isGenerativeContext, setIsGenerativeContext] =
     useState<boolean>(false);
+  const [generalInstructions, setGeneralInstructions] = useState<string>("");
+  const { hidden, setHidden } = useContext(OverlayContext);
   const { get, post, response, loading } = useFetch();
   let { taskCode } = useParams<{ taskCode: string }>();
   const history = useHistory();
@@ -55,6 +58,7 @@ const CreateInterface = () => {
       setTaskConfiguration(taskConfiguration);
       setModelInTheLoop(modelInTheLoop);
       setTaskInfoName(taskInfo.name);
+      setGeneralInstructions(taskInfo.instructions_md);
       setTaskId(taskId);
       setIsGenerativeContext(
         taskConfiguration.context.generative_context?.is_generative
@@ -92,41 +96,54 @@ const CreateInterface = () => {
           <div id="title">
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
-                <AnnotationTitle taskName={taskInfoName} />
+                <AnnotationTitle
+                  taskName={taskInfoName}
+                  subtitle="Find examples that fool the model"
+                />
               </div>
-              <div>
-                <div className="grid grid-cols-3 gap-2">
-                  {/* <AnnotationHelperButtons /> */}
-                </div>
+              <div className="flex items-start justify-end pr-4 pt-14">
+                <CreateInterfaceHelpersButton
+                  generalInstructions={generalInstructions}
+                />
               </div>
             </div>
           </div>
-          <div id="goal" className="mb-3 ">
-            <AnnotationGoalStrategy
-              config={taskConfiguration?.goal as any}
-              task={{}}
-              onInputChange={updateModelInputs}
-            />
-          </div>
-          <div className="border-2 ">
-            <div id="context" className="p-3 mb-1 rounded light-gray-bg">
+          <div className="border p-2">
+            <div id="goal">
+              {taskConfiguration?.goal && (
+                <AnnotationGoalStrategy
+                  config={taskConfiguration?.goal as any}
+                  task={{}}
+                  onInputChange={updateModelInputs}
+                  hidden={hidden}
+                />
+              )}
+            </div>
+            <div id="context" className="p-3 mb-1 rounded">
               <h6 className="text-xs text-[#005798] font-bold pl-2">
                 CONTEXT:
               </h6>
-              <AnnotationContextStrategy
-                config={taskConfiguration?.context as any}
-                task={{}}
-                context={taskContextInfo?.current_context}
-                onInputChange={updateModelInputs}
-                setIsGenerativeContext={setIsGenerativeContext}
-              />
+              {taskConfiguration?.context && (
+                <AnnotationContextStrategy
+                  config={taskConfiguration?.context as any}
+                  task={{}}
+                  context={taskContextInfo?.current_context}
+                  onInputChange={updateModelInputs}
+                  setIsGenerativeContext={setIsGenerativeContext}
+                  hidden={hidden}
+                />
+              )}
             </div>
             <div id="inputUser" className="p-3">
-              <AnnotationUserInputStrategy
-                config={taskConfiguration?.user_input as any}
-                task={{}}
-                onInputChange={updateModelInputs}
-              />
+              {taskConfiguration?.user_input && (
+                <AnnotationUserInputStrategy
+                  config={taskConfiguration?.user_input as any}
+                  task={{}}
+                  onInputChange={updateModelInputs}
+                  isGenerativeContext={isGenerativeContext}
+                  hidden={hidden}
+                />
+              )}
             </div>
             <div id="buttons">
               {taskContextInfo && taskConfiguration && (
@@ -152,7 +169,7 @@ const CreateInterface = () => {
                 />
               )}
             </div>
-            <div id="responseInfo" className="max-h-96">
+            <div id="responseInfo">
               {modelOutput && (
                 <ResponseInfo
                   label={modelOutput.label}

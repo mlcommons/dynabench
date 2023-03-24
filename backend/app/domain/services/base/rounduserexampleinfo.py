@@ -7,7 +7,7 @@ from app.infrastructure.repositories.rounduserexampleinfo import (
 )
 
 
-class RoundUserExampleInfo:
+class RoundUserExampleInfoService:
     def __init__(self):
         self.rounds_user_example_info_repository = RoundUserExampleInfoRepository()
 

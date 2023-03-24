@@ -11,3 +11,15 @@ class UserService:
 
     def increment_examples_fooled(self, user_id: int):
         self.user_repository.increment_examples_fooled(user_id)
+
+    def increment_examples_verified(self, user_id: int):
+        self.user_repository.increment_examples_verified(user_id)
+
+    def increment_examples_verified_correct(self, user_id: int):
+        self.user_repository.increment_examples_verified_correct(user_id)
+
+    def increment_examples_verified_correct_fooled(self, user_id: int):
+        self.user_repository.increment_examples_verified_correct_fooled(user_id)
+
+    def increment_examples_verified_incorrect_fooled(self, user_id: int):
+        self.user_repository.increment_examples_verified_incorrect_fooled(user_id)

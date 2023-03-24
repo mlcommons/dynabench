@@ -1,4 +1,4 @@
-import ModulesRegistry from "new_front/utils/interface_options.json";
+import ModulesRegistry from "new_front/utils/creation_interface_options.json";
 import React, {
   FC,
   ReactElement,
@@ -8,8 +8,8 @@ import React, {
   LazyExoticComponent,
   ComponentType,
 } from "react";
-import { AnnotationFactoryType } from "new_front/types/createSamples/annotationFactory";
-import { GoalConfigType } from "new_front/types/createSamples/annotationGoal";
+import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
+import { GoalConfigType } from "new_front/types/createSamples/createSamples/annotationGoal";
 import { BarLoader } from "react-spinners";
 
 const Import = (
@@ -25,17 +25,18 @@ const AnnotationGoalStrategy: FC<Props & AnnotationFactoryType> = ({
   config,
   task,
   onInputChange,
+  hidden,
 }) => {
   const [goalRender, setGoalRender] =
     useState<ReactElement<GoalConfigType & AnnotationFactoryType>>();
 
   useEffect(() => {
-    const getView = async () => {
-      const View = await Import(ModulesRegistry.goal[config.type]);
-      setGoalRender(<View {...{ onInputChange, task, ...config }} />);
+    const getView = () => {
+      const View = Import(ModulesRegistry.goal[config.type]);
+      setGoalRender(<View {...{ onInputChange, task, hidden, ...config }} />);
     };
     getView();
-  }, []);
+  }, [hidden]);
 
   return (
     <Suspense fallback={<BarLoader color="#ccebd4" />}>{goalRender}</Suspense>

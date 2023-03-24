@@ -1,0 +1,10 @@
+{
+    "context": {
+        "text": "Text",
+        "image-with-text": "ImageWithText"
+    },
+    "user_input": {
+        "multioptions": "Multioptions",
+        "radio-button-options": "RadioButtonOptions"
+    }
+}

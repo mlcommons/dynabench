@@ -12,10 +12,12 @@
         "modify-original-text": "ModifyOriginalText",
         "select-multiple-images-generative": "SelectBetweenImagesGenerative"
     },
-    "input": {
+    "user_input": {
+        "input-with-instructions": "InputWithInstructions",
         "text": "Text",
         "audio": "Audio",
         "multioptions": "Multioptions",
-        "radio-button-options": "RadioButtonOptions"
+        "radio-button-options": "RadioButtonOptions",
+        "select-multiple-images": "SelectMultipleImages"
     }
 }

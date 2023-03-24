@@ -12,6 +12,19 @@ export const isLogin = async () => {
   return true;
 };
 
+export const sendUserToLogin = (login: boolean, history: any, url: string) => {
+  if (!login) {
+    history.push(
+      "/login?msg=" +
+        encodeURIComponent(
+          "Please sign up or log in so that you can upload a model"
+        ) +
+        "&src=" +
+        encodeURIComponent(url)
+    );
+  }
+};
+
 type DecodedToken = {
   exp: number;
 };

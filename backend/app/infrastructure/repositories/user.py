@@ -56,3 +56,33 @@ class UserRepository(AbstractRepository):
             .filter(self.model.id == user_id)
             .first()
         )
+
+    def increment_examples_verified(self, user_id: int):
+        self.session.query(self.model).filter(self.model.id == user_id).update(
+            {self.model.examples_verified: self.model.examples_verified + 1}
+        )
+        self.session.commit()
+
+    def increment_examples_verified_correct(self, user_id: int):
+        self.session.query(self.model).filter(self.model.id == user_id).update(
+            {
+                self.model.examples_verified_correct: self.model.examples_verified_correct
+                + 1
+            }
+        )
+        self.session.commit()
+
+    def increment_examples_verified_correct_fooled(self, user_id: int):
+        self.session.query(self.model).filter(self.model.id == user_id).update(
+            {self.model.total_verified_fooled: self.model.total_verified_fooled + 1}
+        )
+        self.session.commit()
+
+    def increment_examples_verified_incorrect_fooled(self, user_id: int):
+        self.session.query(self.model).filter(self.model.id == user_id).update(
+            {
+                self.model.total_verified_not_correct_fooled: self.model.total_verified_not_correct_fooled
+                + 1
+            }
+        )
+        self.session.commit()

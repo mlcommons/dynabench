@@ -69,8 +69,11 @@ class TaskService:
             scoring_dataset["default_weight"] = self.get_dataset_weight()
         return scoring_datasets
 
+    def get_task_info_by_task_id(self, task_id: int):
+        return self.task_repository.get_task_info_by_task_id(task_id)
+
     def get_order_metrics_by_task_id(self, task_id: int):
-        task_info = self.task_repository.get_task_info_by_task_id(task_id).__dict__
+        task_info = self.get_task_info_by_task_id(task_id).__dict__
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
         perf_metric_type = task_configuration.get("perf_metric", [])
         delta_perf_metrics_type = [
@@ -119,7 +122,7 @@ class TaskService:
         return self.task_repository.get_task_id_by_task_code(task_code).id
 
     def get_perf_metric_field_name_by_task_id(self, task_id: int):
-        task_info = self.task_repository.get_task_info_by_task_id(task_id).__dict__
+        task_info = self.get_task_info_by_task_id(task_id).__dict__
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
         return task_configuration["perf_metric"]["type"]
 

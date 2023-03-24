@@ -3,15 +3,19 @@ import React, { FC, useState } from "react";
 type SelectImageProps = {
   image: string;
   index: number;
-  setSelectImage: (image: string) => void;
+  handleSelectImage: (image: string) => void;
 };
 
 const SelectImage: FC<SelectImageProps> = ({
   image,
   index,
-  setSelectImage,
+  handleSelectImage,
 }) => {
   const [expandImage, setExpandImage] = useState<boolean>(false);
+
+  const handleOnClicked = (image: string) => {
+    handleSelectImage(image);
+  };
 
   return (
     <div key={index}>
@@ -22,7 +26,7 @@ const SelectImage: FC<SelectImageProps> = ({
         onClick={() => {
           setExpandImage(!expandImage);
         }}
-        className={expandImage ? "scale-[2.7]" : "scale-[1]"}
+        className={expandImage ? "relative scale-[2.7] z-50" : "scale-[1]"}
         alt="src"
       ></img>
       <input
@@ -31,7 +35,7 @@ const SelectImage: FC<SelectImageProps> = ({
         value=""
         className="items-center"
         onClick={() => {
-          setSelectImage(image);
+          handleOnClicked(image);
         }}
       />
     </div>
