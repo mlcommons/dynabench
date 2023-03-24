@@ -91,16 +91,18 @@ class Evaluator:
         calculate alternative metrics from the yaml one.
         """
         delta_metrics = {}
+
         perturb_prefixes = [metric["type"] for metric in self.config["delta_metrics"]]
+
         for prefix in perturb_prefixes:
             if prefix == "robustness":
                 delta_metric = self._compute_delta_metrics(
-                    grouped_predictions, grouped_robusts, prefix
+                    grouped_robusts, grouped_predictions, prefix
                 )
                 delta_metrics["robustness"] = delta_metric.get("robustness")
             else:
                 delta_metric = self._compute_delta_metrics(
-                    grouped_predictions, grouped_fairs, prefix
+                    grouped_fairs, grouped_predictions, prefix
                 )
                 delta_metrics["fairness"] = delta_metric.get("fairness")
         return delta_metrics

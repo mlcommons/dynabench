@@ -65,9 +65,8 @@ class Login:
         user = self.users_repository.get_by_email(email)
         if user:
             user_with_email_already_exists(email)
-        return self.users_repository.create_user(
-            email, self.get_hashed_password(password), username
-        )
+        password = self.get_hashed_password(password)
+        return self.users_repository.create_user(email, password, username)
 
     def login(self, email: str, password: str) -> dict:
         user = self.users_repository.get_by_email(email)
