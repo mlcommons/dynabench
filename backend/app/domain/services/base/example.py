@@ -2,7 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import ast
+import json
 
 import yaml
 from pydantic import Json
@@ -99,12 +99,14 @@ class ExampleService:
         )
         example_info = example_to_validate[0].__dict__
         context_info = example_to_validate[1].__dict__
+        metadata_json = json.loads(example_info["metadata_json"])
+        input_json = json.loads(example_info["input_json"])
+        context_info = json.loads(context_info["context_json"])
         example_necessary_info["context_info"] = {
-            **ast.literal_eval(example_info["input_json"]),
-            **ast.literal_eval(example_info["metadata_json"]),
-            **ast.literal_eval(context_info["context_json"]),
+            **input_json,
+            **context_info,
+            **metadata_json,
         }
-
         return example_necessary_info
 
     def increment_counter_total_verified(
