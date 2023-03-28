@@ -71,6 +71,7 @@ class ExampleService:
             metadata,
             tag,
         )
+        self.user_service.increment_examples_created(user_id)
         self.round_service.increment_counter_examples_collected(round_id, task_id)
         self.context_service.increment_counter_total_samples_and_update_date(context_id)
         self.task_service.update_last_activity_date(task_id)

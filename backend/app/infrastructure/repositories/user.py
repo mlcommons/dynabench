@@ -86,3 +86,9 @@ class UserRepository(AbstractRepository):
             }
         )
         self.session.commit()
+
+    def increment_examples_created(self, user_id: int):
+        self.session.query(self.model).filter(self.model.id == user_id).update(
+            {self.model.examples_submitted: self.model.examples_submitted + 1}
+        )
+        self.session.commit()

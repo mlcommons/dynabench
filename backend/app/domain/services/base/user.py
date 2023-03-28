@@ -24,5 +24,8 @@ class UserService:
     def increment_examples_verified_incorrect_fooled(self, user_id: int):
         self.user_repository.increment_examples_verified_incorrect_fooled(user_id)
 
+    def increment_examples_created(self, user_id: int):
+        self.user_repository.increment_examples_created(user_id)
+
     def get_user_name_by_id(self, user_id: int):
         return self.user_repository.get_user_name_by_id(user_id)
