@@ -125,11 +125,12 @@ class ExampleService:
         validate_non_fooling: bool,
     ):
         self.validation_service.create_validation(
-            user_id, label, mode, example_id, metadata_json
+            example_id, user_id, label, mode, metadata_json
         )
         self.task_service.update_last_activity_date(task_id)
         self.example_repository.increment_counter_total_verified(example_id)
         self.user_service.increment_examples_verified(user_id)
+        self.example_repository.mark_as_verified(example_id)
         if label == "correct":
             self.example_repository.increment_counter_total_correct(example_id)
             self.user_service.increment_examples_verified_correct(user_id)
