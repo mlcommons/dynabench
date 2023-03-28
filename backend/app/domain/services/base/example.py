@@ -92,12 +92,17 @@ class ExampleService:
         user_id: int,
         num_matching_validations: int,
         validate_non_fooling: bool,
+        task_id: int,
     ) -> dict:
         example_necessary_info = {}
         example_to_validate = self.example_repository.get_example_to_validate(
             real_round_id, user_id, num_matching_validations, validate_non_fooling
         )
+
         example_info = example_to_validate[0].__dict__
+        example_necessary_info["example_id"] = example_info["id"]
+        example_necessary_info["user_id"] = user_id
+        example_necessary_info["task_id"] = task_id
         context_info = example_to_validate[1].__dict__
         metadata_json = json.loads(example_info["metadata_json"])
         input_json = json.loads(example_info["input_json"])
@@ -109,7 +114,7 @@ class ExampleService:
         }
         return example_necessary_info
 
-    def increment_counter_total_verified(
+    def validate_example(
         self,
         example_id: int,
         user_id: int,

@@ -10,3 +10,14 @@ class GetExampleRequest(BaseModel):
     user_id: int
     num_matching_validations: int
     validate_non_fooling: bool
+    task_id: int
+
+
+class ValidateExampleRequest(BaseModel):
+    example_id: int
+    user_id: int
+    label: int
+    mode: str = "user"
+    metadata_json: dict
+    task_id: int
+    validate_non_fooling: bool

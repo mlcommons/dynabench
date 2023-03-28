@@ -315,6 +315,13 @@ class Category(Base):
     name = Column(String(100), nullable=False, unique=True)
 
 
+class ChallengesTypes(Base):
+    __tablename__ = "challenges_types"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(260), nullable=False, unique=True)
+
+
 class TaskCategories(Base):
     __tablename__ = "task_categories"
 

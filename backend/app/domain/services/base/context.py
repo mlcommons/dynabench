@@ -11,16 +11,16 @@ import requests
 import yaml
 from fastapi import HTTPException
 
+from app.domain.services.base.task import TaskService
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
-from app.infrastructure.repositories.task import TaskRepository
 
 
 class ContextService:
     def __init__(self):
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
-        self.task_repository = TaskRepository()
+        self.task_service = TaskService()
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
         self.context_repository.increment_counter_total_samples_and_update_date(
@@ -49,7 +49,7 @@ class ContextService:
         Returns:
             list: A list of context objects, each of which has different attributes.
         """
-        task_config = self.task_repository.get_task_info_by_task_id(task_id)
+        task_config = self.task_service.get_task_info_by_task_id(task_id)
         try:
             self.get_context_configuration(task_id)
         except AttributeError:
@@ -80,7 +80,7 @@ class ContextService:
         }
 
     def get_context_configuration(self, task_id) -> dict:
-        task_config = self.task_repository.get_task_info_by_task_id(task_id)
+        task_config = self.task_service.get_task_info_by_task_id(task_id)
         config_yaml = yaml.safe_load(task_config.config_yaml)
         context_info = {
             "goal": config_yaml.get("goal"),
@@ -95,7 +95,7 @@ class ContextService:
 
     def get_nibbler_contexts(self, prompt: str, endpoint: str) -> dict:
         print(prompt)
-        context_config = self.task_repository.get_task_info_by_task_id(45)
+        context_config = self.task_service.get_task_info_by_task_id(45)
         res = requests.post(
             context_config.lambda_model,
             json={
