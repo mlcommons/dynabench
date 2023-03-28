@@ -16,7 +16,7 @@ class GetExampleRequest(BaseModel):
 class ValidateExampleRequest(BaseModel):
     example_id: int
     user_id: int
-    label: int
+    label: str
     mode: str = "user"
     metadata_json: dict
     task_id: int
