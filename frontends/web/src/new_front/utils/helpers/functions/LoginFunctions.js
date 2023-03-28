@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import decode from "jwt-decode";
 
 export const isLogin = async () => {
@@ -12,7 +18,7 @@ export const isLogin = async () => {
   return true;
 };
 
-export const sendUserToLogin = (login: boolean, history: any, url: string) => {
+export const sendUserToLogin = (login, history, url) => {
   if (!login) {
     history.push(
       "/login?msg=" +
@@ -25,12 +31,8 @@ export const sendUserToLogin = (login: boolean, history: any, url: string) => {
   }
 };
 
-type DecodedToken = {
-  exp: number;
-};
-
-const isTokenExpired = (token: string) => {
-  const decoded = decode<DecodedToken>(token);
+const isTokenExpired = (token) => {
+  const decoded = decode(token);
   const currentTime = Date.now() / 1000;
   if (decoded.exp < currentTime) {
     return true;
