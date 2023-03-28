@@ -116,6 +116,9 @@ class TaskService:
         )
         task = task_and_round_info["Task"].__dict__
         task["round"] = task_and_round_info["Round"].__dict__
+        task["challenge_type_name"] = task_and_round_info["ChallengesTypes"].__dict__[
+            "name"
+        ]
         return task
 
     def get_task_id_by_task_code(self, task_code: str):
