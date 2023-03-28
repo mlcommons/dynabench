@@ -25,7 +25,7 @@ class TaskService:
         self.model_repository = ModelRepository()
         self.score_services = ScoreService()
         self.task_categories_repository = TaskCategoriesRepository()
-        self.user_repository = UserRepository
+        self.user_repository = UserRepository()
 
     def update_last_activity_date(self, task_id: int):
         self.task_repository.update_last_activity_date(task_id)

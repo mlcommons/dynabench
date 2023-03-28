@@ -104,3 +104,10 @@ class ModelRepository(AbstractRepository):
 
     def get_user_id_by_model_id(self, id: int) -> int:
         return self.session.query(self.model.uid).filter(self.model.id == id).first()
+
+    def get_amount_of_models_per_task(self, task_id: int) -> int:
+        return (
+            self.session.query(self.model)
+            .filter(self.model.tid == task_id, self.model.is_published == 1)
+            .count()
+        )

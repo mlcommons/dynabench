@@ -317,3 +317,12 @@ class ModelService:
             f"./app/resources/predictions/{model_id}-{dataset_name}.jsonl.out",
         )
         return predictions
+
+    def get_amount_of_models_per_task(self, task_id: int):
+        return self.model_repository.get_amount_of_models_per_task(task_id)
+
+    def get_model_name_by_id(self, model_id: int):
+        return self.model_repository.get_model_name_by_id(model_id)
+
+    def get_user_id_by_model_id(self, model_id: int):
+        return self.model_repository.get_user_id_by_model_id(model_id)

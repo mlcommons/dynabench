@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.endpoints import auth
-from app.api.endpoints.base import context, example, model, task
+from app.api.endpoints.base import context, example, model, score, task
 from app.api.endpoints.builder_and_evaluation import evaluation
 
 
@@ -44,7 +44,7 @@ app.include_router(model.router, prefix="/model", tags=["model"])
 app.include_router(task.router, prefix="/task", tags=["task"])
 app.include_router(context.router, prefix="/context", tags=["context"])
 app.include_router(example.router, prefix="/example", tags=["example"])
-
+app.include_router(score.router, prefix="/score", tags=["score"])
 app.include_router(
     evaluation.router, prefix="/builder_evaluation/evaluation", tags=["evaluation"]
 )

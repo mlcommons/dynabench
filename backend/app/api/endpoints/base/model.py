@@ -4,9 +4,6 @@
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.responses import FileResponse
 
-from app.domain.helpers.task.model_evaluation_metrics.model_evaluation_metric import (
-    ModelEvaluationStrategy,
-)
 from app.domain.schemas.base.model import (
     BatchCreateExampleRequest,
     ModelInTheLoopRequest,
@@ -106,3 +103,8 @@ def get_model_prediction_per_dataset(model: ModelPredictionPerDatasetRequest):
     return ModelService().get_model_prediction_per_dataset(
         model.user_id, model.model_id, model.dataset_id
     )
+
+
+@router.get("/get_amount_of_models_per_task")
+def get_amount_of_models_per_task(task_id: int):
+    return ModelService().get_amount_of_models_per_task(task_id)
