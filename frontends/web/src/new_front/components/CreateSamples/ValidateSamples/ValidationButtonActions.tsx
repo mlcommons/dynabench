@@ -1,9 +1,35 @@
-import React from "react";
+import React, { FC } from "react";
 import { Button } from "react-bootstrap";
+import useFetch from "use-http";
 
-const ValidationButtonActions = () => {
+type ValidationButtonActionsProps = {
+  exampleId: number;
+  userId: number;
+  label: string;
+  metadataExample: object;
+  taskId: number;
+  validateNonFooling: boolean;
+};
+
+const ValidationButtonActions: FC<ValidationButtonActionsProps> = ({
+  exampleId,
+  userId,
+  label,
+  metadataExample,
+  taskId,
+  validateNonFooling,
+}) => {
+  const { post, loading } = useFetch();
+
   const onSubmission = async () => {
-    console.log("submit");
+    await post("/example/validate_example", {
+      example_id: exampleId,
+      user_id: userId,
+      label: label,
+      metadata_json: metadataExample,
+      task_id: taskId,
+      validate_non_fooling: validateNonFooling,
+    });
   };
 
   return (

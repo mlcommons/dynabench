@@ -19,12 +19,19 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
     <>
       <div>
         {instructions && (
-          <h3
-            className="my-2 font-semibold text-letter-color pointer"
+          <div
+            className="flex items-center h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
             onClick={() => setOpen(!open)}
           >
-            {instructions} ↓
-          </h3>
+            <h3 className="mb-1 text-base font-semibold capitalize text-letter-color">
+              {open ? (
+                <i className="pl-2 pr-3 fas fa-minus" />
+              ) : (
+                <i className="pl-2 pr-3 fas fa-plus" />
+              )}
+              {instructions}
+            </h3>
+          </div>
         )}
         <Collapse in={open}>
           <div className="grid grid-cols-3">

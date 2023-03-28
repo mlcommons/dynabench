@@ -8,7 +8,7 @@ const Text: FC<ValidationFactoryType & ValidationContext> = ({
 }) => {
   return (
     <div className="py-1">
-      <div className="text-base text-third-color capitalize font-semibold	">
+      <div className="text-base font-semibold capitalize text-third-color ">
         {label!.replace("_", " ")}
       </div>
       <div className="text-base text-gray-500">{info}</div>

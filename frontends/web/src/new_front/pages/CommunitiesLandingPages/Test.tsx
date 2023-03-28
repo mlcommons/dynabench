@@ -18,10 +18,10 @@ const Test: FC = () => {
         <div className="flex flex-wrap min-w-full">
           <div>
             <ul
-              className="w-full flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row"
+              className="flex flex-row flex-wrap w-full pt-3 pb-4 mb-0 list-none"
               role="tablist"
             >
-              <li className="-mb-px mr-2 last:mr-0 flex-auto text-center">
+              <li className="flex-auto mr-2 -mb-px text-center last:mr-0">
                 <a
                   className="relative block p-4"
                   onClick={(e) => {
@@ -41,15 +41,15 @@ const Test: FC = () => {
                   <div className="flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 flex-shrink-0 text-gray-500"
+                      className="flex-shrink-0 w-5 h-5 text-gray-500"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
                       <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
                         d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
                       />
                     </svg>
@@ -59,7 +59,7 @@ const Test: FC = () => {
                   </div>
                 </a>
               </li>
-              <li className="-mb-px mr-2 last:mr-0 flex-auto text-center">
+              <li className="flex-auto mr-2 -mb-px text-center last:mr-0">
                 <a
                   className="relative block p-4"
                   onClick={(e) => {
@@ -79,15 +79,15 @@ const Test: FC = () => {
                   <div className="flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 flex-shrink-0 text-gray-500"
+                      className="flex-shrink-0 w-5 h-5 text-gray-500"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
                       <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
                         d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
                       />
                     </svg>
@@ -97,7 +97,7 @@ const Test: FC = () => {
                   </div>
                 </a>
               </li>
-              <li className="-mb-px mr-2 last:mr-0 flex-auto text-center">
+              <li className="flex-auto mr-2 -mb-px text-center last:mr-0">
                 <a
                   className="relative block p-4"
                   onClick={(e) => {
@@ -117,15 +117,15 @@ const Test: FC = () => {
                   <div className="flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 flex-shrink-0 text-gray-500"
+                      className="flex-shrink-0 w-5 h-5 text-gray-500"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
                       <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
                         d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
                       />
                     </svg>
@@ -137,7 +137,7 @@ const Test: FC = () => {
               </li>
             </ul>
             <div>
-              <div className="px-4 flex-auto">
+              <div className="flex-auto px-4">
                 <div className="tab-content tab-space">
                   <div
                     className={openTab === 1 ? "block" : "hidden"}
@@ -145,7 +145,7 @@ const Test: FC = () => {
                   >
                     <div>
                       <div>
-                        <p className="text-xl font-normal text-letter-color py-4">
+                        <p className="py-4 text-xl font-normal text-letter-color">
                           DADC invites you to find weaknesses in existing state
                           of the art AI models so that we can make them even
                           better.
