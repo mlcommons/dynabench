@@ -105,6 +105,6 @@ def get_model_prediction_per_dataset(model: ModelPredictionPerDatasetRequest):
     )
 
 
-@router.get("/get_amount_of_models_per_task")
+@router.get("/get_amount_of_models_per_task/{task_id}", response_model=int)
 def get_amount_of_models_per_task(task_id: int):
     return ModelService().get_amount_of_models_per_task(task_id)
