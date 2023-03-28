@@ -41,7 +41,6 @@ class BuilderService:
         self.lamda_ = self.session.client("lambda")
         self.api_gateway = self.session.client("apigateway")
         self.ecr = self.session.client("ecr")
-        self.docker_client = docker.from_env()
 
     def download_zip(self, bucket_name: str, model: str):
         zip_name = model.split("/")[-1]
@@ -103,11 +102,11 @@ class BuilderService:
         return response["repository"]["repositoryUri"]
 
     def clean_docker_images(self):
-        self.docker_client.containers.prune()
-        self.docker_client.images.prune()
-        images = self.docker_client.images.list()
+        docker.from_env().containers.prune()
+        docker.from_env().images.prune()
+        images = docker.from_env().images.list()
         for image in images:
-            self.docker_client.images.remove(image.id, force=True)
+            docker.from_env().images.remove(image.id, force=True)
 
     def push_image_to_ECR(
         self,
@@ -117,7 +116,7 @@ class BuilderService:
         docker_name: str = "Dockerfile",
     ) -> str:
         ecr_config = self.extract_ecr_configuration()
-        self.docker_client.login(
+        docker.from_env().login(
             username=ecr_config["ecr_username"],
             password=ecr_config["ecr_password"],
             registry=ecr_config["ecr_url"],
@@ -126,11 +125,11 @@ class BuilderService:
         path = f"{folder_name}"
         absolute_path = os.getcwd()
         path = absolute_path + path.strip(".")
-        image, _ = self.docker_client.images.build(
+        image, _ = docker.from_env().images.build(
             path=path, tag=tag, dockerfile=f"{path}/{docker_name}"
         )
         image.tag(repository=repository_name, tag=tag)
-        self.docker_client.images.push(
+        docker.from_env().images.push(
             repository=repository_name,
             tag=tag,
             auth_config={
