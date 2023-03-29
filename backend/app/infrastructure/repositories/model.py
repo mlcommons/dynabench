@@ -108,6 +108,10 @@ class ModelRepository(AbstractRepository):
     def get_amount_of_models_per_task(self, task_id: int) -> int:
         return (
             self.session.query(self.model)
-            .filter(self.model.tid == task_id, self.model.is_published == 1)
+            .filter(
+                self.model.tid == task_id,
+                self.model.is_published == 1,
+                self.model.deployment_status == "deployed",
+            )
             .count()
         )
