@@ -143,21 +143,33 @@ class SubmitInterface extends React.Component {
           }
         );
     } else {
-      this.context.api.uploadTrainFiles(
-        this.state.task.id,
-        values.modelName,
-        files
-      );
-      values.modelName = "";
-      for (const [fname, _] of Object.entries(files)) {
-        values[fname] = null;
+      if (!this.context.api.loggedIn()) {
+        this.props.history.push(
+          "/login?&src=" +
+            encodeURIComponent(
+              "/tasks/" +
+                this.props.match.params.taskId +
+                "/submit_" +
+                this.state.submission_type
+            )
+        );
+      } else {
+        this.context.api.uploadTrainFiles(
+          this.state.task.id,
+          values.modelName,
+          files
+        );
+        values.modelName = "";
+        for (const [fname, _] of Object.entries(files)) {
+          values[fname] = null;
+        }
+        resetForm({ values: values });
+        setSubmitting(false);
+        setFieldError(
+          "accept",
+          "Thank you. You will soon receive an email about the status of your submission."
+        );
       }
-      resetForm({ values: values });
-      setSubmitting(false);
-      setFieldError(
-        "accept",
-        "Thank you. You will soon recieve an email about the status of your submission."
-      );
     }
   };
 

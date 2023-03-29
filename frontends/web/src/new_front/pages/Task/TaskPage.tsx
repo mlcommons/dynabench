@@ -149,7 +149,7 @@ const TaskPage = () => {
                   <div className="flex-auto px-4">
                     <div className="tab-content tab-space">
                       <div className={openTab === 1 ? "block" : "hidden"}>
-                        {/* <Leaderboard taskCode={task.task_code} /> */}
+                        <Leaderboard taskCode={task.task_code} />
                       </div>
                       <div className={openTab === 2 ? "block" : "hidden"}>
                         <OverviewTask
