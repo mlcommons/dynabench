@@ -306,11 +306,23 @@ def do_upload_via_train_files(credentials, tid, model_name):
     for name, upload in train_files.items():
         if upload.content_type == "text/plain":
             with tempfile.NamedTemporaryFile() as tf:
-                upload.save(tf, overwrite=True)
-                tf.seek(0)
-                string = (tf.read()).decode("utf-8")
-                sub = [int(s) for s in string.split(",")]
-                payload = {"submission": {str(name[-1]): sub}}
+                try:
+                    upload.save(tf, overwrite=True)
+                    tf.seek(0)
+                    string = (tf.read()).decode("utf-8")
+                    sub = [int(s) for s in string.split(",")]
+                    payload = {"submission": {str(name[-1]): sub}}
+                except Exception as ex:
+                    logger.exception(ex)
+                    subject = f"Model {model_name} failed training as file is incorrectly formatted."
+                    Email().send(
+                        contact=user.email,
+                        cc_contact="dynabench-site@mlcommons.org",
+                        template_name="model_train_failed.txt",
+                        msg_dict={"name": model_name},
+                        subject=subject,
+                    )
+                    bottle.abort(400, "File is incorrectly formatted")
                 light_model_endpoint = task.lambda_model
                 r = requests.post(light_model_endpoint, json=payload)
                 if r.status_code == 200:
