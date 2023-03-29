@@ -13,13 +13,14 @@ import TabOption from "new_front/components/Buttons/TabOption";
 import TaskActionButtons from "new_front/components/Buttons/TaskActionButtons_new";
 import TaskHelpersButton from "new_front/components/Buttons/TaskHelpersButton";
 import { TaskInfoType } from "new_front/types/task/taskInfo";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import Leaderboard from "new_front/pages/Task/LeaderBoard";
 import OverviewTask from "./OverviewTask";
 import PrincipalTaskStats from "new_front/components/TaskPage/PrincipalTaskStats";
+import UserContext from "containers/UserContext";
 
 const TaskPage = () => {
   const [task, setTask] = useState<TaskInfoType>();
@@ -27,19 +28,29 @@ const TaskPage = () => {
   const [maxScore, setMaxScore] = useState<number>(0);
   const [adminOrOwner, setAdminOrOwner] = useState(false);
   const [openTab, setOpenTab] = React.useState(1);
-  const { get, loading } = useFetch();
+  const { get, post, loading, response } = useFetch();
   const { taskCode } = useParams<{ taskCode: string }>();
+  const userContext = useContext(UserContext);
+  const { user } = userContext;
 
   const getTask = async (taskCode: string) => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
-    const [taskData, maxScore, amountOfModels] = await Promise.all([
-      await get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
-      await get(`/score/get_maximun_principal_score_per_task/${taskId}`),
-      await get(`/model/get_amount_of_models_per_task/${taskId}`),
-    ]);
-    setTask(taskData);
-    setMaxScore(maxScore.perf);
-    setAmountOfModels(amountOfModels);
+    const [taskData, maxScore, amountOfModels, adminOrOwner] =
+      await Promise.all([
+        await get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
+        await get(`/score/get_maximun_principal_score_per_task/${taskId}`),
+        await get(`/model/get_amount_of_models_per_task/${taskId}`),
+        await post("/auth/is_admin_or_owner", {
+          task_id: taskId,
+          user_id: user.id,
+        }),
+      ]);
+    if (response.ok) {
+      setTask(taskData);
+      setMaxScore(maxScore.perf);
+      setAmountOfModels(amountOfModels);
+      setAdminOrOwner(adminOrOwner);
+    }
   };
 
   useEffect(() => {

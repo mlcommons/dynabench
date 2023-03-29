@@ -175,7 +175,3 @@ class TaskService:
 
     def get_tasks_categories(self):
         return self.task_categories_repository.get_tasks_categories()
-
-    def is_admin_or_owner(self, user_id: int, task_id: int):
-        is_task_owner = self.task_repository.is_task_owner(user_id, task_id)
-        return is_task_owner or self.user_repository.get_is_admin(user_id)[0]

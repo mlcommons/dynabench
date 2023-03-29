@@ -14,7 +14,10 @@ from app.domain.helpers.exceptions import (
     user_does_not_exist,
     user_with_email_already_exists,
 )
-from app.infrastructure.repositories.user import UserRepository
+from app.domain.services.base.user import UserService
+from app.infrastructure.repositories.taskuserpermission import (
+    TaskUserPermissionRepository,
+)
 
 
 class Login:
@@ -25,7 +28,8 @@ class Login:
             "AUTH_REFRESH_TOKEN_EXPIRE_MINUTES"
         )
         self.AUTH_HASH_ALGORITHM = os.getenv("AUTH_HASH_ALGORITHM")
-        self.users_repository = UserRepository()
+        self.users_service = UserService()
+        self.task_user_permission_repository = TaskUserPermissionRepository()
 
     def get_hashed_password(self, password: str) -> str:
         return generate_password_hash(password)
@@ -62,14 +66,14 @@ class Login:
         )
 
     def create_user(self, email: str, password: str, username: str) -> dict:
-        user = self.users_repository.get_by_email(email)
+        user = self.users_service.get_by_email(email)
         if user:
             user_with_email_already_exists(email)
         password = self.get_hashed_password(password)
-        return self.users_repository.create_user(email, password, username)
+        return self.users_service.create_user(email, password, username)
 
     def login(self, email: str, password: str) -> dict:
-        user = self.users_repository.get_by_email(email)
+        user = self.users_service.get_by_email(email)
         if user is None:
             user_does_not_exist()
         hashed_pass = user["password"]
@@ -79,3 +83,8 @@ class Login:
             "access_token": self.create_access_token(user["email"]),
             "token_type": "bearer",
         }
+
+    def is_admin_or_owner(self, user_id: int, task_id: int):
+        return self.task_user_permission_repository.is_task_owner(
+            user_id, task_id
+        ) or self.users_service.get_is_admin(user_id)

@@ -9,6 +9,7 @@ from app.domain.auth.authentication import Login
 from app.domain.schemas.auth.auth import (
     CreateUserRequest,
     CreateUserResponse,
+    IsAdminOrOwnerRequest,
     LoginResponse,
 )
 
@@ -24,3 +25,8 @@ async def login(model: OAuth2PasswordRequestForm = Depends()):
 @router.post("/create_user", response_model=CreateUserResponse)
 async def create_user(model: CreateUserRequest):
     return Login().create_user(model.email, model.password, model.username)
+
+
+@router.post("/is_admin_or_owner", response_model=bool)
+async def is_admin_or_owner(model: IsAdminOrOwnerRequest):
+    return Login().is_admin_or_owner(model.user_id, model.task_id)

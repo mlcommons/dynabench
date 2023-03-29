@@ -29,3 +29,12 @@ class UserService:
 
     def get_user_name_by_id(self, user_id: int):
         return self.user_repository.get_user_name_by_id(user_id)
+
+    def get_by_email(self, email: str):
+        return self.user_repository.get_by_email(email)
+
+    def create_user(self, email: str, password: str, username: str):
+        return self.user_repository.create_user(email, password, username)
+
+    def get_is_admin(self, user_id: int):
+        return self.user_repository.get_is_admin(user_id)

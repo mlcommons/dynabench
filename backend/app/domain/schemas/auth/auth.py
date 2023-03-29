@@ -30,3 +30,8 @@ class LoginResponse(BaseModel):
 class TokenPayload(BaseModel):
     access_token: str
     token_type: str
+
+
+class IsAdminOrOwnerRequest(BaseModel):
+    user_id: int
+    task_id: int
