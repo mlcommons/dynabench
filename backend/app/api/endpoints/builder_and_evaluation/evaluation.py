@@ -82,5 +82,5 @@ def update_light_model(params):
 @router.post("/post_dataperf_response")
 def post_dataperf_response(response: dict):
     evaluation = EvaluationService()
-    score = evaluation.evaluate_dataperf_decentralized(response.response)
+    score = evaluation.evaluate_dataperf_decentralized(response.get("response"))
     return score
