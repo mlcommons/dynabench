@@ -40,10 +40,10 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
       setContextRender(
         <View
           {...{
-            onInputChange,
-            setIsGenerativeContext,
             task,
             context,
+            onInputChange,
+            setIsGenerativeContext,
             ...config,
           }}
         />

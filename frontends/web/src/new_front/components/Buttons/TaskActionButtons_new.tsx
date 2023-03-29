@@ -13,9 +13,9 @@ const yaml = require("js-yaml");
 
 type TaskActionButtonsProps = {
   configYaml: string;
-  dynamicAdversarialDataCollection: number;
-  submitable: number;
-  hasPredictionsUpload: number;
+  dynamicAdversarialDataCollection: boolean;
+  submitable: boolean;
+  hasPredictionsUpload: boolean;
   taskCode: string;
 };
 
@@ -69,7 +69,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
           </Button>
         </Nav.Item>
       )}
-      {hasPredictionsUpload !== 0 && (
+      {hasPredictionsUpload && (
         <Nav.Item className="task-action-btn">
           <Button
             as={Link}

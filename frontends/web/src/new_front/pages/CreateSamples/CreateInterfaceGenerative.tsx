@@ -83,6 +83,19 @@ const CreateInterface = () => {
     }
   };
 
+  const createPartialSample = async () => {
+    const partialSampleId = await post(`/sample/create_partial_sample`, {
+      example_info: modelInputs,
+      context_id: taskContextInfo?.context_id,
+      user_id: user.id,
+      round_id: taskInfo?.round.id,
+      task_id: taskId,
+    });
+    if (response.ok) {
+      setPartialSampleId(partialSampleId);
+    }
+  };
+
   useEffect(() => {
     userIsLoggedIn();
     loadTaskContextData();

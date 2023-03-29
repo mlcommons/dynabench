@@ -43,8 +43,8 @@ import SubmitInterface from "./SubmitInterface.js";
 import SubmitModel from "./SubmitModel";
 import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
-import TaskPage from "./TaskPage";
-// import TaskPage from "new_front/pages/Task/TaskPage";
+// import TaskPage from "./TaskPage";
+import TaskPage from "new_front/pages/Task/TaskPage";
 import Test from "new_front/pages/CommunitiesLandingPages/Test";
 import SearchBar from "../new_front/components/Utils/SearchBar";
 import FilterTasks from "../new_front/pages/Task/FilterTasks";
@@ -383,7 +383,7 @@ class App extends React.Component {
                       />
                       <Route
                         path="/tasks/:taskCode/validate"
-                        component={ValidateInterface}
+                        component={ValidateSamples}
                       />
                       <Route
                         path="/tasks/:taskCode/uploadModel"

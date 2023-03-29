@@ -43,6 +43,7 @@ export type TaskInfoType = {
   validate_non_fooling: number;
   image_url: string;
   documentation_url: string;
+  challenge_type_name: string;
 };
 
 type roundInfoType = {

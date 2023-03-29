@@ -61,7 +61,7 @@ class ExampleService:
         round_id: int,
         task_id: int,
     ) -> dict:
-        self.create_example(
+        new_sample_info = self.create_example(
             context_id,
             user_id,
             model_wrong,
@@ -85,7 +85,7 @@ class ExampleService:
                 real_round_id, user_id
             )
             self.user_service.increment_examples_fooled(user_id)
-        return {"message": "Example created successfully"}
+        return new_sample_info["id"]
 
     def get_example_to_validate(
         self,
@@ -154,3 +154,49 @@ class ExampleService:
             "validation_context": config_yaml.get("validation_context"),
         }
         return context_info
+
+    def partially_creation_example_generative(
+        self,
+        example_info: dict,
+        context_id: int,
+        user_id: int,
+        tag: str,
+        round_id: int,
+        task_id: int,
+    ) -> str:
+        return self.create_example_and_increment_counters(
+            context_id,
+            user_id,
+            False,
+            None,
+            json.dumps(example_info),
+            json.dumps({}),
+            json.dumps({}),
+            tag,
+            round_id,
+            task_id,
+        )
+
+    def update_creation_example_by_creation_id(
+        self,
+        model_input: dict,
+        context_id: int,
+        user_id: int,
+        tag: str,
+        round_id: int,
+        task_id: int,
+        sandbox_mode: bool,
+    ) -> str:
+        if not sandbox_mode:
+            return self.example_service.create_example_and_increment_counters(
+                context_id,
+                user_id,
+                False,
+                "",
+                json.dumps(model_input),
+                "",
+                {},
+                tag,
+                round_id,
+                task_id,
+            )

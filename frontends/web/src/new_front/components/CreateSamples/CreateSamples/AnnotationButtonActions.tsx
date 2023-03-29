@@ -1,8 +1,9 @@
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import UserContext from "containers/UserContext";
+import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import { ModelEvaluationMetric } from "new_front/types/createSamples/createSamples/configurationTask";
 import { ModelOutputType } from "new_front/types/createSamples/createSamples/modelOutput";
-import React, { FC, useContext, useState } from "react";
+import React, { FC, useState } from "react";
 import { Button } from "react-bootstrap";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
@@ -19,6 +20,7 @@ type Props = {
   modelPredictionLabel: string;
   modelEvaluationMetricInfo: ModelEvaluationMetric;
   isGenerativeContext: boolean;
+  userId: number;
   setModelOutput: (modelOutput: ModelOutputType) => void;
 };
 
@@ -34,11 +36,11 @@ const AnnotationButtonActions: FC<Props> = ({
   modelPredictionLabel,
   modelEvaluationMetricInfo,
   isGenerativeContext,
+  userId,
   setModelOutput,
 }) => {
-  const [sandboxMode, setSandboxMode] = useState<boolean>(true);
-  const userContext = useContext(UserContext);
-  const { user } = userContext;
+  const [sandboxMode, setSandboxMode] = useState<boolean>(false);
+
   const { post, loading } = useFetch();
 
   const onSubmission = async () => {
@@ -46,10 +48,11 @@ const AnnotationButtonActions: FC<Props> = ({
       ...modelInputs,
       input_by_user: inputByUser,
     };
+
     const finaModelInputs = {
       model_input: modelInputs,
       sandbox_mode: sandboxMode,
-      user_id: user.id,
+      user_id: userId,
       context_id: contextId,
       tag: tags,
       round_id: realRoundId,
@@ -58,6 +61,7 @@ const AnnotationButtonActions: FC<Props> = ({
       model_prediction_label: modelPredictionLabel,
       model_evaluation_metric_info: modelEvaluationMetricInfo,
     };
+
     const modelOutput = await post(
       `/model/single_model_prediction_submit`,
       finaModelInputs
@@ -69,19 +73,20 @@ const AnnotationButtonActions: FC<Props> = ({
     <>
       {!loading ? (
         <>
-          {!isGenerativeContext && (
+          {!isGenerativeContext ? (
             <>
               <div className="col-span-1 py-4">
                 <div className="grid grid-cols-6">
-                  <div className="col-span-3 px-3">
+                  <div className="col-span-3 px-3 text-white">
                     <BootstrapSwitchButton
                       checked={!sandboxMode}
                       onlabel="Live Mode"
+                      onstyle="dark"
                       offstyle="warning"
                       offlabel="Sandbox"
                       width={120}
                       onChange={(checked: boolean) => {
-                        setSandboxMode(checked);
+                        setSandboxMode(!checked);
                       }}
                     />
                   </div>
@@ -109,6 +114,14 @@ const AnnotationButtonActions: FC<Props> = ({
                   </div>
                 </div>
               </div>
+            </>
+          ) : (
+            <>
+              <GeneralButton
+                onClick={() => {}}
+                text="Generate Images"
+                className="border-0 font-weight-bold light-gray-bg task-action-btn mt-4"
+              />
             </>
           )}
         </>

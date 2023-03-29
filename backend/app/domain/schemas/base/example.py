@@ -21,3 +21,12 @@ class ValidateExampleRequest(BaseModel):
     metadata_json: dict
     task_id: int
     validate_non_fooling: bool
+
+
+class PartiallyCreationExampleGenerativeRequest(BaseModel):
+    example_info: dict
+    context_id: int
+    user_id: int
+    tag: str = "generative"
+    round_id: int
+    task_id: int
