@@ -33,5 +33,5 @@ class TokenPayload(BaseModel):
 
 
 class IsAdminOrOwnerRequest(BaseModel):
-    user_id: int
+    user_id: int = 0
     task_id: int
