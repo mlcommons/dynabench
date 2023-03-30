@@ -1,11 +1,12 @@
-import React, { FC, useEffect, useState } from "react";
-import { InputGroup, DropdownButton, Dropdown } from "react-bootstrap";
-import { GoalConfigType } from "new_front/types/createSamples/createSamples/annotationGoal";
 import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
+import { GoalConfigType } from "new_front/types/createSamples/createSamples/annotationGoal";
+import React, { FC, useEffect, useState } from "react";
+import { Dropdown, DropdownButton, InputGroup } from "react-bootstrap";
 
 const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
   onInputChange,
   options,
+  metadata,
   field_name_for_the_model,
 }) => {
   const [selectedOption, setSelectedOption] = useState<string>(options[0]);
@@ -14,9 +15,13 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
   );
 
   useEffect(() => {
-    onInputChange({
-      [field_name_for_the_model ?? "goal_input"]: selectedOption,
-    });
+    onInputChange(
+      {
+        [field_name_for_the_model ?? "goal_input"]: selectedOption,
+      },
+      metadata
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -32,9 +37,12 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
                 key={index}
                 onClick={() => {
                   setSelectedOption(option);
-                  onInputChange({
-                    [field_name_for_the_model ?? "goal_input"]: option,
-                  });
+                  onInputChange(
+                    {
+                      [field_name_for_the_model ?? "goal_input"]: option,
+                    },
+                    metadata
+                  );
                   setNoSelectedOptions(options.filter((o) => o !== option));
                 }}
                 name={index}

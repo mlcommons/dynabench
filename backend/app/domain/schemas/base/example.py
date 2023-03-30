@@ -30,3 +30,9 @@ class PartiallyCreationExampleGenerativeRequest(BaseModel):
     tag: str = "generative"
     round_id: int
     task_id: int
+
+
+class UpdateCreationExampleGenerativeRequest(BaseModel):
+    example_id: int
+    example_info: dict
+    metadata_json: dict

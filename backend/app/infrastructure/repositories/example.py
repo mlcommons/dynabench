@@ -87,3 +87,11 @@ class ExampleRepository(AbstractRepository):
         example = self.get_by_id(example_id)
         example["verified"] = 1
         self.session.commit()
+
+    def update_creation_generative_example_by_example_id(
+        self, example_id: int, model_input: dict, metadata: dict
+    ):
+        example = self.get_by_id(example_id)
+        example["input_json"] = model_input
+        example["metadata_json"] = metadata
+        self.session.commit()

@@ -1,6 +1,4 @@
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
-import UserContext from "containers/UserContext";
-import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import { ModelEvaluationMetric } from "new_front/types/createSamples/createSamples/configurationTask";
 import { ModelOutputType } from "new_front/types/createSamples/createSamples/modelOutput";
 import React, { FC, useState } from "react";
@@ -15,12 +13,14 @@ type Props = {
   realRoundId: number;
   currentContext: any;
   modelInputs: any;
+  metadataExample: any;
   taskID: number;
   inputByUser: string;
   modelPredictionLabel: string;
   modelEvaluationMetricInfo: ModelEvaluationMetric;
   isGenerativeContext: boolean;
   userId: number;
+  partialSampleId?: number;
   setModelOutput: (modelOutput: ModelOutputType) => void;
 };
 
@@ -31,12 +31,14 @@ const AnnotationButtonActions: FC<Props> = ({
   realRoundId,
   currentContext,
   modelInputs,
+  metadataExample,
   taskID,
   inputByUser,
   modelPredictionLabel,
   modelEvaluationMetricInfo,
   isGenerativeContext,
   userId,
+  partialSampleId,
   setModelOutput,
 }) => {
   const [sandboxMode, setSandboxMode] = useState<boolean>(false);
@@ -62,18 +64,30 @@ const AnnotationButtonActions: FC<Props> = ({
       model_evaluation_metric_info: modelEvaluationMetricInfo,
     };
 
-    const modelOutput = await post(
-      `/model/single_model_prediction_submit`,
-      finaModelInputs
-    );
-    setModelOutput(modelOutput);
+    if (partialSampleId) {
+      const modelOutput = await post(
+        `/model/single_model_prediction_submit`,
+        finaModelInputs
+      );
+      setModelOutput(modelOutput);
+    } else {
+      const modelOutput = await post(
+        `/example/update_creation_generative_example_by_example_id`,
+        {
+          example_id: partialSampleId,
+          model_input: modelInputs,
+          metadata: metadataExample,
+        }
+      );
+      setModelOutput(modelOutput);
+    }
   };
 
   return (
     <>
       {!loading ? (
         <>
-          {!isGenerativeContext ? (
+          {!isGenerativeContext && (
             <>
               <div className="col-span-1 py-4">
                 <div className="grid grid-cols-6">
@@ -114,14 +128,6 @@ const AnnotationButtonActions: FC<Props> = ({
                   </div>
                 </div>
               </div>
-            </>
-          ) : (
-            <>
-              <GeneralButton
-                onClick={() => {}}
-                text="Generate Images"
-                className="border-0 font-weight-bold light-gray-bg task-action-btn mt-4"
-              />
             </>
           )}
         </>

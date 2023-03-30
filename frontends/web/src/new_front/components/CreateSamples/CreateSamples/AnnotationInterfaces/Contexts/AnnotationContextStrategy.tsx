@@ -28,6 +28,7 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
   config,
   task,
   context,
+  createPartialSample,
   onInputChange,
   setIsGenerativeContext,
 }) => {
@@ -42,6 +43,7 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
           {...{
             task,
             context,
+            createPartialSample,
             onInputChange,
             setIsGenerativeContext,
             ...config,

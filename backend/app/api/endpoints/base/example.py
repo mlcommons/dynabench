@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from app.domain.schemas.base.example import (
     GetExampleRequest,
     PartiallyCreationExampleGenerativeRequest,
+    UpdateCreationExampleGenerativeRequest,
     ValidateExampleRequest,
 )
 from app.domain.services.base.example import ExampleService
@@ -44,11 +45,11 @@ def validate_example(model: ValidateExampleRequest):
     )
 
 
-@router.post("/partially_creation_example_generative", response_model={})
-def partially_creation_example_generative(
+@router.post("/partially_creation_generative_example", response_model={})
+def partially_creation_generative_example(
     model: PartiallyCreationExampleGenerativeRequest,
 ):
-    return ExampleService().partially_creation_example_generative(
+    return ExampleService().partially_creation_generative_example(
         model.example_info,
         model.context_id,
         model.user_id,
@@ -58,6 +59,10 @@ def partially_creation_example_generative(
     )
 
 
-# @router.post("/", response_model={})
-# def update_creation_example_by_creation_id(model: ):
-#     return ExampleService().update_creation_example_by_creation_id()
+@router.post("/update_creation_generative_example_by_example_id", response_model={})
+def update_creation_generative_example_by_example_id(
+    model: UpdateCreationExampleGenerativeRequest,
+):
+    return ExampleService().update_creation_generative_example_by_example_id(
+        model.example_id, model.example_info, model.metadata_json
+    )

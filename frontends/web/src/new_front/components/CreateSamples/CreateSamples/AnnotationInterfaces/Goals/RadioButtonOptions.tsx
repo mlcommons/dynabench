@@ -1,14 +1,14 @@
-import React, { FC, useEffect, useState } from "react";
-import { InputGroup, DropdownButton, Dropdown } from "react-bootstrap";
-import { GoalConfigType } from "new_front/types/createSamples/createSamples/annotationGoal";
-import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import RadioButton from "new_front/components/Lists/RadioButton";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
+import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
+import { GoalConfigType } from "new_front/types/createSamples/createSamples/annotationGoal";
+import React, { FC } from "react";
 
 const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
   options,
   text,
   field_name_for_the_model,
+  metadata,
   onInputChange,
 }) => {
   return (
@@ -22,6 +22,7 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
             options={options}
             instructions={text}
             field_name_for_the_model={field_name_for_the_model}
+            metadata={metadata}
             onInputChange={onInputChange}
           />
         </AnnotationInstruction>

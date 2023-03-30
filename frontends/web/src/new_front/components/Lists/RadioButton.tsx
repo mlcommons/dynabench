@@ -5,14 +5,16 @@ type RadioButtonProps = {
   options: string[];
   instructions: string;
   field_name_for_the_model?: string;
+  metadata?: boolean;
   InitialOpen?: boolean;
-  onInputChange?: (value: any) => void;
+  onInputChange?: (value: any, metadata: boolean) => void;
 };
 
 const RadioButton: FC<RadioButtonProps> = ({
   options,
   instructions,
   field_name_for_the_model,
+  metadata,
   InitialOpen = true,
   onInputChange,
 }) => {
@@ -20,9 +22,12 @@ const RadioButton: FC<RadioButtonProps> = ({
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (field_name_for_the_model && onInputChange) {
-      onInputChange({
-        [field_name_for_the_model]: event.target.value,
-      });
+      onInputChange(
+        {
+          [field_name_for_the_model]: event.target.value,
+        },
+        metadata || false
+      );
     }
   };
 

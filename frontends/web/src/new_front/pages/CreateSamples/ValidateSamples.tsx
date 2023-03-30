@@ -9,7 +9,7 @@ import useFetch from "use-http";
 import { useHistory, useParams } from "react-router-dom";
 import { ValidationConfigurationTask } from "new_front/types/createSamples/createSamples/configurationTask";
 import UserContext from "containers/UserContext";
-import { isLogin } from "new_front/utils/helpers/functions/LoginFunctions";
+import { checkUserIsLoggedIn } from "new_front/utils/helpers/functions/LoginFunctions";
 import { PacmanLoader } from "react-spinners";
 import RadioButton from "new_front/components/Lists/RadioButton";
 import { ExampleInfoType } from "new_front/types/createSamples/validateSamples/exampleInfo";
@@ -60,23 +60,19 @@ const ValidateSamples: FC = () => {
     }
   };
 
-  const userIsLoggedIn = async () => {
-    const login = await isLogin();
-    if (!login) {
-      history.push(
-        "/login?msg=" +
-          encodeURIComponent(
-            "Please sign up or log in so that you can upload a model"
-          ) +
-          "&src=" +
-          encodeURIComponent(`/tasks/${taskCode}/validate`)
-      );
+  const handleData = async () => {
+    const isLogin = await checkUserIsLoggedIn(
+      history,
+      `/tasks/${taskCode}/validate`
+    );
+    if (isLogin) {
+      loadTaskContextData();
     }
   };
 
   useEffect(() => {
-    userIsLoggedIn();
-    loadTaskContextData();
+    handleData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

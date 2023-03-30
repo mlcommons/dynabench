@@ -6,7 +6,12 @@
 
 import decode from "jwt-decode";
 
-export const isLogin = async () => {
+export const checkUserIsLoggedIn = async (history, url) => {
+  const login = await isLogin();
+  return sendUserToLogin(login, history, url);
+};
+
+const isLogin = async () => {
   const token = localStorage.getItem("id_token");
   if (!token) {
     return false;
@@ -18,7 +23,7 @@ export const isLogin = async () => {
   return true;
 };
 
-export const sendUserToLogin = (login, history, url) => {
+const sendUserToLogin = (login, history, url) => {
   if (!login) {
     history.push(
       "/login?msg=" +
@@ -28,12 +33,14 @@ export const sendUserToLogin = (login, history, url) => {
         "&src=" +
         encodeURIComponent(url)
     );
+  } else {
+    return true;
   }
 };
 
 const isTokenExpired = (token) => {
   const decoded = decode(token);
-  const currentTime = Date.now() / 1000;
+  const currentTime = Date.now() / 10000000;
   if (decoded.exp < currentTime) {
     return true;
   }

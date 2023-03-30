@@ -11,7 +11,12 @@ import useFetch from "use-http";
 
 const SelectBetweenImagesGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
-> = ({ field_names_for_the_model, onInputChange, setIsGenerativeContext }) => {
+> = ({
+  field_names_for_the_model,
+  createPartialSample,
+  onInputChange,
+  setIsGenerativeContext,
+}) => {
   const type = "nibbler";
   const artifacts = {
     endpoint: "https://www.google.com",
@@ -20,10 +25,20 @@ const SelectBetweenImagesGenerative: FC<
   const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<object>(artifacts);
   const [prompt, setPrompt] = useState<string>("");
-  const [exampleId, setExampleId] = useState<number>(0);
   const [selectImage, setSelectImage] = useState<string>("");
   const [showOtherImages, setShowOtherImages] = useState<boolean>(false);
-  const { post, loading, response } = useFetch();
+  const { post, loading, response, error } = useFetch();
+
+  const generateImages = async () => {
+    const generatedImages = await post("/context/get_generative_contexts", {
+      type: type,
+      artifacts: artifactsInput,
+    });
+    if (response.ok) {
+      setGeneratedImages(generatedImages);
+      setShowImages(generatedImages);
+    }
+  };
 
   const handlePromptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setArtifactsInput({ ...artifactsInput, prompt: event.target.value });
@@ -46,6 +61,8 @@ const SelectBetweenImagesGenerative: FC<
     onInputChange({
       [field_names_for_the_model.select_image ?? "select_image"]: image,
     });
+
+    createPartialSample!();
   };
 
   const handleSelectOtherImages = (images: string[]) => {
@@ -61,6 +78,11 @@ const SelectBetweenImagesGenerative: FC<
         <div>
           <div className="grid col-span-1 py-3 justify-items-end">
             <BasicInput onChange={handlePromptChange} placeholder="Prompt" />
+            <GeneralButton
+              onClick={generateImages}
+              text="Generate Images"
+              className="border-0 font-weight-bold light-gray-bg task-action-btn mt-4"
+            />
           </div>
           {generatedImages.length === 0 ? (
             <></>
@@ -70,7 +92,7 @@ const SelectBetweenImagesGenerative: FC<
               <div>
                 <AnnotationInstruction
                   placement="left"
-                  tooltip="Select the image"
+                  tooltip="Selected image"
                 >
                   <MultiSelectImage
                     instructions="Select an image"

@@ -38,7 +38,7 @@ const AnnotationUserInputStrategy: FC<Props & AnnotationFactoryType> = ({
         const View = Import(ModulesRegistry.user_input[option.type]);
         setUserInputRenders((prev) => [
           ...prev,
-          <View {...{ onInputChange, task, ...option }} key={index} />,
+          <View {...{ task, onInputChange, ...option }} key={index} />,
         ]);
       });
     };

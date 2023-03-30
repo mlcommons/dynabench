@@ -33,7 +33,7 @@ const AnnotationGoalStrategy: FC<Props & AnnotationFactoryType> = ({
   useEffect(() => {
     const getView = () => {
       const View = Import(ModulesRegistry.goal[config.type]);
-      setGoalRender(<View {...{ onInputChange, task, hidden, ...config }} />);
+      setGoalRender(<View {...{ task, hidden, onInputChange, ...config }} />);
     };
     getView();
   }, [hidden]);

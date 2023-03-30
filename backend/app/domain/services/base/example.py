@@ -155,7 +155,7 @@ class ExampleService:
         }
         return context_info
 
-    def partially_creation_example_generative(
+    def partially_creation_generative_example(
         self,
         example_info: dict,
         context_id: int,
@@ -164,39 +164,28 @@ class ExampleService:
         round_id: int,
         task_id: int,
     ) -> str:
-        return self.create_example_and_increment_counters(
-            context_id,
-            user_id,
-            False,
-            None,
-            json.dumps(example_info),
-            json.dumps({}),
-            json.dumps({}),
-            tag,
-            round_id,
-            task_id,
-        )
-
-    def update_creation_example_by_creation_id(
-        self,
-        model_input: dict,
-        context_id: int,
-        user_id: int,
-        tag: str,
-        round_id: int,
-        task_id: int,
-        sandbox_mode: bool,
-    ) -> str:
-        if not sandbox_mode:
-            return self.example_service.create_example_and_increment_counters(
+        try:
+            return self.create_example_and_increment_counters(
                 context_id,
                 user_id,
                 False,
-                "",
-                json.dumps(model_input),
-                "",
-                {},
+                None,
+                json.dumps(example_info),
+                json.dumps({}),
+                json.dumps({}),
                 tag,
                 round_id,
                 task_id,
             )
+        except Exception as e:
+            return str(e)
+
+    def update_creation_generative_example_by_example_id(
+        self,
+        example_id: int,
+        model_input: dict,
+        metadata: dict,
+    ) -> str:
+        return self.example_repository.update_creation_generative_example_by_example_id(
+            example_id, model_input, metadata
+        )

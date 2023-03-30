@@ -1,34 +1,35 @@
-import React, { useContext, useEffect, useState } from "react";
-import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
+import UserContext from "containers/UserContext";
 import CreateInterfaceHelpersButton from "new_front/components/Buttons/CreateInterfaceHelpersButton";
-import AnnotationGoalStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Goals/AnnotationGoalStrategy";
 import AnnotationContextStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/AnnotationContextStrategy";
+import AnnotationGoalStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Goals/AnnotationGoalStrategy";
 import AnnotationUserInputStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/UserInput/AnnotationUserInputStrategy";
-import AnnotationButtonActions from "../../components/CreateSamples/CreateSamples/AnnotationButtonActions";
-import useFetch from "use-http";
 import ResponseInfo from "new_front/components/CreateSamples/CreateSamples/ResponseInfo";
-import { ModelOutputType } from "new_front/types/createSamples/createSamples/modelOutput";
+import { OverlayContext } from "new_front/components/OverlayInstructions/Provider";
 import {
   ConfigurationTask,
   InfoContextTask,
 } from "new_front/types/createSamples/createSamples/configurationTask";
-import UserContext from "containers/UserContext";
+import { ModelOutputType } from "new_front/types/createSamples/createSamples/modelOutput";
+import { TaskInfoType } from "new_front/types/task/taskInfo";
+import { checkUserIsLoggedIn } from "new_front/utils/helpers/functions/LoginFunctions";
+import React, { useContext, useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
-import { isLogin } from "new_front/utils/helpers/functions/LoginFunctions";
-import { OverlayContext } from "new_front/components/OverlayInstructions/Provider";
-import { TaskInfoType } from "new_front/types/task/taskInfo";
+import useFetch from "use-http";
+import AnnotationButtonActions from "../../components/CreateSamples/CreateSamples/AnnotationButtonActions";
+import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
 
 const CreateInterface = () => {
   const [modelInputs, setModelInputs] = useState<object>({});
+  const [metadataExample, setMetadataExample] = useState<object>({});
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
+  const [partialSampleId, setPartialSampleId] = useState<number>();
   const [taskConfiguration, setTaskConfiguration] =
     useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
   const [taskInfo, setTaskInfo] = useState<TaskInfoType>();
   const [taskId, setTaskId] = useState<number>(0);
-  const [partialSampleId, setPartialSampleId] = useState<number>(0);
   const [isGenerativeContext, setIsGenerativeContext] =
     useState<boolean>(false);
   const { hidden, setHidden } = useContext(OverlayContext);
@@ -38,10 +39,16 @@ const CreateInterface = () => {
   const { user } = userContext;
   const history = useHistory();
 
-  const updateModelInputs = (input: object) => {
-    setModelInputs((prevModelInputs) => {
-      return { ...prevModelInputs, ...input };
-    });
+  const updateModelInputs = (input: object, metadata?: boolean) => {
+    if (!metadata) {
+      setModelInputs((prevModelInputs) => {
+        return { ...prevModelInputs, ...input };
+      });
+    } else {
+      setMetadataExample((prevModelInputs) => {
+        return { ...prevModelInputs, ...input };
+      });
+    }
   };
 
   const loadTaskContextData = async () => {
@@ -69,23 +76,41 @@ const CreateInterface = () => {
     }
   };
 
-  const userIsLoggedIn = async () => {
-    const login = await isLogin();
-    if (!login) {
-      history.push(
-        "/login?msg=" +
-          encodeURIComponent(
-            "Please sign up or log in so that you can upload a model"
-          ) +
-          "&src=" +
-          encodeURIComponent(`/tasks/${taskCode}/create`)
+  const createPartialSample = async () => {
+    if (isGenerativeContext) {
+      const partialSampleId = await post(
+        `/example/partially_creation_generative_example`,
+        {
+          example_info: modelInputs,
+          context_id: taskContextInfo?.current_context?.id,
+          user_id: user?.id,
+          round_id: taskInfo?.round?.id,
+          task_id: taskId,
+        }
       );
+      if (response.ok) {
+        setPartialSampleId(partialSampleId);
+      }
+    }
+  };
+
+  const handleData = async () => {
+    const isLogin = await checkUserIsLoggedIn(
+      history,
+      `/tasks/${taskCode}/create`
+    );
+    if (isLogin) {
+      loadTaskContextData();
     }
   };
 
   useEffect(() => {
-    userIsLoggedIn();
-    loadTaskContextData();
+    createPartialSample();
+  }, [isGenerativeContext]);
+
+  useEffect(() => {
+    handleData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -131,6 +156,7 @@ const CreateInterface = () => {
                   config={taskConfiguration?.context as any}
                   task={{}}
                   context={taskContextInfo?.current_context}
+                  createPartialSample={createPartialSample}
                   onInputChange={updateModelInputs}
                   setIsGenerativeContext={setIsGenerativeContext}
                   hidden={hidden}
@@ -157,6 +183,7 @@ const CreateInterface = () => {
                   realRoundId={taskContextInfo?.real_round_id}
                   currentContext={taskContextInfo?.current_context}
                   modelInputs={modelInputs}
+                  metadataExample={metadataExample}
                   taskID={taskId}
                   inputByUser={
                     taskConfiguration?.response_fields?.input_by_user
@@ -167,6 +194,7 @@ const CreateInterface = () => {
                   modelEvaluationMetricInfo={
                     taskConfiguration?.model_evaluation_metric
                   }
+                  partialSampleId={partialSampleId}
                   isGenerativeContext={isGenerativeContext}
                   userId={user.id!}
                   setModelOutput={setModelOutput}
