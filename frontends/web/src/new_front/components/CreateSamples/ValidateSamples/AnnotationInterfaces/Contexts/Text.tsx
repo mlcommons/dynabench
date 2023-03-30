@@ -10,7 +10,7 @@ const Text: FC<ValidationFactoryType & ValidationContext> = ({
     <>
       {info && (
         <div className="py-1">
-          <div className="text-base text-[#005798] font-bold capitalize ">
+          <div className="text-base text-[#005798] font-bold normal-case ">
             {label!.replace("_", " ")}
           </div>
           <div className="text-base text-gray-500">{info}</div>

@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { Collapse } from "react-bootstrap";
 
 type RadioButtonProps = {
@@ -19,6 +19,9 @@ const RadioButton: FC<RadioButtonProps> = ({
   onInputChange,
 }) => {
   const [open, setOpen] = useState(InitialOpen);
+  const [selectedOption, setSelectedOption] = useState<string>(
+    options[0] || ""
+  );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (field_name_for_the_model && onInputChange) {
@@ -37,7 +40,7 @@ const RadioButton: FC<RadioButtonProps> = ({
         className="flex items-center h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
         onClick={() => setOpen(!open)}
       >
-        <h3 className="mb-1 text-base font-semibold capitalize text-letter-color">
+        <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
           {open ? (
             <i className="pl-2 pr-3 fas fa-minus" />
           ) : (
@@ -58,7 +61,10 @@ const RadioButton: FC<RadioButtonProps> = ({
                   className="w-4 h-5 bg-gray-100 border-gray-300 rounded text-third-color focus:ring-third-color"
                   onChange={handleChange}
                 />
-                <label className="w-full pt-2 ml-2 text-base font-medium dark:text-gray-300">
+                <label
+                  className="w-full pt-2 ml-2 text-base font-medium dark:text-gray-300"
+                  defaultValue={selectedOption}
+                >
                   {option}
                 </label>
               </div>

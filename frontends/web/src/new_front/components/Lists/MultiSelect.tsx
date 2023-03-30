@@ -44,7 +44,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
         className="flex items-center h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
         onClick={() => setOpen(!open)}
       >
-        <h3 className="mb-1 text-base font-semibold capitalize text-letter-color">
+        <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
           {open ? (
             <i className="pl-2 pr-3 fas fa-minus" />
           ) : (
@@ -56,10 +56,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
       <Collapse in={open}>
         <ul className="w-full text-sm font-medium text-letter-color ">
           {options.map((option, index) => (
-            <li
-              className="w-full rounded-t-lg dark:border-gray-600"
-              key={index}
-            >
+            <li className="w-full rounded-t-lg border-gray-600" key={index}>
               <div className="flex items-center pl-3">
                 <input
                   id="vue-checkbox"
@@ -67,7 +64,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
                   onChange={(event) => handleChange(event, option)}
                   className="w-4 h-5 bg-gray-100 border-gray-300 rounded text-third-color focus:ring-third-color"
                 />
-                <label className="w-full pt-2 ml-2 text-base font-medium dark:text-gray-300">
+                <label className="w-full pt-2 ml-2 text-base font-medium text-letter-color">
                   {option}
                 </label>
                 <input

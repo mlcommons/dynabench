@@ -1,8 +1,9 @@
-import UserContext from "containers/UserContext";
+import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
 import CreateInterfaceHelpersButton from "new_front/components/Buttons/CreateInterfaceHelpersButton";
 import AnnotationContextStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/AnnotationContextStrategy";
 import AnnotationGoalStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Goals/AnnotationGoalStrategy";
 import AnnotationUserInputStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/UserInput/AnnotationUserInputStrategy";
+import AnnotationButtonActions from "../../components/CreateSamples/CreateSamples/AnnotationButtonActions";
 import ResponseInfo from "new_front/components/CreateSamples/CreateSamples/ResponseInfo";
 import { OverlayContext } from "new_front/components/OverlayInstructions/Provider";
 import {
@@ -14,17 +15,16 @@ import { TaskInfoType } from "new_front/types/task/taskInfo";
 import { checkUserIsLoggedIn } from "new_front/utils/helpers/functions/LoginFunctions";
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
+import UserContext from "containers/UserContext";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
-import AnnotationButtonActions from "../../components/CreateSamples/CreateSamples/AnnotationButtonActions";
-import AnnotationTitle from "../../components/CreateSamples/CreateSamples/AnnotationTitle";
 
 const CreateInterface = () => {
   const [modelInputs, setModelInputs] = useState<object>({});
   const [metadataExample, setMetadataExample] = useState<object>({});
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
-  const [partialSampleId, setPartialSampleId] = useState<number>();
+  const [partialSampleId, setPartialSampleId] = useState<number>(0);
   const [taskConfiguration, setTaskConfiguration] =
     useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
@@ -77,21 +77,21 @@ const CreateInterface = () => {
   };
 
   const createPartialSample = async () => {
-    if (isGenerativeContext) {
-      const partialSampleId = await post(
-        `/example/partially_creation_generative_example`,
-        {
-          example_info: modelInputs,
-          context_id: taskContextInfo?.current_context?.id,
-          user_id: user?.id,
-          round_id: taskInfo?.round?.id,
-          task_id: taskId,
-        }
-      );
-      if (response.ok) {
-        setPartialSampleId(partialSampleId);
-      }
-    }
+    // if (isGenerativeContext) {
+    //   const partialSampleId = await post(
+    //     `/example/partially_creation_generative_example`,
+    //     {
+    //       example_info: modelInputs,
+    //       context_id: taskContextInfo?.current_context?.id,
+    //       user_id: user?.id,
+    //       round_id: taskInfo?.round?.id,
+    //       task_id: taskId,
+    //     },
+    //   )
+    //   if (response.ok) {
+    //     setPartialSampleId(partialSampleId)
+    //   }
+    // }
   };
 
   const handleData = async () => {
@@ -195,6 +195,7 @@ const CreateInterface = () => {
                     taskConfiguration?.model_evaluation_metric
                   }
                   partialSampleId={partialSampleId}
+                  neccessaryFields={taskConfiguration.required_fields}
                   isGenerativeContext={isGenerativeContext}
                   userId={user.id!}
                   setModelOutput={setModelOutput}
