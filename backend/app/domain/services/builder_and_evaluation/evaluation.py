@@ -45,7 +45,6 @@ class EvaluationService:
             region_name=os.getenv("AWS_REGION"),
         )
         self.s3 = self.session.client("s3")
-        self.sqs = self.session.client("sqs")
         self.cloud_watch = self.session.client("cloudwatch")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.builder = BuilderService()
