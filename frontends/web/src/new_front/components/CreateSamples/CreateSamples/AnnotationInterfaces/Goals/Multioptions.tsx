@@ -1,10 +1,10 @@
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { GoalConfigType } from "new_front/types/createSamples/createSamples/annotationGoal";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useContext } from "react";
 import { Dropdown, DropdownButton, InputGroup } from "react-bootstrap";
 
 const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
-  onInputChange,
   options,
   metadata,
   field_name_for_the_model,
@@ -13,9 +13,10 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
   const [noSelectedOptions, setNoSelectedOptions] = useState<string[]>(
     options.slice(1)
   );
+  const { updateModelInputs } = useContext(CreateInterfaceContext);
 
   useEffect(() => {
-    onInputChange(
+    updateModelInputs(
       {
         [field_name_for_the_model ?? "goal_input"]: selectedOption,
       },
@@ -37,7 +38,7 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
                 key={index}
                 onClick={() => {
                   setSelectedOption(option);
-                  onInputChange(
+                  updateModelInputs(
                     {
                       [field_name_for_the_model ?? "goal_input"]: option,
                     },

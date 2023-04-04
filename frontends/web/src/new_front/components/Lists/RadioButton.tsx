@@ -62,7 +62,7 @@ const RadioButton: FC<RadioButtonProps> = ({
                   onChange={handleChange}
                 />
                 <label
-                  className="w-full pt-2 ml-2 text-base font-medium dark:text-gray-300"
+                  className="w-full pt-2 ml-2 text-base font-medium dark:text-letter-color"
                   defaultValue={selectedOption}
                 >
                   {option}

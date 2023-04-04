@@ -17,6 +17,7 @@
         "text": "Text",
         "audio": "Audio",
         "multioptions": "Multioptions",
+        "multioptions-with-instructions": "MultioptionsWithInstructions",
         "radio-button-options": "RadioButtonOptions",
         "select-multiple-images": "SelectMultipleImages"
     }

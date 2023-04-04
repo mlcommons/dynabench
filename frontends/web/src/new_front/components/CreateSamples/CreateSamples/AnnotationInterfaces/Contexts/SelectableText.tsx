@@ -1,17 +1,23 @@
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useContext } from "react";
 import { TokenAnnotator } from "react-text-annotate";
 
 const PlainText: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
-  onInputChange,
   field_names_for_the_model,
   context,
+  metadata,
 }) => {
+  const { updateModelInputs } = useContext(CreateInterfaceContext);
+
   useEffect(() => {
-    onInputChange({
-      [field_names_for_the_model.context]: context.context,
-    });
+    updateModelInputs(
+      {
+        [field_names_for_the_model.context]: context.context,
+      },
+      metadata
+    );
   }, []);
 
   const [selectionInfo, setSelectionInfo] = useState([] as any);
@@ -22,13 +28,16 @@ const PlainText: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
         value={selectionInfo}
         onChange={(value) => {
           setSelectionInfo(value);
-          onInputChange({
-            [field_names_for_the_model.answer ?? "selectable_text"]:
-              context.context
-                .split(" ")
-                .slice(value[0].start, value[0].end)
-                .join(" "),
-          });
+          updateModelInputs(
+            {
+              [field_names_for_the_model.answer ?? "selectable_text"]:
+                context.context
+                  .split(" ")
+                  .slice(value[0].start, value[0].end)
+                  .join(" "),
+            },
+            metadata
+          );
         }}
       />
     </div>

@@ -1,11 +1,12 @@
 import BootstrapSwitchButton from "bootstrap-switch-button-react";
 import { ModelEvaluationMetric } from "new_front/types/createSamples/createSamples/configurationTask";
 import { ModelOutputType } from "new_front/types/createSamples/createSamples/modelOutput";
-import React, { FC, useState } from "react";
+import React, { FC, useContext, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import Swal from "sweetalert2";
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 
 type Props = {
   modelInTheLoop: string;
@@ -13,8 +14,6 @@ type Props = {
   tags: string | undefined;
   realRoundId: number;
   currentContext: any;
-  modelInputs: any;
-  metadataExample: any;
   taskID: number;
   inputByUser: string;
   modelPredictionLabel: string;
@@ -32,8 +31,6 @@ const AnnotationButtonActions: FC<Props> = ({
   tags,
   realRoundId,
   currentContext,
-  modelInputs,
-  metadataExample,
   taskID,
   inputByUser,
   modelPredictionLabel,
@@ -45,6 +42,7 @@ const AnnotationButtonActions: FC<Props> = ({
   setModelOutput,
 }) => {
   const [sandboxMode, setSandboxMode] = useState<boolean>(false);
+  let { modelInputs, metadataExample } = useContext(CreateInterfaceContext);
 
   const { post, loading } = useFetch();
 
@@ -53,6 +51,10 @@ const AnnotationButtonActions: FC<Props> = ({
       ...modelInputs,
       input_by_user: inputByUser,
     };
+
+    console.log("neccessaryFields", neccessaryFields);
+    console.log("modelInputs", modelInputs);
+
     if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
       const finaModelInputs = {
         model_input: modelInputs,
@@ -77,8 +79,8 @@ const AnnotationButtonActions: FC<Props> = ({
           `/example/update_creation_generative_example_by_example_id`,
           {
             example_id: partialSampleId,
-            model_input: modelInputs,
-            metadata: metadataExample,
+            example_info: modelInputs,
+            metadata_json: metadataExample,
           }
         );
         setModelOutput(modelOutput);

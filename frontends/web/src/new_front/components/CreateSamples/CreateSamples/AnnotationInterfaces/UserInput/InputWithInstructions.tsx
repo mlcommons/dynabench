@@ -1,14 +1,16 @@
 import BasicInput from "new_front/components/Inputs/BasicInput";
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
-import React, { FC, useState } from "react";
-import { Collapse } from "react-bootstrap";
+import React, { FC, useState, useContext } from "react";
 
 const InputWithInstructions: FC<AnnotationFactoryType & AnnotationUserInput> =
-  ({ onInputChange, placeholder, instructions, field_name_for_the_model }) => {
+  ({ placeholder, instructions, field_name_for_the_model }) => {
     const [open, setOpen] = useState(true);
+    const { updateModelInputs } = useContext(CreateInterfaceContext);
+
     const handleChanges = (event: React.ChangeEvent<HTMLInputElement>) => {
-      onInputChange({
+      updateModelInputs({
         [field_name_for_the_model]: event.target.value,
       });
     };

@@ -1,5 +1,6 @@
 import React, { FC, useState } from "react";
 import { Collapse } from "react-bootstrap";
+import SimpleInputMultiSelect from "../Inputs/SimpleInputMultiSelect";
 
 type MultiSelectProps = {
   options: string[];
@@ -16,14 +17,11 @@ const MultiSelect: FC<MultiSelectProps> = ({
 }) => {
   const selected: string[] = [];
   const [open, setOpen] = useState(false);
-  const [addExplanation, setAddExplanation] = useState(false);
-
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     option: string
   ) => {
-    setAddExplanation(!addExplanation);
-    if (field_name_for_the_model && onInputChange) {
+    if (field_name_for_the_model) {
       if (event.target.checked) {
         selected.push(option);
       } else {
@@ -32,11 +30,15 @@ const MultiSelect: FC<MultiSelectProps> = ({
           selected.splice(index, 1);
         }
       }
-      onInputChange({
+      onInputChange!({
         [field_name_for_the_model]: selected,
       });
     }
   };
+
+  React.useEffect(() => {
+    console.log("selected", selected);
+  }, [selected]);
 
   return (
     <div className="py-2 ">
@@ -57,27 +59,10 @@ const MultiSelect: FC<MultiSelectProps> = ({
         <ul className="w-full text-sm font-medium text-letter-color ">
           {options.map((option, index) => (
             <li className="w-full rounded-t-lg border-gray-600" key={index}>
-              <div className="flex items-center pl-3">
-                <input
-                  id="vue-checkbox"
-                  type="checkbox"
-                  onChange={(event) => handleChange(event, option)}
-                  className="w-4 h-5 bg-gray-100 border-gray-300 rounded text-third-color focus:ring-third-color"
-                />
-                <label className="w-full pt-2 ml-2 text-base font-medium text-letter-color">
-                  {option}
-                </label>
-                <input
-                  placeholder="Please specify"
-                  className={`${
-                    addExplanation ? "block" : "hidden"
-                  } px-2 py-1 text-base text-letter-color border border-gray-300 rounded-md w-2/4  `}
-                  type="text"
-                  onChange={(event) => {
-                    setAddExplanation(true);
-                  }}
-                />
-              </div>
+              <SimpleInputMultiSelect
+                option={option}
+                handleChange={handleChange}
+              />
             </li>
           ))}
         </ul>

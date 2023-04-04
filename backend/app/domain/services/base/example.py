@@ -187,5 +187,5 @@ class ExampleService:
         metadata: dict,
     ) -> str:
         return self.example_repository.update_creation_generative_example_by_example_id(
-            example_id, model_input, metadata
+            example_id, json.dumps(model_input), json.dumps(metadata)
         )

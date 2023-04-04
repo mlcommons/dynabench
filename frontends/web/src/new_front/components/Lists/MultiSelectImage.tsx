@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useMemo } from "react";
 import SelectImage from "new_front/components/Images/SelectImage";
 import { Collapse } from "react-bootstrap";
 
@@ -14,6 +14,20 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
   handleFunction,
 }) => {
   const [open, setOpen] = useState(true);
+
+  const renderedImages = useMemo(
+    () =>
+      images.map((image, index) => (
+        <div key={index} className="max-h-72">
+          <SelectImage
+            image={image}
+            index={index}
+            handleSelectImage={handleFunction}
+          />
+        </div>
+      )),
+    [images, handleFunction]
+  );
 
   return (
     <>
@@ -34,17 +48,7 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
           </div>
         )}
         <Collapse in={open}>
-          <div className="grid grid-cols-3">
-            {images.map((image, index) => (
-              <div key={index} className="max-h-72">
-                <SelectImage
-                  image={image}
-                  index={index}
-                  handleSelectImage={handleFunction}
-                />
-              </div>
-            ))}
-          </div>
+          <div className="grid grid-cols-3">{renderedImages}</div>
         </Collapse>
       </div>
     </>

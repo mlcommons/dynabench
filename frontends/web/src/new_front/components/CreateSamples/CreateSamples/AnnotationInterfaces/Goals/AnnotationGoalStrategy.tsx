@@ -23,8 +23,6 @@ type Props = {
 
 const AnnotationGoalStrategy: FC<Props & AnnotationFactoryType> = ({
   config,
-  task,
-  onInputChange,
   hidden,
 }) => {
   const [goalRender, setGoalRender] =
@@ -33,7 +31,7 @@ const AnnotationGoalStrategy: FC<Props & AnnotationFactoryType> = ({
   useEffect(() => {
     const getView = () => {
       const View = Import(ModulesRegistry.goal[config.type]);
-      setGoalRender(<View {...{ task, hidden, onInputChange, ...config }} />);
+      setGoalRender(<View {...{ hidden, ...config }} />);
     };
     getView();
   }, [hidden]);

@@ -146,12 +146,12 @@ const TaskPage = () => {
                   </div>
                 </div>
                 <div className="flex flex-wrap mt-3">
-                  <div className="flex-auto px-4">
+                  <div className="flex-auto">
                     <div className="tab-content tab-space">
-                      <div className={openTab === 1 ? "block" : "hidden"}>
+                      <div className={openTab === 1 ? "block  px-4" : "hidden"}>
                         <Leaderboard taskCode={task.task_code} />
                       </div>
-                      <div className={openTab === 2 ? "block" : "hidden"}>
+                      <div className={openTab === 2 ? "block " : "hidden"}>
                         <OverviewTask
                           roundDescription={task.round?.longdesc}
                           generalDescription={task.instructions_md}
