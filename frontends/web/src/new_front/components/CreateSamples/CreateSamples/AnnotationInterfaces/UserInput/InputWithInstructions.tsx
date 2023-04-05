@@ -5,14 +5,17 @@ import { AnnotationUserInput } from "new_front/types/createSamples/createSamples
 import React, { FC, useState, useContext } from "react";
 
 const InputWithInstructions: FC<AnnotationFactoryType & AnnotationUserInput> =
-  ({ placeholder, instructions, field_name_for_the_model }) => {
+  ({ placeholder, instructions, field_name_for_the_model, metadata }) => {
     const [open, setOpen] = useState(true);
     const { updateModelInputs } = useContext(CreateInterfaceContext);
 
     const handleChanges = (event: React.ChangeEvent<HTMLInputElement>) => {
-      updateModelInputs({
-        [field_name_for_the_model]: event.target.value,
-      });
+      updateModelInputs(
+        {
+          [field_name_for_the_model]: event.target.value,
+        },
+        metadata
+      );
     };
 
     return (

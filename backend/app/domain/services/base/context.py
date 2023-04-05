@@ -12,6 +12,7 @@ import yaml
 from fastapi import HTTPException
 
 from app.domain.services.base.task import TaskService
+from app.domain.services.utils.constant import black_image
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
@@ -117,11 +118,12 @@ class ContextService:
             image_response = response["data"][0]["b64_json"]
         image_list = []
         for i in image_response:
-            new_dict = {
-                "image": i["image_base64"],
-                "id": hashlib.md5(i["image_base64"].encode()).hexdigest(),
-            }
-            image_list.append(new_dict)
+            if black_image not in image_response:
+                new_dict = {
+                    "image": i["image_base64"],
+                    "id": hashlib.md5(i["image_base64"].encode()).hexdigest(),
+                }
+                image_list.append(new_dict)
 
         return image_list
 

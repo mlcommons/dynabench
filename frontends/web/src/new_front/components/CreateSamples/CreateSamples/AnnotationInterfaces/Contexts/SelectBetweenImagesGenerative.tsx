@@ -9,25 +9,25 @@ import { ContextConfigType } from "new_front/types/createSamples/createSamples/a
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import React, { FC, useState, useContext } from "react";
 import { PacmanLoader } from "react-spinners";
+import Swal from "sweetalert2";
 import useFetch from "use-http";
 
 const SelectBetweenImagesGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
 > = ({
   field_names_for_the_model,
+  generative_context,
   contextId,
   taskId,
   realRoundId,
   setIsGenerativeContext,
   setPartialSampleId,
 }) => {
-  const type = "nibbler";
-  const artifacts = {
-    endpoint: "https://www.google.com",
-  };
   const [generatedImages, setGeneratedImages] = useState<any[]>([]);
   const [showImages, setShowImages] = useState<any[]>([]);
-  const [artifactsInput, setArtifactsInput] = useState<object>(artifacts);
+  const [artifactsInput, setArtifactsInput] = useState<object>(
+    generative_context.artifacts
+  );
   const [prompt, setPrompt] = useState<string>("");
   const [selectImage, setSelectImage] = useState<string>("");
   const [showOtherImages, setShowOtherImages] = useState<boolean>(false);
@@ -36,13 +36,20 @@ const SelectBetweenImagesGenerative: FC<
   const { modelInputs, updateModelInputs } = useContext(CreateInterfaceContext);
 
   const generateImages = async () => {
-    const generatedImages = await post("/context/get_generative_contexts", {
-      type: type,
-      artifacts: artifactsInput,
-    });
-    if (response.ok) {
-      setGeneratedImages(generatedImages);
-      setShowImages(generatedImages);
+    if (modelInputs.hasOwnProperty("label")) {
+      const generatedImages = await post("/context/get_generative_contexts", {
+        type: generative_context.type,
+        artifacts: artifactsInput,
+      });
+      if (response.ok) {
+        setGeneratedImages(generatedImages);
+        setShowImages(generatedImages);
+      }
+    } else {
+      Swal.fire({
+        title: "Please select the type of your prompt",
+        icon: "warning",
+      });
     }
   };
 
@@ -50,7 +57,7 @@ const SelectBetweenImagesGenerative: FC<
     setArtifactsInput({ ...artifactsInput, prompt: event.target.value });
     setPrompt(event.target.value);
     updateModelInputs({
-      [field_names_for_the_model.prompt ?? "original_prompt"]:
+      [field_names_for_the_model.original_prompt ?? "original_prompt"]:
         event.target.value,
     });
   };
@@ -100,6 +107,7 @@ const SelectBetweenImagesGenerative: FC<
           <div className="grid col-span-1 py-3 justify-items-end">
             <BasicInput
               onChange={handlePromptChange}
+              onEnter={generateImages}
               placeholder="Type the image you want to generate "
             />
             <GeneralButton

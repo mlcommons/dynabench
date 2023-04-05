@@ -5,11 +5,18 @@ type MultiSelectWithExtraExplanationProps = {
   options: any[];
   instructions: string;
   field_name_for_the_model?: string;
-  onInputChange?: (value: any) => void;
+  metadata?: boolean;
+  onInputChange?: (data: any, metadata?: boolean) => void;
 };
 
 const MultiSelectWithExtraExplanation: FC<MultiSelectWithExtraExplanationProps> =
-  ({ options, instructions, field_name_for_the_model, onInputChange }) => {
+  ({
+    options,
+    instructions,
+    field_name_for_the_model,
+    metadata,
+    onInputChange,
+  }) => {
     const [selected, setSelected] = useState<string[]>([]);
     const [extraInfos, setExtraInfos] = useState<{}>(
       options
@@ -31,11 +38,13 @@ const MultiSelectWithExtraExplanation: FC<MultiSelectWithExtraExplanationProps> 
       }
       if (field_name_for_the_model && onInputChange) {
         if (event.target.checked) {
-          setSelected([...selected, option]);
+          selected.push(option);
         } else {
           const index = selected.indexOf(option);
           if (index > -1) {
-            selected.splice(index, 1);
+            if (!extraInfo) {
+              selected.splice(index, 1);
+            }
             if (extraInfo && extraInfo.trim() === "") {
               setExtraInfos({ ...extraInfos, [option]: "" });
             }
@@ -43,15 +52,14 @@ const MultiSelectWithExtraExplanation: FC<MultiSelectWithExtraExplanationProps> 
         }
         finalData["extraInfos"] = extraInfos;
         finalData["selected"] = selected;
-        onInputChange({
-          [field_name_for_the_model]: finalData,
-        });
+        onInputChange(
+          {
+            [field_name_for_the_model]: finalData,
+          },
+          metadata
+        );
       }
     };
-
-    useEffect(() => {
-      console.log("finalData", finalData);
-    }, [finalData]);
 
     return (
       <div className="py-2 ">

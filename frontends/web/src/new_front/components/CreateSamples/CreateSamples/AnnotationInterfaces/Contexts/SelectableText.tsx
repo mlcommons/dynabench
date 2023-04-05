@@ -4,7 +4,7 @@ import { ContextAnnotationFactoryType } from "new_front/types/createSamples/crea
 import React, { FC, useEffect, useState, useContext } from "react";
 import { TokenAnnotator } from "react-text-annotate";
 
-const PlainText: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
+const SelectableText: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   field_names_for_the_model,
   context,
   metadata,
@@ -16,7 +16,7 @@ const PlainText: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
       {
         [field_names_for_the_model.context]: context.context,
       },
-      metadata
+      metadata.context
     );
   }, []);
 
@@ -36,7 +36,7 @@ const PlainText: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                   .slice(value[0].start, value[0].end)
                   .join(" "),
             },
-            metadata
+            metadata.answer
           );
         }}
       />
@@ -44,4 +44,4 @@ const PlainText: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   );
 };
 
-export default PlainText;
+export default SelectableText;

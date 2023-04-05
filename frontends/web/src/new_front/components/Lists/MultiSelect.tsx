@@ -6,13 +6,15 @@ type MultiSelectProps = {
   options: string[];
   instructions: string;
   field_name_for_the_model?: string;
-  onInputChange?: (value: any) => void;
+  metadata?: boolean;
+  onInputChange?: (data: any, metadata?: boolean) => void;
 };
 
 const MultiSelect: FC<MultiSelectProps> = ({
   options,
   instructions,
   field_name_for_the_model,
+  metadata,
   onInputChange,
 }) => {
   const selected: string[] = [];
@@ -30,9 +32,12 @@ const MultiSelect: FC<MultiSelectProps> = ({
           selected.splice(index, 1);
         }
       }
-      onInputChange!({
-        [field_name_for_the_model]: selected,
-      });
+      onInputChange!(
+        {
+          [field_name_for_the_model]: selected,
+        },
+        metadata
+      );
     }
   };
 

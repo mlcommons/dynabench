@@ -14,7 +14,13 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
   handleFunction,
 }) => {
   const [open, setOpen] = useState(true);
-
+  let showCheck = true;
+  let cols = 3;
+  if (images.length === 1) {
+    showCheck = false;
+    instructions = "Selected image";
+    cols = 1;
+  }
   const renderedImages = useMemo(
     () =>
       images.map((image, index) => (
@@ -23,6 +29,7 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
             image={image}
             index={index}
             handleSelectImage={handleFunction}
+            showCheck={showCheck}
           />
         </div>
       )),
@@ -48,7 +55,9 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
           </div>
         )}
         <Collapse in={open}>
-          <div className="grid grid-cols-3">{renderedImages}</div>
+          <div className={`grid grid-cols-${cols} justify-center`}>
+            {renderedImages}
+          </div>
         </Collapse>
       </div>
     </>

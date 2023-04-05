@@ -51,10 +51,6 @@ const AnnotationButtonActions: FC<Props> = ({
       ...modelInputs,
       input_by_user: inputByUser,
     };
-
-    console.log("neccessaryFields", neccessaryFields);
-    console.log("modelInputs", modelInputs);
-
     if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
       const finaModelInputs = {
         model_input: modelInputs,
@@ -86,14 +82,23 @@ const AnnotationButtonActions: FC<Props> = ({
         setModelOutput(modelOutput);
       }
     } else {
+      console.log("neccessaryFields", neccessaryFields);
+
       Swal.fire({
-        icon: "error",
+        icon: "warning",
         title: "Oops...",
-        text: "Please fill all the fields",
+        html: `Please fill the missing fields: <br/> ${neccessaryFields.filter(
+          (field) => !modelInputs.hasOwnProperty(field)
+        )}  `,
         confirmButtonColor: "#2088ef",
       });
     }
   };
+
+  useEffect(() => {
+    console.log("modelInputs", modelInputs);
+    console.log("metadataExample", metadataExample);
+  }, [modelInputs, metadataExample]);
 
   return (
     <>
@@ -118,7 +123,7 @@ const AnnotationButtonActions: FC<Props> = ({
                   </div>
                   <div className="flex justify-end col-span-3 ">
                     <div className="col-span-1 pl-2" id="switchContext">
-                      {currentContext && partialSampleId === 0 && (
+                      {currentContext && partialSampleId !== 0 && (
                         <Button
                           className="border-0 font-weight-bold light-gray-bg task-action-btn"
                           onClick={() => {

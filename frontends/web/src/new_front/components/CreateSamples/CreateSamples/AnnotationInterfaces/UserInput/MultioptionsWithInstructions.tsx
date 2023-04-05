@@ -6,7 +6,7 @@ import React, { FC, useContext } from "react";
 
 const MultioptionsWithInstructions: FC<
   AnnotationFactoryType & AnnotationUserInput
-> = ({ instructions, options, field_name_for_the_model }) => {
+> = ({ instructions, options, field_name_for_the_model, metadata }) => {
   const { updateModelInputs } = useContext(CreateInterfaceContext);
 
   return (
@@ -16,6 +16,7 @@ const MultioptionsWithInstructions: FC<
           options={options}
           instructions={instructions}
           field_name_for_the_model={field_name_for_the_model}
+          metadata={metadata}
           onInputChange={updateModelInputs}
         />
       )}

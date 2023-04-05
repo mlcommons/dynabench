@@ -7,14 +7,18 @@ import React, { FC, useContext } from "react";
 const SelectMultipleImages: FC<AnnotationFactoryType & AnnotationUserInput> = ({
   instructions,
   options,
+  metadata,
   field_name_for_the_model,
 }) => {
   const { updateModelInputs } = useContext(CreateInterfaceContext);
 
   const handleFunction = (value: any) => {
-    updateModelInputs({
-      [field_name_for_the_model]: value,
-    });
+    updateModelInputs(
+      {
+        [field_name_for_the_model]: value,
+      },
+      metadata
+    );
   };
 
   return (

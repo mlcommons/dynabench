@@ -7,14 +7,16 @@ type BasicInputProps = {
   disabled?: boolean;
   required?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
 const BasicInput: FC<BasicInputProps> = ({
-  onChange,
   placeholder,
   open = true,
   disabled = false,
   required = true,
+  onChange,
+  onEnter,
 }) => {
   return (
     <Collapse in={open}>
@@ -22,6 +24,11 @@ const BasicInput: FC<BasicInputProps> = ({
         className="p-3 h-12 rounded-1 thick-border bg-[#f0f2f5]"
         placeholder={placeholder}
         onChange={onChange}
+        onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
+          if (e.key === "Enter") {
+            onEnter && onEnter(e);
+          }
+        }}
         disabled={disabled}
         required={required}
       />

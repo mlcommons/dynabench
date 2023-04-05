@@ -1,6 +1,6 @@
-import React, { FC, useState } from "react";
-import SelectImages from "new_front/components/Images/SelectImages";
+import React, { FC, useEffect, useState } from "react";
 import { Collapse } from "react-bootstrap";
+import SelectImages from "../Images/SelectImages";
 
 export type MultiSelectImagesProps = {
   instructions?: string;
@@ -13,8 +13,12 @@ const MultiSelectImages: FC<MultiSelectImagesProps> = ({
   images,
   handleFunction,
 }) => {
-  const selectedImages: string[] = [];
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [open, setOpen] = useState(true);
+
+  useEffect(() => {
+    handleFunction(selectedImages);
+  }, [selectedImages]);
 
   return (
     <>
@@ -42,6 +46,7 @@ const MultiSelectImages: FC<MultiSelectImagesProps> = ({
                   image={image}
                   index={index}
                   selectedImages={selectedImages}
+                  setSelectedImages={setSelectedImages}
                   handleSelectImages={handleFunction}
                 />
               </div>

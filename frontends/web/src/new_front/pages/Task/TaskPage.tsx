@@ -18,7 +18,7 @@ import { useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import Leaderboard from "new_front/pages/Task/LeaderBoard";
-import OverviewTask from "./OverviewTask";
+import OverviewTask from "../../components/TaskPage/OverviewTask";
 import PrincipalTaskStats from "new_front/components/TaskPage/PrincipalTaskStats";
 import UserContext from "containers/UserContext";
 

@@ -4,6 +4,7 @@ type SelectImageProps = {
   image: string;
   index: number;
   selectedImages: string[];
+  setSelectedImages: (images: string[]) => void;
   handleSelectImages: (images: string[]) => void;
 };
 
@@ -11,22 +12,24 @@ const SelectImages: FC<SelectImageProps> = ({
   image,
   index,
   selectedImages,
-  handleSelectImages,
+  setSelectedImages,
 }) => {
   const [expandImage, setExpandImage] = useState<boolean>(false);
 
   const handleOnClicked = (image: string) => {
     if (selectedImages.includes(image)) {
-      selectedImages.splice(selectedImages.indexOf(image), 1);
+      const index = selectedImages.indexOf(image);
+      if (index > -1) {
+        selectedImages.splice(index, 1);
+      }
     } else {
       selectedImages.push(image);
     }
-    console.log("selectedImages", selectedImages);
-    handleSelectImages(selectedImages);
+    setSelectedImages(selectedImages);
   };
 
   return (
-    <div key={index}>
+    <div key={index} className="py-2 flex flex-col align-center items-center">
       <img
         height={240}
         width={240}
@@ -34,7 +37,11 @@ const SelectImages: FC<SelectImageProps> = ({
         onClick={() => {
           setExpandImage(!expandImage);
         }}
-        className={expandImage ? "relative scale-[2.7] z-50 " : "scale-[1]"}
+        className={
+          expandImage
+            ? "relative scale-[2.7] z-50 rounded-lg"
+            : "scale-[1] rounded-lg pb-2"
+        }
         alt="src"
       ></img>
       <div>
@@ -42,7 +49,7 @@ const SelectImages: FC<SelectImageProps> = ({
           id="checkbox"
           type="checkbox"
           value=""
-          className="items-center"
+          className="items-center w-4 h-4 px-6"
           onClick={() => {
             handleOnClicked(image);
           }}
