@@ -18,7 +18,7 @@ const OverviewTask: FC<OverviewTaskProps> = ({
             <div className="flex flex-col justify-between flex-1 mt-6">
               <nav className="flex-1 -mx-3 space-y-3 ">
                 <a
-                  className="flex items-center px-2 py-1 text-letter-color transition-colors duration-300 transform rounded-lg hover:bg-gray-100  dark:hover:text-gray-200 hover:text-gray-700"
+                  className="flex items-center px-2 py-1 text-letter-color transition-colors duration-300 transform rounded-lg hover:bg-gray-100 hover:text-gray-700"
                   href="/"
                 >
                   <svg

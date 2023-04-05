@@ -117,14 +117,13 @@ class ContextService:
             )
             image_response = response["data"][0]["b64_json"]
         image_list = []
-        for i in image_response:
-            if black_image not in image_response:
+        for image in image_response:
+            if black_image not in image:
                 new_dict = {
-                    "image": i["image_base64"],
-                    "id": hashlib.md5(i["image_base64"].encode()).hexdigest(),
+                    "image": image["image_base64"],
+                    "id": hashlib.md5(image["image_base64"].encode()).hexdigest(),
                 }
                 image_list.append(new_dict)
-
         return image_list
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
