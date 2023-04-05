@@ -103,7 +103,7 @@ class ContextService:
             json={
                 "model": "runwayml-stable-diffusion-v1-5",
                 "prompt": prompt,
-                "n": 9,
+                "n": 6,
                 "steps": 20,
             },
             headers={"Authorization": "Bearer ", "User-Agent": ""},
@@ -113,7 +113,7 @@ class ContextService:
         else:
             openai.api_key = os.getenv("OPENAI")
             response = openai.Image.create(
-                prompt=prompt, n=9, size="256x256", response_format="b64_json"
+                prompt=prompt, n=6, size="256x256", response_format="b64_json"
             )
             image_response = response["data"][0]["b64_json"]
         image_list = []

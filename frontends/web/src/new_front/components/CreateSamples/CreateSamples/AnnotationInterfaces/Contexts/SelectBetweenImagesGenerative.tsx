@@ -33,10 +33,12 @@ const SelectBetweenImagesGenerative: FC<
   const [showOtherImages, setShowOtherImages] = useState<boolean>(false);
   const { post, loading, response } = useFetch();
   const { user } = useContext(UserContext);
-  const { modelInputs, updateModelInputs } = useContext(CreateInterfaceContext);
+  const { modelInputs, metadataExample, updateModelInputs } = useContext(
+    CreateInterfaceContext
+  );
 
   const generateImages = async () => {
-    if (modelInputs.hasOwnProperty("label")) {
+    if (metadataExample.hasOwnProperty("label")) {
       const generatedImages = await post("/context/get_generative_contexts", {
         type: generative_context.type,
         artifacts: artifactsInput,

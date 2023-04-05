@@ -92,7 +92,7 @@ const MultiSelectWithExtraExplanation: FC<MultiSelectWithExtraExplanationProps> 
                       {option.label}
                     </label>
                     <input
-                      placeholder="Please specify"
+                      placeholder=""
                       className={`${
                         option.explanation ? "block" : "hidden"
                       } px-2 py-1 text-base text-letter-color border border-gray-300 rounded-md w-full  `}
