@@ -28,7 +28,7 @@ const SelectBetweenImagesGenerative: FC<
   const [artifactsInput, setArtifactsInput] = useState<object>(
     generative_context.artifacts
   );
-  const [prompt, setPrompt] = useState<string>("");
+  const [prompt, setPrompt] = useState<string>("Type your prompt here");
   const [selectImage, setSelectImage] = useState<string>("");
   const [showOtherImages, setShowOtherImages] = useState<boolean>(false);
   const { post, loading, response } = useFetch();
@@ -67,16 +67,12 @@ const SelectBetweenImagesGenerative: FC<
   const handleSelectImage = async (image: string) => {
     setSelectImage(image);
     setIsGenerativeContext(false);
-    setShowImages([
-      {
-        image: image,
-      },
-    ]);
+
     setShowOtherImages(true);
     updateModelInputs({
       [field_names_for_the_model.select_image ?? "select_image"]: image,
     });
-    // createPartialSample()
+    createPartialSample();
   };
 
   const createPartialSample = async () => {
@@ -110,7 +106,7 @@ const SelectBetweenImagesGenerative: FC<
             <BasicInput
               onChange={handlePromptChange}
               onEnter={generateImages}
-              placeholder="Type the image you want to generate "
+              placeholder={prompt}
             />
             <GeneralButton
               onClick={generateImages}
@@ -122,11 +118,10 @@ const SelectBetweenImagesGenerative: FC<
             <></>
           ) : (
             <>
-              <BasicInput placeholder={prompt} disabled={true} />
               <div>
                 <AnnotationInstruction
                   placement="left"
-                  tooltip="Selected image"
+                  tooltip="Select the image that best exemplifies the harm"
                 >
                   <MultiSelectImage
                     instructions="Select an image"
@@ -137,22 +132,9 @@ const SelectBetweenImagesGenerative: FC<
               </div>
             </>
           )}
-          {showOtherImages && (
-            <>
-              <div>
-                <MultiSelectImages
-                  instructions="Select other images"
-                  images={generatedImages
-                    .map(({ image }) => image)
-                    .filter((image) => image !== selectImage)}
-                  handleFunction={handleSelectOtherImages}
-                />
-              </div>
-            </>
-          )}
         </div>
       ) : (
-        <div className="grid items-center justify-center grid-rows-2">
+        <div className="grid items -center justify-center grid-rows-2">
           <div className="mr-2 text-letter-color">
             Images are being generated, bear with the model
           </div>

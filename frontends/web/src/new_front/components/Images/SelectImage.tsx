@@ -38,10 +38,9 @@ const SelectImage: FC<SelectImageProps> = ({
       <input
         id="checkbox"
         type="radio"
+        name="image"
         value=""
-        className={`${
-          showCheck ? "block" : "hidden"
-        } items-center w-4 h-4 px-6`}
+        className={`items-center w-4 h-4 px-6`}
         onClick={() => {
           handleOnClicked(image);
         }}

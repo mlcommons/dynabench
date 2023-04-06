@@ -92,6 +92,7 @@ class ContextService:
             "model_output": config_yaml.get("model_output"),
             "model_evaluation_metric": config_yaml.get("model_evaluation_metric"),
             "required_fields": config_yaml.get("required_fields"),
+            "creation_samples_title": config_yaml.get("creation_samples_title"),
         }
         return context_info
 
