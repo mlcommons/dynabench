@@ -3,8 +3,45 @@ import { fadeIn } from "new_front/utils/helpers/motion";
 import React from "react";
 import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import Carousel from "react-multi-carousel";
+import { responsiveCarouselCompanies } from "../../utils/constants";
+import "react-multi-carousel/lib/styles.css";
 
 const Test = () => {
+  const companies = [
+    {
+      name: "Stanford University",
+      logo: "https://logodownload.org/wp-content/uploads/2021/04/stanford-university-logo-2.png",
+    },
+    {
+      name: "Harvard University",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Harvard_University_logo.svg/2560px-Harvard_University_logo.svg.png",
+    },
+    {
+      name: "Meta",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/2560px-Meta_Platforms_Inc._logo.svg.png",
+    },
+    {
+      name: "Google",
+      logo: "https://logodownload.org/wp-content/uploads/2014/09/google-logo-1.png",
+    },
+    {
+      name: "Coactive",
+      logo: "https://s4-recruiting.cdn.greenhouse.io/external_greenhouse_job_boards/logos/400/614/500/original/coactive-logo-rgb-2400px.png?1639152613",
+    },
+    {
+      name: "ETH Zurich",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/ETH_Z%C3%BCrich_Logo_black.svg/2560px-ETH_Z%C3%BCrich_Logo_black.svg.png",
+    },
+    {
+      name: "Cohere",
+      logo: "https://cdn.sanity.io/images/1b1xyaip/production/f5e234e86f931398d5e05f4cdeb8d6dfcd182c7a-102x18.svg",
+    },
+    {
+      name: "Oxford University",
+      logo: "https://e7.pngegg.com/pngimages/156/150/png-clipart-university-of-oxford-logo-college-others-blue-text.png",
+    },
+  ];
   return (
     <>
       <section id="hero" className="container mt-20">
@@ -105,50 +142,33 @@ const Test = () => {
         </div>
       </section>
       <section id="trusted by divide-y">
-        <div className="container mt-16 ">
+        <div className=" mt-16 container">
           <h2 className="w-full my-2 text-5xl font-bold leading-tight text-center text-gray-800">
             Trusted by
           </h2>
-          <div className="flex flex-row items-center justify-center">
-            <img
-              src="https://images.aicrowd.com/images/landing_page/partner-logo-org-7.png"
-              alt="logo"
-              className="w-40 mx-2"
-            />
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Harvard_University_logo.svg/2560px-Harvard_University_logo.svg.png"
-              alt="logo"
-              className="w-40 h-12 mx-2"
-            />
-            <img
-              src="https://1.bp.blogspot.com/-CeFm3Y4ycpg/YYFiD9GMi0I/AAAAAAAADkI/LJO9urQAupstByv1O-suvKo5iCvwzb_rgCNcBGAsYHQ/s2048/Meta.png"
-              alt="logo"
-              className="w-40 mx-2"
-            />
-            <img
-              src="https://images.aicrowd.com/images/landing_page/partner-logo-org-7.png"
-              alt="logo"
-              className="w-40 mx-2"
-            />
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Harvard_University_logo.svg/2560px-Harvard_University_logo.svg.png"
-              alt="logo"
-              className="w-40 h-12 mx-2"
-            />
-            <img
-              src="https://1.bp.blogspot.com/-CeFm3Y4ycpg/YYFiD9GMi0I/AAAAAAAADkI/LJO9urQAupstByv1O-suvKo5iCvwzb_rgCNcBGAsYHQ/s2048/Meta.png"
-              alt="logo"
-              className="w-40 mx-2"
-            />
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Harvard_University_logo.svg/2560px-Harvard_University_logo.svg.png"
-              alt="logo"
-              className="w-40 h-12 mx-2"
-            />
+          <div className="grid grid-cols-1 pt-16">
+            <Carousel
+              responsive={responsiveCarouselCompanies}
+              infinite={true}
+              autoPlay={true}
+              autoPlaySpeed={4000}
+              className="w-full mx-auto"
+              arrows={false}
+            >
+              {companies.map((company) => (
+                <div className="flex justify-center px-2 bg-white">
+                  <img
+                    src={company.logo}
+                    alt={company.name}
+                    className="w-48 "
+                  />
+                </div>
+              ))}
+            </Carousel>
           </div>
         </div>
       </section>
-      <section id="communities" className="mt-8">
+      <section id="communities" className="mt-16">
         <div className="inset-0 flex items-center">
           <div className="w-full border-b border-gray-300"></div>
         </div>
