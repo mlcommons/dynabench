@@ -6,7 +6,13 @@ export const CreateInterfaceContext = createContext({
   updateModelInputs: (input: object, metadata?: boolean) => {},
 });
 
-export const CreateInterfaceProvider: FC = ({ children }) => {
+type CreateInterfaceProviderProps = {
+  children: React.ReactNode;
+};
+
+export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
+  children,
+}) => {
   const [modelInputs, setModelInputs] = useState({});
   const [metadataExample, setMetadataExample] = useState({});
 

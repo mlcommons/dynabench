@@ -6,7 +6,13 @@ export const OverlayInstructionsContext = createContext({
   setHidden: (state: boolean) => {},
 });
 
-const OverlayInstructionsProvider: FC = ({ children }) => {
+type OverlayInstructionsProviderProps = {
+  children: React.ReactNode;
+};
+
+const OverlayInstructionsProvider: FC<OverlayInstructionsProviderProps> = ({
+  children,
+}) => {
   const [hidden, setHidden] = useState(true);
   return (
     <>

@@ -1,5 +1,6 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import { Collapse } from "react-bootstrap";
+import parse from "html-react-parser";
 
 type MultiSelectWithExtraExplanationProps = {
   options: any[];
@@ -73,7 +74,7 @@ const MultiSelectWithExtraExplanation: FC<MultiSelectWithExtraExplanationProps> 
             ) : (
               <i className="pl-2 pr-3 fas fa-plus" />
             )}
-            {instructions}
+            {parse(instructions)}
           </h3>
         </div>
         <Collapse in={open}>
@@ -89,7 +90,7 @@ const MultiSelectWithExtraExplanation: FC<MultiSelectWithExtraExplanationProps> 
                       className=" bg-gray-100 border-gray-300 rounded text-third-color focus:ring-third-color"
                     />
                     <label className="w-full pt-2 ml-2 text-base font-medium text-letter-color">
-                      {option.label}
+                      {parse(option.label)}
                     </label>
                     <input
                       placeholder=""

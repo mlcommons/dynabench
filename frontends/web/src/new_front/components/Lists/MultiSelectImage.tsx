@@ -1,6 +1,7 @@
-import React, { FC, useState, useMemo } from "react";
+import React, { FC, useState } from "react";
 import SelectImage from "new_front/components/Images/SelectImage";
 import { Collapse } from "react-bootstrap";
+import parse from "html-react-parser";
 
 export type MultiSelectImageProps = {
   instructions?: string;
@@ -29,7 +30,7 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
               ) : (
                 <i className="pl-2 pr-3 fas fa-plus" />
               )}
-              {instructions}
+              {parse(instructions)}
             </h3>
           </div>
         )}

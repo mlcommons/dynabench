@@ -2,7 +2,6 @@ import UserContext from "containers/UserContext";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import BasicInput from "new_front/components/Inputs/BasicInput";
 import MultiSelectImage from "new_front/components/Lists/MultiSelectImage";
-import MultiSelectImages from "new_front/components/Lists/MultiSelectImages";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
@@ -29,8 +28,6 @@ const SelectBetweenImagesGenerative: FC<
     generative_context.artifacts
   );
   const [prompt, setPrompt] = useState<string>("Type your prompt here");
-  const [selectImage, setSelectImage] = useState<string>("");
-  const [showOtherImages, setShowOtherImages] = useState<boolean>(false);
   const { post, loading, response } = useFetch();
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
@@ -65,14 +62,11 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const handleSelectImage = async (image: string) => {
-    setSelectImage(image);
     setIsGenerativeContext(false);
-
-    setShowOtherImages(true);
     updateModelInputs({
       [field_names_for_the_model.select_image ?? "select_image"]: image,
     });
-    createPartialSample();
+    // createPartialSample()
   };
 
   const createPartialSample = async () => {
@@ -89,13 +83,6 @@ const SelectBetweenImagesGenerative: FC<
     if (response.ok) {
       setPartialSampleId(partialSampleId);
     }
-  };
-
-  const handleSelectOtherImages = (images: string[]) => {
-    updateModelInputs({
-      [field_names_for_the_model.select_other_images ?? "select_other_images"]:
-        images,
-    });
   };
 
   return (

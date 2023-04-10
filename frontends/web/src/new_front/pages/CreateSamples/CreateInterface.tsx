@@ -91,7 +91,11 @@ const CreateInterface = () => {
                 <div className="col-span-2">
                   <AnnotationTitle
                     taskName={taskInfo?.name!}
-                    subtitle="Find examples that fool the model"
+                    subtitle={`${
+                      taskConfiguration?.creation_samples_title
+                        ? taskConfiguration?.creation_samples_title
+                        : "Find examples that fool the model"
+                    }`}
                   />
                 </div>
                 <div className="flex items-start justify-end pr-4 pt-14">

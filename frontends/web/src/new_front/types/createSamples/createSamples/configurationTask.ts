@@ -14,6 +14,7 @@ export type ConfigurationTask = {
   response_fields: ResponseFields;
   model_output: ModelOutput;
   model_evaluation_metric: ModelEvaluationMetric;
+  creation_samples_title?: string;
 };
 
 export type ValidationConfigurationTask = {

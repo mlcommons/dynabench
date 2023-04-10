@@ -133,6 +133,9 @@ const TaskPage = () => {
                     <div className="flex justify-end pt-1">
                       <TaskActionButtons
                         configYaml={task.config_yaml}
+                        dynamicAdversarialDataValidation={Boolean(
+                          task.dynamic_adversarial_data_validation
+                        )}
                         dynamicAdversarialDataCollection={Boolean(
                           task.dynamic_adversarial_data_collection
                         )}

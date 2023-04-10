@@ -1,3 +1,4 @@
+import parse from "html-react-parser";
 import React, { FC, useState } from "react";
 import { Collapse } from "react-bootstrap";
 import SimpleInputMultiSelect from "../Inputs/SimpleInputMultiSelect";
@@ -41,10 +42,6 @@ const MultiSelect: FC<MultiSelectProps> = ({
     }
   };
 
-  React.useEffect(() => {
-    console.log("selected", selected);
-  }, [selected]);
-
   return (
     <div className="py-2 ">
       <div
@@ -57,7 +54,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
           ) : (
             <i className="pl-2 pr-3 fas fa-plus" />
           )}
-          {instructions}
+          {parse(instructions)}
         </h3>
       </div>
       <Collapse in={open}>

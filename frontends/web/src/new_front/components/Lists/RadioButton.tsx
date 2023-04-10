@@ -1,5 +1,6 @@
 import React, { FC, useState, useEffect } from "react";
 import { Collapse } from "react-bootstrap";
+import parse from "html-react-parser";
 
 type RadioButtonProps = {
   options: string[];
@@ -46,7 +47,7 @@ const RadioButton: FC<RadioButtonProps> = ({
           ) : (
             <i className="pl-2 pr-3 fas fa-plus" />
           )}
-          {instructions}
+          {parse(instructions)}
         </h3>
       </div>
       <Collapse in={open}>
@@ -65,7 +66,7 @@ const RadioButton: FC<RadioButtonProps> = ({
                   className="w-full pt-2 ml-2 text-base font-medium text-letter-color"
                   defaultValue={selectedOption}
                 >
-                  {option}
+                  {parse(option)}
                 </label>
               </div>
             </li>

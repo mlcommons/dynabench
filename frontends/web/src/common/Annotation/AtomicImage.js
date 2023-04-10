@@ -11,7 +11,7 @@
  */
 
 import React from "react";
-import Magnifier from "react-magnifier";
+import Zoom from "react-medium-image-zoom";
 import ErrorAlert from "./ErrorAlert.js";
 
 class AtomicImage extends React.Component {
@@ -65,17 +65,17 @@ class AtomicImage extends React.Component {
           >
             {console.log("state", this.state)}
             {this.state.isImgLoaded ? (
-              <Magnifier
-                mgWidth={250}
-                mgHeight={250}
-                width={this.state.width}
-                height={this.state.height}
-                src={this.props.src}
-                mgShape={"square"}
-                style={{
-                  display: this.state.isImgLoaded ? "block" : "none",
-                }}
-              />
+              <Zoom>
+                <img
+                  alt="That Wanaka Tree, New Zealand by Laura Smetsers"
+                  width={this.state.width}
+                  height={this.state.height}
+                  src={this.props.src}
+                  style={{
+                    display: this.state.isImgLoaded ? "block" : "none",
+                  }}
+                />
+              </Zoom>
             ) : (
               <div className="spinner-border" role="status" />
             )}
