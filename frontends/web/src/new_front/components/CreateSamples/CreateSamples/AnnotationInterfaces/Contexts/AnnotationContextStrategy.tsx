@@ -5,15 +5,16 @@ import React, {
   useEffect,
   useState,
   Suspense,
-  ComponentType,
   LazyExoticComponent,
+  ComponentType,
 } from "react";
 import {
   AnnotationFactoryType,
   ContextAnnotationFactoryType,
 } from "new_front/types/createSamples/createSamples/annotationFactory";
-import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
+import { GoalConfigType } from "new_front/types/createSamples/createSamples/annotationGoal";
 import { BarLoader } from "react-spinners";
+import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 
 const Import = (
   module: string
@@ -26,36 +27,40 @@ type Props = {
 
 const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
   config,
-  task,
   context,
-  onInputChange,
+  contextId,
+  taskId,
+  realRoundId,
+  hidden,
   setIsGenerativeContext,
+  setPartialSampleId,
 }) => {
-  const [contextRender, setContextRender] =
+  const [goalRender, setGoalRender] =
     useState<ReactElement<ContextConfigType & ContextAnnotationFactoryType>>();
 
   useEffect(() => {
-    const getView = async () => {
-      const View = await Import(ModulesRegistry.context[config.type]);
-      setContextRender(
+    const getView = () => {
+      const View = Import(ModulesRegistry.context[config.type]);
+      setGoalRender(
         <View
           {...{
-            onInputChange,
-            setIsGenerativeContext,
-            task,
             context,
+            taskId,
+            contextId,
+            realRoundId,
+            hidden,
+            setIsGenerativeContext,
+            setPartialSampleId,
             ...config,
           }}
         />
       );
     };
     getView();
-  }, []);
+  }, [hidden]);
 
   return (
-    <Suspense fallback={<BarLoader color="#ccebd4" />}>
-      {contextRender}
-    </Suspense>
+    <Suspense fallback={<BarLoader color="#ccebd4" />}>{goalRender}</Suspense>
   );
 };
 

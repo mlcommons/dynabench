@@ -43,9 +43,10 @@ import SubmitInterface from "./SubmitInterface.js";
 import SubmitModel from "./SubmitModel";
 import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
-import TaskPage from "./TaskPage";
-// import TaskPage from "new_front/pages/Task/TaskPage";
-import Test from "new_front/pages/CommunitiesLandingPages/Test";
+// import TaskPage from "./TaskPage";
+import TaskPage from "new_front/pages/Task/TaskPage";
+// import Test from "new_front/pages/CommunitiesLandingPages/Test";
+import Test from "new_front/pages/Landing/Test";
 import SearchBar from "../new_front/components/Utils/SearchBar";
 import FilterTasks from "../new_front/pages/Task/FilterTasks";
 import TasksContext from "./TasksContext";
@@ -58,7 +59,7 @@ import DADCLanding from "../new_front/pages/CommunitiesLandingPages/DADCLanding"
 import OthersTaskLanding from "../new_front/pages/CommunitiesLandingPages/OthersTaskLanding";
 import logoBlack from "../new_front/assets/logo_black.png";
 import logoWhite from "../new_front/assets/logo_mlcommos_white.png";
-import OverlayInstructionsProvider from "new_front/context/OverlayInstructions/Provider";
+import OverlayInstructionsProvider from "new_front/context/OverlayInstructions/Context";
 
 const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
 
@@ -383,7 +384,7 @@ class App extends React.Component {
                       />
                       <Route
                         path="/tasks/:taskCode/validate"
-                        component={ValidateInterface}
+                        component={ValidateSamples}
                       />
                       <Route
                         path="/tasks/:taskCode/uploadModel"

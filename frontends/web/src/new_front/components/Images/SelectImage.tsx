@@ -3,12 +3,14 @@ import React, { FC, useState } from "react";
 type SelectImageProps = {
   image: string;
   index: number;
+  showCheck?: boolean;
   handleSelectImage: (image: string) => void;
 };
 
 const SelectImage: FC<SelectImageProps> = ({
   image,
   index,
+  showCheck = true,
   handleSelectImage,
 }) => {
   const [expandImage, setExpandImage] = useState<boolean>(false);
@@ -18,7 +20,7 @@ const SelectImage: FC<SelectImageProps> = ({
   };
 
   return (
-    <div key={index}>
+    <div key={index} className="py-2 flex flex-col align-center items-center">
       <img
         height={240}
         width={240}
@@ -26,14 +28,19 @@ const SelectImage: FC<SelectImageProps> = ({
         onClick={() => {
           setExpandImage(!expandImage);
         }}
-        className={expandImage ? "relative scale-[2.7] z-50" : "scale-[1]"}
+        className={`${
+          expandImage
+            ? "relative scale-[2.7] z-50 rounded-lg"
+            : "scale-[1] rounded-lg"
+        } pb-2`}
         alt="src"
       ></img>
       <input
         id="checkbox"
-        type="checkbox"
+        type="radio"
+        name="image"
         value=""
-        className="items-center"
+        className={`items-center w-4 h-4 px-6`}
         onClick={() => {
           handleOnClicked(image);
         }}

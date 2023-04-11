@@ -2,7 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import ast
+import json
 
 import yaml
 from pydantic import Json
@@ -61,7 +61,7 @@ class ExampleService:
         round_id: int,
         task_id: int,
     ) -> dict:
-        self.create_example(
+        new_sample_info = self.create_example(
             context_id,
             user_id,
             model_wrong,
@@ -71,6 +71,7 @@ class ExampleService:
             metadata,
             tag,
         )
+        self.user_service.increment_examples_created(user_id)
         self.round_service.increment_counter_examples_collected(round_id, task_id)
         self.context_service.increment_counter_total_samples_and_update_date(context_id)
         self.task_service.update_last_activity_date(task_id)
@@ -84,7 +85,7 @@ class ExampleService:
                 real_round_id, user_id
             )
             self.user_service.increment_examples_fooled(user_id)
-        return {"message": "Example created successfully"}
+        return new_sample_info["id"]
 
     def get_example_to_validate(
         self,
@@ -92,22 +93,29 @@ class ExampleService:
         user_id: int,
         num_matching_validations: int,
         validate_non_fooling: bool,
+        task_id: int,
     ) -> dict:
         example_necessary_info = {}
         example_to_validate = self.example_repository.get_example_to_validate(
             real_round_id, user_id, num_matching_validations, validate_non_fooling
         )
-        example_info = example_to_validate[0].__dict__
-        context_info = example_to_validate[1].__dict__
-        example_necessary_info["context_info"] = {
-            **ast.literal_eval(example_info["input_json"]),
-            **ast.literal_eval(example_info["metadata_json"]),
-            **ast.literal_eval(context_info["context_json"]),
-        }
 
+        example_info = example_to_validate[0].__dict__
+        example_necessary_info["example_id"] = example_info["id"]
+        example_necessary_info["user_id"] = user_id
+        example_necessary_info["task_id"] = task_id
+        context_info = example_to_validate[1].__dict__
+        metadata_json = json.loads(example_info["metadata_json"])
+        input_json = json.loads(example_info["input_json"])
+        context_info = json.loads(context_info["context_json"])
+        example_necessary_info["context_info"] = {
+            **input_json,
+            **context_info,
+            **metadata_json,
+        }
         return example_necessary_info
 
-    def increment_counter_total_verified(
+    def validate_example(
         self,
         example_id: int,
         user_id: int,
@@ -118,11 +126,12 @@ class ExampleService:
         validate_non_fooling: bool,
     ):
         self.validation_service.create_validation(
-            user_id, label, mode, example_id, metadata_json
+            example_id, user_id, label, mode, metadata_json
         )
         self.task_service.update_last_activity_date(task_id)
         self.example_repository.increment_counter_total_verified(example_id)
         self.user_service.increment_examples_verified(user_id)
+        self.example_repository.mark_as_verified(example_id)
         if label == "correct":
             self.example_repository.increment_counter_total_correct(example_id)
             self.user_service.increment_examples_verified_correct(user_id)
@@ -145,3 +154,38 @@ class ExampleService:
             "validation_context": config_yaml.get("validation_context"),
         }
         return context_info
+
+    def partially_creation_generative_example(
+        self,
+        example_info: dict,
+        context_id: int,
+        user_id: int,
+        tag: str,
+        round_id: int,
+        task_id: int,
+    ) -> str:
+        try:
+            return self.create_example_and_increment_counters(
+                context_id,
+                user_id,
+                False,
+                None,
+                json.dumps(example_info),
+                json.dumps({}),
+                json.dumps({}),
+                tag,
+                round_id,
+                task_id,
+            )
+        except Exception as e:
+            return str(e)
+
+    def update_creation_generative_example_by_example_id(
+        self,
+        example_id: int,
+        model_input: dict,
+        metadata: dict,
+    ) -> str:
+        return self.example_repository.update_creation_generative_example_by_example_id(
+            example_id, json.dumps(model_input), json.dumps(metadata)
+        )

@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -156,14 +160,14 @@ manualMap = {
 }
 articles = ["a", "an", "the"]
 periodStrip = re.compile(r"(?!<=\d)(\.)(?!\d)")
-commaStrip = re.compile(r"(?<=\d)(\,)+(?=\d)")
-puncStrip = re.compile(
-    r"(?<=[ \\;/\"`\[\](){}<>@=+_\-,?!])([\\;/\"`\[\](){}<>@=+_\-,?!])|([\\;/\"`"
-    + r"\[\](){}<>@=+_\-,?!])(?=[ \\;/\"`\[\](){}<>@=+_\-,?!])"
-)
-puncStrip2 = re.compile(r"(?<=[a-zA-Z])([\\;/\"`\[\](){}<>@=+_\-,?!])(?=[a-zA-Z])")
+# commaStrip = re.compile(r"(?<=\d)(\,)+(?=\d)")
+# puncStrip = re.compile(
+#     r"(?<=[ \\;/\"`\[\](){}<>@=+_\-,?!])([\\;/\"`\[\](){}<>@=+_\-,?!])|([\\;/\"`"
+#     + r"\[\](){}<>@=+_\-,?!])(?=[ \\;/\"`\[\](){}<>@=+_\-,?!])"
+# )
+# puncStrip2 = re.compile(r"(?<=[a-zA-Z])([\\;/\"`\[\](){}<>@=+_\-,?!])(?=[a-zA-Z])")
 puncStripBegin = re.compile(r"\A([ \\;/\"`\[\](){}<>@=+_\-,?!]+)(?=[a-zA-Z0-9 ])")
-puncStripEnd = re.compile(r"(?<=[a-zA-Z0-9 ])([ \\;/\"`\[\](){}<>@=+_\-,?!]+)\Z")
+# puncStripEnd = re.compile(r"(?<=[a-zA-Z0-9 ])([ \\;/\"`\[\](){}<>@=+_\-,?!]+)\Z")
 spaceCleanup = re.compile(r"([ ]+)")
 punct = [
     ";",
@@ -222,12 +226,12 @@ class VQAEval(ABC):
 
     def processPunctuation(self, inText):
         outText = puncStripBegin.sub("", inText)
-        outText = puncStripEnd.sub("", outText)
-        outText = commaStrip.sub("", outText)
-        outText = puncStrip.sub(" ", outText)
+        # outText = puncStripEnd.sub("", outText)
+        # outText = commaStrip.sub("", outText)
+        # outText = puncStrip.sub(" ", outText)
         outText = spaceCleanup.sub(" ", outText)
-        outText = puncStrip2.sub(" ", outText)
-        outText = puncStrip2.sub("", outText)
+        # outText = puncStrip2.sub(" ", outText)
+        # outText = puncStrip2.sub("", outText)
         outText = periodStrip.sub("", outText, re.UNICODE)
         return outText
 

@@ -54,8 +54,9 @@ class UserRepository(AbstractRepository):
         return (
             self.session.query(self.model.admin)
             .filter(self.model.id == user_id)
+            .filter(self.model.admin == 1)
             .first()
-        )
+        ) is not None
 
     def increment_examples_verified(self, user_id: int):
         self.session.query(self.model).filter(self.model.id == user_id).update(
@@ -84,5 +85,11 @@ class UserRepository(AbstractRepository):
                 self.model.total_verified_not_correct_fooled: self.model.total_verified_not_correct_fooled
                 + 1
             }
+        )
+        self.session.commit()
+
+    def increment_examples_created(self, user_id: int):
+        self.session.query(self.model).filter(self.model.id == user_id).update(
+            {self.model.examples_submitted: self.model.examples_submitted + 1}
         )
         self.session.commit()

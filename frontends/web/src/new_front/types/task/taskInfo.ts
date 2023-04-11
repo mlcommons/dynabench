@@ -14,6 +14,7 @@ export type TaskInfoType = {
   dynalab_hr_diff: number;
   dynalab_threshold: number;
   dynamic_adversarial_data_collection: number;
+  dynamic_adversarial_data_validation: number;
   eval_server_id: string;
   eval_sqs_queue: string;
   extra_torchserve_config: string;
@@ -43,6 +44,7 @@ export type TaskInfoType = {
   validate_non_fooling: number;
   image_url: string;
   documentation_url: string;
+  challenge_type_name: string;
 };
 
 type roundInfoType = {

@@ -20,6 +20,8 @@ const Settings = (props) => {
               initialValues={{
                 hidden: props.task.hidden,
                 submitable: props.task.submitable,
+                dynamic_adversarial_data_validation:
+                  props.task.dynamic_adversarial_data_validation,
                 dynamic_adversarial_data_collection:
                   props.task.dynamic_adversarial_data_collection,
                 instructions_md: props.task.instructions_md,
@@ -260,6 +262,25 @@ const Settings = (props) => {
                         <Col sm="6">
                           <Form.Check
                             checked={values.dynamic_adversarial_data_collection}
+                            onChange={handleChange}
+                          />
+                        </Col>
+                      </Form.Group>
+                      <Form.Group
+                        as={Row}
+                        controlId="dynamic_adversarial_data_validation"
+                        className="py-3 my-0 border-bottom"
+                      >
+                        <Form.Label column className="text-base">
+                          Dynamic adversarial data validation
+                          <Form.Text id="paramsHelpBlock" muted>
+                            Does this task accept dynamic adversarial data
+                            validation?
+                          </Form.Text>
+                        </Form.Label>
+                        <Col sm="6">
+                          <Form.Check
+                            checked={values.dynamic_adversarial_data_validation}
                             onChange={handleChange}
                           />
                         </Col>

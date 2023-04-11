@@ -13,27 +13,44 @@ import TabOption from "new_front/components/Buttons/TabOption";
 import TaskActionButtons from "new_front/components/Buttons/TaskActionButtons_new";
 import TaskHelpersButton from "new_front/components/Buttons/TaskHelpersButton";
 import { TaskInfoType } from "new_front/types/task/taskInfo";
-import React, { useEffect, useState } from "react";
-import { Col, Row } from "react-bootstrap";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import Leaderboard from "new_front/pages/Task/LeaderBoard";
+import OverviewTask from "../../components/TaskPage/OverviewTask";
+import PrincipalTaskStats from "new_front/components/TaskPage/PrincipalTaskStats";
+import UserContext from "containers/UserContext";
 
 const TaskPage = () => {
   const [task, setTask] = useState<TaskInfoType>();
+  const [amountOfModels, setAmountOfModels] = useState<number>(0);
+  const [maxScore, setMaxScore] = useState<number>(0);
   const [adminOrOwner, setAdminOrOwner] = useState(false);
   const [openTab, setOpenTab] = React.useState(1);
-  const { get, loading } = useFetch();
-
+  const { get, post, loading, response } = useFetch();
   const { taskCode } = useParams<{ taskCode: string }>();
+  const userContext = useContext(UserContext);
+  const { user } = userContext;
 
   const getTask = async (taskCode: string) => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
-    const taskData = await get(
-      `/task/get_task_with_round_info_by_task_id/${taskId}`
-    );
-    setTask(taskData);
+    const [taskData, maxScore, amountOfModels, adminOrOwner] =
+      await Promise.all([
+        await get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
+        await get(`/score/get_maximun_principal_score_per_task/${taskId}`),
+        await get(`/model/get_amount_of_models_per_task/${taskId}`),
+        await post("/auth/is_admin_or_owner", {
+          task_id: taskId,
+          user_id: user.id,
+        }),
+      ]);
+    if (response.ok) {
+      setTask(taskData);
+      setMaxScore(maxScore.perf);
+      setAmountOfModels(amountOfModels);
+      setAdminOrOwner(adminOrOwner);
+    }
   };
 
   useEffect(() => {
@@ -48,24 +65,40 @@ const TaskPage = () => {
             <>
               <div className="container ">
                 <div className="mt-4 border border-gray-200 rounded-lg">
-                  <div className="grid grid-cols-3 gap-1 relative bg-opacity-25 bg-no-repeat bg-cover bg-[url(https://d2p5o30oix33cf.cloudfront.net/assets/sentiment-analysis.jpg)]">
-                    <div className="col-span-2">
-                      <div className="">
-                        <h2 className="text-2xl font-medium text-white">
+                  <div
+                    className={`grid grid-cols-2 relative bg-no-repeat bg-[50%] bg-cover`}
+                    style={{
+                      backgroundImage: `url(${task?.image_url})`,
+                    }}
+                  >
+                    <div className="bg-[#0000009c] pl-4 ">
+                      <div className="col-span-2 pt-4 pl-4">
+                        <div className="flex gap-1">
+                          <i className="fa fa-users text-white"></i>
+                          <p className=" text-sm text-white">
+                            {task.challenge_type_name}
+                          </p>
+                        </div>
+                        <h2 className="text-3xl font-medium text-white">
                           {task.name}{" "}
                         </h2>
+                        <p className="pb-2 pl-3 text-xl text-white">
+                          {task.desc}
+                        </p>
                       </div>
-                      <p className="pb-4 pl-3 text-base text-white">
-                        {task.desc}
-                      </p>
-                      <p className="pb-4 pl-3 text-base text-white">
-                        Some metrics are not available for this task.
-                      </p>
                     </div>
-                    <div className="flex items-start justify-end pt-2 pr-4">
-                      <TaskHelpersButton
-                        taskCode={taskCode}
-                        adminOrOwner={adminOrOwner}
+                    <div className="bg-[#0000009c]">
+                      <div className="flex items-start justify-end pt-2 pr-4">
+                        <TaskHelpersButton
+                          taskCode={taskCode}
+                          adminOrOwner={adminOrOwner}
+                        />
+                      </div>
+                      <PrincipalTaskStats
+                        totalRounds={task.cur_round}
+                        totalCollected={task.round.total_collected}
+                        maxScore={maxScore}
+                        amountOfModels={amountOfModels}
                       />
                     </div>
                   </div>
@@ -87,61 +120,45 @@ const TaskPage = () => {
                           openTab={openTab}
                           setOpenTab={setOpenTab}
                         />
-                        <TabOption
-                          optionTab={3}
-                          tabName="Documentation"
-                          openTab={openTab}
-                          setOpenTab={setOpenTab}
-                        />
+                        {task.documentation_url && (
+                          <TabOption
+                            optionTab={3}
+                            tabName="Documentation"
+                            openTab={openTab}
+                            documentationUrl={task.documentation_url}
+                          />
+                        )}
                       </ul>
                     </div>
                     <div className="flex justify-end pt-1">
                       <TaskActionButtons
                         configYaml={task.config_yaml}
-                        dynamicAdversarialDataCollection={
+                        dynamicAdversarialDataValidation={Boolean(
+                          task.dynamic_adversarial_data_validation
+                        )}
+                        dynamicAdversarialDataCollection={Boolean(
                           task.dynamic_adversarial_data_collection
-                        }
-                        submitable={task.submitable}
-                        hasPredictionsUpload={task.has_predictions_upload}
+                        )}
+                        submitable={Boolean(task.submitable)}
+                        hasPredictionsUpload={Boolean(
+                          task.has_predictions_upload
+                        )}
                         taskCode={task.task_code}
                       />
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-wrap mt-3">
-                  <div className="flex-auto px-4">
+                  <div className="flex-auto">
                     <div className="tab-content tab-space">
-                      <div className={openTab === 1 ? "block" : "hidden"}>
+                      <div className={openTab === 1 ? "block  px-4" : "hidden"}>
                         <Leaderboard taskCode={task.task_code} />
-                        {/* Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Nesciunt, dolores, pariatur nisi sit eveniet commodi
-                        tenetur error laboriosam similique rerum atque eum sequi
-                        quasi. Quis explicabo delectus in enim quam! */}
                       </div>
-                      <div className={openTab === 2 ? "block" : "hidden"}>
-                        <Row className="justify-content-center">
-                          <Col xs={12} md={12}>
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html: task.round?.longdesc,
-                              }}
-                            ></div>
-                          </Col>
-                        </Row>
-                      </div>
-                      <div className={openTab === 3 ? "block" : "hidden"}>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Nesciunt, dolores, pariatur nisi sit eveniet commodi
-                        tenetur error laboriosam similique rerum atque eum sequi
-                        quasi. Quis explicabo delectus in enim quam! Lorem ipsum
-                        dolor sit amet consectetur adipisicing elit. Nesciunt,
-                        dolores, pariatur nisi sit eveniet commodi tenetur error
-                        laboriosam similique rerum atque eum sequi quasi. Quis
-                        explicabo delectus in enim quam! Lorem ipsum dolor sit
-                        amet consectetur adipisicing elit. Nesciunt, dolores,
-                        pariatur nisi sit eveniet commodi tenetur error
-                        laboriosam similique rerum atque eum sequi quasi. Quis
-                        explicabo delectus in enim quam!
+                      <div className={openTab === 2 ? "block " : "hidden"}>
+                        <OverviewTask
+                          roundDescription={task.round?.longdesc}
+                          generalDescription={task.instructions_md}
+                        />
                       </div>
                     </div>
                   </div>

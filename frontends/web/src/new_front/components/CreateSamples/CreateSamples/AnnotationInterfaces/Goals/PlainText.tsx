@@ -3,7 +3,7 @@ import { GoalConfigType } from "new_front/types/createSamples/createSamples/anno
 import React, { FC } from "react";
 
 const Plain: FC<AnnotationFactoryType & GoalConfigType> = ({ text }) => {
-  return <div>{text}</div>;
+  return <div className="p-3 border rounded bg-[#f0f2f5] pl-6">{text}</div>;
 };
 
 export default Plain;

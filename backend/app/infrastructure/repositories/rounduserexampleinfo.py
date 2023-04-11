@@ -29,7 +29,7 @@ class RoundUserExampleInfoRepository(AbstractRepository):
                 uid=user_id,
                 examples_submitted=0,
                 total_fooled=0,
-                total_correct=0,
+                total_verified_not_correct_fooled=0,
             )
         )
         self.session.commit()

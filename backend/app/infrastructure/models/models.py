@@ -106,6 +106,7 @@ class Task(Base):
     train_file_upload_instructions_md = Column(Text)
     mlcube_tutorial_markdown = Column(Text)
     dynamic_adversarial_data_collection = Column(TINYINT(1))
+    dynamic_adversarial_data_validation = Column(TINYINT(1))
     build_sqs_queue = Column(Text)
     eval_sqs_queue = Column(Text)
     is_decen_task = Column(TINYINT(1), server_default=text("'0'"))
@@ -135,6 +136,7 @@ class User(Base):
     forgot_password_token = Column(String(255))
     forgot_password_token_expiry_date = Column(DateTime)
     total_retracted = Column(Integer)
+    examples_verified_correct = Column(Integer)
     total_verified_fooled = Column(Integer)
     total_verified_not_correct_fooled = Column(Integer)
     total_fooled = Column(Integer)
@@ -315,6 +317,13 @@ class Category(Base):
     name = Column(String(100), nullable=False, unique=True)
 
 
+class ChallengesTypes(Base):
+    __tablename__ = "challenges_types"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(260), nullable=False, unique=True)
+
+
 class TaskCategories(Base):
     __tablename__ = "task_categories"
 
@@ -413,8 +422,12 @@ class Example(Base):
     tag = Column(Text)
     input_json = Column(Text)
     output_json = Column(Text)
-    metadata_json = Column(Text)
+    metadata_json = Column(Text, server_default=text("'{}'"))
     model_endpoint_name = Column(Text)
+    verified = Column(TINYINT(1))
+    verified_correct = Column(Integer)
+    verified_incorrect = Column(Integer)
+    verified_flagged = Column(Integer)
     split = Column(String(255))
     model_wrong = Column(TINYINT(1))
     retracted = Column(TINYINT(1))

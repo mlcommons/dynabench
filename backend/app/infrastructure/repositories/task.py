@@ -6,7 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from app.infrastructure.models.models import Round, Task
+from app.infrastructure.models.models import ChallengesTypes, Round, Task
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -40,22 +40,24 @@ class TaskRepository(AbstractRepository):
 
     def get_active_tasks_with_round_info(self):
         return (
-            self.session.query(self.model, Round)
+            self.session.query(self.model, Round, ChallengesTypes)
             .join(
                 Round,
                 (Round.tid == self.model.id) & (Round.rid == self.model.cur_round),
             )
+            .join(ChallengesTypes, ChallengesTypes.id == self.model.challenge_type)
             .filter(self.model.hidden.is_(False))
             .all()
         )
 
     def get_task_with_round_info_by_task_id(self, task_id: int):
         return (
-            self.session.query(self.model, Round)
+            self.session.query(self.model, Round, ChallengesTypes)
             .join(
                 Round,
                 (Round.tid == self.model.id) & (Round.rid == self.model.cur_round),
             )
+            .join(ChallengesTypes, ChallengesTypes.id == self.model.challenge_type)
             .filter(self.model.id == task_id)
             .first()
         )

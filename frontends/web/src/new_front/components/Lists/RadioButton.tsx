@@ -1,37 +1,55 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { Collapse } from "react-bootstrap";
+import parse from "html-react-parser";
 
 type RadioButtonProps = {
   options: string[];
   instructions: string;
   field_name_for_the_model?: string;
-  onInputChange?: (value: any) => void;
+  metadata?: boolean;
+  InitialOpen?: boolean;
+  onInputChange?: (value: any, metadata: boolean) => void;
 };
 
 const RadioButton: FC<RadioButtonProps> = ({
   options,
   instructions,
   field_name_for_the_model,
+  metadata,
+  InitialOpen = true,
   onInputChange,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(InitialOpen);
+  const [selectedOption, setSelectedOption] = useState<string>(
+    options[0] || ""
+  );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (field_name_for_the_model && onInputChange) {
-      onInputChange({
-        [field_name_for_the_model]: event.target.value,
-      });
+      onInputChange(
+        {
+          [field_name_for_the_model]: event.target.value,
+        },
+        metadata || false
+      );
     }
   };
 
   return (
     <div key="" className="py-2">
-      <h3
-        className="mb-1 font-semibold text-letter-color pointer"
+      <div
+        className="flex items-center h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
         onClick={() => setOpen(!open)}
       >
-        {instructions} ↆ
-      </h3>
+        <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
+          {open ? (
+            <i className="pl-2 pr-3 fas fa-minus" />
+          ) : (
+            <i className="pl-2 pr-3 fas fa-plus" />
+          )}
+          {parse(instructions)}
+        </h3>
+      </div>
       <Collapse in={open}>
         <ul className="w-full text-sm font-medium text-letter-color">
           {options.map((option, index) => (
@@ -41,11 +59,14 @@ const RadioButton: FC<RadioButtonProps> = ({
                   type="radio"
                   value={option}
                   name="radio"
-                  className="w-4 h-5 text-third-color bg-gray-100 border-gray-300 rounded focus:ring-third-color"
+                  className="w-4 h-5 bg-gray-100 border-gray-300 rounded text-third-color focus:ring-third-color"
                   onChange={handleChange}
                 />
-                <label className="w-full pt-2 ml-2 text-base font-medium dark:text-gray-300">
-                  {option}
+                <label
+                  className="w-full pt-2 ml-2 text-base font-medium text-letter-color"
+                  defaultValue={selectedOption}
+                >
+                  {parse(option)}
                 </label>
               </div>
             </li>

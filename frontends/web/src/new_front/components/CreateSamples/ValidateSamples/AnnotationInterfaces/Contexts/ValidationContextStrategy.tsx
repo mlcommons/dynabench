@@ -19,13 +19,13 @@ const Import = (
 
 type Props = {
   config: ValidationContext[];
-  responseModel: any;
+  infoExampleToValidate: any;
 };
 
 const ValidationContextStrategy: FC<Props & ValidationFactoryType> = ({
   config,
   task,
-  responseModel,
+  infoExampleToValidate,
   onInputChange,
 }) => {
   const [contextRenders, setContextRenders] = useState<
@@ -35,11 +35,14 @@ const ValidationContextStrategy: FC<Props & ValidationFactoryType> = ({
   useEffect(() => {
     const getView = () => {
       config.map((option, index) => {
-        option = { ...option, info: responseModel[option?.label!] };
+        option = { ...option, info: infoExampleToValidate[option?.label!] };
         const View = Import(ModulesRegistry.context[option.type]);
         setContextRenders((prev) => [
           ...prev,
-          <View {...{ onInputChange, task, ...option }} key={index} />,
+          <View
+            {...{ onInputChange, task, infoExampleToValidate, ...option }}
+            key={index}
+          />,
         ]);
       });
     };

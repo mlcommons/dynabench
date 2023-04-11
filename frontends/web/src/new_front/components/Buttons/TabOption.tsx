@@ -4,13 +4,15 @@ type TabOptionProps = {
   optionTab: number;
   tabName: string;
   openTab: number;
-  setOpenTab: (openTab: number) => void;
+  documentationUrl?: string;
+  setOpenTab?: (openTab: number) => void;
 };
 
 const TabOption: FC<TabOptionProps> = ({
   optionTab,
   tabName,
   openTab,
+  documentationUrl,
   setOpenTab,
 }) => {
   return (
@@ -18,12 +20,15 @@ const TabOption: FC<TabOptionProps> = ({
       <a
         className="relative block py-3"
         onClick={(e) => {
+          if (!setOpenTab) return;
           e.preventDefault();
           setOpenTab(optionTab);
         }}
         data-toggle="tab"
-        href="#link1"
+        target="_blank"
+        href={setOpenTab ? "#link1" : documentationUrl}
         role="tablist"
+        rel="noreferrer"
       >
         <span
           className={

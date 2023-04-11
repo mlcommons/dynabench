@@ -162,6 +162,7 @@ class Leaderboard extends React.Component {
                   <Row>
                     {this.state.task.id &&
                       this.state.task.dynamic_adversarial_data_collection &&
+                      this.state.task.dynamic_adversarial_data_validation &&
                       this.state.task.round &&
                       this.state.task.cur_round && (
                         <Col xs={12} md={6}>

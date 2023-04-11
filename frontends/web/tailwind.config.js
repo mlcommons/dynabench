@@ -20,6 +20,7 @@ module.exports = {
       },
     },
     extend: {
+      padding: { "fluid-video": "56.25%" },
       colors: {
         "primary-color": "#ccebd4",
         "secondary-color": "#ff6d6a",

@@ -1,68 +1,88 @@
+import UserContext from "containers/UserContext";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import BasicInput from "new_front/components/Inputs/BasicInput";
 import MultiSelectImage from "new_front/components/Lists/MultiSelectImage";
-import MultiSelectImages from "new_front/components/Lists/MultiSelectImages";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
-import React, { FC, useState } from "react";
+import React, { FC, useState, useContext } from "react";
 import { PacmanLoader } from "react-spinners";
+import Swal from "sweetalert2";
 import useFetch from "use-http";
 
 const SelectBetweenImagesGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
-> = ({ field_names_for_the_model, onInputChange, setIsGenerativeContext }) => {
-  const type = "nibbler";
-  const artifacts = {
-    endpoint: "https://www.google.com",
-  };
+> = ({
+  field_names_for_the_model,
+  generative_context,
+  contextId,
+  taskId,
+  realRoundId,
+  setIsGenerativeContext,
+  setPartialSampleId,
+}) => {
   const [generatedImages, setGeneratedImages] = useState<any[]>([]);
   const [showImages, setShowImages] = useState<any[]>([]);
-  const [artifactsInput, setArtifactsInput] = useState<object>(artifacts);
-  const [prompt, setPrompt] = useState<string>("");
-  const [selectImage, setSelectImage] = useState<string>("");
-  const [showOtherImages, setShowOtherImages] = useState<boolean>(false);
+  const [artifactsInput, setArtifactsInput] = useState<object>(
+    generative_context.artifacts
+  );
+  const [prompt, setPrompt] = useState<string>("Type your prompt here");
   const { post, loading, response } = useFetch();
+  const { user } = useContext(UserContext);
+  const { modelInputs, metadataExample, updateModelInputs } = useContext(
+    CreateInterfaceContext
+  );
 
   const generateImages = async () => {
-    const generatedImages = await post("/context/get_generative_contexts", {
-      type: type,
-      artifacts: artifactsInput,
-    });
-    if (response.ok) {
-      setGeneratedImages(generatedImages);
-      setShowImages(generatedImages);
+    if (metadataExample.hasOwnProperty("label")) {
+      const generatedImages = await post("/context/get_generative_contexts", {
+        type: generative_context.type,
+        artifacts: artifactsInput,
+      });
+      if (response.ok) {
+        setGeneratedImages(generatedImages);
+        setShowImages(generatedImages);
+      }
+    } else {
+      Swal.fire({
+        title: "Please select the type of your prompt",
+        icon: "warning",
+      });
     }
   };
 
   const handlePromptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setArtifactsInput({ ...artifactsInput, prompt: event.target.value });
     setPrompt(event.target.value);
-    onInputChange({
-      [field_names_for_the_model.prompt ?? "original_prompt"]:
+    updateModelInputs({
+      [field_names_for_the_model.original_prompt ?? "original_prompt"]:
         event.target.value,
     });
   };
 
-  const handleSelectImage = (image: string) => {
-    setSelectImage(image);
+  const handleSelectImage = async (image: string) => {
     setIsGenerativeContext(false);
-    setShowImages([
-      {
-        image: image,
-      },
-    ]);
-    setShowOtherImages(true);
-    onInputChange({
+    updateModelInputs({
       [field_names_for_the_model.select_image ?? "select_image"]: image,
     });
+    // createPartialSample()
   };
 
-  const handleSelectOtherImages = (images: string[]) => {
-    onInputChange({
-      [field_names_for_the_model.select_other_images ?? "select_other_images"]:
-        images,
-    });
+  const createPartialSample = async () => {
+    const partialSampleId = await post(
+      `/example/partially_creation_generative_example`,
+      {
+        example_info: modelInputs,
+        context_id: contextId,
+        user_id: user.id,
+        round_id: realRoundId,
+        task_id: taskId,
+      }
+    );
+    if (response.ok) {
+      setPartialSampleId(partialSampleId);
+    }
   };
 
   return (
@@ -70,22 +90,25 @@ const SelectBetweenImagesGenerative: FC<
       {!loading ? (
         <div>
           <div className="grid col-span-1 py-3 justify-items-end">
-            <BasicInput onChange={handlePromptChange} placeholder="Prompt" />
+            <BasicInput
+              onChange={handlePromptChange}
+              onEnter={generateImages}
+              placeholder={prompt}
+            />
             <GeneralButton
               onClick={generateImages}
               text="Generate Images"
               className="border-0 font-weight-bold light-gray-bg task-action-btn mt-4"
             />
           </div>
-          {generatedImages.length === 0 ? (
+          {showImages.length === 0 ? (
             <></>
           ) : (
             <>
-              <BasicInput placeholder={prompt} disabled={true} />
               <div>
                 <AnnotationInstruction
                   placement="left"
-                  tooltip="Select the image"
+                  tooltip="Select the image that best exemplifies the harm"
                 >
                   <MultiSelectImage
                     instructions="Select an image"
@@ -96,23 +119,18 @@ const SelectBetweenImagesGenerative: FC<
               </div>
             </>
           )}
-          {showOtherImages && (
-            <>
-              <div>
-                <MultiSelectImages
-                  instructions="Select other images"
-                  images={generatedImages
-                    .map(({ image }) => image)
-                    .filter((image) => image !== selectImage)}
-                  handleFunction={handleSelectOtherImages}
-                />
-              </div>
-            </>
-          )}
         </div>
       ) : (
-        <div className="flex items-center justify-center">
-          <PacmanLoader color="#ccebd4" loading={loading} size={50} />
+        <div className="grid items -center justify-center grid-rows-2">
+          <div className="mr-2 text-letter-color">
+            Images are being generated, bear with the model
+          </div>
+          <PacmanLoader
+            color="#ccebd4"
+            loading={loading}
+            size={50}
+            className="align-center"
+          />
         </div>
       )}
     </>

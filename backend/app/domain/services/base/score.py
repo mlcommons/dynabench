@@ -4,7 +4,7 @@
 
 import numpy as np
 
-from app.infrastructure.repositories.dataset import DatasetRepository
+from app.domain.services.base.dataset import DatasetService
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
@@ -15,7 +15,7 @@ class ScoreService:
     def __init__(self):
         self.score_repository = ScoreRepository()
         self.task_repository = TaskRepository()
-        self.dataset_repository = DatasetRepository()
+        self.dataset_service = DatasetService()
         self.model_repository = ModelRepository()
         self.user_repository = UserRepository()
 
@@ -54,7 +54,7 @@ class ScoreService:
         ).__dict__
         final_scores_by_dataset_and_model_id = {}
         dataset_id = scores_by_dataset_and_model_id["did"]
-        dataset_name = self.dataset_repository.get_dataset_name_by_id(dataset_id)[0]
+        dataset_name = self.dataset_service.get_dataset_name_by_id(dataset_id)[0]
         final_scores_by_dataset_and_model_id["id"] = dataset_id
         final_scores_by_dataset_and_model_id["name"] = dataset_name
         metrics_with_score_and_weight = self.get_scores_by_dataset_and_model_id(
@@ -172,3 +172,10 @@ class ScoreService:
             ] * weights.get(metric, 0)
 
         return averaged_dataset_results
+
+    def get_maximun_principal_score_per_task(self, task_id: int) -> float:
+        scoring_datasets = self.dataset_service.get_scoring_datasets_by_task_id(task_id)
+        scoring_datasets = [dataset["id"] for dataset in scoring_datasets]
+        return self.score_repository.get_maximun_principal_score_per_task(
+            task_id, scoring_datasets
+        )

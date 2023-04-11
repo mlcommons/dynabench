@@ -1,6 +1,7 @@
-import React, { FC, useState } from "react";
-import SelectImages from "new_front/components/Images/SelectImages";
+import React, { FC, useEffect, useState } from "react";
 import { Collapse } from "react-bootstrap";
+import SelectImages from "../Images/SelectImages";
+import parse from "html-react-parser";
 
 export type MultiSelectImagesProps = {
   instructions?: string;
@@ -13,19 +14,30 @@ const MultiSelectImages: FC<MultiSelectImagesProps> = ({
   images,
   handleFunction,
 }) => {
-  const selectedImages: string[] = [];
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [open, setOpen] = useState(true);
+
+  useEffect(() => {
+    handleFunction(selectedImages);
+  }, [selectedImages]);
 
   return (
     <>
       <div>
         {instructions && (
-          <h3
-            className="mb-1 font-semibold text-letter-color pointer"
+          <div
+            className="flex items-center h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
             onClick={() => setOpen(!open)}
           >
-            {instructions} ↆ
-          </h3>
+            <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
+              {open ? (
+                <i className="pl-2 pr-3 fas fa-minus" />
+              ) : (
+                <i className="pl-2 pr-3 fas fa-plus" />
+              )}
+              {parse(instructions)}
+            </h3>
+          </div>
         )}
         <Collapse in={open}>
           <div className="grid grid-cols-3">
@@ -35,6 +47,7 @@ const MultiSelectImages: FC<MultiSelectImagesProps> = ({
                   image={image}
                   index={index}
                   selectedImages={selectedImages}
+                  setSelectedImages={setSelectedImages}
                   handleSelectImages={handleFunction}
                 />
               </div>

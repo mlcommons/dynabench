@@ -187,54 +187,6 @@ class ModelService:
             )
         return response
 
-    def partially_creation_example(
-        self,
-        example_info: dict,
-        context_id: int,
-        user_id: int,
-        tag: str,
-        round_id: int,
-        task_id: int,
-        sandbox_mode: bool,
-    ) -> str:
-        if not sandbox_mode:
-            return self.example_service.create_example_and_increment_counters(
-                context_id,
-                user_id,
-                False,
-                "",
-                json.dumps(example_info),
-                "",
-                {},
-                tag,
-                round_id,
-                task_id,
-            )
-
-    def update_creation_example_by_creation_id(
-        self,
-        model_input: dict,
-        context_id: int,
-        user_id: int,
-        tag: str,
-        round_id: int,
-        task_id: int,
-        sandbox_mode: bool,
-    ) -> str:
-        if not sandbox_mode:
-            return self.example_service.create_example_and_increment_counters(
-                context_id,
-                user_id,
-                False,
-                "",
-                json.dumps(model_input),
-                "",
-                {},
-                tag,
-                round_id,
-                task_id,
-            )
-
     def evaluate_model_in_the_loop(
         self,
         prediction: str,
@@ -317,3 +269,12 @@ class ModelService:
             f"./app/resources/predictions/{model_id}-{dataset_name}.jsonl.out",
         )
         return predictions
+
+    def get_amount_of_models_per_task(self, task_id: int):
+        return self.model_repository.get_amount_of_models_per_task(task_id)
+
+    def get_model_name_by_id(self, model_id: int):
+        return self.model_repository.get_model_name_by_id(model_id)
+
+    def get_user_id_by_model_id(self, model_id: int):
+        return self.model_repository.get_user_id_by_model_id(model_id)

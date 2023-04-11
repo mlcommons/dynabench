@@ -25,7 +25,7 @@ class TaskService:
         self.model_repository = ModelRepository()
         self.score_services = ScoreService()
         self.task_categories_repository = TaskCategoriesRepository()
-        self.user_repository = UserRepository
+        self.user_repository = UserRepository()
 
     def update_last_activity_date(self, task_id: int):
         self.task_repository.update_last_activity_date(task_id)
@@ -116,6 +116,9 @@ class TaskService:
         )
         task = task_and_round_info["Task"].__dict__
         task["round"] = task_and_round_info["Round"].__dict__
+        task["challenge_type_name"] = task_and_round_info["ChallengesTypes"].__dict__[
+            "name"
+        ]
         return task
 
     def get_task_id_by_task_code(self, task_code: str):
@@ -172,7 +175,3 @@ class TaskService:
 
     def get_tasks_categories(self):
         return self.task_categories_repository.get_tasks_categories()
-
-    def is_admin_or_owner(self, user_id: int, task_id: int):
-        is_task_owner = self.task_repository.is_task_owner(user_id, task_id)
-        return is_task_owner or self.user_repository.get_is_admin(user_id)[0]

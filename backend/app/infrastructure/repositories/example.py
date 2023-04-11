@@ -64,21 +64,34 @@ class ExampleRepository(AbstractRepository):
         )
 
     def increment_counter_total_verified(self, example_id: int):
-        example = self.get_by_id(example_id)
-        example.total_verified += 1
-        self.session.commit()
+        self.session.query(self.model).filter(self.model.id == example_id).update(
+            {self.model.total_verified: self.model.total_verified + 1}
+        )
 
     def increment_counter_total_correct(self, example_id: int):
-        example = self.get_by_id(example_id)
-        example.verified_correct += 1
-        self.session.commit()
+        self.session.query(self.model).filter(self.model.id == example_id).update(
+            {self.model.verified_correct: self.model.verified_correct + 1}
+        )
 
     def increment_counter_total_incorrect(self, example_id: int):
-        example = self.get_by_id(example_id)
-        example.verified_incorrect += 1
-        self.session.commit()
+        self.session.query(self.model).filter(self.model.id == example_id).update(
+            {self.model.verified_incorrect: self.model.verified_incorrect + 1}
+        )
 
     def increment_counter_total_flagged(self, example_id: int):
+        self.session.query(self.model).filter(self.model.id == example_id).update(
+            {self.model.verified_flagged: self.model.verified_flagged + 1}
+        )
+
+    def mark_as_verified(self, example_id: int):
         example = self.get_by_id(example_id)
-        example.verified_flagged += 1
+        example["verified"] = 1
+        self.session.commit()
+
+    def update_creation_generative_example_by_example_id(
+        self, example_id: int, model_input: dict, metadata: dict
+    ):
+        example = self.get_by_id(example_id)
+        example["input_json"] = model_input
+        example["metadata_json"] = metadata
         self.session.commit()

@@ -9,10 +9,12 @@ export type ConfigurationTask = {
   goal: object;
   context: object;
   user_input: object[];
+  required_fields: string[];
   model_input: object;
   response_fields: ResponseFields;
   model_output: ModelOutput;
   model_evaluation_metric: ModelEvaluationMetric;
+  creation_samples_title?: string;
 };
 
 export type ValidationConfigurationTask = {

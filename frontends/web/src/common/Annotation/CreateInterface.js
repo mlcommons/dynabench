@@ -680,7 +680,9 @@ class CreateInterface extends React.Component {
                   <Modal.Title>Instructions</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  <Markdown>{this.state.task.instructions_md}</Markdown>
+                  <Markdown className="mt-20">
+                    {this.state.task.instructions_md}
+                  </Markdown>
                 </Modal.Body>
               </Modal>
               <Modal

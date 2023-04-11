@@ -11,16 +11,17 @@ import requests
 import yaml
 from fastapi import HTTPException
 
+from app.domain.services.base.task import TaskService
+from app.domain.services.utils.constant import black_image
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
-from app.infrastructure.repositories.task import TaskRepository
 
 
 class ContextService:
     def __init__(self):
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
-        self.task_repository = TaskRepository()
+        self.task_service = TaskService()
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
         self.context_repository.increment_counter_total_samples_and_update_date(
@@ -49,7 +50,7 @@ class ContextService:
         Returns:
             list: A list of context objects, each of which has different attributes.
         """
-        task_config = self.task_repository.get_task_info_by_task_id(task_id)
+        task_config = self.task_service.get_task_info_by_task_id(task_id)
         try:
             self.get_context_configuration(task_id)
         except AttributeError:
@@ -80,7 +81,7 @@ class ContextService:
         }
 
     def get_context_configuration(self, task_id) -> dict:
-        task_config = self.task_repository.get_task_info_by_task_id(task_id)
+        task_config = self.task_service.get_task_info_by_task_id(task_id)
         config_yaml = yaml.safe_load(task_config.config_yaml)
         context_info = {
             "goal": config_yaml.get("goal"),
@@ -90,18 +91,20 @@ class ContextService:
             "response_fields": config_yaml.get("response_fields"),
             "model_output": config_yaml.get("model_output"),
             "model_evaluation_metric": config_yaml.get("model_evaluation_metric"),
+            "required_fields": config_yaml.get("required_fields"),
+            "creation_samples_title": config_yaml.get("creation_samples_title"),
         }
         return context_info
 
     def get_nibbler_contexts(self, prompt: str, endpoint: str) -> dict:
         print(prompt)
-        context_config = self.task_repository.get_task_info_by_task_id(45)
+        context_config = self.task_service.get_task_info_by_task_id(45)
         res = requests.post(
             context_config.lambda_model,
             json={
                 "model": "runwayml-stable-diffusion-v1-5",
                 "prompt": prompt,
-                "n": 9,
+                "n": 6,
                 "steps": 20,
             },
             headers={"Authorization": "Bearer ", "User-Agent": ""},
@@ -111,17 +114,17 @@ class ContextService:
         else:
             openai.api_key = os.getenv("OPENAI")
             response = openai.Image.create(
-                prompt=prompt, n=9, size="256x256", response_format="b64_json"
+                prompt=prompt, n=6, size="256x256", response_format="b64_json"
             )
             image_response = response["data"][0]["b64_json"]
         image_list = []
-        for i in image_response:
-            new_dict = {
-                "image": i["image_base64"],
-                "id": hashlib.md5(i["image_base64"].encode()).hexdigest(),
-            }
-            image_list.append(new_dict)
-
+        for image in image_response:
+            if black_image not in image:
+                new_dict = {
+                    "image": image["image_base64"],
+                    "id": hashlib.md5(image["image_base64"].encode()).hexdigest(),
+                }
+                image_list.append(new_dict)
         return image_list
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
