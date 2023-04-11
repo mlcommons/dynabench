@@ -5,6 +5,7 @@ import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Carousel from "react-multi-carousel";
 import { responsiveCarouselCompanies } from "../../utils/constants";
+import { Link as ScrollLink } from "react-scroll";
 import "react-multi-carousel/lib/styles.css";
 
 const Test = () => {
@@ -45,8 +46,8 @@ const Test = () => {
   return (
     <>
       <section id="hero" className="container mt-20">
-        <div className="mx-auto">
-          <div className="grid lg:grid-cols-2 gap-4 items-center">
+        <div className="mx-auto ">
+          <div className="grid items-center gap-4 lg:grid-cols-2 ">
             <motion.div
               className="mt-12 lg:mt-0"
               variants={fadeIn("right", "tween", 0.5, 0.5)}
@@ -54,21 +55,21 @@ const Test = () => {
               <h2 className="font-sans text-5xl font-bold  text-[#344854]">
                 Challenging the Limits of Benchmarking AI
               </h2>
-              <p className="mb-16 text-xl mt-4">
+              <p className="mt-4 mb-16 text-xl">
                 Collaborate with fellow AI enthusiasts and experts, and work
                 together to create new and innovative solutions to the most
                 pressing challenges facing the field of AI today.
               </p>
               <Button
                 as={Link}
-                className="mr-2 border-0 font-semibold text-xl bg-primary-color  p-3 rounded-full"
+                className="p-3 mr-2 text-xl font-semibold border-0 rounded-full bg-primary-color"
                 to="/tasks"
               >
                 Challenges
               </Button>
               <Button
                 as={Link}
-                className="mr-2 border-0 font-medium light-gray-bg text-xl p-3"
+                className="p-3 mr-2 text-xl font-medium border-0 light-gray-bg"
                 to="/account#tasks"
               >
                 Create your own task
@@ -78,71 +79,55 @@ const Test = () => {
                   <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
                     20+
                   </h2>
-                  <h5 className="text-lg font-medium mb-2">Challenges</h5>
+                  <h5 className="mb-2 text-lg font-medium">Challenges</h5>
+                </div>
+                <div className="mb-12 md:mb-0">
+                  <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
+                    15+
+                  </h2>
+                  <h5 className="mb-2 text-lg font-medium">Partipants</h5>
                 </div>
                 <div className="mb-12 md:mb-0">
                   <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
                     50+
                   </h2>
-                  <h5 className="text-lg font-medium mb-2">Models</h5>
-                </div>
-                <div className="mb-12 md:mb-0">
-                  <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
-                    50+
-                  </h2>
-                  <h5 className="text-lg font-medium mb-4">Participants</h5>
+                  <h5 className="mb-2 text-lg font-medium">Models</h5>
                 </div>
               </div>
             </motion.div>
             <div className="mb-12 lg:mb-0">
-              {/* <img src="https://i.postimg.cc/90DyYQGD/collage-1.png" alt="" /> */}
-              {/* <div
-                id="responsiveVideoWrapper"
-                className="relative h-0 pb-fluid-video overflow-hidden border-hidden rounded-2xl shadow-lg border-transparent	border-0	"
-              >
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full "
-                  src="https://models-dynalab.s3.eu-west-3.amazonaws.com/assets/explainer.mp4"
-                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="YouTube video player"
-                ></iframe>
-              </div> */}
-              <div
-                id="responsiveVideoWrapper"
-                className="relative h-0 pb-fluid-video overflow-hidden rounded-md shadow-lg"
-              >
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full "
-                  src="https://s10.gifyu.com/images/ezgif.com-video-to-gif23674cd2ee6b09d5.gif"
-                  allow="accelerometer; clipboard-write;  encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="YouTube video player"
-                ></iframe>
-              </div>
+              <img src="https://i.postimg.cc/90DyYQGD/collage-1.png" alt="" />
             </div>
           </div>
         </div>
         <div className="mt-8">
-          <a
-            href="/text"
-            aria-label="Scroll down"
-            className="flex items-center justify-center w-10 h-10 mx-auto text-gray-600 hover:text-deep-purple-accent-400 hover:border-deep-purple-accent-400 duration-300 transform border border-gray-400 rounded-full hover:shadow hover:scale-110"
+          <ScrollLink
+            to="trusted"
+            spy={true}
+            smooth={true}
+            offset={-70}
+            duration={1500}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="currentColor"
+            <a
+              href="/text"
+              aria-label="Scroll down"
+              className="flex items-center justify-center w-10 h-10 mx-auto text-gray-600 duration-300 transform border border-gray-400 rounded-full hover:text-deep-purple-accent-400 hover:border-deep-purple-accent-400 hover:shadow hover:scale-110"
             >
-              <path d="M10.293,3.293,6,7.586,1.707,3.293A1,1,0,0,0,.293,4.707l5,5a1,1,0,0,0,1.414,0l5-5a1,1,0,1,0-1.414-1.414Z" />
-            </svg>
-          </a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="currentColor"
+              >
+                <path d="M10.293,3.293,6,7.586,1.707,3.293A1,1,0,0,0,.293,4.707l5,5a1,1,0,0,0,1.414,0l5-5a1,1,0,1,0-1.414-1.414Z" />
+              </svg>
+            </a>
+          </ScrollLink>
         </div>
       </section>
-      <section id="trusted by divide-y">
-        <div className=" mt-16 container">
+      <section id="trusted" className="">
+        <div className="container mt-16 ">
           <h2 className="w-full my-2 text-5xl font-bold leading-tight text-center text-gray-800">
             Trusted by
           </h2>
@@ -168,131 +153,261 @@ const Test = () => {
           </div>
         </div>
       </section>
-      <section id="communities" className="mt-16">
-        <div className="inset-0 flex items-center">
-          <div className="w-full border-b border-gray-300"></div>
-        </div>
-        <div className="container max-w-5xl mx-auto mt-4">
-          <motion.h2
-            className="w-full my-2 text-5xl font-bold leading-tight text-center text-gray-800 pointer"
-            variants={fadeIn("right", "tween", 0.5, 0.5)}
-            initial="initial"
-            animate="animate"
-          >
-            Communities
-          </motion.h2>
+      <div className="bg-gray-50">
+        <section id="communities" className="mt-16">
+          <div className="inset-0 flex items-center"></div>
+          <div className="container mx-auto mt-4">
+            <a
+              className="flex flex-row justify-center hover:no-underline pointer"
+              href="/"
+            >
+              <motion.h2
+                className="flex flex-row my-2 text-5xl font-bold leading-tight text-center text-gray-800"
+                variants={fadeIn("right", "tween", 0.5, 0.5)}
+                initial="initial"
+                animate="animate"
+              >
+                Communities
+                <svg
+                  version="1.1"
+                  id="Layer_1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 32 32"
+                  enable-background="new 0 0 32 32"
+                  width="56px"
+                  height="56px"
+                  className="pt-[12px]"
+                  fill="#000000"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    {" "}
+                    <line
+                      fill="none"
+                      stroke="#344854"
+                      stroke-width="2"
+                      stroke-miterlimit="10"
+                      x1="26"
+                      y1="16"
+                      x2="4"
+                      y2="16"
+                    ></line>{" "}
+                    <polyline
+                      fill="none"
+                      stroke="#344854"
+                      stroke-width="2"
+                      stroke-miterlimit="10"
+                      points="18,7.5 26.5,16 18,24.5 "
+                    ></polyline>{" "}
+                  </g>
+                </svg>
+              </motion.h2>
+            </a>
 
-          <div className="flex flex-wrap my-12">
-            <div className="w-5/6 sm:w-1/2 p-6">
-              <h3 className="text-3xl text-gray-800 font-bold leading-none mb-3">
-                Dynamical adversarial
-              </h3>
-              <p className="text-gray-600 mb-8">
-                Dynabench is a platform for dynamic data collection and
-                benchmarking. Static benchmarks have many issues. Dynabench
-                offers a more accurate and sustainable way for evaluating
-                progress in AI.
-              </p>
-            </div>
-            <div className="w-full sm:w-1/2 p-6">
-              <div
-                id="responsiveVideoWrapper"
-                className="relative h-0 pb-fluid-video overflow-hidden rounded-md shadow-lg"
-              >
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full "
-                  src="https://models-dynalab.s3.eu-west-3.amazonaws.com/assets/explainer.mp4"
-                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="YouTube video player"
-                ></iframe>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-wrap flex-col-reverse sm:flex-row my-12">
-            <div className="w-full sm:w-1/2 p-6 mt-6">
-              <div
-                id="responsiveVideoWrapper"
-                className="relative h-0 pb-fluid-video overflow-hidden rounded-md shadow-lg"
-              >
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full "
-                  src="https://drive.google.com/file/d/1yrbob0nbViaaZw4iV3gQdYM6NR83fjXU/preview?authuser=0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="YouTube video player"
-                ></iframe>
-              </div>
-            </div>
-            <div className="w-full sm:w-1/2 p-6 mt-6">
-              <div className="align-middle">
-                <h3 className="text-3xl text-gray-800 font-bold leading-none mb-3">
-                  Dataperf
-                </h3>
-                <p className="text-gray-600 mb-8">
-                  DataPerf: a suite of benchmarks that evaluate the quality of
-                  training and test data, and the algorithms for constructing or
-                  optimizing such datasets, such as core set selection or
-                  labelling error debugging, across a range of common ML tasks
-                  such as image classification. We plan to leverage the DataPerf
-                  benchmarks through challenges and leaderboards.
+            <div className="flex flex-wrap my-12">
+              <div className="w-5/6 p-6 sm:w-1/2">
+                <a
+                  className="flex flex-row gap-1 pointer hover:no-underline"
+                  href="/dataperf"
+                >
+                  <h3 className="mb-3 text-3xl font-bold leading-none text-gray-800">
+                    Dynamical adversarial
+                  </h3>
+                  <svg
+                    fill="#344854"
+                    className="pb-1"
+                    version="1.1"
+                    id="Capa_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="38px"
+                    height="38px"
+                    viewBox="-57.91 -57.91 694.90 694.90"
+                    stroke="#344854"
+                    transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)"
+                    stroke-width="0.00579083"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke="#CCCCCC"
+                      stroke-width="3.4744979999999996"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      {" "}
+                      <g>
+                        {" "}
+                        <path d="M492.551,389.644c31.823-21.42,100.979-64.872,83.844-111.997c-19.584-52.632-89.964-94.248-134.028-124.236 c-25.092-17.136-110.771-78.336-140.76-41.004c-1.836,1.836-2.448,4.896-1.836,7.344c-12.24,25.092-4.896,64.26-4.896,91.188 c0,4.896,0,9.792,0,14.688c-89.963-0.612-187.883-29.988-275.399-4.284c-5.508,1.836-7.956,5.508-8.568,9.18 c-0.612,0-1.224,0.612-1.836,0.612c-13.464,7.956-7.956,38.556-7.956,52.02c0,23.257-0.612,47.737,3.672,70.38 c1.224,5.509,4.896,8.568,9.18,9.181c2.448,3.06,4.896,4.284,8.568,4.284c92.412-1.225,182.988-12.24,275.399-6.732 c0,29.376-1.224,58.752-5.508,88.128c-0.612,3.672,0.611,6.732,1.836,9.18c-6.12,7.345,0.611,22.645,13.464,20.809 C372.599,469.203,439.307,425.14,492.551,389.644z"></path>{" "}
+                      </g>{" "}
+                    </g>
+                  </svg>
+                </a>
+                <p className="mb-8 text-lg text-gray-600">
+                  Dynabench is a platform for dynamic data collection and
+                  benchmarking. Static benchmarks have many issues. Dynabench
+                  offers a more accurate and sustainable way for evaluating
+                  progress in AI.
                 </p>
               </div>
+              <div className="w-full p-6 sm:w-1/2">
+                <div
+                  id="responsiveVideoWrapper"
+                  className="relative h-0 overflow-hidden rounded-md shadow-lg pb-fluid-video"
+                >
+                  <iframe
+                    className="absolute top-0 left-0 w-full h-full "
+                    src="https://models-dynalab.s3.eu-west-3.amazonaws.com/assets/explainer.mp4"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="YouTube video player"
+                  ></iframe>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap my-12">
-            <div className="w-5/6 sm:w-1/2 p-6">
-              <h3 className="text-3xl text-gray-800 font-bold leading-none mb-3">
-                Dynamical adversarial
-              </h3>
-              <p className="text-gray-600 mb-8">
-                Dynabench is a platform for dynamic data collection and
-                benchmarking. Static benchmarks have many issues. Dynabench
-                offers a more accurate and sustainable way for evaluating
-                progress in AI.
-              </p>
+            <div className="flex flex-col-reverse flex-wrap my-12 sm:flex-row">
+              <div className="w-full p-6 mt-6 sm:w-1/2">
+                <div
+                  id="responsiveVideoWrapper"
+                  className="relative h-0 overflow-hidden rounded-md shadow-lg pb-fluid-video"
+                >
+                  <iframe
+                    className="absolute top-0 left-0 w-full h-full "
+                    src="https://drive.google.com/file/d/1yrbob0nbViaaZw4iV3gQdYM6NR83fjXU/preview?authuser=0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="YouTube video player"
+                  ></iframe>
+                </div>
+              </div>
+              <div className="w-full p-6 mt-6 sm:w-1/2">
+                <div className="align-middle">
+                  <a
+                    className="flex flex-row gap-1 pointer hover:no-underline"
+                    href="/dataperf"
+                  >
+                    <h3 className="mb-3 text-3xl font-bold leading-none text-gray-800">
+                      Dataperf
+                    </h3>
+                    <svg
+                      fill="#344854"
+                      className="pb-1"
+                      version="1.1"
+                      id="Capa_1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="38px"
+                      height="38px"
+                      viewBox="-57.91 -57.91 694.90 694.90"
+                      stroke="#344854"
+                      transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)"
+                      stroke-width="0.00579083"
+                    >
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke="#CCCCCC"
+                        stroke-width="3.4744979999999996"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        {" "}
+                        <g>
+                          {" "}
+                          <path d="M492.551,389.644c31.823-21.42,100.979-64.872,83.844-111.997c-19.584-52.632-89.964-94.248-134.028-124.236 c-25.092-17.136-110.771-78.336-140.76-41.004c-1.836,1.836-2.448,4.896-1.836,7.344c-12.24,25.092-4.896,64.26-4.896,91.188 c0,4.896,0,9.792,0,14.688c-89.963-0.612-187.883-29.988-275.399-4.284c-5.508,1.836-7.956,5.508-8.568,9.18 c-0.612,0-1.224,0.612-1.836,0.612c-13.464,7.956-7.956,38.556-7.956,52.02c0,23.257-0.612,47.737,3.672,70.38 c1.224,5.509,4.896,8.568,9.18,9.181c2.448,3.06,4.896,4.284,8.568,4.284c92.412-1.225,182.988-12.24,275.399-6.732 c0,29.376-1.224,58.752-5.508,88.128c-0.612,3.672,0.611,6.732,1.836,9.18c-6.12,7.345,0.611,22.645,13.464,20.809 C372.599,469.203,439.307,425.14,492.551,389.644z"></path>{" "}
+                        </g>{" "}
+                      </g>
+                    </svg>
+                  </a>
+                  <p className="mb-8 text-lg text-gray-600">
+                    A suite of benchmarks that evaluate the quality of training
+                    and test data, and the algorithms for constructing or
+                    optimizing such datasets, such as core set selection or
+                    labelling error debugging, across a range of common ML tasks
+                    such as image classification. We plan to leverage the
+                    DataPerf benchmarks through challenges and leaderboards.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="w-full sm:w-1/2 p-6">
-              <div
-                id="responsiveVideoWrapper"
-                className="relative h-0 pb-fluid-video overflow-hidden rounded-md shadow-lg"
-              >
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full "
-                  src="https://drive.google.com/file/d/1fOSlRhkkiM0rmZDkWUnrG_zDfLMVo08D/view"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="YouTube video player"
-                ></iframe>
+            <div className="flex flex-wrap my-12">
+              <div className="w-5/6 p-6 sm:w-1/2">
+                <a
+                  className="flex flex-row gap-1 pointer hover:no-underline"
+                  href="/dataperf"
+                >
+                  <h3 className="mb-3 text-3xl font-bold leading-none text-gray-800">
+                    Others
+                  </h3>
+                  <svg
+                    fill="#344854"
+                    className="pb-1"
+                    version="1.1"
+                    id="Capa_1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="38px"
+                    height="38px"
+                    viewBox="-57.91 -57.91 694.90 694.90"
+                    stroke="#344854"
+                    transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)"
+                    stroke-width="0.00579083"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke="#CCCCCC"
+                      stroke-width="3.4744979999999996"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      {" "}
+                      <g>
+                        {" "}
+                        <path d="M492.551,389.644c31.823-21.42,100.979-64.872,83.844-111.997c-19.584-52.632-89.964-94.248-134.028-124.236 c-25.092-17.136-110.771-78.336-140.76-41.004c-1.836,1.836-2.448,4.896-1.836,7.344c-12.24,25.092-4.896,64.26-4.896,91.188 c0,4.896,0,9.792,0,14.688c-89.963-0.612-187.883-29.988-275.399-4.284c-5.508,1.836-7.956,5.508-8.568,9.18 c-0.612,0-1.224,0.612-1.836,0.612c-13.464,7.956-7.956,38.556-7.956,52.02c0,23.257-0.612,47.737,3.672,70.38 c1.224,5.509,4.896,8.568,9.18,9.181c2.448,3.06,4.896,4.284,8.568,4.284c92.412-1.225,182.988-12.24,275.399-6.732 c0,29.376-1.224,58.752-5.508,88.128c-0.612,3.672,0.611,6.732,1.836,9.18c-6.12,7.345,0.611,22.645,13.464,20.809 C372.599,469.203,439.307,425.14,492.551,389.644z"></path>{" "}
+                      </g>{" "}
+                    </g>
+                  </svg>
+                </a>
+                <p className="mb-8 text-lg text-gray-600">
+                  Dynabench is a platform for dynamic data collection and
+                  benchmarking. Static benchmarks have many issues. Dynabench
+                  offers a more accurate and sustainable way for evaluating
+                  progress in AI.
+                </p>
+              </div>
+              <div className="w-full p-6 sm:w-1/2">
+                <div
+                  id="responsiveVideoWrapper"
+                  className="relative h-0 overflow-hidden rounded-md shadow-lg pb-fluid-video"
+                >
+                  <iframe
+                    className="absolute top-0 left-0 w-full h-full "
+                    src="https://d2p5o30oix33cf.cloudfront.net/assets/final.mp4"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="YouTube video player"
+                  ></iframe>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-      <section id="features">
-        <h2 className="text-3xl font-bold mb-12 text-center">
-          Why is it so great?
+        </section>
+      </div>
+      <section id="features" className="container mb-20 bg-white">
+        <h2 className="w-full mb-12 text-3xl font-bold text-center text-letter-color">
+          What can you do with Dynabench?
         </h2>
-
         <div className="flex flex-wrap items-center">
-          <div className="grow-0 shrink-0 basis-auto w-full lg:w-5/12 mb-12 lg:mb-0 md:px-6">
-            <div
-              className="relative overflow-hidden bg-no-repeat bg-cover rounded-lg shadow-lg"
-              data-mdb-ripple="true"
-              data-mdb-ripple-color="light"
-            >
-              <img
-                src="https://mdbootstrap.com/img/new/textures/full/98.jpg"
-                className="w-full"
-                alt=""
-              />
-            </div>
-          </div>
-
-          <div className="grow-0 shrink-0 basis-auto w-full lg:w-7/12 md:px-6">
+          <div className="w-full grow-0 shrink-0 basis-auto lg:w-7/12 md:px-6">
             <div className="flex mb-12">
               <div className="shrink-0">
-                <div className="p-4 rounded-md shadow-lg">
+                <div className="p-4 rounded-md shadow-lg bg-[#253946]">
                   <svg
                     className="w-5 h-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
@@ -305,19 +420,21 @@ const Test = () => {
                   </svg>
                 </div>
               </div>
-              <div className="grow ml-4">
-                <p className="font-bold mb-1">Support 24/7</p>
-                <p className="text-gray-500">
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Nihil quisquam quibusdam modi sapiente magni molestias
-                  pariatur facilis reprehenderit facere aliquam ex.
+              <div className="ml-4 grow">
+                <p className="mb-1 text-xl font-bold text-letter-color">
+                  Outsmart advanced AI models:
+                </p>
+                <p className="text-lg text-letter-color">
+                  Take on the best in the game by competing against models like
+                  BERT, GPT, DALLE, YOLO, and more, and see if you can
+                  outperform them in a specific challenge or dataset.
                 </p>
               </div>
             </div>
 
             <div className="flex mb-12">
               <div className="shrink-0">
-                <div className="p-4 rounded-md shadow-lg">
+                <div className="p-4 rounded-md shadow-lg bg-[#253946]">
                   <svg
                     className="w-5 h-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
@@ -330,19 +447,22 @@ const Test = () => {
                   </svg>
                 </div>
               </div>
-              <div className="grow ml-4">
-                <p className="font-bold mb-1">Safe and solid</p>
-                <p className="text-gray-500">
-                  Eum nostrum fugit numquam, voluptates veniam neque quibusdam
-                  ullam aspernatur odio soluta, quisquam dolore animi mollitia a
-                  omnis praesentium, expedita nobis!
+              <div className="ml-4 grow">
+                <p className="mb-1 text-xl font-bold text-letter-color">
+                  Create cutting-edge challenges
+                </p>
+                <p className="text-lg text-letter-color">
+                  Push the boundaries of AI by creating your own challenges that
+                  address critical issues such as safety, robustness, fairness,
+                  adversarial AI, and data-centricity. Get creative and design
+                  challenges that truly test the limits of AI.
                 </p>
               </div>
             </div>
 
             <div className="flex mb-12">
               <div className="shrink-0">
-                <div className="p-4 rounded-md shadow-lg">
+                <div className="p-4 rounded-md shadow-lg bg-[#253946]">
                   <svg
                     className="w-5 h-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
@@ -355,19 +475,22 @@ const Test = () => {
                   </svg>
                 </div>
               </div>
-              <div className="grow ml-4">
-                <p className="font-bold mb-1">Extremely fast</p>
-                <p className="text-gray-500">
-                  Enim cupiditate, minus nulla dolor cumque iure eveniet facere
-                  ullam beatae hic voluptatibus dolores exercitationem? Facilis
-                  debitis aspernatur amet nisi iure eveniet facere?
+              <div className="ml-4 grow">
+                <p className="mb-1 text-xl font-bold text-letter-color">
+                  Share your own AI models (Dynalab){" "}
+                </p>
+                <p className="text-lg text-letter-color">
+                  Submit your own AI models to various challenges and datasets,
+                  and get recognized for your innovative approaches in areas
+                  such as computer vision, natural language processing, speech
+                  recognition, coreset selection and more.
                 </p>
               </div>
             </div>
 
             <div className="flex">
               <div className="shrink-0">
-                <div className="p-4 rounded-md shadow-lg">
+                <div className="p-4 rounded-md shadow-lg bg-[#253946]">
                   <svg
                     className="w-5 h-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
@@ -380,15 +503,26 @@ const Test = () => {
                   </svg>
                 </div>
               </div>
-              <div className="grow ml-4">
-                <p className="font-bold mb-1">Live analytics</p>
-                <p className="text-gray-500">
-                  Illum doloremque ea, blanditiis sed dolor laborum praesentium
-                  maxime sint, consectetur atque ipsum ab adipisci ullam
-                  aspernatur odio soluta, quisquam dolore
+              <div className="ml-4 grow">
+                <p className="mb-1 text-xl font-bold text-letter-color">
+                  Collaborate with peers and experts
+                </p>
+                <p className="text-lg text-letter-color">
+                  Dynabench offers a unique opportunity to connect with other
+                  like-minded individuals and experts in the AI community.
+                  You'll be at the forefront of the latest advancements in AI
+                  research. Keep your skills sharp and stay ahead of the curve
+                  by getting involved in the Dynabench community.
                 </p>
               </div>
             </div>
+          </div>
+          <div className="w-5/12 h-56 mb-12 ">
+            <img
+              src="https://i.postimg.cc/90DyYQGD/collage-1.png"
+              alt=""
+              className="object-cover w-full h-56"
+            />
           </div>
         </div>
       </section>
