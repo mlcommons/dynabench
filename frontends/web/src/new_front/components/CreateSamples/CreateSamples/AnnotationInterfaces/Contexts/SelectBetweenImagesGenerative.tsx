@@ -16,6 +16,7 @@ const SelectBetweenImagesGenerative: FC<
 > = ({
   field_names_for_the_model,
   generative_context,
+  instruction,
   contextId,
   taskId,
   realRoundId,
@@ -90,16 +91,31 @@ const SelectBetweenImagesGenerative: FC<
       {!loading ? (
         <div>
           <div className="grid col-span-1 py-3 justify-items-end">
-            <BasicInput
-              onChange={handlePromptChange}
-              onEnter={generateImages}
-              placeholder={prompt}
-            />
-            <GeneralButton
-              onClick={generateImages}
-              text="Generate Images"
-              className="border-0 font-weight-bold light-gray-bg task-action-btn mt-4"
-            />
+            <AnnotationInstruction
+              placement="left"
+              tooltip={
+                instruction.prompt ||
+                "Select the image that best exemplifies the harm"
+              }
+            >
+              <BasicInput
+                onChange={handlePromptChange}
+                onEnter={generateImages}
+                placeholder={prompt}
+              />
+            </AnnotationInstruction>
+            <AnnotationInstruction
+              placement="top"
+              tooltip={
+                instruction.generate_button || "Select one of the options below"
+              }
+            >
+              <GeneralButton
+                onClick={generateImages}
+                text="Generate Images"
+                className="border-0 font-weight-bold light-gray-bg task-action-btn mt-4"
+              />
+            </AnnotationInstruction>
           </div>
           {showImages.length === 0 ? (
             <></>
@@ -108,7 +124,10 @@ const SelectBetweenImagesGenerative: FC<
               <div>
                 <AnnotationInstruction
                   placement="left"
-                  tooltip="Select the image that best exemplifies the harm"
+                  tooltip={
+                    instruction.select_image ||
+                    "Select the image that best exemplifies the harm"
+                  }
                 >
                   <MultiSelectImage
                     instructions="Select an image"

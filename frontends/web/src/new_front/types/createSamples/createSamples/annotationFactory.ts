@@ -1,4 +1,5 @@
 export type AnnotationFactoryType = {
+  instruction?: any;
   hidden?: boolean;
 };
 
