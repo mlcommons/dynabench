@@ -6,7 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-# from sqlalchemy.sql.expression import func
+from sqlalchemy.sql.expression import func
 
 from app.infrastructure.models.models import ChallengesTypes, Round, Task
 from app.infrastructure.repositories.abstract import AbstractRepository
@@ -49,6 +49,7 @@ class TaskRepository(AbstractRepository):
             )
             .join(ChallengesTypes, ChallengesTypes.id == self.model.challenge_type)
             .filter(self.model.hidden.is_(False))
+            .order_by(func.random())
             .all()
         )
 
