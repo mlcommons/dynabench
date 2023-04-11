@@ -113,7 +113,7 @@ const SelectBetweenImagesGenerative: FC<
               <GeneralButton
                 onClick={generateImages}
                 text="Generate Images"
-                className="border-0 font-weight-bold light-gray-bg task-action-btn mt-4"
+                className="mt-4 border-0 font-weight-bold light-gray-bg task-action-btn"
               />
             </AnnotationInstruction>
           </div>
@@ -140,7 +140,7 @@ const SelectBetweenImagesGenerative: FC<
           )}
         </div>
       ) : (
-        <div className="grid items -center justify-center grid-rows-2">
+        <div className="grid items-center justify-center grid-rows-2">
           <div className="mr-2 text-letter-color">
             Images are being generated, bear with the model
           </div>

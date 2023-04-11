@@ -4,6 +4,7 @@ import { CreateInterfaceContext } from "new_front/context/CreateInterface/Contex
 import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
 import React, { FC, useState, useContext } from "react";
+import parse from "html-react-parser";
 
 const InputWithInstructions: FC<AnnotationFactoryType & AnnotationUserInput> =
   ({
@@ -42,7 +43,7 @@ const InputWithInstructions: FC<AnnotationFactoryType & AnnotationUserInput> =
                 ) : (
                   <i className="pl-2 pr-3 fas fa-plus" />
                 )}
-                {instructions}
+                {parse(instructions)}
               </h3>
             </div>
           )}
