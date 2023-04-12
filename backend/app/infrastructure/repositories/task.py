@@ -96,3 +96,10 @@ class TaskRepository(AbstractRepository):
             .filter(self.model.id == task_id)
             .first()
         )
+
+    def get_task_instructions(self, task_id: int):
+        return (
+            self.session.query(self.model.general_instructions)
+            .filter(self.model.id == task_id)
+            .first()
+        )

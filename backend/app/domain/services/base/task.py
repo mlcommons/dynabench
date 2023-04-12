@@ -175,3 +175,6 @@ class TaskService:
 
     def get_tasks_categories(self):
         return self.task_categories_repository.get_tasks_categories()
+
+    def get_task_instructions(self, task_id: int):
+        return self.task_repository.get_task_instructions(task_id)

@@ -79,6 +79,7 @@ class Task(Base):
     task_code = Column(String(255), nullable=False, unique=True)
     name = Column(String(255), nullable=False, unique=True)
     config_yaml = Column(Text)
+    general_instructions = Column(Text)
     instructions_md = Column(Text)
     desc = Column(String(255))
     last_updated = Column(DateTime, onupdate=func.now())

@@ -74,8 +74,8 @@ const TaskPage = () => {
                     <div className="bg-[#0000009c] pl-4 ">
                       <div className="col-span-2 pt-4 pl-4">
                         <div className="flex gap-1">
-                          <i className="fa fa-users text-white"></i>
-                          <p className=" text-sm text-white">
+                          <i className="text-white fa fa-users"></i>
+                          <p className="text-sm text-white ">
                             {task.challenge_type_name}
                           </p>
                         </div>
@@ -158,6 +158,7 @@ const TaskPage = () => {
                         <OverviewTask
                           roundDescription={task.round?.longdesc}
                           generalDescription={task.instructions_md}
+                          taskId={task.id}
                         />
                       </div>
                     </div>
