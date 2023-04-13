@@ -44,14 +44,20 @@ const AnnotationButtonActions: FC<Props> = ({
   const [sandboxMode, setSandboxMode] = useState<boolean>(false);
   let { modelInputs, metadataExample } = useContext(CreateInterfaceContext);
 
-  const { post, loading } = useFetch();
+  const { post, loading, response } = useFetch();
 
   const onSubmission = async () => {
     modelInputs = {
       ...modelInputs,
       input_by_user: inputByUser,
     };
-    if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
+    if (
+      neccessaryFields.every(
+        (item) =>
+          modelInputs.hasOwnProperty(item) ||
+          metadataExample.hasOwnProperty(item)
+      )
+    ) {
       const finaModelInputs = {
         model_input: modelInputs,
         sandbox_mode: sandboxMode,
@@ -79,11 +85,24 @@ const AnnotationButtonActions: FC<Props> = ({
             metadata_json: metadataExample,
           }
         );
-        setModelOutput(modelOutput);
+        if (response.ok) {
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Your example has been saved",
+            confirmButtonColor: "#2088ef",
+          });
+          setModelOutput(modelOutput);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong! please contact task owner",
+            confirmButtonColor: "#2088ef",
+          });
+        }
       }
     } else {
-      console.log("neccessaryFields", neccessaryFields);
-
       Swal.fire({
         icon: "warning",
         title: "Oops...",

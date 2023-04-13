@@ -20,6 +20,7 @@ import useFetch from "use-http";
 import Leaderboard from "new_front/pages/Task/LeaderBoard";
 import OverviewTask from "../../components/TaskPage/OverviewTask";
 import PrincipalTaskStats from "new_front/components/TaskPage/PrincipalTaskStats";
+import { OverviewTaskInstructions } from "new_front/types/task/overviewTaskInstructions";
 import UserContext from "containers/UserContext";
 
 const TaskPage = () => {
@@ -28,6 +29,8 @@ const TaskPage = () => {
   const [maxScore, setMaxScore] = useState<number>(0);
   const [adminOrOwner, setAdminOrOwner] = useState(false);
   const [openTab, setOpenTab] = React.useState(1);
+  const [taskInstructions, setTaskInstructions] =
+    useState<OverviewTaskInstructions>();
   const { get, post, loading, response } = useFetch();
   const { taskCode } = useParams<{ taskCode: string }>();
   const userContext = useContext(UserContext);
@@ -35,7 +38,7 @@ const TaskPage = () => {
 
   const getTask = async (taskCode: string) => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
-    const [taskData, maxScore, amountOfModels, adminOrOwner] =
+    const [taskData, maxScore, amountOfModels, adminOrOwner, taskInstructions] =
       await Promise.all([
         await get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
         await get(`/score/get_maximun_principal_score_per_task/${taskId}`),
@@ -44,12 +47,14 @@ const TaskPage = () => {
           task_id: taskId,
           user_id: user.id,
         }),
+        await get(`/task/get_task_instructions/${taskId}`),
       ]);
     if (response.ok) {
       setTask(taskData);
       setMaxScore(maxScore.perf);
       setAmountOfModels(amountOfModels);
       setAdminOrOwner(adminOrOwner);
+      setTaskInstructions(taskInstructions.general_instructions);
     }
   };
 
@@ -158,7 +163,7 @@ const TaskPage = () => {
                         <OverviewTask
                           roundDescription={task.round?.longdesc}
                           generalDescription={task.instructions_md}
-                          taskId={task.id}
+                          taskInstructions={taskInstructions!}
                         />
                       </div>
                     </div>

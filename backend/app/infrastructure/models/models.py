@@ -423,7 +423,7 @@ class Example(Base):
     tag = Column(Text)
     input_json = Column(Text)
     output_json = Column(Text)
-    metadata_json = Column(Text, server_default=text("'{}'"))
+    metadata_json = Column(Text)
     model_endpoint_name = Column(Text)
     verified = Column(TINYINT(1))
     verified_correct = Column(Integer)

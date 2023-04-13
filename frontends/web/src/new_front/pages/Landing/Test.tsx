@@ -4,45 +4,11 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Carousel from "react-multi-carousel";
-import { responsiveCarouselCompanies } from "../../utils/constants";
+import { responsiveCarouselCompanies, companies } from "../../utils/constants";
 import { Link as ScrollLink } from "react-scroll";
 import "react-multi-carousel/lib/styles.css";
 
 const Test = () => {
-  const companies = [
-    {
-      name: "Stanford University",
-      logo: "https://logodownload.org/wp-content/uploads/2021/04/stanford-university-logo-2.png",
-    },
-    {
-      name: "Harvard University",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Harvard_University_logo.svg/2560px-Harvard_University_logo.svg.png",
-    },
-    {
-      name: "Meta",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/2560px-Meta_Platforms_Inc._logo.svg.png",
-    },
-    {
-      name: "Google",
-      logo: "https://logodownload.org/wp-content/uploads/2014/09/google-logo-1.png",
-    },
-    {
-      name: "Coactive",
-      logo: "https://s4-recruiting.cdn.greenhouse.io/external_greenhouse_job_boards/logos/400/614/500/original/coactive-logo-rgb-2400px.png?1639152613",
-    },
-    {
-      name: "ETH Zurich",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/ETH_Z%C3%BCrich_Logo_black.svg/2560px-ETH_Z%C3%BCrich_Logo_black.svg.png",
-    },
-    {
-      name: "Cohere",
-      logo: "https://cdn.sanity.io/images/1b1xyaip/production/f5e234e86f931398d5e05f4cdeb8d6dfcd182c7a-102x18.svg",
-    },
-    {
-      name: "Oxford University",
-      logo: "https://logodownload.org/wp-content/uploads/2020/12/university-of-oxford-logo-2.png",
-    },
-  ];
   return (
     <>
       <section id="hero" className="container mt-20">
@@ -128,7 +94,7 @@ const Test = () => {
       </section>
       <section id="trusted" className="">
         <div className="container mt-16 ">
-          <h2 className="w-full my-2 text-5xl font-bold leading-tight text-center text-gray-800">
+          <h2 className="w-full my-2 text-5xl font-bold leading-tight text-center text-letter-color">
             Trusted by
           </h2>
           <div className="grid grid-cols-1 pt-16">
@@ -162,7 +128,7 @@ const Test = () => {
               href="/"
             >
               <motion.h2
-                className="flex flex-row my-2 text-5xl font-bold leading-tight text-center text-gray-800"
+                className="flex flex-row my-2 text-5xl font-bold leading-tight text-center text-letter-color"
                 variants={fadeIn("right", "tween", 0.5, 0.5)}
                 initial="initial"
                 animate="animate"
@@ -215,36 +181,45 @@ const Test = () => {
                   className="flex flex-row gap-1 pointer hover:no-underline"
                   href="/dataperf"
                 >
-                  <h3 className="mb-3 text-3xl font-bold leading-none text-gray-800">
+                  <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
                     Dynamical adversarial
                   </h3>
                   <svg
-                    fill="#344854"
-                    className="pb-1"
                     version="1.1"
-                    id="Capa_1"
+                    id="Layer_1"
                     xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 32 32"
+                    enable-background="new 0 0 32 32"
                     width="38px"
                     height="38px"
-                    viewBox="-57.91 -57.91 694.90 694.90"
-                    stroke="#344854"
-                    transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)"
-                    stroke-width="0.00579083"
+                    className="pb-1"
+                    fill="#000000"
                   >
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                     <g
                       id="SVGRepo_tracerCarrier"
                       stroke-linecap="round"
                       stroke-linejoin="round"
-                      stroke="#CCCCCC"
-                      stroke-width="3.4744979999999996"
                     ></g>
                     <g id="SVGRepo_iconCarrier">
                       {" "}
-                      <g>
-                        {" "}
-                        <path d="M492.551,389.644c31.823-21.42,100.979-64.872,83.844-111.997c-19.584-52.632-89.964-94.248-134.028-124.236 c-25.092-17.136-110.771-78.336-140.76-41.004c-1.836,1.836-2.448,4.896-1.836,7.344c-12.24,25.092-4.896,64.26-4.896,91.188 c0,4.896,0,9.792,0,14.688c-89.963-0.612-187.883-29.988-275.399-4.284c-5.508,1.836-7.956,5.508-8.568,9.18 c-0.612,0-1.224,0.612-1.836,0.612c-13.464,7.956-7.956,38.556-7.956,52.02c0,23.257-0.612,47.737,3.672,70.38 c1.224,5.509,4.896,8.568,9.18,9.181c2.448,3.06,4.896,4.284,8.568,4.284c92.412-1.225,182.988-12.24,275.399-6.732 c0,29.376-1.224,58.752-5.508,88.128c-0.612,3.672,0.611,6.732,1.836,9.18c-6.12,7.345,0.611,22.645,13.464,20.809 C372.599,469.203,439.307,425.14,492.551,389.644z"></path>{" "}
-                      </g>{" "}
+                      <line
+                        fill="none"
+                        stroke="#344854"
+                        stroke-width="2"
+                        stroke-miterlimit="10"
+                        x1="26"
+                        y1="16"
+                        x2="4"
+                        y2="16"
+                      ></line>{" "}
+                      <polyline
+                        fill="none"
+                        stroke="#344854"
+                        stroke-width="2"
+                        stroke-miterlimit="10"
+                        points="18,7.5 26.5,16 18,24.5 "
+                      ></polyline>{" "}
                     </g>
                   </svg>
                 </a>
@@ -291,36 +266,45 @@ const Test = () => {
                     className="flex flex-row gap-1 pointer hover:no-underline"
                     href="/dataperf"
                   >
-                    <h3 className="mb-3 text-3xl font-bold leading-none text-gray-800">
+                    <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
                       Dataperf
                     </h3>
                     <svg
-                      fill="#344854"
-                      className="pb-1"
                       version="1.1"
-                      id="Capa_1"
+                      id="Layer_1"
                       xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 32 32"
+                      enable-background="new 0 0 32 32"
                       width="38px"
                       height="38px"
-                      viewBox="-57.91 -57.91 694.90 694.90"
-                      stroke="#344854"
-                      transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)"
-                      stroke-width="0.00579083"
+                      className="pb-1"
+                      fill="#000000"
                     >
                       <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                       <g
                         id="SVGRepo_tracerCarrier"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke="#CCCCCC"
-                        stroke-width="3.4744979999999996"
                       ></g>
                       <g id="SVGRepo_iconCarrier">
                         {" "}
-                        <g>
-                          {" "}
-                          <path d="M492.551,389.644c31.823-21.42,100.979-64.872,83.844-111.997c-19.584-52.632-89.964-94.248-134.028-124.236 c-25.092-17.136-110.771-78.336-140.76-41.004c-1.836,1.836-2.448,4.896-1.836,7.344c-12.24,25.092-4.896,64.26-4.896,91.188 c0,4.896,0,9.792,0,14.688c-89.963-0.612-187.883-29.988-275.399-4.284c-5.508,1.836-7.956,5.508-8.568,9.18 c-0.612,0-1.224,0.612-1.836,0.612c-13.464,7.956-7.956,38.556-7.956,52.02c0,23.257-0.612,47.737,3.672,70.38 c1.224,5.509,4.896,8.568,9.18,9.181c2.448,3.06,4.896,4.284,8.568,4.284c92.412-1.225,182.988-12.24,275.399-6.732 c0,29.376-1.224,58.752-5.508,88.128c-0.612,3.672,0.611,6.732,1.836,9.18c-6.12,7.345,0.611,22.645,13.464,20.809 C372.599,469.203,439.307,425.14,492.551,389.644z"></path>{" "}
-                        </g>{" "}
+                        <line
+                          fill="none"
+                          stroke="#344854"
+                          stroke-width="2"
+                          stroke-miterlimit="10"
+                          x1="26"
+                          y1="16"
+                          x2="4"
+                          y2="16"
+                        ></line>{" "}
+                        <polyline
+                          fill="none"
+                          stroke="#344854"
+                          stroke-width="2"
+                          stroke-miterlimit="10"
+                          points="18,7.5 26.5,16 18,24.5 "
+                        ></polyline>{" "}
                       </g>
                     </svg>
                   </a>
@@ -341,36 +325,45 @@ const Test = () => {
                   className="flex flex-row gap-1 pointer hover:no-underline"
                   href="/dataperf"
                 >
-                  <h3 className="mb-3 text-3xl font-bold leading-none text-gray-800">
+                  <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
                     Others
                   </h3>
                   <svg
-                    fill="#344854"
-                    className="pb-1"
                     version="1.1"
-                    id="Capa_1"
+                    id="Layer_1"
                     xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 32 32"
+                    enable-background="new 0 0 32 32"
                     width="38px"
                     height="38px"
-                    viewBox="-57.91 -57.91 694.90 694.90"
-                    stroke="#344854"
-                    transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)"
-                    stroke-width="0.00579083"
+                    className="pb-1"
+                    fill="#000000"
                   >
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                     <g
                       id="SVGRepo_tracerCarrier"
                       stroke-linecap="round"
                       stroke-linejoin="round"
-                      stroke="#CCCCCC"
-                      stroke-width="3.4744979999999996"
                     ></g>
                     <g id="SVGRepo_iconCarrier">
                       {" "}
-                      <g>
-                        {" "}
-                        <path d="M492.551,389.644c31.823-21.42,100.979-64.872,83.844-111.997c-19.584-52.632-89.964-94.248-134.028-124.236 c-25.092-17.136-110.771-78.336-140.76-41.004c-1.836,1.836-2.448,4.896-1.836,7.344c-12.24,25.092-4.896,64.26-4.896,91.188 c0,4.896,0,9.792,0,14.688c-89.963-0.612-187.883-29.988-275.399-4.284c-5.508,1.836-7.956,5.508-8.568,9.18 c-0.612,0-1.224,0.612-1.836,0.612c-13.464,7.956-7.956,38.556-7.956,52.02c0,23.257-0.612,47.737,3.672,70.38 c1.224,5.509,4.896,8.568,9.18,9.181c2.448,3.06,4.896,4.284,8.568,4.284c92.412-1.225,182.988-12.24,275.399-6.732 c0,29.376-1.224,58.752-5.508,88.128c-0.612,3.672,0.611,6.732,1.836,9.18c-6.12,7.345,0.611,22.645,13.464,20.809 C372.599,469.203,439.307,425.14,492.551,389.644z"></path>{" "}
-                      </g>{" "}
+                      <line
+                        fill="none"
+                        stroke="#344854"
+                        stroke-width="2"
+                        stroke-miterlimit="10"
+                        x1="26"
+                        y1="16"
+                        x2="4"
+                        y2="16"
+                      ></line>{" "}
+                      <polyline
+                        fill="none"
+                        stroke="#344854"
+                        stroke-width="2"
+                        stroke-miterlimit="10"
+                        points="18,7.5 26.5,16 18,24.5 "
+                      ></polyline>{" "}
                     </g>
                   </svg>
                 </a>
@@ -400,7 +393,7 @@ const Test = () => {
         </section>
       </div>
       <section id="features" className="container mb-20 bg-white">
-        <h2 className="w-full mb-12 text-3xl font-bold text-center text-letter-color">
+        <h2 className="w-full mb-20 text-5xl font-bold leading-tight text-center text-letter-color">
           What can you do with Dynabench?
         </h2>
         <div className="grid grid-cols-2 gap-12">

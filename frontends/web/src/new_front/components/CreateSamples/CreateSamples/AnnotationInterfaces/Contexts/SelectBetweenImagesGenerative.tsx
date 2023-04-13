@@ -6,7 +6,7 @@ import AnnotationInstruction from "new_front/components/OverlayInstructions/Anno
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
-import React, { FC, useState, useContext } from "react";
+import React, { FC, useState, useContext, useEffect } from "react";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
@@ -24,6 +24,7 @@ const SelectBetweenImagesGenerative: FC<
   setPartialSampleId,
 }) => {
   const [generatedImages, setGeneratedImages] = useState<any[]>([]);
+  const savePrompt = true;
   const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<object>(
     generative_context.artifacts
@@ -34,6 +35,8 @@ const SelectBetweenImagesGenerative: FC<
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
     CreateInterfaceContext
   );
+
+  const [selectedImage, setSelectedImage] = useState<string>("");
 
   const generateImages = async () => {
     if (metadataExample.hasOwnProperty("label")) {
@@ -67,10 +70,11 @@ const SelectBetweenImagesGenerative: FC<
     updateModelInputs({
       [field_names_for_the_model.select_image ?? "select_image"]: image,
     });
-    // createPartialSample()
+    setSelectedImage(image);
   };
 
   const createPartialSample = async () => {
+    console.log("modelInputs", modelInputs);
     const partialSampleId = await post(
       `/example/partially_creation_generative_example`,
       {
@@ -85,6 +89,12 @@ const SelectBetweenImagesGenerative: FC<
       setPartialSampleId(partialSampleId);
     }
   };
+
+  useEffect(() => {
+    if (modelInputs.hasOwnProperty("select_image")) {
+      createPartialSample();
+    }
+  }, [selectedImage]);
 
   return (
     <>
@@ -102,6 +112,7 @@ const SelectBetweenImagesGenerative: FC<
                 onChange={handlePromptChange}
                 onEnter={generateImages}
                 placeholder={prompt}
+                savePrompt={savePrompt}
               />
             </AnnotationInstruction>
             <AnnotationInstruction
@@ -130,6 +141,7 @@ const SelectBetweenImagesGenerative: FC<
                   }
                 >
                   <MultiSelectImage
+                    selectedImage={selectedImage}
                     instructions="Select an image"
                     images={showImages.map(({ image }) => image)}
                     handleFunction={handleSelectImage}

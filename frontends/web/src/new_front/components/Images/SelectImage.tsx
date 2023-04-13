@@ -3,15 +3,15 @@ import React, { FC, useState } from "react";
 type SelectImageProps = {
   image: string;
   index: number;
-  showCheck?: boolean;
+  isSelected: boolean;
   handleSelectImage: (image: string) => void;
 };
 
 const SelectImage: FC<SelectImageProps> = ({
   image,
   index,
-  showCheck = true,
   handleSelectImage,
+  isSelected,
 }) => {
   const [expandImage, setExpandImage] = useState<boolean>(false);
 
@@ -20,7 +20,7 @@ const SelectImage: FC<SelectImageProps> = ({
   };
 
   return (
-    <div key={index} className="py-2 flex flex-col align-center items-center">
+    <div key={index} className="flex flex-col items-center py-2 align-center">
       <img
         height={240}
         width={240}
@@ -40,6 +40,7 @@ const SelectImage: FC<SelectImageProps> = ({
         type="radio"
         name="image"
         value=""
+        checked={isSelected}
         className={`items-center w-4 h-4 px-6`}
         onClick={() => {
           handleOnClicked(image);

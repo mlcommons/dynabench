@@ -6,6 +6,7 @@ import parse from "html-react-parser";
 export type MultiSelectImageProps = {
   instructions?: string;
   images: string[];
+  selectedImage: string;
   handleFunction: (value: any) => void;
 };
 
@@ -13,6 +14,7 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
   instructions,
   images,
   handleFunction,
+  selectedImage,
 }) => {
   const [open, setOpen] = useState(true);
 
@@ -39,6 +41,7 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
             {images.map((image, index) => (
               <div key={index} className="max-h-72">
                 <SelectImage
+                  isSelected={selectedImage === image}
                   image={image}
                   index={index}
                   handleSelectImage={handleFunction}

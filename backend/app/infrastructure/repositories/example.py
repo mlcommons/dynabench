@@ -36,7 +36,7 @@ class ExampleRepository(AbstractRepository):
                 "model_endpoint_name": model_endpoint_name,
                 "input_json": input_json,
                 "output_json": output_json,
-                "metadata": metadata,
+                "metadata_json": metadata,
                 "tag": tag,
                 "retracted": 0,
                 "split": "undecided",
@@ -89,9 +89,9 @@ class ExampleRepository(AbstractRepository):
         self.session.commit()
 
     def update_creation_generative_example_by_example_id(
-        self, example_id: int, model_input: dict, metadata: dict
+        self, example_id: int, model_input: Json, metadata: Json
     ):
-        example = self.get_by_id(example_id)
-        example["input_json"] = model_input
-        example["metadata_json"] = metadata
+        self.session.query(self.model).filter_by(id=example_id).update(
+            {"input_json": model_input, "metadata_json": metadata}
+        )
         self.session.commit()
