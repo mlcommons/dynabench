@@ -6,7 +6,6 @@ type BasicInputProps = {
   open?: boolean;
   disabled?: boolean;
   required?: boolean;
-  savePrompt?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
@@ -16,7 +15,6 @@ const BasicInput: FC<BasicInputProps> = ({
   open = true,
   disabled = false,
   required = true,
-  savePrompt,
   onChange,
   onEnter,
 }) => {

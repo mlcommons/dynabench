@@ -14,6 +14,10 @@ const OverviewTask: FC<OverviewTaskProps> = ({
   taskInstructions,
 }) => {
   const [openTab, setOpenTab] = useState(1);
+
+  console.log("taskInstructions", typeof taskInstructions);
+  console.log("taskInstructions", taskInstructions);
+
   return (
     <>
       <div className="grid grid-cols-6 border">
@@ -46,10 +50,7 @@ const OverviewTask: FC<OverviewTaskProps> = ({
                 openTab === index + 1 ? "block" : "hidden"
               } col-span-4 mt-[32px]`}
             >
-              <div
-                data-color-mode="light"
-                className="mt-4 text-lg font-normal text-letter-color "
-              >
+              <div data-color-mode="light" className="mt-4 ">
                 <MDEditor.Markdown source={taskInstructions[key]} />
               </div>
             </div>

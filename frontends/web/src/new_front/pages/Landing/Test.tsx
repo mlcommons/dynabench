@@ -43,7 +43,7 @@ const Test = () => {
               <div className="flex flex-row w-full gap-16 mt-4">
                 <div className="mb-12 md:mb-0">
                   <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
-                    20+
+                    15+
                   </h2>
                   <h5 className="mb-2 text-lg font-medium">Challenges</h5>
                 </div>
@@ -55,7 +55,7 @@ const Test = () => {
                 </div>
                 <div className="mb-12 md:mb-0">
                   <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
-                    50+
+                    30+
                   </h2>
                   <h5 className="mb-2 text-lg font-medium">Models</h5>
                 </div>
@@ -134,7 +134,7 @@ const Test = () => {
                 animate="animate"
               >
                 Communities
-                <svg
+                {/* <svg
                   version="1.1"
                   id="Layer_1"
                   xmlns="http://www.w3.org/2000/svg"
@@ -171,7 +171,7 @@ const Test = () => {
                       points="18,7.5 26.5,16 18,24.5 "
                     ></polyline>{" "}
                   </g>
-                </svg>
+                </svg> */}
               </motion.h2>
             </a>
 
@@ -179,12 +179,12 @@ const Test = () => {
               <div className="w-5/6 p-6 sm:w-1/2">
                 <a
                   className="flex flex-row gap-1 pointer hover:no-underline"
-                  href="/dataperf"
+                  href="/dadc"
                 >
                   <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
                     Dynamical adversarial
                   </h3>
-                  <svg
+                  {/* <svg
                     version="1.1"
                     id="Layer_1"
                     xmlns="http://www.w3.org/2000/svg"
@@ -221,7 +221,7 @@ const Test = () => {
                         points="18,7.5 26.5,16 18,24.5 "
                       ></polyline>{" "}
                     </g>
-                  </svg>
+                  </svg> */}
                 </a>
                 <p className="mb-8 text-lg text-gray-600">
                   Dynabench is a platform for dynamic data collection and
@@ -269,7 +269,7 @@ const Test = () => {
                     <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
                       Dataperf
                     </h3>
-                    <svg
+                    {/* <svg
                       version="1.1"
                       id="Layer_1"
                       xmlns="http://www.w3.org/2000/svg"
@@ -306,7 +306,7 @@ const Test = () => {
                           points="18,7.5 26.5,16 18,24.5 "
                         ></polyline>{" "}
                       </g>
-                    </svg>
+                    </svg> */}
                   </a>
                   <p className="mb-8 text-lg text-gray-600">
                     A suite of benchmarks that evaluate the quality of training
@@ -323,12 +323,12 @@ const Test = () => {
               <div className="w-5/6 p-6 sm:w-1/2">
                 <a
                   className="flex flex-row gap-1 pointer hover:no-underline"
-                  href="/dataperf"
+                  href="/others_tasks"
                 >
                   <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
                     Others
                   </h3>
-                  <svg
+                  {/* <svg
                     version="1.1"
                     id="Layer_1"
                     xmlns="http://www.w3.org/2000/svg"
@@ -365,13 +365,14 @@ const Test = () => {
                         points="18,7.5 26.5,16 18,24.5 "
                       ></polyline>{" "}
                     </g>
-                  </svg>
+                  </svg> */}
                 </a>
                 <p className="mb-8 text-lg text-gray-600">
-                  Dynabench is a platform for dynamic data collection and
-                  benchmarking. Static benchmarks have many issues. Dynabench
-                  offers a more accurate and sustainable way for evaluating
-                  progress in AI.
+                  Data from multiple modalities, such as images, text, and
+                  audio, are frequently encountered in real-world applications.
+                  If you have a challenge that doesn't fit within our existing
+                  communities, you are welcome to propose a new community or
+                  submit your challenge
                 </p>
               </div>
               <div className="w-full p-6 sm:w-1/2">

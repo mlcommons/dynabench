@@ -1,6 +1,6 @@
 import UserContext from "containers/UserContext";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
-import BasicInput from "new_front/components/Inputs/BasicInput";
+import BasicInputRemain from "new_front/components/Inputs/BasicInputRemain";
 import MultiSelectImage from "new_front/components/Lists/MultiSelectImage";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
@@ -24,7 +24,6 @@ const SelectBetweenImagesGenerative: FC<
   setPartialSampleId,
 }) => {
   const [generatedImages, setGeneratedImages] = useState<any[]>([]);
-  const savePrompt = true;
   const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<object>(
     generative_context.artifacts
@@ -108,11 +107,10 @@ const SelectBetweenImagesGenerative: FC<
                 "Select the image that best exemplifies the harm"
               }
             >
-              <BasicInput
+              <BasicInputRemain
                 onChange={handlePromptChange}
                 onEnter={generateImages}
                 placeholder={prompt}
-                savePrompt={savePrompt}
               />
             </AnnotationInstruction>
             <AnnotationInstruction

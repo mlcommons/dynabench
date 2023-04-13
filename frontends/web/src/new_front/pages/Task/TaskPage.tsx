@@ -54,7 +54,7 @@ const TaskPage = () => {
       setMaxScore(maxScore.perf);
       setAmountOfModels(amountOfModels);
       setAdminOrOwner(adminOrOwner);
-      setTaskInstructions(taskInstructions.general_instructions);
+      setTaskInstructions(taskInstructions);
     }
   };
 
