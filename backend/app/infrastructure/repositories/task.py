@@ -103,3 +103,9 @@ class TaskRepository(AbstractRepository):
             .filter(self.model.id == task_id)
             .first()
         )
+
+    def update_task_instructions(self, task_id: int, instructions: dict):
+        self.session.query(self.model).filter_by(id=task_id).update(
+            {"general_instructions": instructions}
+        )
+        self.session.commit()

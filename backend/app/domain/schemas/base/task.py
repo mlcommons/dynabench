@@ -14,6 +14,11 @@ class GetTaskInfoByCodeResponse(BaseModel):
     task_code: str
 
 
+class UpdateTaskInstructions(BaseModel):
+    task_id: int
+    instructions: str
+
+
 class GetDynaboardInfoByTaskIdRequest(BaseModel):
     task_id: int
     ordered_metric_weights: List[float]

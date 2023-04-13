@@ -14,10 +14,6 @@ const OverviewTask: FC<OverviewTaskProps> = ({
   taskInstructions,
 }) => {
   const [openTab, setOpenTab] = useState(1);
-
-  console.log("taskInstructions", typeof taskInstructions);
-  console.log("taskInstructions", taskInstructions);
-
   return (
     <>
       <div className="grid grid-cols-6 border">
