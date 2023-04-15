@@ -12,7 +12,7 @@ import yaml
 from fastapi import HTTPException
 
 from app.domain.services.base.task import TaskService
-from app.domain.services.utils.constant import black_image
+from app.domain.services.utils.constant import black_image, forbidden_image
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
@@ -119,12 +119,19 @@ class ContextService:
             image_response = response["data"][0]["b64_json"]
         image_list = []
         for image in image_response:
-            if black_image not in image:
+            if black_image in image["image_base64"]:
+                new_dict = {
+                    "image": forbidden_image,
+                    "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
+                }
+                image_list.append(new_dict)
+            else:
                 new_dict = {
                     "image": image["image_base64"],
                     "id": hashlib.md5(image["image_base64"].encode()).hexdigest(),
                 }
                 image_list.append(new_dict)
+
         return image_list
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
