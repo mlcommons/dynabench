@@ -51,6 +51,7 @@ const CreateInterface = () => {
         get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
       ]).then();
     if (response.ok) {
+      console.log(taskContextInfo, "Printing taskContextInfo");
       setTaskContextInfo(taskContextInfo);
       setTaskConfiguration(taskConfiguration);
       setModelInTheLoop(modelInTheLoop);

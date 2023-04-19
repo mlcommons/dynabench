@@ -15,7 +15,7 @@ const ModifyOriginalText: FC<ContextAnnotationFactoryType & ContextConfigType> =
       <>
         <AnnotationInstruction
           placement="top"
-          tooltip={instruction.context || "Select one of the options below"}
+          tooltip={instruction?.context || "Select one of the options below"}
         >
           <div>
             <div>

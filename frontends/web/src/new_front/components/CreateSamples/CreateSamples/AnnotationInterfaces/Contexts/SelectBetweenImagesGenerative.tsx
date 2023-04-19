@@ -140,7 +140,7 @@ const SelectBetweenImagesGenerative: FC<
                 >
                   <MultiSelectImage
                     selectedImage={selectedImage}
-                    instructions="Select an image"
+                    instructions="Please select an image. A blank image indicates the the model could not generate an image."
                     images={showImages.map(({ image }) => image)}
                     handleFunction={handleSelectImage}
                   />

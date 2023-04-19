@@ -13,6 +13,7 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
   maxScore,
   amountOfModels,
 }) => {
+  console.log(maxScore, "maxScore");
   return (
     <div className="grid grid-rows-2 pl-32">
       <div className="grid items-center justify-end grid-cols-2 px-8 py-4">

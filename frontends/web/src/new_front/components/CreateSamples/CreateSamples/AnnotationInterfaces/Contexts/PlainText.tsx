@@ -24,7 +24,7 @@ const PlainText: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   return (
     <AnnotationInstruction
       placement="top"
-      tooltip={instruction.context || "Select one of the options below"}
+      tooltip={instruction?.context || "Select one of the options below"}
     >
       <div className="p-2 rounded">{context.context}</div>
     </AnnotationInstruction>

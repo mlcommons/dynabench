@@ -25,7 +25,7 @@ const ZoomImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   return (
     <AnnotationInstruction
       placement="top"
-      tooltip={instruction.context || "Select one of the options below"}
+      tooltip={instruction?.context || "Select one of the options below"}
     >
       <div className="flex items-center justify-center">
         <Zoom>

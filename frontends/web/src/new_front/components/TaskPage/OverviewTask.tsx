@@ -13,6 +13,7 @@ const OverviewTask: FC<OverviewTaskProps> = ({
   generalDescription,
   taskInstructions,
 }) => {
+  console.log(taskInstructions, "3");
   const [openTab, setOpenTab] = useState(1);
   return (
     <>

@@ -29,8 +29,7 @@ const TaskPage = () => {
   const [maxScore, setMaxScore] = useState<number>(0);
   const [adminOrOwner, setAdminOrOwner] = useState(false);
   const [openTab, setOpenTab] = React.useState(1);
-  const [taskInstructions, setTaskInstructions] =
-    useState<OverviewTaskInstructions>();
+  const [taskInstructions, setTaskInstructions] = useState<any>();
   const { get, post, loading, response } = useFetch();
   const { taskCode } = useParams<{ taskCode: string }>();
   const userContext = useContext(UserContext);
