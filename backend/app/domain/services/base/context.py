@@ -102,7 +102,7 @@ class ContextService:
         res = requests.post(
             context_config.lambda_model,
             json={
-                "model": "runwayml-stable-diffusion-v1-5",
+                "model": "StableDiffusionImage",
                 "prompt": prompt,
                 "n": 6,
                 "steps": 20,
