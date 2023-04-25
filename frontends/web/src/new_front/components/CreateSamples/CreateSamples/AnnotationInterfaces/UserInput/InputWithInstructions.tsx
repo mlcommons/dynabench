@@ -14,7 +14,7 @@ const InputWithInstructions: FC<AnnotationFactoryType & AnnotationUserInput> =
     instruction,
     metadata,
   }) => {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const { updateModelInputs } = useContext(CreateInterfaceContext);
 
     const handleChanges = (event: React.ChangeEvent<HTMLInputElement>) => {
