@@ -102,31 +102,39 @@ class ContextService:
         context_config = self.task_service.get_task_info_by_task_id(45)
         images = []
         for i in range(2):
-            res = requests.post(
-                context_config.lambda_model,
-                json={
-                    "model": "StableDiffusionImage",
-                    "prompt": prompt,
-                    "n": 3,
-                    "steps": 20,
-                },
-                headers={"Authorization": "Bearer ", "User-Agent": ""},
-            )
-            if res.status_code == 200:
-                image_response = res.json()["output"]["choices"]
-                image_response = [x["image_base64"] for x in image_response]
-                images.extend(image_response)
-
-            try:
-                openai.api_key = os.getenv("OPENAI")
-                response = openai.Image.create(
-                    prompt=prompt, n=3, size="256x256", response_format="b64_json"
+            if len(images) == 6:
+                break
+            else:
+                res = requests.post(
+                    context_config.lambda_model,
+                    json={
+                        "model": "StableDiffusionImage",
+                        "prompt": prompt,
+                        "n": 3,
+                        "steps": 20,
+                    },
+                    headers={
+                        "Authorization": "Bearer f121595762ad87b4c23603d8b6f72c2beea04b5d408d70d65e8de8d07cde18cc ",
+                        "User-Agent": "",
+                    },
                 )
-                image_response = response["data"]
-                image_response = [x["b64_json"] for x in image_response]
-                images.extend(image_response)
-            except openai.error.OpenAIError as e:
-                print(e)
+                print(res.status_code)
+                if res.status_code == 200:
+                    image_response = res.json()["output"]["choices"]
+                    image_response = [x["image_base64"] for x in image_response]
+                    images.extend(image_response)
+
+                try:
+                    openai.api_key = os.getenv("OPENAI")
+                    response = openai.Image.create(
+                        prompt=prompt, n=3, size="256x256", response_format="b64_json"
+                    )
+                    image_response = response["data"]
+                    print(image_response, type(image_response))
+                    image_response = [x["b64_json"] for x in image_response]
+                    images.extend(image_response)
+                except openai.error.OpenAIError as e:
+                    print(e)
 
         image_list = []
         random.shuffle(images)
