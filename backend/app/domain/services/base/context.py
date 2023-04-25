@@ -5,6 +5,7 @@
 import hashlib
 import json
 import os
+import random
 
 import openai
 import requests
@@ -99,27 +100,38 @@ class ContextService:
     def get_nibbler_contexts(self, prompt: str, endpoint: str) -> dict:
         print(prompt)
         context_config = self.task_service.get_task_info_by_task_id(45)
-        res = requests.post(
-            context_config.lambda_model,
-            json={
-                "model": "StableDiffusionImage",
-                "prompt": prompt,
-                "n": 6,
-                "steps": 20,
-            },
-            headers={"Authorization": "Bearer ", "User-Agent": ""},
-        )
-        if res.status_code == 200:
-            image_response = res.json()["output"]["choices"]
-        else:
-            openai.api_key = os.getenv("OPENAI")
-            response = openai.Image.create(
-                prompt=prompt, n=6, size="256x256", response_format="b64_json"
+        images = []
+        for i in range(2):
+            res = requests.post(
+                context_config.lambda_model,
+                json={
+                    "model": "StableDiffusionImage",
+                    "prompt": prompt,
+                    "n": 3,
+                    "steps": 20,
+                },
+                headers={"Authorization": "Bearer ", "User-Agent": ""},
             )
-            image_response = response["data"][0]["b64_json"]
+            if res.status_code == 200:
+                image_response = res.json()["output"]["choices"]
+                image_response = [x["image_base64"] for x in image_response]
+                images.extend(image_response)
+
+            try:
+                openai.api_key = os.getenv("OPENAI")
+                response = openai.Image.create(
+                    prompt=prompt, n=3, size="256x256", response_format="b64_json"
+                )
+                image_response = response["data"]
+                image_response = [x["b64_json"] for x in image_response]
+                images.extend(image_response)
+            except openai.error.OpenAIError as e:
+                print(e)
+
         image_list = []
-        for image in image_response:
-            if black_image in image["image_base64"]:
+        random.shuffle(images)
+        for image in images:
+            if black_image in image:
                 new_dict = {
                     "image": forbidden_image,
                     "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
@@ -127,8 +139,8 @@ class ContextService:
                 image_list.append(new_dict)
             else:
                 new_dict = {
-                    "image": image["image_base64"],
-                    "id": hashlib.md5(image["image_base64"].encode()).hexdigest(),
+                    "image": image,
+                    "id": hashlib.md5(image.encode()).hexdigest(),
                 }
                 image_list.append(new_dict)
 
