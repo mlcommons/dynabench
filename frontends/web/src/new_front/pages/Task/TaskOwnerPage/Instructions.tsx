@@ -32,7 +32,7 @@ const Instructions: FC<InstructionsProps> = ({ taskId }) => {
   const handleSave = async () => {
     await post(`/task/update_task_instructions`, {
       task_id: taskId,
-      instructions: newInstructions,
+      instructions: JSON.stringify(newInstructions),
     });
   };
 
