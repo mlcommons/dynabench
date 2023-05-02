@@ -36,7 +36,6 @@ from models.user import User, UserModel
 @bottle.put("/tasks/process_proposal/<tpid:int>")
 @_auth.requires_auth
 def process_proposal(credentials, tpid):
-
     um = UserModel()
     user = um.get(credentials["id"])
     if not user.admin:
@@ -258,7 +257,6 @@ def get_admin_or_owner(credentials, tid):
 @bottle.post("/tasks/create_round/<tid:int>")
 @_auth.requires_auth
 def create_round(credentials, tid):
-
     ensure_owner_or_admin(tid, credentials["id"])
 
     tm = TaskModel()
@@ -614,6 +612,7 @@ def construct_user_board_response_json(query_result, total_count=0):
         obj["avatar_url"] = result[2] if result[2] is not None else ""
         obj["count"] = int(result[3])
         obj["MER"] = str(round(result[4] * 100, 2))
+        obj["created"] = result[5]
         obj["total"] = str(result[3]) + "/" + str(result[5])
         list_objs.append(obj)
     if list_objs:
@@ -643,7 +642,6 @@ def get_top_leaderboard_tags(tid):
 
 @bottle.get("/tasks/<tid:int>/models/dynaboard")
 def get_dynaboard_info(tid):
-
     # defaults
     sort_by = "dynascore"
     sort_direction = "asc"
@@ -985,7 +983,6 @@ def create_leaderboard_snapshot(credentials, tid):
 
 @bottle.get("/tasks/<task_code>/disambiguate_forks_and_snapshots/<name>")
 def disambiguate_forks_and_snapshots(task_code, name):
-
     tm = TaskModel()
     tid = tm.getByTaskCode(task_code).id
     name = quote(name)
@@ -1165,7 +1162,6 @@ def decen_eaas_list_model_ids():
         bottle.abort(401, "Operation not authorized")
 
     try:
-
         # Get all datasets related to the task code
         models = mm.getByTid(task.id)
         model_ids = []

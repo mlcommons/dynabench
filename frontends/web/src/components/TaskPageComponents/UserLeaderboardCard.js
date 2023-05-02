@@ -101,7 +101,7 @@ const UserLeaderboardCard = (props) => {
     >
       <Card className="my-4">
         <Card.Header className="light-gray-bg d-flex align-items-center">
-          <h2 className="text-uppercase m-0 text-reset">Example Leaderboard</h2>
+          <h2 className="m-0 text-uppercase text-reset">Example Leaderboard</h2>
           <div className="d-flex justify-content-end flex-fill">
             <OverlayTrigger
               placement="top"
@@ -131,8 +131,10 @@ const UserLeaderboardCard = (props) => {
           <thead>
             <tr>
               <th>User</th>
-              <th className="text-right">Verified MER</th>
-              <th className="text-right pr-4">Totals</th>
+              {props.dataValidation ? (
+                <th className="text-right">MER</th>
+              ) : null}
+              <th className="pr-4 text-right">Totals</th>
             </tr>
           </thead>
           <tbody>
@@ -153,15 +155,22 @@ const UserLeaderboardCard = (props) => {
                       {data.username}
                     </Link>
                   </td>
-                  <td className="text-right">{data.MER}%</td>
-                  <td className="text-right pr-4">{data.total}</td>
+                  {props.dataValidation ? (
+                    <td className="text-right">{data.MER}%</td>
+                  ) : null}
+                  {console.log("data", data)}
+                  {props.dataValidation ? (
+                    <td className="pr-4 text-right">{data.total}</td>
+                  ) : (
+                    <td className="pr-4 text-right">{data.created}</td>
+                  )}
                 </tr>
               );
             })}
           </tbody>
         </Table>
         <Card.Footer className="text-center">
-          <Pagination className="mb-0 float-right" size="sm">
+          <Pagination className="float-right mb-0" size="sm">
             <Pagination.Item
               disabled={!userLeaderBoardPage}
               onClick={() => setUserLeaderBoardPage(userLeaderBoardPage - 1)}

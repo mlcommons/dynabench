@@ -1,12 +1,18 @@
 import UserContext from "containers/UserContext";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import BasicInputRemain from "new_front/components/Inputs/BasicInputRemain";
+import Dropdown from "new_front/components/Inputs/Dropdown";
 import MultiSelectImage from "new_front/components/Lists/MultiSelectImage";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import React, { FC, useState, useContext, useEffect } from "react";
+import {
+  saveListToLocalStorage,
+  getListFromLocalStorage,
+  addElementToListInLocalStorage,
+} from "new_front/utils/helpers/functions/LocalStorage";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
@@ -23,9 +29,9 @@ const SelectBetweenImagesGenerative: FC<
   setIsGenerativeContext,
   setPartialSampleId,
 }) => {
-  const [generatedImages, setGeneratedImages] = useState<any[]>([]);
+  const [promptHistory, setPromptHistory] = useState<any[]>([]);
   const [showImages, setShowImages] = useState<any[]>([]);
-  const [artifactsInput, setArtifactsInput] = useState<object>(
+  const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts
   );
   const [prompt, setPrompt] = useState<string>("Type your prompt here");
@@ -44,8 +50,9 @@ const SelectBetweenImagesGenerative: FC<
         artifacts: artifactsInput,
       });
       if (response.ok) {
-        setGeneratedImages(generatedImages);
         setShowImages(generatedImages);
+        addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
+        setPromptHistory(getListFromLocalStorage("promptHistory"));
       }
     } else {
       Swal.fire({
@@ -90,6 +97,16 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   useEffect(() => {
+    saveListToLocalStorage([], "promptHistory");
+    setPromptHistory(getListFromLocalStorage("promptHistory"));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("promptHistory", JSON.stringify(promptHistory));
+    console.log("promptHistory", promptHistory);
+  }, [promptHistory]);
+
+  useEffect(() => {
     if (modelInputs.hasOwnProperty("select_image")) {
       createPartialSample();
     }
@@ -100,6 +117,7 @@ const SelectBetweenImagesGenerative: FC<
       {!loading ? (
         <div>
           <div className="grid col-span-1 py-3 justify-items-end">
+            <Dropdown options={promptHistory} placeholder="" />
             <AnnotationInstruction
               placement="left"
               tooltip={

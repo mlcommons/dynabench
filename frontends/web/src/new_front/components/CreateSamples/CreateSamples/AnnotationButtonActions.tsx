@@ -92,6 +92,7 @@ const AnnotationButtonActions: FC<Props> = ({
             text: "Your example has been saved",
             confirmButtonColor: "#2088ef",
           });
+          window.location.reload();
           setModelOutput(modelOutput);
         } else {
           Swal.fire({
@@ -119,94 +120,61 @@ const AnnotationButtonActions: FC<Props> = ({
     console.log("metadataExample", metadataExample);
   }, [modelInputs, metadataExample]);
 
-  if (taskID !== 45) {
-    return (
-      <>
-        {!loading ? (
-          <>
-            {!isGenerativeContext && (
-              <>
-                <div className="col-span-1 py-4">
-                  <div className="grid grid-cols-6">
-                    <div className="col-span-3 px-3 text-white">
-                      <BootstrapSwitchButton
-                        checked={!sandboxMode}
-                        onlabel="Live Mode"
-                        onstyle="dark"
-                        offstyle="warning"
-                        offlabel="Sandbox"
-                        width={120}
-                        onChange={(checked: boolean) => {
-                          setSandboxMode(!checked);
-                        }}
-                      />
-                    </div>
-                    <div className="flex justify-end col-span-3 ">
-                      <div className="col-span-1 pl-2" id="switchContext">
-                        {currentContext && partialSampleId !== 0 && (
-                          <Button
-                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                            onClick={() => {
-                              window.location.reload();
-                            }}
-                          >
-                            New context
-                          </Button>
-                        )}
-                      </div>
-                      <div className="col-span-1 pl-2 pr-3" id="submit">
+  return (
+    <>
+      {!loading ? (
+        <>
+          {!isGenerativeContext && (
+            <>
+              <div className="col-span-1 py-4">
+                <div className="grid grid-cols-6">
+                  <div className="col-span-3 px-3 text-white">
+                    <BootstrapSwitchButton
+                      checked={!sandboxMode}
+                      onlabel="Live Mode"
+                      onstyle="dark"
+                      offstyle="warning"
+                      offlabel="Sandbox"
+                      width={120}
+                      onChange={(checked: boolean) => {
+                        setSandboxMode(!checked);
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-end col-span-3 ">
+                    <div className="col-span-1 pl-2" id="switchContext">
+                      {currentContext && partialSampleId !== 0 && (
                         <Button
                           className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                          onClick={onSubmission}
+                          onClick={() => {
+                            window.location.reload();
+                          }}
                         >
-                          Submit
+                          New context
                         </Button>
-                      </div>
+                      )}
+                    </div>
+                    <div className="col-span-1 pl-2 pr-3" id="submit">
+                      <Button
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                        onClick={onSubmission}
+                      >
+                        Submit
+                      </Button>
                     </div>
                   </div>
                 </div>
-              </>
-            )}
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-32">
-            <PacmanLoader color="#ccebd4" loading={loading} size={50} />
-          </div>
-        )}
-      </>
-    );
-  } else {
-    return (
-      <>
-        {!loading ? (
-          <>
-            {!isGenerativeContext && (
-              <>
-                <div className="col-span-1 py-4">
-                  <div className="grid grid-cols-6">
-                    <div className="flex justify-end col-span-3 ">
-                      <div className="col-span-1 pl-2 pr-3" id="submit">
-                        <Button
-                          className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                          onClick={onSubmission}
-                        >
-                          Submit
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-32">
-            <PacmanLoader color="#ccebd4" loading={loading} size={50} />
-          </div>
-        )}
-      </>
-    );
-  }
+              </div>
+            </>
+          )}
+        </>
+      ) : (
+        <div className="flex items-center justify-center h-32">
+          <PacmanLoader color="#ccebd4" loading={loading} size={50} />
+        </div>
+      )}
+    </>
+  );
 };
 
 export default AnnotationButtonActions;

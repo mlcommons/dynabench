@@ -20,8 +20,6 @@ import useFetch from "use-http";
 import Leaderboard from "new_front/pages/Task/LeaderBoard";
 import OverviewTask from "../../components/TaskPage/OverviewTask";
 import PrincipalTaskStats from "new_front/components/TaskPage/PrincipalTaskStats";
-import NibblerTaskStats from "new_front/components/TaskPage/NibblerTaskStats";
-import { OverviewTaskInstructions } from "new_front/types/task/overviewTaskInstructions";
 import UserContext from "containers/UserContext";
 
 const TaskPage = () => {
@@ -62,235 +60,123 @@ const TaskPage = () => {
     getTask(taskCode);
   }, []);
 
-  if (taskCode !== "adversarial-nibbler") {
-    return (
-      <div>
-        {!loading ? (
-          <>
-            {task && (
-              <>
-                <div className="container ">
-                  <div className="mt-4 border border-gray-200 rounded-lg">
-                    <div
-                      className={`grid grid-cols-2 relative bg-no-repeat bg-[50%] bg-cover`}
-                      style={{
-                        backgroundImage: `url(${task?.image_url})`,
-                      }}
-                    >
-                      <div className="bg-[#0000009c] pl-4 ">
-                        <div className="col-span-2 pt-4 pl-4">
-                          <div className="flex gap-1">
-                            <i className="text-white fa fa-users"></i>
-                            <p className="text-sm text-white ">
-                              {task.challenge_type_name}
-                            </p>
-                          </div>
-                          <h2 className="text-3xl font-medium text-white">
-                            {task.name}{" "}
-                          </h2>
-                          <p className="pb-2 pl-3 text-xl text-white">
-                            {task.desc}
+  return (
+    <div>
+      {!loading ? (
+        <>
+          {task && (
+            <>
+              <div className="container ">
+                <div className="mt-4 border border-gray-200 rounded-lg">
+                  <div
+                    className={`grid grid-cols-2 relative bg-no-repeat bg-[50%] bg-cover`}
+                    style={{
+                      backgroundImage: `url(${task?.image_url})`,
+                    }}
+                  >
+                    <div className="bg-[#0000009c] pl-4 ">
+                      <div className="col-span-2 pt-4 pl-4">
+                        <div className="flex gap-1">
+                          <i className="text-white fa fa-users"></i>
+                          <p className="text-sm text-white ">
+                            {task.challenge_type_name}
                           </p>
                         </div>
-                      </div>
-                      <div className="bg-[#0000009c]">
-                        <div className="flex items-start justify-end pt-2 pr-4">
-                          <TaskHelpersButton
-                            taskCode={taskCode}
-                            adminOrOwner={adminOrOwner}
-                          />
-                        </div>
-                        <PrincipalTaskStats
-                          totalRounds={task.cur_round}
-                          totalCollected={task.round.total_collected}
-                          maxScore={maxScore}
-                          amountOfModels={amountOfModels}
-                        />
+                        <h2 className="text-3xl font-medium text-white">
+                          {task.name}{" "}
+                        </h2>
+                        <p className="pb-2 pl-3 text-xl text-white">
+                          {task.desc}
+                        </p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2">
-                      <div>
-                        <ul
-                          className="flex flex-row flex-wrap list-none border-t-2"
-                          role="tablist"
-                        >
-                          <TabOption
-                            optionTab={1}
-                            tabName="Leaderboard"
-                            openTab={openTab}
-                            setOpenTab={setOpenTab}
-                          />
-                          <TabOption
-                            optionTab={2}
-                            tabName="Overview"
-                            openTab={openTab}
-                            setOpenTab={setOpenTab}
-                          />
-                          {task.documentation_url && (
-                            <TabOption
-                              optionTab={3}
-                              tabName="Documentation"
-                              openTab={openTab}
-                              documentationUrl={task.documentation_url}
-                            />
-                          )}
-                        </ul>
-                      </div>
-                      <div className="flex justify-end pt-1">
-                        <TaskActionButtons
-                          configYaml={task.config_yaml}
-                          dynamicAdversarialDataValidation={Boolean(
-                            task.dynamic_adversarial_data_validation
-                          )}
-                          dynamicAdversarialDataCollection={Boolean(
-                            task.dynamic_adversarial_data_collection
-                          )}
-                          submitable={Boolean(task.submitable)}
-                          hasPredictionsUpload={Boolean(
-                            task.has_predictions_upload
-                          )}
-                          taskCode={task.task_code}
+                    <div className="bg-[#0000009c]">
+                      <div className="flex items-start justify-end pt-2 pr-4">
+                        <TaskHelpersButton
+                          taskCode={taskCode}
+                          adminOrOwner={adminOrOwner}
                         />
                       </div>
+                      <PrincipalTaskStats
+                        totalRounds={task.cur_round}
+                        totalCollected={task.round.total_collected}
+                        maxScore={maxScore}
+                        amountOfModels={amountOfModels}
+                      />
                     </div>
                   </div>
-                  <div className="flex flex-wrap mt-3">
-                    <div className="flex-auto">
-                      <div className="tab-content tab-space">
-                        <div
-                          className={openTab === 1 ? "block  px-4" : "hidden"}
-                        >
-                          <Leaderboard taskCode={task.task_code} />
-                        </div>
-                        <div className={openTab === 2 ? "block " : "hidden"}>
-                          <OverviewTask
-                            roundDescription={task.round?.longdesc}
-                            generalDescription={task.instructions_md}
-                            taskInstructions={taskInstructions!}
+                  <div className="grid grid-cols-2">
+                    <div>
+                      <ul
+                        className="flex flex-row flex-wrap list-none border-t-2"
+                        role="tablist"
+                      >
+                        <TabOption
+                          optionTab={1}
+                          tabName="Leaderboard"
+                          openTab={openTab}
+                          setOpenTab={setOpenTab}
+                        />
+                        <TabOption
+                          optionTab={2}
+                          tabName="Overview"
+                          openTab={openTab}
+                          setOpenTab={setOpenTab}
+                        />
+                        {task.documentation_url && (
+                          <TabOption
+                            optionTab={3}
+                            tabName="Documentation"
+                            openTab={openTab}
+                            documentationUrl={task.documentation_url}
                           />
-                        </div>
+                        )}
+                      </ul>
+                    </div>
+                    <div className="flex justify-end pt-1">
+                      <TaskActionButtons
+                        configYaml={task.config_yaml}
+                        dynamicAdversarialDataValidation={Boolean(
+                          task.dynamic_adversarial_data_validation
+                        )}
+                        dynamicAdversarialDataCollection={Boolean(
+                          task.dynamic_adversarial_data_collection
+                        )}
+                        submitable={Boolean(task.submitable)}
+                        hasPredictionsUpload={Boolean(
+                          task.has_predictions_upload
+                        )}
+                        taskCode={task.task_code}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap mt-3">
+                  <div className="flex-auto">
+                    <div className="tab-content tab-space">
+                      <div className={openTab === 1 ? "block  px-4" : "hidden"}>
+                        <Leaderboard taskCode={task.task_code} />
+                      </div>
+                      <div className={openTab === 2 ? "block " : "hidden"}>
+                        <OverviewTask
+                          roundDescription={task.round?.longdesc}
+                          generalDescription={task.instructions_md}
+                          taskInstructions={taskInstructions!}
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
-              </>
-            )}
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-screen">
-            <PacmanLoader color="#ccebd4" loading={loading} size={50} />
-          </div>
-        )}
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        {!loading ? (
-          <>
-            {task && (
-              <>
-                <div className="container ">
-                  <div className="mt-4 border border-gray-200 rounded-lg">
-                    <div
-                      className={`grid grid-cols-2 relative bg-no-repeat bg-[50%] bg-cover`}
-                      style={{
-                        backgroundImage: `url(${task?.image_url})`,
-                      }}
-                    >
-                      <div className="bg-[#0000009c] pl-4 ">
-                        <div className="col-span-2 pt-4 pl-4">
-                          <div className="flex gap-1">
-                            <i className="text-white fa fa-users"></i>
-                            <p className="text-sm text-white ">
-                              {task.challenge_type_name}
-                            </p>
-                          </div>
-                          <h2 className="text-3xl font-medium text-white">
-                            {task.name}{" "}
-                          </h2>
-                          <p className="pb-2 pl-3 text-xl text-white">
-                            {task.desc}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="bg-[#0000009c]">
-                        <div className="flex items-start justify-end pt-2 pr-4">
-                          <TaskHelpersButton
-                            taskCode={taskCode}
-                            adminOrOwner={adminOrOwner}
-                          />
-                        </div>
-                        <NibblerTaskStats
-                          totalRounds={task.cur_round}
-                          amountOfModels={amountOfModels}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <div>
-                        <ul
-                          className="flex flex-row flex-wrap list-none border-t-2"
-                          role="tablist"
-                        >
-                          <TabOption
-                            optionTab={1}
-                            tabName="Overview"
-                            openTab={openTab}
-                            setOpenTab={setOpenTab}
-                          />
-                          {task.documentation_url && (
-                            <TabOption
-                              optionTab={2}
-                              tabName="Documentation"
-                              openTab={openTab}
-                              documentationUrl={task.documentation_url}
-                            />
-                          )}
-                        </ul>
-                      </div>
-                      <div className="flex justify-end pt-1">
-                        <TaskActionButtons
-                          configYaml={task.config_yaml}
-                          dynamicAdversarialDataValidation={Boolean(
-                            task.dynamic_adversarial_data_validation
-                          )}
-                          dynamicAdversarialDataCollection={Boolean(
-                            task.dynamic_adversarial_data_collection
-                          )}
-                          submitable={Boolean(task.submitable)}
-                          hasPredictionsUpload={Boolean(
-                            task.has_predictions_upload
-                          )}
-                          taskCode={task.task_code}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap mt-3">
-                    <div className="flex-auto">
-                      <div className="tab-content tab-space">
-                        <div className={openTab === 1 ? "block " : "hidden"}>
-                          <OverviewTask
-                            roundDescription={task.round?.longdesc}
-                            generalDescription={task.instructions_md}
-                            taskInstructions={taskInstructions!}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-screen">
-            <PacmanLoader color="#ccebd4" loading={loading} size={50} />
-          </div>
-        )}
-      </div>
-    );
-  }
+              </div>
+            </>
+          )}
+        </>
+      ) : (
+        <div className="flex items-center justify-center h-screen">
+          <PacmanLoader color="#ccebd4" loading={loading} size={50} />
+        </div>
+      )}
+    </div>
+  );
 };
 export default TaskPage;
