@@ -13,6 +13,7 @@ import {
   getListFromLocalStorage,
   addElementToListInLocalStorage,
 } from "new_front/utils/helpers/functions/LocalStorage";
+import { getIdFromImageString } from "new_front/utils/helpers/functions/DataManipulation";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
@@ -74,7 +75,8 @@ const SelectBetweenImagesGenerative: FC<
   const handleSelectImage = async (image: string) => {
     setIsGenerativeContext(false);
     updateModelInputs({
-      [field_names_for_the_model.select_image ?? "select_image"]: image,
+      [field_names_for_the_model.select_image ?? "select_image"]:
+        getIdFromImageString(showImages, image),
     });
     setSelectedImage(image);
   };
