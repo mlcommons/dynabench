@@ -2,17 +2,24 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import base64
 import hashlib
 import json
 import os
+import random
 
+import boto3
 import openai
 import requests
 import yaml
 from fastapi import HTTPException
 
 from app.domain.services.base.task import TaskService
-from app.domain.services.utils.constant import black_image
+from app.domain.services.utils.constant import black_image, forbidden_image
+from app.domain.services.utils.image_generators import (
+    OpenAIImageProvider,
+    StableDiffusionImageProvider,
+)
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
@@ -22,6 +29,13 @@ class ContextService:
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
         self.task_service = TaskService()
+        self.providers = [StableDiffusionImageProvider(), OpenAIImageProvider()]
+        self.session = boto3.Session(
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.getenv("AWS_REGION"),
+        )
+        self.s3 = self.session.client("s3")
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
         self.context_repository.increment_counter_total_samples_and_update_date(
@@ -96,36 +110,41 @@ class ContextService:
         }
         return context_info
 
-    def get_nibbler_contexts(self, prompt: str, endpoint: str) -> dict:
-        print(prompt)
-        context_config = self.task_service.get_task_info_by_task_id(45)
-        res = requests.post(
-            context_config.lambda_model,
-            json={
-                "model": "runwayml-stable-diffusion-v1-5",
-                "prompt": prompt,
-                "n": 6,
-                "steps": 20,
-            },
-            headers={"Authorization": "Bearer ", "User-Agent": ""},
-        )
-        if res.status_code == 200:
-            image_response = res.json()["output"]["choices"]
-        else:
-            openai.api_key = os.getenv("OPENAI")
-            response = openai.Image.create(
-                prompt=prompt, n=6, size="256x256", response_format="b64_json"
-            )
-            image_response = response["data"][0]["b64_json"]
-        image_list = []
-        for image in image_response:
-            if black_image not in image:
-                new_dict = {
-                    "image": image["image_base64"],
-                    "id": hashlib.md5(image["image_base64"].encode()).hexdigest(),
-                }
-                image_list.append(new_dict)
-        return image_list
+    def get_nibbler_contexts(self, prompt: str, num_images: int = 3) -> dict:
+        images = []
+        for counter in range(2):
+            if len(images) == 6:
+                break
+            else:
+                for generator in self.providers:
+                    generated_images = generator.generate_images(prompt, 3)
+                    for image in generated_images:
+                        image_id = (
+                            generator.provider_name()
+                            + "_"
+                            + hashlib.md5(image.encode()).hexdigest()
+                        )
+                        print(image_id)
+                        if black_image in image:
+                            new_dict = {
+                                "image": forbidden_image,
+                                "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
+                            }
+                            images.append(new_dict)
+                        else:
+                            new_dict = {
+                                "image": image,
+                                "id": image_id,
+                            }
+                            filename = f"adversarial-nibbler/{image_id}.jpeg"
+                            self.s3.put_object(
+                                Body=base64.b64decode(image),
+                                Bucket="dataperf",
+                                Key=filename,
+                            )
+                            images.append(new_dict)
+        random.shuffle(images)
+        return images
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":

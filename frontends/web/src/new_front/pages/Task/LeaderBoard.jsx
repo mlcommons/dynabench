@@ -119,7 +119,8 @@ class Leaderboard extends React.Component {
             <>
               {this.state.task?.active ? (
                 <>
-                  {this.state.task && (
+                  {console.log("state", this.state)}
+                  {this.state.task && this.state.task.submitable && (
                     <Row className="justify-content-center">
                       <Col xs={12} md={12}>
                         <Annotation
@@ -162,7 +163,6 @@ class Leaderboard extends React.Component {
                   <Row>
                     {this.state.task.id &&
                       this.state.task.dynamic_adversarial_data_collection &&
-                      this.state.task.dynamic_adversarial_data_validation &&
                       this.state.task.round &&
                       this.state.task.cur_round && (
                         <Col xs={12} md={6}>
@@ -170,6 +170,10 @@ class Leaderboard extends React.Component {
                             taskId={this.state.task.id}
                             round={this.state.task.round}
                             cur_round={this.state.task.cur_round}
+                            dataValidation={
+                              this.state.task
+                                .dynamic_adversarial_data_validation
+                            }
                           />
                         </Col>
                       )}

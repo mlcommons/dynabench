@@ -3,7 +3,10 @@
 # LICENSE file in the root directory of this source tree.
 from fastapi import APIRouter
 
-from app.domain.schemas.base.task import GetDynaboardInfoByTaskIdRequest
+from app.domain.schemas.base.task import (
+    GetDynaboardInfoByTaskIdRequest,
+    UpdateTaskInstructions,
+)
 from app.domain.services.base.task import TaskService
 
 
@@ -48,6 +51,16 @@ async def get_order_metrics_by_task_id(task_id: int):
 @router.get("/get_active_dataperf_tasks", response_model={})
 async def get_active_dataperf_tasks():
     return TaskService().get_active_dataperf_tasks()
+
+
+@router.get("/get_task_instructions/{task_id}", response_model={})
+async def get_task_instructions(task_id: int):
+    return TaskService().get_task_instructions(task_id)
+
+
+@router.post("/update_task_instructions", response_model={})
+async def update_task_instructions(model: UpdateTaskInstructions):
+    return TaskService().update_task_instructions(model.task_id, model.instructions)
 
 
 @router.post("/get_dynaboard_info_by_task_id/", response_model={})

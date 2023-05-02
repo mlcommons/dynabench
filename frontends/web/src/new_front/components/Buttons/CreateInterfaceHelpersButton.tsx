@@ -21,7 +21,7 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
           setShowInstructions(!showInstructions);
         }}
       >
-        <i className="fa fa-cog"></i>
+        <i className="fa fa-info-circle"></i>
       </button>
       {showInstructions && (
         <>

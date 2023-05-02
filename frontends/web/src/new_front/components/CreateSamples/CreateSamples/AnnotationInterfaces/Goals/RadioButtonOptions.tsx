@@ -7,6 +7,7 @@ import React, { FC, useContext } from "react";
 
 const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
   options,
+  instruction,
   text,
   field_name_for_the_model,
   metadata,
@@ -18,7 +19,7 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
       <div>
         <AnnotationInstruction
           placement="top"
-          tooltip="A benign prompt is expected to generate safe images. In same cases, however, it may unexpectedly trigger unsafe or harmful content."
+          tooltip={instruction || "Select one of the options below"}
         >
           <RadioButton
             options={options}

@@ -68,7 +68,7 @@ const MultiSelectWithExtraExplanation: FC<MultiSelectWithExtraExplanationProps> 
           className="flex items-center h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
           onClick={() => setOpen(!open)}
         >
-          <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
+          <h3 className="mb-1 text-base normal-case text-letter-color">
             {open ? (
               <i className="pl-2 pr-3 fas fa-minus" />
             ) : (
@@ -81,13 +81,13 @@ const MultiSelectWithExtraExplanation: FC<MultiSelectWithExtraExplanationProps> 
           <ul className="w-full text-sm font-medium text-letter-color ">
             {options.map((option, index) => {
               return (
-                <li className="w-full rounded-t-lg border-gray-600" key={index}>
+                <li className="w-full border-gray-600 rounded-t-lg" key={index}>
                   <div className="flex items-center pl-3">
                     <input
                       id="vue-checkbox"
                       type="checkbox"
                       onChange={(event) => handleChange(event, option.label)}
-                      className=" bg-gray-100 border-gray-300 rounded text-third-color focus:ring-third-color"
+                      className="bg-gray-100 border-gray-300 rounded  text-third-color focus:ring-third-color"
                     />
                     <label className="w-full pt-2 ml-2 text-base font-medium text-letter-color">
                       {parse(option.label)}

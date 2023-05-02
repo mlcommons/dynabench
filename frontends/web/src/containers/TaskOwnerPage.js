@@ -19,6 +19,7 @@ import Owners from "../components/TaskOwnerPageComponents/Owners";
 import Rounds from "../components/TaskOwnerPageComponents/Rounds";
 import Settings from "../components/TaskOwnerPageComponents/Settings";
 import Datasets from "../components/TaskOwnerPageComponents/Datasets";
+import Instructions from "new_front/pages/Task/TaskOwnerPage/Instructions";
 const yaml = require("js-yaml");
 
 class TaskOwnerPage extends React.Component {
@@ -495,6 +496,10 @@ class TaskOwnerPage extends React.Component {
         buttonText: "Settings",
       },
       {
+        href: "#instructions",
+        buttonText: "Instructions",
+      },
+      {
         href: "#advanced",
         buttonText: "Advanced",
       },
@@ -553,6 +558,10 @@ class TaskOwnerPage extends React.Component {
             ) : null}
             {this.state.task?.active ? (
               <>
+                {this.props.location.hash === "#instructions" &&
+                this.state.task ? (
+                  <Instructions taskId={this.state.task.id} />
+                ) : null}
                 {this.props.location.hash === "#owners" && this.state.owners ? (
                   <Owners
                     owners={this.state.owners}
@@ -601,7 +610,7 @@ class TaskOwnerPage extends React.Component {
             ) : (
               this.props.location.hash !== "#settings" &&
               this.props.location.hash !== "#advanced" && (
-                <Container className="mb-5 pb-5">
+                <Container className="pb-5 mb-5">
                   <Card className="my-4">
                     <Card.Body>
                       <Row className="justify-content-center">

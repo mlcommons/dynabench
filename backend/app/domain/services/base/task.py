@@ -2,6 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from ast import literal_eval
+
 import yaml
 
 from app.domain.services.base.score import ScoreService
@@ -175,3 +177,12 @@ class TaskService:
 
     def get_tasks_categories(self):
         return self.task_categories_repository.get_tasks_categories()
+
+    def get_task_instructions(self, task_id: int):
+        instructions = self.task_repository.get_task_instructions(
+            task_id
+        ).general_instructions
+        return literal_eval(instructions)
+
+    def update_task_instructions(self, task_id: int, instructions: dict):
+        return self.task_repository.update_task_instructions(task_id, instructions)

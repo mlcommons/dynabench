@@ -48,7 +48,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
         className="flex items-center h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
         onClick={() => setOpen(!open)}
       >
-        <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
+        <h3 className="mb-1 text-base normal-case text-letter-color">
           {open ? (
             <i className="pl-2 pr-3 fas fa-minus" />
           ) : (
@@ -60,7 +60,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
       <Collapse in={open}>
         <ul className="w-full text-sm font-medium text-letter-color ">
           {options.map((option, index) => (
-            <li className="w-full rounded-t-lg border-gray-600" key={index}>
+            <li className="w-full border-gray-600 rounded-t-lg" key={index}>
               <SimpleInputMultiSelect
                 option={option}
                 handleChange={handleChange}

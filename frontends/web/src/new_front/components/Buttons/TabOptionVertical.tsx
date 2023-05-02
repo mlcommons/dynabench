@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 
-type TabOptionProps = {
+type TabOptionVerticalProps = {
   optionTab: number;
   tabName: string;
   openTab: number;
@@ -8,7 +8,7 @@ type TabOptionProps = {
   setOpenTab?: (openTab: number) => void;
 };
 
-const TabOption: FC<TabOptionProps> = ({
+const TabOptionVertical: FC<TabOptionVerticalProps> = ({
   optionTab,
   tabName,
   openTab,
@@ -30,14 +30,9 @@ const TabOption: FC<TabOptionProps> = ({
         role="tablist"
         rel="noreferrer"
       >
-        <span
-          className={
-            "absolute inset-x-0 -bottom-px h-1 w-full" +
-            (openTab === optionTab ? " bg-primary-color" : "")
-          }
-        ></span>
-        <div className="flex items-center justify-center">
-          <span className="ml-3 text-base font-medium text-letter-color">
+        <span className={"absolute inset-x-0 -bottom-px h-1 w-full"}></span>
+        <div className="flex pl-2">
+          <span className="mx-2 text-lg font-medium capitalize text-letter-color">
             {tabName}
           </span>
         </div>
@@ -46,4 +41,4 @@ const TabOption: FC<TabOptionProps> = ({
   );
 };
 
-export default TabOption;
+export default TabOptionVertical;

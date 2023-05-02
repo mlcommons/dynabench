@@ -176,6 +176,10 @@ class ScoreService:
     def get_maximun_principal_score_per_task(self, task_id: int) -> float:
         scoring_datasets = self.dataset_service.get_scoring_datasets_by_task_id(task_id)
         scoring_datasets = [dataset["id"] for dataset in scoring_datasets]
-        return self.score_repository.get_maximun_principal_score_per_task(
+        scores = self.score_repository.get_maximun_principal_score_per_task(
             task_id, scoring_datasets
         )
+        if scores:
+            return scores
+        else:
+            return {"perf": 0.00}
