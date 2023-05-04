@@ -64,7 +64,11 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const handlePromptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setArtifactsInput({ ...artifactsInput, prompt: event.target.value });
+    setArtifactsInput({
+      ...artifactsInput,
+      prompt: event.target.value,
+      userid: user.id,
+    });
     setPrompt(event.target.value);
     updateModelInputs({
       [field_names_for_the_model.original_prompt ?? "original_prompt"]:
@@ -84,7 +88,7 @@ const SelectBetweenImagesGenerative: FC<
   const createPartialSample = async () => {
     console.log("modelInputs", modelInputs);
     const partialSampleId = await post(
-      `/example/partially_creation_generative_example`,
+      `/example/partial_creation_generative_example`,
       {
         example_info: modelInputs,
         context_id: contextId,
@@ -119,7 +123,11 @@ const SelectBetweenImagesGenerative: FC<
       {!loading ? (
         <div>
           <div className="grid col-span-1 py-3 justify-items-end">
-            <Dropdown options={promptHistory} placeholder="" />
+            <Dropdown
+              options={promptHistory}
+              placeholder=""
+              setPrompt={setPrompt}
+            />
             <AnnotationInstruction
               placement="left"
               tooltip={

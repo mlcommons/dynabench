@@ -45,11 +45,11 @@ def validate_example(model: ValidateExampleRequest):
     )
 
 
-@router.post("/partially_creation_generative_example", response_model={})
-def partially_creation_generative_example(
+@router.post("/partial_creation_generative_example", response_model={})
+def partial_creation_generative_example(
     model: PartiallyCreationExampleGenerativeRequest,
 ):
-    return ExampleService().partially_creation_generative_example(
+    return ExampleService().partial_creation_generative_example(
         model.example_info,
         model.context_id,
         model.user_id,

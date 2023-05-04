@@ -110,7 +110,7 @@ class ContextService:
         return context_info
 
     def get_nibbler_contexts(
-        self, prompt: str, user_id: int = 1912, num_images: int = 24
+        self, prompt: str, user_id: int, num_images: int = 24
     ) -> dict:
         images = []
         for i in range(2):
@@ -156,5 +156,7 @@ class ContextService:
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
             return self.get_nibbler_contexts(
-                prompt=artifacts["prompt"], num_images=12
-            )  # user_id = artifacts["user_id"]
+                prompt=artifacts["prompt"],
+                user_id=artifacts["user_id"],
+                num_images=12,
+            )

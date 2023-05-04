@@ -119,47 +119,47 @@ class Leaderboard extends React.Component {
             <>
               {this.state.task?.active ? (
                 <>
-                  {console.log("state", this.state)}
-                  {this.state.task && this.state.task.submitable && (
-                    <Row className="justify-content-center">
-                      <Col xs={12} md={12}>
-                        <Annotation
-                          placement="left"
-                          tooltip="This shows how models have performed on this task - the top-performing models are the ones we’ll use for the next round"
-                        >
-                          {this.props.match?.params.forkOrSnapshotName ? (
-                            <TaskModelForkLeaderboard
-                              {...this.props}
-                              task={this.state.task}
-                              taskCode={this.state.taskCode}
-                              title={
-                                hasTrainFileUpload
-                                  ? "Coreset Selection Algorithm Leaderboard (Fork)"
-                                  : "Model Leaderboard (Fork)"
-                              }
-                              modelColumnTitle={
-                                hasTrainFileUpload ? "Algorithm" : "Model"
-                              }
-                            />
-                          ) : (
-                            <TaskModelDefaultLeaderboard
-                              {...this.props}
-                              task={this.state.task}
-                              taskCode={this.state.taskCode}
-                              title={
-                                hasTrainFileUpload
-                                  ? "Coreset Selection Algorithm Leaderboard"
-                                  : "Model Leaderboard"
-                              }
-                              modelColumnTitle={
-                                hasTrainFileUpload ? "Algorithm" : "Model"
-                              }
-                            />
-                          )}
-                        </Annotation>
-                      </Col>
-                    </Row>
-                  )}
+                  {this.state.task &&
+                    (this.state.task.submitable || hasTrainFileUpload) && (
+                      <Row className="justify-content-center">
+                        <Col xs={12} md={12}>
+                          <Annotation
+                            placement="left"
+                            tooltip="This shows how models have performed on this task - the top-performing models are the ones we’ll use for the next round"
+                          >
+                            {this.props.match?.params.forkOrSnapshotName ? (
+                              <TaskModelForkLeaderboard
+                                {...this.props}
+                                task={this.state.task}
+                                taskCode={this.state.taskCode}
+                                title={
+                                  hasTrainFileUpload
+                                    ? "Coreset Selection Algorithm Leaderboard (Fork)"
+                                    : "Model Leaderboard (Fork)"
+                                }
+                                modelColumnTitle={
+                                  hasTrainFileUpload ? "Algorithm" : "Model"
+                                }
+                              />
+                            ) : (
+                              <TaskModelDefaultLeaderboard
+                                {...this.props}
+                                task={this.state.task}
+                                taskCode={this.state.taskCode}
+                                title={
+                                  hasTrainFileUpload
+                                    ? "Coreset Selection Algorithm Leaderboard"
+                                    : "Model Leaderboard"
+                                }
+                                modelColumnTitle={
+                                  hasTrainFileUpload ? "Algorithm" : "Model"
+                                }
+                              />
+                            )}
+                          </Annotation>
+                        </Col>
+                      </Row>
+                    )}
                   <Row>
                     {this.state.task.id &&
                       this.state.task.dynamic_adversarial_data_collection &&

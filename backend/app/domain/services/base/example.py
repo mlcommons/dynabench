@@ -155,7 +155,7 @@ class ExampleService:
         }
         return context_info
 
-    def partially_creation_generative_example(
+    def partial_creation_generative_example(
         self,
         example_info: dict,
         context_id: int,
@@ -165,7 +165,7 @@ class ExampleService:
         task_id: int,
     ) -> str:
         try:
-            return self.create_example_and_increment_counters(
+            return self.create_example(
                 context_id,
                 user_id,
                 False,
@@ -174,8 +174,6 @@ class ExampleService:
                 json.dumps({}),
                 json.dumps({}),
                 tag,
-                round_id,
-                task_id,
             )
         except Exception as e:
             return str(e)
