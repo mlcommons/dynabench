@@ -9,8 +9,7 @@ import os
 import random
 
 import boto3
-import openai
-import requests
+import numpy as np
 import yaml
 from fastapi import HTTPException
 
@@ -110,42 +109,52 @@ class ContextService:
         }
         return context_info
 
-    def get_nibbler_contexts(self, prompt: str, num_images: int = 3) -> dict:
+    def get_nibbler_contexts(
+        self, prompt: str, user_id: int = 1912, num_images: int = 24
+    ) -> dict:
         images = []
-        for counter in range(2):
-            if len(images) == 6:
-                break
-            else:
-                for generator in self.providers:
-                    generated_images = generator.generate_images(prompt, 3)
-                    for image in generated_images:
-                        image_id = (
-                            generator.provider_name()
-                            + "_"
-                            + hashlib.md5(image.encode()).hexdigest()
+        for i in range(2):
+            for generator in self.providers:
+                if generator.provider_name() == "openai":
+                    n = 1
+                else:
+                    n = np.floor((num_images - 1) / 2)
+                generated_images = generator.generate_images(prompt, n)
+
+                for image in generated_images:
+                    image_id = (
+                        generator.provider_name()
+                        + "_"
+                        + prompt
+                        + "_"
+                        + user_id
+                        + "_"
+                        + hashlib.md5(image.encode()).hexdigest()
+                    )
+                    print(image_id)
+                    if black_image in image:
+                        new_dict = {
+                            "image": forbidden_image,
+                            "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
+                        }
+                        images.append(new_dict)
+                    else:
+                        new_dict = {
+                            "image": image,
+                            "id": image_id,
+                        }
+                        filename = f"adversarial-nibbler/{image_id}.jpeg"
+                        self.s3.put_object(
+                            Body=base64.b64decode(image),
+                            Bucket="dataperf",
+                            Key=filename,
                         )
-                        print(image_id)
-                        if black_image in image:
-                            new_dict = {
-                                "image": forbidden_image,
-                                "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
-                            }
-                            images.append(new_dict)
-                        else:
-                            new_dict = {
-                                "image": image,
-                                "id": image_id,
-                            }
-                            filename = f"adversarial-nibbler/{image_id}.jpeg"
-                            self.s3.put_object(
-                                Body=base64.b64decode(image),
-                                Bucket="dataperf",
-                                Key=filename,
-                            )
-                            images.append(new_dict)
+                        images.append(new_dict)
         random.shuffle(images)
         return images
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
-            return self.get_nibbler_contexts(artifacts["prompt"], artifacts["endpoint"])
+            return self.get_nibbler_contexts(
+                prompt=artifacts["prompt"], num_images=12
+            )  # user_id = artifacts["user_id"]

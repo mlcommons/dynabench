@@ -7,7 +7,6 @@ from abc import ABC, abstractmethod
 
 import openai
 import requests
-from fastapi import HTTPException
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import forbidden_image
@@ -42,6 +41,7 @@ class OpenAIImageProvider(ImageProvider):
             return image_response
 
         except openai.error.OpenAIError as e:
+            print(e)
             return [forbidden_image] * num_images
 
     def provider_name(self):
@@ -67,8 +67,12 @@ class StableDiffusionImageProvider(ImageProvider):
                 "User-Agent": "",
             },
         )
-        image_response = res.json()["output"]["choices"]
-        image_response = [x["image_base64"] for x in image_response]
+        print("status_code", res.status_code)
+        image_response = res.json().get("output").get("choices")
+        if res.status_code == 200:
+            image_response = [x["image_base64"] for x in image_response]
+        else:
+            image_response = [forbidden_image] * num_images
         return image_response
 
     def provider_name(self):
