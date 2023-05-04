@@ -67,7 +67,7 @@ const SelectBetweenImagesGenerative: FC<
     setArtifactsInput({
       ...artifactsInput,
       prompt: event.target.value,
-      userid: user.id,
+      user_id: user.id,
     });
     setPrompt(event.target.value);
     updateModelInputs({

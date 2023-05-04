@@ -127,7 +127,7 @@ class ContextService:
                         + "_"
                         + prompt
                         + "_"
-                        + user_id
+                        + str(user_id)
                         + "_"
                         + hashlib.md5(image.encode()).hexdigest()
                     )
