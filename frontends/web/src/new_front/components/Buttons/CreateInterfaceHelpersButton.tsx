@@ -5,12 +5,15 @@ import ShowInstructionsButton from "new_front/components/Buttons/ShowInstruction
 
 type CreateInterfaceHelpersButtonProps = {
   generalInstructions: string;
+  creationExample?: string;
 };
 
 const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
   generalInstructions,
+  creationExample,
 }) => {
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showCreationExample, setShowCreationExample] = useState(false);
   return (
     <div>
       <ShowInstructionsButton />
@@ -36,6 +39,23 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
             </Modal.Header>
             <Modal.Body>
               <Markdown>{generalInstructions}</Markdown>
+            </Modal.Body>
+          </Modal>
+        </>
+      )}
+      {showCreationExample && creationExample && (
+        <>
+          <Modal
+            show={showCreationExample}
+            onHide={() => {
+              setShowCreationExample(false);
+            }}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Example</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Markdown>{creationExample}</Markdown>
             </Modal.Body>
           </Modal>
         </>

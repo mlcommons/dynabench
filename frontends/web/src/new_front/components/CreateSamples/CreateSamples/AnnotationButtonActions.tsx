@@ -22,6 +22,7 @@ type Props = {
   userId: number;
   partialSampleId?: number;
   neccessaryFields: string[];
+  accept_sandbox_creation: boolean;
   setModelOutput: (modelOutput: ModelOutputType) => void;
 };
 
@@ -39,6 +40,7 @@ const AnnotationButtonActions: FC<Props> = ({
   userId,
   partialSampleId,
   neccessaryFields,
+  accept_sandbox_creation,
   setModelOutput,
 }) => {
   const [sandboxMode, setSandboxMode] = useState<boolean>(false);
@@ -128,32 +130,38 @@ const AnnotationButtonActions: FC<Props> = ({
             <>
               <div className="col-span-1 py-4">
                 <div className="grid grid-cols-6">
-                  <div className="col-span-3 px-3 text-white">
-                    <BootstrapSwitchButton
-                      checked={!sandboxMode}
-                      onlabel="Live Mode"
-                      onstyle="dark"
-                      offstyle="warning"
-                      offlabel="Sandbox"
-                      width={120}
-                      onChange={(checked: boolean) => {
-                        setSandboxMode(!checked);
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-end col-span-3 ">
-                    <div className="col-span-1 pl-2" id="switchContext">
-                      {currentContext && partialSampleId !== 0 && (
-                        <Button
-                          className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                          onClick={() => {
-                            window.location.reload();
-                          }}
-                        >
-                          New context
-                        </Button>
-                      )}
+                  {}
+                  {accept_sandbox_creation && (
+                    <div className="col-span-3 px-3 text-white">
+                      <BootstrapSwitchButton
+                        checked={!sandboxMode}
+                        onlabel="Live Mode"
+                        onstyle="dark"
+                        offstyle="warning"
+                        offlabel="Sandbox"
+                        width={120}
+                        onChange={(checked: boolean) => {
+                          setSandboxMode(!checked);
+                        }}
+                      />
                     </div>
+                  )}
+                  <div className="flex justify-end col-span-3 ">
+                    {accept_sandbox_creation && (
+                      <div className="col-span-1 pl-2" id="switchContext">
+                        {currentContext && partialSampleId !== 0 && (
+                          <Button
+                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                            onClick={() => {
+                              window.location.reload();
+                            }}
+                          >
+                            New context
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
                     <div className="col-span-1 pl-2 pr-3" id="submit">
                       <Button
                         className="border-0 font-weight-bold light-gray-bg task-action-btn"

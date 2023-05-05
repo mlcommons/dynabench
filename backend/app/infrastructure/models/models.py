@@ -120,8 +120,10 @@ class Task(Base):
     decen_aws_region = Column(Text)
     image_url = Column(Text)
     documentation_url = Column(Text)
+    accept_sandbox_creation = Column(TINYINT(1), server_default=text("'1'"))
     lambda_model = Column(Text)
     dataperf = Column(TINYINT(1))
+    creation_example_md = Column(Text)
 
 
 class User(Base):

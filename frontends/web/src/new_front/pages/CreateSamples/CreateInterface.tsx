@@ -102,11 +102,12 @@ const CreateInterface = () => {
                 <div className="flex items-start justify-end pr-4 pt-14">
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
+                    creationExample={taskInfo?.creation_example_md!}
                   />
                 </div>
               </div>
             </div>
-            <div className="border p-2">
+            <div className="p-2 border">
               <div id="goal">
                 {taskConfiguration?.goal && (
                   <AnnotationGoalStrategy
@@ -163,6 +164,9 @@ const CreateInterface = () => {
                     neccessaryFields={taskConfiguration.required_fields}
                     isGenerativeContext={isGenerativeContext}
                     userId={user.id!}
+                    accept_sandbox_creation={Boolean(
+                      taskInfo.accept_sandbox_creation
+                    )}
                     setModelOutput={setModelOutput}
                   />
                 )}
