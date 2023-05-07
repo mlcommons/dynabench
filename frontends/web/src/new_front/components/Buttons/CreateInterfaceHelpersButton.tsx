@@ -14,6 +14,8 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
 }) => {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showCreationExample, setShowCreationExample] = useState(false);
+  console.log("creationExample", creationExample);
+
   return (
     <div>
       <ShowInstructionsButton />
@@ -43,21 +45,35 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
           </Modal>
         </>
       )}
-      {showCreationExample && creationExample && (
+
+      {creationExample && (
         <>
-          <Modal
-            show={showCreationExample}
-            onHide={() => {
-              setShowCreationExample(false);
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm btn-help-info"
+            onClick={() => {
+              setShowCreationExample(!showCreationExample);
             }}
           >
-            <Modal.Header closeButton>
-              <Modal.Title>Example</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Markdown>{creationExample}</Markdown>
-            </Modal.Body>
-          </Modal>
+            <span className="text-xs">Example</span>
+          </button>
+          {showCreationExample && (
+            <>
+              <Modal
+                show={showCreationExample}
+                onHide={() => {
+                  setShowCreationExample(false);
+                }}
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Example</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <Markdown>{creationExample}</Markdown>
+                </Modal.Body>
+              </Modal>
+            </>
+          )}
         </>
       )}
     </div>
