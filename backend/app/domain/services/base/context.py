@@ -110,17 +110,18 @@ class ContextService:
         return context_info
 
     def get_nibbler_contexts(
-        self, prompt: str, user_id: int, num_images: int = 24
+        self, prompt: str, user_id: int, num_images: int, models: list, endpoint: str
     ) -> dict:
         images = []
-        for i in range(2):
+        for counter in range(2):
             for generator in self.providers:
                 if generator.provider_name() == "openai":
                     n = 1
                 else:
                     n = np.floor((num_images - 1) / 2)
-                generated_images = generator.generate_images(prompt, n)
-
+                generated_images = generator.generate_images(
+                    prompt, n, models, endpoint
+                )
                 for image in generated_images:
                     image_id = (
                         generator.provider_name()
@@ -158,5 +159,7 @@ class ContextService:
             return self.get_nibbler_contexts(
                 prompt=artifacts["prompt"],
                 user_id=artifacts["user_id"],
-                num_images=12,
+                models=artifacts["model"],
+                endpoint=artifacts["endpoint"],
+                num_images=30,
             )

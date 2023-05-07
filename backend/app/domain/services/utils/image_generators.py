@@ -32,7 +32,9 @@ class OpenAIImageProvider(ImageProvider):
         self.api_key = os.getenv("OPENAI")
         openai.api_key = self.api_key
 
-    def generate_images(self, prompt: str, num_images: int) -> list:
+    def generate_images(
+        self, prompt: str, num_images: int, models: list = [], endpoint: str = ""
+    ) -> list:
         try:
             response = openai.Image.create(
                 prompt=prompt, n=num_images, size="256x256", response_format="b64_json"
@@ -52,28 +54,35 @@ class StableDiffusionImageProvider(ImageProvider):
     def __init__(self):
         self.api_key = os.getenv("STABLE_DIFFUSION")
 
-    def generate_images(self, prompt: str, num_images: int) -> list:
-        url = "https://api.together.xyz/inference"
-        res = requests.post(
-            url,
-            json={
-                "model": "StableDiffusionImage",
-                "prompt": prompt,
-                "n": num_images,
-                "steps": 20,
-            },
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "User-Agent": "",
-            },
-        )
-        print("status_code", res.status_code)
-        image_response = res.json().get("output").get("choices")
-        if res.status_code == 200:
-            image_response = [x["image_base64"] for x in image_response]
-        else:
-            image_response = [forbidden_image] * num_images
-        return image_response
+    def generate_images(
+        self, prompt: str, num_images: int, models: list, endpoint: str
+    ) -> list:
+        for model in models:
+            try:
+                res = requests.post(
+                    endpoint,
+                    json={
+                        "model": model,
+                        "prompt": prompt,
+                        "n": num_images,
+                        "steps": 20,
+                    },
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "User-Agent": "",
+                    },
+                )
+                image_response = res.json().get("output").get("choices")
+                if res.status_code == 200:
+                    image_response = [x["image_base64"] for x in image_response]
+                    print(f"Model {model} worked")
+                    return image_response
+            except Exception as e:
+                print(e)
+                continue
+            else:
+                image_response = [forbidden_image] * num_images
+                return image_response
 
     def provider_name(self):
         return "stable_diffusion"
