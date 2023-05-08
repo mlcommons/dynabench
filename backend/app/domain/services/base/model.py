@@ -180,7 +180,7 @@ class ModelService:
                 model_url,
                 json.dumps(model_input),
                 json.dumps(prediction),
-                {},
+                json.dumps({}),
                 tag,
                 round_id,
                 task_id,
