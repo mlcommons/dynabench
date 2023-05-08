@@ -76,6 +76,18 @@ const SelectBetweenImagesGenerative: FC<
     });
   };
 
+  const handlePromptHistory = (prompt: string) => {
+    setArtifactsInput({
+      ...artifactsInput,
+      prompt: prompt,
+      user_id: user.id,
+    });
+    setPrompt(prompt);
+    updateModelInputs({
+      [field_names_for_the_model.original_prompt ?? "original_prompt"]: prompt,
+    });
+  };
+
   const handleSelectImage = async (image: string) => {
     setIsGenerativeContext(false);
     updateModelInputs({
@@ -109,7 +121,6 @@ const SelectBetweenImagesGenerative: FC<
 
   useEffect(() => {
     localStorage.setItem("promptHistory", JSON.stringify(promptHistory));
-    console.log("promptHistory", promptHistory);
   }, [promptHistory]);
 
   useEffect(() => {
@@ -126,7 +137,7 @@ const SelectBetweenImagesGenerative: FC<
             <Dropdown
               options={promptHistory}
               placeholder=""
-              setPrompt={setPrompt}
+              onChange={handlePromptHistory}
             />
             <AnnotationInstruction
               placement="left"

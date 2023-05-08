@@ -5,14 +5,14 @@ import { Typeahead } from "react-bootstrap-typeahead";
 type DropdownProps = {
   options: any[];
   placeholder: string;
-  setPrompt: (prompt: any) => void;
+  onChange: (prompt: any) => void;
   disabled?: boolean;
 };
 
 const Dropdown: FC<DropdownProps> = ({
   options,
   placeholder,
-  setPrompt,
+  onChange,
   disabled = false,
 }) => {
   const [open, setOpen] = useState(false);
@@ -43,7 +43,7 @@ const Dropdown: FC<DropdownProps> = ({
           emptyLabel="No prompts found"
           onChange={(selected) => {
             if (selected.length > 0) {
-              setPrompt(selected[0]);
+              onChange(selected[0]);
             }
           }}
         />
