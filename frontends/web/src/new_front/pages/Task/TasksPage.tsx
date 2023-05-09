@@ -40,8 +40,8 @@ const TasksPage = () => {
     <>
       {!loading ? (
         <div className="container">
-          <h2 className="text-2xl font-semibold text-center d-block text-letter-color">
-            TASKS
+          <h2 className="text-4xl font-semibold text-center d-block text-letter-color">
+            Communities
           </h2>
           <div className="pb-2">
             <span className="inline-flex items-center px-3 py-1 m-3 rounded-full bg-primary-color">

@@ -43,10 +43,9 @@ import SubmitInterface from "./SubmitInterface.js";
 import SubmitModel from "./SubmitModel";
 import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
-// import TaskPage from "./TaskPage";
 import TaskPage from "new_front/pages/Task/TaskPage";
-// import Test from "new_front/pages/CommunitiesLandingPages/Test";
-import Test from "new_front/pages/Landing/Test";
+import Test from "new_front/pages/CommunitiesLandingPages/Test";
+import Landing from "new_front/pages/Landing/Landing";
 import SearchBar from "../new_front/components/Utils/SearchBar";
 import FilterTasks from "../new_front/pages/Task/FilterTasks";
 import TasksContext from "./TasksContext";
@@ -481,7 +480,8 @@ class App extends React.Component {
                       <Route path="/register" component={RegisterPage} />
                       <Route path="/users/:userId" component={UserPage} />
                       <Route path="/models/:modelId" component={ModelPage} />
-                      <Route path="/" component={TasksPage} />
+                      <Route path="/communities" component={TasksPage} />
+                      <Route path="/" component={Landing} />
                     </Switch>
                   </div>
                   {!showContentOnly && (

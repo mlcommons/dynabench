@@ -13,8 +13,8 @@ const FilterTasks: FC = () => {
   return (
     <div className="container text-center d-block">
       <div>
-        <h2 className="text-2xl font-semibold text-center d-block text-letter-color">
-          TASKS
+        <h2 className="text-4xl font-semibold text-center d-block text-letter-color">
+          Challenges
         </h2>
       </div>
       <div>

@@ -117,11 +117,6 @@ const AnnotationButtonActions: FC<Props> = ({
     }
   };
 
-  useEffect(() => {
-    console.log("modelInputs", modelInputs);
-    console.log("metadataExample", metadataExample);
-  }, [modelInputs, metadataExample]);
-
   return (
     <>
       {!loading ? (
@@ -130,7 +125,6 @@ const AnnotationButtonActions: FC<Props> = ({
             <>
               <div className="col-span-1 py-4">
                 <div className="grid grid-cols-6">
-                  {}
                   {accept_sandbox_creation && (
                     <div className="col-span-3 px-3 text-white">
                       <BootstrapSwitchButton
