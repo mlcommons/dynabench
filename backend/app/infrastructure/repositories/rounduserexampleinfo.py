@@ -50,7 +50,7 @@ class RoundUserExampleInfoRepository(AbstractRepository):
 
     def amounts_examples_created_today(self, round_id: int, user_id: int):
         return (
-            self.session.query(self.model.amount_examples_on_a_day)
+            self.session.query(self.model.max_amount_examples_on_a_day)
             .filter(
                 (self.model.r_realid == round_id)
                 & (self.model.uid == user_id)
@@ -72,7 +72,7 @@ class RoundUserExampleInfoRepository(AbstractRepository):
         ).update(
             {
                 self.model.last_used: datetime.date.today(),
-                self.model.amount_examples_on_a_day: 0,
+                self.model.max_amount_examples_on_a_day: 0,
             }
         )
         self.session.commit()
