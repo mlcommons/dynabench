@@ -8,3 +8,8 @@ class StillAllowedToSubmit(BaseModel):
     round_id: int
     user_id: int
     max_amount_examples_on_a_day: int
+
+
+class AmountExamplesCreatedToday(BaseModel):
+    round_id: int
+    user_id: int

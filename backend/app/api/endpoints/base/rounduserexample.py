@@ -4,7 +4,10 @@
 
 from fastapi import APIRouter
 
-from app.domain.schemas.base.rounduserexample import StillAllowedToSubmit
+from app.domain.schemas.base.rounduserexample import (
+    AmountExamplesCreatedToday,
+    StillAllowedToSubmit,
+)
 from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoService
 
 
@@ -19,7 +22,7 @@ async def still_allowed_to_submit(model: StillAllowedToSubmit):
 
 
 @router.post("/amounts_examples_created_today", response_model={})
-async def amounts_examples_created_today(model: StillAllowedToSubmit):
+async def amounts_examples_created_today(model: AmountExamplesCreatedToday):
     return RoundUserExampleInfoService().amounts_examples_created_today(
         model.round_id, model.user_id
     )[0]
