@@ -124,6 +124,7 @@ class Task(Base):
     lambda_model = Column(Text)
     dataperf = Column(TINYINT(1))
     creation_example_md = Column(Text)
+    amount_examples_on_a_day = Column(Integer)
 
 
 class User(Base):
@@ -387,6 +388,8 @@ class RoundUserExampleInfo(Base):
     total_verified_not_correct_fooled = Column(Integer)
     total_fooled = Column(Integer)
     examples_submitted = Column(Integer)
+    amount_examples_on_a_day = Column(Integer)
+    last_used = Column(DateTime, onupdate=func.now())
 
     round = relationship("Round")
     user = relationship("User")

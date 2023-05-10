@@ -167,6 +167,9 @@ const CreateInterface = () => {
                     accept_sandbox_creation={Boolean(
                       taskInfo.accept_sandbox_creation
                     )}
+                    maxAmountExamplesOnADay={
+                      taskInfo.max_amount_examples_on_a_day
+                    }
                     setModelOutput={setModelOutput}
                   />
                 )}

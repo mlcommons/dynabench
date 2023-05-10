@@ -6,6 +6,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import datetime
+
 from app.infrastructure.models.models import RoundUserExampleInfo
 from app.infrastructure.repositories.abstract import AbstractRepository
 
@@ -44,4 +46,33 @@ class RoundUserExampleInfoRepository(AbstractRepository):
         self.session.query(self.model).filter(
             (self.model.r_realid == round_id) & (self.model.uid == user_id)
         ).update({self.model.total_fooled: self.model.total_fooled + 1})
+        self.session.commit()
+
+    def amounts_examples_created_today(self, round_id: int, user_id: int):
+        return (
+            self.session.query(self.model.amount_examples_on_a_day)
+            .filter(
+                (self.model.r_realid == round_id)
+                & (self.model.uid == user_id)
+                & (self.model.last_used == datetime.date.today())
+            )
+            .first()
+        )
+
+    def get_last_date_used(self, round_id: int, user_id: int):
+        return (
+            self.session.query(self.model.last_used)
+            .filter((self.model.r_realid == round_id) & (self.model.uid == user_id))
+            .first()
+        )
+
+    def update_last_used_and_counter(self, round_id: int, user_id: int):
+        self.session.query(self.model).filter(
+            (self.model.r_realid == round_id) & (self.model.uid == user_id)
+        ).update(
+            {
+                self.model.last_used: datetime.date.today(),
+                self.model.amount_examples_on_a_day: 0,
+            }
+        )
         self.session.commit()

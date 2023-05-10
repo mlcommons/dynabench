@@ -47,6 +47,7 @@ export type TaskInfoType = {
   challenge_type_name: string;
   accept_sandbox_creation: number;
   creation_example_md: string;
+  max_amount_examples_on_a_day: number;
 };
 
 type roundInfoType = {
