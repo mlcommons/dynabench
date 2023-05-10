@@ -16,3 +16,10 @@ async def still_allowed_to_submit(model: StillAllowedToSubmit):
     return RoundUserExampleInfoService().still_allowed_to_submit(
         model.round_id, model.user_id, model.max_amount_examples_on_a_day
     )
+
+
+@router.post("/amounts_examples_created_today", response_model={})
+async def amounts_examples_created_today(model: StillAllowedToSubmit):
+    return RoundUserExampleInfoService().amounts_examples_created_today(
+        model.round_id, model.user_id
+    )[0]

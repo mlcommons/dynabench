@@ -79,6 +79,9 @@ class ExampleService:
         self.round_user_example_info.increment_counter_examples_submitted(
             real_round_id, user_id
         )
+        self.round_user_example_info.increment_counter_examples_submitted_today(
+            real_round_id, user_id
+        )
         if model_wrong:
             self.round_service.increment_counter_examples_fooled(round_id, task_id)
             self.round_user_example_info.increment_counter_examples_fooled(

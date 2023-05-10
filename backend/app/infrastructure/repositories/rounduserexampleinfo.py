@@ -48,6 +48,17 @@ class RoundUserExampleInfoRepository(AbstractRepository):
         ).update({self.model.total_fooled: self.model.total_fooled + 1})
         self.session.commit()
 
+    def increment_examples_submitted_today(self, round_id: int, user_id: int):
+        self.session.query(self.model).filter(
+            (self.model.r_realid == round_id) & (self.model.uid == user_id)
+        ).update(
+            {
+                self.model.amount_examples_on_a_day: self.model.amount_examples_on_a_day
+                + 1
+            }
+        )
+        self.session.commit()
+
     def amounts_examples_created_today(self, round_id: int, user_id: int):
         return (
             self.session.query(self.model.amount_examples_on_a_day)

@@ -37,6 +37,11 @@ class RoundUserExampleInfoService:
             round_id, user_id
         )
 
+    def increment_counter_examples_submitted_today(self, round_id: int, user_id: int):
+        self.rounds_user_example_info_repository.increment_examples_submitted_today(
+            round_id, user_id
+        )
+
     def amounts_examples_created_today(self, round_id: int, user_id: int):
         return self.rounds_user_example_info_repository.amounts_examples_created_today(
             round_id, user_id
