@@ -6,15 +6,16 @@ import ShowInstructionsButton from "new_front/components/Buttons/ShowInstruction
 type CreateInterfaceHelpersButtonProps = {
   generalInstructions: string;
   creationExample?: string;
+  amountsExamplesCreatedToday?: number;
 };
 
 const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
   generalInstructions,
   creationExample,
+  amountsExamplesCreatedToday,
 }) => {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showCreationExample, setShowCreationExample] = useState(false);
-  console.log("creationExample", creationExample);
 
   return (
     <div>
@@ -45,7 +46,6 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
           </Modal>
         </>
       )}
-
       {creationExample && (
         <>
           <button

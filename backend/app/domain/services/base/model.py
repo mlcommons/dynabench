@@ -264,13 +264,14 @@ class ModelService:
         task_code = self.task_repository.get_task_code_by_task_id(model_info["tid"])[0]
         if model_info["uid"] != user_id:
             return None
-        model_id = "dynalab-base-qa"
-        predictions = self.s3.download_file(
+        model_id = str(model_id)
+        final_file = f"./app/resources/predictions/{model_id}-{dataset_name}.jsonl.out"
+        self.s3.download_file(
             self.s3_bucket,
             f"predictions/{task_code}/{model_id}/{dataset_name}.jsonl.out",
-            f"./app/resources/predictions/{model_id}-{dataset_name}.jsonl.out",
+            final_file,
         )
-        return predictions
+        return final_file
 
     def get_amount_of_models_per_task(self, task_id: int):
         return self.model_repository.get_amount_of_models_per_task(task_id)

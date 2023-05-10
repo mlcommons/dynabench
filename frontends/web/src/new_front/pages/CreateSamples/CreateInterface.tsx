@@ -24,6 +24,8 @@ const CreateInterface = () => {
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
   const [partialSampleId, setPartialSampleId] = useState<number>(0);
+  const [amountsExamplesCreatedToday, setAmountsExamplesCreatedToday] =
+    useState<number>(0);
   const [taskConfiguration, setTaskConfiguration] =
     useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
@@ -51,7 +53,6 @@ const CreateInterface = () => {
         get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
       ]).then();
     if (response.ok) {
-      console.log(taskContextInfo, "Printing taskContextInfo");
       setTaskContextInfo(taskContextInfo);
       setTaskConfiguration(taskConfiguration);
       setModelInTheLoop(modelInTheLoop);
@@ -60,6 +61,16 @@ const CreateInterface = () => {
       setIsGenerativeContext(
         taskConfiguration.context.generative_context?.is_generative
       );
+      const amountsExamplesCreatedToday = await post(
+        `/rounduserexample/amounts_examples_created_today`,
+        {
+          round_id: taskContextInfo.real_round_id,
+          user_id: user.id!,
+        }
+      );
+      if (response.ok) {
+        setAmountsExamplesCreatedToday(amountsExamplesCreatedToday);
+      }
     }
   };
 
@@ -103,6 +114,7 @@ const CreateInterface = () => {
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
                     creationExample={taskInfo?.creation_example_md!}
+                    amountsExamplesCreatedToday={amountsExamplesCreatedToday}
                   />
                 </div>
               </div>

@@ -20,7 +20,7 @@ type Props = {
   modelEvaluationMetricInfo: ModelEvaluationMetric;
   isGenerativeContext: boolean;
   userId: number;
-  partialSampleId?: number;
+  partialSampleId?: any;
   neccessaryFields: string[];
   accept_sandbox_creation: boolean;
   maxAmountExamplesOnADay: number;
@@ -45,8 +45,6 @@ const AnnotationButtonActions: FC<Props> = ({
   maxAmountExamplesOnADay,
   setModelOutput,
 }) => {
-  console.log("maxAmountExamplesOnADay", maxAmountExamplesOnADay);
-
   const [sandboxMode, setSandboxMode] = useState<boolean>(false);
   let { modelInputs, metadataExample } = useContext(CreateInterfaceContext);
 
@@ -57,23 +55,24 @@ const AnnotationButtonActions: FC<Props> = ({
       ...modelInputs,
       input_by_user: inputByUser,
     };
-    const stillAllowedToSubmit = await post(
-      `/rounduserexample/still_allowed_to_submit`,
-      {
-        round_id: realRoundId,
-        user_id: userId,
-        max_amount_examples_on_a_day: maxAmountExamplesOnADay,
-      }
-    );
-    if (!stillAllowedToSubmit) {
-      Swal.fire({
-        icon: "warning",
-        title: "Oops...",
-        text: "You have reached the maximum amount of examples you can submit today",
-        confirmButtonColor: "#2088ef",
-      });
-      return;
-    }
+    // const stillAllowedToSubmit = await post(
+    //   `/rounduserexample/still_allowed_to_submit`,
+    //   {
+    //     round_id: realRoundId,
+    //     user_id: userId,
+    //     max_amount_examples_on_a_day: maxAmountExamplesOnADay,
+    //   },
+    // )
+    // if (!stillAllowedToSubmit) {
+    //   Swal.fire({
+    //     icon: 'warning',
+    //     title: 'Oops...',
+    //     text:
+    //       'You have reached the maximum amount of examples you can submit today',
+    //     confirmButtonColor: '#2088ef',
+    //   })
+    //   return
+    // }
     if (
       neccessaryFields.every(
         (item) =>

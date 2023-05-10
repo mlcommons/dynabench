@@ -110,7 +110,7 @@ const SelectBetweenImagesGenerative: FC<
       }
     );
     if (response.ok) {
-      setPartialSampleId(partialSampleId);
+      setPartialSampleId(partialSampleId.id);
     }
   };
 
