@@ -204,10 +204,10 @@ class ExampleService:
 
     def download_created_examples(self, task_id: int, user_id: int) -> dict:
         if user_id:
-            return self.example_repository.download_created_examples(task_id)
+            return self.example_repository.download_created_examples(task_id, user_id)
         else:
             return self.example_repository.download_all_created_examples(
-                task_id, user_id
+                task_id
             )
 
     def download_additional_data(self, bucket_name) -> dict:
