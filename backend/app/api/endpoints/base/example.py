@@ -89,6 +89,8 @@ def download_additional_data(
     zip_file = ExampleService().download_additional_data(model.bucket_name)
     return Response(
         content=zip_file,
-        media_type="application/zip",
-        headers={"Content-Disposition": 'attachment; filename="bucket.zip"'},
+        headers={
+            "Content-Disposition": "attachment; filename=files.zip",
+            "Content-Type": "application/zip",
+        },
     )
