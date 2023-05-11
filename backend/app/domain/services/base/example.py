@@ -204,11 +204,19 @@ class ExampleService:
 
     def download_created_examples(self, task_id: int, user_id: int) -> dict:
         if user_id:
-            return self.example_repository.download_created_examples(task_id, user_id)
+            examples_data = self.example_repository.download_created_examples(
+                task_id, user_id
+            )
         else:
-            return self.example_repository.download_all_created_examples(
+            examples_data = self.example_repository.download_all_created_examples(
                 task_id
             )
+        from fastapi.encoders import jsonable_encoder
+
+        python_list = [jsonable_encoder(obj) for obj in examples_data]
+        print(len(python_list))
+        json_string = json.dumps(python_list)
+        return json_string
 
     def download_additional_data(self, bucket_name) -> dict:
         bucket_name = bucket_name.split("/")[0]
