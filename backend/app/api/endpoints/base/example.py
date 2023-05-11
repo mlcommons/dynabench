@@ -3,6 +3,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from fastapi import APIRouter, Response
+from fastapi.responses import FileResponse
 
 from app.domain.schemas.base.example import (
     DownloadAdditionalDataExamplesRequest,
@@ -74,7 +75,12 @@ def update_creation_generative_example_by_example_id(
 def download_created_examples(
     model: DownloadExamplesRequest,
 ):
-    return ExampleService().download_created_examples(model.task_id, model.user_id)
+    file_name = ExampleService().download_created_examples(model.task_id, model.user_id)
+    return FileResponse(
+        "%s" % (file_name),
+        filename=file_name,
+        headers={"Access-Control-Expose-Headers": "Content-Disposition"},
+    )
 
 
 @router.post("/download_additional_data", response_model={})
