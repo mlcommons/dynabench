@@ -231,4 +231,4 @@ class ExampleService:
                 file_content = response["Body"].read()
                 zf.writestr(key, file_content)
         in_memory_zip.seek(0)
-        return in_memory_zip.read()
+        return in_memory_zip.getvalue()
