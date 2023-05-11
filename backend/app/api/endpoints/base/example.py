@@ -2,9 +2,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from app.domain.schemas.base.example import (
+    DownloadAdditionalDataExamplesRequest,
+    DownloadExamplesRequest,
     GetExampleRequest,
     PartiallyCreationExampleGenerativeRequest,
     UpdateCreationExampleGenerativeRequest,
@@ -65,4 +67,23 @@ def update_creation_generative_example_by_example_id(
 ):
     return ExampleService().update_creation_generative_example_by_example_id(
         model.example_id, model.example_info, model.metadata_json
+    )
+
+
+@router.post("/download_created_examples", response_model={})
+def download_created_examples(
+    model: DownloadExamplesRequest,
+):
+    return ExampleService().download_created_examples(model.task_id, model.user_id)
+
+
+@router.post("/download_additional_data", response_model={})
+def download_additional_data(
+    model: DownloadAdditionalDataExamplesRequest,
+):
+    zip_file = ExampleService().download_additional_data(model.bucket_name)
+    return Response(
+        content=zip_file,
+        media_type="application/zip",
+        headers={"Content-Disposition": 'attachment; filename="bucket.zip"'},
     )

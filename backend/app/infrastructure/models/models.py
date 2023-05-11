@@ -125,6 +125,7 @@ class Task(Base):
     dataperf = Column(TINYINT(1))
     creation_example_md = Column(Text)
     max_amount_examples_on_a_day = Column(Integer)
+    bucket_for_aditional_example_data = Column(Text)
 
 
 class User(Base):

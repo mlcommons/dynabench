@@ -2,8 +2,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import io
 import json
+import os
+import zipfile
 
+import boto3
 import yaml
 from pydantic import Json
 
@@ -25,6 +29,13 @@ class ExampleService:
         self.round_user_example_info = RoundUserExampleInfoService()
         self.user_service = UserService()
         self.validation_service = ValidationService()
+        self.session = boto3.Session(
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.getenv("AWS_REGION"),
+        )
+        self.s3 = self.session.client("s3")
+        self.dataperf_bucket = os.getenv("AWS_S3_DATAPERF_BUCKET")
 
     def create_example(
         self,
@@ -190,3 +201,26 @@ class ExampleService:
         return self.example_repository.update_creation_generative_example_by_example_id(
             example_id, json.dumps(model_input), json.dumps(metadata)
         )
+
+    def download_created_examples(self, task_id: int, user_id: int) -> dict:
+        if user_id:
+            return self.example_repository.download_created_examples(task_id)
+        else:
+            return self.example_repository.download_all_created_examples(
+                task_id, user_id
+            )
+
+    def download_additional_data(self, bucket_name) -> dict:
+        bucket_name = bucket_name.split("/")[0]
+        folder_path = "/".join(bucket_name.split("/")[1:])
+        in_memory_zip = io.BytesIO()
+        with zipfile.ZipFile(in_memory_zip, mode="w") as zf:
+            for obj in self.s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_path)[
+                "Contents"
+            ]:
+                key = obj["Key"]
+                response = self.s3.get_object(Bucket=bucket_name, Key=key)
+                file_content = response["Body"].read()
+                zf.writestr(key, file_content)
+        in_memory_zip.seek(0)
+        return in_memory_zip.read()

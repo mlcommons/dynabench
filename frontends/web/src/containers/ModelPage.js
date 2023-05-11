@@ -175,15 +175,29 @@ const ScoreRow = ({
       : [];
 
   const downloadPrection = async (datasetId) => {
-    //setShowSpinner(true)
-    console.log("modelId", modelId);
-    await post("/model/get_model_prediction_per_dataset", {
-      user_id: user.id,
-      model_id: modelId,
-      dataset_id: datasetId,
-    });
+    setShowSpinner(true);
+    await post(
+      "/model/get_model_prediction_per_dataset",
+      {
+        user_id: user.id,
+        model_id: modelId,
+        dataset_id: datasetId,
+      },
+      {
+        responseType: "blob",
+      }
+    );
     if (response.ok) {
       setShowSpinner(false);
+      response.blob().then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${modelId}_prediction.jsonl.out`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      });
     } else {
       setShowSpinner(false);
       Swal.fire({
@@ -247,38 +261,6 @@ const ScoreRow = ({
             {(isAdminOrTaskOwner ||
               (score.dataset_log_access_type === "user" && isModelOwner)) && (
               <>
-                <Button
-                  className="logs-button"
-                  variant="outline-primary"
-                  size="sm"
-                  disabled={showSpinner}
-                  onClick={() => {
-                    setShowSpinner(true);
-                    downloadLog(modelId, score.dataset_id).then(
-                      (result) => {
-                        setShowSpinner(false);
-                      },
-                      (error) => {
-                        console.log(error);
-                        setShowSpinner(false);
-                        Swal.fire({
-                          title: "Oh no!!",
-                          text: error.error,
-                          icon: "warning",
-                        });
-                      }
-                    );
-                  }}
-                >
-                  {showSpinner ? (
-                    <Spinner animation="border" size="sm" />
-                  ) : (
-                    <i className="fas fa-file-download">
-                      {" "}
-                      <span className="name-buttons">Logs</span>
-                    </i>
-                  )}
-                </Button>
                 <Button
                   variant="outline-primary"
                   size="sm"
@@ -657,25 +639,23 @@ ${latexTableContent}
           <h1 className="pt-3 my-4 text-center text-uppercase">
             Model Overview
           </h1>
-          <Col className="m-auto" lg={8}>
+          <Col className="m-auto " lg={8}>
             <Card className="profile-card">
-              <Card.Body>
-                <div className="mx-4 mt-4 d-flex justify-content-between">
+              <Card.Body className="mx-6">
+                <div className="mt-4 d-flex justify-content-between">
                   <Button
-                    className={`border-0 font-weight-bold light-gray-bg ${
-                      isModelOwner ? "mr-2" : null
-                    }`}
+                    className="border-0 font-weight-bold light-gray-bg"
                     aria-label="Back"
                     onClick={this.handleBack}
                   >
-                    {"< Back"}
+                    {"Back"}
                   </Button>
-                  <div>
-                    {console.log(model)}
+                  <div className="gap-2">
                     {(isModelOwner || model.is_published) &&
                     model.deployment_status === "deployed" ? (
                       <Button
                         variant="border-0 font-weight-bold light-gray-bg"
+                        className="mr-2"
                         onClick={() => this.handleInteract()}
                       >
                         <i className="fas fa-pen"></i> Interact
@@ -712,6 +692,7 @@ ${latexTableContent}
                       <Button
                         variant="border-0 font-weight-bold light-gray-bg"
                         onClick={() => this.handleEdit()}
+                        className="mr-2"
                       >
                         Edit
                       </Button>
@@ -738,11 +719,11 @@ ${latexTableContent}
                 </div>
                 {model.id ? (
                   <InputGroup>
-                    <Table className="mb-0">
+                    <Table className="mt-8 mb-4">
                       <thead />
                       <tbody>
                         <tr>
-                          <td colSpan="2">
+                          <td colSpan="2" className="p-6 text-base">
                             <h5 className="mx-0">
                               <span>{model.name || "Unknown"}</span>
                               <span className="float-right">
@@ -772,8 +753,8 @@ ${latexTableContent}
                       <tbody>
                         {isModelOwner && (
                           <tr style={{ border: `none` }}>
-                            <td>Owner Anonymity</td>
-                            <td>
+                            <td className="p-6 text-base">Owner Anonymity</td>
+                            <td className="flex justify-end p-6 text-base">
                               <AnonymousStatus
                                 anonymousStatus={model.is_anonymous}
                               />
@@ -782,7 +763,7 @@ ${latexTableContent}
                         )}
                         <tr style={{ border: `none` }}>
                           <td className="p-6 text-base">Deployment Status</td>
-                          <td className="p-6 text-base">
+                          <td className="flex justify-end p-6 text-base">
                             <DeploymentStatus
                               deploymentStatus={model.deployment_status}
                             />
@@ -790,7 +771,7 @@ ${latexTableContent}
                         </tr>
                         <tr style={{ border: `none` }}>
                           <td className="p-6 text-base">Owner</td>
-                          <td className="p-6 text-base">
+                          <td className="flex justify-end p-6 text-base">
                             {model.uid ? (
                               <span>
                                 <Link to={`/users/${model.uid}`}>
@@ -812,14 +793,16 @@ ${latexTableContent}
                         {!isFlores && (
                           <tr style={{ border: `none` }}>
                             <td className="p-6 text-base">Task</td>
-                            <td className="p-6 text-base">
+                            <td className="flex justify-end p-6 text-base">
                               <Link to={`/tasks/${taskCode}`}>{taskCode}</Link>
                             </td>
                           </tr>
                         )}
                         <tr style={{ border: `none` }}>
-                          <td className="p-6 text-base">Summary</td>
-                          <td className="p-6 text-base">{model.longdesc}</td>
+                          <td className="p-6 text-base ">Summary</td>
+                          <td className="flex justify-end p-6 text-base">
+                            {model.longdesc}
+                          </td>
                         </tr>
                         <tr style={{ border: `none` }}>
                           <td
@@ -828,12 +811,14 @@ ${latexTableContent}
                           >
                             # Parameters
                           </td>
-                          <td className="p-6 text-base">{model.params}</td>
+                          <td className="flex justify-end p-6 text-base">
+                            {model.params}
+                          </td>
                         </tr>
                         {!isFlores && (
                           <tr style={{ border: `none` }}>
                             <td className="p-6 text-base">Language(s)</td>
-                            <td className="p-6 text-base">
+                            <td className="flex justify-end p-6 text-base">
                               {" "}
                               {model.languages}
                             </td>
@@ -850,7 +835,7 @@ ${latexTableContent}
                           >
                             Model Card
                           </td>
-                          <td className="p-6 text-base modelCard">
+                          <td className="flex justify-end p-6 text-base modelCard">
                             <Markdown>{model.model_card}</Markdown>
                           </td>
                         </tr>

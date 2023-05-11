@@ -410,7 +410,6 @@ const AudioComponent = ({
   showName = true,
   inputReminder = false,
 }) => {
-  console.log(data);
   return (
     <>
       {!create ? (

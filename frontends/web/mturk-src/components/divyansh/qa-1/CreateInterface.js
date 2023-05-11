@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -231,13 +237,7 @@ class CreateInterface extends React.Component {
                       },
                     },
                     function () {
-                      {
-                        /*if (this.state.content[this.state.content.length-1].fooled || this.state.tries >= this.state.total_tries) {
-                  console.log('Success! You can submit HIT');
-                  this.setState({taskCompleted: true});
-                }*/
-                      }
-                      if (this.state.tries == this.state.total_tries) {
+                      if (this.state.tries === this.state.total_tries) {
                         console.log("Success! You can submit HIT");
                         this.setState({ taskCompleted: true });
                       }

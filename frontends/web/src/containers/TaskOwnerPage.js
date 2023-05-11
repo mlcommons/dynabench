@@ -20,6 +20,7 @@ import Rounds from "../components/TaskOwnerPageComponents/Rounds";
 import Settings from "../components/TaskOwnerPageComponents/Settings";
 import Datasets from "../components/TaskOwnerPageComponents/Datasets";
 import Instructions from "new_front/pages/Task/TaskOwnerPage/Instructions";
+import ExamplesCreated from "new_front/pages/Task/TaskOwnerPage/ExamplesCreated";
 const yaml = require("js-yaml");
 
 class TaskOwnerPage extends React.Component {
@@ -519,6 +520,10 @@ class TaskOwnerPage extends React.Component {
         href: "#datasets",
         buttonText: "Datasets",
       },
+      {
+        href: "#examples",
+        buttonText: "Examples created",
+      },
     ];
 
     return (
@@ -605,6 +610,9 @@ class TaskOwnerPage extends React.Component {
                     }
                     handleDatasetDelete={this.handleDatasetDelete}
                   />
+                ) : null}
+                {this.props.location.hash === "#examples" && this.state.task ? (
+                  <ExamplesCreated />
                 ) : null}
               </>
             ) : (

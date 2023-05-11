@@ -65,10 +65,7 @@ export const LineRechart = ({
           tickLine={false}
         />
         <YAxis padding={{ top: 10 }} tick={{ fontSize }} />
-        <Tooltip
-          allowEscapeViewBox={{ x: false, y: true }}
-          wrapperStyle={{ zIndex: 10 }}
-        />
+        <Tooltip wrapperStyle={{ zIndex: 10 }} />
         <Legend
           align="center"
           layout="horizontal"

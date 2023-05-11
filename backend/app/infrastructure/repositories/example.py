@@ -9,7 +9,7 @@
 from pydantic import Json
 from sqlalchemy import func
 
-from app.infrastructure.models.models import Context, Example
+from app.infrastructure.models.models import Context, Example, Round
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -95,3 +95,22 @@ class ExampleRepository(AbstractRepository):
             {"input_json": model_input, "metadata_json": metadata}
         )
         self.session.commit()
+
+    def download_created_examples(self, task_id: int, user_id: int):
+        return (
+            self.session.query(self.model)
+            .join(Context, Example.cid == Context.id)
+            .join(Round, Context.r_realid == Round.id)
+            .filter(Round.tid == task_id)
+            .filter(Example.uid == user_id)
+            .all()
+        )
+
+    def download_all_created_examples(self, task_id: int):
+        return (
+            self.session.query(self.model)
+            .join(Context, Example.cid == Context.id)
+            .join(Round, Context.r_realid == Round.id)
+            .filter(Round.tid == task_id)
+            .all()
+        )

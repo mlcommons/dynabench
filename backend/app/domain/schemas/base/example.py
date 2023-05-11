@@ -2,6 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -36,3 +38,12 @@ class UpdateCreationExampleGenerativeRequest(BaseModel):
     example_id: int
     example_info: dict
     metadata_json: dict
+
+
+class DownloadExamplesRequest(BaseModel):
+    task_id: int
+    user_id: Optional[int] = None
+
+
+class DownloadAdditionalDataExamplesRequest(BaseModel):
+    bucket_name: str

@@ -35,6 +35,7 @@ class ContextService:
             region_name=os.getenv("AWS_REGION"),
         )
         self.s3 = self.session.client("s3")
+        self.dataperf_bucket = os.getenv("AWS_S3_DATAPERF_BUCKET")
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
         self.context_repository.increment_counter_total_samples_and_update_date(
@@ -147,7 +148,7 @@ class ContextService:
                         filename = f"adversarial-nibbler/{image_id}.jpeg"
                         self.s3.put_object(
                             Body=base64.b64decode(image),
-                            Bucket="dataperf",
+                            Bucket=self.dataperf_bucket,
                             Key=filename,
                         )
                         images.append(new_dict)

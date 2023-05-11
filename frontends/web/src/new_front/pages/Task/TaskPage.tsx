@@ -58,7 +58,7 @@ const TaskPage = () => {
 
   useEffect(() => {
     getTask(taskCode);
-  }, []);
+  }, [user]);
 
   return (
     <div>

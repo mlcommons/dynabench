@@ -41,11 +41,12 @@ import ModelSubPage from "../components/ProfilePageComponents/ModelSubPage";
 import TaskSubPage from "../components/ProfilePageComponents/TaskSubPage";
 import ForksAndSnapshotsSubPage from "../components/ProfilePageComponents/ForksAndSnapshotsSubPage";
 import AdminTaskProposalSubPage from "../components/ProfilePageComponents/AdminTaskProposalSubPage";
+import ExamplesCreated from "new_front/pages/ProfilePage/ExamplesCreated";
 
 const StatsSubPage = (props) => {
   return (
-    <Container className="mb-5 pb-5">
-      <h1 className="my-4 pt-3 text-uppercase text-center">
+    <Container className="pb-5 mb-5">
+      <h1 className="pt-3 my-4 text-center text-uppercase">
         Your Stats &amp; Badges
       </h1>
       <Col className="m-auto" lg={8}>
@@ -142,8 +143,8 @@ const StatsSubPage = (props) => {
 
 const NotificationsSubPage = (props) => {
   return (
-    <Container className="mb-5 pb-5">
-      <h1 className="my-4 pt-3 text-uppercase text-center">
+    <Container className="pb-5 mb-5">
+      <h1 className="pt-3 my-4 text-center text-uppercase">
         Your Notifications
       </h1>
       <Col className="m-auto" lg={8}>
@@ -225,7 +226,7 @@ const NotificationsSubPage = (props) => {
             </Table>
           </Card.Body>
           <Card.Footer className="text-center">
-            <Pagination className="mb-0 float-right" size="sm">
+            <Pagination className="float-right mb-0" size="sm">
               <Pagination.Item
                 disabled={!props.notificationsPage}
                 onClick={() => props.paginate("prev")}
@@ -425,63 +426,40 @@ class ProfilePage extends React.Component {
   };
 
   render() {
-    const navOptions = this.state.user.admin
-      ? [
-          {
-            href: "#profile",
-            buttonText: "Profile",
-          },
-          {
-            href: "#notifications",
-            buttonText: "Notifications",
-          },
-          {
-            href: "#stats",
-            buttonText: "Stats & Badges",
-          },
-          {
-            href: "#models",
-            buttonText: "Models",
-          },
-          {
-            href: "#forks-and-snapshots",
-            buttonText: "Forks & Snapshots",
-          },
-          {
-            href: "#tasks",
-            buttonText: "Tasks",
-          },
-          {
-            href: "#admin_task_proposals",
-            buttonText: "Admin Task Proposals",
-          },
-        ]
-      : [
-          {
-            href: "#profile",
-            buttonText: "Profile",
-          },
-          {
-            href: "#notifications",
-            buttonText: "Notifications",
-          },
-          {
-            href: "#stats",
-            buttonText: "Stats & Badges",
-          },
-          {
-            href: "#models",
-            buttonText: "Models",
-          },
-          {
-            href: "#forks-and-snapshots",
-            buttonText: "Forks & Snapshots",
-          },
-          {
-            href: "#tasks",
-            buttonText: "Tasks",
-          },
-        ];
+    const navOptions = [
+      {
+        href: "#profile",
+        buttonText: "Profile",
+      },
+      {
+        href: "#notifications",
+        buttonText: "Notifications",
+      },
+      {
+        href: "#stats",
+        buttonText: "Stats & Badges",
+      },
+      {
+        href: "#models",
+        buttonText: "Models",
+      },
+      {
+        href: "#forks-and-snapshots",
+        buttonText: "Forks & Snapshots",
+      },
+      {
+        href: "#tasks",
+        buttonText: "Tasks",
+      },
+      {
+        href: "#admin_task_proposals",
+        buttonText: "Admin Task Proposals",
+      },
+      {
+        href: "#examples",
+        buttonText: "Examples created",
+      },
+    ];
 
     return (
       <Container fluid>
@@ -506,8 +484,8 @@ class ProfilePage extends React.Component {
           </Col>
           <Col>
             {this.props.location.hash === "#profile" ? (
-              <Container className="mb-5 pb-5">
-                <h1 className="my-4 pt-3 text-uppercase text-center">
+              <Container className="pb-5 mb-5">
+                <h1 className="pt-3 my-4 text-center text-uppercase">
                   Your Profile
                 </h1>
                 <Col className="m-auto" lg={8}>
@@ -530,7 +508,7 @@ class ProfilePage extends React.Component {
                             )}
                           </UserContext.Consumer>
                           {this.state.invalidFileUpload ? (
-                            <div className="text-center mt-4">
+                            <div className="mt-4 text-center">
                               *Upload a valid file
                             </div>
                           ) : null}
@@ -659,7 +637,7 @@ class ProfilePage extends React.Component {
                                         <Button
                                           type="submit"
                                           variant="primary"
-                                          className="submit-btn button-ellipse text-uppercase my-4"
+                                          className="my-4 submit-btn button-ellipse text-uppercase"
                                           disabled={isSubmitting}
                                         >
                                           Save
@@ -722,6 +700,9 @@ class ProfilePage extends React.Component {
                 api={this.context.api}
                 history={this.props.history}
               />
+            ) : null}
+            {this.props.location.hash === "#examples" ? (
+              <ExamplesCreated />
             ) : null}
           </Col>
         </Row>

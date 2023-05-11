@@ -175,7 +175,6 @@ const AnnotationButtonActions: FC<Props> = ({
                         )}
                       </div>
                     )}
-
                     <div className="col-span-1 pl-2 pr-3" id="submit">
                       <Button
                         className="border-0 font-weight-bold light-gray-bg task-action-btn"

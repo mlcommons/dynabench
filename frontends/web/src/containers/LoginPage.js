@@ -53,7 +53,6 @@ class LoginPage extends React.Component {
                     onSubmit={(values, { setFieldError, setSubmitting }) => {
                       props.api.login(values.email, values.password).then(
                         (result) => {
-                          //console.log(result);
                           props.updateState({
                             user: {
                               ...props.api.getCredentials(),
