@@ -129,9 +129,11 @@ const CreateInterface = () => {
                 )}
               </div>
               <div id="context" className="p-3 mb-1 rounded">
-                <h6 className="text-[15px] text-[#005798] font-bold pl-2">
-                  CONTEXT:
-                </h6>
+                {taskInfo.challenge_type === 1 && (
+                  <h6 className="text-[15px] text-[#005798] font-bold pl-2">
+                    CONTEXT:
+                  </h6>
+                )}
                 {taskConfiguration?.context && (
                   <AnnotationContextStrategy
                     config={taskConfiguration?.context as any}

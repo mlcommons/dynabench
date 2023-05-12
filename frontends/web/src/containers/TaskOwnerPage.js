@@ -612,7 +612,10 @@ class TaskOwnerPage extends React.Component {
                   />
                 ) : null}
                 {this.props.location.hash === "#examples" && this.state.task ? (
-                  <ExamplesCreated />
+                  <ExamplesCreated
+                    taskId={this.state.task.id}
+                    s3Bucket={this.state.task.bucket_for_aditional_example_data}
+                  />
                 ) : null}
               </>
             ) : (

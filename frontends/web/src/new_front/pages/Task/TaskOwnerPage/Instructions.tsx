@@ -1,14 +1,13 @@
 import React, { FC, useState, useEffect } from "react";
 import useFetch from "use-http";
 import { Button } from "react-bootstrap";
+import Swal from "sweetalert2";
 
 type InstructionsProps = {
   taskId: number;
 };
 
 const Instructions: FC<InstructionsProps> = ({ taskId }) => {
-  console.log("taskId", taskId);
-
   const { get, post, loading, response } = useFetch();
   const [instructions, setInstructions] = useState<any>();
   const [newInstructions, setNewInstructions] = useState<any>();
@@ -34,6 +33,15 @@ const Instructions: FC<InstructionsProps> = ({ taskId }) => {
       task_id: taskId,
       instructions: JSON.stringify(newInstructions),
     });
+    if (response.ok) {
+      Swal.fire({
+        title: "Success!",
+        text: "Instructions updated successfully!",
+        icon: "success",
+        confirmButtonText: "Ok",
+      });
+    }
+    window.location.reload();
   };
 
   return (

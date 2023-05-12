@@ -31,12 +31,13 @@ const SelectBetweenImagesGenerative: FC<
   setPartialSampleId,
 }) => {
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
+  const [showLoader, setShowLoader] = useState<boolean>(false);
   const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts
   );
   const [prompt, setPrompt] = useState<string>("Type your prompt here");
-  const { post, loading, response } = useFetch();
+  const { post, response } = useFetch();
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
     CreateInterfaceContext
@@ -45,21 +46,16 @@ const SelectBetweenImagesGenerative: FC<
   const [selectedImage, setSelectedImage] = useState<string>("");
 
   const generateImages = async () => {
-    if (metadataExample.hasOwnProperty("label")) {
-      const generatedImages = await post("/context/get_generative_contexts", {
-        type: generative_context.type,
-        artifacts: artifactsInput,
-      });
-      if (response.ok) {
-        setShowImages(generatedImages);
-        addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
-        setPromptHistory(getListFromLocalStorage("promptHistory"));
-      }
-    } else {
-      Swal.fire({
-        title: "Please select the type of your prompt",
-        icon: "warning",
-      });
+    setShowLoader(true);
+    const generatedImages = await post("/context/get_generative_contexts", {
+      type: generative_context.type,
+      artifacts: artifactsInput,
+    });
+    if (response.ok) {
+      setShowImages(generatedImages);
+      addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
+      setPromptHistory(getListFromLocalStorage("promptHistory"));
+      setShowLoader(false);
     }
   };
 
@@ -97,8 +93,7 @@ const SelectBetweenImagesGenerative: FC<
     setSelectedImage(image);
   };
 
-  const createPartialSample = async () => {
-    console.log("modelInputs", modelInputs);
+  const CreatePartialSample = async () => {
     const partialSampleId = await post(
       `/example/partial_creation_generative_example`,
       {
@@ -125,13 +120,13 @@ const SelectBetweenImagesGenerative: FC<
 
   useEffect(() => {
     if (modelInputs.hasOwnProperty("select_image")) {
-      createPartialSample();
+      CreatePartialSample();
     }
   }, [selectedImage]);
 
   return (
     <>
-      {!loading ? (
+      {!showLoader ? (
         <div>
           <div className="grid col-span-1 py-3 justify-items-end">
             <Dropdown
@@ -195,7 +190,7 @@ const SelectBetweenImagesGenerative: FC<
           </div>
           <PacmanLoader
             color="#ccebd4"
-            loading={loading}
+            loading={showLoader}
             size={50}
             className="align-center"
           />

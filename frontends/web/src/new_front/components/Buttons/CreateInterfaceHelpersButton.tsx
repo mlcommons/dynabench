@@ -20,15 +20,18 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
   return (
     <div>
       <ShowInstructionsButton />
-      <button
-        type="button"
-        className="btn btn-outline-primary btn-sm btn-help-info"
-        onClick={() => {
-          setShowInstructions(!showInstructions);
-        }}
-      >
-        <i className="fa fa-info-circle"></i>
-      </button>
+      {generalInstructions && (
+        <button
+          type="button"
+          className="btn btn-outline-primary btn-sm btn-help-info"
+          onClick={() => {
+            setShowInstructions(!showInstructions);
+          }}
+        >
+          <i className="fa fa-info-circle"></i>
+        </button>
+      )}
+
       {showInstructions && (
         <>
           <Modal
