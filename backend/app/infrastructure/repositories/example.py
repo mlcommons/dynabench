@@ -96,9 +96,9 @@ class ExampleRepository(AbstractRepository):
         )
         self.session.commit()
 
-    def download_created_examples(self, task_id: int, user_id: int):
+    def download_created_examples_user(self, task_id: int, user_id: int):
         return (
-            self.session.query(self.model)
+            self.session.query(self.model, Context)
             .join(Context, Example.cid == Context.id)
             .join(Round, Context.r_realid == Round.id)
             .filter(Round.tid == task_id)

@@ -9,6 +9,7 @@ import zipfile
 
 import boto3
 import yaml
+from fastapi.encoders import jsonable_encoder
 from pydantic import Json
 
 from app.domain.services.base.context import ContextService
@@ -113,15 +114,24 @@ class ExampleService:
         example_to_validate = self.example_repository.get_example_to_validate(
             real_round_id, user_id, num_matching_validations, validate_non_fooling
         )
-
         example_info = example_to_validate[0].__dict__
         example_necessary_info["example_id"] = example_info["id"]
         example_necessary_info["user_id"] = user_id
         example_necessary_info["task_id"] = task_id
         context_info = example_to_validate[1].__dict__
-        metadata_json = json.loads(example_info["metadata_json"])
-        input_json = json.loads(example_info["input_json"])
-        context_info = json.loads(context_info["context_json"])
+        metadata_json = (
+            json.loads(example_info["metadata_json"])
+            if example_info["metadata_json"]
+            else {}
+        )
+        input_json = (
+            json.loads(example_info["input_json"]) if example_info["input_json"] else {}
+        )
+        context_info = (
+            json.loads(context_info["context_json"])
+            if context_info["context_json"]
+            else {}
+        )
         example_necessary_info["context_info"] = {
             **input_json,
             **context_info,
@@ -203,22 +213,44 @@ class ExampleService:
         )
 
     def download_created_examples_user(self, task_id: int, user_id: int) -> dict:
-        examples_data = self.example_repository.download_created_examples(
-            task_id, user_id
-        )
-        return examples_data
-
-    def download_created_examples(self, task_id: int, user_id: int) -> dict:
         if user_id:
-            examples_data = self.example_repository.download_created_examples(
+            examples_data = self.example_repository.download_created_examples_user(
                 task_id, user_id
             )
+            examples_data_list = []
+            for example in examples_data:
+                example_necessary_info = {}
+                example_info = example[0].__dict__
+                example_necessary_info["example_id"] = example_info["id"]
+                example_necessary_info["user_id"] = user_id
+                example_necessary_info["task_id"] = task_id
+                context_info = example[1].__dict__
+                metadata_json = (
+                    json.loads(example_info["metadata_json"])
+                    if example_info["metadata_json"]
+                    else {}
+                )
+                input_json = (
+                    json.loads(example_info["input_json"])
+                    if example_info["input_json"]
+                    else {}
+                )
+                context_info = (
+                    json.loads(context_info["context_json"])
+                    if context_info["context_json"]
+                    else {}
+                )
+                example_necessary_info["context_info"] = {
+                    **input_json,
+                    **context_info,
+                    **metadata_json,
+                }
+                examples_data_list.append(example_necessary_info)
+            return examples_data_list
         else:
             examples_data = self.example_repository.download_all_created_examples(
                 task_id
             )
-        from fastapi.encoders import jsonable_encoder
-
         python_list = [jsonable_encoder(obj) for obj in examples_data]
         json_string = json.dumps(python_list)
         return json_string
