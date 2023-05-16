@@ -82,6 +82,13 @@ def download_created_examples(
     )
 
 
+@router.post("/download_created_examples_user", response_model={})
+def download_created_examples_user(
+    model: DownloadExamplesRequest,
+):
+    return ExampleService().download_created_examples_user(model.task_id, model.user_id)
+
+
 @router.post("/download_additional_data", response_model={})
 def download_additional_data(
     model: DownloadAdditionalDataExamplesRequest,

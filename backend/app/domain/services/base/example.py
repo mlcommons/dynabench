@@ -202,6 +202,12 @@ class ExampleService:
             example_id, json.dumps(model_input), json.dumps(metadata)
         )
 
+    def download_created_examples_user(self, task_id: int, user_id: int) -> dict:
+        examples_data = self.example_repository.download_created_examples(
+            task_id, user_id
+        )
+        return examples_data
+
     def download_created_examples(self, task_id: int, user_id: int) -> dict:
         if user_id:
             examples_data = self.example_repository.download_created_examples(
@@ -214,7 +220,6 @@ class ExampleService:
         from fastapi.encoders import jsonable_encoder
 
         python_list = [jsonable_encoder(obj) for obj in examples_data]
-        print(len(python_list))
         json_string = json.dumps(python_list)
         return json_string
 
