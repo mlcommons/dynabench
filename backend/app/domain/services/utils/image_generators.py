@@ -79,10 +79,9 @@ class StableDiffusionImageProvider(ImageProvider):
                     return image_response
             except Exception as e:
                 print(e)
-                continue
-            else:
-                image_response = [forbidden_image] * num_images
-                return image_response
+
+            image_response = [forbidden_image] * num_images
+            return image_response
 
     def provider_name(self):
         return "stable_diffusion"

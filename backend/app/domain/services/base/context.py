@@ -123,6 +123,7 @@ class ContextService:
                 generated_images = generator.generate_images(
                     prompt, n, models, endpoint
                 )
+                print(len(generated_images))
                 for image in generated_images:
                     image_id = (
                         generator.provider_name()
