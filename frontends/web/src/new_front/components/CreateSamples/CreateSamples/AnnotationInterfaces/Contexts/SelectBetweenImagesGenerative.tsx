@@ -129,11 +129,19 @@ const SelectBetweenImagesGenerative: FC<
       {!showLoader ? (
         <div>
           <div className="grid col-span-1 py-3 justify-items-end">
-            <Dropdown
-              options={promptHistory}
-              placeholder=""
-              onChange={handlePromptHistory}
-            />
+            <AnnotationInstruction
+              placement="left"
+              tooltip={
+                instruction.prompt ||
+                "“Click here to view a log of all your previously attempted prompts”"
+              }
+            >
+              <Dropdown
+                options={promptHistory}
+                placeholder=""
+                onChange={handlePromptHistory}
+              />
+            </AnnotationInstruction>
             <AnnotationInstruction
               placement="left"
               tooltip={

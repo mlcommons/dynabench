@@ -1,6 +1,6 @@
 import React, { FC, useState } from "react";
 import { Modal } from "react-bootstrap";
-import Markdown from "react-markdown";
+import MDEditor from "@uiw/react-md-editor";
 import ShowInstructionsButton from "new_front/components/Buttons/ShowInstructionsButton";
 
 type CreateInterfaceHelpersButtonProps = {
@@ -44,7 +44,7 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
               <Modal.Title>Instructions</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <Markdown>{generalInstructions}</Markdown>
+              <MDEditor.Markdown source={generalInstructions} />
             </Modal.Body>
           </Modal>
         </>
@@ -67,12 +67,13 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
                 onHide={() => {
                   setShowCreationExample(false);
                 }}
+                size="lg"
               >
                 <Modal.Header closeButton>
                   <Modal.Title>Example</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  <Markdown>{creationExample}</Markdown>
+                  <MDEditor.Markdown source={creationExample} />
                 </Modal.Body>
               </Modal>
             </>

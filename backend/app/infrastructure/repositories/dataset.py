@@ -88,3 +88,13 @@ class DatasetRepository(AbstractRepository):
             .filter(self.model.access_type == "scoring")
             .all()
         )
+
+    def create_dataset_in_db(
+        self, task_id: int, dataset_name: str, access_type: str
+    ) -> dict:
+        dataset = Dataset(
+            tid=task_id, name=dataset_name, access_type=access_type, rid=0
+        )
+        self.session.add(dataset)
+        self.session.commit()
+        return dataset

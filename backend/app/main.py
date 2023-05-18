@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.endpoints import auth
 from app.api.endpoints.base import (
     context,
+    dataset,
     example,
     model,
     rounduserexample,
@@ -52,6 +53,7 @@ app.include_router(task.router, prefix="/task", tags=["task"])
 app.include_router(context.router, prefix="/context", tags=["context"])
 app.include_router(example.router, prefix="/example", tags=["example"])
 app.include_router(score.router, prefix="/score", tags=["score"])
+app.include_router(dataset.router, prefix="/dataset", tags=["dataset"])
 app.include_router(
     rounduserexample.router, prefix="/rounduserexample", tags=["rounduserexample"]
 )

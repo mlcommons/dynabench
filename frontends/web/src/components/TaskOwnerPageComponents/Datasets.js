@@ -22,6 +22,9 @@ import {
 } from "react-bootstrap";
 import { Formik } from "formik";
 import DragAndDrop from "../DragAndDrop/DragAndDrop";
+import useFetch from "use-http";
+import axios from "axios";
+
 const yaml = require("js-yaml");
 
 const FileUpload = (props) => {
@@ -63,12 +66,31 @@ const Datasets = (props) => {
   const config = yaml.load(props.task.config_yaml);
   const delta_metric_configs = config.delta_metrics ? config.delta_metrics : [];
   const delta_files = {};
+  const { post, response, loading } = useFetch();
+
   for (const config of delta_metric_configs) {
     delta_files[config.type] = null;
   }
+
+  const handleUploadAndCreateDataset = async (values, actions) => {
+    const formData = new FormData();
+    const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
+    formData.append("dataset", values.file);
+
+    axios.post(`${BASE_URL_2}/dataset/upload_dataset`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      params: {
+        dataset_name: values.name,
+        task_name: props.task.name,
+      },
+    });
+  };
+
   return (
-    <Container className="mb-5 pb-5">
-      <h1 className="my-4 pt-3 text-uppercase text-center">Datasets</h1>
+    <Container className="pb-5 mb-5">
+      <h1 className="pt-3 my-4 text-center text-uppercase">Datasets</h1>
       <Col>
         <Card className="my-4">
           <Card.Body>
@@ -80,7 +102,7 @@ const Datasets = (props) => {
                 },
                 delta_files
               )}
-              onSubmit={props.handleUploadAndCreateDataset}
+              onSubmit={handleUploadAndCreateDataset}
             >
               {({
                 values,
@@ -190,7 +212,7 @@ const Datasets = (props) => {
                             <Button
                               type="submit"
                               variant="primary"
-                              className="submit-btn button-ellipse text-uppercase my-4"
+                              className="my-4 submit-btn button-ellipse text-uppercase"
                               disabled={isSubmitting}
                             >
                               {isSubmitting ? (
@@ -217,7 +239,7 @@ const Datasets = (props) => {
           .slice(0)
           .reverse()
           .map((dataset) => (
-            <Card key={dataset.id} className="my-4 pt-3">
+            <Card key={dataset.id} className="pt-3 my-4">
               <Card.Body className="mt-4">
                 <Formik
                   enableReinitialize={true}
@@ -398,7 +420,7 @@ const Datasets = (props) => {
                                 <Button
                                   type="submit"
                                   variant="primary"
-                                  className="submit-btn button-ellipse text-uppercase my-4"
+                                  className="my-4 submit-btn button-ellipse text-uppercase"
                                   disabled={isSubmitting}
                                 >
                                   Save

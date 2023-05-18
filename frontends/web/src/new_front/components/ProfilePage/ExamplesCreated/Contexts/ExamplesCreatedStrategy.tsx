@@ -1,5 +1,5 @@
-import { ValidationContext } from "new_front/types/createSamples/validateSamples/validationContext";
-import { ValidationFactoryType } from "new_front/types/createSamples/validateSamples/validationFactory";
+import { ExamplesCreatedContext } from "new_front/types/profilePage/examplesCreated/examplesCreatedContext";
+import { ExamplesCreatedFactoryType } from "new_front/types/profilePage/examplesCreated/examplesCreatedFactory";
 import ModulesRegistry from "new_front/utils/validation_interface_options.json";
 import React, {
   FC,
@@ -14,22 +14,20 @@ import { BarLoader } from "react-spinners";
 
 const Import = (
   module: string
-): LazyExoticComponent<ComponentType<ValidationFactoryType>> =>
+): LazyExoticComponent<ComponentType<ExamplesCreatedFactoryType>> =>
   React.lazy(() => import(`./${module}`).catch(() => import(`./GoalFallback`)));
 
 type Props = {
-  config: ValidationContext[];
+  config: ExamplesCreatedContext[];
   infoExampleToValidate: any;
 };
 
-const ValidationContextStrategy: FC<Props & ValidationFactoryType> = ({
+const ExamplesCreatedStrategy: FC<Props & ExamplesCreatedFactoryType> = ({
   config,
-  task,
   infoExampleToValidate,
-  onInputChange,
 }) => {
   const [contextRenders, setContextRenders] = useState<
-    ReactElement<ValidationContext & ValidationFactoryType>[]
+    ReactElement<ExamplesCreatedContext & ExamplesCreatedFactoryType>[]
   >([]);
 
   useEffect(() => {
@@ -39,17 +37,11 @@ const ValidationContextStrategy: FC<Props & ValidationFactoryType> = ({
         const View = Import(ModulesRegistry.context[option.type]);
         setContextRenders((prev) => [
           ...prev,
-          <View
-            {...{ onInputChange, task, infoExampleToValidate, ...option }}
-            key={index}
-          />,
+          <View {...{ infoExampleToValidate, ...option }} key={index} />,
         ]);
       });
     };
     getView();
-    console.log("contextRenders", contextRenders);
-    console.log("config", config);
-    console.log("infoExampleToValidate", infoExampleToValidate);
   }, []);
 
   return (
@@ -61,4 +53,4 @@ const ValidationContextStrategy: FC<Props & ValidationFactoryType> = ({
   );
 };
 
-export default ValidationContextStrategy;
+export default ExamplesCreatedStrategy;
