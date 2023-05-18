@@ -67,7 +67,6 @@ const Datasets = (props) => {
   const config = yaml.load(props.task.config_yaml);
   const delta_metric_configs = config.delta_metrics ? config.delta_metrics : [];
   const delta_files = {};
-  const { post, response, loading } = useFetch();
 
   for (const config of delta_metric_configs) {
     delta_files[config.type] = null;
