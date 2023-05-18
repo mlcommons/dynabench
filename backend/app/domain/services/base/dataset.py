@@ -55,4 +55,4 @@ class DatasetService:
         self.s3_helpers.upload_file_to_s3(
             jsonl_contents.encode("utf-8"), f"datasets/{task_code}/{dataset_name}.jsonl"
         )
-        return jsonl_contents
+        return "Dataset uploaded successfully"

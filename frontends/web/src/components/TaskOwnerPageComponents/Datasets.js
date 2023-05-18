@@ -24,6 +24,7 @@ import { Formik } from "formik";
 import DragAndDrop from "../DragAndDrop/DragAndDrop";
 import useFetch from "use-http";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const yaml = require("js-yaml");
 
@@ -76,17 +77,36 @@ const Datasets = (props) => {
     const formData = new FormData();
     const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
     formData.append("dataset", values.file);
-
-    axios.post(`${BASE_URL_2}/dataset/upload_dataset`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      params: {
-        task_id: props.task.id,
-        dataset_name: values.name,
-        task_name: props.task.name,
-      },
-    });
+    axios
+      .post(`${BASE_URL_2}/dataset/upload_dataset`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        params: {
+          task_id: props.task.id,
+          dataset_name: values.name,
+          task_code: props.task.task_code,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          Swal.fire({
+            title: "Success!",
+            text: "Dataset uploaded successfully.",
+            icon: "success",
+            confirmButtonText: "Ok",
+          }).then(() => {
+            window.location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: "Error!",
+            text: "Something went wrong.",
+            icon: "error",
+            confirmButtonText: "Ok",
+          });
+        }
+      });
   };
 
   return (
