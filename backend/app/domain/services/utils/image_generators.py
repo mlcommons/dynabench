@@ -58,30 +58,29 @@ class StableDiffusionImageProvider(ImageProvider):
         self, prompt: str, num_images: int, models: list, endpoint: str
     ) -> list:
         for model in models:
-            try:
-                res = requests.post(
-                    endpoint,
-                    json={
-                        "model": model,
-                        "prompt": prompt,
-                        "n": num_images,
-                        "steps": 20,
-                    },
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "User-Agent": "",
-                    },
-                )
+            res = requests.post(
+                endpoint,
+                json={
+                    "model": model,
+                    "prompt": prompt,
+                    "n": num_images,
+                    "steps": 20,
+                },
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "User-Agent": "",
+                },
+            )
+            if res.status_code == 200:
                 image_response = res.json().get("output").get("choices")
-                if res.status_code == 200:
-                    image_response = [x["image_base64"] for x in image_response]
-                    print(f"Model {model} worked")
-                    return image_response
-            except Exception as e:
-                print(e)
+                image_response = [x["image_base64"] for x in image_response]
+                print(f"Model {model} worked")
+                return image_response
+            else:
+                continue
 
-            image_response = [forbidden_image] * num_images
-            return image_response
+        image_response = [forbidden_image] * int(num_images)
+        return image_response
 
     def provider_name(self):
         return "stable_diffusion"
