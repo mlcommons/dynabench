@@ -132,7 +132,6 @@ const SelectBetweenImagesGenerative: FC<
             <AnnotationInstruction
               placement="left"
               tooltip={
-                instruction.prompt ||
                 "“Click here to view a log of all your previously attempted prompts”"
               }
             >

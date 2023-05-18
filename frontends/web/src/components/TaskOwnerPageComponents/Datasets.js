@@ -82,6 +82,7 @@ const Datasets = (props) => {
         "Content-Type": "multipart/form-data",
       },
       params: {
+        task_id: props.task.id,
         dataset_name: values.name,
         task_name: props.task.name,
       },
