@@ -212,6 +212,17 @@ class ExampleService:
             example_id, json.dumps(model_input), json.dumps(metadata)
         )
 
+    def download_all_created_examples(self, task_id: int) -> dict:
+        examples_data = self.example_repository.download_all_created_examples(task_id)
+        examples_data_list = []
+        for example in examples_data:
+            example_necessary_info = {}
+            example_info = example[0].__dict__
+            example_necessary_info["example_info"] = example_info
+            example_necessary_info["context_info"] = example[1].__dict__
+            examples_data_list.append(example_necessary_info)
+        return examples_data_list
+
     def download_created_examples_user(self, task_id: int, user_id: int) -> dict:
         if user_id:
             examples_data = self.example_repository.download_created_examples_user(

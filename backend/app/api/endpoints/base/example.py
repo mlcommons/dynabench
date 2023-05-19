@@ -6,6 +6,7 @@ from fastapi import APIRouter, Response
 
 from app.domain.schemas.base.example import (
     DownloadAdditionalDataExamplesRequest,
+    DownloadAllExamplesRequest,
     DownloadExamplesRequest,
     GetExampleRequest,
     PartiallyCreationExampleGenerativeRequest,
@@ -70,15 +71,34 @@ def update_creation_generative_example_by_example_id(
     )
 
 
-@router.post("/download_created_examples", response_model={})
-def download_created_examples(
-    model: DownloadExamplesRequest,
+@router.post("/download_all_created_examples", response_model={})
+def download_all_created_examples(
+    model: DownloadAllExamplesRequest,
 ):
-    csv_file = ExampleService().download_created_examples(model.task_id, model.user_id)
-    return Response(
-        content=csv_file,
-        media_type="application/json",
-        headers={"Content-Disposition": 'attachment; filename="data.json"'},
+    import json
+    from datetime import datetime
+
+    from fastapi.responses import StreamingResponse
+    from sqlalchemy.orm.state import InstanceState
+
+    class CustomJSONEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            elif isinstance(obj, InstanceState):
+                return None  # Skip serializing the problematic object
+            return super().default(obj)
+
+    examples = ExampleService().download_all_created_examples(model.task_id)
+
+    def json_lines_generator(examples):
+        for item in examples:
+            yield json.dumps(item, cls=CustomJSONEncoder) + "\n"
+
+    return StreamingResponse(
+        content=json_lines_generator(examples),
+        media_type="application/json-lines",
+        headers={"Content-Disposition": 'attachment; filename="data.jsonl"'},
     )
 
 

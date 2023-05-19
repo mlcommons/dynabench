@@ -40,6 +40,10 @@ class UpdateCreationExampleGenerativeRequest(BaseModel):
     metadata_json: dict
 
 
+class DownloadAllExamplesRequest(BaseModel):
+    task_id: int
+
+
 class DownloadExamplesRequest(BaseModel):
     task_id: int
     user_id: Optional[int] = None

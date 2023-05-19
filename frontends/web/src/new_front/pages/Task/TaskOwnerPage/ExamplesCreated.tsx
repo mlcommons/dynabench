@@ -12,7 +12,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
   const { post, response, loading } = useFetch();
 
   const downloadExamples = async () => {
-    await post(`/example/download_created_examples`, {
+    await post(`/example/download_all_created_examples`, {
       task_id: taskId,
     });
     if (response.ok) {
