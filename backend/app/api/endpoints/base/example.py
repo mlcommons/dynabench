@@ -94,7 +94,7 @@ def download_created_examples_user(
 def download_additional_data(
     model: DownloadAdditionalDataExamplesRequest,
 ):
-    zip_file = ExampleService().download_additional_data(model.bucket_name)
+    zip_file = ExampleService().download_additional_data(model.folder_direction)
     return Response(
         content=zip_file,
         headers={

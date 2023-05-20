@@ -50,4 +50,4 @@ class DownloadExamplesRequest(BaseModel):
 
 
 class DownloadAdditionalDataExamplesRequest(BaseModel):
-    bucket_name: str
+    folder_direction: str

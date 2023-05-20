@@ -37,7 +37,6 @@ class ExampleService:
             region_name=os.getenv("AWS_REGION"),
         )
         self.s3 = self.session.client("s3")
-        self.dataperf_bucket = os.getenv("AWS_S3_DATAPERF_BUCKET")
 
     def create_example(
         self,
@@ -267,9 +266,9 @@ class ExampleService:
         json_string = json.dumps(python_list)
         return json_string
 
-    def download_additional_data(self, bucket_name) -> dict:
-        bucket_name = bucket_name.split("/")[0]
-        folder_path = "/".join(bucket_name.split("/")[1:])
+    def download_additional_data(self, folder_direction: str) -> dict:
+        bucket_name = folder_direction.split("/")[0]
+        folder_path = "/".join(folder_direction.split("/")[1:])
         in_memory_zip = io.BytesIO()
         with zipfile.ZipFile(in_memory_zip, mode="w") as zf:
             for obj in self.s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_path)[
