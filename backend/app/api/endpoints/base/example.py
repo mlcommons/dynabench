@@ -75,30 +75,11 @@ def update_creation_generative_example_by_example_id(
 def download_all_created_examples(
     model: DownloadAllExamplesRequest,
 ):
-    import json
-    from datetime import datetime
-
-    from fastapi.responses import StreamingResponse
-    from sqlalchemy.orm.state import InstanceState
-
-    class CustomJSONEncoder(json.JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, datetime):
-                return obj.isoformat()
-            elif isinstance(obj, InstanceState):
-                return None  # Skip serializing the problematic object
-            return super().default(obj)
-
     examples = ExampleService().download_all_created_examples(model.task_id)
-
-    def json_lines_generator(examples):
-        for item in examples:
-            yield json.dumps(item, cls=CustomJSONEncoder) + "\n"
-
-    return StreamingResponse(
-        content=json_lines_generator(examples),
-        media_type="application/json-lines",
-        headers={"Content-Disposition": 'attachment; filename="data.jsonl"'},
+    return Response(
+        content=examples,
+        media_type="application/json",
+        headers={"Content-Disposition": 'attachment; filename="data.json"'},
     )
 
 

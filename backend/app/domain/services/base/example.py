@@ -12,6 +12,7 @@ import yaml
 from fastapi.encoders import jsonable_encoder
 from pydantic import Json
 
+from app.domain.helpers.transform_data_objects import CustomJSONEncoder
 from app.domain.services.base.context import ContextService
 from app.domain.services.base.round import RoundService
 from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoService
@@ -221,7 +222,7 @@ class ExampleService:
             example_necessary_info["example_info"] = example_info
             example_necessary_info["context_info"] = example[1].__dict__
             examples_data_list.append(example_necessary_info)
-        return examples_data_list
+        return json.dumps(examples_data_list, cls=CustomJSONEncoder)
 
     def download_created_examples_user(self, task_id: int, user_id: int) -> dict:
         if user_id:
