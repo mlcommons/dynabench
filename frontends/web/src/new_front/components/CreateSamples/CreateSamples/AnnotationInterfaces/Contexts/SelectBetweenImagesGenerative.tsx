@@ -82,6 +82,7 @@ const SelectBetweenImagesGenerative: FC<
     updateModelInputs({
       [field_names_for_the_model.original_prompt ?? "original_prompt"]: prompt,
     });
+    generateImages();
   };
 
   const handleSelectImage = async (image: string) => {
@@ -137,7 +138,7 @@ const SelectBetweenImagesGenerative: FC<
             >
               <Dropdown
                 options={promptHistory}
-                placeholder=""
+                placeholder="Find your previous prompts here"
                 onChange={handlePromptHistory}
               />
             </AnnotationInstruction>

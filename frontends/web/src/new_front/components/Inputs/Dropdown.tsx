@@ -1,5 +1,9 @@
 import React, { FC, useState } from "react";
-import { Collapse } from "react-bootstrap";
+import {
+  Collapse,
+  DropdownButton,
+  Dropdown as BootsDropdown,
+} from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 
 type DropdownProps = {
@@ -33,7 +37,7 @@ const Dropdown: FC<DropdownProps> = ({
         </h3>
       </div>
       <Collapse in={open}>
-        <Typeahead
+        {/* <Typeahead
           id="basic-typeahead-single"
           labelKey="name"
           className="w-full py-2"
@@ -43,10 +47,22 @@ const Dropdown: FC<DropdownProps> = ({
           emptyLabel="No prompts found"
           onChange={(selected) => {
             if (selected.length > 0) {
-              onChange(selected[0]);
+              onChange(selected[0])
             }
           }}
-        />
+          clearButton
+        /> */}
+        <DropdownButton
+          id="dropdown-basic-button"
+          title={placeholder}
+          className="flex justify-center w-full border-gray-200 "
+        >
+          {options.map((option) => (
+            <BootsDropdown.Item onClick={() => onChange(option)}>
+              {option}
+            </BootsDropdown.Item>
+          ))}
+        </DropdownButton>
       </Collapse>
     </div>
   );

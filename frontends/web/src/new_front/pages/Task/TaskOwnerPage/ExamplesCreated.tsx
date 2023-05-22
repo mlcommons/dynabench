@@ -20,7 +20,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
         const url = window.URL.createObjectURL(new Blob([blob]));
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", `${taskId}_prediction.json`);
+        link.setAttribute("download", `${taskId}_examples_created.json`);
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -30,7 +30,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
 
   const downloadAdditionalData = async () => {
     const response = await post(`/example/download_additional_data`, {
-      bucket_name: s3Bucket,
+      folder_direction: s3Bucket,
     });
     if (response.ok) {
       const blob = await response.blob();
