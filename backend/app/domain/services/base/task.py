@@ -182,10 +182,7 @@ class TaskService:
         instructions = self.task_repository.get_task_instructions(
             task_id
         ).general_instructions
-        if instructions is None:
-            return None
-        else:
-            literal_eval(instructions)
+        return literal_eval(instructions)
 
     def update_task_instructions(self, task_id: int, instructions: dict):
         return self.task_repository.update_task_instructions(task_id, instructions)
