@@ -58,6 +58,7 @@ class StableDiffusionImageProvider(ImageProvider):
         self, prompt: str, num_images: int, models: list, endpoint: str
     ) -> list:
         for model in models:
+            print(f"Trying model {model}")
             res = requests.post(
                 endpoint,
                 json={
@@ -84,3 +85,60 @@ class StableDiffusionImageProvider(ImageProvider):
 
     def provider_name(self):
         return "stable_diffusion"
+
+
+class MidjourneyImageProvider(ImageProvider):
+    def __init__(self):
+        self.server_id = os.getenv("SERVER_ID")
+        self.channel_id = os.getenv("CHANNEL_ID")
+        self.dyna_bot = os.getenv("DYNA_BOT")
+
+    def generate_images(
+        self, prompt: str, num_images: int, models: list, endpoint: str
+    ) -> list:
+        payload = {
+            "type": 2,
+            "application_id": "1109849712405782700",
+            "guild_id": self.server_id,
+            "channel_id": self.channel_id,
+            "session_id": "2fb980f65e5c9a77c96ca01f2c242cf6",
+            "data": {
+                "version": "1077969938624553050",
+                "id": "938956540159881230",
+                "name": "imagine",
+                "type": 1,
+                "options": [{"type": 3, "name": "prompt", "value": prompt}],
+                "application_command": {
+                    "id": "938956540159881230",
+                    "application_id": "1109849712405782700",
+                    "version": "1077969938624553050",
+                    "default_permission": True,
+                    "default_member_permissions": None,
+                    "type": 1,
+                    "nsfw": False,
+                    "name": "imagine",
+                    "description": "Create images with Midjourney",
+                    "dm_permission": True,
+                    "options": [
+                        {
+                            "type": 3,
+                            "name": "prompt",
+                            "description": "The prompt to imagine",
+                            "required": True,
+                        }
+                    ],
+                },
+                "attachments": [],
+            },
+        }
+
+        header = {"authorization": self.dyna_bot}
+        response = requests.post(
+            "https://discord.com/api/v9/interactions", json=payload, headers=header
+        )
+
+        print(response)
+        return
+
+    def provider_name(self):
+        return "midjourney"

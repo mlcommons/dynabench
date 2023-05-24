@@ -9,13 +9,13 @@ import os
 import random
 
 import boto3
-import numpy as np
 import yaml
 from fastapi import HTTPException
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
 from app.domain.services.utils.image_generators import (
+    MidjourneyImageProvider,
     OpenAIImageProvider,
     StableDiffusionImageProvider,
 )
@@ -28,7 +28,11 @@ class ContextService:
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
         self.task_service = TaskService()
-        self.providers = [StableDiffusionImageProvider(), OpenAIImageProvider()]
+        self.providers = [
+            StableDiffusionImageProvider(),
+            OpenAIImageProvider(),
+            MidjourneyImageProvider(),
+        ]
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
@@ -114,15 +118,13 @@ class ContextService:
         self, prompt: str, user_id: int, num_images: int, models: list, endpoint: str
     ) -> dict:
         images = []
-        for counter in range(2):
-            for generator in self.providers:
-                if generator.provider_name() == "openai":
-                    n = 1
-                else:
-                    n = np.floor((num_images - 1) / 2)
-                generated_images = generator.generate_images(
-                    prompt, n, models, endpoint
-                )
+        for generator in self.providers:
+            if generator.provider_name() == "openai":
+                n = 2
+            else:
+                n = 16
+            generated_images = generator.generate_images(prompt, n, models, endpoint)
+            if generator.provider_name() != "midjourney":
                 print(len(generated_images))
                 for image in generated_images:
                     image_id = (
