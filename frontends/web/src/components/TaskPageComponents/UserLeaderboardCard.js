@@ -158,7 +158,6 @@ const UserLeaderboardCard = (props) => {
                   {props.dataValidation ? (
                     <td className="text-right">{data.MER}%</td>
                   ) : null}
-                  {console.log("data", data)}
                   {props.dataValidation ? (
                     <td className="pr-4 text-right">{data.total}</td>
                   ) : (

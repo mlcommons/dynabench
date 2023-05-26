@@ -9,14 +9,13 @@ import os
 import random
 
 import boto3
-import openai
-import requests
 import yaml
 from fastapi import HTTPException
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
 from app.domain.services.utils.image_generators import (
+    MidjourneyImageProvider,
     OpenAIImageProvider,
     StableDiffusionImageProvider,
 )
@@ -29,13 +28,18 @@ class ContextService:
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
         self.task_service = TaskService()
-        self.providers = [StableDiffusionImageProvider(), OpenAIImageProvider()]
+        self.providers = [
+            StableDiffusionImageProvider(),
+            OpenAIImageProvider(),
+            MidjourneyImageProvider(),
+        ]
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
             region_name=os.getenv("AWS_REGION"),
         )
         self.s3 = self.session.client("s3")
+        self.dataperf_bucket = os.getenv("AWS_S3_DATAPERF_BUCKET")
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
         self.context_repository.increment_counter_total_samples_and_update_date(
@@ -110,42 +114,56 @@ class ContextService:
         }
         return context_info
 
-    def get_nibbler_contexts(self, prompt: str, num_images: int = 3) -> dict:
+    def get_nibbler_contexts(
+        self, prompt: str, user_id: int, num_images: int, models: list, endpoint: str
+    ) -> dict:
         images = []
-        for counter in range(2):
-            if len(images) == 6:
-                break
+        for generator in self.providers:
+            if generator.provider_name() == "openai":
+                n = 2
             else:
-                for generator in self.providers:
-                    generated_images = generator.generate_images(prompt, 3)
-                    for image in generated_images:
-                        image_id = (
-                            generator.provider_name()
-                            + "_"
-                            + hashlib.md5(image.encode()).hexdigest()
+                n = 16
+            generated_images = generator.generate_images(prompt, n, models, endpoint)
+            if generator.provider_name() != "midjourney":
+                print(len(generated_images))
+                for image in generated_images:
+                    image_id = (
+                        generator.provider_name()
+                        + "_"
+                        + prompt
+                        + "_"
+                        + str(user_id)
+                        + "_"
+                        + hashlib.md5(image.encode()).hexdigest()
+                    )
+                    print(image_id)
+                    if black_image in image:
+                        new_dict = {
+                            "image": forbidden_image,
+                            "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
+                        }
+                        images.append(new_dict)
+                    else:
+                        new_dict = {
+                            "image": image,
+                            "id": image_id,
+                        }
+                        filename = f"adversarial-nibbler/{image_id}.jpeg"
+                        self.s3.put_object(
+                            Body=base64.b64decode(image),
+                            Bucket=self.dataperf_bucket,
+                            Key=filename,
                         )
-                        print(image_id)
-                        if black_image in image:
-                            new_dict = {
-                                "image": forbidden_image,
-                                "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
-                            }
-                            images.append(new_dict)
-                        else:
-                            new_dict = {
-                                "image": image,
-                                "id": image_id,
-                            }
-                            filename = f"adversarial-nibbler/{image_id}.jpeg"
-                            self.s3.put_object(
-                                Body=base64.b64decode(image),
-                                Bucket="dataperf",
-                                Key=filename,
-                            )
-                            images.append(new_dict)
+                        images.append(new_dict)
         random.shuffle(images)
         return images
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
-            return self.get_nibbler_contexts(artifacts["prompt"], artifacts["endpoint"])
+            return self.get_nibbler_contexts(
+                prompt=artifacts["prompt"],
+                user_id=artifacts["user_id"],
+                models=artifacts["model"],
+                endpoint=artifacts["endpoint"],
+                num_images=30,
+            )

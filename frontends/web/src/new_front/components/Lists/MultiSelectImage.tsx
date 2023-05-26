@@ -2,6 +2,7 @@ import React, { FC, useState } from "react";
 import SelectImage from "new_front/components/Images/SelectImage";
 import { Collapse } from "react-bootstrap";
 import parse from "html-react-parser";
+import Carousel from "react-grid-carousel";
 
 export type MultiSelectImageProps = {
   instructions?: string;
@@ -28,27 +29,29 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
           >
             <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
               {open ? (
-                <i className="pl-2 pr-3 fas fa-minus" />
+                <i className="pl-2 pr-3  " />
               ) : (
-                <i className="pl-2 pr-3 fas fa-plus" />
+                <i className="pl-2 pr-3  " />
               )}
               {parse(instructions)}
             </h3>
           </div>
         )}
         <Collapse in={open}>
-          <div className={`grid grid-cols-3 justify-center`}>
+          <Carousel cols={3} rows={2} gap={10} showDots={true}>
             {images.map((image, index) => (
-              <div key={index} className="max-h-72">
-                <SelectImage
-                  isSelected={selectedImage === image}
-                  image={image}
-                  index={index}
-                  handleSelectImage={handleFunction}
-                />
-              </div>
+              <Carousel.Item>
+                <div key={index} className="max-h-72">
+                  <SelectImage
+                    isSelected={selectedImage === image}
+                    image={image}
+                    index={index}
+                    handleSelectImage={handleFunction}
+                  />
+                </div>
+              </Carousel.Item>
             ))}
-          </div>
+          </Carousel>
         </Collapse>
       </div>
     </>

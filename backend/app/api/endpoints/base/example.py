@@ -2,9 +2,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from app.domain.schemas.base.example import (
+    DownloadAdditionalDataExamplesRequest,
+    DownloadAllExamplesRequest,
+    DownloadExamplesRequest,
     GetExampleRequest,
     PartiallyCreationExampleGenerativeRequest,
     UpdateCreationExampleGenerativeRequest,
@@ -45,11 +48,11 @@ def validate_example(model: ValidateExampleRequest):
     )
 
 
-@router.post("/partially_creation_generative_example", response_model={})
-def partially_creation_generative_example(
+@router.post("/partial_creation_generative_example", response_model={})
+def partial_creation_generative_example(
     model: PartiallyCreationExampleGenerativeRequest,
 ):
-    return ExampleService().partially_creation_generative_example(
+    return ExampleService().partial_creation_generative_example(
         model.example_info,
         model.context_id,
         model.user_id,
@@ -65,4 +68,37 @@ def update_creation_generative_example_by_example_id(
 ):
     return ExampleService().update_creation_generative_example_by_example_id(
         model.example_id, model.example_info, model.metadata_json
+    )
+
+
+@router.post("/download_all_created_examples", response_model={})
+def download_all_created_examples(
+    model: DownloadAllExamplesRequest,
+):
+    examples = ExampleService().download_all_created_examples(model.task_id)
+    return Response(
+        content=examples,
+        media_type="application/json",
+        headers={"Content-Disposition": 'attachment; filename="data.json"'},
+    )
+
+
+@router.post("/download_created_examples_user", response_model={})
+def download_created_examples_user(
+    model: DownloadExamplesRequest,
+):
+    return ExampleService().download_created_examples_user(model.task_id, model.user_id)
+
+
+@router.post("/download_additional_data", response_model={})
+def download_additional_data(
+    model: DownloadAdditionalDataExamplesRequest,
+):
+    zip_file = ExampleService().download_additional_data(model.folder_direction)
+    return Response(
+        content=zip_file,
+        headers={
+            "Content-Disposition": "attachment; filename=files.zip",
+            "Content-Type": "application/zip",
+        },
     )

@@ -10,7 +10,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Badge,
   Button,
@@ -38,6 +38,7 @@ import {
   DeploymentStatus,
   EvaluationStatus,
 } from "./ModelStatus";
+import useFetch from "use-http";
 import { BadgeOverlay, OverlayProvider } from "./Overlay";
 import UserContext from "./UserContext";
 const yaml = require("js-yaml");
@@ -165,11 +166,47 @@ const ScoreRow = ({
   const [expanded, setExpanded] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
+  const { post, response } = useFetch();
+  const { user } = useContext(UserContext);
   const perf_by_tag =
     score.metadata_json &&
     JSON.parse(score.metadata_json).hasOwnProperty("perf_by_tag")
       ? JSON.parse(score.metadata_json)["perf_by_tag"]
       : [];
+
+  const downloadPrection = async (datasetId) => {
+    setShowSpinner(true);
+    await post(
+      "/model/get_model_prediction_per_dataset",
+      {
+        user_id: user.id,
+        model_id: modelId,
+        dataset_id: datasetId,
+      },
+      {
+        responseType: "blob",
+      }
+    );
+    if (response.ok) {
+      setShowSpinner(false);
+      response.blob().then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${modelId}_prediction.jsonl.out`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      });
+    } else {
+      setShowSpinner(false);
+      Swal.fire({
+        title: "Oh no!!",
+        text: "Something went wrong while downloading the prediction file",
+        icon: "warning",
+      });
+    }
+  };
 
   const clickable = perf_by_tag.length !== 0;
 
@@ -225,57 +262,11 @@ const ScoreRow = ({
               (score.dataset_log_access_type === "user" && isModelOwner)) && (
               <>
                 <Button
-                  className="logs-button"
                   variant="outline-primary"
                   size="sm"
                   disabled={showSpinner}
                   onClick={() => {
-                    setShowSpinner(true);
-                    downloadLog(modelId, score.dataset_id).then(
-                      (result) => {
-                        setShowSpinner(false);
-                      },
-                      (error) => {
-                        console.log(error);
-                        setShowSpinner(false);
-                        Swal.fire({
-                          title: "Oh no!!",
-                          text: error.error,
-                          icon: "warning",
-                        });
-                      }
-                    );
-                  }}
-                >
-                  {showSpinner ? (
-                    <Spinner animation="border" size="sm" />
-                  ) : (
-                    <i className="fas fa-file-download">
-                      {" "}
-                      <span className="name-buttons">Logs</span>
-                    </i>
-                  )}
-                </Button>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  disabled={showSpinner}
-                  onClick={() => {
-                    setShowSpinner(true);
-                    downloadPrediction(modelId, score.dataset_id).then(
-                      (result) => {
-                        setShowSpinner(false);
-                      },
-                      (error) => {
-                        console.log(error);
-                        setShowSpinner(false);
-                        Swal.fire({
-                          title: "Oh no!!",
-                          text: error.error,
-                          icon: "warning",
-                        });
-                      }
-                    );
+                    downloadPrection(score.dataset_id);
                   }}
                 >
                   {showSpinner ? (
@@ -310,7 +301,7 @@ const ScoreRow = ({
           perf_by_tag.map((perf_and_tag, index) => {
             return (
               <tr key={index} style={{ border: `none` }}>
-                <td className="text-right pr-4  text-nowrap">
+                <td className="pr-4 text-right text-nowrap">
                   <div className="d-flex justify-content-end align-items-center">
                     <span className="d-flex align-items-center">
                       {perf_and_tag.tag}&nbsp;
@@ -644,29 +635,27 @@ ${latexTableContent}
           show={!!this.state.showBadges}
           onHide={() => this.setState({ showBadges: "" })}
         ></BadgeOverlay>
-        <Container className="mb-5 pb-5">
-          <h1 className="my-4 pt-3 text-uppercase text-center">
+        <Container className="pb-5 mb-5">
+          <h1 className="pt-3 my-4 text-center text-uppercase">
             Model Overview
           </h1>
-          <Col className="m-auto" lg={8}>
+          <Col className="m-auto " lg={8}>
             <Card className="profile-card">
-              <Card.Body>
-                <div className="d-flex justify-content-between mx-4 mt-4">
+              <Card.Body className="mx-6">
+                <div className="mt-4 d-flex justify-content-between">
                   <Button
-                    className={`border-0 font-weight-bold light-gray-bg ${
-                      isModelOwner ? "mr-2" : null
-                    }`}
+                    className="border-0 font-weight-bold light-gray-bg"
                     aria-label="Back"
                     onClick={this.handleBack}
                   >
-                    {"< Back"}
+                    {"Back"}
                   </Button>
-                  <div>
-                    {console.log(model)}
+                  <div className="gap-2">
                     {(isModelOwner || model.is_published) &&
                     model.deployment_status === "deployed" ? (
                       <Button
                         variant="border-0 font-weight-bold light-gray-bg"
+                        className="mr-2"
                         onClick={() => this.handleInteract()}
                       >
                         <i className="fas fa-pen"></i> Interact
@@ -703,6 +692,7 @@ ${latexTableContent}
                       <Button
                         variant="border-0 font-weight-bold light-gray-bg"
                         onClick={() => this.handleEdit()}
+                        className="mr-2"
                       >
                         Edit
                       </Button>
@@ -729,11 +719,11 @@ ${latexTableContent}
                 </div>
                 {model.id ? (
                   <InputGroup>
-                    <Table className="mb-0">
+                    <Table className="mt-8 mb-4">
                       <thead />
                       <tbody>
                         <tr>
-                          <td colSpan="2">
+                          <td colSpan="2" className="p-6 text-base">
                             <h5 className="mx-0">
                               <span>{model.name || "Unknown"}</span>
                               <span className="float-right">
@@ -763,8 +753,8 @@ ${latexTableContent}
                       <tbody>
                         {isModelOwner && (
                           <tr style={{ border: `none` }}>
-                            <td>Owner Anonymity</td>
-                            <td>
+                            <td className="p-6 text-base">Owner Anonymity</td>
+                            <td className="flex justify-end p-6 text-base">
                               <AnonymousStatus
                                 anonymousStatus={model.is_anonymous}
                               />
@@ -772,16 +762,16 @@ ${latexTableContent}
                           </tr>
                         )}
                         <tr style={{ border: `none` }}>
-                          <td className="text-base p-6">Deployment Status</td>
-                          <td className="text-base p-6">
+                          <td className="p-6 text-base">Deployment Status</td>
+                          <td className="flex justify-end p-6 text-base">
                             <DeploymentStatus
                               deploymentStatus={model.deployment_status}
                             />
                           </td>
                         </tr>
                         <tr style={{ border: `none` }}>
-                          <td className="text-base p-6">Owner</td>
-                          <td className="text-base p-6">
+                          <td className="p-6 text-base">Owner</td>
+                          <td className="flex justify-end p-6 text-base">
                             {model.uid ? (
                               <span>
                                 <Link to={`/users/${model.uid}`}>
@@ -802,46 +792,50 @@ ${latexTableContent}
                         </tr>
                         {!isFlores && (
                           <tr style={{ border: `none` }}>
-                            <td className="text-base p-6">Task</td>
-                            <td className="text-base p-6">
+                            <td className="p-6 text-base">Task</td>
+                            <td className="flex justify-end p-6 text-base">
                               <Link to={`/tasks/${taskCode}`}>{taskCode}</Link>
                             </td>
                           </tr>
                         )}
                         <tr style={{ border: `none` }}>
-                          <td className="text-base p-6">Summary</td>
-                          <td className="text-base p-6">{model.longdesc}</td>
+                          <td className="p-6 text-base ">Summary</td>
+                          <td className="flex justify-end p-6 text-base">
+                            {model.longdesc}
+                          </td>
                         </tr>
                         <tr style={{ border: `none` }}>
                           <td
-                            className="text-base p-6"
+                            className="p-6 text-base"
                             style={{ whiteSpace: "nowrap" }}
                           >
                             # Parameters
                           </td>
-                          <td className="text-base p-6">{model.params}</td>
+                          <td className="flex justify-end p-6 text-base">
+                            {model.params}
+                          </td>
                         </tr>
                         {!isFlores && (
                           <tr style={{ border: `none` }}>
-                            <td className="text-base p-6">Language(s)</td>
-                            <td className="text-base p-6">
+                            <td className="p-6 text-base">Language(s)</td>
+                            <td className="flex justify-end p-6 text-base">
                               {" "}
                               {model.languages}
                             </td>
                           </tr>
                         )}
                         <tr style={{ border: `none` }}>
-                          <td className="text-base p-6">License(s)</td>
-                          <td className="text-base p-6">{model.license}</td>
+                          <td className="p-6 text-base">License(s)</td>
+                          <td className="p-6 text-base">{model.license}</td>
                         </tr>
                         <tr style={{ border: `none` }}>
                           <td
-                            className="text-base p-6"
+                            className="p-6 text-base"
                             style={{ verticalAlign: "middle" }}
                           >
                             Model Card
                           </td>
-                          <td className="modelCard text-base p-6">
+                          <td className="flex justify-end p-6 text-base modelCard">
                             <Markdown>{model.model_card}</Markdown>
                           </td>
                         </tr>
@@ -853,7 +847,7 @@ ${latexTableContent}
                         <DropdownButton
                           alignRight={true}
                           variant="outline-primary"
-                          className="mr-2 float-right border-0 font-weight-bold light-gray-bg"
+                          className="float-right mr-2 border-0 font-weight-bold light-gray-bg"
                           title={"Export"}
                         >
                           <Dropdown.Item onClick={this.downloadCsv}>
@@ -872,12 +866,12 @@ ${latexTableContent}
                       <Table>
                         <tbody>
                           <tr>
-                            <td className="text-base p-6" colSpan={2}>
+                            <td className="p-6 text-base" colSpan={2}>
                               <h5>Leaderboard Datasets</h5>
                             </td>
                           </tr>
                           <tr>
-                            <td className="text-base p-6">
+                            <td className="p-6 text-base">
                               <div className="parent">
                                 <label className="child2">
                                   <b>{perf_metric_metric_configs.type}</b>
@@ -917,7 +911,7 @@ ${latexTableContent}
                       <Table>
                         <tbody>
                           <tr>
-                            <td className="text-base p-6" colSpan={3}>
+                            <td className="p-6 text-base" colSpan={3}>
                               <h5>Non-Leaderboard Datasets</h5>
                             </td>
                           </tr>
@@ -954,7 +948,7 @@ ${latexTableContent}
                       <Table>
                         <tbody>
                           <tr>
-                            <td className="text-base p-6" colSpan={2}>
+                            <td className="p-6 text-base" colSpan={2}>
                               <h5>
                                 Hidden Dataset Incomplete Evaluation Statuses
                               </h5>

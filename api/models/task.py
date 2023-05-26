@@ -686,6 +686,7 @@ class Task(Base):
     image_url = db.Column(db.Text)
     challenge_type = db.Column(db.Text)
     documentation_url = db.Column(db.Text)
+    bucket_for_aditional_example_data = db.Column(db.Text)
 
     def __repr__(self):
         return f"<Task {self.name}>"

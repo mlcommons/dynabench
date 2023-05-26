@@ -16,7 +16,7 @@ const TabOptionVertical: FC<TabOptionVerticalProps> = ({
   setOpenTab,
 }) => {
   return (
-    <li className="flex-auto mr-2 text-center last:mr-0">
+    <li className="flex-auto text-center last:mr-0">
       <a
         className="relative block py-3"
         onClick={(e) => {
@@ -30,7 +30,12 @@ const TabOptionVertical: FC<TabOptionVerticalProps> = ({
         role="tablist"
         rel="noreferrer"
       >
-        <span className={"absolute inset-x-0 -bottom-px h-1 w-full"}></span>
+        <span
+          className={
+            "absolute inset-x-0 -bottom-px h-1 w-full" +
+            (openTab === optionTab ? " bg-primary-color" : "")
+          }
+        ></span>
         <div className="flex pl-2">
           <span className="mx-2 text-lg font-medium capitalize text-letter-color">
             {tabName}

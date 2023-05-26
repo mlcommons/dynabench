@@ -21,6 +21,7 @@ from app.domain.helpers.transform_data_objects import (
     transform_list_to_csv,
 )
 from app.domain.services.base.example import ExampleService
+from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoService
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
@@ -36,6 +37,7 @@ class ModelService:
         self.dataset_repository = DatasetRepository()
         self.example_service = ExampleService()
         self.evaluation_service = EvaluationService()
+        self.round_user_example_service = RoundUserExampleInfoService()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
@@ -180,7 +182,7 @@ class ModelService:
                 model_url,
                 json.dumps(model_input),
                 json.dumps(prediction),
-                {},
+                json.dumps({}),
                 tag,
                 round_id,
                 task_id,
@@ -262,13 +264,14 @@ class ModelService:
         task_code = self.task_repository.get_task_code_by_task_id(model_info["tid"])[0]
         if model_info["uid"] != user_id:
             return None
-        model_id = "dynalab-base-qa"
-        predictions = self.s3.download_file(
+        model_id = str(model_id)
+        final_file = f"./app/resources/predictions/{model_id}-{dataset_name}.jsonl.out"
+        self.s3.download_file(
             self.s3_bucket,
             f"predictions/{task_code}/{model_id}/{dataset_name}.jsonl.out",
-            f"./app/resources/predictions/{model_id}-{dataset_name}.jsonl.out",
+            final_file,
         )
-        return predictions
+        return final_file
 
     def get_amount_of_models_per_task(self, task_id: int):
         return self.model_repository.get_amount_of_models_per_task(task_id)

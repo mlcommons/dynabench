@@ -2,11 +2,17 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import io
 import json
+import os
+import zipfile
 
+import boto3
 import yaml
+from fastapi.encoders import jsonable_encoder
 from pydantic import Json
 
+from app.domain.helpers.transform_data_objects import CustomJSONEncoder
 from app.domain.services.base.context import ContextService
 from app.domain.services.base.round import RoundService
 from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoService
@@ -25,6 +31,12 @@ class ExampleService:
         self.round_user_example_info = RoundUserExampleInfoService()
         self.user_service = UserService()
         self.validation_service = ValidationService()
+        self.session = boto3.Session(
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.getenv("AWS_REGION"),
+        )
+        self.s3 = self.session.client("s3")
 
     def create_example(
         self,
@@ -79,6 +91,9 @@ class ExampleService:
         self.round_user_example_info.increment_counter_examples_submitted(
             real_round_id, user_id
         )
+        self.round_user_example_info.increment_counter_examples_submitted_today(
+            real_round_id, user_id
+        )
         if model_wrong:
             self.round_service.increment_counter_examples_fooled(round_id, task_id)
             self.round_user_example_info.increment_counter_examples_fooled(
@@ -99,15 +114,24 @@ class ExampleService:
         example_to_validate = self.example_repository.get_example_to_validate(
             real_round_id, user_id, num_matching_validations, validate_non_fooling
         )
-
         example_info = example_to_validate[0].__dict__
         example_necessary_info["example_id"] = example_info["id"]
         example_necessary_info["user_id"] = user_id
         example_necessary_info["task_id"] = task_id
         context_info = example_to_validate[1].__dict__
-        metadata_json = json.loads(example_info["metadata_json"])
-        input_json = json.loads(example_info["input_json"])
-        context_info = json.loads(context_info["context_json"])
+        metadata_json = (
+            json.loads(example_info["metadata_json"])
+            if example_info["metadata_json"]
+            else {}
+        )
+        input_json = (
+            json.loads(example_info["input_json"]) if example_info["input_json"] else {}
+        )
+        context_info = (
+            json.loads(context_info["context_json"])
+            if context_info["context_json"]
+            else {}
+        )
         example_necessary_info["context_info"] = {
             **input_json,
             **context_info,
@@ -155,7 +179,7 @@ class ExampleService:
         }
         return context_info
 
-    def partially_creation_generative_example(
+    def partial_creation_generative_example(
         self,
         example_info: dict,
         context_id: int,
@@ -165,7 +189,7 @@ class ExampleService:
         task_id: int,
     ) -> str:
         try:
-            return self.create_example_and_increment_counters(
+            return self.create_example(
                 context_id,
                 user_id,
                 False,
@@ -174,8 +198,6 @@ class ExampleService:
                 json.dumps({}),
                 json.dumps({}),
                 tag,
-                round_id,
-                task_id,
             )
         except Exception as e:
             return str(e)
@@ -189,3 +211,72 @@ class ExampleService:
         return self.example_repository.update_creation_generative_example_by_example_id(
             example_id, json.dumps(model_input), json.dumps(metadata)
         )
+
+    def download_all_created_examples(self, task_id: int) -> dict:
+        examples_data = self.example_repository.download_all_created_examples(task_id)
+        examples_data_list = []
+        for example in examples_data:
+            example_necessary_info = {}
+            example_info = example[0].__dict__
+            example_necessary_info["example_info"] = example_info
+            example_necessary_info["context_info"] = example[1].__dict__
+            examples_data_list.append(example_necessary_info)
+        return json.dumps(examples_data_list, cls=CustomJSONEncoder)
+
+    def download_created_examples_user(self, task_id: int, user_id: int) -> dict:
+        if user_id:
+            examples_data = self.example_repository.download_created_examples_user(
+                task_id, user_id
+            )
+            examples_data_list = []
+            for example in examples_data:
+                example_necessary_info = {}
+                example_info = example[0].__dict__
+                example_necessary_info["example_id"] = example_info["id"]
+                example_necessary_info["user_id"] = user_id
+                example_necessary_info["task_id"] = task_id
+                context_info = example[1].__dict__
+                metadata_json = (
+                    json.loads(example_info["metadata_json"])
+                    if example_info["metadata_json"]
+                    else {}
+                )
+                input_json = (
+                    json.loads(example_info["input_json"])
+                    if example_info["input_json"]
+                    else {}
+                )
+                context_info = (
+                    json.loads(context_info["context_json"])
+                    if context_info["context_json"]
+                    else {}
+                )
+                example_necessary_info["context_info"] = {
+                    **input_json,
+                    **context_info,
+                    **metadata_json,
+                }
+                examples_data_list.append(example_necessary_info)
+            return examples_data_list
+        else:
+            examples_data = self.example_repository.download_all_created_examples(
+                task_id
+            )
+        python_list = [jsonable_encoder(obj) for obj in examples_data]
+        json_string = json.dumps(python_list)
+        return json_string
+
+    def download_additional_data(self, folder_direction: str) -> dict:
+        bucket_name = folder_direction.split("/")[0]
+        folder_path = "/".join(folder_direction.split("/")[1:])
+        in_memory_zip = io.BytesIO()
+        with zipfile.ZipFile(in_memory_zip, mode="w") as zf:
+            for obj in self.s3.list_objects_v2(Bucket=bucket_name, Prefix=folder_path)[
+                "Contents"
+            ]:
+                key = obj["Key"]
+                response = self.s3.get_object(Bucket=bucket_name, Key=key)
+                file_content = response["Body"].read()
+                zf.writestr(key, file_content)
+        in_memory_zip.seek(0)
+        return in_memory_zip.getvalue()

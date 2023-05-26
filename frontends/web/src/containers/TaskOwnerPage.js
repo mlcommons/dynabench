@@ -20,6 +20,7 @@ import Rounds from "../components/TaskOwnerPageComponents/Rounds";
 import Settings from "../components/TaskOwnerPageComponents/Settings";
 import Datasets from "../components/TaskOwnerPageComponents/Datasets";
 import Instructions from "new_front/pages/Task/TaskOwnerPage/Instructions";
+import ExamplesCreated from "new_front/pages/Task/TaskOwnerPage/ExamplesCreated";
 const yaml = require("js-yaml");
 
 class TaskOwnerPage extends React.Component {
@@ -519,6 +520,10 @@ class TaskOwnerPage extends React.Component {
         href: "#datasets",
         buttonText: "Datasets",
       },
+      {
+        href: "#examples",
+        buttonText: "Examples created",
+      },
     ];
 
     return (
@@ -604,6 +609,12 @@ class TaskOwnerPage extends React.Component {
                       this.handleUploadAndCreateDataset
                     }
                     handleDatasetDelete={this.handleDatasetDelete}
+                  />
+                ) : null}
+                {this.props.location.hash === "#examples" && this.state.task ? (
+                  <ExamplesCreated
+                    taskId={this.state.task.id}
+                    s3Bucket={this.state.task.bucket_for_aditional_example_data}
                   />
                 ) : null}
               </>

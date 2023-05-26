@@ -45,6 +45,9 @@ export type TaskInfoType = {
   image_url: string;
   documentation_url: string;
   challenge_type_name: string;
+  accept_sandbox_creation: number;
+  creation_example_md: string;
+  max_amount_examples_on_a_day: number;
 };
 
 type roundInfoType = {

@@ -47,6 +47,9 @@ const ValidationContextStrategy: FC<Props & ValidationFactoryType> = ({
       });
     };
     getView();
+    console.log("contextRenders", contextRenders);
+    console.log("config", config);
+    console.log("infoExampleToValidate", infoExampleToValidate);
   }, []);
 
   return (

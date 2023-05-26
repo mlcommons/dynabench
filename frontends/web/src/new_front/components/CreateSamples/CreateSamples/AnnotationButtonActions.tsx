@@ -20,8 +20,10 @@ type Props = {
   modelEvaluationMetricInfo: ModelEvaluationMetric;
   isGenerativeContext: boolean;
   userId: number;
-  partialSampleId?: number;
+  partialSampleId?: any;
   neccessaryFields: string[];
+  accept_sandbox_creation: boolean;
+  maxAmountExamplesOnADay: number;
   setModelOutput: (modelOutput: ModelOutputType) => void;
 };
 
@@ -39,6 +41,8 @@ const AnnotationButtonActions: FC<Props> = ({
   userId,
   partialSampleId,
   neccessaryFields,
+  accept_sandbox_creation,
+  maxAmountExamplesOnADay,
   setModelOutput,
 }) => {
   const [sandboxMode, setSandboxMode] = useState<boolean>(false);
@@ -51,6 +55,24 @@ const AnnotationButtonActions: FC<Props> = ({
       ...modelInputs,
       input_by_user: inputByUser,
     };
+    // const stillAllowedToSubmit = await post(
+    //   `/rounduserexample/still_allowed_to_submit`,
+    //   {
+    //     round_id: realRoundId,
+    //     user_id: userId,
+    //     max_amount_examples_on_a_day: maxAmountExamplesOnADay,
+    //   },
+    // )
+    // if (!stillAllowedToSubmit) {
+    //   Swal.fire({
+    //     icon: 'warning',
+    //     title: 'Oops...',
+    //     text:
+    //       'You have reached the maximum amount of examples you can submit today',
+    //     confirmButtonColor: '#2088ef',
+    //   })
+    //   return
+    // }
     if (
       neccessaryFields.every(
         (item) =>
@@ -115,11 +137,6 @@ const AnnotationButtonActions: FC<Props> = ({
     }
   };
 
-  useEffect(() => {
-    console.log("modelInputs", modelInputs);
-    console.log("metadataExample", metadataExample);
-  }, [modelInputs, metadataExample]);
-
   return (
     <>
       {!loading ? (
@@ -128,32 +145,36 @@ const AnnotationButtonActions: FC<Props> = ({
             <>
               <div className="col-span-1 py-4">
                 <div className="grid grid-cols-6">
-                  <div className="col-span-3 px-3 text-white">
-                    <BootstrapSwitchButton
-                      checked={!sandboxMode}
-                      onlabel="Live Mode"
-                      onstyle="dark"
-                      offstyle="warning"
-                      offlabel="Sandbox"
-                      width={120}
-                      onChange={(checked: boolean) => {
-                        setSandboxMode(!checked);
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-end col-span-3 ">
-                    <div className="col-span-1 pl-2" id="switchContext">
-                      {currentContext && partialSampleId !== 0 && (
-                        <Button
-                          className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                          onClick={() => {
-                            window.location.reload();
-                          }}
-                        >
-                          New context
-                        </Button>
-                      )}
+                  {accept_sandbox_creation && (
+                    <div className="col-span-3 px-3 text-white">
+                      <BootstrapSwitchButton
+                        checked={!sandboxMode}
+                        onlabel="Live Mode"
+                        onstyle="dark"
+                        offstyle="warning"
+                        offlabel="Sandbox"
+                        width={120}
+                        onChange={(checked: boolean) => {
+                          setSandboxMode(!checked);
+                        }}
+                      />
                     </div>
+                  )}
+                  <div className="flex justify-end col-span-3 ">
+                    {accept_sandbox_creation && (
+                      <div className="col-span-1 pl-2" id="switchContext">
+                        {currentContext && partialSampleId !== 0 && (
+                          <Button
+                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                            onClick={() => {
+                              window.location.reload();
+                            }}
+                          >
+                            New context
+                          </Button>
+                        )}
+                      </div>
+                    )}
                     <div className="col-span-1 pl-2 pr-3" id="submit">
                       <Button
                         className="border-0 font-weight-bold light-gray-bg task-action-btn"

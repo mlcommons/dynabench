@@ -120,8 +120,12 @@ class Task(Base):
     decen_aws_region = Column(Text)
     image_url = Column(Text)
     documentation_url = Column(Text)
+    accept_sandbox_creation = Column(TINYINT(1), server_default=text("'1'"))
     lambda_model = Column(Text)
     dataperf = Column(TINYINT(1))
+    creation_example_md = Column(Text)
+    max_amount_examples_on_a_day = Column(Integer)
+    bucket_for_aditional_example_data = Column(Text)
 
 
 class User(Base):
@@ -385,6 +389,8 @@ class RoundUserExampleInfo(Base):
     total_verified_not_correct_fooled = Column(Integer)
     total_fooled = Column(Integer)
     examples_submitted = Column(Integer)
+    amount_examples_on_a_day = Column(Integer)
+    last_used = Column(DateTime, onupdate=func.now())
 
     round = relationship("Round")
     user = relationship("User")

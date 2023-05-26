@@ -90,8 +90,13 @@ def initiate_lambda_models() -> None:
 
 @router.post("/get_model_prediction_per_dataset")
 def get_model_prediction_per_dataset(model: ModelPredictionPerDatasetRequest):
-    return ModelService().get_model_prediction_per_dataset(
+    file_name = ModelService().get_model_prediction_per_dataset(
         model.user_id, model.model_id, model.dataset_id
+    )
+    return FileResponse(
+        "%s" % (file_name),
+        filename=file_name,
+        headers={"Access-Control-Expose-Headers": "Content-Disposition"},
     )
 
 

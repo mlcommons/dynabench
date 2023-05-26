@@ -24,6 +24,8 @@ const CreateInterface = () => {
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
   const [partialSampleId, setPartialSampleId] = useState<number>(0);
+  const [amountsExamplesCreatedToday, setAmountsExamplesCreatedToday] =
+    useState<number>(0);
   const [taskConfiguration, setTaskConfiguration] =
     useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
@@ -51,7 +53,6 @@ const CreateInterface = () => {
         get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
       ]).then();
     if (response.ok) {
-      console.log(taskContextInfo, "Printing taskContextInfo");
       setTaskContextInfo(taskContextInfo);
       setTaskConfiguration(taskConfiguration);
       setModelInTheLoop(modelInTheLoop);
@@ -60,6 +61,16 @@ const CreateInterface = () => {
       setIsGenerativeContext(
         taskConfiguration.context.generative_context?.is_generative
       );
+      const amountsExamplesCreatedToday = await post(
+        `/rounduserexample/amounts_examples_created_today`,
+        {
+          round_id: taskContextInfo.real_round_id,
+          user_id: user.id!,
+        }
+      );
+      if (response.ok) {
+        setAmountsExamplesCreatedToday(amountsExamplesCreatedToday);
+      }
     }
   };
 
@@ -102,11 +113,13 @@ const CreateInterface = () => {
                 <div className="flex items-start justify-end pr-4 pt-14">
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
+                    creationExample={taskInfo?.creation_example_md!}
+                    amountsExamplesCreatedToday={amountsExamplesCreatedToday}
                   />
                 </div>
               </div>
             </div>
-            <div className="border p-2">
+            <div className="p-2 border">
               <div id="goal">
                 {taskConfiguration?.goal && (
                   <AnnotationGoalStrategy
@@ -116,9 +129,11 @@ const CreateInterface = () => {
                 )}
               </div>
               <div id="context" className="p-3 mb-1 rounded">
-                <h6 className="text-[15px] text-[#005798] font-bold pl-2">
-                  CONTEXT:
-                </h6>
+                {taskInfo.challenge_type === 1 && (
+                  <h6 className="text-[15px] text-[#005798] font-bold pl-2">
+                    CONTEXT:
+                  </h6>
+                )}
                 {taskConfiguration?.context && (
                   <AnnotationContextStrategy
                     config={taskConfiguration?.context as any}
@@ -163,6 +178,12 @@ const CreateInterface = () => {
                     neccessaryFields={taskConfiguration.required_fields}
                     isGenerativeContext={isGenerativeContext}
                     userId={user.id!}
+                    accept_sandbox_creation={Boolean(
+                      taskInfo.accept_sandbox_creation
+                    )}
+                    maxAmountExamplesOnADay={
+                      taskInfo.max_amount_examples_on_a_day
+                    }
                     setModelOutput={setModelOutput}
                   />
                 )}

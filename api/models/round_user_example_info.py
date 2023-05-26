@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -121,7 +125,7 @@ class RoundUserExampleInfoModel(BaseModel):
             .join(RoundUserExampleInfo, RoundUserExampleInfo.uid == User.id)
             .filter(RoundUserExampleInfo.r_realid.in_(r_realids))
             .group_by(RoundUserExampleInfo.uid)
-            .order_by((total_fooled_cnt - total_verified_not_correct_fooled_cnt).desc())
+            .order_by(examples_submitted_cnt.desc())
         )
 
         return query_res.limit(n).offset(n * offset), util.get_query_count(query_res)
