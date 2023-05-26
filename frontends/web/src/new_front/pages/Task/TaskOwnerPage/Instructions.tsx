@@ -46,6 +46,22 @@ const Instructions: FC<InstructionsProps> = ({ taskId }) => {
     setShowRemoveModal(false);
   };
 
+  const handleUpdate = async () => {
+    await post(`/task/update_task_instructions`, {
+      task_id: taskId,
+      instructions: JSON.stringify(newInstructions),
+    });
+    if (response.ok) {
+      Swal.fire({
+        title: "Success!",
+        text: "Instructions updated successfully!",
+        icon: "success",
+        confirmButtonText: "Ok",
+      });
+      window.location.reload();
+    }
+  };
+
   const handleSave = async (instructions: any) => {
     await post(`/task/update_task_instructions`, {
       task_id: taskId,
@@ -88,7 +104,7 @@ const Instructions: FC<InstructionsProps> = ({ taskId }) => {
                 <Button
                   variant="primary"
                   className="max-w-xs my-4 submit-btn button-ellipse text-uppercase"
-                  onClick={handleSave}
+                  onClick={() => handleUpdate()}
                 >
                   Save
                 </Button>

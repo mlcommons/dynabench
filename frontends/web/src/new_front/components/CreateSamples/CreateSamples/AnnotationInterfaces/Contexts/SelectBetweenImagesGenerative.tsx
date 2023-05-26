@@ -72,7 +72,7 @@ const SelectBetweenImagesGenerative: FC<
     });
   };
 
-  const handlePromptHistory = (prompt: string) => {
+  const handlePromptHistory = async (prompt: string) => {
     setArtifactsInput({
       ...artifactsInput,
       prompt: prompt,
@@ -82,7 +82,20 @@ const SelectBetweenImagesGenerative: FC<
     updateModelInputs({
       [field_names_for_the_model.original_prompt ?? "original_prompt"]: prompt,
     });
-    generateImages();
+    setShowLoader(true);
+    const generatedImages = await post("/context/get_generative_contexts", {
+      type: generative_context.type,
+      artifacts: {
+        ...artifactsInput,
+        prompt: prompt,
+      },
+    });
+    if (response.ok) {
+      setShowImages(generatedImages);
+      addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
+      setPromptHistory(getListFromLocalStorage("promptHistory"));
+      setShowLoader(false);
+    }
   };
 
   const handleSelectImage = async (image: string) => {
@@ -138,7 +151,7 @@ const SelectBetweenImagesGenerative: FC<
             >
               <Dropdown
                 options={promptHistory}
-                placeholder="Find your previous prompts here"
+                placeholder="Find your previous prompts here           "
                 onChange={handlePromptHistory}
               />
             </AnnotationInstruction>

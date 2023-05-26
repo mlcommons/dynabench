@@ -55,6 +55,9 @@ const TaskPage = () => {
       setAdminOrOwner(adminOrOwner);
       setTaskInstructions(taskInstructions);
       setLoading(false);
+      if (taskData.id === 45) {
+        setOpenTab(2);
+      }
     }
   };
 
@@ -109,12 +112,15 @@ const TaskPage = () => {
                     className="flex flex-row flex-wrap list-none border-t-2"
                     role="tablist"
                   >
-                    <TabOption
-                      optionTab={1}
-                      tabName="Leaderboard"
-                      openTab={openTab}
-                      setOpenTab={setOpenTab}
-                    />
+                    {task.id !== 45 && (
+                      <TabOption
+                        optionTab={1}
+                        tabName="Leaderboard"
+                        openTab={openTab}
+                        setOpenTab={setOpenTab}
+                      />
+                    )}
+
                     <TabOption
                       optionTab={2}
                       tabName="Overview"
@@ -151,7 +157,9 @@ const TaskPage = () => {
               <div className="flex-auto">
                 <div className="tab-content tab-space">
                   <div className={openTab === 1 ? "block  px-4" : "hidden"}>
-                    <Leaderboard taskCode={task.task_code} />
+                    {task.id !== 45 && (
+                      <Leaderboard taskCode={task.task_code} />
+                    )}
                   </div>
                   <div className={openTab === 2 ? "block " : "hidden"}>
                     <OverviewTask

@@ -29,9 +29,9 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
           >
             <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
               {open ? (
-                <i className="pl-2 pr-3 fas fa-minus" />
+                <i className="pl-2 pr-3  " />
               ) : (
-                <i className="pl-2 pr-3 fas fa-plus" />
+                <i className="pl-2 pr-3  " />
               )}
               {parse(instructions)}
             </h3>
