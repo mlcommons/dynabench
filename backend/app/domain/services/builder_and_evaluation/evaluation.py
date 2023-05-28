@@ -25,9 +25,12 @@ from cloudwatch import cloudwatch
 
 from app.domain.helpers.email import EmailHelper
 from app.domain.services.builder_and_evaluation.builder import BuilderService
-from app.domain.services.builder_and_evaluation.eval_utils.evaluator import Evaluator
+from app.domain.services.builder_and_evaluation.eval_utils.evaluator import (
+    evaluate,
+    evaluate_delta_metrics,
+)
 from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
-    InputFormatter,
+    neccesary_format_for_evaluation,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
@@ -403,6 +406,34 @@ class EvaluationService:
         self.builder.delete_ecs_service(str(arn_service))
         shutil.rmtree(f"./app/models/{folder_name}")
 
+    def get_finals_scores(self, task_id: int, prediction_dict: dict):
+        task_configuration = self.get_task_configuration(task_id)
+        metric_info = task_configuration["perf_metric"]
+        formatted_dict, perturb_exists = neccesary_format_for_evaluation(
+            prediction_dict, metric_info["reference_name"]
+        )
+        main_metric = evaluate(
+            metric_info["type"],
+            formatted_dict["formatted_base_predictions"],
+            formatted_dict["formatted_base_dataset"],
+        )
+        delta_metrics = {}
+        if perturb_exists:
+            delta_metrics = evaluate_delta_metrics(
+                metric_info["type"],
+                formatted_dict.get("grouped_base_predictions"),
+                formatted_dict.get("grouped_robustness_predictions"),
+                formatted_dict.get("grouped_fairness_predictions"),
+                task_configuration["delta_metrics"],
+            )
+        metric = metric_info["type"]
+        final_scores = {
+            str(metric): main_metric,
+            "fairness": delta_metrics.get("fairness"),
+            "robustness": delta_metrics.get("robustness"),
+        }
+        return final_scores, main_metric, metric
+
     def save_predictions_dataset(
         self,
         dataset: dict,
@@ -413,7 +444,6 @@ class EvaluationService:
         model_id: int,
         arn_service: str,
         current_round: int = 1,
-        scoring: bool = True,
     ):
         try:
             print("dataset", dataset)
@@ -432,66 +462,16 @@ class EvaluationService:
             self.logger.info("Calculate throughput")
             throughput = self.get_throughput(num_samples, minutes_time_prediction)
             self.logger.info("Calculate score")
-            data_dict = {}
-            for data_version, data_types in prediction_dict.items():
-                for data_type in data_types:
-                    data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
-                        prediction_dict[data_version][data_type]
-                    )
-            if scoring:
-                perturb_exists = (
-                    "fairness_predictions" in data_dict
-                    or "robustness_predictions" in data_dict
-                )
-            task_configuration = yaml.safe_load(
-                self.task_repository.get_by_id(tasks.id)["config_yaml"]
+            final_scores, main_metric, metric = self.get_finals_scores(
+                tasks.id, prediction_dict
             )
-            input_formatter = InputFormatter(task_configuration)
-            formatted_dict = {}
-            for data_type in data_dict:
-                formatted_key = f"formatted_{data_type}"
-                grouped_key = f"grouped_{data_type}"
-                if "dataset" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_labels(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_labels(
-                        formatted_dict[formatted_key]
-                    )
-                elif "predictions" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_predictions(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_predictions(
-                        formatted_dict[formatted_key]
-                    )
-
-            evaluator = Evaluator(task_configuration)
-            main_metric = evaluator.evaluate(
-                formatted_dict["formatted_base_predictions"],
-                formatted_dict["formatted_base_dataset"],
-            )
-            delta_metrics = {}
-            if perturb_exists:
-                delta_metrics = evaluator.evaluate_delta_metrics(
-                    formatted_dict.get("grouped_base_predictions"),
-                    formatted_dict.get("grouped_robustness_predictions"),
-                    formatted_dict.get("grouped_fairness_predictions"),
-                )
-            metric = task_configuration["perf_metric"]["type"]
-            final_scores = {
-                str(metric): main_metric,
-                "fairness": delta_metrics.get("fairness"),
-                "robustness": delta_metrics.get("robustness"),
-                "memory": memory,
-                "throughput": throughput,
-            }
             print("current_round", current_round)
-            print("tasks.id", tasks.id)
             round_info = self.round_repository.get_round_info_by_round_and_task(
                 tasks.id, current_round
             )
-            print("round_info", round_info)
+            print("final_scores", final_scores)
+            print("main_metric", main_metric)
+            print("metric", metric)
             new_score = {
                 "perf": main_metric["perf"],
                 "pretty_perf": main_metric["pretty_perf"],
@@ -500,10 +480,9 @@ class EvaluationService:
                 "mid": model_id,
                 "r_realid": round_info.id,
                 "did": dataset_id,
-                "memory_utilization": final_scores["memory"],
-                "examples_per_second": final_scores["throughput"],
+                "memory_utilization": memory,
+                "examples_per_second": throughput,
             }
-            print(new_score)
             final_score = new_score.copy()
             metric_name = str(metric)
             final_score[metric_name] = main_metric["perf"]
@@ -560,13 +539,11 @@ class EvaluationService:
     ):
         return self.evaluation(task_code, s3_url, model_id, user_id)
 
-    @staticmethod
-    def _load_dataset(path: str):
-        data = []
-        with open(path) as f:
-            for line in f.readlines():
-                data.append(json.loads(line))
-        return data
-
-    def _upload_results(evaluated_model_metrics: dict):
-        return None
+    def test(self):
+        self.email_helper.send(
+            contact="juan.ciro@factored.ai",
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": "model_name", "model_id": "model_id"},
+            subject=f"Model {'model_name'} training succeeded.",
+        )
