@@ -84,3 +84,8 @@ def post_dataperf_response(response: dict):
     evaluation = EvaluationService()
     score = evaluation.evaluate_dataperf_decentralized(response.get("response"))
     return score
+
+
+@router.get("/test")
+def get_by_id():
+    return EvaluationService().test()

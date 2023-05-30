@@ -12,20 +12,14 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import 
 )
 
 
-def evaluate(metric: str, formatted_predictions: list, formatted_labels: list) -> dict:
-    """
-    Evaluates a list of predictions against a list of labels
-    using a metric included in the metrics_dictionary.
-    """
-    target_ids = [x["id"] for x in formatted_labels]
-    target_labels_dict = {t["id"]: t["answer"] for t in formatted_labels}  # labels
+def format_data_for_evaluation(
+    predictions: list, labels: list, tags: bool = False
+) -> dict:
+    target_ids = [x["id"] for x in labels]
+    target_labels_dict = {t["id"]: t["answer"] for t in labels}  # labels
     target_labels = [target_labels_dict[ids] for ids in target_ids]
-    target_tags_dict = {t["id"]: t["tags"] for t in formatted_labels}
-    target_tags = [target_tags_dict[ids] for ids in target_ids]
 
-    prediction_labels_dict = {
-        p["id"]: p["pred"] for p in formatted_predictions
-    }  # predictions
+    prediction_labels_dict = {p["id"]: p["pred"] for p in predictions}  # predictions
     prediction_labels = [prediction_labels_dict[ids] for ids in target_ids]
     assert len(prediction_labels) == len(target_labels)
     predictions = []
@@ -33,9 +27,35 @@ def evaluate(metric: str, formatted_predictions: list, formatted_labels: list) -
     for ids, target_label in target_labels_dict.items():
         predictions.append(prediction_labels_dict[ids])
         labels.append(target_label)
+    if tags:
+        target_tags_dict = {t["id"]: t["tags"] for t in labels}
+        target_tags = [target_tags_dict[ids] for ids in target_ids]
+        return (
+            predictions,
+            labels,
+            target_tags,
+            prediction_labels_dict,
+            target_labels_dict,
+            target_tags_dict,
+        )
+    else:
+        return predictions, labels
 
+
+def evaluate(metric: str, formatted_predictions: list, formatted_labels: list) -> dict:
+    """
+    Evaluates a list of predictions against a list of labels
+    using a metric included in the metrics_dictionary.
+    """
+    (
+        predictions,
+        labels,
+        target_tags,
+        prediction_labels_dict,
+        target_labels_dict,
+        target_tags_dict,
+    ) = format_data_for_evaluation(formatted_predictions, formatted_labels, True)
     perf, perf_dict = _compute_metric(metric, predictions, labels)
-
     score_obj = {}
     score_obj["perf"] = perf
     score_obj["perf_std"] = perf_dict.get("perf_std", None)
@@ -67,7 +87,17 @@ def evaluate(metric: str, formatted_predictions: list, formatted_labels: list) -
             }
             for tag, (perf, perf_dict) in perf_by_tag_tuple_dict.items()
         ]
+    return score_obj
 
+
+def direct_evaluation(metric: str, predictions: list, labels: list) -> dict:
+    predictions, labels = format_data_for_evaluation(predictions, labels)
+    perf, perf_dict = _compute_metric(metric, predictions, labels)
+    score_obj = {}
+    score_obj["perf"] = perf
+    score_obj["perf_std"] = perf_dict.get("perf_std", None)
+    score_obj["pretty_perf"] = str(perf) + " %"
+    score_obj["metadata_json"] = perf_dict
     return score_obj
 
 

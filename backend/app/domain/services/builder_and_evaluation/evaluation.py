@@ -26,10 +26,12 @@ from cloudwatch import cloudwatch
 from app.domain.helpers.email import EmailHelper
 from app.domain.services.builder_and_evaluation.builder import BuilderService
 from app.domain.services.builder_and_evaluation.eval_utils.evaluator import (
+    direct_evaluation,
     evaluate,
     evaluate_delta_metrics,
 )
 from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
+    load_dataset,
     neccesary_format_for_evaluation,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
@@ -534,14 +536,83 @@ class EvaluationService:
         self.score_repository.add(new_score)
         return new_score
 
-    def initialize_model_evaluation(
-        self, task_code: str, s3_url: str, model_id: int, user_id: int
-    ):
-        return self.evaluation(task_code, s3_url, model_id, user_id)
+    def download_downstream_dataset(self, task_code: str, downstream_dataset: dict):
+        base_dataset_name = "datasets/{}/{}.jsonl".format(
+            task_code, downstream_dataset["dataset"]
+        )
+        filename = "app/resources/datasets/{}.jsonl".format(
+            downstream_dataset["dataset"]
+        )
+        self.s3.download_file(
+            self.s3_bucket,
+            base_dataset_name,
+            filename,
+        )
+        return filename
+
+    def download_predictions(self, task_code: str, predictions: str):
+        filename = f"app/resources/predictions/{predictions}.jsonl"
+        base_prediction_name = f"predictions/{task_code}/{predictions}.jsonl"
+        self.s3.download_file(
+            self.s3_bucket,
+            base_prediction_name,
+            filename,
+        )
+        return filename
+
+    def evaluate_downstream_tasks(self, task_id: int, predictions: str, model_id: int):
+        downstream_datasets_info = self.dataset_repository.get_downstream_datasets(
+            task_id
+        )
+        task_code = self.task_repository.get_by_id(task_id)["task_code"]
+        for downstream_dataset in downstream_datasets_info:
+            downstream_datasets_filename = self.download_downstream_dataset(
+                task_code, downstream_dataset
+            )
+            downstream_datasets = load_dataset(downstream_datasets_filename)
+            downstream_tasks = [item["sub_task"] for item in downstream_datasets]
+            download_predictions = self.download_predictions(task_code, predictions)
+            downstream_predictions = load_dataset(download_predictions)
+            current_round = downstream_dataset["round_id"]
+            dataset_id = downstream_dataset["dataset_id"]
+            for sub_task in downstream_tasks:
+                self.logger.info("Evaluate downstream task", sub_task)
+                labels = [
+                    data for data in downstream_tasks if data["sub_task"] == sub_task
+                ][0]["labels"]
+                predicts = [
+                    data
+                    for data in downstream_predictions
+                    if data["sub_task"] == sub_task
+                ][0]["predictions"]
+                metric = [
+                    data for data in downstream_tasks if data["sub_task"] == sub_task
+                ][0]["metric"]
+                score = direct_evaluation(metric, predicts, labels)
+                round_info = self.round_repository.get_round_info_by_round_and_task(
+                    task_id, current_round
+                )
+                new_score = {
+                    "perf": score["perf"],
+                    "pretty_perf": score["pretty_perf"],
+                    "fairness": 0,
+                    "robustness": 0,
+                    "mid": model_id,
+                    "r_realid": round_info.id,
+                    "did": dataset_id,
+                    "memory_utilization": 0,
+                    "examples_per_second": 0,
+                }
+                final_score = new_score.copy()
+                metric_name = str(metric)
+                final_score[metric_name] = final_score["perf"]
+                new_score["metadata_json"] = json.dumps(final_score)
+                self.score_repository.add(new_score)
+                self.logger.info("Save score")
 
     def test(self):
         self.email_helper.send(
-            contact="juan.ciro@factored.ai",
+            contact="rafael.mosquera@factored.ai",
             cc_contact="dynabench-site@mlcommons.org",
             template_name="model_train_successful.txt",
             msg_dict={"name": "model_name", "model_id": "model_id"},
