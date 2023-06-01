@@ -578,7 +578,7 @@ class EvaluationService:
             for sub_task in downstream_tasks:
                 self.logger.info("Evaluate downstream task", sub_task)
                 labels = [
-                    data for data in downstream_tasks if data["sub_task"] == sub_task
+                    data for data in downstream_datasets if data["sub_task"] == sub_task
                 ][0]["labels"]
                 predicts = [
                     data
@@ -586,7 +586,7 @@ class EvaluationService:
                     if data["sub_task"] == sub_task
                 ][0]["predictions"]
                 metric = [
-                    data for data in downstream_tasks if data["sub_task"] == sub_task
+                    data for data in downstream_datasets if data["sub_task"] == sub_task
                 ][0]["metric"]
                 score = direct_evaluation(metric, predicts, labels)
                 round_info = self.round_repository.get_round_info_by_round_and_task(
@@ -611,10 +611,63 @@ class EvaluationService:
                 self.logger.info("Save score")
 
     def test(self):
-        self.email_helper.send(
-            contact="rafael.mosquera@factored.ai",
-            cc_contact="dynabench-site@mlcommons.org",
-            template_name="model_train_successful.txt",
-            msg_dict={"name": "model_name", "model_id": "model_id"},
-            subject=f"Model {'model_name'} training succeeded.",
+        task_id = 48
+        predictions = "baby_test_1_pred"
+        model_id = 1103
+        downstream_datasets_info = self.dataset_repository.get_downstream_datasets(
+            task_id
         )
+        task_code = self.task_repository.get_by_id(task_id)["task_code"]
+        for downstream_dataset in downstream_datasets_info:
+            downstream_datasets_filename = self.download_downstream_dataset(
+                task_code, downstream_dataset
+            )
+            downstream_datasets = load_dataset(downstream_datasets_filename)
+            downstream_tasks = [item["sub_task"] for item in downstream_datasets]
+            download_predictions = self.download_predictions(task_code, predictions)
+            downstream_predictions = load_dataset(download_predictions)
+            current_round = downstream_dataset["round_id"]
+            dataset_id = downstream_dataset["dataset_id"]
+
+            for sub_task in downstream_tasks:
+                print("sub_task", sub_task)
+                self.logger.info("Evaluate downstream task", sub_task)
+                labels = [
+                    data for data in downstream_datasets if data["sub_task"] == sub_task
+                ][0]["labels"]
+                predicts = [
+                    data
+                    for data in downstream_predictions
+                    if data["sub_task"] == sub_task
+                ][0]["predictions"]
+                metric = [
+                    data for data in downstream_datasets if data["sub_task"] == sub_task
+                ][0]["metric"]
+                round_info = self.round_repository.get_round_info_by_round_and_task(
+                    task_id, current_round
+                )
+                score = direct_evaluation(metric, predicts, labels)
+                print(score)
+
+                new_score = {
+                    "perf": score["perf"],
+                    "pretty_perf": score["pretty_perf"],
+                    "fairness": 0,
+                    "robustness": 0,
+                    "mid": model_id,
+                    "r_realid": round_info.id,
+                    "did": dataset_id,
+                    "memory_utilization": 0,
+                    "examples_per_second": 0,
+                }
+                final_score = new_score.copy()
+                metric_name = str(metric)
+                final_score[metric_name] = final_score["perf"]
+                new_score["metadata_json"] = json.dumps(final_score)
+                self.score_repository.add(new_score)
+                self.logger.info("Save score")
+
+    def initialize_model_evaluation(
+        self, task_code: str, s3_url: str, model_id: int, user_id: int
+    ):
+        return self.evaluation(task_code, s3_url, model_id, user_id)

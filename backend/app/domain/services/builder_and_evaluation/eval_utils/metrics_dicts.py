@@ -11,6 +11,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
     get_accuracy_meta,
     get_bleu,
     get_bleu_meta,
+    get_blue_accuracy,
     get_chrf_pp_meta,
     get_dataperf_auc,
     get_dataperf_auc_meta,
@@ -25,6 +26,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
     get_fairness_meta,
     get_macro_f1,
     get_macro_f1_meta,
+    get_matthews_corrcoef,
     get_memory_utilization,
     get_memory_utilization_meta,
     get_robustness_meta,
@@ -50,6 +52,8 @@ eval_metrics_dict = {
     "dataperf_auc": get_dataperf_auc,
     "dataperf_fraction_of_fixes": get_dataperf_fraction_of_fixes,
     "dataperf_balanced_accuracy": get_dataperf_balanced_accuracy,
+    "matthews_corrcoef": get_matthews_corrcoef,
+    "blue_accuracy": get_blue_accuracy,
 }
 
 delta_metrics_dict = {
