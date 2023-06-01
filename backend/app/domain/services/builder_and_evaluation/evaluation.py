@@ -145,6 +145,7 @@ class EvaluationService:
             final_dataset["dataset_type"] = "base"
             final_dataset["round_id"] = scoring_dataset["round_id"]
             final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
+            final_dataset["tags"] = scoring_dataset["tags"]
             final_dataset["dataset"] = "{}.jsonl".format(scoring_dataset["dataset"])
             final_datasets.append(final_dataset)
             for delta_metric in delta_metrics_task:
@@ -162,6 +163,7 @@ class EvaluationService:
                 final_dataset["dataset_type"] = delta_metric
                 final_dataset["round_id"] = scoring_dataset["round_id"]
                 final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
+                final_dataset["tags"] = scoring_dataset["tags"]
                 final_dataset["dataset"] = "{}-{}.jsonl".format(
                     delta_metric, scoring_dataset["dataset"]
                 )

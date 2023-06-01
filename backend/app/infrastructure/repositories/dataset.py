@@ -26,7 +26,6 @@ class DatasetRepository(AbstractRepository):
             jsonl_scoring_dataset["dataset_id"] = scoring_dataset.id
             jsonl_scoring_dataset["tags"] = scoring_dataset.tags
             jsonl_scoring_datasets.append(jsonl_scoring_dataset)
-
         return jsonl_scoring_datasets
 
     def get_not_scoring_datasets(self, task_id: int) -> dict:
