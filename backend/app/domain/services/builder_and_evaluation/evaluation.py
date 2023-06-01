@@ -26,9 +26,9 @@ from cloudwatch import cloudwatch
 from app.domain.helpers.email import EmailHelper
 from app.domain.services.builder_and_evaluation.builder import BuilderService
 from app.domain.services.builder_and_evaluation.eval_utils.evaluator import (
-    direct_evaluation,
     evaluate,
     evaluate_delta_metrics,
+    evaluation_without_tags,
 )
 from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
     load_dataset,
@@ -418,12 +418,18 @@ class EvaluationService:
         formatted_dict, perturb_exists = neccesary_format_for_evaluation(
             prediction_dict, metric_info["reference_name"]
         )
-        main_metric = evaluate(
-            metric_info["type"],
-            formatted_dict["formatted_base_predictions"],
-            formatted_dict["formatted_base_dataset"],
-            tags,
-        )
+        if tags:
+            main_metric = evaluate(
+                metric_info["type"],
+                formatted_dict["formatted_base_predictions"],
+                formatted_dict["formatted_base_dataset"],
+            )
+        else:
+            main_metric = evaluation_without_tags(
+                metric_info["type"],
+                formatted_dict["formatted_base_predictions"],
+                formatted_dict["formatted_base_dataset"],
+            )
         delta_metrics = {}
         if perturb_exists:
             delta_metrics = evaluate_delta_metrics(
@@ -593,7 +599,7 @@ class EvaluationService:
                 metric = [
                     data for data in downstream_datasets if data["sub_task"] == sub_task
                 ][0]["metric"]
-                score = direct_evaluation(metric, predicts, labels)
+                score = evaluation_without_tags(metric, predicts, labels)
                 round_info = self.round_repository.get_round_info_by_round_and_task(
                     task_id, current_round
                 )
@@ -651,7 +657,7 @@ class EvaluationService:
                 round_info = self.round_repository.get_round_info_by_round_and_task(
                     task_id, current_round
                 )
-                score = direct_evaluation(metric, predicts, labels)
+                score = evaluation_without_tags(metric, predicts, labels)
                 print(score)
 
                 new_score = {
