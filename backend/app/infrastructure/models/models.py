@@ -194,6 +194,7 @@ class Dataset(Base):
     source_url = Column(Text)
     access_type = Column(Enum("scoring", "standard", "hidden"))
     log_access_type = Column(Enum("owner", "user"))
+    tags = Column(Integer)
 
     task = relationship("Task")
 

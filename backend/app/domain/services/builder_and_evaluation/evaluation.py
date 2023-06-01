@@ -250,6 +250,7 @@ class EvaluationService:
             dataset_type = dataset["dataset_type"]
             final_dict_prediction[dataset_type] = dict_dataset_type
             dataset_id = dataset["dataset_id"]
+            tags = dataset["tags"]
         end_prediction = time.time()
         seconds_time_prediction = end_prediction - start_prediction
         return (
@@ -259,6 +260,7 @@ class EvaluationService:
             seconds_time_prediction,
             num_samples,
             folder_name,
+            tags,
         )
 
     def get_memory_utilization(self, model_name: str) -> float:
@@ -408,7 +410,7 @@ class EvaluationService:
         self.builder.delete_ecs_service(str(arn_service))
         shutil.rmtree(f"./app/models/{folder_name}")
 
-    def get_finals_scores(self, task_id: int, prediction_dict: dict):
+    def get_finals_scores(self, task_id: int, prediction_dict: dict, tags: bool):
         task_configuration = self.get_task_configuration(task_id)
         metric_info = task_configuration["perf_metric"]
         formatted_dict, perturb_exists = neccesary_format_for_evaluation(
@@ -418,6 +420,7 @@ class EvaluationService:
             metric_info["type"],
             formatted_dict["formatted_base_predictions"],
             formatted_dict["formatted_base_dataset"],
+            tags,
         )
         delta_metrics = {}
         if perturb_exists:
@@ -456,6 +459,7 @@ class EvaluationService:
             minutes_time_prediction,
             num_samples,
             folder_name,
+            tags,
         ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_id, folder_name)
         self.logger.info("Calculate memory utilization")
         memory = self.get_memory_utilization(model_name)
@@ -463,7 +467,7 @@ class EvaluationService:
         throughput = self.get_throughput(num_samples, minutes_time_prediction)
         self.logger.info("Calculate score")
         final_scores, main_metric, metric = self.get_finals_scores(
-            tasks.id, prediction_dict
+            tasks.id, prediction_dict, tags
         )
         print("current_round", current_round)
         round_info = self.round_repository.get_round_info_by_round_and_task(

@@ -42,7 +42,9 @@ def format_data_for_evaluation(
         return predictions, labels
 
 
-def evaluate(metric: str, formatted_predictions: list, formatted_labels: list) -> dict:
+def evaluate(
+    metric: str, formatted_predictions: list, formatted_labels: list, tags
+) -> dict:
     """
     Evaluates a list of predictions against a list of labels
     using a metric included in the metrics_dictionary.
@@ -54,7 +56,7 @@ def evaluate(metric: str, formatted_predictions: list, formatted_labels: list) -
         prediction_labels_dict,
         target_labels_dict,
         target_tags_dict,
-    ) = format_data_for_evaluation(formatted_predictions, formatted_labels, True)
+    ) = format_data_for_evaluation(formatted_predictions, formatted_labels, tags)
     perf, perf_dict = _compute_metric(metric, predictions, labels)
     score_obj = {}
     score_obj["perf"] = perf
