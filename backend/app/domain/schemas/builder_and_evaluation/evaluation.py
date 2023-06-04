@@ -10,3 +10,9 @@ class InitializeModelEvaluationRequest(BaseModel):
     s3_url: str
     model_id: int
     user_id: int
+
+
+class EvaluateDownstreamTaskRequest(BaseModel):
+    task_id: int
+    predictions: str
+    model_id: int

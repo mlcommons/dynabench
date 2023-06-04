@@ -458,53 +458,55 @@ class EvaluationService:
         arn_service: str,
         current_round: int = 1,
     ):
-        # try:
-        print("dataset", dataset)
-        (
-            prediction_dict,
-            dataset_id,
-            model_id,
-            minutes_time_prediction,
-            num_samples,
-            folder_name,
-            tags,
-        ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_id, folder_name)
-        self.logger.info("Calculate memory utilization")
-        memory = self.get_memory_utilization(model_name)
-        self.logger.info("Calculate throughput")
-        throughput = self.get_throughput(num_samples, minutes_time_prediction)
-        self.logger.info("Calculate score")
-        final_scores, main_metric, metric = self.get_finals_scores(
-            tasks.id, prediction_dict, tags
-        )
-        print("current_round", current_round)
-        round_info = self.round_repository.get_round_info_by_round_and_task(
-            tasks.id, current_round
-        )
-        print("final_scores", final_scores)
-        print("main_metric", main_metric)
-        print("metric", metric)
-        new_score = {
-            "perf": main_metric["perf"],
-            "pretty_perf": main_metric["pretty_perf"],
-            "fairness": final_scores["fairness"],
-            "robustness": final_scores["robustness"],
-            "mid": model_id,
-            "r_realid": round_info.id,
-            "did": dataset_id,
-            "memory_utilization": memory,
-            "examples_per_second": throughput,
-        }
-        final_score = new_score.copy()
-        metric_name = str(metric)
-        final_score[metric_name] = main_metric["perf"]
-        new_score["metadata_json"] = json.dumps(final_score)
-        self.score_repository.add(new_score)
-        self.logger.info("Save score")
-        return new_score
 
-    # except Exception:
-    #     self.clean_folder_and_service(folder_name, arn_service)
+        try:
+            print("dataset", dataset)
+            (
+                prediction_dict,
+                dataset_id,
+                model_id,
+                minutes_time_prediction,
+                num_samples,
+                folder_name,
+                tags,
+            ) = self.heavy_prediction(
+                dataset, tasks.task_code, ip, model_id, folder_name
+            )
+            self.logger.info("Calculate memory utilization")
+            memory = self.get_memory_utilization(model_name)
+            self.logger.info("Calculate throughput")
+            throughput = self.get_throughput(num_samples, minutes_time_prediction)
+            self.logger.info("Calculate score")
+            final_scores, main_metric, metric = self.get_finals_scores(
+                tasks.id, prediction_dict, tags
+            )
+            print("current_round", current_round)
+            round_info = self.round_repository.get_round_info_by_round_and_task(
+                tasks.id, current_round
+            )
+            print("final_scores", final_scores)
+            print("main_metric", main_metric)
+            print("metric", metric)
+            new_score = {
+                "perf": main_metric["perf"],
+                "pretty_perf": main_metric["pretty_perf"],
+                "fairness": final_scores["fairness"],
+                "robustness": final_scores["robustness"],
+                "mid": model_id,
+                "r_realid": round_info.id,
+                "did": dataset_id,
+                "memory_utilization": memory,
+                "examples_per_second": throughput,
+            }
+            final_score = new_score.copy()
+            metric_name = str(metric)
+            final_score[metric_name] = main_metric["perf"]
+            new_score["metadata_json"] = json.dumps(final_score)
+            self.score_repository.add(new_score)
+            self.logger.info("Save score")
+            return new_score
+        except Exception:
+            self.clean_folder_and_service(folder_name, arn_service)
 
     def evaluate_dataperf_decentralized(self, dataperf_response: dict):
         model_id = dataperf_response["model_id"]
@@ -576,17 +578,24 @@ class EvaluationService:
             task_id
         )
         task_code = self.task_repository.get_by_id(task_id)["task_code"]
+        print(downstream_datasets_info)
         for downstream_dataset in downstream_datasets_info:
+            dataset_name = downstream_dataset["dataset"].split("-")[0]
+            print("dataset_name", dataset_name)
             downstream_datasets_filename = self.download_downstream_dataset(
                 task_code, downstream_dataset
             )
             downstream_datasets = load_dataset(downstream_datasets_filename)
             downstream_tasks = [item["sub_task"] for item in downstream_datasets]
-            download_predictions = self.download_predictions(task_code, predictions)
+            prediction = list(
+                filter(lambda x: f"{dataset_name}_pred" in x, predictions)
+            )[0]
+            download_predictions = self.download_predictions(task_code, prediction)
             downstream_predictions = load_dataset(download_predictions)
             current_round = downstream_dataset["round_id"]
             dataset_id = downstream_dataset["dataset_id"]
             for sub_task in downstream_tasks:
+                print("sub_task", sub_task)
                 self.logger.info("Evaluate downstream task", sub_task)
                 labels = [
                     data for data in downstream_datasets if data["sub_task"] == sub_task
@@ -599,10 +608,11 @@ class EvaluationService:
                 metric = [
                     data for data in downstream_datasets if data["sub_task"] == sub_task
                 ][0]["metric"]
-                score = evaluation_without_tags(metric, predicts, labels)
                 round_info = self.round_repository.get_round_info_by_round_and_task(
                     task_id, current_round
                 )
+                score = evaluation_without_tags(metric, predicts, labels)
+                print(score)
                 new_score = {
                     "perf": score["perf"],
                     "pretty_perf": score["pretty_perf"],
@@ -623,23 +633,28 @@ class EvaluationService:
 
     def test(self):
         task_id = 48
-        predictions = "baby_test_1_pred"
-        model_id = 1103
+        predictions = ["glue_pred", "blimp_pred"]
+        model_id = 1146
         downstream_datasets_info = self.dataset_repository.get_downstream_datasets(
             task_id
         )
         task_code = self.task_repository.get_by_id(task_id)["task_code"]
+        print(downstream_datasets_info)
         for downstream_dataset in downstream_datasets_info:
+            dataset_name = downstream_dataset["dataset"].split("-")[0]
+            print("dataset_name", dataset_name)
             downstream_datasets_filename = self.download_downstream_dataset(
                 task_code, downstream_dataset
             )
             downstream_datasets = load_dataset(downstream_datasets_filename)
             downstream_tasks = [item["sub_task"] for item in downstream_datasets]
-            download_predictions = self.download_predictions(task_code, predictions)
+            prediction = list(
+                filter(lambda x: f"{dataset_name}_pred" in x, predictions)
+            )[0]
+            download_predictions = self.download_predictions(task_code, prediction)
             downstream_predictions = load_dataset(download_predictions)
             current_round = downstream_dataset["round_id"]
             dataset_id = downstream_dataset["dataset_id"]
-
             for sub_task in downstream_tasks:
                 print("sub_task", sub_task)
                 self.logger.info("Evaluate downstream task", sub_task)

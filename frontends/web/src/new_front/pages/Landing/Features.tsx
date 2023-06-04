@@ -82,7 +82,6 @@ const Features = () => {
               </p>
             </div>
           </div>
-
           <div className="flex mb-12">
             <div className="shrink-0">
               <div className="p-4 rounded-md shadow-lg bg-[#0e1015]">
@@ -92,14 +91,13 @@ const Features = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-5 h-5 text-white"
                 >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0" />
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0" />
 
                   <g
                     id="SVGRepo_tracerCarrier"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
-
                   <g id="SVGRepo_iconCarrier">
                     {" "}
                     <g id="Communication / Share_Android">

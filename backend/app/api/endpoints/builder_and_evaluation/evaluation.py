@@ -9,6 +9,7 @@
 from fastapi import APIRouter, BackgroundTasks
 
 from app.domain.schemas.builder_and_evaluation.evaluation import (
+    EvaluateDownstreamTaskRequest,
     InitializeModelEvaluationRequest,
 )
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
@@ -86,6 +87,15 @@ def post_dataperf_response(response: dict):
     return score
 
 
+@router.post("/evaluate_downstream_tasks")
+def evaluate_downstream_tasks(model: EvaluateDownstreamTaskRequest):
+    evaluation = EvaluationService()
+    score = evaluation.evaluate_downstream_tasks(
+        model.task_id, model.predictions, model.model_id
+    )
+    return score
+
+
 @router.get("/test")
-def get_by_id():
+def test():
     return EvaluationService().test()
