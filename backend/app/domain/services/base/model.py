@@ -251,8 +251,11 @@ class ModelService:
         models = self.model_repository.get_lambda_models()
         while True:
             for model in models:
-                input_data = self.create_input_for_lambda(model.tid)
-                requests.post(f"{model.light_model}", json=input_data)
+                model_url = model.light_model.replace("/model/single_evaluation", "")
+                try:
+                    requests.get(model_url)
+                except requests.exceptions.RequestException as e:
+                    print(e)
             print("Finished")
             time.sleep(320)
 

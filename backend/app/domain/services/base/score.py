@@ -117,6 +117,26 @@ class ScoreService:
         model_dynaboard_info["datasets"] = datasets_info
         model_dynaboard_info["averaged_scores"] = averaged_scores
         model_dynaboard_info["averaged_variances"] = [0] * len(averaged_scores)
+        # weights_dict = {
+        #     metric_info["field_name"]: metric_info["weight"]
+        #     for metric_info in order_metric_with_weight
+        # }
+        # direction_multipliers = {
+        #     metric_info["field_name"]: metric_info["utility_direction"]
+        #     for metric_info in order_metric_with_weight
+        # }
+        # offsets = {
+        #     metric_info["field_name"]: metric_info["offset"]
+        #     for metric_info in order_metric_with_weight
+        # }
+        print("averaged_scores", averaged_scores)
+        # model_dynaboard_info["dynascore"] = self.calculate_dynascore(
+        #     perf_metric_field_name,
+        #     averaged_scores,
+        #     weights_dict,
+        #     direction_multipliers,
+        #     offsets,
+        # )
         model_dynaboard_info["dynascore"] = 0
         return model_dynaboard_info
 
