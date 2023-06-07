@@ -74,6 +74,13 @@ class DatasetRepository(AbstractRepository):
             .one()
         )
 
+    def get_dataset_has_downstream(self, dataset_id: int) -> dict:
+        return (
+            self.session.query(self.model.has_downstream)
+            .filter(self.model.id == dataset_id)
+            .one()
+        )
+
     def get_dataset_info_by_id(self, dataset_id: int) -> dict:
         instance = (
             self.session.query(self.model).filter(self.model.id == dataset_id).one()

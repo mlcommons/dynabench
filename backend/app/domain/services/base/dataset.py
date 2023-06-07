@@ -23,6 +23,9 @@ class DatasetService:
     def get_dataset_name_by_id(self, dataset_id: int):
         return self.dataset_repository.get_dataset_name_by_id(dataset_id)
 
+    def get_dataset_has_downstream(self, dataset_id: int):
+        return self.dataset_repository.get_dataset_has_downstream(dataset_id)
+
     def get_scoring_datasets_by_task_id(self, task_id: int):
         return self.dataset_repository.get_scoring_datasets_by_task_id(task_id)
 

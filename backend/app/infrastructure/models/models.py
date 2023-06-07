@@ -195,6 +195,7 @@ class Dataset(Base):
     access_type = Column(Enum("scoring", "standard", "hidden"))
     log_access_type = Column(Enum("owner", "user"))
     tags = Column(Integer)
+    has_downstream = Column(TINYINT(1))
 
     task = relationship("Task")
 

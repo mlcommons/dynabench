@@ -2,6 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import json
+
 import numpy as np
 import pandas as pd
 
@@ -56,6 +58,9 @@ class ScoreService:
         final_scores_by_dataset_and_model_id = {}
         dataset_id = scores_by_dataset_and_model_id["did"]
         dataset_name = self.dataset_service.get_dataset_name_by_id(dataset_id)[0]
+        dataset_has_downstream = self.dataset_service.get_dataset_has_downstream(
+            dataset_id
+        )[0]
         final_scores_by_dataset_and_model_id["id"] = dataset_id
         final_scores_by_dataset_and_model_id["name"] = dataset_name
         metrics_with_score_and_weight = self.get_scores_by_dataset_and_model_id(
@@ -68,7 +73,30 @@ class ScoreService:
         ]
         final_scores_by_dataset_and_model_id["scores"] = scores
         final_scores_by_dataset_and_model_id["variances"] = [0] * len(scores)
+        if dataset_has_downstream:
+            downstream_info = self.get_score_info_by_downstream_task(
+                dataset_id, model_id
+            )
+            final_scores_by_dataset_and_model_id["downstream_info"] = downstream_info
         return final_scores_by_dataset_and_model_id
+
+    def get_score_info_by_downstream_task(self, dataset_id: int, model_id: int):
+        downstream_scores = self.score_repository.get_downstream_scores(
+            dataset_id, model_id
+        )
+        downstream_info = []
+        for downstream_score in downstream_scores:
+            downstream_score = downstream_score.__dict__
+            downstream_info_metadata = json.loads(
+                downstream_score["metadata_json"].replace("“", '"').replace("”", '"')
+            )
+            downstream_info.append(
+                {
+                    "sub_task": downstream_info_metadata["sub_task"],
+                    "score": downstream_score["perf"],
+                }
+            )
+        return downstream_info
 
     def get_dynaboard_info_for_all_the_models(
         self,
@@ -93,6 +121,7 @@ class ScoreService:
             models_dynaboard_info, order_metric_with_weight, perf_metric_field_name
         )
         df_dynascore = df_dynascore.sort_index()
+        df_dynascore.fillna(0, inplace=True)
         models_ids = [data_dict["model_id"] for data_dict in models_dynaboard_info]
         df_dynascore["model_id"] = models_ids
         models_dynaboard_info = [
@@ -135,6 +164,7 @@ class ScoreService:
             datasets_info, order_scoring_datasets_with_weight
         )
         model_dynaboard_info["datasets"] = datasets_info
+        print("datasets_info", datasets_info)
         model_dynaboard_info["averaged_scores"] = averaged_scores
         model_dynaboard_info["averaged_variances"] = [0] * len(averaged_scores)
         return model_dynaboard_info, order_metric_with_weight
