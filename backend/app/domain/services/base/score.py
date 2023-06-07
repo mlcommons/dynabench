@@ -3,6 +3,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import numpy as np
+import pandas as pd
 
 from app.domain.services.base.dataset import DatasetService
 from app.infrastructure.repositories.model import ModelRepository
@@ -78,13 +79,32 @@ class ScoreService:
     ):
         models_dynaboard_info = []
         for model_id in model_ids:
-            model_dynaboard_info = self.get_model_dynaboard_info(
+            (
+                model_dynaboard_info,
+                order_metric_with_weight,
+            ) = self.get_model_dynaboard_info(
                 model_id,
                 order_scoring_datasets_with_weight,
                 order_metric_with_weight,
                 perf_metric_field_name,
             )
             models_dynaboard_info.append(model_dynaboard_info)
+        df_dynascore = self.calculate_all_dynascores(
+            models_dynaboard_info, order_metric_with_weight, perf_metric_field_name
+        )
+        df_dynascore = df_dynascore.sort_index()
+        models_ids = [data_dict["model_id"] for data_dict in models_dynaboard_info]
+        df_dynascore["model_id"] = models_ids
+        models_dynaboard_info = [
+            {
+                **d,
+                "dynascore": df_dynascore[df_dynascore["model_id"] == d["model_id"]][
+                    "dynascore"
+                ].iloc[0],
+            }
+            for d in models_dynaboard_info
+            if df_dynascore["model_id"].isin([d["model_id"]]).any()
+        ]
         return models_dynaboard_info
 
     def get_model_dynaboard_info(
@@ -117,28 +137,7 @@ class ScoreService:
         model_dynaboard_info["datasets"] = datasets_info
         model_dynaboard_info["averaged_scores"] = averaged_scores
         model_dynaboard_info["averaged_variances"] = [0] * len(averaged_scores)
-        # weights_dict = {
-        #     metric_info["field_name"]: metric_info["weight"]
-        #     for metric_info in order_metric_with_weight
-        # }
-        # direction_multipliers = {
-        #     metric_info["field_name"]: metric_info["utility_direction"]
-        #     for metric_info in order_metric_with_weight
-        # }
-        # offsets = {
-        #     metric_info["field_name"]: metric_info["offset"]
-        #     for metric_info in order_metric_with_weight
-        # }
-        print("averaged_scores", averaged_scores)
-        # model_dynaboard_info["dynascore"] = self.calculate_dynascore(
-        #     perf_metric_field_name,
-        #     averaged_scores,
-        #     weights_dict,
-        #     direction_multipliers,
-        #     offsets,
-        # )
-        model_dynaboard_info["dynascore"] = 0
-        return model_dynaboard_info
+        return model_dynaboard_info, order_metric_with_weight
 
     def get_averaged_scores(self, datasets_info: list, weights: list) -> list:
         datasets_info = sorted(datasets_info, key=lambda i: i["id"])
@@ -148,50 +147,76 @@ class ScoreService:
         averaged_scores = np.array(scores).T
         return list(np.dot(averaged_scores, weights))
 
+    def calculate_all_dynascores(
+        self, models_dynaboard_info, order_metric_with_weight, perf_metric_field_name
+    ):
+        averaged_scores_list = [
+            data_dict["averaged_scores"] for data_dict in models_dynaboard_info
+        ]
+        columns = [
+            metric_info["field_name"] for metric_info in order_metric_with_weight
+        ]
+        df_scores = pd.DataFrame(averaged_scores_list, columns=columns)
+
+        weights_dict = {
+            metric_info["field_name"]: metric_info["weight"]
+            for metric_info in order_metric_with_weight
+        }
+        direction_multipliers = {
+            metric_info["field_name"]: metric_info["utility_direction"]
+            for metric_info in order_metric_with_weight
+        }
+        offsets = {
+            metric_info["field_name"]: metric_info["offset"]
+            for metric_info in order_metric_with_weight
+        }
+        return self.calculate_dynascore(
+            perf_metric_field_name,
+            df_scores,
+            weights_dict,
+            direction_multipliers,
+            offsets,
+        )
+
     def calculate_dynascore(
         self,
         perf_metric_field_name: str,
-        averaged_dataset_results: dict,
+        data,
         weights: dict,
         direction_multipliers: dict,
         offsets: dict,
         delta_cutoff_proportion=0.0001,
     ):
-        metrics = list(averaged_dataset_results)
-        for metric in metrics:
-            averaged_dataset_results[metric] = (
-                direction_multipliers[metric] * averaged_dataset_results[metric]
-                + offsets[metric]
+        converted_data = data.copy(deep=True)
+        converted_data.sort_values(perf_metric_field_name, inplace=True)
+        for metric in list(data):
+            converted_data[metric] = (
+                direction_multipliers[metric] * converted_data[metric] + offsets[metric]
             )
-        averaged_dataset_results["dynascore"] = 0
+        converted_data["dynascore"] = 0
 
         denominator = sum(weights.values())
         for key in weights:
             weights[key] /= denominator
 
-        delta = averaged_dataset_results.diff()
+        delta = converted_data.diff()
         delta_threshold = (
-            averaged_dataset_results[perf_metric_field_name].max()
-            * delta_cutoff_proportion
+            converted_data[perf_metric_field_name].max() * delta_cutoff_proportion
         )
         satisfied_indices = []
         for index in range(len(delta[perf_metric_field_name])):
             if abs(delta[perf_metric_field_name][index]) > delta_threshold:
                 satisfied_indices.append(index)
-
-        for metric in metrics:
+        for metric in list(data):
             AMRS = (
                 delta[metric][satisfied_indices].abs()
                 / delta[perf_metric_field_name][satisfied_indices]
             ).mean(skipna=True)
-            averaged_dataset_results[metric] = averaged_dataset_results[metric] / abs(
-                AMRS
+            converted_data[metric] = converted_data[metric] / abs(AMRS)
+            converted_data["dynascore"] += converted_data[metric] * weights.get(
+                metric, 0
             )
-            averaged_dataset_results["dynascore"] += averaged_dataset_results[
-                metric
-            ] * weights.get(metric, 0)
-
-        return averaged_dataset_results
+        return converted_data
 
     def get_maximun_principal_score_per_task(self, task_id: int) -> float:
         scoring_datasets = self.dataset_service.get_scoring_datasets_by_task_id(task_id)
