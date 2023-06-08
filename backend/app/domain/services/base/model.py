@@ -284,3 +284,50 @@ class ModelService:
 
     def get_user_id_by_model_id(self, model_id: int):
         return self.model_repository.get_user_id_by_model_id(model_id)
+
+    def upload_prediction_to_s3(
+        self, user_id: int, task_code: str, model_name: str, predictions: UploadFile
+    ):
+        task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        model = self.model_repository.create_new_model(
+            task_id=task_id,
+            user_id=user_id,
+            model_name=model_name,
+            shortname=model_name,
+            longdesc="",
+            desc="",
+            languages="",
+            license=license,
+            params=0,
+            deployment_status="uploaded",
+            secret=secrets.token_hex(),
+        )
+        self.user_repository.increment_model_submitted_count(user_id)
+        file_name = f"{model['id']}-{predictions.filename.split('.')[0]}-{user_id}"
+        model_path = f"predictions/{task_code}/{file_name}.jsonl"
+        self.s3.put_object(
+            Body=predictions.file,
+            Bucket=os.getenv("AWS_S3_BUCKET"),
+            Key=model_path,
+            ContentType=predictions.content_type,
+        )
+        centralize_host = os.getenv("CENTRALIZED_HOST")
+        endpoint = "/builder_evaluation/evaluation/evaluate_downstream_tasks"
+        url = f"{centralize_host}{endpoint}"
+        requests.post(
+            url,
+            json={
+                "task_id": task_id,
+                "predictions": file_name,
+                "model_id": model["id"],
+            },
+        )
+        self.email_helper.send(
+            contact=user_email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_upload_successful.txt",
+            msg_dict={"name": model_name},
+            subject=f"Model {model_name} upload succeeded.",
+        )
+        return "Model evaluate successfully"

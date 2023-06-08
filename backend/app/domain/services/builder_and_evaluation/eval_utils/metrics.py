@@ -19,7 +19,6 @@ from sklearn.metrics import (
     auc,
     balanced_accuracy_score,
     f1_score,
-    matthews_corrcoef,
     roc_curve,
 )
 
@@ -261,99 +260,7 @@ def get_squad_f1_meta(task=None):
     return {"unit": "%", "pretty_name": "QA F1", "utility_direction": 1, "offset": 0}
 
 
-# BLUE metrics
-def get_matthews_corrcoef(predictions: list, targets: list):
-    mcc = matthews_corrcoef(targets, predictions)
-    return round(float(mcc) * 100, 2)
-
-
 def get_new_accuracy(predictions: list, targets: list):
-    accuracy = accuracy_score(targets, predictions)
-    return accuracy
-
-
-# BLIMP metrics
-def get_anaphor_agreement(predictions: list, targets: list):
-    label_anaphors = [
-        label.split()[-1].lower() for label in targets
-    ]  # Extract the anaphors from the labels
-    prediction_antecedents = [
-        prediction.split()[-1].lower() for prediction in predictions
-    ]  # Extract the antecedents from the predictions
-
-    accuracy = accuracy_score(label_anaphors, prediction_antecedents)
-    return accuracy
-
-
-def get_argument_structure(predictions: list, targets: list):
-    from nltk.translate.bleu_score import sentence_bleu
-
-    total_score = 0.0
-    num_samples = len(targets)
-
-    for label, prediction in zip(targets, predictions):
-        reference = [label.split()]
-        hypothesis = prediction.split()
-        score = sentence_bleu(reference, hypothesis)
-        total_score += score
-    average_score = total_score / num_samples
-    return average_score
-
-
-def get_binding(predictions: list, targets: list):
-    total = len(targets)
-    correct = 0
-    for label, prediction in zip(targets, predictions):
-        label_anaphor = label.split()[-1].lower()
-        prediction_anaphor = prediction.split()[-1].lower()
-
-        if label_anaphor == prediction_anaphor:
-            correct += 1
-    score = correct / total
-    return score
-
-
-def get_control_raising(predictions: list, targets: list):
-    accuracy = accuracy_score(targets, predictions)
-    return accuracy
-
-
-def get_determiner_noun_agreement(predictions: list, targets: list):
-    accuracy = accuracy_score(targets, predictions)
-    return accuracy
-
-
-def get_ellipsis(predictions: list, targets: list):
-    accuracy = accuracy_score(targets, predictions)
-    return accuracy
-
-
-def get_filler_gap(predictions: list, targets: list):
-    accuracy = accuracy_score(targets, predictions)
-    return accuracy
-
-
-def get_irregular_forms(predictions: list, targets: list):
-    accuracy = accuracy_score(targets, predictions)
-    return accuracy
-
-
-def get_island_effects(predictions: list, targets: list):
-    accuracy = accuracy_score(targets, predictions)
-    return accuracy
-
-
-def get_npi_licensing(predictions: list, targets: list):
-    accuracy = accuracy_score(targets, predictions)
-    return accuracy
-
-
-def get_quantifiers(predictions: list, targets: list):
-    accuracy = accuracy_score(targets, predictions)
-    return accuracy
-
-
-def get_subject_verb_agreement(predictions: list, targets: list):
     accuracy = accuracy_score(targets, predictions)
     return accuracy
 
