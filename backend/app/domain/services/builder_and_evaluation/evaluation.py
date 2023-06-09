@@ -579,6 +579,8 @@ class EvaluationService:
         )
         task_code = self.task_repository.get_by_id(task_id)["task_code"]
         print(downstream_datasets_info)
+        download_predictions = self.download_predictions(task_code, predictions)
+        downstream_predictions = load_dataset(download_predictions)
         for downstream_dataset in downstream_datasets_info:
             dataset_name = downstream_dataset["dataset"].split("-")[0]
             print("dataset_name", dataset_name)
@@ -587,11 +589,9 @@ class EvaluationService:
             )
             downstream_datasets = load_dataset(downstream_datasets_filename)
             downstream_tasks = [item["sub_task"] for item in downstream_datasets]
-            prediction = list(
-                filter(lambda x: f"{dataset_name}_pred" in x, predictions)
-            )[0]
-            download_predictions = self.download_predictions(task_code, prediction)
-            downstream_predictions = load_dataset(download_predictions)
+            downstream_prediction = [
+                d for d in downstream_predictions if d["task"].lower() == dataset_name
+            ]
             current_round = downstream_dataset["round_id"]
             dataset_id = downstream_dataset["dataset_id"]
             for sub_task in downstream_tasks:
@@ -602,7 +602,7 @@ class EvaluationService:
                 ][0]["labels"]
                 predicts = [
                     data
-                    for data in downstream_predictions
+                    for data in downstream_prediction
                     if data["sub_task"] == sub_task
                 ][0]["predictions"]
                 metric = [
@@ -633,13 +633,15 @@ class EvaluationService:
 
     def test(self):
         task_id = 48
-        predictions = ["glue_pred", "blimp_pred"]
+        predictions = "1161-test_prediction-1675"
         model_id = 1146
         downstream_datasets_info = self.dataset_repository.get_downstream_datasets(
             task_id
         )
         task_code = self.task_repository.get_by_id(task_id)["task_code"]
         print(downstream_datasets_info)
+        download_predictions = self.download_predictions(task_code, predictions)
+        downstream_predictions = load_dataset(download_predictions)
         for downstream_dataset in downstream_datasets_info:
             dataset_name = downstream_dataset["dataset"].split("-")[0]
             print("dataset_name", dataset_name)
@@ -648,13 +650,12 @@ class EvaluationService:
             )
             downstream_datasets = load_dataset(downstream_datasets_filename)
             downstream_tasks = [item["sub_task"] for item in downstream_datasets]
-            prediction = list(
-                filter(lambda x: f"{dataset_name}_pred" in x, predictions)
-            )[0]
-            download_predictions = self.download_predictions(task_code, prediction)
-            downstream_predictions = load_dataset(download_predictions)
+            downstream_prediction = [
+                d for d in downstream_predictions if d["task"].lower() == dataset_name
+            ]
             current_round = downstream_dataset["round_id"]
             dataset_id = downstream_dataset["dataset_id"]
+            print("downstream_prediction", downstream_prediction)
             for sub_task in downstream_tasks:
                 print("sub_task", sub_task)
                 self.logger.info("Evaluate downstream task", sub_task)
@@ -663,7 +664,7 @@ class EvaluationService:
                 ][0]["labels"]
                 predicts = [
                     data
-                    for data in downstream_predictions
+                    for data in downstream_prediction
                     if data["sub_task"] == sub_task
                 ][0]["predictions"]
                 metric = [
