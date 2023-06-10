@@ -74,3 +74,8 @@ async def get_dynaboard_info_by_task_id(model: GetDynaboardInfoByTaskIdRequest):
         model.offset,
         model.limit,
     )
+
+
+@router.get("/get_challenges_types", response_model={})
+async def get_challenges_types():
+    return TaskService().get_challenges_types()

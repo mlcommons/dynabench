@@ -109,3 +109,6 @@ class TaskRepository(AbstractRepository):
             {"general_instructions": instructions}
         )
         self.session.commit()
+
+    def get_challenges_types(self):
+        return self.session.query(ChallengesTypes).all()

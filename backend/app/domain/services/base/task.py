@@ -52,6 +52,9 @@ class TaskService:
             tasks[i]["round"] = dict(round)
         return tasks
 
+    def get_challenges_types(self):
+        return self.task_repository.get_challenges_types()
+
     def get_metric_weight(self, field_name, perf_metric_field_name, default_weights):
         default_weight = default_weights.get(field_name)
         if default_weight is not None:
