@@ -461,10 +461,3 @@ class Validation(Base):
 
     example = relationship("Example")
     user = relationship("User")
-
-
-class TaskChallengeType(Base):
-    __tablename__ = "task_challenge_type"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False, unique=True)

@@ -85,6 +85,7 @@ class ScoreService:
             dataset_id, model_id
         )
         downstream_info = []
+        print(downstream_scores)
         for downstream_score in downstream_scores:
             downstream_score = downstream_score.__dict__
             downstream_info_metadata = json.loads(

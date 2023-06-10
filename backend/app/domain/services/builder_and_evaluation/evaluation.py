@@ -627,9 +627,12 @@ class EvaluationService:
                 final_score = new_score.copy()
                 metric_name = str(metric)
                 final_score[metric_name] = final_score["perf"]
+                final_score["task"] = dataset_name
+                final_score["sub_task"] = sub_task
                 new_score["metadata_json"] = json.dumps(final_score)
                 self.score_repository.add(new_score)
                 self.logger.info("Save score")
+        self.model_repository.update_model_status(model_id)
 
     def test(self):
         task_id = 48

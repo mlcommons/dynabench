@@ -42,6 +42,12 @@ class TaskService:
             task_and_round_info["Round"].__dict__
             for task_and_round_info in tasks_and_round_info
         ]
+        challenge_types = [
+            task_and_round_info["ChallengesTypes"].__dict__
+            for task_and_round_info in tasks_and_round_info
+        ]
+        for i, challenge_type in enumerate(challenge_types):
+            tasks[i]["challenge_type"] = dict(challenge_type)
         for i, round in enumerate(rounds):
             tasks[i]["round"] = dict(round)
         return tasks
@@ -76,6 +82,7 @@ class TaskService:
 
     def get_order_metrics_by_task_id(self, task_id: int):
         task_info = self.get_task_info_by_task_id(task_id).__dict__
+        print("task_info", task_info)
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
         perf_metric_type = task_configuration.get("perf_metric", [])
         delta_perf_metrics_type = [
