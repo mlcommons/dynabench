@@ -47,7 +47,7 @@ class TaskService:
             for task_and_round_info in tasks_and_round_info
         ]
         for i, challenge_type in enumerate(challenge_types):
-            tasks[i]["challenge_type"] = dict(challenge_type)
+            tasks[i]["challenge_type_info"] = dict(challenge_type)
         for i, round in enumerate(rounds):
             tasks[i]["round"] = dict(round)
         return tasks
