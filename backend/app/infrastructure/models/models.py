@@ -126,6 +126,7 @@ class Task(Base):
     creation_example_md = Column(Text)
     max_amount_examples_on_a_day = Column(Integer)
     bucket_for_aditional_example_data = Column(Text)
+    is_finished = Column(TINYINT(1), server_default=text("'0'"))
 
 
 class User(Base):
