@@ -329,6 +329,7 @@ class ChallengesTypes(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(260), nullable=False, unique=True)
+    url = Column(String(260), nullable=False, unique=True)
 
 
 class TaskCategories(Base):
