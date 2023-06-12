@@ -85,7 +85,6 @@ class TaskService:
 
     def get_order_metrics_by_task_id(self, task_id: int):
         task_info = self.get_task_info_by_task_id(task_id).__dict__
-        print("task_info", task_info)
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
         perf_metric_type = task_configuration.get("perf_metric", [])
         delta_perf_metrics_type = [

@@ -71,31 +71,42 @@ class ScoreService:
         scores = [
             metric_score["score"] for metric_score in metrics_with_score_and_weight
         ]
+
         final_scores_by_dataset_and_model_id["scores"] = scores
         final_scores_by_dataset_and_model_id["variances"] = [0] * len(scores)
         if dataset_has_downstream:
             downstream_info = self.get_score_info_by_downstream_task(
-                dataset_id, model_id
+                dataset_id, model_id, order_metric_with_weight
             )
             final_scores_by_dataset_and_model_id["downstream_info"] = downstream_info
+            mean_dataset_score = [
+                sum(scores) / len(downstream_info)
+                for scores in zip(*(item["score"] for item in downstream_info))
+            ]
+            final_scores_by_dataset_and_model_id["scores"] = mean_dataset_score
         return final_scores_by_dataset_and_model_id
 
-    def get_score_info_by_downstream_task(self, dataset_id: int, model_id: int):
+    def get_score_info_by_downstream_task(
+        self, dataset_id: int, model_id: int, order_metric_with_weight: dict
+    ):
         downstream_scores = self.score_repository.get_downstream_scores(
             dataset_id, model_id
         )
         downstream_info = []
-        print(downstream_scores)
         for downstream_score in downstream_scores:
             downstream_score = downstream_score.__dict__
             downstream_info_metadata = json.loads(
                 downstream_score["metadata_json"].replace("“", '"').replace("”", '"')
             )
+            field_scores_names = [
+                item["field_name"] for item in order_metric_with_weight
+            ]
+            scores = []
+            for field_score_name in field_scores_names:
+                score_name = field_score_name
+                scores.append(downstream_info_metadata[score_name])
             downstream_info.append(
-                {
-                    "sub_task": downstream_info_metadata["sub_task"],
-                    "score": downstream_score["perf"],
-                }
+                {"sub_task": downstream_info_metadata["sub_task"], "score": scores}
             )
         return downstream_info
 
@@ -164,8 +175,8 @@ class ScoreService:
         averaged_scores = self.get_averaged_scores(
             datasets_info, order_scoring_datasets_with_weight
         )
+        print("averaged_scores", averaged_scores)
         model_dynaboard_info["datasets"] = datasets_info
-        print("datasets_info", datasets_info)
         model_dynaboard_info["averaged_scores"] = averaged_scores
         model_dynaboard_info["averaged_variances"] = [0] * len(averaged_scores)
         return model_dynaboard_info, order_metric_with_weight
@@ -176,6 +187,9 @@ class ScoreService:
         scores = [dataset_info["scores"] for dataset_info in datasets_info]
         weights = [weight["weight"] for weight in weights]
         averaged_scores = np.array(scores).T
+        print("averaged_scores", averaged_scores)
+        print("weights", weights)
+        print("scores", scores)
         return list(np.dot(averaged_scores, weights))
 
     def calculate_all_dynascores(
