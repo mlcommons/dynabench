@@ -691,6 +691,7 @@ class Task(Base):
     submitable_predictions = db.Column(db.Integer())
     show_leaderboard = db.Column(db.Integer())
     show_trends = db.Column(db.Integer())
+    show_user_leaderboard = db.Column(db.Integer())
 
     def __repr__(self):
         return f"<Task {self.name}>"
