@@ -158,6 +158,26 @@ class ContextService:
         random.shuffle(images)
         return images
 
+    def get_perdi_contexts(self) -> dict:
+        return [
+            {
+                "id": "perdi_1",
+                "text": "The dog is running in the park",
+            },
+            {
+                "id": "perdi_2",
+                "text": "The cat is running in the park",
+            },
+            {
+                "id": "perdi_3",
+                "text": "The tiger is walking in the park",
+            },
+            {
+                "id": "perdi_4",
+                "text": "The dog is walking in the sea",
+            },
+        ]
+
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
             return self.get_nibbler_contexts(
@@ -167,3 +187,5 @@ class ContextService:
                 endpoint=artifacts["endpoint"],
                 num_images=30,
             )
+        elif type == "perdi":
+            return self.get_perdi_contexts()
