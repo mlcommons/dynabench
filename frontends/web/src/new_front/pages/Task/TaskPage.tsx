@@ -55,15 +55,24 @@ const TaskPage = () => {
       setAdminOrOwner(adminOrOwner);
       setTaskInstructions(taskInstructions);
       setLoading(false);
-      if (taskData.id === 45) {
-        setOpenTab(2);
-      }
     }
   };
 
   useEffect(() => {
     getTask(taskCode);
   }, [user]);
+
+  useEffect(() => {
+    if (
+      task &&
+      task.show_user_leaderboard === 0 &&
+      task.show_leaderboard === 0
+    ) {
+      setOpenTab(2);
+    }
+  }, [task]);
+
+  console.log("task", task);
 
   return (
     <div>
@@ -112,7 +121,8 @@ const TaskPage = () => {
                     className="flex flex-row flex-wrap list-none border-t-2"
                     role="tablist"
                   >
-                    {task.id !== 45 && (
+                    {(task.show_user_leaderboard !== 0 ||
+                      task.show_leaderboard !== 0) && (
                       <TabOption
                         optionTab={1}
                         tabName="Leaderboard"
@@ -149,6 +159,8 @@ const TaskPage = () => {
                     submitable={Boolean(task.submitable)}
                     hasPredictionsUpload={Boolean(task.has_predictions_upload)}
                     taskCode={task.task_code}
+                    MLCubeTutorialMarkdown={task.mlcube_tutorial_markdown}
+                    submitablePredictions={Boolean(task.submitable_predictions)}
                   />
                 </div>
               </div>
@@ -157,8 +169,13 @@ const TaskPage = () => {
               <div className="flex-auto">
                 <div className="tab-content tab-space">
                   <div className={openTab === 1 ? "block  px-4" : "hidden"}>
-                    {task.id !== 45 && (
-                      <Leaderboard taskCode={task.task_code} />
+                    {(task.show_user_leaderboard !== 0 ||
+                      task.show_leaderboard !== 0) && (
+                      <Leaderboard
+                        taskCode={task.task_code}
+                        showLeaderboard={Boolean(task.show_leaderboard)}
+                        showTrends={Boolean(task.show_trends)}
+                      />
                     )}
                   </div>
                   <div className={openTab === 2 ? "block " : "hidden"}>

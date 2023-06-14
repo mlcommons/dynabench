@@ -633,6 +633,15 @@ class EvaluationService:
                 self.score_repository.add(new_score)
                 self.logger.info("Save score")
         self.model_repository.update_model_status(model_id)
+        user_id = self.model_repository.get_user_id_by_model_id(model_id)[0]
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        self.email_helper.send(
+            contact=user_email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": model_id, "model_id": model_id},
+            subject=f"Model {model_id} training succeeded.",
+        )
 
     def test(self):
         task_id = 48

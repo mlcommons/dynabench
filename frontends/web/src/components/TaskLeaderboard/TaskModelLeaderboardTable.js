@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -225,7 +231,6 @@ const TaskModelLeaderboardRow = ({ model, metrics, datasetWeights }) => {
           const weight = weightsLookup[dataset.id];
           return (
             <tr key={`score-${dataset.name}`}>
-              {/* Title */}
               <td className="text-right pr-4  text-nowrap">
                 <div className="d-flex justify-content-end align-items-center">
                   <WeightPopover label={dataset.name} weight={weight}>
@@ -360,7 +365,6 @@ const TaskModelLeaderboardTable = ({
   modelColumnTitle,
 }) => {
   const total = metrics?.reduce((sum, metric) => sum + metric.weight, 0);
-
   const metricColumnWidth =
     60 / ((metrics?.length ?? 0) === 0 ? 1 : metrics.length);
 

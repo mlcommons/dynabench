@@ -18,6 +18,8 @@ type TaskActionButtonsProps = {
   submitable: boolean;
   hasPredictionsUpload: boolean;
   taskCode: string;
+  MLCubeTutorialMarkdown: string;
+  submitablePredictions: boolean;
 };
 
 const TaskActionButtons: FC<TaskActionButtonsProps> = ({
@@ -27,6 +29,8 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
   submitable,
   hasPredictionsUpload,
   taskCode,
+  MLCubeTutorialMarkdown,
+  submitablePredictions,
 }) => {
   const hasTrainFileUpload =
     configYaml && yaml.load(configYaml).hasOwnProperty("train_file_metric");
@@ -86,6 +90,17 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
           </Button>
         </Nav.Item>
       )}
+      {submitablePredictions && (
+        <Nav.Item className="task-action-btn">
+          <Button
+            as={Link}
+            className="mr-2 border-0 font-weight-bold light-gray-bg"
+            to={"/tasks/" + taskCode + "/submit_prediction"}
+          >
+            <i className="fa fa-upload"></i> Submit Predictions
+          </Button>
+        </Nav.Item>
+      )}
       {hasTrainFileUpload && (
         <>
           <Nav.Item className="task-action-btn">
@@ -99,17 +114,19 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
               </Button>
             </>
           </Nav.Item>
-          <Nav.Item className="task-action-btn">
-            <>
-              <Button
-                as={Link}
-                className="mr-2 border-0 font-weight-bold light-gray-bg"
-                to={"/tasks/" + taskCode + "/mlcube_tutorial"}
-              >
-                <i className="fa fa-upload"></i> MLCube Tutorial
-              </Button>
-            </>
-          </Nav.Item>
+          {MLCubeTutorialMarkdown && (
+            <Nav.Item className="task-action-btn">
+              <>
+                <Button
+                  as={Link}
+                  className="mr-2 border-0 font-weight-bold light-gray-bg"
+                  to={"/tasks/" + taskCode + "/mlcube_tutorial"}
+                >
+                  <i className="fa fa-upload"></i> MLCube Tutorial
+                </Button>
+              </>
+            </Nav.Item>
+          )}
         </>
       )}
     </Nav>

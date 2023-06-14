@@ -50,6 +50,8 @@ class ScoreService:
         order_metric_with_weight: dict,
         perf_metric_field_name: str,
     ):
+        print("dataset_id", dataset_id)
+        print("model_id", model_id)
         scores_by_dataset_and_model_id = (
             self.score_repository.get_scores_by_dataset_and_model_id(
                 dataset_id, model_id

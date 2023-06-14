@@ -7,6 +7,7 @@ export type TaskInfoType = {
   context: string;
   create_endpoint: number;
   cur_round: number;
+  challenge_type_info: ChallengeType;
   decen_aws_region: string;
   decen_bucket: string;
   decen_queue: string;
@@ -48,6 +49,11 @@ export type TaskInfoType = {
   accept_sandbox_creation: number;
   creation_example_md: string;
   max_amount_examples_on_a_day: number;
+  is_finished: number;
+  submitable_predictions: number;
+  show_leaderboard: number;
+  show_trends: number;
+  show_user_leaderboard: number;
 };
 
 type roundInfoType = {
@@ -63,4 +69,10 @@ type roundInfoType = {
   total_fooled: number;
   total_time_spent: number;
   total_verified_fooled: number;
+};
+
+export type ChallengeType = {
+  id: number;
+  name: string;
+  url: string;
 };
