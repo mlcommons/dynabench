@@ -145,7 +145,7 @@ class TaskService:
         task_id: int,
         ordered_metric_weights: list,
         ordered_scoring_dataset_weights: list,
-        sort_by: str = "id",
+        sort_by: str = "dynascore",
         sort_direction: str = "asc",
         offset: int = 0,
         limit: int = 5,
@@ -173,6 +173,10 @@ class TaskService:
             order_scoring_datasets_with_weight,
             order_metric_with_weight,
             perf_metric_field_name,
+            sort_by,
+            sort_direction,
+            offset,
+            limit,
         )
         dynaboard_info["data"] = data
         return dynaboard_info

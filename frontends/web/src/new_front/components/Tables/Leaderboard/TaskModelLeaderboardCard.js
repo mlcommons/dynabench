@@ -112,8 +112,6 @@ const TaskModelLeaderboardCard = ({
       setDatasetWeights(result.orderedDatasetWeights);
       setDescription(result.description);
     });
-    console.log("metrics", metrics);
-    console.log("datasetWeights", datasetWeights);
   }, [context.api, task, getInitialWeights]);
 
   const handleScoreData = async () => {
@@ -145,7 +143,7 @@ const TaskModelLeaderboardCard = ({
 
   useEffect(() => {
     handleScoreData();
-  }, [metrics, datasetWeights]);
+  }, [metrics, datasetWeights, sort]);
 
   const isEndOfPage = (page + 1) * pageLimit >= total;
 

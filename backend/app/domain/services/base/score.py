@@ -50,8 +50,6 @@ class ScoreService:
         order_metric_with_weight: dict,
         perf_metric_field_name: str,
     ):
-        print("dataset_id", dataset_id)
-        print("model_id", model_id)
         scores_by_dataset_and_model_id = (
             self.score_repository.get_scores_by_dataset_and_model_id(
                 dataset_id, model_id
@@ -118,6 +116,10 @@ class ScoreService:
         order_scoring_datasets_with_weight: list,
         order_metric_with_weight: dict,
         perf_metric_field_name: str,
+        sort_by: str,
+        sort_direction: str,
+        offset: int,
+        limit: int,
     ):
         models_dynaboard_info = []
         for model_id in model_ids:
@@ -148,6 +150,22 @@ class ScoreService:
             for d in models_dynaboard_info
             if df_dynascore["model_id"].isin([d["model_id"]]).any()
         ]
+
+        # Sort
+        order_metric_names = [item["name"] for item in order_metric_with_weight]
+        if sort_by != "dynascore":
+            models_dynaboard_info = sorted(
+                models_dynaboard_info,
+                key=lambda x: x["averaged_scores"][order_metric_names.index(sort_by)],
+            )
+        if sort_direction == "desc":
+            models_dynaboard_info = sorted(
+                models_dynaboard_info, key=lambda x: x["averaged_scores"], reverse=True
+            )
+        else:
+            models_dynaboard_info = sorted(
+                models_dynaboard_info, key=lambda x: x["averaged_scores"]
+            )
         return models_dynaboard_info
 
     def get_model_dynaboard_info(
@@ -177,7 +195,6 @@ class ScoreService:
         averaged_scores = self.get_averaged_scores(
             datasets_info, order_scoring_datasets_with_weight
         )
-        print("averaged_scores", averaged_scores)
         model_dynaboard_info["datasets"] = datasets_info
         model_dynaboard_info["averaged_scores"] = averaged_scores
         model_dynaboard_info["averaged_variances"] = [0] * len(averaged_scores)
@@ -189,9 +206,6 @@ class ScoreService:
         scores = [dataset_info["scores"] for dataset_info in datasets_info]
         weights = [weight["weight"] for weight in weights]
         averaged_scores = np.array(scores).T
-        print("averaged_scores", averaged_scores)
-        print("weights", weights)
-        print("scores", scores)
         return list(np.dot(averaged_scores, weights))
 
     def calculate_all_dynascores(
