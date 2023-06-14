@@ -28,17 +28,26 @@ const BabyLMLandingOverview = () => {
               evaluation pipeline
             </a>
           </li>
-          <li className="p-2">Models and results due July 15, 2023</li>
-          <li className="p-2">Paper submission due August 1, 2023</li>
+          <li className="p-2">
+            Models and results due <strong>July 15, 2023</strong>
+          </li>
+          <li className="p-2">
+            Paper submission due <strong>August 1, 2023</strong>
+          </li>
         </ul>
         <p className="text-lg">
           See the guidelines for an overview of submission tracks and
-          pretraining data. See the call for papers for a detailed description
-          of the task setup and data.
+          pretraining data. See the{" "}
+          <a href="https://arxiv.org/abs/2301.11796">call for papers</a> for a
+          detailed description of the task setup and data.
           <br />
           <br />
-          Consider joining the BabyLM Slack if you have any questions for the
-          organizers or want to connect with other participants!
+          Consider{" "}
+          <a href="https://babylmchallenge.slack.com/join/shared_invite/zt-1s8el4mro-qvVO447l3POBZcUNvMWQcg#/shared-invite/email">
+            joining the BabyLM Slack
+          </a>{" "}
+          if you have any questions for the organizers or want to connect with
+          other participants!
         </p>
       </div>
       <div className="text-left">
