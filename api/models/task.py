@@ -687,6 +687,11 @@ class Task(Base):
     challenge_type = db.Column(db.Text)
     documentation_url = db.Column(db.Text)
     bucket_for_aditional_example_data = db.Column(db.Text)
+    is_finished = db.Column(db.Integer())
+    submitable_predictions = db.Column(db.Integer())
+    show_leaderboard = db.Column(db.Integer())
+    show_trends = db.Column(db.Integer())
+    show_user_leaderboard = db.Column(db.Integer())
 
     def __repr__(self):
         return f"<Task {self.name}>"

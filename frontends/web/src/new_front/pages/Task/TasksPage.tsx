@@ -8,10 +8,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useFetch from "use-http";
 import TaskCard from "../../components/Cards/TaskCard";
-import { TaskInfoType } from "../../types/task/taskInfo";
+import { TaskInfoType, ChallengeType } from "../../types/task/taskInfo";
 import { TaskCategories } from "../../types/task/taskCategories";
 import { PacmanLoader } from "react-spinners";
-import TasksSkeleton from "new_front/components/Skeletons/TasksSkeleton";
 import Carousel from "react-multi-carousel";
 import { responsiveCarousel } from "../../utils/constants";
 import "react-multi-carousel/lib/styles.css";
@@ -19,22 +18,30 @@ import "react-multi-carousel/lib/styles.css";
 const TasksPage = () => {
   const [tasksData, setTasksData] = useState([] as TaskInfoType[]);
   const [tasksCategories, setTasksCategories] = useState<TaskCategories[]>([]);
+  const [challengesTypes, setChallengesTypes] = useState([] as ChallengeType[]);
   const { get, response, loading } = useFetch();
 
   const getTaskData = async () => {
-    const [tasksInfo, tasksCategoriesInfo] = await Promise.all([
-      get("/task/get_active_tasks_with_round_info"),
-      get("/task/get_tasks_categories"),
-    ]);
+    const [tasksInfo, tasksCategoriesInfo, challengesTypes] = await Promise.all(
+      [
+        get("/task/get_active_tasks_with_round_info"),
+        get("/task/get_tasks_categories"),
+        get("/task/get_challenges_types"),
+      ]
+    );
+
     if (response.ok) {
       setTasksData(tasksInfo);
       setTasksCategories(tasksCategoriesInfo);
+      setChallengesTypes(challengesTypes);
     }
   };
 
   useEffect(() => {
     getTaskData();
   }, []);
+
+  console.log("tasksData", tasksData);
 
   return (
     <>
@@ -43,113 +50,48 @@ const TasksPage = () => {
           <h2 className="text-4xl font-semibold text-center d-block text-letter-color">
             Communities
           </h2>
-          <div className="pb-2">
-            <span className="inline-flex items-center px-3 py-1 m-3 rounded-full bg-primary-color">
-              <Link
-                className="text-lg font-medium text-[#6e6e6e] hover:text-letter-color"
-                to="/dadc"
+
+          {challengesTypes.map((challengeType) => (
+            <div className="pb-2" key={challengeType.id}>
+              <span className="inline-flex items-center px-3 py-1 m-3 rounded-full bg-primary-color">
+                <Link
+                  className="text-lg font-medium text-[#6e6e6e] hover:text-letter-color"
+                  to={`/${challengeType.url}`}
+                >
+                  {challengeType.name}
+                </Link>
+              </span>
+              <div
+                className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
+                key={challengeType.id}
               >
-                DADC
-              </Link>
-            </span>
-            <div
-              className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
-              key="DADC"
-            >
-              <Carousel responsive={responsiveCarousel} key="DADC">
-                {tasksData
-                  .filter((t) => t.challenge_type === 1)
-                  .map((task) => (
-                    <div key={task.id} className="px-2 py-2">
-                      <TaskCard
-                        id={task.id}
-                        name={task.name}
-                        description={task.desc}
-                        curRound={task.cur_round}
-                        totalCollected={task.round.total_collected}
-                        totalFooled={task.round.total_fooled}
-                        taskCode={task.task_code}
-                        imageUrl={task.image_url}
-                        tasksCategories={tasksCategories}
-                        isBuilding={task.is_building}
-                      />
-                    </div>
-                  ))}
-              </Carousel>
+                <Carousel
+                  responsive={responsiveCarousel}
+                  key={challengeType.id}
+                >
+                  {tasksData
+                    .filter((t) => t.challenge_type === challengeType.id)
+                    .map((task) => (
+                      <div key={task.id} className="px-2 py-2">
+                        <TaskCard
+                          id={task.id}
+                          name={task.name}
+                          description={task.desc}
+                          curRound={task.cur_round}
+                          totalCollected={task.round.total_collected}
+                          totalFooled={task.round.total_fooled}
+                          taskCode={task.task_code}
+                          imageUrl={task.image_url}
+                          tasksCategories={tasksCategories}
+                          isBuilding={task.is_building}
+                          isFinished={task.is_finished}
+                        />
+                      </div>
+                    ))}
+                </Carousel>
+              </div>
             </div>
-          </div>
-          <div className="pb-2 container-fluid">
-            <span className="inline-flex items-center px-3 py-1 m-2 rounded-full bg-primary-color ">
-              <Link
-                className="text-lg font-medium text-[#6e6e6e] hover:text-letter-color"
-                to="/dataperf"
-              >
-                Dataperf
-              </Link>
-            </span>
-          </div>
-          <div>
-            <div
-              className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
-              key="Dataperf"
-            >
-              <Carousel responsive={responsiveCarousel} key="Dataperf">
-                {tasksData
-                  .filter((t) => t.challenge_type === 2)
-                  .map((task) => (
-                    <div key={task.id} className="px-2 py-2">
-                      <TaskCard
-                        id={task.id}
-                        name={task.name}
-                        description={task.desc}
-                        curRound={task.cur_round}
-                        totalCollected={task.round.total_collected}
-                        totalFooled={task.round.total_fooled}
-                        taskCode={task.task_code}
-                        imageUrl={task.image_url}
-                        tasksCategories={tasksCategories}
-                        isBuilding={task.is_building}
-                      />
-                    </div>
-                  ))}
-              </Carousel>
-            </div>
-          </div>
-          <div className="pb-2">
-            <span className="inline-flex items-center px-3 py-1 m-3 rounded-full bg-primary-color">
-              <Link
-                className="text-lg font-medium text-[#6e6e6e] hover:text-letter-color"
-                to="/others_tasks"
-              >
-                Others
-              </Link>
-            </span>
-            <div
-              className="grid grid-cols-1 gap-4 pb-2 md:grid-cols-1"
-              key="others"
-            >
-              <Carousel responsive={responsiveCarousel} key="others">
-                {tasksData
-                  .filter((t) => t.challenge_type === 4)
-                  .map((task) => (
-                    <div key={task.id} className="px-2 py-2">
-                      <TaskCard
-                        id={task.id}
-                        name={task.name}
-                        description={task.desc}
-                        curRound={task.cur_round}
-                        totalCollected={task.round.total_collected}
-                        totalFooled={task.round.total_fooled}
-                        taskCode={task.task_code}
-                        imageUrl={task.image_url}
-                        tasksCategories={tasksCategories}
-                        isBuilding={task.is_building}
-                      />
-                    </div>
-                  ))}
-              </Carousel>
-            </div>
-          </div>
+          ))}
         </div>
       ) : (
         <div className="flex items-center justify-center h-screen">

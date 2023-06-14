@@ -42,9 +42,18 @@ class TaskService:
             task_and_round_info["Round"].__dict__
             for task_and_round_info in tasks_and_round_info
         ]
+        challenge_types = [
+            task_and_round_info["ChallengesTypes"].__dict__
+            for task_and_round_info in tasks_and_round_info
+        ]
+        for i, challenge_type in enumerate(challenge_types):
+            tasks[i]["challenge_type_info"] = dict(challenge_type)
         for i, round in enumerate(rounds):
             tasks[i]["round"] = dict(round)
         return tasks
+
+    def get_challenges_types(self):
+        return self.task_repository.get_challenges_types()
 
     def get_metric_weight(self, field_name, perf_metric_field_name, default_weights):
         default_weight = default_weights.get(field_name)
@@ -136,10 +145,11 @@ class TaskService:
         task_id: int,
         ordered_metric_weights: list,
         ordered_scoring_dataset_weights: list,
-        sort_by: str = "id",
+        sort_by: str = "dynascore",
         sort_direction: str = "asc",
         offset: int = 0,
         limit: int = 5,
+        metrics: list = [],
     ):
         dynaboard_info = {}
         ordered_metrics = self.get_order_metrics_by_task_id(task_id)
@@ -164,6 +174,11 @@ class TaskService:
             order_scoring_datasets_with_weight,
             order_metric_with_weight,
             perf_metric_field_name,
+            sort_by,
+            sort_direction,
+            offset,
+            limit,
+            metrics,
         )
         dynaboard_info["data"] = data
         return dynaboard_info

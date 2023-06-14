@@ -3,6 +3,8 @@ import { fadeIn } from "new_front/utils/helpers/motion";
 import React from "react";
 import { Button } from "react-bootstrap";
 import { ReactComponent as Other } from "new_front/assets/other.svg";
+import { ReactComponent as LLM } from "new_front/assets/llm.svg";
+import { ReactComponent as Baby } from "new_front/assets/baby.svg";
 import { Link } from "react-router-dom";
 
 const Communities = () => {
@@ -98,6 +100,79 @@ const Communities = () => {
                 debugging, across a range of common ML tasks such as image
                 classification. We plan to leverage the DataPerf benchmarks
                 through challenges and leaderboards.
+              </p>
+              <Button
+                className="p-2 text-lg font-semibold border-0 rounded-full bg-primary-color"
+                as={Link}
+                to="/dataperf"
+              >
+                Learn more
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap my-12">
+          <div className="w-5/6 p-6 sm:w-1/2">
+            <a
+              className="flex flex-row gap-1 pointer hover:no-underline"
+              href="/babylm"
+            >
+              <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
+                BabyLM
+              </h3>
+            </a>
+            <p className="mb-8 text-lg text-gray-600">
+              This shared task challenges community members to train a language
+              model from scratch on the same amount of linguistic data available
+              to a child. Submissions should be implemented in Huggingface's
+              Transformers library and will be evaluated on a shared pipeline.
+              This shared task is co-sponsored by CMCL and CoNLL.
+            </p>
+            <Button
+              className="p-2 text-lg font-semibold border-0 rounded-full bg-primary-color"
+              as={Link}
+              to="/babylm"
+            >
+              Learn more
+            </Button>
+          </div>
+          <div className="w-full p-6 sm:w-1/2">
+            <div
+              id="responsiveVideoWrapper"
+              className="relative h-0 overflow-hidden rounded-md pb-fluid-video"
+            >
+              <Baby className="absolute top-0 left-0 w-full h-full" />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col-reverse flex-wrap my-12 sm:flex-row">
+          <div className="w-full p-6 mt-6 sm:w-1/2">
+            <div
+              id="responsiveVideoWrapper"
+              className="relative h-0 overflow-hidden rounded-md pb-fluid-video"
+            >
+              <LLM className="absolute top-0 left-0 w-full h-full" />
+            </div>
+          </div>
+          <div className="w-full p-6 mt-6 sm:w-1/2">
+            <div className="align-middle">
+              <a
+                className="flex flex-row gap-1 pointer hover:no-underline"
+                href="/dataperf"
+              >
+                <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
+                  Large language model
+                </h3>
+              </a>
+              <p className="mb-8 text-lg text-gray-600">
+                The LLM community on our platform is dedicated to creating
+                advanced challenges to evaluate Language Models (LLMs) across
+                various tasks, ensuring their performance and capabilities are
+                thoroughly assessed. We provide a collaborative space for
+                researchers, developers, and enthusiasts to explore and measure
+                the effectiveness of LLMs in specific areas such as bias
+                creation, domain expertise, and more.
               </p>
               <Button
                 className="p-2 text-lg font-semibold border-0 rounded-full bg-primary-color"

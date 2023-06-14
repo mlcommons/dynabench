@@ -19,6 +19,7 @@ import { OverlayProvider } from "new_front/components/OverlayInstructions/Provid
 
 import CreateInterface from "new_front/pages/CreateSamples/CreateInterface";
 import ValidateInterface from "../common/Annotation/ValidateInterface.js";
+import SubmitPrediction from "new_front/pages/Submissions/SubmitPrediction";
 import ValidateSamples from "new_front/pages/CreateSamples/ValidateSamples";
 import ApiService from "../common/ApiService";
 import { Avatar } from "../components/Avatar/Avatar";
@@ -44,7 +45,8 @@ import SubmitModel from "./SubmitModel";
 import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
 import TaskPage from "new_front/pages/Task/TaskPage";
-import Test from "new_front/pages/CommunitiesLandingPages/Test";
+// import Test from "new_front/pages/CommunitiesLandingPages/Test";
+import Test from "new_front/pages/Task/Test";
 import Landing from "new_front/pages/Landing/Landing";
 import SearchBar from "../new_front/components/Utils/SearchBar";
 import FilterTasks from "../new_front/pages/Task/FilterTasks";
@@ -54,10 +56,11 @@ import UpdateModelInfoInterface from "./UpdateModelInfoInterface.js";
 import UserContext from "./UserContext";
 import UserPage from "./UserPage";
 import DataperfLanding from "../new_front/pages/CommunitiesLandingPages/DataperfLanding";
-import DADCLanding from "../new_front/pages/CommunitiesLandingPages/DADCLanding";
-import OthersTaskLanding from "../new_front/pages/CommunitiesLandingPages/OthersTaskLanding";
-import logoBlack from "../new_front/assets/logo_black.png";
-import logoWhite from "../new_front/assets/logo_mlcommos_white.png";
+import DADCLanding from "new_front/pages/CommunitiesLandingPages/DADCLanding";
+import BabyLMLanding from "new_front/pages/CommunitiesLandingPages/BabyLMLanding";
+import OthersTaskLanding from "new_front/pages/CommunitiesLandingPages/OthersTaskLanding";
+import logoBlack from "new_front/assets/logo_black.png";
+import logoWhite from "new_front/assets/logo_mlcommos_white.png";
 import OverlayInstructionsProvider from "new_front/context/OverlayInstructions/Context";
 
 const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
@@ -244,12 +247,81 @@ class App extends React.Component {
                                       ))}
                                 </ul>
                               </li>
+                              <li id="babylm" className="li-nav">
+                                <span
+                                  className="second-nav-a"
+                                  onClick={console.log()}
+                                >
+                                  BabyLM
+                                </span>
+                                <ul className="ul-nav">
+                                  {this.state &&
+                                    this.state.tasks
+                                      .filter((t) => t.challenge_type === 3)
+                                      .map((task, index) => (
+                                        <li
+                                          key={task.task_code}
+                                          className="li-nav"
+                                        >
+                                          <a href={`/tasks/${task.task_code}`}>
+                                            {task.name}
+                                          </a>
+                                        </li>
+                                      ))}
+                                </ul>
+                              </li>
+                              <li id="lmms" className="li-nav">
+                                <span
+                                  className="second-nav-a"
+                                  onClick={console.log()}
+                                >
+                                  LLMs
+                                </span>
+                                <ul className="ul-nav">
+                                  {this.state &&
+                                    this.state.tasks
+                                      .filter((t) => t.challenge_type === 4)
+                                      .map((task, index) => (
+                                        <li
+                                          key={task.task_code}
+                                          className="li-nav"
+                                        >
+                                          <a href={`/tasks/${task.task_code}`}>
+                                            {task.name}
+                                          </a>
+                                        </li>
+                                      ))}
+                                </ul>
+                              </li>
+                              <li id="flores" className="li-nav">
+                                <span
+                                  className="second-nav-a"
+                                  onClick={console.log()}
+                                >
+                                  Flores
+                                </span>
+                                <ul className="ul-nav">
+                                  {this.state &&
+                                    this.state.tasks
+                                      .filter((t) => t.challenge_type === 5)
+                                      .map((task, index) => (
+                                        <li
+                                          key={task.task_code}
+                                          className="li-nav"
+                                        >
+                                          <a href={`/tasks/${task.task_code}`}>
+                                            {task.name}
+                                          </a>
+                                        </li>
+                                      ))}
+                                </ul>
+                              </li>
                               <li id="contributed" className="li-nav">
                                 <span className="second-nav-a">Others</span>
                                 <ul className="ul-nav">
                                   {this.state &&
                                     this.state.tasks
-                                      .filter((t) => t.challenge_type === 4)
+                                      .filter((t) => t.challenge_type === 6)
                                       .map((task, index) => (
                                         <li
                                           className="li-nav"
@@ -394,6 +466,10 @@ class App extends React.Component {
                         component={UpdateModelInfoInterface}
                       />
                       <Route
+                        path="/tasks/:taskCode/submit_prediction"
+                        render={(props) => <SubmitPrediction />}
+                      />
+                      <Route
                         path="/tasks/:taskId/submit_predictions"
                         render={(props) => (
                           <SubmitInterface
@@ -453,6 +529,8 @@ class App extends React.Component {
                       />
                       <Route path="/dataperf" component={DataperfLanding} />
                       <Route path="/dadc" component={DADCLanding} />
+                      <Route path="/babylm" component={BabyLMLanding} />
+
                       <Route
                         path="/others_tasks"
                         component={OthersTaskLanding}

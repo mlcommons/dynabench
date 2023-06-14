@@ -23,6 +23,9 @@ class DatasetService:
     def get_dataset_name_by_id(self, dataset_id: int):
         return self.dataset_repository.get_dataset_name_by_id(dataset_id)
 
+    def get_dataset_has_downstream(self, dataset_id: int):
+        return self.dataset_repository.get_dataset_has_downstream(dataset_id)
+
     def get_scoring_datasets_by_task_id(self, task_id: int):
         return self.dataset_repository.get_scoring_datasets_by_task_id(task_id)
 
@@ -47,9 +50,8 @@ class DatasetService:
         jsonl_writer.write_all(jsonl_data)
         jsonl_writer.close()
         random_id = str(random.randint(1, 10000))
-        self.create_dataset_in_db(
-            task_id, f"{dataset_name}-{task_code}-{random_id}", "hidden"
-        )
+        dataset_name = f"{dataset_name}-{task_code}-{random_id}"
+        self.create_dataset_in_db(task_id, dataset_name, "hidden")
         # Get the JSONL data as a string
         jsonl_contents = jsonl_file.getvalue()
         self.s3_helpers.upload_file_to_s3(

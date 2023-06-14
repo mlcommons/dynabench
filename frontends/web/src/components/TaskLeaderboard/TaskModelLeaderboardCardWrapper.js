@@ -11,38 +11,8 @@
  */
 
 import React from "react";
-import TaskModelLeaderboardCard from "./TaskModelLeaderboardCard";
+import TaskModelLeaderboardCard from "new_front/components/Tables/Leaderboard/TaskModelLeaderboardCard";
 import { useParams } from "react-router-dom";
-
-const taskModelLeaderboardCardWrapper2 = (
-  title,
-  task,
-  history,
-  taskCode,
-  disableForkAndSnapshot,
-  disableToggleSort,
-  disableAdjustWeights,
-  disablePagination,
-  modelColumnTitle,
-  getInitialWeights,
-  fetchLeaderboardData
-) => {
-  return (
-    <TaskModelLeaderboardCard
-      title={title}
-      task={task}
-      history={history}
-      taskCode={taskCode}
-      disableForkAndSnapshot={disableForkAndSnapshot}
-      disableToggleSort={disableToggleSort}
-      disableAdjustWeights={disableAdjustWeights}
-      disablePagination={disablePagination}
-      modelColumnTitle={modelColumnTitle}
-      getInitialWeights={getInitialWeights}
-      fetchLeaderboardData={fetchLeaderboardData}
-    />
-  );
-};
 
 const taskModelLeaderboardCardWrapper = (
   getInitialWeights,

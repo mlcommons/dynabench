@@ -27,6 +27,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
     get_macro_f1_meta,
     get_memory_utilization,
     get_memory_utilization_meta,
+    get_new_accuracy,
     get_robustness_meta,
     get_sp_bleu,
     get_sp_bleu_meta,
@@ -50,6 +51,7 @@ eval_metrics_dict = {
     "dataperf_auc": get_dataperf_auc,
     "dataperf_fraction_of_fixes": get_dataperf_fraction_of_fixes,
     "dataperf_balanced_accuracy": get_dataperf_balanced_accuracy,
+    "new_accuracy": get_new_accuracy,
 }
 
 delta_metrics_dict = {
@@ -64,6 +66,7 @@ job_metrics_dict = {
 
 meta_metrics_dict = {
     "accuracy": get_accuracy_meta,
+    "new_accuracy": get_accuracy_meta,
     "macro_f1": get_macro_f1_meta,
     "squad_f1": get_squad_f1_meta,
     "bleu": get_bleu_meta,

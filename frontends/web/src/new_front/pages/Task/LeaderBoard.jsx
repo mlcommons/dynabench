@@ -34,6 +34,8 @@ class Leaderboard extends React.Component {
       numMatchingValidations: 3,
     };
     this.taskCode = this.props.taskCode;
+    this.showLeaderboard = this.props.showLeaderboard;
+    this.showTrends = this.props.showTrends;
     this.getCurrentTaskData = this.getCurrentTaskData.bind(this);
   }
 
@@ -107,6 +109,7 @@ class Leaderboard extends React.Component {
   }
 
   render() {
+    console.log("this.state.task", this.state.task);
     const hasTrainFileUpload =
       this.state.task.config_yaml &&
       yaml
@@ -120,7 +123,9 @@ class Leaderboard extends React.Component {
               {this.state.task?.active ? (
                 <>
                   {this.state.task &&
-                    (this.state.task.submitable || hasTrainFileUpload) && (
+                    (this.state.task.submitable ||
+                      hasTrainFileUpload ||
+                      this.state.task.submitable_predictions) && (
                       <Row className="justify-content-center">
                         <Col xs={12} md={12}>
                           <Annotation
@@ -178,7 +183,7 @@ class Leaderboard extends React.Component {
                         </Col>
                       )}
                     <Col xs={12} md={6}>
-                      {this.state.trendScore.length > 0 && (
+                      {this.state.trendScore.length > 0 && this.showTrends && (
                         <>
                           <Annotation
                             placement="top-end"

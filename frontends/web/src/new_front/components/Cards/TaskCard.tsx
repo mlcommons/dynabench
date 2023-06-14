@@ -21,6 +21,7 @@ type TaskCardProps = {
   imageUrl: string;
   tasksCategories: TaskCategories[];
   isBuilding?: number;
+  isFinished?: number;
 };
 
 const TaskCard: FC<TaskCardProps> = ({
@@ -34,6 +35,7 @@ const TaskCard: FC<TaskCardProps> = ({
   imageUrl,
   tasksCategories,
   isBuilding,
+  isFinished,
 }) => {
   const history = useHistory();
   return (
@@ -41,17 +43,23 @@ const TaskCard: FC<TaskCardProps> = ({
       <div
         className="max-w-sm transition duration-500 transform bg-white shadow-md h-[30rem] rounded-xl hover:scale-105 cursor-pointer"
         onClick={
-          isBuilding === 0 ? () => history.push(`/tasks/${taskCode}`) : () => {}
+          isBuilding !== 0 || isFinished !== 0
+            ? () => {}
+            : () => history.push(`/tasks/${taskCode}`)
         }
         key={id}
       >
         <div className="relative">
           {isBuilding === 1 && (
-            <span className="rotate-[-35deg] absolute top-0 left-0 z-10 inline-flex px-3 py-1 mt-[21px] text-sm font-medium text-white rounded-lg select-none bg-secondary-color">
+            <span className="rotate-[-35deg] absolute top-0 left-0 z-10 inline-flex px-3 py-1 mt-[21px] text-sm font-medium text-white rounded-lg select-none bg-green-500">
               Building
             </span>
           )}
-
+          {isFinished === 1 && (
+            <span className="rotate-[-35deg] absolute top-0 left-0 z-10 inline-flex px-3 py-1 mt-[21px] text-sm font-medium text-white rounded-lg select-none bg-secondary-color ">
+              Finished
+            </span>
+          )}
           <LazyLoadImage
             className="w-full h-48 rounded-t-xl"
             src={imageUrl}

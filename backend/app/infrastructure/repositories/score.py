@@ -53,3 +53,11 @@ class ScoreRepository(AbstractRepository):
             .order_by(func.avg(Score.perf).desc())
             .first()
         )
+
+    def get_downstream_scores(self, dataset_id: int, model_id: int):
+        return (
+            self.session.query(Score)
+            .filter(Score.did == dataset_id)
+            .filter(Score.mid == model_id)
+            .all()
+        )

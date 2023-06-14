@@ -41,6 +41,7 @@ const DADCLanding: FC = () => {
                       imageUrl={task.image_url}
                       tasksCategories={tasksCategories}
                       isBuilding={task.is_building}
+                      isFinished={task.is_finished}
                     />
                   </div>
                 ))}

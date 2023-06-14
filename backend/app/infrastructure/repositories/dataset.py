@@ -24,8 +24,8 @@ class DatasetRepository(AbstractRepository):
             jsonl_scoring_dataset["dataset"] = scoring_dataset.name
             jsonl_scoring_dataset["round_id"] = scoring_dataset.rid
             jsonl_scoring_dataset["dataset_id"] = scoring_dataset.id
+            jsonl_scoring_dataset["tags"] = scoring_dataset.tags
             jsonl_scoring_datasets.append(jsonl_scoring_dataset)
-
         return jsonl_scoring_datasets
 
     def get_not_scoring_datasets(self, task_id: int) -> dict:
@@ -74,6 +74,13 @@ class DatasetRepository(AbstractRepository):
             .one()
         )
 
+    def get_dataset_has_downstream(self, dataset_id: int) -> dict:
+        return (
+            self.session.query(self.model.has_downstream)
+            .filter(self.model.id == dataset_id)
+            .one()
+        )
+
     def get_dataset_info_by_id(self, dataset_id: int) -> dict:
         instance = (
             self.session.query(self.model).filter(self.model.id == dataset_id).one()
@@ -98,3 +105,17 @@ class DatasetRepository(AbstractRepository):
         self.session.add(dataset)
         self.session.commit()
         return dataset
+
+    def get_downstream_datasets(self, task_id: int) -> dict:
+        downstream_datasets = self.session.query(self.model).filter(
+            self.model.tid == task_id
+        )
+        jsonl_downstream_datasets = []
+        for downstream_dataset in downstream_datasets:
+            jsonl_downstream_dataset = {}
+            jsonl_downstream_dataset["dataset"] = downstream_dataset.name
+            jsonl_downstream_dataset["round_id"] = downstream_dataset.rid
+            jsonl_downstream_dataset["dataset_id"] = downstream_dataset.id
+            jsonl_downstream_datasets.append(jsonl_downstream_dataset)
+
+        return jsonl_downstream_datasets

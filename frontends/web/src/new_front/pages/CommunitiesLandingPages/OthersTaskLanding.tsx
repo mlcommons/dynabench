@@ -26,7 +26,7 @@ const OthersTaskLanding: FC = () => {
               key="Dataperf"
             >
               {tasksData
-                .filter((t) => t.challenge_type === 4)
+                .filter((t) => t.challenge_type === 6)
                 .map((task) => (
                   <div key={task.id}>
                     <TaskCard
@@ -40,6 +40,7 @@ const OthersTaskLanding: FC = () => {
                       imageUrl={task.image_url}
                       tasksCategories={tasksCategories}
                       isBuilding={task.is_building}
+                      isFinished={task.is_finished}
                     />
                   </div>
                 ))}

@@ -25,9 +25,14 @@ from cloudwatch import cloudwatch
 
 from app.domain.helpers.email import EmailHelper
 from app.domain.services.builder_and_evaluation.builder import BuilderService
-from app.domain.services.builder_and_evaluation.eval_utils.evaluator import Evaluator
+from app.domain.services.builder_and_evaluation.eval_utils.evaluator import (
+    evaluate,
+    evaluate_delta_metrics,
+    evaluation_without_tags,
+)
 from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
-    InputFormatter,
+    load_dataset,
+    neccesary_format_for_evaluation,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
@@ -140,6 +145,7 @@ class EvaluationService:
             final_dataset["dataset_type"] = "base"
             final_dataset["round_id"] = scoring_dataset["round_id"]
             final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
+            final_dataset["tags"] = scoring_dataset["tags"]
             final_dataset["dataset"] = "{}.jsonl".format(scoring_dataset["dataset"])
             final_datasets.append(final_dataset)
             for delta_metric in delta_metrics_task:
@@ -157,6 +163,7 @@ class EvaluationService:
                 final_dataset["dataset_type"] = delta_metric
                 final_dataset["round_id"] = scoring_dataset["round_id"]
                 final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
+                final_dataset["tags"] = scoring_dataset["tags"]
                 final_dataset["dataset"] = "{}-{}.jsonl".format(
                     delta_metric, scoring_dataset["dataset"]
                 )
@@ -245,6 +252,7 @@ class EvaluationService:
             dataset_type = dataset["dataset_type"]
             final_dict_prediction[dataset_type] = dict_dataset_type
             dataset_id = dataset["dataset_id"]
+            tags = dataset["tags"]
         end_prediction = time.time()
         seconds_time_prediction = end_prediction - start_prediction
         return (
@@ -254,6 +262,7 @@ class EvaluationService:
             seconds_time_prediction,
             num_samples,
             folder_name,
+            tags,
         )
 
     def get_memory_utilization(self, model_name: str) -> float:
@@ -403,6 +412,41 @@ class EvaluationService:
         self.builder.delete_ecs_service(str(arn_service))
         shutil.rmtree(f"./app/models/{folder_name}")
 
+    def get_finals_scores(self, task_id: int, prediction_dict: dict, tags: bool):
+        task_configuration = self.get_task_configuration(task_id)
+        metric_info = task_configuration["perf_metric"]
+        formatted_dict, perturb_exists = neccesary_format_for_evaluation(
+            prediction_dict, metric_info["reference_name"]
+        )
+        if tags:
+            main_metric = evaluate(
+                metric_info["type"],
+                formatted_dict["formatted_base_predictions"],
+                formatted_dict["formatted_base_dataset"],
+            )
+        else:
+            main_metric = evaluation_without_tags(
+                metric_info["type"],
+                formatted_dict["formatted_base_predictions"],
+                formatted_dict["formatted_base_dataset"],
+            )
+        delta_metrics = {}
+        if perturb_exists:
+            delta_metrics = evaluate_delta_metrics(
+                metric_info["type"],
+                formatted_dict.get("grouped_base_predictions"),
+                formatted_dict.get("grouped_robustness_predictions"),
+                formatted_dict.get("grouped_fairness_predictions"),
+                task_configuration["delta_metrics"],
+            )
+        metric = metric_info["type"]
+        final_scores = {
+            str(metric): main_metric,
+            "fairness": delta_metrics.get("fairness"),
+            "robustness": delta_metrics.get("robustness"),
+        }
+        return final_scores, main_metric, metric
+
     def save_predictions_dataset(
         self,
         dataset: dict,
@@ -413,8 +457,8 @@ class EvaluationService:
         model_id: int,
         arn_service: str,
         current_round: int = 1,
-        scoring: bool = True,
     ):
+
         try:
             print("dataset", dataset)
             (
@@ -424,6 +468,7 @@ class EvaluationService:
                 minutes_time_prediction,
                 num_samples,
                 folder_name,
+                tags,
             ) = self.heavy_prediction(
                 dataset, tasks.task_code, ip, model_id, folder_name
             )
@@ -432,66 +477,16 @@ class EvaluationService:
             self.logger.info("Calculate throughput")
             throughput = self.get_throughput(num_samples, minutes_time_prediction)
             self.logger.info("Calculate score")
-            data_dict = {}
-            for data_version, data_types in prediction_dict.items():
-                for data_type in data_types:
-                    data_dict[f"{data_version}_{data_type}"] = self._load_dataset(
-                        prediction_dict[data_version][data_type]
-                    )
-            if scoring:
-                perturb_exists = (
-                    "fairness_predictions" in data_dict
-                    or "robustness_predictions" in data_dict
-                )
-            task_configuration = yaml.safe_load(
-                self.task_repository.get_by_id(tasks.id)["config_yaml"]
+            final_scores, main_metric, metric = self.get_finals_scores(
+                tasks.id, prediction_dict, tags
             )
-            input_formatter = InputFormatter(task_configuration)
-            formatted_dict = {}
-            for data_type in data_dict:
-                formatted_key = f"formatted_{data_type}"
-                grouped_key = f"grouped_{data_type}"
-                if "dataset" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_labels(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_labels(
-                        formatted_dict[formatted_key]
-                    )
-                elif "predictions" in data_type:
-                    formatted_dict[formatted_key] = input_formatter.format_predictions(
-                        data_dict[data_type]
-                    )
-                    formatted_dict[grouped_key] = input_formatter.group_predictions(
-                        formatted_dict[formatted_key]
-                    )
-
-            evaluator = Evaluator(task_configuration)
-            main_metric = evaluator.evaluate(
-                formatted_dict["formatted_base_predictions"],
-                formatted_dict["formatted_base_dataset"],
-            )
-            delta_metrics = {}
-            if perturb_exists:
-                delta_metrics = evaluator.evaluate_delta_metrics(
-                    formatted_dict.get("grouped_base_predictions"),
-                    formatted_dict.get("grouped_robustness_predictions"),
-                    formatted_dict.get("grouped_fairness_predictions"),
-                )
-            metric = task_configuration["perf_metric"]["type"]
-            final_scores = {
-                str(metric): main_metric,
-                "fairness": delta_metrics.get("fairness"),
-                "robustness": delta_metrics.get("robustness"),
-                "memory": memory,
-                "throughput": throughput,
-            }
             print("current_round", current_round)
-            print("tasks.id", tasks.id)
             round_info = self.round_repository.get_round_info_by_round_and_task(
                 tasks.id, current_round
             )
-            print("round_info", round_info)
+            print("final_scores", final_scores)
+            print("main_metric", main_metric)
+            print("metric", metric)
             new_score = {
                 "perf": main_metric["perf"],
                 "pretty_perf": main_metric["pretty_perf"],
@@ -500,10 +495,9 @@ class EvaluationService:
                 "mid": model_id,
                 "r_realid": round_info.id,
                 "did": dataset_id,
-                "memory_utilization": final_scores["memory"],
-                "examples_per_second": final_scores["throughput"],
+                "memory_utilization": memory,
+                "examples_per_second": throughput,
             }
-            print(new_score)
             final_score = new_score.copy()
             metric_name = str(metric)
             final_score[metric_name] = main_metric["perf"]
@@ -555,18 +549,164 @@ class EvaluationService:
         self.score_repository.add(new_score)
         return new_score
 
+    def download_downstream_dataset(self, task_code: str, downstream_dataset: dict):
+        base_dataset_name = "datasets/{}/{}.jsonl".format(
+            task_code, downstream_dataset["dataset"]
+        )
+        filename = "app/resources/datasets/{}.jsonl".format(
+            downstream_dataset["dataset"]
+        )
+        self.s3.download_file(
+            self.s3_bucket,
+            base_dataset_name,
+            filename,
+        )
+        return filename
+
+    def download_predictions(self, task_code: str, predictions: str):
+        filename = f"app/resources/predictions/{predictions}.jsonl"
+        base_prediction_name = f"predictions/{task_code}/{predictions}.jsonl"
+        self.s3.download_file(
+            self.s3_bucket,
+            base_prediction_name,
+            filename,
+        )
+        return filename
+
+    def evaluate_downstream_tasks(self, task_id: int, predictions: str, model_id: int):
+        downstream_datasets_info = self.dataset_repository.get_downstream_datasets(
+            task_id
+        )
+        task_code = self.task_repository.get_by_id(task_id)["task_code"]
+        print(downstream_datasets_info)
+        download_predictions = self.download_predictions(task_code, predictions)
+        downstream_predictions = load_dataset(download_predictions)
+        for downstream_dataset in downstream_datasets_info:
+            dataset_name = downstream_dataset["dataset"].split("-")[0]
+            print("dataset_name", dataset_name)
+            downstream_datasets_filename = self.download_downstream_dataset(
+                task_code, downstream_dataset
+            )
+            downstream_datasets = load_dataset(downstream_datasets_filename)
+            downstream_tasks = [item["sub_task"] for item in downstream_datasets]
+            downstream_prediction = [
+                d for d in downstream_predictions if d["task"].lower() == dataset_name
+            ]
+            current_round = downstream_dataset["round_id"]
+            dataset_id = downstream_dataset["dataset_id"]
+            for sub_task in downstream_tasks:
+                print("sub_task", sub_task)
+                self.logger.info("Evaluate downstream task", sub_task)
+                labels = [
+                    data for data in downstream_datasets if data["sub_task"] == sub_task
+                ][0]["labels"]
+                predicts = [
+                    data
+                    for data in downstream_prediction
+                    if data["sub_task"] == sub_task
+                ][0]["predictions"]
+                metric = [
+                    data for data in downstream_datasets if data["sub_task"] == sub_task
+                ][0]["metric"]
+                round_info = self.round_repository.get_round_info_by_round_and_task(
+                    task_id, current_round
+                )
+                score = evaluation_without_tags(metric, predicts, labels)
+                print(score)
+                new_score = {
+                    "perf": score["perf"],
+                    "pretty_perf": score["pretty_perf"],
+                    "fairness": 0,
+                    "robustness": 0,
+                    "mid": model_id,
+                    "r_realid": round_info.id,
+                    "did": dataset_id,
+                    "memory_utilization": 0,
+                    "examples_per_second": 0,
+                }
+                final_score = new_score.copy()
+                metric_name = str(metric)
+                final_score[metric_name] = final_score["perf"]
+                final_score["task"] = dataset_name
+                final_score["sub_task"] = sub_task
+                new_score["metadata_json"] = json.dumps(final_score)
+                self.score_repository.add(new_score)
+                self.logger.info("Save score")
+        self.model_repository.update_model_status(model_id)
+        user_id = self.model_repository.get_user_id_by_model_id(model_id)[0]
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        self.email_helper.send(
+            contact=user_email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": model_id, "model_id": model_id},
+            subject=f"Model {model_id} training succeeded.",
+        )
+
+    def test(self):
+        task_id = 48
+        predictions = "1161-test_prediction-1675"
+        model_id = 1146
+        downstream_datasets_info = self.dataset_repository.get_downstream_datasets(
+            task_id
+        )
+        task_code = self.task_repository.get_by_id(task_id)["task_code"]
+        print(downstream_datasets_info)
+        download_predictions = self.download_predictions(task_code, predictions)
+        downstream_predictions = load_dataset(download_predictions)
+        for downstream_dataset in downstream_datasets_info:
+            dataset_name = downstream_dataset["dataset"].split("-")[0]
+            print("dataset_name", dataset_name)
+            downstream_datasets_filename = self.download_downstream_dataset(
+                task_code, downstream_dataset
+            )
+            downstream_datasets = load_dataset(downstream_datasets_filename)
+            downstream_tasks = [item["sub_task"] for item in downstream_datasets]
+            downstream_prediction = [
+                d for d in downstream_predictions if d["task"].lower() == dataset_name
+            ]
+            current_round = downstream_dataset["round_id"]
+            dataset_id = downstream_dataset["dataset_id"]
+            print("downstream_prediction", downstream_prediction)
+            for sub_task in downstream_tasks:
+                print("sub_task", sub_task)
+                self.logger.info("Evaluate downstream task", sub_task)
+                labels = [
+                    data for data in downstream_datasets if data["sub_task"] == sub_task
+                ][0]["labels"]
+                predicts = [
+                    data
+                    for data in downstream_prediction
+                    if data["sub_task"] == sub_task
+                ][0]["predictions"]
+                metric = [
+                    data for data in downstream_datasets if data["sub_task"] == sub_task
+                ][0]["metric"]
+                round_info = self.round_repository.get_round_info_by_round_and_task(
+                    task_id, current_round
+                )
+                score = evaluation_without_tags(metric, predicts, labels)
+                print(score)
+
+                new_score = {
+                    "perf": score["perf"],
+                    "pretty_perf": score["pretty_perf"],
+                    "fairness": 0,
+                    "robustness": 0,
+                    "mid": model_id,
+                    "r_realid": round_info.id,
+                    "did": dataset_id,
+                    "memory_utilization": 0,
+                    "examples_per_second": 0,
+                }
+                final_score = new_score.copy()
+                metric_name = str(metric)
+                final_score[metric_name] = final_score["perf"]
+                new_score["metadata_json"] = json.dumps(final_score)
+                self.score_repository.add(new_score)
+                self.logger.info("Save score")
+
     def initialize_model_evaluation(
         self, task_code: str, s3_url: str, model_id: int, user_id: int
     ):
         return self.evaluation(task_code, s3_url, model_id, user_id)
-
-    @staticmethod
-    def _load_dataset(path: str):
-        data = []
-        with open(path) as f:
-            for line in f.readlines():
-                data.append(json.loads(line))
-        return data
-
-    def _upload_results(evaluated_model_metrics: dict):
-        return None

@@ -14,7 +14,13 @@ from pathlib import Path
 import numpy as np
 import sacrebleu
 import sentencepiece
-from sklearn.metrics import auc, balanced_accuracy_score, f1_score, roc_curve
+from sklearn.metrics import (
+    accuracy_score,
+    auc,
+    balanced_accuracy_score,
+    f1_score,
+    roc_curve,
+)
 
 from app.domain.services.builder_and_evaluation.eval_utils.instance_property import (
     instance_property,
@@ -252,6 +258,11 @@ def get_squad_f1(predictions: list, targets: list):
 
 def get_squad_f1_meta(task=None):
     return {"unit": "%", "pretty_name": "QA F1", "utility_direction": 1, "offset": 0}
+
+
+def get_new_accuracy(predictions: list, targets: list):
+    accuracy = accuracy_score(targets, predictions)
+    return accuracy
 
 
 # TODO: split into different functions for fairness and robustness.

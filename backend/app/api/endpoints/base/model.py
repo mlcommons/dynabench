@@ -1,7 +1,7 @@
 # Copyright (c) MLCommons and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, File, UploadFile
 from fastapi.responses import FileResponse
 
 from app.domain.schemas.base.model import (
@@ -103,3 +103,12 @@ def get_model_prediction_per_dataset(model: ModelPredictionPerDatasetRequest):
 @router.get("/get_amount_of_models_per_task/{task_id}", response_model=int)
 def get_amount_of_models_per_task(task_id: int):
     return ModelService().get_amount_of_models_per_task(task_id)
+
+
+@router.post("/upload_prediction_to_s3")
+def upload_prediction_to_s3(
+    user_id: int, task_code: str, model_name: str, predictions: UploadFile = File(...)
+):
+    return ModelService().upload_prediction_to_s3(
+        user_id, task_code, model_name, predictions
+    )

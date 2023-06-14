@@ -93,7 +93,6 @@ class ModelRepository(AbstractRepository):
             .filter(
                 self.model.tid == task_id,
                 self.model.is_published == 1,
-                self.model.deployment_status == "deployed",
             )
             .all()
         )

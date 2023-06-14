@@ -96,7 +96,7 @@ const CreateModel = ({ handleClose, handleSubmitModel, ...props }) => {
                   <Card.Body>
                     <Container>
                       <Row>
-                        <Col md={12}>{fileName}</Col>
+                        <Col md={12}>{fileName.split("\\").pop()}</Col>
                         <Col
                           md={12}
                           style={{

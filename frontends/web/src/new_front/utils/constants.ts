@@ -63,7 +63,7 @@ export const companies = [
   },
   {
     name: "Cohere",
-    logo: "https://cdn.sanity.io/images/1b1xyaip/production/f5e234e86f931398d5e05f4cdeb8d6dfcd182c7a-102x18.svg",
+    logo: "https://cdn.sanity.io/images/rjtqmwfu/production/ae020d94b599cc453cc09ebc80be06d35d953c23-102x18.svg",
   },
   {
     name: "Oxford University",

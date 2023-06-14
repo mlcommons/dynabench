@@ -126,6 +126,11 @@ class Task(Base):
     creation_example_md = Column(Text)
     max_amount_examples_on_a_day = Column(Integer)
     bucket_for_aditional_example_data = Column(Text)
+    is_finished = Column(TINYINT(1), server_default=text("'0'"))
+    submitable_predictions = Column(TINYINT(1), server_default=text("'0'"))
+    show_leaderboard = Column(TINYINT(1), server_default=text("'1'"))
+    show_trends = Column(TINYINT(1), server_default=text("'1'"))
+    show_user_leaderboard = Column(TINYINT(1), server_default=text("'1'"))
 
 
 class User(Base):
@@ -194,6 +199,8 @@ class Dataset(Base):
     source_url = Column(Text)
     access_type = Column(Enum("scoring", "standard", "hidden"))
     log_access_type = Column(Enum("owner", "user"))
+    tags = Column(Integer)
+    has_downstream = Column(TINYINT(1))
 
     task = relationship("Task")
 
@@ -327,6 +334,7 @@ class ChallengesTypes(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(260), nullable=False, unique=True)
+    url = Column(String(260), nullable=False, unique=True)
 
 
 class TaskCategories(Base):
@@ -459,10 +467,3 @@ class Validation(Base):
 
     example = relationship("Example")
     user = relationship("User")
-
-
-class TaskChallengeType(Base):
-    __tablename__ = "task_challenge_type"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False, unique=True)
