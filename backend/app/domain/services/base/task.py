@@ -149,6 +149,7 @@ class TaskService:
         sort_direction: str = "asc",
         offset: int = 0,
         limit: int = 5,
+        metrics: list = [],
     ):
         dynaboard_info = {}
         ordered_metrics = self.get_order_metrics_by_task_id(task_id)
@@ -177,6 +178,7 @@ class TaskService:
             sort_direction,
             offset,
             limit,
+            metrics,
         )
         dynaboard_info["data"] = data
         return dynaboard_info

@@ -120,6 +120,7 @@ class ScoreService:
         sort_direction: str,
         offset: int,
         limit: int,
+        metrics: list,
     ):
         models_dynaboard_info = []
         for model_id in model_ids:
@@ -152,11 +153,10 @@ class ScoreService:
         ]
 
         # Sort
-        order_metric_names = [item["name"] for item in order_metric_with_weight]
         if sort_by != "dynascore":
             models_dynaboard_info = sorted(
                 models_dynaboard_info,
-                key=lambda x: x["averaged_scores"][order_metric_names.index(sort_by)],
+                key=lambda x: x["averaged_scores"][metrics.index(sort_by)],
                 reverse=(sort_direction == "desc"),
             )
         return models_dynaboard_info

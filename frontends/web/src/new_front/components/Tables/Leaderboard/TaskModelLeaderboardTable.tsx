@@ -249,8 +249,6 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
   const metricColumnWidth =
     60 / ((metrics?.length ?? 0) === 0 ? 1 : metrics.length);
 
-  console.log("sort", sort);
-
   return (
     <Table hover className="mb-0">
       {metrics && metrics.length > 0 && (

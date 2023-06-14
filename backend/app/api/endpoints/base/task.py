@@ -73,6 +73,7 @@ async def get_dynaboard_info_by_task_id(model: GetDynaboardInfoByTaskIdRequest):
         model.sort_direction,
         model.offset,
         model.limit,
+        model.metrics,
     )
 
 

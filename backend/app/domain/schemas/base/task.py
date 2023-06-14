@@ -27,3 +27,4 @@ class GetDynaboardInfoByTaskIdRequest(BaseModel):
     sort_direction: str
     offset: int
     limit: int
+    metrics: List[str]

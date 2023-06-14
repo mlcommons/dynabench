@@ -133,6 +133,7 @@ const TaskModelLeaderboardCard = ({
         sort_direction: sort.direction,
         offset: page * pageLimit,
         limit: pageLimit,
+        metrics: metrics.map((metric) => metric.id),
       });
       if (response.ok) {
         setData(scoreData.data);
