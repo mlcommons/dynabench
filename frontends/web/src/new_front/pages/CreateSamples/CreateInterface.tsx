@@ -147,7 +147,7 @@ const CreateInterface = () => {
                   />
                 )}
               </div>
-              <div id="inputUser" className="p-3">
+              <div id="inputUser" className="">
                 {taskConfiguration?.user_input && (
                   <AnnotationUserInputStrategy
                     config={taskConfiguration?.user_input as any}

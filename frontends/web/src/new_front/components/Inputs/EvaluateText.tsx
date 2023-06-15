@@ -23,7 +23,24 @@ const EvaluateText: FC<EvaluateTextProps> = ({ text, id }) => {
             required
           ></textarea>
         </div>
-        <div className="flex items-center w-full justify-between px-3 py-2 border-t ">
+        <div className="flex items-center w-full justify-between px-3 pt-4  border-t ">
+          <div className="relative ">
+            <div className="bg-gray-50 -mt-8 text-letter truncate rounded py-1 px-4">
+              {score}
+            </div>
+            <svg
+              className="absolute text-letter w-full h-2 left-0 top-100"
+              x="0px"
+              y="0px"
+              viewBox="0 0 20 20"
+            >
+              <polygon
+                className="fill-current"
+                points="5,0 20,10 5,20"
+                fill="black"
+              ></polygon>
+            </svg>
+          </div>
           <input
             id={id}
             className={`rounded-full w-full cursor-pointer ${
@@ -41,8 +58,9 @@ const EvaluateText: FC<EvaluateTextProps> = ({ text, id }) => {
             onChange={handleRangeChange}
           />
         </div>
+
         <div className="flex justify-between w-full">
-          <span className=" text-gray-500 pl-3">0</span>
+          <span className=" text-gray-500 pl-20">0</span>
           <span className=" text-gray-500 pr-3">100</span>
         </div>
       </div>

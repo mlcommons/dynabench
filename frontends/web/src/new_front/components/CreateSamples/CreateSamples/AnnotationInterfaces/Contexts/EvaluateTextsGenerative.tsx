@@ -13,11 +13,11 @@ import {
   getListFromLocalStorage,
   addElementToListInLocalStorage,
 } from "new_front/utils/helpers/functions/LocalStorage";
-import { getIdFromImageString } from "new_front/utils/helpers/functions/DataManipulation";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
 import EvaluateText from "new_front/components/Inputs/EvaluateText";
+import { Button, Modal } from "react-bootstrap";
 
 const EvaluateTextsGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -31,9 +31,9 @@ const EvaluateTextsGenerative: FC<
   setIsGenerativeContext,
   setPartialSampleId,
 }) => {
-  const [promptHistory, setPromptHistory] = useState<any[]>([]);
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [texts, setTexts] = useState<any[]>([]);
+  const [showExtraInfo, setShowExtraInfo] = useState<boolean>(false);
   const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts
   );
@@ -69,36 +69,48 @@ const EvaluateTextsGenerative: FC<
     });
   };
 
+  useEffect(() => {
+    if (modelInputs) {
+      console.log("modelInputs", modelInputs);
+    }
+  }, [modelInputs]);
+
   return (
     <>
       {!showLoader ? (
         <div>
           <div className="grid col-span-1 py-3 justify-items-end">
-            <AnnotationInstruction
-              placement="left"
-              tooltip={
-                "“Click here to view a log of all your previously attempted prompts”"
-              }
-            >
-              <Dropdown
-                options={artifactsInput.categories}
-                placeholder="Categories"
-                onChange={() => {}}
-              />
-            </AnnotationInstruction>
-            <AnnotationInstruction
-              placement="left"
-              tooltip={
-                instruction.prompt ||
-                "Select the text that best exemplifies the harm"
-              }
-            >
-              <BasicInputRemain
-                onChange={handlePromptChange}
-                onEnter={generateTexts}
-                placeholder={prompt}
-              />
-            </AnnotationInstruction>
+            <div className="grid grid-cols-3 w-full gap-6">
+              <div className="col-span-2">
+                <AnnotationInstruction
+                  placement="left"
+                  tooltip={
+                    instruction.prompt ||
+                    "Select the text that best exemplifies the harm"
+                  }
+                >
+                  <BasicInputRemain
+                    onChange={handlePromptChange}
+                    onEnter={generateTexts}
+                    placeholder={prompt}
+                  />
+                </AnnotationInstruction>
+              </div>
+              <div className="col-span-1 z-40">
+                <AnnotationInstruction
+                  placement="left"
+                  tooltip={
+                    "“Click here to view a log of all your previously attempted prompts”"
+                  }
+                >
+                  <Dropdown
+                    options={artifactsInput.categories}
+                    placeholder="Categories"
+                    onChange={() => {}}
+                  />
+                </AnnotationInstruction>
+              </div>
+            </div>
             <AnnotationInstruction
               placement="top"
               tooltip={
@@ -107,8 +119,8 @@ const EvaluateTextsGenerative: FC<
             >
               <GeneralButton
                 onClick={generateTexts}
-                text="Ask "
-                className="mt-4 border-0 font-weight-bold light-gray-bg task-action-btn"
+                text="Ask the model a question"
+                className=" border-0 font-weight-bold light-gray-bg task-action-btn"
               />
             </AnnotationInstruction>
           </div>
@@ -122,6 +134,44 @@ const EvaluateTextsGenerative: FC<
                     <EvaluateText text={text.text} id={index.toString()} />
                   ))}
                 </>
+              </div>
+              <div className="grid col-span-1 py-3 justify-items-end">
+                <GeneralButton
+                  onClick={() => {
+                    setShowExtraInfo(true);
+                  }}
+                  text="Save"
+                  className=" border-0 font-weight-bold light-gray-bg task-action-btn"
+                />
+                <Modal
+                  show={showExtraInfo}
+                  onHide={() => setShowExtraInfo(false)}
+                >
+                  <Modal.Header
+                    closeButton
+                    onHide={() => setShowExtraInfo(false)}
+                  >
+                    <Modal.Title>Explanation</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    <h5 className="text-lg pb-6">
+                      Your prefer output is the answer of the model A. What do
+                      you like and dislike about the answer?
+                    </h5>
+                    <input className="w-full p-3 rounded-1 thick-border bg-[#f0f2f5]" />
+                    <div
+                      className="flex justify-center col-span-3 gap-8"
+                      id="submit"
+                    >
+                      <Button
+                        variant="primary"
+                        className="max-w-xs my-4 submit-btn button-ellipse text-uppercase"
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </Modal.Body>
+                </Modal>
               </div>
             </>
           )}
