@@ -159,6 +159,13 @@ class ScoreService:
                 key=lambda x: x["averaged_scores"][metrics.index(sort_by)],
                 reverse=(sort_direction == "desc"),
             )
+        else:
+            print("sort by dynascore")
+            models_dynaboard_info = sorted(
+                models_dynaboard_info,
+                key=lambda x: x["averaged_scores"][-1],
+                reverse=(sort_direction == "desc"),
+            )
         return models_dynaboard_info
 
     def get_model_dynaboard_info(
