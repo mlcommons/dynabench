@@ -5,20 +5,22 @@
 import base64
 import hashlib
 import json
+import multiprocessing
 import os
 import random
 
 import boto3
 import yaml
 from fastapi import HTTPException
+from tqdm import tqdm
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
 from app.domain.services.utils.image_generators import (
-    MidjourneyImageProvider,
     OpenAIImageProvider,
     StableDiffusionImageProvider,
 )
+from app.domain.services.utils.llm import HFProvider, OpenAIProvider
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
@@ -28,11 +30,11 @@ class ContextService:
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
         self.task_service = TaskService()
-        self.providers = [
+        self.image_providers = [
             StableDiffusionImageProvider(),
             OpenAIImageProvider(),
-            MidjourneyImageProvider(),
         ]
+        self.llm_provider = OpenAIProvider()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
@@ -118,65 +120,71 @@ class ContextService:
         self, prompt: str, user_id: int, num_images: int, models: list, endpoint: str
     ) -> dict:
         images = []
-        for generator in self.providers:
+        for generator in self.image_providers:
             if generator.provider_name() == "openai":
                 n = 2
+                generated_images = generator.generate_images(
+                    prompt, n, models, endpoint
+                )
             else:
-                n = 16
-            generated_images = generator.generate_images(prompt, n, models, endpoint)
-            if generator.provider_name() != "midjourney":
-                print(len(generated_images))
-                for image in generated_images:
-                    image_id = (
-                        generator.provider_name()
-                        + "_"
-                        + prompt
-                        + "_"
-                        + str(user_id)
-                        + "_"
-                        + hashlib.md5(image.encode()).hexdigest()
+                n = 8
+                with multiprocessing.Pool(2) as p:
+                    generated_images = p.starmap(
+                        generator.generate_images,
+                        [(prompt, n, models, endpoint)] * 2,
                     )
-                    print(image_id)
-                    if black_image in image:
-                        new_dict = {
-                            "image": forbidden_image,
-                            "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
-                        }
-                        images.append(new_dict)
-                    else:
-                        new_dict = {
-                            "image": image,
-                            "id": image_id,
-                        }
-                        filename = f"adversarial-nibbler/{image_id}.jpeg"
-                        self.s3.put_object(
-                            Body=base64.b64decode(image),
-                            Bucket=self.dataperf_bucket,
-                            Key=filename,
-                        )
-                        images.append(new_dict)
+                    p.close()
+                    p.join()
+                generated_images = [
+                    image for sublist in generated_images for image in sublist
+                ]
+            for image in generated_images:
+                image_id = (
+                    generator.provider_name()
+                    + "_"
+                    + prompt
+                    + "_"
+                    + str(user_id)
+                    + "_"
+                    + hashlib.md5(image.encode()).hexdigest()
+                )
+                print(image_id)
+                if black_image in image:
+                    new_dict = {
+                        "image": forbidden_image,
+                        "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
+                    }
+                    images.append(new_dict)
+                else:
+                    new_dict = {
+                        "image": image,
+                        "id": image_id,
+                    }
+                    filename = f"adversarial-nibbler/{image_id}.jpeg"
+                    self.s3.put_object(
+                        Body=base64.b64decode(image),
+                        Bucket=self.dataperf_bucket,
+                        Key=filename,
+                    )
+                    images.append(new_dict)
         random.shuffle(images)
         return images
 
-    def get_perdi_contexts(self) -> dict:
-        return [
-            {
-                "id": "perdi_1",
-                "text": "The dog is running in the park",
-            },
-            {
-                "id": "perdi_2",
-                "text": "The cat is running in the park",
-            },
-            {
-                "id": "perdi_3",
-                "text": "The tiger is walking in the park",
-            },
-            {
-                "id": "perdi_4",
-                "text": "The dog is walking in the sea",
-            },
-        ]
+    def get_perdi_contexts(self, prompt) -> dict:
+        all_answers = []
+        count = 1
+        for model in [
+            "text-davinci-003",
+            "text-ada-001",
+            "text-babbage-001",
+            "text-curie-001",
+        ]:
+            text = self.llm_provider.generate_text(prompt, model)
+            print("This is the response from", model, text)
+            all_answers.append({"id": f"perdi_{count}", "text": text, "model": model})
+            count += 1
+        print("This are all answers", all_answers)
+        return all_answers
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
@@ -188,4 +196,4 @@ class ContextService:
                 num_images=30,
             )
         elif type == "perdi":
-            return self.get_perdi_contexts()
+            return self.get_perdi_contexts(prompt=artifacts["prompt"])
