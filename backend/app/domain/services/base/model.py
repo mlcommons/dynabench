@@ -23,6 +23,7 @@ from app.domain.helpers.transform_data_objects import (
 )
 from app.domain.services.base.example import ExampleService
 from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoService
+from app.domain.services.base.task import TaskService
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
@@ -36,6 +37,7 @@ class ModelService:
         self.task_repository = TaskRepository()
         self.user_repository = UserRepository()
         self.dataset_repository = DatasetRepository()
+        self.task_service = TaskService()
         self.example_service = ExampleService()
         self.evaluation_service = EvaluationService()
         self.round_user_example_service = RoundUserExampleInfoService()
