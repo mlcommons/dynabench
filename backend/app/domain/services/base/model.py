@@ -188,6 +188,7 @@ class ModelService:
         response["label"] = model_input["label"]
         response["input"] = model_input[model_input["input_by_user"]]
         response["fooled"] = model_wrong
+        response["sandBox"] = sandbox_mode
         if not sandbox_mode:
             self.example_service.create_example_and_increment_counters(
                 context_id,

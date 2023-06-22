@@ -8,9 +8,8 @@ const ResponseInfo: FC<ModelOutputType> = ({
   prediction,
   probabilities,
   fooled,
+  sandBox,
 }) => {
-  const sandBox = true;
-
   return (
     <>
       <div className="rounded border m-3 bg-[#e9ffe8]">

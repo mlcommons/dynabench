@@ -4,6 +4,7 @@ export type ModelOutputType = {
   prediction: string | number;
   probabilities?: Probabilities[];
   fooled: boolean;
+  sandBox: boolean;
 };
 
 export type Probabilities = {

@@ -196,6 +196,7 @@ const CreateInterface = () => {
                     prediction={modelOutput.prediction}
                     probabilities={modelOutput.probabilities}
                     fooled={modelOutput.fooled}
+                    sandBox={modelOutput.sandBox}
                   />
                 )}
               </div>

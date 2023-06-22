@@ -12,7 +12,6 @@ import random
 import boto3
 import yaml
 from fastapi import HTTPException
-from tqdm import tqdm
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
@@ -20,7 +19,7 @@ from app.domain.services.utils.image_generators import (
     OpenAIImageProvider,
     StableDiffusionImageProvider,
 )
-from app.domain.services.utils.llm import HFProvider, OpenAIProvider
+from app.domain.services.utils.llm import OpenAIProvider
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
@@ -170,20 +169,18 @@ class ContextService:
         random.shuffle(images)
         return images
 
-    def get_perdi_contexts(self, prompt) -> dict:
-        all_answers = []
-        count = 1
-        for model in [
-            "text-davinci-003",
-            "text-ada-001",
-            "text-babbage-001",
-            "text-curie-001",
-        ]:
-            text = self.llm_provider.generate_text(prompt, model)
-            print("This is the response from", model, text)
-            all_answers.append({"id": f"perdi_{count}", "text": text, "model": model})
-            count += 1
-        print("This are all answers", all_answers)
+    def get_perdi_contexts(
+        self, prompt: str, number_of_samples: int, models: list
+    ) -> dict:
+        random.shuffle(models)
+        all_answers = [
+            {
+                "id": f"perdi_{id + 1}",
+                "text": self.llm_provider.generate_text(prompt, model),
+                "model": model,
+            }
+            for id, model in enumerate(models[:number_of_samples])
+        ]
         return all_answers
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
@@ -196,4 +193,8 @@ class ContextService:
                 num_images=30,
             )
         elif type == "perdi":
-            return self.get_perdi_contexts(prompt=artifacts["prompt"])
+            return self.get_perdi_contexts(
+                prompt=artifacts["prompt"],
+                number_of_samples=artifacts["number_of_samples"],
+                models=artifacts["models"],
+            )
