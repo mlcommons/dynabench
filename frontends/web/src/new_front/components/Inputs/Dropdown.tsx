@@ -59,7 +59,10 @@ const Dropdown: FC<DropdownProps> = ({
               type="button"
               className="text-gray-700 block w-full px-4 py-2 text-left border-solid rounded-sm	focus:outline-none hover:bg-gray-100 hover:text-gray-900"
               role="menuitem"
-              onClick={() => onChange(option)}
+              onClick={() => {
+                setOpen(false);
+                onChange(option);
+              }}
             >
               {option}
             </button>

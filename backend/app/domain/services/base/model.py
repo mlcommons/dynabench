@@ -9,6 +9,7 @@ import time
 
 import boto3
 import requests
+import yaml
 from fastapi import UploadFile
 from pydantic import Json
 
@@ -160,7 +161,18 @@ class ModelService:
         response = {}
         if model_url:
             prediction = self.single_model_prediction(model_url, model_input)
+            task_config = self.task_service.get_task_info_by_task_id(task_id)
+            config_yaml = yaml.safe_load(task_config.config_yaml)
             response["prediction"] = prediction[model_prediction_label]
+            if "cast_output" in config_yaml:
+                response["prediction"] = next(
+                    (
+                        key
+                        for key, value in config_yaml["cast_output"].items()
+                        if value == response["prediction"]
+                    ),
+                    None,
+                )
             response["probabilities"] = prediction["prob"]
             model_wrong = self.evaluate_model_in_the_loop(
                 response["prediction"],

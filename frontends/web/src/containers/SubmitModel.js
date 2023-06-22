@@ -235,7 +235,7 @@ const SubmitModel = (props) => {
                       <li>python3 -m venv env</li>
                       <li>source env/bin/activate</li>
                       <li>python3 -m pip install -r requirements.txt</li>
-                      <li>python3 -m uvicorn app.app:app --reload</li>
+                      <li>python3 -m uvicorn app.main:app --reload</li>
                     </ul>
                     <br />
                     Once you run the last command, open localhost:8000/docs on

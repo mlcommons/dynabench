@@ -1,26 +1,54 @@
-import React, { FC, useState } from "react";
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
+import React, { FC, useContext, useState } from "react";
 
 type EvaluateTextProps = {
   text: string;
   id: string;
+  texts: any;
+  setTexts: any;
+  name?: string;
 };
 
-const EvaluateText: FC<EvaluateTextProps> = ({ text, id }) => {
+const EvaluateText: FC<EvaluateTextProps> = ({
+  text,
+  id,
+  name,
+  texts,
+  setTexts,
+}) => {
   const [score, setScore] = useState<number>(50);
 
-  const handleRangeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpdateScore = (event: any) => {
     setScore(parseInt(event.target.value));
+    setTexts(
+      texts.map((text: any) => {
+        if (text.id === id) {
+          return {
+            ...text,
+            score: parseInt(event.target.value),
+          };
+        }
+        return text;
+      })
+    );
   };
 
   return (
     <form>
+      <label
+        htmlFor="comment"
+        className="block text-base font-medium text-letter-color"
+      >
+        {name}
+      </label>
       <div className="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 ">
-        <div className="px-4 py-2 bg-white rounded-t-lg ">
+        <div className="px-2 py-2 bg-white rounded-t-lg ">
           <textarea
             id="comment"
-            className="w-full px-0 text-letter-color bg-white border-0 h-32"
+            className="w-full px-0 text-black bg-white border-0 h-32 font-medium"
             placeholder={text}
             required
+            disabled
           ></textarea>
         </div>
         <div className="flex items-center w-full justify-between px-3 pt-4  border-t ">
@@ -55,7 +83,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({ text, id }) => {
             defaultValue={50}
             min={1}
             max={100}
-            onChange={handleRangeChange}
+            onChange={handleUpdateScore}
           />
         </div>
 

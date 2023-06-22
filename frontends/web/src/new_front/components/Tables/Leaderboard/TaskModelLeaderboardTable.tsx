@@ -25,7 +25,6 @@ const SortContainer: FC<SortContainerProps> = ({
   className,
   children,
 }) => {
-  console.log("currentSort", currentSort);
   return (
     <div onClick={() => toggleSort(sortKey)} className={className}>
       {currentSort.field === sortKey && currentSort.direction === "asc" && (
