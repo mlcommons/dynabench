@@ -23,6 +23,7 @@ class ValidateExampleRequest(BaseModel):
     metadata_json: dict
     task_id: int
     validate_non_fooling: bool
+    round_id: int
 
 
 class PartiallyCreationExampleGenerativeRequest(BaseModel):

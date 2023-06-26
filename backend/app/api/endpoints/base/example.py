@@ -45,6 +45,7 @@ def validate_example(model: ValidateExampleRequest):
         model.metadata_json,
         model.task_id,
         model.validate_non_fooling,
+        model.round_id,
     )
 
 

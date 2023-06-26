@@ -148,6 +148,7 @@ class ExampleService:
         metadata_json: dict,
         task_id: int,
         validate_non_fooling: bool,
+        round_id: int,
     ):
         self.validation_service.create_validation(
             example_id, user_id, label, mode, metadata_json
@@ -168,7 +169,9 @@ class ExampleService:
         elif label == "flag":
             self.example_repository.increment_counter_total_flagged(example_id)
         if not validate_non_fooling:
-            self.round_service.increment_counter_examples_verified_fooled(task_id)
+            self.round_service.increment_counter_examples_verified_fooled(
+                task_id, round_id
+            )
 
     def get_validate_configuration(self, task_id: int) -> dict:
         task_config = self.task_service.get_task_info_by_task_id(task_id)
