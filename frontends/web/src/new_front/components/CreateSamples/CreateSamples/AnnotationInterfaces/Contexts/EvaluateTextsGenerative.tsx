@@ -73,25 +73,25 @@ const EvaluateTextsGenerative: FC<
       {
         id: "1",
         model_name: "GPT-3",
-        text: "This is a generated text",
+        text: "The secret of life is a philosophical and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
         score: 0.9,
       },
       {
         id: "2",
         model_name: "GPT-2",
-        text: "This is another generated text",
+        text: "The secret of life is a philosophical and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
         score: 0.8,
       },
       {
         id: "3",
         model_name: "GPT-1",
-        text: "This is a generated text",
+        text: "The secret of life is a profound and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
         score: 0.7,
       },
       {
         id: "4",
         model_name: "GPT-4",
-        text: "This is another generated text",
+        text: "Ultimately, the secret of life may be found in the journey of self-reflection, introspection, and living in alignment with one's values and authentic self. It is an ongoing process of seeking purpose, finding joy and fulfillment, and embracing the experiences and lessons that life offers.",
         score: 0.6,
       },
     ];

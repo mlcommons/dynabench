@@ -40,15 +40,31 @@ const Chatbot: FC<ChatbotProps> = ({
     let artifactsInput = {
       prompt: artifact,
     };
-    const generatedTexts = await post("/context/get_generative_contexts", {
-      type: type,
-      artifacts: artifactsInput,
-    });
+    // const generatedTexts = await post("/context/get_generative_contexts", {
+    //   type: type,
+    //   artifacts: artifactsInput,
+    // });
 
-    if (response.ok) {
-      setNewResponses(generatedTexts);
-      setIsAskingQuestion(false);
-    }
+    // if (response.ok) {
+    //   setNewResponses(generatedTexts);
+    //   setIsAskingQuestion(false);
+    // }
+    const generatedTexts = [
+      {
+        id: "1",
+        model_name: "GPT-3",
+        text: "As an AI language model, I do not have personal experiences or direct interactions with individuals who taught me specific information. My responses are generated based on a vast amount of pre-existing human knowledge that has been processed and organized by machine learning algorithms.",
+        score: 0.9,
+      },
+      {
+        id: "2",
+        model_name: "GPT-2",
+        text: "My training involved analyzing and learning from a wide range of text sources, such as books, articles, websites, and other textual materials available on the internet. The information I provide is a combination of general knowledge and patterns derived from the training data.",
+        score: 0.8,
+      },
+    ];
+    setNewResponses(generatedTexts);
+    setIsAskingQuestion(false);
   };
 
   const finishSection = () => {

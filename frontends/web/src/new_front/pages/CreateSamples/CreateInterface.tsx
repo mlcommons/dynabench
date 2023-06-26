@@ -185,6 +185,7 @@ const CreateInterface = () => {
                       taskInfo.max_amount_examples_on_a_day
                     }
                     setModelOutput={setModelOutput}
+                    setIsGenerativeContext={setIsGenerativeContext}
                   />
                 )}
               </div>

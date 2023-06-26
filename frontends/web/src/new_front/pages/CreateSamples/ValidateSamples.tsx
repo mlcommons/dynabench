@@ -17,6 +17,7 @@ import { ExampleInfoType } from "new_front/types/createSamples/validateSamples/e
 const ValidateSamples: FC = () => {
   const [taskInfoName, setTaskInfoName] = useState<string>("");
   const [validateNonFooling, setValidateNonFooling] = useState<boolean>(false);
+  const [roundId, setRoundId] = useState<number>(0);
   const [label, setLabel] = useState<string>("");
   const { get, post, response, loading } = useFetch();
   const [generalInstructions, setGeneralInstructions] = useState<string>("");
@@ -54,6 +55,7 @@ const ValidateSamples: FC = () => {
     );
     if (response.ok) {
       setTaskInfoName(taskInfo?.task_name);
+      setRoundId(taskInfo?.round.id);
       setValidateNonFooling(Boolean(taskInfo?.validate_non_fooling));
       setValidationConfigInfo(validationConfigInfo);
       setInfoExampleToValidate(infoExampleToValidate);
@@ -142,6 +144,7 @@ const ValidateSamples: FC = () => {
                 metadataExample={metadataExample}
                 taskId={infoExampleToValidate.task_id}
                 validateNonFooling={validateNonFooling}
+                roundId={roundId}
               />
             </div>
           </div>

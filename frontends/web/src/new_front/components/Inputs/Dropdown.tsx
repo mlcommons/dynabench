@@ -17,7 +17,7 @@ const Dropdown: FC<DropdownProps> = ({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className=" w-full text-right pb-6 ">
+    <div className="w-full pb-6 text-right ">
       <div>
         <button
           type="button"
@@ -30,15 +30,15 @@ const Dropdown: FC<DropdownProps> = ({
           <div className="flex justify-between w-full">
             <span className="pt-1">{placeholder}</span>
             <svg
-              className="-mr-1 h-7 w-7 text-gray-800 flex mt-1 "
+              className="flex mt-1 -mr-1 text-gray-800 h-7 w-7 "
               viewBox="0 0 20 20"
               fill="currentColor"
               aria-hidden="true"
             >
               <path
-                fill-rule="evenodd"
+                fillRule="evenodd"
                 d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                clip-rule="evenodd"
+                clipRule="evenodd"
               />
             </svg>
           </div>
@@ -57,7 +57,7 @@ const Dropdown: FC<DropdownProps> = ({
           {options.map((option) => (
             <button
               type="button"
-              className="text-gray-700 block w-full px-4 py-2 text-left border-solid rounded-sm	focus:outline-none hover:bg-gray-100 hover:text-gray-900"
+              className="block w-full px-4 py-2 text-left text-gray-700 border-solid rounded-sm focus:outline-none hover:bg-gray-100 hover:text-gray-900"
               role="menuitem"
               onClick={() => {
                 setOpen(false);
