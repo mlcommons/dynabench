@@ -5,6 +5,7 @@
 from fastapi import APIRouter, Response
 
 from app.domain.schemas.base.example import (
+    ConvertS3ImageToBase64Request,
     DownloadAdditionalDataExamplesRequest,
     DownloadAllExamplesRequest,
     DownloadExamplesRequest,
@@ -88,7 +89,9 @@ def download_all_created_examples(
 def download_created_examples_user(
     model: DownloadExamplesRequest,
 ):
-    return ExampleService().download_created_examples_user(model.task_id, model.user_id)
+    return ExampleService().download_created_examples_user(
+        model.task_id, model.user_id, model.amount
+    )
 
 
 @router.post("/download_additional_data", response_model={})
@@ -102,4 +105,13 @@ def download_additional_data(
             "Content-Disposition": "attachment; filename=files.zip",
             "Content-Type": "application/zip",
         },
+    )
+
+
+@router.post("/convert_s3_image_to_base_64", response_model={})
+def convert_s3_image_to_base_64(
+    model: ConvertS3ImageToBase64Request,
+):
+    return ExampleService().convert_s3_image_to_base_64(
+        model.image_name, model.bucket_name
     )

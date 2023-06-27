@@ -2,6 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import base64
 import io
 import json
 import os
@@ -226,10 +227,12 @@ class ExampleService:
             examples_data_list.append(example_necessary_info)
         return json.dumps(examples_data_list, cls=CustomJSONEncoder)
 
-    def download_created_examples_user(self, task_id: int, user_id: int) -> dict:
+    def download_created_examples_user(
+        self, task_id: int, user_id: int, amount: int
+    ) -> dict:
         if user_id:
             examples_data = self.example_repository.download_created_examples_user(
-                task_id, user_id
+                task_id, user_id, amount
             )
             examples_data_list = []
             for example in examples_data:
@@ -283,3 +286,8 @@ class ExampleService:
                 zf.writestr(key, file_content)
         in_memory_zip.seek(0)
         return in_memory_zip.getvalue()
+
+    def convert_s3_image_to_base_64(self, image_name: str, bucket_name: str) -> str:
+        image = self.s3.get_object(Bucket=bucket_name, Key=image_name)
+        image_content = image["Body"].read()
+        return base64.b64encode(image_content).decode("utf-8")

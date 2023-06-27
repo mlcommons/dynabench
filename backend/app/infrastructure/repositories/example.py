@@ -96,13 +96,15 @@ class ExampleRepository(AbstractRepository):
         )
         self.session.commit()
 
-    def download_created_examples_user(self, task_id: int, user_id: int):
+    def download_created_examples_user(self, task_id: int, user_id: int, amount: int):
         return (
             self.session.query(self.model, Context)
             .join(Context, Example.cid == Context.id)
             .join(Round, Context.r_realid == Round.id)
             .filter(Round.tid == task_id)
             .filter(Example.uid == user_id)
+            .order_by(func.random())
+            .limit(amount)
             .all()
         )
 

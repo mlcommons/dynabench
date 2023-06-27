@@ -48,7 +48,13 @@ class DownloadAllExamplesRequest(BaseModel):
 class DownloadExamplesRequest(BaseModel):
     task_id: int
     user_id: Optional[int] = None
+    amount: Optional[int] = 5
 
 
 class DownloadAdditionalDataExamplesRequest(BaseModel):
     folder_direction: str
+
+
+class ConvertS3ImageToBase64Request(BaseModel):
+    image_name: str
+    bucket_name: str
