@@ -201,3 +201,6 @@ class TaskService:
 
     def update_task_instructions(self, task_id: int, instructions: dict):
         return self.task_repository.update_task_instructions(task_id, instructions)
+
+    def get_tasks_with_samples_created_by_user(self, user_id: int):
+        return self.task_repository.get_tasks_with_samples_created_by_user(user_id)

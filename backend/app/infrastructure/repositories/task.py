@@ -8,7 +8,13 @@
 
 from sqlalchemy.sql.expression import func
 
-from app.infrastructure.models.models import ChallengesTypes, Round, Task
+from app.infrastructure.models.models import (
+    ChallengesTypes,
+    Context,
+    Example,
+    Round,
+    Task,
+)
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -112,3 +118,14 @@ class TaskRepository(AbstractRepository):
 
     def get_challenges_types(self):
         return self.session.query(ChallengesTypes).all()
+
+    def get_tasks_with_samples_created_by_user(self, user_id: int):
+        return (
+            self.session.query(self.model.id, self.model.name)
+            .join(Round, Round.tid == self.model.id)
+            .join(Context, Context.r_realid == Round.id)
+            .join(Example, Example.cid == Context.id)
+            .filter(Example.uid == user_id)
+            .distinct()
+            .all()
+        )

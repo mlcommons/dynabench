@@ -80,3 +80,8 @@ async def get_dynaboard_info_by_task_id(model: GetDynaboardInfoByTaskIdRequest):
 @router.get("/get_challenges_types", response_model={})
 async def get_challenges_types():
     return TaskService().get_challenges_types()
+
+
+@router.get("/get_tasks_with_samples_created_by_user/{user_id}", response_model={})
+async def get_tasks_with_samples_created_by_user(user_id: int):
+    return TaskService().get_tasks_with_samples_created_by_user(user_id)
