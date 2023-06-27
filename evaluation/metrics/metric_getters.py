@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -63,11 +67,12 @@ def get_delta_metrics(
 
 
 def get_task_metrics_meta(task):
-    instance_config = instance_property[task.instance_type]
     task_config = yaml.load(task.config_yaml, yaml.SafeLoader)
     perf_metric_type = task_config["perf_metric"]["type"]
     delta_metric_types = [obj["type"] for obj in task_config.get("delta_metrics", [])]
-    aws_metric_names = instance_config["aws_metrics"]
+    aws_metric_names = instance_property.get(
+        task.__dict__.get("instance_type"), {}
+    ).get("aws_metrics", [])
 
     # TODO: make it possible to display some modes with aws metrics and some
     # models without aws metrics on the same leaderboard?

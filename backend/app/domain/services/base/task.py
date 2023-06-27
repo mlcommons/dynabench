@@ -91,8 +91,9 @@ class TaskService:
             obj["type"] for obj in task_configuration.get("delta_metrics", [])
         ]
         aws_metric_names = instance_property.get(
-            task_info.get("instance_type"), None
+            task_info.get("instance_type"), {}
         ).get("aws_metrics", [])
+        print("aws_metric_names", aws_metric_names)
         ordered_metric_field_names = (
             [perf_metric_type["type"]] + delta_perf_metrics_type + aws_metric_names
         )
