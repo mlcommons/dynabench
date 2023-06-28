@@ -11,6 +11,8 @@ import boto3
 import requests
 import yaml
 from fastapi import UploadFile
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferMemory
 from pydantic import Json
 
 from app.domain.helpers.email import EmailHelper
@@ -25,6 +27,7 @@ from app.domain.services.base.example import ExampleService
 from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoService
 from app.domain.services.base.task import TaskService
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
+from app.domain.services.utils.llm import OpenAIProvider
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
@@ -49,6 +52,7 @@ class ModelService:
         self.s3 = self.session.client("s3")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.email_helper = EmailHelper()
+        self.openai_provider = OpenAIProvider()
 
     def get_model_in_the_loop(self, task_id: str) -> str:
         model_in_the_loop_info = self.model_repository.get_model_in_the_loop(task_id)
@@ -346,3 +350,36 @@ class ModelService:
             subject=f"Model {model_name} upload succeeded.",
         )
         return "Model evaluate successfully"
+
+    def conversation_with_buffer_memory(
+        self,
+        history: dict,
+        model_name: str,
+        provider: str,
+        prompt: str,
+        num_answers: int,
+    ):
+        if provider == "openai":
+            llm = self.openai_provider.initialize(
+                model_name=model_name,
+            )
+        memory = ConversationBufferMemory()
+        memory_functions = {
+            "user": memory.chat_memory.add_user_message,
+            "bot": memory.chat_memory.add_ai_message,
+        }
+        for key, messages in history.items():
+            for message in messages:
+                memory_function = memory_functions.get(key)
+                memory_function(message["text"])
+        responses = []
+        for i in range(num_answers):
+            conversation = ConversationChain(llm=llm, memory=memory)
+            response = {
+                "id": i,
+                "model_name": model_name,
+                "text": conversation.predict(input=prompt),
+                "score": 0.5,
+            }
+            responses.append(response)
+        return responses

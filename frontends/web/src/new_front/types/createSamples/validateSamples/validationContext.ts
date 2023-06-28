@@ -5,4 +5,5 @@ export type ValidationContext = {
   label?: string;
   info?: string;
   bucket?: string;
+  folder?: string;
 };

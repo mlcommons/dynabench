@@ -7,31 +7,39 @@ const ImageS3: FC<ValidationFactoryType & ValidationContext> = ({
   label,
   info,
   bucket,
+  folder,
 }) => {
   const [image, setImage] = useState<any>();
   const { post, response } = useFetch();
 
   useEffect(() => {
-    // const getImage = async () => {
-    //   const image = await post(`/example/convert_s3_image_to_base_64`, {
-    //     image_name: info,
-    //     bucket_name: bucket,
-    //   })
-    //   if (response.ok) {
-    //     setImage(image)
-    //   }
-    // }
-    // getImage()
-    console.log("bucket", bucket);
-    console.log("info", info);
+    const getImage = async () => {
+      const image = await post(`/example/convert_s3_image_to_base_64`, {
+        image_name: `${folder}/${info}.jpeg`,
+        bucket_name: bucket,
+      });
+      if (response.ok) {
+        setImage(image);
+      }
+    };
+    getImage();
   }, [info]);
 
   return (
     <>
       {info && (
         <div className="py-1">
-          <div className="text-base text-[#005798] font-bold normal-case ">
-            {label!.replace("_", " ")}
+          <div className="text-lg text-[#005798] font-bold normal-case pb-4">
+            {label!.charAt(0).toUpperCase() + label!.slice(1).replace("_", " ")}
+          </div>
+          <div className="flex justify-center">
+            <img
+              height={240}
+              width={240}
+              src={`data:image/jpeg;base64,${image}`}
+              className={`scale-[1] rounded-lg pb-2`}
+              alt="src"
+            />
           </div>
         </div>
       )}

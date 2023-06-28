@@ -6,6 +6,7 @@ import os
 from abc import ABC, abstractmethod
 
 import openai
+from langchain.llms import OpenAI
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from app.domain.services.base.task import TaskService
@@ -30,6 +31,9 @@ class OpenAIProvider(LLMProvider):
     def __init__(self):
         self.api_key = os.getenv("OPENAI")
         openai.api_key = self.api_key
+
+    def initialize(self, model_name: str):
+        return OpenAI(temperature=0.9, model_name=model_name)
 
     def generate_text(self, prompt: str, model: str) -> str:
         response = openai.Completion.create(

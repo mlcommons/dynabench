@@ -52,7 +52,7 @@ const ExampleCreated: FC<ExampleCreatedProps> = ({ taskId }) => {
             <h3 className="flex justify-center pt-8 pb-6 pl-16 text-2xl font-bold">
               Examples created by you
             </h3>
-            <div className="w-9/12 py-16 mx-auto ">
+            <div className="w-9/12 py-4 mx-auto ">
               <Carousel cols={1} rows={1} loop>
                 {examplesCreated.map((example) => (
                   <Carousel.Item>

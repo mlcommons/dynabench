@@ -32,6 +32,7 @@ const EvaluateTextsGenerative: FC<
   setPartialSampleId,
 }) => {
   const [showLoader, setShowLoader] = useState<boolean>(false);
+  const [bestAnswer, setBestAnswer] = useState<any>({});
   const [texts, setTexts] = useState<any[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
     user: [],
@@ -73,24 +74,28 @@ const EvaluateTextsGenerative: FC<
       {
         id: "1",
         model_name: "GPT-3",
+        provider: "openai",
         text: "The secret of life is a philosophical and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
         score: 0.9,
       },
       {
         id: "2",
         model_name: "GPT-2",
+        provider: "openai",
         text: "The secret of life is a philosophical and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
         score: 0.8,
       },
       {
         id: "3",
         model_name: "GPT-1",
+        provider: "openai",
         text: "The secret of life is a profound and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
         score: 0.7,
       },
       {
         id: "4",
         model_name: "GPT-4",
+        provider: "openai",
         text: "Ultimately, the secret of life may be found in the journey of self-reflection, introspection, and living in alignment with one's values and authentic self. It is an ongoing process of seeking purpose, finding joy and fulfillment, and embracing the experiences and lessons that life offers.",
         score: 0.6,
       },
@@ -131,6 +136,11 @@ const EvaluateTextsGenerative: FC<
           answer.score > max.score ? answer : max
       ),
     });
+    setBestAnswer(
+      texts.reduce((max: { score: number }, answer: { score: number }) =>
+        answer.score > max.score ? answer : max
+      )
+    );
 
     setChatHistory({
       ...chatHistory,
@@ -171,7 +181,7 @@ const EvaluateTextsGenerative: FC<
       {!showLoader ? (
         <div>
           <div className="grid col-span-1 py-3 justify-items-end">
-            <div className="grid grid-cols-3 w-full gap-6">
+            <div className="grid w-full grid-cols-3 gap-6">
               <div className="col-span-2">
                 <AnnotationInstruction
                   placement="left"
@@ -187,7 +197,7 @@ const EvaluateTextsGenerative: FC<
                   />
                 </AnnotationInstruction>
               </div>
-              <div className="col-span-1 z-40">
+              <div className="z-40 col-span-1">
                 <AnnotationInstruction
                   placement="left"
                   tooltip={
@@ -211,7 +221,7 @@ const EvaluateTextsGenerative: FC<
               <GeneralButton
                 onClick={generateTexts}
                 text="Ask the model a question"
-                className=" border-0 font-weight-bold light-gray-bg task-action-btn"
+                className="border-0 font-weight-bold light-gray-bg task-action-btn"
               />
             </AnnotationInstruction>
           </div>
@@ -232,7 +242,7 @@ const EvaluateTextsGenerative: FC<
                 <GeneralButton
                   onClick={handleSelectedText}
                   text="Save"
-                  className=" border-0 font-weight-bold light-gray-bg task-action-btn"
+                  className="border-0 font-weight-bold light-gray-bg task-action-btn"
                 />
               </div>
             </>
@@ -240,7 +250,8 @@ const EvaluateTextsGenerative: FC<
           {showChatbot && (
             <Chatbot
               chatHistory={chatHistory}
-              type={generative_context.type}
+              model_name={bestAnswer.model_name}
+              provider={bestAnswer.provider}
               setChatHistory={setChatHistory}
               setShowExtraInfo={setShowExtraInfo}
               updateModelInputs={updateModelInputs}
@@ -282,7 +293,7 @@ const ExtraInfo: FC<ExtraInfoProps> = ({ showExtraInfo, setShowExtraInfo }) => {
         <Modal.Title>Explanation</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <h5 className="text-lg pb-6">
+        <h5 className="pb-6 text-lg">
           Your prefer output is the answer of the model A. What do you like and
           dislike about the answer?
         </h5>

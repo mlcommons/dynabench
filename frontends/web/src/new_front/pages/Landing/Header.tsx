@@ -39,19 +39,19 @@ const Header = () => {
             <div className="flex flex-row w-full gap-16 mt-4">
               <div className="mb-12 md:mb-0">
                 <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
-                  15+
+                  20+
                 </h2>
                 <h5 className="mb-2 text-lg font-medium">Challenges</h5>
               </div>
               <div className="mb-12 md:mb-0">
                 <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
-                  25+
+                  40+
                 </h2>
                 <h5 className="mb-2 text-lg font-medium">Partipants</h5>
               </div>
               <div className="mb-12 md:mb-0">
                 <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
-                  30+
+                  50+
                 </h2>
                 <h5 className="mb-2 text-lg font-medium">Models</h5>
               </div>
