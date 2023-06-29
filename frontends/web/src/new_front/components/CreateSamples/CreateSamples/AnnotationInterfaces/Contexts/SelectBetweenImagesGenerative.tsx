@@ -42,21 +42,41 @@ const SelectBetweenImagesGenerative: FC<
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
     CreateInterfaceContext
   );
-
+  const neccessaryFields = ["original_prompt"];
   const [selectedImage, setSelectedImage] = useState<string>("");
 
   const generateImages = async () => {
-    setShowLoader(true);
-    setIsGenerativeContext(true);
-    const generatedImages = await post("/context/get_generative_contexts", {
-      type: generative_context.type,
-      artifacts: artifactsInput,
-    });
-    if (response.ok) {
-      setShowImages(generatedImages);
-      addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
-      setPromptHistory(getListFromLocalStorage("promptHistory"));
-      setShowLoader(false);
+    if (
+      neccessaryFields.every(
+        (item) =>
+          modelInputs.hasOwnProperty(item) ||
+          metadataExample.hasOwnProperty(item)
+      )
+    ) {
+      setShowLoader(true);
+      setIsGenerativeContext(true);
+      const generatedImages = await post("/context/get_generative_contexts", {
+        type: generative_context.type,
+        artifacts: artifactsInput,
+      });
+      if (response.ok) {
+        setShowImages(generatedImages);
+        addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
+        setPromptHistory(getListFromLocalStorage("promptHistory"));
+        setShowLoader(false);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+      }
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "You need to fill all the fields!",
+      });
     }
   };
 
@@ -135,8 +155,22 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const cleanHistory = () => {
-    saveListToLocalStorage([], "promptHistory");
-    setPromptHistory(getListFromLocalStorage("promptHistory"));
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will not be able to recover this history!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, keep it",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        saveListToLocalStorage([], "promptHistory");
+        setPromptHistory(getListFromLocalStorage("promptHistory"));
+        Swal.fire("Deleted!", "Your history has been deleted.", "success");
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire("Cancelled", "Your history is safe :)", "error");
+      }
+    });
   };
 
   useEffect(() => {

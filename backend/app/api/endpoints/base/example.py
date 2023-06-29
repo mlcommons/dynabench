@@ -6,6 +6,7 @@ from fastapi import APIRouter, Response
 
 from app.domain.schemas.base.example import (
     ConvertS3ImageToBase64Request,
+    CreateExampleRequest,
     DownloadAdditionalDataExamplesRequest,
     DownloadAllExamplesRequest,
     DownloadExamplesRequest,
@@ -61,6 +62,22 @@ def partial_creation_generative_example(
         model.tag,
         model.round_id,
         model.task_id,
+    )
+
+
+@router.post("/create_example", response_model={})
+def create_example(
+    model: CreateExampleRequest,
+):
+    return ExampleService().create_example(
+        model.context_id,
+        model.user_id,
+        model.model_wrong,
+        model.model_endpoint_name,
+        model.input_json,
+        model.output_json,
+        model.metadata,
+        model.tag,
     )
 
 

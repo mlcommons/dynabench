@@ -26,6 +26,17 @@ class ValidateExampleRequest(BaseModel):
     round_id: int
 
 
+class CreateExampleRequest(BaseModel):
+    context_id: int
+    user_id: int
+    input_json: dict
+    model_wrong: Optional[bool] = False
+    model_endpoint_name: Optional[str] = None
+    output_json: Optional[dict] = None
+    metadata: Optional[dict] = None
+    tag: Optional[str] = "generative"
+
+
 class PartiallyCreationExampleGenerativeRequest(BaseModel):
     example_info: dict
     context_id: int

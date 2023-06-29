@@ -1,23 +1,19 @@
 import UserContext from "containers/UserContext";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
+import Chatbot from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/Chatbot";
 import BasicInput from "new_front/components/Inputs/BasicInput";
 import Dropdown from "new_front/components/Inputs/Dropdown";
+import EvaluateText from "new_front/components/Inputs/EvaluateText";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
-import React, { FC, useState, useContext, useEffect } from "react";
+import { ChatHistoryType } from "new_front/types/createSamples/createSamples/utils";
+import React, { FC, useContext, useEffect, useState } from "react";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
-import EvaluateText from "new_front/components/Inputs/EvaluateText";
-import { Button, Modal } from "react-bootstrap";
-import Chatbot from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/Chatbot";
-
-interface ChatHistoryType {
-  user: any[];
-  bot: any[];
-}
+import ExtraInfoChatbot from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/ExtraInfoChatbot";
 
 const EvaluateTextsGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -26,10 +22,6 @@ const EvaluateTextsGenerative: FC<
   generative_context,
   instruction,
   contextId,
-  taskId,
-  realRoundId,
-  setIsGenerativeContext,
-  setPartialSampleId,
 }) => {
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [bestAnswer, setBestAnswer] = useState<any>({});
@@ -49,6 +41,7 @@ const EvaluateTextsGenerative: FC<
   const { post, response } = useFetch();
   const { user } = useContext(UserContext);
   const { modelInputs, updateModelInputs } = useContext(CreateInterfaceContext);
+  const neccessaryFields = ["original_prompt", "category"];
 
   const handleSaveCategory = async (category: string) => {
     updateModelInputs({
@@ -58,62 +51,77 @@ const EvaluateTextsGenerative: FC<
   };
 
   const generateTexts = async () => {
-    setShowLoader(true);
-    // const generatedTexts = await post('/context/get_generative_contexts', {
-    //   type: generative_context.type,
-    //   artifacts: artifactsInput,
-    // })
-    // if (response.ok) {
-    //   setTexts(generatedTexts)
-    //   updateModelInputs({
-    //     [field_names_for_the_model.generated_answers ??
-    //     'generated_answers']: generatedTexts,
-    //   })
-    // }
-    const generatedTexts = [
-      {
-        id: "1",
-        model_name: "GPT-3",
-        provider: "openai",
-        text: "The secret of life is a philosophical and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
-        score: 0.9,
-      },
-      {
-        id: "2",
-        model_name: "GPT-2",
-        provider: "openai",
-        text: "The secret of life is a philosophical and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
-        score: 0.8,
-      },
-      {
-        id: "3",
-        model_name: "GPT-1",
-        provider: "openai",
-        text: "The secret of life is a profound and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
-        score: 0.7,
-      },
-      {
-        id: "4",
-        model_name: "GPT-4",
-        provider: "openai",
-        text: "Ultimately, the secret of life may be found in the journey of self-reflection, introspection, and living in alignment with one's values and authentic self. It is an ongoing process of seeking purpose, finding joy and fulfillment, and embracing the experiences and lessons that life offers.",
-        score: 0.6,
-      },
-    ];
-    setTexts(generatedTexts);
+    if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
+      const generatedTexts = await post("/context/get_generative_contexts", {
+        type: generative_context.type,
+        artifacts: artifactsInput,
+      });
+      if (response.ok) {
+        setTexts(generatedTexts);
+        updateModelInputs({
+          [field_names_for_the_model.generated_answers ?? "generated_answers"]:
+            generatedTexts,
+        });
+      }
 
-    setChatHistory({
-      ...chatHistory,
-      user: [
-        ...chatHistory.user,
-        {
-          id: "1",
-          text: prompt,
-        },
-      ],
-    });
-    setShowLoader(false);
-    setShowAnswers(true);
+      setShowLoader(true);
+      // const generatedTexts = [
+      //   {
+      //     id: '1',
+      //     model_name: 'GPT-3',
+      //     provider: 'openai',
+      //     model_letter: 'A',
+      //     text:
+      //       'The secret of life is a philosophical and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.',
+      //     score: 50,
+      //   },
+      //   {
+      //     id: '2',
+      //     model_name: 'text-davinci-003',
+      //     provider: 'openai',
+      //     text: 'Good and you?',
+      //     model_letter: 'B',
+      //     score: 50,
+      //   },
+      //   {
+      //     id: '3',
+      //     model_name: 'GPT-1',
+      //     provider: 'openai',
+      //     model_letter: 'C',
+      //     text:
+      //       'The secret of life is a profound and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.',
+      //     score: 50,
+      //   },
+      //   {
+      //     id: '4',
+      //     model_name: 'GPT-4',
+      //     provider: 'openai',
+      //     model_letter: 'D',
+      //     text:
+      //       "Ultimately, the secret of life may be found in the journey of self-reflection, introspection, and living in alignment with one's values and authentic self. It is an ongoing process of seeking purpose, finding joy and fulfillment, and embracing the experiences and lessons that life offers.",
+      //     score: 50,
+      //   },
+      // ]
+      // setTexts(generatedTexts)
+
+      setChatHistory({
+        ...chatHistory,
+        user: [
+          ...chatHistory.user,
+          {
+            id: "1",
+            text: prompt,
+          },
+        ],
+      });
+      setShowLoader(false);
+      setShowAnswers(true);
+    } else {
+      Swal.fire({
+        title: "Please fill in all the fields",
+        icon: "error",
+      });
+    }
   };
 
   const handlePromptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,7 +266,10 @@ const EvaluateTextsGenerative: FC<
             />
           )}
           {showExtraInfo && (
-            <ExtraInfo
+            <ExtraInfoChatbot
+              bestAnswer={bestAnswer}
+              contextId={contextId}
+              userId={user.id!}
               showExtraInfo={showExtraInfo}
               setShowExtraInfo={setShowExtraInfo}
             />
@@ -278,37 +289,6 @@ const EvaluateTextsGenerative: FC<
         </div>
       )}
     </>
-  );
-};
-
-type ExtraInfoProps = {
-  showExtraInfo: boolean;
-  setShowExtraInfo: (show: boolean) => void;
-};
-
-const ExtraInfo: FC<ExtraInfoProps> = ({ showExtraInfo, setShowExtraInfo }) => {
-  return (
-    <Modal show={showExtraInfo} onHide={() => setShowExtraInfo(false)}>
-      <Modal.Header closeButton onHide={() => setShowExtraInfo(false)}>
-        <Modal.Title>Explanation</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <h5 className="pb-6 text-lg">
-          Your prefer output is the answer of the model A. What do you like and
-          dislike about the answer?
-        </h5>
-        <input className="w-full p-3 rounded-1 thick-border bg-[#f0f2f5]" />
-        <div className="flex justify-center col-span-3 gap-8" id="submit">
-          <Button
-            variant="primary"
-            className="max-w-xs my-4 submit-btn button-ellipse text-uppercase"
-            onClick={() => setShowExtraInfo(false)}
-          >
-            Save
-          </Button>
-        </div>
-      </Modal.Body>
-    </Modal>
   );
 };
 

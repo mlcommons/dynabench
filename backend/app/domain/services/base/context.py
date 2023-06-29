@@ -173,14 +173,17 @@ class ContextService:
         self, prompt: str, number_of_samples: int, models: list
     ) -> dict:
         random.shuffle(models)
-        all_answers = [
-            {
+        all_answers = []
+        for id, model in enumerate(models[:number_of_samples]):
+            answer = {
                 "id": f"perdi_{id + 1}",
-                "text": self.llm_provider.generate_text(prompt, model),
-                "model": model,
+                "text": self.llm_provider.generate_text(prompt, model["name"]),
+                "model": model["name"],
+                "model_letter": chr(ord("A") + id),
+                "provider": model["provider"],
+                "score": 50,
             }
-            for id, model in enumerate(models[:number_of_samples])
-        ]
+            all_answers.append(answer)
         return all_answers
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:

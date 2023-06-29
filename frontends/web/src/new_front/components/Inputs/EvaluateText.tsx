@@ -37,7 +37,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
     <form id={id}>
       <label
         htmlFor="comment"
-        className="block text-base font-medium text-letter-color"
+        className="block pl-1 text-lg font-medium text-letter-color"
       >
         {name}
       </label>
@@ -45,19 +45,19 @@ const EvaluateText: FC<EvaluateTextProps> = ({
         <div className="px-2 py-2 bg-white rounded-t-lg ">
           <textarea
             id="comment"
-            className="w-full px-0 text-black bg-white border-0 h-32 font-medium"
+            className="w-full h-32 px-0 font-medium text-black bg-white border-0"
             placeholder={text}
             required
             disabled
           ></textarea>
         </div>
-        <div className="flex items-center w-full justify-between px-3 pt-4  border-t ">
+        <div className="flex items-center justify-between w-full px-3 pt-4 border-t ">
           <div className="relative ">
-            <div className="bg-gray-50 -mt-8 text-letter truncate rounded py-1 px-4">
+            <div className="px-4 py-1 -mt-8 truncate rounded bg-gray-50 text-letter">
               {score}
             </div>
             <svg
-              className="absolute text-letter w-full h-2 left-0 top-100"
+              className="absolute left-0 w-full h-2 text-letter top-100"
               x="0px"
               y="0px"
               viewBox="0 0 20 20"
@@ -88,8 +88,8 @@ const EvaluateText: FC<EvaluateTextProps> = ({
         </div>
 
         <div className="flex justify-between w-full">
-          <span className=" text-gray-500 pl-20">0</span>
-          <span className=" text-gray-500 pr-3">100</span>
+          <span className="pl-20 text-gray-500 ">0</span>
+          <span className="pr-3 text-gray-500 ">100</span>
         </div>
       </div>
     </form>
