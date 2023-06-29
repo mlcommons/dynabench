@@ -364,15 +364,12 @@ class ModelService:
                 model_name=model_name,
             )
         memory = ConversationBufferMemory()
-        memory_functions = {
-            "user": memory.chat_memory.add_user_message,
-            "bot": memory.chat_memory.add_ai_message,
-        }
-        print("history", history)
-        for key, messages in sorted(history.keys(), key=lambda x: x != "user"):
-            for message in messages:
-                memory_function = memory_functions.get(key)
-                memory_function(message["text"])
+        for entry in history["user"]:
+            user_message = entry["text"]
+            memory.chat_memory.add_user_message(user_message)
+            if history["bot"]:
+                ai_message = history["bot"].pop(0)["text"]
+                memory.chat_memory.add_ai_message(ai_message)
         responses = []
         for i in range(num_answers):
             conversation = ConversationChain(llm=llm, memory=memory)
