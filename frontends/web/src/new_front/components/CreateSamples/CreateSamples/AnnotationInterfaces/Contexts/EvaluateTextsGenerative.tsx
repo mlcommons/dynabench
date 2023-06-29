@@ -52,6 +52,7 @@ const EvaluateTextsGenerative: FC<
 
   const generateTexts = async () => {
     if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
+      setShowLoader(true);
       const generatedTexts = await post("/context/get_generative_contexts", {
         type: generative_context.type,
         artifacts: artifactsInput,
@@ -62,9 +63,15 @@ const EvaluateTextsGenerative: FC<
           [field_names_for_the_model.generated_answers ?? "generated_answers"]:
             generatedTexts,
         });
+        setShowLoader(false);
+      } else {
+        setShowLoader(false);
+        Swal.fire({
+          title: "Something went wrong",
+          icon: "error",
+        });
       }
 
-      setShowLoader(true);
       // const generatedTexts = [
       //   {
       //     id: '1',
@@ -114,7 +121,6 @@ const EvaluateTextsGenerative: FC<
           },
         ],
       });
-      setShowLoader(false);
       setShowAnswers(true);
     } else {
       Swal.fire({
@@ -258,7 +264,7 @@ const EvaluateTextsGenerative: FC<
           {showChatbot && (
             <Chatbot
               chatHistory={chatHistory}
-              model_name={bestAnswer.model_name}
+              model_name={bestAnswer.model}
               provider={bestAnswer.provider}
               setChatHistory={setChatHistory}
               setShowExtraInfo={setShowExtraInfo}
