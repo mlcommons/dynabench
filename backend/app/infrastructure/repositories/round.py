@@ -22,7 +22,7 @@ class RoundRepository(AbstractRepository):
         )
         return round_info
 
-    def increment_counter_examples_collected(self, round_id: int, task_id: int):
+    def increment_counter_examples_collected(self, round_id: int):
         self.session.query(self.model).filter(self.model.id == round_id).update(
             {self.model.total_collected: self.model.total_collected + 1}
         )
