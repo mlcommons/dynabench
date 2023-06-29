@@ -96,13 +96,14 @@ class ExampleService:
             round_id, user_id
         )
         if last_update_examples != datetime.date.today():
+            print("Hello world")
             self.round_user_example_info.create_first_entry_for_day(round_id, user_id)
         else:
             self.round_user_example_info.increment_counter_examples_submitted_today(
                 round_id, user_id
             )
         if model_wrong:
-            self.round_service.increment_counter_examples_fooled(round_id, task_id)
+            self.round_service.increment_counter_examples_fooled(round_id)
             self.round_user_example_info.increment_counter_examples_fooled(
                 round_id, user_id
             )
