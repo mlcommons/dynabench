@@ -33,7 +33,7 @@ class OpenAIProvider(LLMProvider):
         openai.api_key = self.api_key
 
     def initialize(self, model_name: str):
-        return OpenAI(temperature=0.9, model_name=model_name)
+        return OpenAI(temperature=0.6, model_name=model_name)
 
     def generate_text(self, prompt: str, model: str) -> str:
         response = openai.Completion.create(
