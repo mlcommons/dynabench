@@ -74,6 +74,7 @@ class ExampleService:
         round_id: int,
         task_id: int,
     ) -> dict:
+        print("user_id", user_id)
         new_sample_info = self.create_example(
             context_id,
             user_id,
