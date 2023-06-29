@@ -368,6 +368,7 @@ class ModelService:
             "user": memory.chat_memory.add_user_message,
             "bot": memory.chat_memory.add_ai_message,
         }
+        print("history", history)
         for key, messages in sorted(history.keys(), key=lambda x: x != "user"):
             for message in messages:
                 memory_function = memory_functions.get(key)
