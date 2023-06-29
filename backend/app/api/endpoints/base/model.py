@@ -117,6 +117,7 @@ def upload_prediction_to_s3(
 
 @router.post("/conversation_with_buffer_memory")
 def conversation_with_buffer_memory(model: ConversationWithBufferMemoryRequest):
+    print("model.history", model.history)
     return ModelService().conversation_with_buffer_memory(
         model.history, model.model_name, model.provider, model.prompt, model.num_answers
     )

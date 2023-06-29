@@ -87,3 +87,9 @@ class RoundUserExampleInfoRepository(AbstractRepository):
             }
         )
         self.session.commit()
+
+    def create_first_entry_for_day(self, round_id: int, user_id: int):
+        self.session.query(self.model).filter(
+            (self.model.r_realid == round_id) & (self.model.uid == user_id)
+        ).update({self.model.amount_examples_on_a_day: 1})
+        self.session.commit()

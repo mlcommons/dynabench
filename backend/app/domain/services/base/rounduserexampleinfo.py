@@ -29,10 +29,6 @@ class RoundUserExampleInfoService:
         )
 
     def increment_counter_examples_fooled(self, round_id: int, user_id: int):
-        if not self.verify_user_and_round(user_id, round_id):
-            self.rounds_user_example_info_repository.create_user_and_round_example_info(
-                round_id, user_id
-            )
         self.rounds_user_example_info_repository.increment_counter_examples_fooled(
             round_id, user_id
         )
@@ -52,6 +48,11 @@ class RoundUserExampleInfoService:
             round_id, user_id
         ) or [datetime.date(1, 1, 1)]
 
+    def create_first_entry_for_day(self, round_id: int, user_id: int):
+        self.rounds_user_example_info_repository.create_first_entry_for_day(
+            round_id, user_id
+        )
+
     def still_allowed_to_submit(
         self, round_id: int, user_id: int, max_amount_examples_on_a_day: int
     ):
@@ -63,4 +64,6 @@ class RoundUserExampleInfoService:
         amounts_examples_created_today = self.amounts_examples_created_today(
             round_id, user_id
         )[0]
+        if not amounts_examples_created_today:
+            amounts_examples_created_today = 0
         return amounts_examples_created_today < max_amount_examples_on_a_day

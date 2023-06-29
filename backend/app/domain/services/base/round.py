@@ -9,8 +9,8 @@ class RoundService:
     def __init__(self):
         self.round_repository = RoundRepository()
 
-    def increment_counter_examples_collected(self, round_id: int, task_id: int):
-        self.round_repository.increment_counter_examples_collected(round_id, task_id)
+    def increment_counter_examples_collected(self, round_id: int):
+        self.round_repository.increment_counter_examples_collected(round_id)
 
     def increment_counter_examples_fooled(self, round_id: int, task_id: int):
         self.round_repository.increment_counter_examples_fooled(round_id, task_id)
