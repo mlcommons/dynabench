@@ -10,7 +10,7 @@ import time
 import boto3
 import requests
 import yaml
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from pydantic import Json
@@ -25,6 +25,7 @@ from app.domain.helpers.transform_data_objects import (
 )
 from app.domain.services.base.example import ExampleService
 from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoService
+from app.domain.services.base.score import ScoreService
 from app.domain.services.base.task import TaskService
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
 from app.domain.services.utils.llm import OpenAIProvider
@@ -39,6 +40,7 @@ class ModelService:
         self.model_repository = ModelRepository()
         self.task_repository = TaskRepository()
         self.user_repository = UserRepository()
+        self.score_service = ScoreService()
         self.dataset_repository = DatasetRepository()
         self.task_service = TaskService()
         self.example_service = ExampleService()
@@ -381,3 +383,9 @@ class ModelService:
             }
             responses.append(response)
         return responses
+
+    def update_model_status(self, model_id: int):
+        if self.score_service.verify_scores_for_all_the_datasets(model_id):
+            self.model_repository.update_published_status(model_id)
+        else:
+            raise HTTPException(status_code=400, detail="Model no has all the scores")

@@ -19,6 +19,7 @@ from sklearn.metrics import (
     auc,
     balanced_accuracy_score,
     f1_score,
+    matthews_corrcoef,
     roc_curve,
 )
 
@@ -187,6 +188,10 @@ def get_accuracy_meta(task=None):
     return {"unit": "%", "pretty_name": "Accuracy", "utility_direction": 1, "offset": 0}
 
 
+def get_matthews_correlation_meta(task=None):
+    return {"unit": "%", "pretty_name": "Accuracy", "utility_direction": 1, "offset": 0}
+
+
 def get_vqa_accuracy(predictions: list, targets: list):
     """
     prediction format: [
@@ -263,6 +268,11 @@ def get_squad_f1_meta(task=None):
 def get_new_accuracy(predictions: list, targets: list):
     accuracy = accuracy_score(targets, predictions)
     return accuracy
+
+
+def get_matthews_correlation(predictions: list, targets: list):
+    mcc = matthews_corrcoef(targets, predictions)
+    return mcc
 
 
 # TODO: split into different functions for fairness and robustness.

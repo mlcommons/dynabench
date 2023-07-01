@@ -114,3 +114,22 @@ class ModelRepository(AbstractRepository):
             )
             .count()
         )
+
+    def get_task_id_by_model_id(self, model_id: int) -> int:
+        return (
+            self.session.query(self.model.tid).filter(self.model.id == model_id).first()
+        )
+
+    def update_published_status(self, model_id: int):
+        instance = (
+            self.session.query(self.model).filter(self.model.id == model_id).first()
+        )
+        instance.is_published = (
+            0
+            if instance.is_published == 1
+            else 1
+            if instance.is_published == 0
+            else instance.is_published
+        )
+        self.session.flush()
+        self.session.commit()

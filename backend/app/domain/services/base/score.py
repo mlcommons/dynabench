@@ -288,3 +288,11 @@ class ScoreService:
             return scores
         else:
             return {"perf": 0.00}
+
+    def verify_scores_for_all_the_datasets(self, model_id: int):
+        task_id = self.model_repository.get_task_id_by_model_id(model_id)[0]
+        scoring_datasets = self.dataset_service.get_scoring_datasets_by_task_id(task_id)
+        scoring_datasets = [item[0] for item in scoring_datasets]
+        return self.score_repository.check_if_model_has_all_scoring_datasets(
+            model_id, scoring_datasets
+        )

@@ -121,3 +121,8 @@ def conversation_with_buffer_memory(model: ConversationWithBufferMemoryRequest):
     return ModelService().conversation_with_buffer_memory(
         model.history, model.model_name, model.provider, model.prompt, model.num_answers
     )
+
+
+@router.get("/update_model_status/{model_id}")
+def update_model_status(model_id: int):
+    return ModelService().update_model_status(model_id)
