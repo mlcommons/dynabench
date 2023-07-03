@@ -133,9 +133,12 @@ class Flores101Base(BaseDataset):
                 src_perfs = self.eval_src_lang(job, src)
                 perf_by_tag.extend(src_perfs)
 
-        perf_metric_type = yaml.load(self.task.config_yaml, yaml.SafeLoader)[
-            "perf_metric"
-        ]["type"]
+
+        task_config = yaml.load(self.task.config_yaml, yaml.SafeLoader)
+        if isinstance(task_config["perf_metric"], list):
+            perf_metric_type = task_config["perf_metric"]["type"]
+        elif isinstance(task_config["perf_metric"], dict):
+            perf_metric_type = task_config["perf_metric"]["type"]
         return compute_averages(perf_metric_type, perf_by_tag), {}
 
     def eval_src_lang(self, job: Job, src: str) -> dict:

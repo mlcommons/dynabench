@@ -17,9 +17,11 @@ from metrics.metrics_dicts import (
 
 
 def get_eval_metrics(task, predictions: list, targets: list) -> tuple:
-    perf_metric_type = yaml.load(task.config_yaml, yaml.SafeLoader)["perf_metric"][
-        "type"
-    ]
+    task_config = yaml.load(task.config_yaml, yaml.SafeLoader)
+    if isinstance(task_config["perf_metric"], list):
+        perf_metric_type = task_config["perf_metric"]["type"]
+    elif isinstance(task_config["perf_metric"], dict):
+        perf_metric_type = task_config["perf_metric"]["type"]
     # NOTE:
     # right now, the returned eval metric scores are just the perf metric, but we
     # could add a feature that allows for the display of multiple eval metrics
@@ -54,9 +56,11 @@ def get_delta_metrics(
     predictions: a list of list of predictions
     targets: a list of labels
     """
-    perf_metric_type = yaml.load(task.config_yaml, yaml.SafeLoader)["perf_metric"][
-        "type"
-    ]
+    task_config = yaml.load(task.config_yaml, yaml.SafeLoader)
+    if isinstance(task_config["perf_metric"], list):
+        perf_metric_type = task_config["perf_metric"]["type"]
+    elif isinstance(task_config["perf_metric"], dict):
+        perf_metric_type = task_config["perf_metric"]["type"]
     perf_metric = eval_metrics_dict[perf_metric_type]
     delta_metrics_scores = {
         perturb_prefix: delta_metrics_dict[perturb_prefix](
@@ -68,6 +72,10 @@ def get_delta_metrics(
 
 def get_task_metrics_meta(task):
     task_config = yaml.load(task.config_yaml, yaml.SafeLoader)
+    if isinstance(task_config["perf_metric"], list):
+        perf_metric_type = task_config["perf_metric"]["type"]
+    elif isinstance(task_config["perf_metric"], dict):
+        perf_metric_type = task_config["perf_metric"]["type"]
     perf_metric_type = task_config["perf_metric"]["type"]
     delta_metric_types = [obj["type"] for obj in task_config.get("delta_metrics", [])]
     aws_metric_names = instance_property.get(

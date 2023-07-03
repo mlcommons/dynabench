@@ -366,12 +366,15 @@ class BaseDataset:
             "tags": <list of string, can be empty>
         }
         """
+        task_config = yaml.load(self.task.config_yaml, yaml.SafeLoader)
+        if isinstance(task_config["perf_metric"], list):
+            reference_name = task_config["perf_metric"]["reference_name"]
+        elif isinstance(task_config["perf_metric"], dict):
+            reference_name = task_config["perf_metric"]["reference_name"]
         return {
             "id": example["uid"],
             "answer": example[
-                yaml.load(self.task.config_yaml, yaml.SafeLoader)["perf_metric"][
-                    "reference_name"
-                ]
+                reference_name
             ],
             "tags": example.get("tags", []),
         }  # NOTE: For now, the perf_metric defines the output to look for
@@ -387,11 +390,16 @@ class BaseDataset:
             "pred": <the prediction that will be used to calculate metrics>,
         }
         """
+        task_config = yaml.load(self.task.config_yaml, yaml.SafeLoader)
+        if isinstance(task_config["perf_metric"], list):
+            reference_name = task_config["perf_metric"]["reference_name"]
+        elif isinstance(task_config["perf_metric"], dict):
+            reference_name = task_config["perf_metric"]["reference_name"]
         return {
             "id": example["id"],
             "pred": example[
-                yaml.load(self.task.config_yaml, yaml.SafeLoader)["perf_metric"][
-                    "reference_name"
+                ["perf_metric"][
+                    reference_name
                 ]
             ],
         }  # NOTE: For now, the perf_metric defines the output to look for
