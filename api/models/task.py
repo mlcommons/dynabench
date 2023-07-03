@@ -923,7 +923,10 @@ class TaskModel(BaseModel):
             config = yaml.load(t_dict["config_yaml"], yaml.SafeLoader)
             # TODO: make the frontend use perf_metric instead of perf_metric_field_name?
             if "perf_metric" in config:
-                t_dict["perf_metric_field_name"] = config["perf_metric"]["type"]
+                if isinstance(config["perf_metric"], list):
+                    t_dict["perf_metric_field_name"] = config["perf_metric"]["type"]
+                elif isinstance(config["perf_metric"], dict):
+                    t_dict["perf_metric_field_name"] = config["perf_metric"]["type"]
                 metrics_meta, ordered_field_names = get_task_metrics_meta(t)
                 ordered_metrics = [
                     dict(

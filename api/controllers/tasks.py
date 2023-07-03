@@ -125,7 +125,6 @@ output:
 - name: prob
   reference_name: label
   type: prob
-perf_metric:
   reference_name: label
   type: macro_f1
             """,
