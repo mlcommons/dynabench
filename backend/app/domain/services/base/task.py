@@ -86,21 +86,26 @@ class TaskService:
     def get_order_metrics_by_task_id(self, task_id: int):
         task_info = self.get_task_info_by_task_id(task_id).__dict__
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
-        perf_metric_type = task_configuration.get("perf_metric", [])
+
+        if isinstance(task_configuration["perf_metric"], list):
+            perf_metric_type = task_configuration.get("perf_metric", [])
+            type_values = [item["type"] for item in perf_metric_type]
+        elif isinstance(task_configuration["perf_metric"], dict):
+            perf_metric_type = task_configuration.get("perf_metric", {})
+            type_values = [perf_metric_type["type"]]
+
         delta_perf_metrics_type = [
             obj["type"] for obj in task_configuration.get("delta_metrics", [])
         ]
         aws_metric_names = instance_property.get(
             task_info.get("instance_type"), {}
         ).get("aws_metrics", [])
-        print("aws_metric_names", aws_metric_names)
+
         ordered_metric_field_names = (
-            [perf_metric_type["type"]] + delta_perf_metrics_type + aws_metric_names
+            type_values + delta_perf_metrics_type + aws_metric_names
         )
         metrics_metadata = {
-            metric: meta_metrics_dict.get(
-                metric, meta_metrics_dict[perf_metric_type["type"]]
-            )(task_info)
+            metric: meta_metrics_dict.get(metric)(task_info)
             for metric in ordered_metric_field_names
         }
         order_metrics = [
