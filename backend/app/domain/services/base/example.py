@@ -62,6 +62,37 @@ class ExampleService:
             tag,
         )
 
+    def increment_counter_examples_submitted(
+        self,
+        round_id: int,
+        user_id: int,
+        context_id: int,
+        task_id: int,
+        model_wrong: int,
+    ):
+        self.user_service.increment_examples_created(user_id)
+        self.round_service.increment_counter_examples_collected(round_id)
+        self.context_service.increment_counter_total_samples_and_update_date(context_id)
+        self.task_service.update_last_activity_date(task_id)
+        self.round_user_example_info.increment_counter_examples_submitted(
+            round_id, user_id
+        )
+        last_update_examples = self.round_user_example_info.get_last_date_used(
+            round_id, user_id
+        )
+        if last_update_examples != datetime.date.today():
+            self.round_user_example_info.create_first_entry_for_day(round_id, user_id)
+        else:
+            self.round_user_example_info.increment_counter_examples_submitted_today(
+                round_id, user_id
+            )
+        if model_wrong:
+            self.round_service.increment_counter_examples_fooled(round_id)
+            self.round_user_example_info.increment_counter_examples_fooled(
+                round_id, user_id
+            )
+            self.user_service.increment_examples_fooled(user_id)
+
     def create_example_and_increment_counters(
         self,
         context_id: int,
@@ -85,28 +116,9 @@ class ExampleService:
             metadata,
             tag,
         )
-        self.user_service.increment_examples_created(user_id)
-        self.round_service.increment_counter_examples_collected(round_id)
-        self.context_service.increment_counter_total_samples_and_update_date(context_id)
-        self.task_service.update_last_activity_date(task_id)
-        self.round_user_example_info.increment_counter_examples_submitted(
-            round_id, user_id
+        self.increment_counter_examples_submitted(
+            round_id, user_id, context_id, task_id, model_wrong
         )
-        last_update_examples = self.round_user_example_info.get_last_date_used(
-            round_id, user_id
-        )
-        if last_update_examples != datetime.date.today():
-            self.round_user_example_info.create_first_entry_for_day(round_id, user_id)
-        else:
-            self.round_user_example_info.increment_counter_examples_submitted_today(
-                round_id, user_id
-            )
-        if model_wrong:
-            self.round_service.increment_counter_examples_fooled(round_id)
-            self.round_user_example_info.increment_counter_examples_fooled(
-                round_id, user_id
-            )
-            self.user_service.increment_examples_fooled(user_id)
         return new_sample_info["id"]
 
     def get_example_to_validate(
@@ -217,7 +229,15 @@ class ExampleService:
         example_id: int,
         model_input: dict,
         metadata: dict,
+        round_id: int,
+        user_id: int,
+        context_id: int,
+        task_id: int,
+        model_wrong: int,
     ) -> str:
+        self.increment_counter_examples_submitted(
+            round_id, user_id, context_id, task_id, model_wrong
+        )
         return self.example_repository.update_creation_generative_example_by_example_id(
             example_id, json.dumps(model_input), json.dumps(metadata)
         )
