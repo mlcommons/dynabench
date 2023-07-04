@@ -107,6 +107,10 @@ const AnnotationButtonActions: FC<Props> = ({
             example_id: partialSampleId,
             example_info: modelInputs,
             metadata_json: metadataExample,
+            round_id: realRoundId,
+            user_id: userId,
+            context_id: contextId,
+            task_id: taskID,
           }
         );
         if (response.ok) {

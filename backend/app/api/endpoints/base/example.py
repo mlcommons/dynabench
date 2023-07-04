@@ -86,7 +86,14 @@ def update_creation_generative_example_by_example_id(
     model: UpdateCreationExampleGenerativeRequest,
 ):
     return ExampleService().update_creation_generative_example_by_example_id(
-        model.example_id, model.example_info, model.metadata_json
+        model.example_id,
+        model.example_info,
+        model.metadata_json,
+        model.round_id,
+        model.user_id,
+        model.context_id,
+        model.task_id,
+        model.model_wrong,
     )
 
 

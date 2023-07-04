@@ -50,6 +50,11 @@ class UpdateCreationExampleGenerativeRequest(BaseModel):
     example_id: int
     example_info: dict
     metadata_json: dict
+    round_id: int
+    user_id: int
+    context_id: int
+    task_id: int
+    model_wrong: Optional[int] = 0
 
 
 class DownloadAllExamplesRequest(BaseModel):
