@@ -50,7 +50,6 @@ class ExampleRepository(AbstractRepository):
         real_round_id: int,
         user_id: int,
         num_matching_validations: int,
-        validate_non_fooling: bool,
     ):
         return (
             self.session.query(Example, Context)
@@ -59,6 +58,21 @@ class ExampleRepository(AbstractRepository):
             .filter(Example.uid != user_id)
             .filter(Example.retracted == 0)
             .filter(Example.total_verified < num_matching_validations)
+            .order_by(func.random())
+            .first()
+        )
+
+    def get_example_to_validate_fooling(
+        self, real_round_id: int, user_id: int, num_matching_validations: int
+    ):
+        return (
+            self.session.query(Example, Context)
+            .join(Context, Example.cid == Context.id)
+            .filter(Context.r_realid == real_round_id)
+            .filter(Example.uid != user_id)
+            .filter(Example.retracted == 0)
+            .filter(Example.total_verified < num_matching_validations)
+            .filter(Example.model_wrong == 1)
             .order_by(func.random())
             .first()
         )

@@ -139,6 +139,7 @@ class TaskService:
         return task
 
     def get_task_id_by_task_code(self, task_code: str):
+        print("task_code", task_code)
         return self.task_repository.get_task_id_by_task_code(task_code).id
 
     def get_perf_metric_field_name_by_task_id(self, task_id: int):

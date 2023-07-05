@@ -130,9 +130,16 @@ class ExampleService:
         task_id: int,
     ) -> dict:
         example_necessary_info = {}
-        example_to_validate = self.example_repository.get_example_to_validate(
-            real_round_id, user_id, num_matching_validations, validate_non_fooling
-        )
+        if validate_non_fooling:
+            example_to_validate = self.example_repository.get_example_to_validate(
+                real_round_id, user_id, num_matching_validations
+            )
+        else:
+            example_to_validate = (
+                self.example_repository.get_example_to_validate_fooling(
+                    real_round_id, user_id, num_matching_validations
+                )
+            )
         example_info = example_to_validate[0].__dict__
         example_necessary_info["example_id"] = example_info["id"]
         example_necessary_info["user_id"] = user_id
