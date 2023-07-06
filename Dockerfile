@@ -3,12 +3,12 @@ FROM python:3.9
 WORKDIR /dynabench
 
 COPY api/requirements.txt api/requirements.txt
-COPY evaluation/requirements.txt evaluation/requirements.txt
+COPY api/evaluation/requirements.txt api/evaluation/requirements.txt
 RUN pip install -r api/requirements.txt --no-cache-dir
-RUN pip install -r evaluation/requirements.txt --no-cache-dir
+RUN pip install -r api/evaluation/requirements.txt --no-cache-dir
 
 COPY api api
-COPY evaluation evaluation
+COPY api/evaluation api/evaluation
 # Run API server
 WORKDIR /dynabench/api
 ENV PORT 8080

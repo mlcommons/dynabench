@@ -207,7 +207,9 @@ class App extends React.Component {
                           <NavDropdown title="Tasks" id="basic-nav-dropdown">
                             <ul className="cl-menu ul-nav">
                               <li id="original" className="li-nav">
-                                <span className="second-nav-a">DADC</span>
+                                <a href="/dadc" className="second-nav-a">
+                                  DADC
+                                </a>
                                 <ul className="ul-nav">
                                   {this.state &&
                                     this.state.tasks
@@ -225,12 +227,9 @@ class App extends React.Component {
                                 </ul>
                               </li>
                               <li id="dataperf" className="li-nav">
-                                <span
-                                  className="second-nav-a"
-                                  onClick={console.log()}
-                                >
+                                <a className="second-nav-a" href="/dataperf">
                                   Dataperf
-                                </span>
+                                </a>
                                 <ul className="ul-nav">
                                   {this.state &&
                                     this.state.tasks
@@ -248,12 +247,9 @@ class App extends React.Component {
                                 </ul>
                               </li>
                               <li id="babylm" className="li-nav">
-                                <span
-                                  className="second-nav-a"
-                                  onClick={console.log()}
-                                >
+                                <a className="second-nav-a" href="/babylm">
                                   BabyLM
-                                </span>
+                                </a>
                                 <ul className="ul-nav">
                                   {this.state &&
                                     this.state.tasks
@@ -271,12 +267,9 @@ class App extends React.Component {
                                 </ul>
                               </li>
                               <li id="lmms" className="li-nav">
-                                <span
-                                  className="second-nav-a"
-                                  onClick={console.log()}
-                                >
+                                <a className="second-nav-a" href="/lmms">
                                   LLMs
-                                </span>
+                                </a>
                                 <ul className="ul-nav">
                                   {this.state &&
                                     this.state.tasks
@@ -294,12 +287,9 @@ class App extends React.Component {
                                 </ul>
                               </li>
                               <li id="flores" className="li-nav">
-                                <span
-                                  className="second-nav-a"
-                                  onClick={console.log()}
-                                >
+                                <a className="second-nav-a" href="/flores">
                                   Flores
-                                </span>
+                                </a>
                                 <ul className="ul-nav">
                                   {this.state &&
                                     this.state.tasks
@@ -317,7 +307,9 @@ class App extends React.Component {
                                 </ul>
                               </li>
                               <li id="contributed" className="li-nav">
-                                <span className="second-nav-a">Others</span>
+                                <a href="/others" className="second-nav-a">
+                                  Others
+                                </a>
                                 <ul className="ul-nav">
                                   {this.state &&
                                     this.state.tasks

@@ -37,7 +37,8 @@ class ScoreService:
             for row in order_metric_with_weight
         ]
         for metric_with_score_and_weight in metrics_with_score_and_weight:
-            score = scores_by_dataset_and_model_id[
+            print(scores_by_dataset_and_model_id["metadata_json"])
+            score = json.loads(scores_by_dataset_and_model_id["metadata_json"])[
                 metric_with_score_and_weight["field_name"]
             ]
             metric_with_score_and_weight["score"] = score
@@ -115,7 +116,7 @@ class ScoreService:
         model_ids: list,
         order_scoring_datasets_with_weight: list,
         order_metric_with_weight: dict,
-        perf_metric_field_name: str,
+        perf_metric_field_name: list,
         sort_by: str,
         sort_direction: str,
         offset: int,

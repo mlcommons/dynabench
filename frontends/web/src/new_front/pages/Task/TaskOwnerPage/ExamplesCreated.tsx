@@ -2,6 +2,7 @@ import React, { FC } from "react";
 import { Button } from "react-bootstrap";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
+import Swal from "sweetalert2";
 
 type ExamplesCreatedProps = {
   taskId: number;
@@ -29,26 +30,29 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
   };
 
   const downloadAdditionalData = async () => {
-    const response = await post(`/example/download_additional_data`, {
+    const urlSigned = await post(`/example/download_additional_data`, {
       folder_direction: s3Bucket,
     });
     if (response.ok) {
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "bucket.zip");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: `Here you can download the additional data: ${urlSigned}`,
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });
     }
   };
 
   return (
     <>
       {!loading ? (
-        <div className="col-span-1 py-4">
-          <div className="grid grid-cols-6">
+        <div className=" col-span-1 py-4">
+          <div className="items-center justify-center grid grid-cols-6">
             <div className="flex justify-end col-span-3 ">
               <div className="col-span-1 pl-2 pr-3" id="submit">
                 <Button

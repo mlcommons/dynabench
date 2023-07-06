@@ -7,7 +7,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import base64
-import sys
 
 import enum
 import requests
@@ -22,9 +21,8 @@ from .dataset import AccessTypeEnum, DatasetModel
 from .round import Round
 
 
-sys.path.append("../evaluation")  # noqa
-from metrics.metric_getters import get_task_metrics_meta  # isort:skip
-from metrics.train_file_metrics import dataperf  # isort:skip
+from evaluation.metrics.metric_getters import get_task_metrics_meta  # isort:skip
+from evaluation.metrics.train_file_metrics import dataperf  # isort:skip
 
 
 EPSILON_PREC = 1e-4
@@ -924,10 +922,12 @@ class TaskModel(BaseModel):
             # TODO: make the frontend use perf_metric instead of perf_metric_field_name?
             if "perf_metric" in config:
                 if isinstance(config["perf_metric"], list):
-                    t_dict["perf_metric_field_name"] = config["perf_metric"]["type"]
+                    principal_metric = config["perf_metric"][0]
+                    t_dict["perf_metric_field_name"] = principal_metric["type"]
                 elif isinstance(config["perf_metric"], dict):
                     t_dict["perf_metric_field_name"] = config["perf_metric"]["type"]
                 metrics_meta, ordered_field_names = get_task_metrics_meta(t)
+                print("ordered_field_names", ordered_field_names)
                 ordered_metrics = [
                     dict(
                         {
