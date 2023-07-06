@@ -145,7 +145,12 @@ class TaskService:
     def get_perf_metric_field_name_by_task_id(self, task_id: int):
         task_info = self.get_task_info_by_task_id(task_id).__dict__
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
-        return task_configuration["perf_metric"]["type"]
+        if isinstance(task_configuration["perf_metric"], list):
+            principal_metric = task_configuration.get("perf_metric", [])[0]
+            perf_metric_type = principal_metric["type"]
+        elif isinstance(task_configuration["perf_metric"], dict):
+            perf_metric_type = task_configuration.get("perf_metric", {})["type"]
+        return perf_metric_type
 
     def get_dynaboard_info_by_task_id(
         self,
