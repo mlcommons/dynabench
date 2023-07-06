@@ -122,14 +122,7 @@ def download_created_examples_user(
 def download_additional_data(
     model: DownloadAdditionalDataExamplesRequest,
 ):
-    zip_file = ExampleService().download_additional_data(model.folder_direction)
-    return Response(
-        content=zip_file,
-        headers={
-            "Content-Disposition": "attachment; filename=files.zip",
-            "Content-Type": "application/zip",
-        },
-    )
+    return ExampleService().download_additional_data(model.folder_direction)
 
 
 @router.post("/convert_s3_image_to_base_64", response_model={})

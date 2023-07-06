@@ -317,8 +317,16 @@ class ExampleService:
                 response = self.s3.get_object(Bucket=bucket_name, Key=key)
                 file_content = response["Body"].read()
                 zf.writestr(key, file_content)
+        # Upload the zip file to S3
+        zip_key = f"{folder_path}/extra_info.zip"
         in_memory_zip.seek(0)
-        return in_memory_zip.getvalue()
+        self.s3.upload_fileobj(in_memory_zip, bucket_name, zip_key)
+        presigned_url = self.s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket_name, "Key": zip_key},
+            ExpiresIn=3600,
+        )
+        return presigned_url
 
     def convert_s3_image_to_base_64(self, image_name: str, bucket_name: str) -> str:
         image = self.s3.get_object(Bucket=bucket_name, Key=image_name)
