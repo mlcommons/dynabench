@@ -62,3 +62,11 @@ class ModelPredictionPerDatasetRequest(BaseModel):
     user_id: int
     model_id: int
     dataset_id: int
+
+
+class ConversationWithBufferMemoryRequest(BaseModel):
+    history: dict
+    model_name: str
+    provider: str
+    prompt: str
+    num_answers: int

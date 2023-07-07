@@ -41,6 +41,8 @@ import {
 import useFetch from "use-http";
 import { BadgeOverlay, OverlayProvider } from "./Overlay";
 import UserContext from "./UserContext";
+import axios from "axios";
+
 const yaml = require("js-yaml");
 
 const EvalStatusRow = ({
@@ -460,6 +462,7 @@ class ModelPage extends React.Component {
 
   togglePublish = () => {
     const modelName = this.state.model.name;
+    const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
     if (!modelName || modelName === "") {
       this.props.history.push({
         pathname: `/tasks/${this.state.taskCode}/models/${this.state.model.id}/updateModelInfo`,
@@ -467,17 +470,41 @@ class ModelPage extends React.Component {
       });
       return;
     }
-    return this.context.api.toggleModelStatus(this.state.modelId).then(
-      (result) => {
-        if (!!result.badges) {
-          this.setState({ showBadges: result.badges });
+
+    return axios
+      .get(`${BASE_URL_2}/model/update_model_status/${this.state.modelId}`)
+      .then((res) => {
+        if (res.status === 200) {
+          Swal.fire({
+            icon: "success",
+            title: "Model status change",
+            text: "Model status has been update successfully",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          window.location.reload();
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Model status change",
+            text: "Model status change failed",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         }
-        this.fetchModel();
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
+      });
+
+    // return this.context.api.toggleModelStatus(this.state.modelId).then(
+    //   (result) => {
+    //     if (!!result.badges) {
+    //       this.setState({ showBadges: result.badges })
+    //     }
+    //     this.fetchModel()
+    //   },
+    //   (error) => {
+    //     console.log(error)
+    //   },
+    // )
   };
 
   handleBack = () => {

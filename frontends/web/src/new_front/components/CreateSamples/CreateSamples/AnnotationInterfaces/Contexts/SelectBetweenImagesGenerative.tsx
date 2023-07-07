@@ -42,20 +42,41 @@ const SelectBetweenImagesGenerative: FC<
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
     CreateInterfaceContext
   );
-
+  const neccessaryFields = ["original_prompt"];
   const [selectedImage, setSelectedImage] = useState<string>("");
 
   const generateImages = async () => {
-    setShowLoader(true);
-    const generatedImages = await post("/context/get_generative_contexts", {
-      type: generative_context.type,
-      artifacts: artifactsInput,
-    });
-    if (response.ok) {
-      setShowImages(generatedImages);
-      addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
-      setPromptHistory(getListFromLocalStorage("promptHistory"));
-      setShowLoader(false);
+    if (
+      neccessaryFields.every(
+        (item) =>
+          modelInputs.hasOwnProperty(item) ||
+          metadataExample.hasOwnProperty(item)
+      )
+    ) {
+      setShowLoader(true);
+      setIsGenerativeContext(true);
+      const generatedImages = await post("/context/get_generative_contexts", {
+        type: generative_context.type,
+        artifacts: artifactsInput,
+      });
+      if (response.ok) {
+        setShowImages(generatedImages);
+        addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
+        setPromptHistory(getListFromLocalStorage("promptHistory"));
+        setShowLoader(false);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+      }
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "You need to fill all the fields!",
+      });
     }
   };
 
@@ -88,6 +109,7 @@ const SelectBetweenImagesGenerative: FC<
       artifacts: {
         ...artifactsInput,
         prompt: prompt,
+        user_id: user.id,
       },
     });
     if (response.ok) {
@@ -96,6 +118,7 @@ const SelectBetweenImagesGenerative: FC<
       setPromptHistory(getListFromLocalStorage("promptHistory"));
       setShowLoader(false);
     }
+    setIsGenerativeContext(true);
   };
 
   const handleSelectImage = async (image: string) => {
@@ -108,24 +131,59 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const CreatePartialSample = async () => {
-    const partialSampleId = await post(
-      `/example/partial_creation_generative_example`,
-      {
-        example_info: modelInputs,
-        context_id: contextId,
-        user_id: user.id,
-        round_id: realRoundId,
-        task_id: taskId,
+    if (contextId && user.id && realRoundId && taskId) {
+      const partialSampleId = await post(
+        `/example/partial_creation_generative_example`,
+        {
+          example_info: modelInputs,
+          context_id: contextId,
+          user_id: user.id,
+          round_id: realRoundId,
+          task_id: taskId,
+        }
+      );
+      if (response.ok) {
+        setPartialSampleId(partialSampleId.id);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       }
-    );
-    if (response.ok) {
-      setPartialSampleId(partialSampleId.id);
     }
   };
 
+  const cleanHistory = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will not be able to recover this history!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, keep it",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        saveListToLocalStorage([], "promptHistory");
+        setPromptHistory(getListFromLocalStorage("promptHistory"));
+        Swal.fire("Deleted!", "Your history has been deleted.", "success");
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire("Cancelled", "Your history is safe :)", "error");
+      }
+    });
+  };
+
   useEffect(() => {
-    saveListToLocalStorage([], "promptHistory");
+    if (!localStorage.getItem("promptHistory")) {
+      saveListToLocalStorage([], "promptHistory");
+    }
     setPromptHistory(getListFromLocalStorage("promptHistory"));
+    saveListToLocalStorage(
+      getListFromLocalStorage("promptHistory").filter(
+        (prompt: null) => prompt !== null
+      ),
+      "promptHistory"
+    );
   }, []);
 
   useEffect(() => {
@@ -137,6 +195,15 @@ const SelectBetweenImagesGenerative: FC<
       CreatePartialSample();
     }
   }, [selectedImage]);
+
+  useEffect(() => {
+    if (modelInputs) {
+      console.log("modelInputs", modelInputs);
+    }
+    if (metadataExample) {
+      console.log("metadataExample", metadataExample);
+    }
+  }, [modelInputs, metadataExample]);
 
   return (
     <>
@@ -168,18 +235,26 @@ const SelectBetweenImagesGenerative: FC<
                 placeholder={prompt}
               />
             </AnnotationInstruction>
-            <AnnotationInstruction
-              placement="top"
-              tooltip={
-                instruction.generate_button || "Select one of the options below"
-              }
-            >
+            <div className="flex justify-end gap-2">
               <GeneralButton
-                onClick={generateImages}
-                text="Generate Images"
+                onClick={cleanHistory}
+                text="Clean History"
                 className="mt-4 border-0 font-weight-bold light-gray-bg task-action-btn"
               />
-            </AnnotationInstruction>
+              <AnnotationInstruction
+                placement="top"
+                tooltip={
+                  instruction.generate_button ||
+                  "Select one of the options below"
+                }
+              >
+                <GeneralButton
+                  onClick={generateImages}
+                  text="Generate Images"
+                  className="mt-4 border-0 font-weight-bold light-gray-bg task-action-btn"
+                />
+              </AnnotationInstruction>
+            </div>
           </div>
           {showImages.length === 0 ? (
             <></>

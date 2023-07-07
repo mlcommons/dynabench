@@ -8,7 +8,6 @@
 
 import os
 import re
-import sys
 import tempfile
 
 import boto3
@@ -27,15 +26,12 @@ from models.task import AnnotationVerifierMode, TaskModel
 from .tasks import ensure_owner_or_admin, get_secret_for_task_id
 
 
-from utils.helpers import (  # noqa isort:skip
+from evaluation.utils.helpers import (  # noqa isort:skip
     decen_send_eval_download_dataset_request,
     decen_send_reload_dataset_request,
     get_data_s3_path,
     send_eval_request,
 )
-
-
-sys.path.append("../evaluation")  # noqa isort:skip
 
 
 @bottle.get("/datasets/get_access_types")

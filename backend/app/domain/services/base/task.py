@@ -86,20 +86,26 @@ class TaskService:
     def get_order_metrics_by_task_id(self, task_id: int):
         task_info = self.get_task_info_by_task_id(task_id).__dict__
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
-        perf_metric_type = task_configuration.get("perf_metric", [])
+
+        if isinstance(task_configuration["perf_metric"], list):
+            perf_metric_type = task_configuration.get("perf_metric", [])
+            type_values = [item["type"] for item in perf_metric_type]
+        elif isinstance(task_configuration["perf_metric"], dict):
+            perf_metric_type = task_configuration.get("perf_metric", {})
+            type_values = [perf_metric_type["type"]]
+
         delta_perf_metrics_type = [
             obj["type"] for obj in task_configuration.get("delta_metrics", [])
         ]
         aws_metric_names = instance_property.get(
-            task_info.get("instance_type"), None
+            task_info.get("instance_type"), {}
         ).get("aws_metrics", [])
+
         ordered_metric_field_names = (
-            [perf_metric_type["type"]] + delta_perf_metrics_type + aws_metric_names
+            type_values + delta_perf_metrics_type + aws_metric_names
         )
         metrics_metadata = {
-            metric: meta_metrics_dict.get(
-                metric, meta_metrics_dict[perf_metric_type["type"]]
-            )(task_info)
+            metric: meta_metrics_dict.get(metric)(task_info)
             for metric in ordered_metric_field_names
         }
         order_metrics = [
@@ -133,12 +139,18 @@ class TaskService:
         return task
 
     def get_task_id_by_task_code(self, task_code: str):
+        print("task_code", task_code)
         return self.task_repository.get_task_id_by_task_code(task_code).id
 
     def get_perf_metric_field_name_by_task_id(self, task_id: int):
         task_info = self.get_task_info_by_task_id(task_id).__dict__
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
-        return task_configuration["perf_metric"]["type"]
+        if isinstance(task_configuration["perf_metric"], list):
+            principal_metric = task_configuration.get("perf_metric", [])[0]
+            perf_metric_type = principal_metric["type"]
+        elif isinstance(task_configuration["perf_metric"], dict):
+            perf_metric_type = task_configuration.get("perf_metric", {})["type"]
+        return perf_metric_type
 
     def get_dynaboard_info_by_task_id(
         self,
@@ -201,3 +213,6 @@ class TaskService:
 
     def update_task_instructions(self, task_id: int, instructions: dict):
         return self.task_repository.update_task_instructions(task_id, instructions)
+
+    def get_tasks_with_samples_created_by_user(self, user_id: int):
+        return self.task_repository.get_tasks_with_samples_created_by_user(user_id)

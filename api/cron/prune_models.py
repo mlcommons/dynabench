@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -17,7 +21,6 @@
 # server, for example:
 # {"model_id": MODEL_ID, "s3_uri": s3_PATH_TO_SAVED_MODEL, "endpoint_only":True}
 import argparse
-import sys
 import traceback
 from datetime import datetime, timedelta
 
@@ -26,11 +29,8 @@ import boto3
 from models.model import DeploymentStatusEnum, ModelModel
 
 
-sys.path.remove("../evaluation")  # noqa
-sys.path.append("../builder")  # noqa
-
-from utils.deployer import ModelDeployer  # noqa isort:skip
-from build_config import build_config  # noqa isort:skip
+from builder.utils.deployer import ModelDeployer  # noqa isort:skip
+from builder.build_config import build_config  # noqa isort:skip
 
 
 class ModelPruner:

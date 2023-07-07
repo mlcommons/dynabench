@@ -111,6 +111,7 @@ const TaskModelLeaderboardCard = ({
       setMetrics(result.orderedMetricWeights);
       setDatasetWeights(result.orderedDatasetWeights);
       setDescription(result.description);
+      console.log("result", result);
     });
   }, [context.api, task, getInitialWeights]);
 

@@ -5,6 +5,8 @@
 from fastapi import APIRouter, Response
 
 from app.domain.schemas.base.example import (
+    ConvertS3ImageToBase64Request,
+    CreateExampleRequest,
     DownloadAdditionalDataExamplesRequest,
     DownloadAllExamplesRequest,
     DownloadExamplesRequest,
@@ -45,6 +47,7 @@ def validate_example(model: ValidateExampleRequest):
         model.metadata_json,
         model.task_id,
         model.validate_non_fooling,
+        model.round_id,
     )
 
 
@@ -62,12 +65,35 @@ def partial_creation_generative_example(
     )
 
 
+@router.post("/create_example", response_model={})
+def create_example(
+    model: CreateExampleRequest,
+):
+    return ExampleService().create_example(
+        model.context_id,
+        model.user_id,
+        model.model_wrong,
+        model.model_endpoint_name,
+        model.input_json,
+        model.output_json,
+        model.metadata,
+        model.tag,
+    )
+
+
 @router.post("/update_creation_generative_example_by_example_id", response_model={})
 def update_creation_generative_example_by_example_id(
     model: UpdateCreationExampleGenerativeRequest,
 ):
     return ExampleService().update_creation_generative_example_by_example_id(
-        model.example_id, model.example_info, model.metadata_json
+        model.example_id,
+        model.example_info,
+        model.metadata_json,
+        model.round_id,
+        model.user_id,
+        model.context_id,
+        model.task_id,
+        model.model_wrong,
     )
 
 
@@ -87,18 +113,22 @@ def download_all_created_examples(
 def download_created_examples_user(
     model: DownloadExamplesRequest,
 ):
-    return ExampleService().download_created_examples_user(model.task_id, model.user_id)
+    return ExampleService().download_created_examples_user(
+        model.task_id, model.user_id, model.amount
+    )
 
 
 @router.post("/download_additional_data", response_model={})
 def download_additional_data(
     model: DownloadAdditionalDataExamplesRequest,
 ):
-    zip_file = ExampleService().download_additional_data(model.folder_direction)
-    return Response(
-        content=zip_file,
-        headers={
-            "Content-Disposition": "attachment; filename=files.zip",
-            "Content-Type": "application/zip",
-        },
+    return ExampleService().download_additional_data(model.folder_direction)
+
+
+@router.post("/convert_s3_image_to_base_64", response_model={})
+def convert_s3_image_to_base_64(
+    model: ConvertS3ImageToBase64Request,
+):
+    return ExampleService().convert_s3_image_to_base_64(
+        model.image_name, model.bucket_name
     )

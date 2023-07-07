@@ -4,4 +4,6 @@ export type ValidationContext = {
   type: keyof typeof ModulesRegistry.context;
   label?: string;
   info?: string;
+  bucket?: string;
+  folder?: string;
 };

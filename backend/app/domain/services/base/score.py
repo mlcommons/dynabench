@@ -37,7 +37,8 @@ class ScoreService:
             for row in order_metric_with_weight
         ]
         for metric_with_score_and_weight in metrics_with_score_and_weight:
-            score = scores_by_dataset_and_model_id[
+            print(scores_by_dataset_and_model_id["metadata_json"])
+            score = json.loads(scores_by_dataset_and_model_id["metadata_json"])[
                 metric_with_score_and_weight["field_name"]
             ]
             metric_with_score_and_weight["score"] = score
@@ -115,7 +116,7 @@ class ScoreService:
         model_ids: list,
         order_scoring_datasets_with_weight: list,
         order_metric_with_weight: dict,
-        perf_metric_field_name: str,
+        perf_metric_field_name: list,
         sort_by: str,
         sort_direction: str,
         offset: int,
@@ -157,6 +158,12 @@ class ScoreService:
             models_dynaboard_info = sorted(
                 models_dynaboard_info,
                 key=lambda x: x["averaged_scores"][metrics.index(sort_by)],
+                reverse=(sort_direction == "desc"),
+            )
+        else:
+            models_dynaboard_info = sorted(
+                models_dynaboard_info,
+                key=lambda x: x["averaged_scores"][-1],
                 reverse=(sort_direction == "desc"),
             )
         return models_dynaboard_info
@@ -282,3 +289,11 @@ class ScoreService:
             return scores
         else:
             return {"perf": 0.00}
+
+    def verify_scores_for_all_the_datasets(self, model_id: int):
+        task_id = self.model_repository.get_task_id_by_model_id(model_id)[0]
+        scoring_datasets = self.dataset_service.get_scoring_datasets_by_task_id(task_id)
+        scoring_datasets = [item[0] for item in scoring_datasets]
+        return self.score_repository.check_if_model_has_all_scoring_datasets(
+            model_id, scoring_datasets
+        )

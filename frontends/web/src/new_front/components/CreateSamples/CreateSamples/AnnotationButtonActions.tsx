@@ -25,6 +25,7 @@ type Props = {
   accept_sandbox_creation: boolean;
   maxAmountExamplesOnADay: number;
   setModelOutput: (modelOutput: ModelOutputType) => void;
+  setIsGenerativeContext: (isGenerativeContext: boolean) => void;
 };
 
 const AnnotationButtonActions: FC<Props> = ({
@@ -44,6 +45,7 @@ const AnnotationButtonActions: FC<Props> = ({
   accept_sandbox_creation,
   maxAmountExamplesOnADay,
   setModelOutput,
+  setIsGenerativeContext,
 }) => {
   const [sandboxMode, setSandboxMode] = useState<boolean>(false);
   let { modelInputs, metadataExample } = useContext(CreateInterfaceContext);
@@ -105,6 +107,10 @@ const AnnotationButtonActions: FC<Props> = ({
             example_id: partialSampleId,
             example_info: modelInputs,
             metadata_json: metadataExample,
+            round_id: realRoundId,
+            user_id: userId,
+            context_id: contextId,
+            task_id: taskID,
           }
         );
         if (response.ok) {
@@ -114,8 +120,10 @@ const AnnotationButtonActions: FC<Props> = ({
             text: "Your example has been saved",
             confirmButtonColor: "#2088ef",
           });
-          window.location.reload();
+          setIsGenerativeContext(true);
           setModelOutput(modelOutput);
+          modelInputs = {};
+          metadataExample = {};
         } else {
           Swal.fire({
             icon: "error",

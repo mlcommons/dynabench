@@ -34,7 +34,7 @@ const SelectImage: FC<SelectImageProps> = ({
             : "scale-[1] rounded-lg"
         } pb-2`}
         alt="src"
-      ></img>
+      />
       <input
         id="checkbox"
         type="radio"

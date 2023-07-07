@@ -9,7 +9,10 @@ import time
 
 import boto3
 import requests
-from fastapi import UploadFile
+import yaml
+from fastapi import HTTPException, UploadFile
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferMemory
 from pydantic import Json
 
 from app.domain.helpers.email import EmailHelper
@@ -22,7 +25,10 @@ from app.domain.helpers.transform_data_objects import (
 )
 from app.domain.services.base.example import ExampleService
 from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoService
+from app.domain.services.base.score import ScoreService
+from app.domain.services.base.task import TaskService
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
+from app.domain.services.utils.llm import OpenAIProvider
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
@@ -34,7 +40,9 @@ class ModelService:
         self.model_repository = ModelRepository()
         self.task_repository = TaskRepository()
         self.user_repository = UserRepository()
+        self.score_service = ScoreService()
         self.dataset_repository = DatasetRepository()
+        self.task_service = TaskService()
         self.example_service = ExampleService()
         self.evaluation_service = EvaluationService()
         self.round_user_example_service = RoundUserExampleInfoService()
@@ -46,6 +54,7 @@ class ModelService:
         self.s3 = self.session.client("s3")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.email_helper = EmailHelper()
+        self.openai_provider = OpenAIProvider()
 
     def get_model_in_the_loop(self, task_id: str) -> str:
         model_in_the_loop_info = self.model_repository.get_model_in_the_loop(task_id)
@@ -160,7 +169,18 @@ class ModelService:
         response = {}
         if model_url:
             prediction = self.single_model_prediction(model_url, model_input)
+            task_config = self.task_service.get_task_info_by_task_id(task_id)
+            config_yaml = yaml.safe_load(task_config.config_yaml)
             response["prediction"] = prediction[model_prediction_label]
+            if "cast_output" in config_yaml:
+                response["prediction"] = next(
+                    (
+                        key
+                        for key, value in config_yaml["cast_output"].items()
+                        if value == response["prediction"]
+                    ),
+                    None,
+                )
             response["probabilities"] = prediction["prob"]
             model_wrong = self.evaluate_model_in_the_loop(
                 response["prediction"],
@@ -174,6 +194,7 @@ class ModelService:
         response["label"] = model_input["label"]
         response["input"] = model_input[model_input["input_by_user"]]
         response["fooled"] = model_wrong
+        response["sandBox"] = sandbox_mode
         if not sandbox_mode:
             self.example_service.create_example_and_increment_counters(
                 context_id,
@@ -331,3 +352,40 @@ class ModelService:
             subject=f"Model {model_name} upload succeeded.",
         )
         return "Model evaluate successfully"
+
+    def conversation_with_buffer_memory(
+        self,
+        history: dict,
+        model_name: str,
+        provider: str,
+        prompt: str,
+        num_answers: int,
+    ):
+        if provider == "openai":
+            llm = self.openai_provider.initialize(
+                model_name=model_name,
+            )
+        memory = ConversationBufferMemory()
+        for entry in history["user"]:
+            user_message = entry["text"]
+            memory.chat_memory.add_user_message(user_message)
+            if history["bot"]:
+                ai_message = history["bot"].pop(0)["text"]
+                memory.chat_memory.add_ai_message(ai_message)
+        responses = []
+        for i in range(num_answers):
+            conversation = ConversationChain(llm=llm, memory=memory)
+            response = {
+                "id": i,
+                "model_name": model_name,
+                "text": conversation.predict(input=prompt),
+                "score": 0.5,
+            }
+            responses.append(response)
+        return responses
+
+    def update_model_status(self, model_id: int):
+        if self.score_service.verify_scores_for_all_the_datasets(model_id):
+            self.model_repository.update_published_status(model_id)
+        else:
+            raise HTTPException(status_code=400, detail="Model no has all the scores")

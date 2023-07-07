@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 
 from app.domain.schemas.base.model import (
     BatchCreateExampleRequest,
+    ConversationWithBufferMemoryRequest,
     ModelInTheLoopRequest,
     ModelPredictionPerDatasetRequest,
     SingleModelEvaluationRequest,
@@ -112,3 +113,16 @@ def upload_prediction_to_s3(
     return ModelService().upload_prediction_to_s3(
         user_id, task_code, model_name, predictions
     )
+
+
+@router.post("/conversation_with_buffer_memory")
+def conversation_with_buffer_memory(model: ConversationWithBufferMemoryRequest):
+    print("model.history", model.history)
+    return ModelService().conversation_with_buffer_memory(
+        model.history, model.model_name, model.provider, model.prompt, model.num_answers
+    )
+
+
+@router.get("/update_model_status/{model_id}")
+def update_model_status(model_id: int):
+    return ModelService().update_model_status(model_id)

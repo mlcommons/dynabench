@@ -358,7 +358,10 @@ class Evaluation:
                     formatted_dict.get("grouped_robustness_predictions"),
                     formatted_dict.get("grouped_fairness_predictions"),
                 )
-            metric = task_configuration["perf_metric"]["type"]
+            if isinstance(task_configuration["perf_metric"], list):
+                metric = task_configuration["perf_metric"]["type"]
+            elif isinstance(task_configuration["perf_metric"], dict):
+                metric = task_configuration["perf_metric"]["type"]
             final_scores = {
                 str(metric): main_metric,
                 "fairness": delta_metrics.get("fairness"),

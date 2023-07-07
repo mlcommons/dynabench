@@ -2,6 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import base64
+import datetime
 import io
 import json
 import os
@@ -60,6 +62,37 @@ class ExampleService:
             tag,
         )
 
+    def increment_counter_examples_submitted(
+        self,
+        round_id: int,
+        user_id: int,
+        context_id: int,
+        task_id: int,
+        model_wrong: int,
+    ):
+        self.user_service.increment_examples_created(user_id)
+        self.round_service.increment_counter_examples_collected(round_id)
+        self.context_service.increment_counter_total_samples_and_update_date(context_id)
+        self.task_service.update_last_activity_date(task_id)
+        self.round_user_example_info.increment_counter_examples_submitted(
+            round_id, user_id
+        )
+        last_update_examples = self.round_user_example_info.get_last_date_used(
+            round_id, user_id
+        )
+        if last_update_examples != datetime.date.today():
+            self.round_user_example_info.create_first_entry_for_day(round_id, user_id)
+        else:
+            self.round_user_example_info.increment_counter_examples_submitted_today(
+                round_id, user_id
+            )
+        if model_wrong:
+            self.round_service.increment_counter_examples_fooled(round_id)
+            self.round_user_example_info.increment_counter_examples_fooled(
+                round_id, user_id
+            )
+            self.user_service.increment_examples_fooled(user_id)
+
     def create_example_and_increment_counters(
         self,
         context_id: int,
@@ -83,23 +116,9 @@ class ExampleService:
             metadata,
             tag,
         )
-        self.user_service.increment_examples_created(user_id)
-        self.round_service.increment_counter_examples_collected(round_id, task_id)
-        self.context_service.increment_counter_total_samples_and_update_date(context_id)
-        self.task_service.update_last_activity_date(task_id)
-        real_round_id = self.context_service.get_real_round_id(context_id)
-        self.round_user_example_info.increment_counter_examples_submitted(
-            real_round_id, user_id
+        self.increment_counter_examples_submitted(
+            round_id, user_id, context_id, task_id, model_wrong
         )
-        self.round_user_example_info.increment_counter_examples_submitted_today(
-            real_round_id, user_id
-        )
-        if model_wrong:
-            self.round_service.increment_counter_examples_fooled(round_id, task_id)
-            self.round_user_example_info.increment_counter_examples_fooled(
-                real_round_id, user_id
-            )
-            self.user_service.increment_examples_fooled(user_id)
         return new_sample_info["id"]
 
     def get_example_to_validate(
@@ -111,9 +130,16 @@ class ExampleService:
         task_id: int,
     ) -> dict:
         example_necessary_info = {}
-        example_to_validate = self.example_repository.get_example_to_validate(
-            real_round_id, user_id, num_matching_validations, validate_non_fooling
-        )
+        if validate_non_fooling:
+            example_to_validate = self.example_repository.get_example_to_validate(
+                real_round_id, user_id, num_matching_validations
+            )
+        else:
+            example_to_validate = (
+                self.example_repository.get_example_to_validate_fooling(
+                    real_round_id, user_id, num_matching_validations
+                )
+            )
         example_info = example_to_validate[0].__dict__
         example_necessary_info["example_id"] = example_info["id"]
         example_necessary_info["user_id"] = user_id
@@ -148,6 +174,7 @@ class ExampleService:
         metadata_json: dict,
         task_id: int,
         validate_non_fooling: bool,
+        round_id: int,
     ):
         self.validation_service.create_validation(
             example_id, user_id, label, mode, metadata_json
@@ -168,7 +195,9 @@ class ExampleService:
         elif label == "flag":
             self.example_repository.increment_counter_total_flagged(example_id)
         if not validate_non_fooling:
-            self.round_service.increment_counter_examples_verified_fooled(task_id)
+            self.round_service.increment_counter_examples_verified_fooled(
+                task_id, round_id
+            )
 
     def get_validate_configuration(self, task_id: int) -> dict:
         task_config = self.task_service.get_task_info_by_task_id(task_id)
@@ -207,7 +236,15 @@ class ExampleService:
         example_id: int,
         model_input: dict,
         metadata: dict,
+        round_id: int,
+        user_id: int,
+        context_id: int,
+        task_id: int,
+        model_wrong: int,
     ) -> str:
+        self.increment_counter_examples_submitted(
+            round_id, user_id, context_id, task_id, model_wrong
+        )
         return self.example_repository.update_creation_generative_example_by_example_id(
             example_id, json.dumps(model_input), json.dumps(metadata)
         )
@@ -223,10 +260,12 @@ class ExampleService:
             examples_data_list.append(example_necessary_info)
         return json.dumps(examples_data_list, cls=CustomJSONEncoder)
 
-    def download_created_examples_user(self, task_id: int, user_id: int) -> dict:
+    def download_created_examples_user(
+        self, task_id: int, user_id: int, amount: int
+    ) -> dict:
         if user_id:
             examples_data = self.example_repository.download_created_examples_user(
-                task_id, user_id
+                task_id, user_id, amount
             )
             examples_data_list = []
             for example in examples_data:
@@ -278,5 +317,18 @@ class ExampleService:
                 response = self.s3.get_object(Bucket=bucket_name, Key=key)
                 file_content = response["Body"].read()
                 zf.writestr(key, file_content)
+        # Upload the zip file to S3
+        zip_key = f"{folder_path}/extra_info.zip"
         in_memory_zip.seek(0)
-        return in_memory_zip.getvalue()
+        self.s3.upload_fileobj(in_memory_zip, bucket_name, zip_key)
+        presigned_url = self.s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket_name, "Key": zip_key},
+            ExpiresIn=3600,
+        )
+        return presigned_url
+
+    def convert_s3_image_to_base_64(self, image_name: str, bucket_name: str) -> str:
+        image = self.s3.get_object(Bucket=bucket_name, Key=image_name)
+        image_content = image["Body"].read()
+        return base64.b64encode(image_content).decode("utf-8")

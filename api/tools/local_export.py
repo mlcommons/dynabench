@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -5,8 +9,6 @@
 import sys
 
 
-sys.path.append("..")  # noqa
-sys.path.append("../../evaluation")  # noqa
 import common.helpers as util  # noqa isort:skip
 
 if __name__ == "__main__":

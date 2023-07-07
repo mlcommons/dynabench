@@ -147,7 +147,7 @@ const CreateInterface = () => {
                   />
                 )}
               </div>
-              <div id="inputUser" className="p-3">
+              <div id="inputUser" className="">
                 {taskConfiguration?.user_input && (
                   <AnnotationUserInputStrategy
                     config={taskConfiguration?.user_input as any}
@@ -185,6 +185,7 @@ const CreateInterface = () => {
                       taskInfo.max_amount_examples_on_a_day
                     }
                     setModelOutput={setModelOutput}
+                    setIsGenerativeContext={setIsGenerativeContext}
                   />
                 )}
               </div>
@@ -196,6 +197,7 @@ const CreateInterface = () => {
                     prediction={modelOutput.prediction}
                     probabilities={modelOutput.probabilities}
                     fooled={modelOutput.fooled}
+                    sandBox={modelOutput.sandBox}
                   />
                 )}
               </div>

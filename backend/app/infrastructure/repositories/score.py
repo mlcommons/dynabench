@@ -61,3 +61,10 @@ class ScoreRepository(AbstractRepository):
             .filter(Score.mid == model_id)
             .all()
         )
+
+    def check_if_model_has_all_scoring_datasets(
+        self, model_id: int, scoring_datasets: list
+    ) -> bool:
+        return self.session.query(Score).filter(Score.mid == model_id).filter(
+            Score.did.in_(scoring_datasets)
+        ).count() == len(scoring_datasets)

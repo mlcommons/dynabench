@@ -23,6 +23,18 @@ class ValidateExampleRequest(BaseModel):
     metadata_json: dict
     task_id: int
     validate_non_fooling: bool
+    round_id: int
+
+
+class CreateExampleRequest(BaseModel):
+    context_id: int
+    user_id: int
+    input_json: dict
+    model_wrong: Optional[bool] = False
+    model_endpoint_name: Optional[str] = None
+    output_json: Optional[dict] = None
+    metadata: Optional[dict] = None
+    tag: Optional[str] = "generative"
 
 
 class PartiallyCreationExampleGenerativeRequest(BaseModel):
@@ -38,6 +50,11 @@ class UpdateCreationExampleGenerativeRequest(BaseModel):
     example_id: int
     example_info: dict
     metadata_json: dict
+    round_id: int
+    user_id: int
+    context_id: int
+    task_id: int
+    model_wrong: Optional[int] = 0
 
 
 class DownloadAllExamplesRequest(BaseModel):
@@ -47,7 +64,13 @@ class DownloadAllExamplesRequest(BaseModel):
 class DownloadExamplesRequest(BaseModel):
     task_id: int
     user_id: Optional[int] = None
+    amount: Optional[int] = 5
 
 
 class DownloadAdditionalDataExamplesRequest(BaseModel):
     folder_direction: str
+
+
+class ConvertS3ImageToBase64Request(BaseModel):
+    image_name: str
+    bucket_name: str

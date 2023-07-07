@@ -125,7 +125,6 @@ output:
 - name: prob
   reference_name: label
   type: prob
-perf_metric:
   reference_name: label
   type: macro_f1
             """,
@@ -395,6 +394,7 @@ def update(credentials, tid):
             "train_file_upload_instructions_md",
             "mlcube_tutorial_markdown",
             "dynamic_adversarial_data_collection",
+            "dynamic_adversarial_data_validation",
             "hidden",
             "submitable",
             "create_endpoint",

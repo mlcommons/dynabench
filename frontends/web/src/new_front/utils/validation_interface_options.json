@@ -1,7 +1,8 @@
 {
     "context": {
         "text": "Text",
-        "image-with-text": "ImageWithText"
+        "image-with-text": "ImageWithText",
+        "image-s3": "ImageS3"
     },
     "user_input": {
         "multioptions": "Multioptions",

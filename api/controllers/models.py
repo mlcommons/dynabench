@@ -10,7 +10,6 @@ import json
 import os
 import secrets
 import shutil
-import sys
 import tempfile
 import time
 
@@ -21,6 +20,7 @@ import sqlalchemy as db
 import ujson
 import yaml
 from bottle import response
+from evaluation.metrics.metric_getters import get_job_metrics
 from infrastructure.email.mail_service import Email
 
 import common.auth as _auth
@@ -40,7 +40,7 @@ from models.user import UserModel
 from .tasks import ensure_owner_or_admin
 
 
-from utils.helpers import (  # noqa isort:skip
+from evaluation.utils.helpers import (  # noqa isort:skip
     get_data_s3_path,  # noqa isort:skip
     get_predictions_s3_path,  # noqa isort:skip
     parse_s3_outfile,  # noqa isort:skip
@@ -50,11 +50,7 @@ from utils.helpers import (  # noqa isort:skip
     generate_job_name,  # noqa isort:skip
 )  # noqa isort:skip
 
-from utils.helpers import update_evaluation_status  # noqa isort:skip
-
-sys.path.append("../evaluation/")  # noqa isort:skip
-
-from metrics.metric_getters import get_job_metrics
+from evaluation.utils.helpers import update_evaluation_status  # noqa isort:skip
 
 
 @bottle.get("/models/latest_job_log/<mid:int>/<did:int>")
@@ -314,7 +310,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
                     payload = {"submission": {str(name[-1]): sub}}
                 except Exception as ex:
                     logger.exception(ex)
-                    subject = f"Model {model_name} failed training as file is incorrectly formatted."
+                    subject = f"Model {model_name} failed training"
                     Email().send(
                         contact=user.email,
                         cc_contact="dynabench-site@mlcommons.org",
@@ -367,7 +363,10 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         did = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
-        metric = task_config.get("perf_metric").get("type")
+        if isinstance(task_config.get("perf_metric"), list):
+            metric = task_config.get("perf_metric").get("type")
+        elif isinstance(task_config.get("perf_metric"), dict):
+            metric = task_config.get("perf_metric").get("type")
         new_score = {
             metric: score,
             "perf": score,

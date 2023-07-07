@@ -22,16 +22,16 @@ class RoundRepository(AbstractRepository):
         )
         return round_info
 
-    def increment_counter_examples_collected(self, round_id: int, task_id: int):
-        self.session.query(self.model).filter(
-            (self.model.rid == round_id) & (self.model.tid == task_id)
-        ).update({self.model.total_collected: self.model.total_collected + 1})
+    def increment_counter_examples_collected(self, round_id: int):
+        self.session.query(self.model).filter(self.model.id == round_id).update(
+            {self.model.total_collected: self.model.total_collected + 1}
+        )
         self.session.commit()
 
-    def increment_counter_examples_fooled(self, round_id: int, task_id: int):
-        self.session.query(self.model).filter(
-            (self.model.rid == round_id) & (self.model.tid == task_id)
-        ).update({self.model.total_fooled: self.model.total_fooled + 1})
+    def increment_counter_examples_fooled(self, round_id: int):
+        self.session.query(self.model).filter(self.model.id == round_id).update(
+            {self.model.total_fooled: self.model.total_fooled + 1}
+        )
         self.session.commit()
 
     def increment_counter_examples_verified_fooled(self, round_id: int, task_id: int):

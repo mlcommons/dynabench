@@ -1,11 +1,12 @@
 // import ExamplesCreatedStrategy from 'new_front/components/ProfilePage/ExamplesCreated/Contexts/ExamplesCreatedStrategy'
 import { ValidationConfigurationTask } from "new_front/types/createSamples/createSamples/configurationTask";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useContext, useEffect, useState } from "react";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import ExamplesCreatedStrategy from "./Contexts/ExamplesCreatedStrategy";
 import Carousel from "react-grid-carousel";
 import Swal from "sweetalert2";
+import UserContext from "containers/UserContext";
 
 type ExampleCreatedProps = {
   taskId: number;
@@ -16,15 +17,15 @@ const ExampleCreated: FC<ExampleCreatedProps> = ({ taskId }) => {
   const [validationConfigInfo, setValidationConfigInfo] =
     useState<ValidationConfigurationTask>();
   const { get, post, response, loading } = useFetch();
-
-  console.log("taskId", taskId);
+  const { user } = useContext(UserContext);
 
   const loadExampleData = async () => {
     const [validationConfigInfo, examplesCreated] = await Promise.all([
       get(`/example/get_validate_configuration?task_id=${taskId}`),
       post(`/example/download_created_examples_user`, {
         task_id: taskId,
-        user_id: 1675,
+        user_id: user.id,
+        amount: 5,
       }),
     ]);
     if (response.ok) {
@@ -47,11 +48,11 @@ const ExampleCreated: FC<ExampleCreatedProps> = ({ taskId }) => {
     <>
       {validationConfigInfo && examplesCreated && !loading ? (
         <>
-          <div className="p-3 py-6">
+          <div className="container p-3 py-6">
             <h3 className="flex justify-center pt-8 pb-6 pl-16 text-2xl font-bold">
               Examples created by you
             </h3>
-            <div className="w-9/12 py-16 mx-auto ">
+            <div className="w-9/12 py-4 mx-auto ">
               <Carousel cols={1} rows={1} loop>
                 {examplesCreated.map((example) => (
                   <Carousel.Item>

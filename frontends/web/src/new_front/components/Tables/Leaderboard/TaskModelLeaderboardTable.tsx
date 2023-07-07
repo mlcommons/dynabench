@@ -25,7 +25,6 @@ const SortContainer: FC<SortContainerProps> = ({
   className,
   children,
 }) => {
-  console.log("currentSort", currentSort);
   return (
     <div onClick={() => toggleSort(sortKey)} className={className}>
       {currentSort.field === sortKey && currentSort.direction === "asc" && (
@@ -205,7 +204,7 @@ type WeightSliderProps = {
 
 const WeightSlider: FC<WeightSliderProps> = ({ weight, onWeightChange }) => {
   return (
-    <Form className="d-flex ml-2 float-right">
+    <Form className="float-right ml-2 d-flex">
       <Form.Control
         type="range"
         className="flex-grow-1"
@@ -283,7 +282,7 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
                 );
               })}
               <th
-                className="text-right pr-4 align-baseline "
+                className="pr-4 text-right align-baseline "
                 style={{ width: "15%" }}
               >
                 <SortContainer

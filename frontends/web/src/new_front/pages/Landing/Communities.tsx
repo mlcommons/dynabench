@@ -33,7 +33,7 @@ const Communities = () => {
               href="/dadc"
             >
               <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
-                Dynamical adversarial
+                Dynamical Adversarial
               </h3>
             </a>
             <p className="mb-8 text-lg text-gray-600">
@@ -159,10 +159,10 @@ const Communities = () => {
             <div className="align-middle">
               <a
                 className="flex flex-row gap-1 pointer hover:no-underline"
-                href="/dataperf"
+                href="/llms"
               >
                 <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
-                  Large language model
+                  Large Language Model
                 </h3>
               </a>
               <p className="mb-8 text-lg text-gray-600">

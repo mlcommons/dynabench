@@ -10,10 +10,10 @@ const Text: FC<ValidationFactoryType & ValidationContext> = ({
     <>
       {info && (
         <div className="py-1">
-          <div className="text-base text-[#005798] font-bold normal-case ">
-            {label!.replace("_", " ")}
+          <div className="text-lg text-[#005798] font-bold normal-case ">
+            {label!.charAt(0).toUpperCase() + label!.slice(1).replace("_", " ")}
           </div>
-          <div className="text-base text-gray-500">{info}</div>
+          <div className="text-lg text-letter-color">{info}</div>
         </div>
       )}
     </>

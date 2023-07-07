@@ -158,10 +158,10 @@ const SubmitPrediction = () => {
                         ) : (
                           <>
                             <Form.Label className="text-base label-upload-file">
-                              Drag & drop your zip model here
+                              Drag & drop your .json file with predictions here
                             </Form.Label>
                             <Form.Control
-                              placeholder="Drag & drop your zip model here"
+                              placeholder="Drag & drop your .json file with predictions here"
                               autoFocus
                               type="file"
                               className="input-upload-file"
@@ -177,7 +177,7 @@ const SubmitPrediction = () => {
                           type="submit"
                           className="border-0 font-weight-bold light-gray-bg"
                         >
-                          Submit Model
+                          Submit Predictions
                         </Button>
                       </div>
                     </Form>

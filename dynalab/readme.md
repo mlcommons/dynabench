@@ -8,7 +8,7 @@ Dynalab 2.0 is the tool used to upload a model in Dynabench challenges. This too
 
 ### Folder structure
 
-``` none
+```none
     └─ app
     │  ├─ api                  <- Backend logic (Do NOT touch it)
     │  │
@@ -46,9 +46,9 @@ Example image:
 
 ## Model script
 
-In model script you will find a class called *ModelController* where you can delete everything except by 3 methods *constructor*, *single_evaluation* and *batch_evaluation*. These 2 methods are the ones you have to update in order to make inferences using your model.
+In model script you will find a class called _ModelController_ where you can delete everything except by 3 methods _constructor_, _single_evaluation_ and _batch_evaluation_. These 2 methods are the ones you have to update in order to make inferences using your model.
 
-An important observation is that you can implement as many methods as you want in order to help *single_evaluation* and *batch_evaluation* to make predictions.
+An important observation is that you can implement as many methods as you want in order to help _single_evaluation_ and _batch_evaluation_ to make predictions.
 
 ### Single evaluation method
 
@@ -68,19 +68,19 @@ If you don't know the input format of a function, follow this steps:
 
 2. Go to /api/schemas/model.py, look for the class with the same name that you find in the previous step and check the variables listed there and that is the input format of that variable.
 
-    ![schema](img/schema.png)
+   ![schema](img/schema.png)
 
 ### Checking output format
 
 If you don't know the output format of a function, follow this steps:
 
-1. Go to the endpoint that you are going to test and look for the word **response_model*, next to it you are going to find a word that you are going to keep in mind.
+1. Go to the endpoint that you are going to test and look for the word \*_response_model_, next to it you are going to find a word that you are going to keep in mind.
 
    ![output format](img/output_format.png)
 
 2. Go to /api/schemas/model.py, look for the class with the same name that you find in the previous step and check the variables listed there and that is the output format of that variable.
 
-    ![schema](img/output_schema.png)
+   ![schema](img/output_schema.png)
 
 ## Requirements
 
@@ -96,11 +96,11 @@ Example:
 
 Open a new terminal and access to the folder where you have been updating and run the following commands:
 
-``` bash
+```bash
 python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
-python3 -m uvicorn app.app:app --reload
+python3 -m uvicorn app.main:app --reload
 ```
 
 Open your browser and access to localhost:8000/docs. In there, a FastAPI interface should allow you to test the POST request and it should looks like this:
@@ -111,15 +111,15 @@ Open your browser and access to localhost:8000/docs. In there, a FastAPI interfa
 
 1. Click on the single evaluation method, and then on the 'Try it out' button.
 
-    [try_it_out](img/try_out.png)
+   [try_it_out](img/try_out.png)
 
 2. Fill the request body with your desired input, and click the execute button.
 
-    ![fill request](img/fill_request.png)
+   ![fill request](img/fill_request.png)
 
 3. Check the response code and the output of your model, if everything is OK you will get a 200 code and the response of your model according to the example you sent before.
 
-    ![fill request](img/check_output.png)
+   ![fill request](img/check_output.png)
 
 4. Do the same for the batch_evaluation endpoint.
 

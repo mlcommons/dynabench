@@ -414,7 +414,11 @@ class EvaluationService:
 
     def get_finals_scores(self, task_id: int, prediction_dict: dict, tags: bool):
         task_configuration = self.get_task_configuration(task_id)
-        metric_info = task_configuration["perf_metric"]
+        if isinstance(task_configuration["perf_metric"], list):
+            metric_info = task_configuration["perf_metric"]
+        elif isinstance(task_configuration["perf_metric"], dict):
+            metric_info = task_configuration["perf_metric"]
+
         formatted_dict, perturb_exists = neccesary_format_for_evaluation(
             prediction_dict, metric_info["reference_name"]
         )
@@ -514,7 +518,11 @@ class EvaluationService:
         print("Received a submission for model ID", model_id, "and task ID", task_id)
 
         task_config = self.get_task_configuration(task_id)
-        task_metric = task_config["perf_metric"]["type"]
+        if isinstance(task_config["perf_metric"], list):
+            task_metric = task_config["perf_metric"]["type"]
+        elif isinstance(task_config["perf_metric"], dict):
+            task_metric = task_config["perf_metric"]["type"]
+
         dataset_name = list(dataperf_response["results"].keys())[0]
 
         score = dataperf_response["results"][dataset_name]["auc_score"][str(model_id)][
