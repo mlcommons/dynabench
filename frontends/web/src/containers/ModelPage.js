@@ -473,25 +473,25 @@ class ModelPage extends React.Component {
 
     return axios
       .get(`${BASE_URL_2}/model/update_model_status/${this.state.modelId}`)
-      .then((res) => {
-        if (res.status === 200) {
-          Swal.fire({
-            icon: "success",
-            title: "Model status change",
-            text: "Model status has been update successfully",
-            showConfirmButton: false,
-            timer: 1500,
-          });
-          window.location.reload();
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Model status change",
-            text: "Model status change failed",
-            showConfirmButton: false,
-            timer: 1500,
-          });
-        }
+      .then(() => {
+        Swal.fire({
+          icon: "success",
+          title: "Model status change",
+          text: "Model status has been update successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        window.location.reload();
+      })
+      .catch(() => {
+        Swal.fire({
+          icon: "error",
+          title: "Model status change",
+          text: "Model status change failed",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        window.location.reload();
       });
 
     // return this.context.api.toggleModelStatus(this.state.modelId).then(

@@ -37,11 +37,19 @@ class ScoreService:
             for row in order_metric_with_weight
         ]
         for metric_with_score_and_weight in metrics_with_score_and_weight:
-            print(scores_by_dataset_and_model_id["metadata_json"])
-            score = json.loads(scores_by_dataset_and_model_id["metadata_json"])[
-                metric_with_score_and_weight["field_name"]
-            ]
-            metric_with_score_and_weight["score"] = score
+            if metric_with_score_and_weight["field_name"] in [
+                "examples_per_second",
+                "memory_utilization",
+            ]:
+                score = scores_by_dataset_and_model_id[
+                    metric_with_score_and_weight["field_name"]
+                ]
+                metric_with_score_and_weight["score"] = score
+            else:
+                score = json.loads(scores_by_dataset_and_model_id["metadata_json"])[
+                    metric_with_score_and_weight["field_name"]
+                ]
+                metric_with_score_and_weight["score"] = score
         return metrics_with_score_and_weight
 
     def get_score_info_by_dataset_and_model_id(
@@ -122,6 +130,7 @@ class ScoreService:
         offset: int,
         limit: int,
         metrics: list,
+        perf_metric_info: dict,
     ):
         models_dynaboard_info = []
         for model_id in model_ids:
@@ -154,6 +163,10 @@ class ScoreService:
         ]
 
         # Sort
+        utility_direction = perf_metric_info.get("utility_direction", None)
+        print("utility_direction", utility_direction)
+        if utility_direction == -1:
+            sort_direction = "desc" if sort_direction == "asc" else "asc"
         if sort_by != "dynascore":
             models_dynaboard_info = sorted(
                 models_dynaboard_info,

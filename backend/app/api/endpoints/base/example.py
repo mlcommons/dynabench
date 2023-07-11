@@ -11,7 +11,7 @@ from app.domain.schemas.base.example import (
     DownloadAllExamplesRequest,
     DownloadExamplesRequest,
     GetExampleRequest,
-    PartiallyCreationExampleGenerativeRequest,
+    PartialCreationExampleRequest,
     UpdateCreationExampleGenerativeRequest,
     ValidateExampleRequest,
 )
@@ -53,7 +53,7 @@ def validate_example(model: ValidateExampleRequest):
 
 @router.post("/partial_creation_generative_example", response_model={})
 def partial_creation_generative_example(
-    model: PartiallyCreationExampleGenerativeRequest,
+    model: PartialCreationExampleRequest,
 ):
     return ExampleService().partial_creation_generative_example(
         model.example_info,

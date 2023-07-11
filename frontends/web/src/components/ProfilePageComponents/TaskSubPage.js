@@ -114,7 +114,9 @@ const TaskSubPage = (props) => {
   return (
     <>
       <Container className="mb-5 pb-5">
-        <h1 className="my-4 pt-3 text-uppercase text-center">Your Tasks</h1>
+        <h1 className="my-4 pt-3 text-uppercase text-center">
+          Your Challenges
+        </h1>
         <TaskTable
           history={history}
           api={api}

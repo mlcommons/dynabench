@@ -449,11 +449,11 @@ class ProfilePage extends React.Component {
       },
       {
         href: "#tasks",
-        buttonText: "Tasks",
+        buttonText: "Challenges",
       },
       {
         href: "#admin_task_proposals",
-        buttonText: "Admin Task Proposals",
+        buttonText: "Admin Challenges Proposals",
       },
       {
         href: "#examples",

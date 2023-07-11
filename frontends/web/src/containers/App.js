@@ -204,7 +204,10 @@ class App extends React.Component {
                               About
                             </Nav.Link>
                           </Nav.Item>
-                          <NavDropdown title="Tasks" id="basic-nav-dropdown">
+                          <NavDropdown
+                            title="Communities"
+                            id="basic-nav-dropdown"
+                          >
                             <ul className="cl-menu ul-nav">
                               <li id="original" className="li-nav">
                                 <a href="/dadc" className="second-nav-a">
@@ -383,7 +386,7 @@ class App extends React.Component {
                                   Forks &amp; Snapshots
                                 </NavDropdown.Item>
                                 <NavDropdown.Item as={Link} to="/account#tasks">
-                                  Tasks
+                                  Challenges
                                 </NavDropdown.Item>
                                 {this.state.user?.admin && (
                                   <>
