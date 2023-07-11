@@ -162,6 +162,8 @@ class ScoreService:
         ]
 
         # Sort
+        if isinstance(perf_metric_info, list):
+            perf_metric_info = perf_metric_info[0]
         utility_direction = perf_metric_info.get("utility_direction", None)
         if utility_direction == -1:
             sort_direction = "desc" if sort_direction == "asc" else "asc"
