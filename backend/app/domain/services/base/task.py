@@ -102,7 +102,7 @@ class TaskService:
         ).get("aws_metrics", [])
 
         ordered_metric_field_names = (
-            type_values + delta_perf_metrics_type + aws_metric_names
+            type_values + aws_metric_names + delta_perf_metrics_type
         )
         metrics_metadata = {
             metric: meta_metrics_dict.get(metric)(task_info)
@@ -213,7 +213,11 @@ class TaskService:
         instructions = self.task_repository.get_task_instructions(
             task_id
         ).general_instructions
-        return literal_eval(instructions)
+        try:
+            return literal_eval(instructions)
+        except Exception as e:
+            print(e)
+            return {}
 
     def update_task_instructions(self, task_id: int, instructions: dict):
         return self.task_repository.update_task_instructions(task_id, instructions)

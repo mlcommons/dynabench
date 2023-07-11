@@ -80,7 +80,6 @@ class ScoreService:
         scores = [
             metric_score["score"] for metric_score in metrics_with_score_and_weight
         ]
-
         final_scores_by_dataset_and_model_id["scores"] = scores
         final_scores_by_dataset_and_model_id["variances"] = [0] * len(scores)
         if dataset_has_downstream:
@@ -164,7 +163,6 @@ class ScoreService:
 
         # Sort
         utility_direction = perf_metric_info.get("utility_direction", None)
-        print("utility_direction", utility_direction)
         if utility_direction == -1:
             sort_direction = "desc" if sort_direction == "asc" else "asc"
         if sort_by != "dynascore":
@@ -205,6 +203,7 @@ class ScoreService:
                 dataset_id, model_id, order_metric_with_weight, perf_metric_field_name
             )
             datasets_info.append(dataset_info)
+
         averaged_scores = self.get_averaged_scores(
             datasets_info, order_scoring_datasets_with_weight
         )
