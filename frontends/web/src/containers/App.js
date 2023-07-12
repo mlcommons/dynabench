@@ -338,7 +338,7 @@ class App extends React.Component {
                             <>
                               <SearchBar />
                               <NavDropdown
-                                onToggle={this.refreshData}
+                                // onToggle={this.refreshData}
                                 alignRight
                                 className="no-chevron"
                                 title={

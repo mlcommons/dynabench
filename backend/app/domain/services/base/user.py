@@ -38,3 +38,9 @@ class UserService:
 
     def get_is_admin(self, user_id: int):
         return self.user_repository.get_is_admin(user_id)
+
+    def get_user_with_badges(self, user_id: int):
+        user_info = self.user_repository.get_info_per_user_id(user_id).__dict__
+        badges = self.user_repository.get_badges_per_user_id(user_id)
+        user_info["badges"] = [[badge for badge in badges]]
+        return user_info

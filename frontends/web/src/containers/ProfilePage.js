@@ -461,6 +461,8 @@ class ProfilePage extends React.Component {
       },
     ];
 
+    console.log("this.state.user", this.state.user);
+
     return (
       <Container fluid>
         <Row>
