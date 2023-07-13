@@ -130,3 +130,13 @@ class ExampleRepository(AbstractRepository):
             .filter(Round.tid == task_id)
             .all()
         )
+
+    def get_active_tasks_per_user_id(self, user_id: int):
+        return (
+            self.session.query(Round.tid)
+            .join(Context, Round.id == Context.r_realid)
+            .join(Example, Context.id == Example.cid)
+            .filter(Example.uid == user_id)
+            .distinct()
+            .all()
+        )

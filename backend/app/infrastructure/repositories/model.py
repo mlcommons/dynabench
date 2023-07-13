@@ -133,3 +133,14 @@ class ModelRepository(AbstractRepository):
         )
         self.session.flush()
         self.session.commit()
+
+    def get_models_per_user(self, user_id: int) -> list:
+        return self.session.query(self.model).filter(self.model.uid == user_id).all()
+
+    def get_active_tasks_per_user_id(self, user_id):
+        return (
+            self.session.query(self.model.tid)
+            .filter(self.model.uid == user_id)
+            .distinct()
+            .all()
+        )

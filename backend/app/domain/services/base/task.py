@@ -14,10 +14,12 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import 
     meta_metrics_dict,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
+from app.infrastructure.repositories.example import ExampleRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.taskcategories import TaskCategoriesRepository
 from app.infrastructure.repositories.user import UserRepository
+from app.infrastructure.repositories.validation import ValidationRepository
 
 
 class TaskService:
@@ -25,9 +27,11 @@ class TaskService:
         self.task_repository = TaskRepository()
         self.dataset_repository = DatasetRepository()
         self.model_repository = ModelRepository()
+        self.example_repository = ExampleRepository()
         self.score_services = ScoreService()
         self.task_categories_repository = TaskCategoriesRepository()
         self.user_repository = UserRepository()
+        self.validation_repository = ValidationRepository()
 
     def update_last_activity_date(self, task_id: int):
         self.task_repository.update_last_activity_date(task_id)
@@ -224,3 +228,23 @@ class TaskService:
 
     def get_tasks_with_samples_created_by_user(self, user_id: int):
         return self.task_repository.get_tasks_with_samples_created_by_user(user_id)
+
+    def get_active_tasks_per_user_id(self, user_id: int):
+        tasks_with_models_activity = self.model_repository.get_active_tasks_per_user_id(
+            user_id
+        )
+        tasks_with_examples_activity = (
+            self.example_repository.get_active_tasks_per_user_id(user_id)
+        )
+        tasks_with_validation_activity = (
+            self.validation_repository.get_active_tasks_per_user_id(user_id)
+        )
+        active_tasks = list(
+            tasks_with_models_activity
+            + tasks_with_examples_activity
+            + tasks_with_validation_activity
+        )
+        active_tasks = [task[0] for task in active_tasks]
+        all_tasks = self.get_active_tasks_with_round_info()
+        active_tasks = [task for task in all_tasks if task["id"] in active_tasks]
+        return active_tasks

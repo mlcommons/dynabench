@@ -125,3 +125,8 @@ def conversation_with_buffer_memory(model: ConversationWithBufferMemoryRequest):
 @router.get("/update_model_status/{model_id}")
 def update_model_status(model_id: int):
     return ModelService().update_model_status(model_id)
+
+
+@router.get("/get_models_per_user/{user_id}")
+def get_models_per_user(user_id: int):
+    return ModelService().get_models_per_user(user_id)

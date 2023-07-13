@@ -389,3 +389,6 @@ class ModelService:
             self.model_repository.update_published_status(model_id)
         else:
             raise HTTPException(status_code=400, detail="Model no has all the scores")
+
+    def get_models_per_user(self, user_id: int):
+        return self.model_repository.get_models_per_user(user_id)
