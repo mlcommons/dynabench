@@ -8,7 +8,7 @@
 
 from sqlalchemy.sql import func
 
-from app.infrastructure.models.models import Model
+from app.infrastructure.models.models import Model, Score, Task
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -135,7 +135,21 @@ class ModelRepository(AbstractRepository):
         self.session.commit()
 
     def get_models_per_user(self, user_id: int) -> list:
-        return self.session.query(self.model).filter(self.model.uid == user_id).all()
+        return (
+            self.session.query(
+                Model.name,
+                Model.is_published,
+                Model.upload_datetime,
+                Task.name.label("task"),
+                func.avg(Score.perf).label("score"),
+            )
+            .join(Task, Task.id == self.model.tid)
+            .join(Score, Score.mid == self.model.id)
+            .filter(self.model.uid == user_id)
+            .group_by(self.model.id)
+            .order_by(self.model.id.desc())
+            .all()
+        )
 
     def get_active_tasks_per_user_id(self, user_id):
         return (
