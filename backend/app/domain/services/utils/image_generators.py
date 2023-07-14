@@ -2,8 +2,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import base64
 import os
 from abc import ABC, abstractmethod
+from multiprocessing import Pool
 
 import openai
 import requests
@@ -50,6 +52,54 @@ class OpenAIImageProvider(ImageProvider):
         return "openai"
 
 
+class HFImageProvider(ImageProvider):
+    def __init__(self):
+        self.api_key = os.getenv("HF")
+
+    def process_request(self, url, num_images, payload, headers):
+        payload = payload
+        headers = headers
+        images = []
+        for _ in range(num_images):
+            response = requests.post(url, json=payload, headers=headers)
+            print(response.status_code, url)
+            if response.status_code == 200:
+                base64_image = base64.b64encode(response.content)
+                images.append(base64_image.decode("utf-8"))
+        return images
+
+    def generate_images(
+        self, prompt: str, num_images: int, models: list, endpoint: str
+    ):
+        payload = {"inputs": prompt}
+        headers = {
+            "Authorization": self.api_key,
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "x-use-cache": "false",
+        }
+        all_images = []
+        with Pool() as pool:
+            results = pool.starmap(
+                self.process_request,
+                [
+                    (
+                        f"{endpoint['huggingface']['endpoint']}/{url}",
+                        num_images,
+                        payload,
+                        headers,
+                    )
+                    for url in models["huggingface"]["models"]
+                ],
+            )
+        for images in results:
+            all_images.extend(images)
+        return all_images
+
+    def provider_name(self):
+        return "hf"
+
+
 class StableDiffusionImageProvider(ImageProvider):
     def __init__(self):
         self.api_key = os.getenv("STABLE_DIFFUSION")
@@ -57,7 +107,7 @@ class StableDiffusionImageProvider(ImageProvider):
     def generate_images(
         self, prompt: str, num_images: int, models: list, endpoint: str
     ) -> list:
-        for model in models:
+        for model in models["together"]["models"]:
             print(f"Trying model {model}")
             res = requests.post(
                 endpoint,
