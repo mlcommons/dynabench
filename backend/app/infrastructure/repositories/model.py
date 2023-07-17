@@ -161,3 +161,6 @@ class ModelRepository(AbstractRepository):
             .distinct()
             .all()
         )
+
+    def get_total_models_per_user_id(self, user_id):
+        return self.session.query(self.model).filter(self.model.uid == user_id).count()

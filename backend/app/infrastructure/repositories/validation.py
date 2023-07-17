@@ -37,3 +37,6 @@ class ValidationRepository(AbstractRepository):
             .distinct()
             .all()
         )
+
+    def get_total_validations_per_user_id(self, user_id: int):
+        return self.session.query(Validation).filter(Validation.uid == user_id).count()

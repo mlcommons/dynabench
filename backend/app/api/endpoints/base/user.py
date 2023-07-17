@@ -13,3 +13,8 @@ router = APIRouter()
 @router.get("/get_user_with_badges/{user_id}", response_model={})
 async def get_task_id_by_task_code(user_id: str):
     return UserService().get_user_with_badges(user_id)
+
+
+@router.get("get_stats_per_user_id/{user_id}", response_model={})
+async def get_stats_per_user_id(user_id: str):
+    return UserService().get_stats_per_user_id(user_id)

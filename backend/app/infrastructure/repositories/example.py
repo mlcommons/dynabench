@@ -140,3 +140,24 @@ class ExampleRepository(AbstractRepository):
             .distinct()
             .all()
         )
+
+    def get_total_examples_per_user_id(self, user_id: int):
+        return (
+            self.session.query(func.count(Example.id))
+            .filter(Example.uid == user_id)
+            .scalar()
+        )
+
+    def get_model_fooling_rate_per_user_id(self, user_id: int):
+        return (
+            self.session.query(
+                func.round(
+                    func.coalesce(
+                        func.sum(Example.model_wrong) / func.count(Example.id), 0
+                    ),
+                    2,
+                )
+            )
+            .filter(Example.uid == user_id)
+            .scalar()
+        )
