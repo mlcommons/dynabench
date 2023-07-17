@@ -8,7 +8,7 @@
 
 from sqlalchemy.sql import func
 
-from app.infrastructure.models.models import Model, Score, Task
+from app.infrastructure.models.models import ChallengesTypes, Model, Score, Task
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -141,10 +141,12 @@ class ModelRepository(AbstractRepository):
                 Model.name,
                 Model.is_published,
                 Model.upload_datetime,
+                ChallengesTypes.name.label("Community"),
                 Task.name.label("task"),
                 func.avg(Score.perf).label("score"),
             )
             .join(Task, Task.id == self.model.tid)
+            .join(ChallengesTypes, ChallengesTypes.id == Task.challenge_type)
             .join(Score, Score.mid == self.model.id)
             .filter(self.model.uid == user_id)
             .group_by(self.model.id)
