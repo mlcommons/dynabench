@@ -137,6 +137,7 @@ class ModelRepository(AbstractRepository):
     def get_models_per_user(self, user_id: int) -> list:
         return (
             self.session.query(
+                Model.id,
                 Model.name,
                 Model.is_published,
                 Model.upload_datetime,
