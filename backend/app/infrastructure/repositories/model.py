@@ -141,7 +141,7 @@ class ModelRepository(AbstractRepository):
                 Model.name,
                 Model.is_published,
                 Model.upload_datetime,
-                ChallengesTypes.name.label("Community"),
+                ChallengesTypes.name.label("community"),
                 Task.name.label("task"),
                 func.avg(Score.perf).label("score"),
             )
