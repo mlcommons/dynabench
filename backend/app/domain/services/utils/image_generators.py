@@ -74,7 +74,7 @@ class HFImageProvider(ImageProvider):
     def generate_images(
         self, prompt: str, num_images: int, models: list, endpoint: str
     ):
-        payload = {"inputs": [prompt]*2}
+        payload = {"inputs": prompt}
         headers = {
             "Authorization": self.api_key,
             "Cache-Control": "no-cache",
