@@ -37,12 +37,14 @@ class OpenAIImageProvider(ImageProvider):
     def generate_images(
         self, prompt: str, num_images: int, models: list = [], endpoint: str = ""
     ) -> list:
+        openai.api_key = self.api_key
         try:
+
             response = openai.Image.create(
-                prompt=prompt, n=num_images, size="256x256", response_format="b64_json"
+                prompt=prompt, n=1, size="256x256", response_format="b64_json"
             )
             image_response = [x["b64_json"] for x in response["data"]]
-            return image_response
+            return {"generator": self.provider_name(), "images": image_response}
 
         except openai.error.OpenAIError as e:
             print(e)
@@ -52,49 +54,57 @@ class OpenAIImageProvider(ImageProvider):
         return "openai"
 
 
+class DynabenchImageProvider(ImageProvider):
+    def __init__(self):
+        pass
+
+    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
+        payload = {"prompt": prompt, "num_images": 4}
+        response = requests.post(f"{endpoint['dynabench']['endpoint']}", json=payload)
+        if response.status_code == 200:
+            return {"generator": self.provider_name(), "images": response.json()}
+
+    def provider_name(self):
+        return "dynabench"
+
 class HFImageProvider(ImageProvider):
     def __init__(self):
         self.api_key = os.getenv("HF")
 
-    def process_request(self, url, num_images, payload, headers):
-        payload = payload
-        headers = headers
-        images = []
-        for _ in range(num_images):
-            response = requests.post(url, json=payload, headers=headers)
-            print(response.status_code, url)
-            if response.status_code == 200:
-                base64_image = base64.b64encode(response.content)
-                images.append(base64_image.decode("utf-8"))
-        return images
-
     def generate_images(
         self, prompt: str, num_images: int, models: list, endpoint: str
     ):
-        payload = {"inputs": prompt}
+        payload = {"inputs": [prompt]*2}
         headers = {
             "Authorization": self.api_key,
             "Cache-Control": "no-cache",
             "Pragma": "no-cache",
             "x-use-cache": "false",
         }
-        all_images = []
-        with Pool() as pool:
-            results = pool.starmap(
-                self.process_request,
-                [
-                    (
-                        f"{endpoint['huggingface']['endpoint']}/{url}",
-                        num_images,
-                        payload,
-                        headers,
-                    )
-                    for url in models["huggingface"]["models"]
-                ],
-            )
-        for images in results:
-            all_images.extend(images)
-        return all_images
+        model = models['huggingface']['models'][0]
+        endpoint = f"{endpoint['huggingface']['endpoint']}/{model}"
+        response = requests.post(endpoint, json=payload, headers=headers)
+        images = []
+        print("Trying model", endpoint, 'with status code', response.status_code)
+        if response.status_code == 200:
+            base64_image = base64.b64encode(response.content)
+            images.append(base64_image.decode("utf-8"))
+        return {"generator": self.provider_name(), "images": images}
+
+        # with Pool() as pool:
+        #     results = pool.starmap(
+        #         self.process_request,
+        #         [
+        #             (
+        #                 f"{endpoint['huggingface']['endpoint']}/{url}",
+        #                 num_images,
+        #                 payload,
+        #                 headers,
+        #             )
+        #             for url in models["huggingface"]["models"]
+        #         ],
+        #     )
+
 
     def provider_name(self):
         return "hf"
