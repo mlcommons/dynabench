@@ -164,3 +164,8 @@ class ModelRepository(AbstractRepository):
 
     def get_total_models_per_user_id(self, user_id):
         return self.session.query(self.model).filter(self.model.uid == user_id).count()
+
+    def delete_model(self, model_id: int):
+        self.session.query(self.model).filter(self.model.id == model_id).delete()
+        self.session.flush()
+        self.session.commit()

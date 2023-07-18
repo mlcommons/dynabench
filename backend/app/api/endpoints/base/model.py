@@ -130,3 +130,8 @@ def update_model_status(model_id: int):
 @router.get("/get_models_per_user/{user_id}")
 def get_models_per_user(user_id: int):
     return ModelService().get_models_per_user(user_id)
+
+
+@router.get("/delete_model/{model_id}")
+def delete_model(model_id: int):
+    return ModelService().delete_model(model_id)

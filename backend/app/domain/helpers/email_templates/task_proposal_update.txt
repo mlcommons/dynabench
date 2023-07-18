@@ -1,0 +1,9 @@
+Greetings,
+
+Someone create the task: $name with the code: $code.
+
+The description is: $desc
+
+Thanks,
+
+The Dynabench Team
