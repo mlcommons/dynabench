@@ -15,10 +15,10 @@ class TaskProposalService:
 
     def validate_no_duplicate_task_code(self, task_code: str):
         return (
-            1
+            False
             if self.task_repository.validate_no_duplicate_task_code(task_code)
             is not None
-            else 0
+            else True
         )
 
     def add_task_proposal(
