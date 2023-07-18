@@ -392,3 +392,9 @@ class ModelService:
 
     def get_models_per_user(self, user_id: int):
         return self.model_repository.get_models_per_user(user_id)
+
+    def delete_model(self, model_id: int):
+        return self.model_repository.delete_model(model_id)
+
+    def get_all_model_info_by_id(self, model_id: int):
+        return self.model_repository.get_all_model_info_by_id(model_id)

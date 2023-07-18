@@ -135,3 +135,8 @@ def get_models_per_user(user_id: int):
 @router.get("/delete_model/{model_id}")
 def delete_model(model_id: int):
     return ModelService().delete_model(model_id)
+
+
+@router.get("/get_all_model_info_by_id/{model_id}")
+def get_all_model_info_by_id(model_id: int):
+    return ModelService().get_all_model_info_by_id(model_id)

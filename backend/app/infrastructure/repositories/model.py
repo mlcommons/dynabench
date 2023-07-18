@@ -20,8 +20,7 @@ class ModelRepository(AbstractRepository):
         instance = (
             self.session.query(self.model).filter(self.model.id == model_id).one()
         )
-        instance = self.instance_converter.instance_to_dict(instance)
-        return instance
+        return self.instance_converter.instance_to_dict(instance)
 
     def get_model_in_the_loop(self, task_id: int) -> dict:
         models_in_the_loop = (
@@ -166,6 +165,32 @@ class ModelRepository(AbstractRepository):
         return self.session.query(self.model).filter(self.model.uid == user_id).count()
 
     def delete_model(self, model_id: int):
+        self.session.query(Score).filter(Score.mid == model_id).delete()
         self.session.query(self.model).filter(self.model.id == model_id).delete()
         self.session.flush()
         self.session.commit()
+
+    def get_all_model_info_by_id(self, model_id: int):
+        return (
+            self.session.query(
+                Model.id,
+                Model.name,
+                Model.desc,
+                Model.params,
+                Model.languages,
+                Model.light_model,
+                Model.deployment_status,
+                Model.is_in_the_loop,
+                Model.is_published,
+                Model.upload_datetime,
+                ChallengesTypes.name.label("community"),
+                Task.name.label("task"),
+                func.avg(Score.perf).label("score"),
+            )
+            .join(Task, Task.id == self.model.tid)
+            .join(ChallengesTypes, ChallengesTypes.id == Task.challenge_type)
+            .join(Score, Score.mid == self.model.id)
+            .filter(self.model.id == model_id)
+            .group_by(self.model.id)
+            .first()
+        )
