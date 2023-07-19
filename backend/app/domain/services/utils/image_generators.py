@@ -5,7 +5,6 @@
 import base64
 import os
 from abc import ABC, abstractmethod
-from multiprocessing import Pool
 
 import openai
 import requests
@@ -59,13 +58,14 @@ class DynabenchImageProvider(ImageProvider):
         pass
 
     def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
-        payload = {"prompt": prompt, "num_images": 4}
+        payload = {"prompt": prompt, "num_images": 1}
         response = requests.post(f"{endpoint['dynabench']['endpoint']}", json=payload)
         if response.status_code == 200:
             return {"generator": self.provider_name(), "images": response.json()}
 
     def provider_name(self):
         return "dynabench"
+
 
 class HFImageProvider(ImageProvider):
     def __init__(self):
@@ -81,11 +81,11 @@ class HFImageProvider(ImageProvider):
             "Pragma": "no-cache",
             "x-use-cache": "false",
         }
-        model = models['huggingface']['models'][0]
+        model = models["huggingface"]["models"][0]
         endpoint = f"{endpoint['huggingface']['endpoint']}/{model}"
         response = requests.post(endpoint, json=payload, headers=headers)
         images = []
-        print("Trying model", endpoint, 'with status code', response.status_code)
+        print("Trying model", endpoint, "with status code", response.status_code)
         if response.status_code == 200:
             base64_image = base64.b64encode(response.content)
             images.append(base64_image.decode("utf-8"))
@@ -104,7 +104,6 @@ class HFImageProvider(ImageProvider):
         #             for url in models["huggingface"]["models"]
         #         ],
         #     )
-
 
     def provider_name(self):
         return "hf"

@@ -31,6 +31,7 @@ const SelectBetweenImagesGenerative: FC<
   setPartialSampleId,
 }) => {
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
+  const [firstMessageReceived, setFirstMessageReceived] = useState(false);
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<any>(
@@ -45,6 +46,10 @@ const SelectBetweenImagesGenerative: FC<
   const neccessaryFields = ["original_prompt"];
   const [selectedImage, setSelectedImage] = useState<string>("");
 
+  useEffect(() => {
+    console.log("showImages", showImages);
+  }, [showImages]);
+
   const generateImages = async () => {
     if (
       neccessaryFields.every(
@@ -54,23 +59,38 @@ const SelectBetweenImagesGenerative: FC<
       )
     ) {
       setShowLoader(true);
+      const socket = new WebSocket(
+        `${process.env.REACT_APP_WS_HOST}/context/ws`
+      );
+      socket.onopen = () => {
+        console.log("WebSocket connection established");
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(
+            JSON.stringify({
+              type: generative_context.type,
+              artifacts: artifactsInput,
+            })
+          );
+        }
+      };
+      socket.onmessage = (event) => {
+        if (!firstMessageReceived) {
+          setShowLoader(false);
+          setFirstMessageReceived(true);
+        }
+        const imageContent = JSON.parse(event.data);
+        setShowImages((prevImages) => [...prevImages, ...imageContent]);
+      };
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+      socket.onclose = (event) => {
+        setFirstMessageReceived(false);
+        console.log("WebSocket closed:", event.code, event.reason);
+      };
+      addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
+      setPromptHistory(getListFromLocalStorage("promptHistory"));
       setIsGenerativeContext(true);
-      const generatedImages = await post("/context/get_generative_contexts", {
-        type: generative_context.type,
-        artifacts: artifactsInput,
-      });
-      if (response.ok) {
-        setShowImages(generatedImages);
-        addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
-        setPromptHistory(getListFromLocalStorage("promptHistory"));
-        setShowLoader(false);
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong!",
-        });
-      }
     } else {
       Swal.fire({
         icon: "error",
@@ -104,20 +124,38 @@ const SelectBetweenImagesGenerative: FC<
       [field_names_for_the_model.original_prompt ?? "original_prompt"]: prompt,
     });
     setShowLoader(true);
-    const generatedImages = await post("/context/get_generative_contexts", {
-      type: generative_context.type,
-      artifacts: {
-        ...artifactsInput,
-        prompt: prompt,
-        user_id: user.id,
-      },
-    });
-    if (response.ok) {
-      setShowImages(generatedImages);
-      addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
-      setPromptHistory(getListFromLocalStorage("promptHistory"));
-      setShowLoader(false);
-    }
+    const socket = new WebSocket(`${process.env.REACT_APP_WS_HOST}/context/ws`);
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            type: generative_context.type,
+            artifacts: {
+              ...artifactsInput,
+              prompt: prompt,
+              user_id: user.id,
+            },
+          })
+        );
+      }
+    };
+    socket.onmessage = (event) => {
+      if (!firstMessageReceived) {
+        setShowLoader(false);
+        setFirstMessageReceived(true);
+      }
+      const imageContent = JSON.parse(event.data);
+      setShowImages((prevImages) => [...prevImages, ...imageContent]);
+    };
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+    socket.onclose = (event) => {
+      console.log("WebSocket closed:", event.code, event.reason);
+    };
+    addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
+    setPromptHistory(getListFromLocalStorage("promptHistory"));
     setIsGenerativeContext(true);
   };
 
@@ -282,13 +320,16 @@ const SelectBetweenImagesGenerative: FC<
       ) : (
         <div className="grid items-center justify-center grid-rows-2">
           <div className="mr-2 text-letter-color">
-            Images are being generated, bear with the model
+            Images are being generated, the images are really big <br />
+            so we generate them in batches of 3. If you want to see <br /> more
+            images just wait a few seconds after the first batch <br />
+            appears.
           </div>
           <PacmanLoader
             color="#ccebd4"
             loading={showLoader}
             size={50}
-            className="align-center"
+            className="flex align-center"
           />
         </div>
       )}

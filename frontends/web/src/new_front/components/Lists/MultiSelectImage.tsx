@@ -38,7 +38,7 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
           </div>
         )}
         <Collapse in={open}>
-          <Carousel cols={3} rows={2} gap={10} showDots={true}>
+          <Carousel cols={3} rows={1} gap={10} showDots={true}>
             {images.map((image, index) => (
               <Carousel.Item>
                 <div key={index} className="max-h-72">
