@@ -3,11 +3,11 @@ import React from "react";
 const Features = () => {
   return (
     <>
-      <div className="mb-12">
+      <div className="pb-32">
         <h2 className="w-full mb-20 text-5xl font-bold leading-tight text-center text-letter-color">
           What can you do with Dynabench?
         </h2>
-        <div className="grid grid-cols-2 gap-12">
+        <div className="grid grid-cols-2 gap-16">
           <div className="flex mb-12">
             <div className="shrink-0">
               <div className="p-4 rounded-md shadow-lg bg-[#0e1015]">

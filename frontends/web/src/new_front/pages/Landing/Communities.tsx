@@ -10,8 +10,7 @@ import { Link } from "react-router-dom";
 const Communities = () => {
   return (
     <>
-      <div className="inset-0 flex items-center"></div>
-      <div className="container mx-auto mt-4">
+      <div className="container mx-auto pt-4">
         <a
           className="flex flex-row justify-center hover:no-underline pointer"
           href="/communities"
@@ -27,7 +26,7 @@ const Communities = () => {
         </a>
 
         <div className="flex flex-wrap my-12">
-          <div className="w-5/6 p-6 sm:w-1/2">
+          <div className="w-5/6 p-6 sm:w-1/2 z-50">
             <a
               className="flex flex-row gap-1 pointer hover:no-underline"
               href="/dadc"
@@ -68,8 +67,8 @@ const Communities = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col-reverse flex-wrap my-12 sm:flex-row">
-          <div className="w-full p-6 mt-6 sm:w-1/2">
+        <div className="flex flex-col-reverse flex-wrap my-12 sm:flex-row ">
+          <div className="w-full p-6 mt-6 sm:w-1/2 z-50 ">
             <div
               id="responsiveVideoWrapper"
               className="relative h-0 overflow-hidden rounded-md shadow-lg pb-fluid-video"
@@ -83,7 +82,7 @@ const Communities = () => {
               ></iframe>
             </div>
           </div>
-          <div className="w-full p-6 mt-6 sm:w-1/2">
+          <div className="w-full p-6 mt-6 sm:w-1/2 z-50">
             <div className="align-middle">
               <a
                 className="flex flex-row gap-1 pointer hover:no-underline"
@@ -111,8 +110,9 @@ const Communities = () => {
             </div>
           </div>
         </div>
+
         <div className="flex flex-wrap my-12">
-          <div className="w-5/6 p-6 sm:w-1/2">
+          <div className="w-5/6 p-6 sm:w-1/2 z-50">
             <a
               className="flex flex-row gap-1 pointer hover:no-underline"
               href="/babylm"
@@ -147,7 +147,7 @@ const Communities = () => {
         </div>
 
         <div className="flex flex-col-reverse flex-wrap my-12 sm:flex-row">
-          <div className="w-full p-6 mt-6 sm:w-1/2">
+          <div className="w-full p-6 mt-6 sm:w-1/2 z-50">
             <div
               id="responsiveVideoWrapper"
               className="relative h-0 overflow-hidden rounded-md pb-fluid-video"
@@ -155,7 +155,7 @@ const Communities = () => {
               <LLM className="absolute top-0 left-0 w-full h-full" />
             </div>
           </div>
-          <div className="w-full p-6 mt-6 sm:w-1/2">
+          <div className="w-full p-6 mt-6 sm:w-1/2 z-50">
             <div className="align-middle">
               <a
                 className="flex flex-row gap-1 pointer hover:no-underline"
@@ -185,7 +185,7 @@ const Communities = () => {
           </div>
         </div>
         <div className="flex flex-wrap my-12">
-          <div className="w-5/6 p-6 sm:w-1/2">
+          <div className="w-5/6 p-6 sm:w-1/2 z-50">
             <a
               className="flex flex-row gap-1 pointer hover:no-underline"
               href="/others_tasks"

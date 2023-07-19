@@ -72,8 +72,6 @@ const TaskPage = () => {
     }
   }, [task]);
 
-  console.log("task", task);
-
   return (
     <div>
       {!loading && task ? (
@@ -130,13 +128,14 @@ const TaskPage = () => {
                         setOpenTab={setOpenTab}
                       />
                     )}
-
-                    <TabOption
-                      optionTab={2}
-                      tabName="Overview"
-                      openTab={openTab}
-                      setOpenTab={setOpenTab}
-                    />
+                    {Object.entries(taskInstructions).length !== 0 && (
+                      <TabOption
+                        optionTab={2}
+                        tabName="Overview"
+                        openTab={openTab}
+                        setOpenTab={setOpenTab}
+                      />
+                    )}
                     {task.documentation_url && (
                       <TabOption
                         optionTab={3}
@@ -178,13 +177,15 @@ const TaskPage = () => {
                       />
                     )}
                   </div>
-                  <div className={openTab === 2 ? "block " : "hidden"}>
-                    <OverviewTask
-                      roundDescription={task.round?.longdesc}
-                      generalDescription={task.instructions_md}
-                      taskInstructions={taskInstructions!}
-                    />
-                  </div>
+                  {Object.entries(taskInstructions).length !== 0 && (
+                    <div className={openTab === 2 ? "block " : "hidden"}>
+                      <OverviewTask
+                        roundDescription={task.round?.longdesc}
+                        generalDescription={task.instructions_md}
+                        taskInstructions={taskInstructions!}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

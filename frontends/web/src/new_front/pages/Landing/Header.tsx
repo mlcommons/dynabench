@@ -1,64 +1,84 @@
-import React from "react";
+import React, { FC, useState } from "react";
 import { motion } from "framer-motion";
 import { fadeIn } from "new_front/utils/helpers/motion";
 import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
+import Landing1 from "new_front/assets/landing-1.png";
+import Modal from "react-bootstrap/Modal";
+import CreateProposalTask from "new_front/components/Modals/CreateProposalTask";
 
-const Header = () => {
+const Header: FC = () => {
+  const [showProposeTask, setShowProposeTask] = useState(false);
+  const handleClose = () => setShowProposeTask(false);
+  const handleShow = () => setShowProposeTask(true);
+
   return (
     <>
-      <div className="mx-auto ">
-        <div className="grid items-center gap-4 lg:grid-cols-2 ">
+      <Modal show={showProposeTask} onHide={handleClose}>
+        <CreateProposalTask handleClose={handleClose} />
+      </Modal>
+      <div className="mx-auto pt-16">
+        <div className="grid items-center gap-16 lg:grid-cols-2">
           <motion.div
             className="mt-12 lg:mt-0"
             variants={fadeIn("right", "tween", 0.5, 0.5)}
           >
-            <h2 className="font-sans text-5xl font-bold  text-[#344854]">
+            <h2 className="font-sans text-5xl font-bold  text-letter-color text-center">
               Challenging the Limits of Benchmarking AI
             </h2>
-            <p className="mt-4 mb-16 text-xl">
-              Collaborate with fellow AI enthusiasts and experts, and work
-              together to create new and innovative solutions to the most
-              pressing challenges facing the field of AI today.
+            <p className="mt-4 mb-16 text-2xl text-center font-medium">
+              Collaborate with AI enthusiasts and experts to solve pressing AI
+              challenges through innovation.
             </p>
-            <Button
-              as={Link}
-              className="p-3 mr-2 text-xl font-semibold border-0 rounded-full bg-primary-color"
-              to="/tasks"
-            >
-              Challenges
-            </Button>
-            <Button
-              as={Link}
-              className="p-3 mr-2 text-xl font-medium border-0 light-gray-bg"
-              to="/account#tasks"
-            >
-              Create your own task
-            </Button>
-            <div className="flex flex-row w-full gap-16 mt-4">
-              <div className="mb-12 md:mb-0">
-                <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
+            <div className="flex flex-row items-center justify-center gap-6">
+              <Button
+                as={Link}
+                className="py-[9px] px-7 text-xl font-semibold border-0 bg-primary-color "
+                to="/tasks"
+              >
+                Challenges
+              </Button>
+              <Button
+                onClick={handleShow}
+                className="py-[9px] px-7 text-xl font-semibold  border-0 light-gray-bg"
+              >
+                Create your own task
+              </Button>
+            </div>
+            <div className="flex flex-row w-full gap-12 mt-4 mx-4">
+              <div className="mb-12 md:mb-0 text-center">
+                <h2 className="text-3xl font-bold display-5 text-letter-color mb-2">
                   20+
                 </h2>
                 <h5 className="mb-2 text-lg font-medium">Challenges</h5>
               </div>
-              <div className="mb-12 md:mb-0">
-                <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
+              <div className="mb-12 md:mb-0 text-center">
+                <h2 className="text-3xl font-bold display-5 text-letter-color mb-2">
                   40+
                 </h2>
                 <h5 className="mb-2 text-lg font-medium">Partipants</h5>
               </div>
-              <div className="mb-12 md:mb-0">
-                <h2 className="text-3xl font-bold display-5 text-[#344854] mb-2">
+              <div className="mb-12 md:mb-0 text-center">
+                <h2 className="text-3xl font-bold display-5 text-letter-color mb-2">
                   50+
                 </h2>
                 <h5 className="mb-2 text-lg font-medium">Models</h5>
               </div>
+              <div className="mb-12 md:mb-0 text-center">
+                <h2 className="text-3xl font-bold display-5 text-letter-color mb-2 text-center">
+                  6
+                </h2>
+                <h5 className="mb-2 text-lg font-medium">Communities</h5>
+              </div>
             </div>
           </motion.div>
-          <div className="mb-12 lg:mb-0">
-            <img src="https://i.ibb.co/YPRJ0xL/landing-1.png" alt="" />
+          <div className="p-4">
+            <img
+              className="object-cover w-full h-full"
+              src={Landing1}
+              alt="Landing"
+            />
           </div>
         </div>
       </div>

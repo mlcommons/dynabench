@@ -113,11 +113,11 @@ h2.active {
 }
 
 .btn-primary:hover {
-    background-color: #ccebd4 !important;
-    color: #344854 !important;
-    border-color: inherit !important;
-    -webkit-box-shadow: none !important;
-    box-shadow: none !important;
+    background-color: #ccebd4;
+    color: #344854;
+    border-color: inherit;
+    -webkit-box-shadow: none;
+    box-shadow: none;
 }
 
 .btn-link {

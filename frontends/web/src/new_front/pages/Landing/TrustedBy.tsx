@@ -8,7 +8,7 @@ import "react-multi-carousel/lib/styles.css";
 
 const TrustedBy = () => {
   return (
-    <div className="container mt-16 ">
+    <div className="container pt-16 ">
       <h2 className="w-full my-2 text-5xl font-bold leading-tight text-center text-letter-color">
         Used By
       </h2>
@@ -21,9 +21,13 @@ const TrustedBy = () => {
           className="w-full mx-auto"
           arrows={false}
         >
-          {companies.map((company) => (
-            <div className="flex justify-center px-2 bg-white">
-              <img src={company.logo} alt={company.name} className="w-48 " />
+          {companies.map((company, key) => (
+            <div className="flex justify-center px-2 bg-transparent" key={key}>
+              <img
+                src={company.logo}
+                alt={company.name}
+                className="w-48 bg-transparent"
+              />
             </div>
           ))}
         </Carousel>
