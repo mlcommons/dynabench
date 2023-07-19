@@ -58,7 +58,7 @@ class DynabenchImageProvider(ImageProvider):
         pass
 
     def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
-        payload = {"prompt": prompt, "num_images": 10}
+        payload = {"prompt": prompt, "num_images": 1}
         response = requests.post(f"{endpoint['dynabench']['endpoint']}", json=payload)
         if response.status_code == 200:
             return {"generator": self.provider_name(), "images": response.json()}
