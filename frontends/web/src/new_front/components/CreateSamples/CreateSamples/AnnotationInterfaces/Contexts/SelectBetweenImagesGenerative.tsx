@@ -320,10 +320,11 @@ const SelectBetweenImagesGenerative: FC<
       ) : (
         <div className="grid items-center justify-center grid-rows-2">
           <div className="mr-2 text-letter-color">
-            Images are being generated, the images are really big <br />
-            so we generate them in batches of 3. If you want to see <br /> more
-            images just wait a few seconds after the first batch <br />
-            appears.
+            High-resolution images are currently being generated in batches of{" "}
+            <br />
+            three. To view additional images, please allow a few seconds after{" "}
+            <br />
+            the initial batch appears.
           </div>
           <PacmanLoader
             color="#ccebd4"
