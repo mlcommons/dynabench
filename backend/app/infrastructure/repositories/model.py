@@ -176,6 +176,7 @@ class ModelRepository(AbstractRepository):
                 Model.id,
                 Model.name,
                 Model.desc,
+                Model.longdesc,
                 Model.params,
                 Model.languages,
                 Model.light_model,
