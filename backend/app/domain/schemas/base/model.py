@@ -77,7 +77,7 @@ class UpdateModelInfoRequest(BaseModel):
     name: Optional[str]
     desc: Optional[str]
     longdesc: Optional[str]
-    params: Optional[float]
+    params: Optional[int]
     languages: Optional[str]
     license: Optional[str]
-    source_url: Optional[str]
+    source_url: Optional[str] = ""

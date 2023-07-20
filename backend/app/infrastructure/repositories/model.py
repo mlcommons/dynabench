@@ -8,7 +8,13 @@
 
 from sqlalchemy.sql import func
 
-from app.infrastructure.models.models import ChallengesTypes, Model, Score, Task
+from app.infrastructure.models.models import (
+    ChallengesTypes,
+    Dataset,
+    Model,
+    Score,
+    Task,
+)
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -171,7 +177,17 @@ class ModelRepository(AbstractRepository):
         self.session.commit()
 
     def get_all_model_info_by_id(self, model_id: int):
-        return (
+        valid_datasets = (
+            self.session.query(Dataset.id)
+            .join(Model, Model.tid == Dataset.tid)
+            .join(Task, Task.id == Model.tid)
+            .filter(Dataset.access_type == "scoring")
+            .filter(Dataset.tid == Task.id)
+            .filter(Model.id == model_id)
+            .all()
+        )
+        has_scores = self.session.query(Score.mid).filter(Score.mid == model_id).all()
+        query = (
             self.session.query(
                 Model.id,
                 Model.name,
@@ -188,15 +204,17 @@ class ModelRepository(AbstractRepository):
                 Model.upload_datetime,
                 ChallengesTypes.name.label("community"),
                 Task.name.label("task"),
-                func.avg(Score.perf).label("score"),
+                func.coalesce(func.avg(Score.perf), 0).label("score"),
             )
             .join(Task, Task.id == self.model.tid)
             .join(ChallengesTypes, ChallengesTypes.id == Task.challenge_type)
-            .join(Score, Score.mid == self.model.id)
+            .outerjoin(Score, Score.mid == self.model.id)
             .filter(self.model.id == model_id)
             .group_by(self.model.id)
-            .first()
         )
+        if len(has_scores) != 0:
+            query = query.filter(Score.did.in_([item[0] for item in valid_datasets]))
+        return query.one()
 
     def update_model_info(
         self,
@@ -209,18 +227,19 @@ class ModelRepository(AbstractRepository):
         license: str,
         source_url: str,
     ):
-        return (
+        (
             self.session.query(self.model)
             .filter(self.model.id == model_id)
             .update(
                 {
-                    self.model.name: name,
-                    self.model.desc: desc,
-                    self.model.longdesc: longdesc,
-                    self.model.params: params,
-                    self.model.languages: languages,
-                    self.model.license: license,
-                    self.model.source_url: source_url,
+                    "name": name,
+                    "desc": desc,
+                    "longdesc": longdesc,
+                    "params": params,
+                    "languages": languages,
+                    "license": license,
+                    "source_url": source_url,
                 }
             )
         )
+        return self.session.commit()
