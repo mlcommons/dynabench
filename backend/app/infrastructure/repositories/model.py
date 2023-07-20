@@ -179,6 +179,8 @@ class ModelRepository(AbstractRepository):
                 Model.longdesc,
                 Model.params,
                 Model.languages,
+                Model.license,
+                Model.source_url,
                 Model.light_model,
                 Model.deployment_status,
                 Model.is_in_the_loop,
@@ -194,4 +196,31 @@ class ModelRepository(AbstractRepository):
             .filter(self.model.id == model_id)
             .group_by(self.model.id)
             .first()
+        )
+
+    def update_model_info(
+        self,
+        model_id: int,
+        name: str,
+        desc: str,
+        longdesc: str,
+        params: float,
+        languages: str,
+        license: str,
+        source_url: str,
+    ):
+        return (
+            self.session.query(self.model)
+            .filter(self.model.id == model_id)
+            .update(
+                {
+                    self.model.name: name,
+                    self.model.desc: desc,
+                    self.model.longdesc: longdesc,
+                    self.model.params: params,
+                    self.model.languages: languages,
+                    self.model.license: license,
+                    self.model.source_url: source_url,
+                }
+            )
         )

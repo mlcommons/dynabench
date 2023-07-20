@@ -11,6 +11,7 @@ from app.domain.schemas.base.model import (
     ModelPredictionPerDatasetRequest,
     SingleModelEvaluationRequest,
     SingleModelEvaluationResponse,
+    UpdateModelInfoRequest,
     UploadModelToS3AndEvaluateRequest,
 )
 from app.domain.services.base.model import ModelService
@@ -140,3 +141,17 @@ def delete_model(model_id: int):
 @router.get("/get_all_model_info_by_id/{model_id}")
 def get_all_model_info_by_id(model_id: int):
     return ModelService().get_all_model_info_by_id(model_id)
+
+
+@router.post("/update_model_info")
+def update_model_info(model: UpdateModelInfoRequest):
+    return ModelService().update_model_info(
+        model.model_id,
+        model.name,
+        model.desc,
+        model.longdesc,
+        model.params,
+        model.languages,
+        model.license,
+        model.source_url,
+    )

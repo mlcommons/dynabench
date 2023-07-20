@@ -398,3 +398,18 @@ class ModelService:
 
     def get_all_model_info_by_id(self, model_id: int):
         return self.model_repository.get_all_model_info_by_id(model_id)
+
+    def update_model_info(
+        self,
+        model_id: int,
+        name: str,
+        desc: str,
+        longdesc: str,
+        params: float,
+        languages: str,
+        license: str,
+        source_url: str,
+    ):
+        return self.model_repository.update_model_info(
+            model_id, name, desc, longdesc, params, languages, license, source_url
+        )
