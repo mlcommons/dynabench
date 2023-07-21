@@ -29,4 +29,4 @@ async def authenticate(model: LoginRequest):
 
 @router.post("/create_user")
 async def create_user(model: CreateUserRequest):
-    return LoginService().create_user(model.username, model.password, model.username)
+    return LoginService().create_user(model.email, model.password, model.username)

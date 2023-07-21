@@ -13,3 +13,9 @@ from app.infrastructure.repositories.abstract import AbstractRepository
 class BadgeRepository(AbstractRepository):
     def __init__(self) -> None:
         super().__init__(Badge)
+
+    def add_badge(self, user_id: int, name: str) -> None:
+        model = self.model(uid=user_id, name=name)
+        self.session.add(model)
+        self.session.flush()
+        self.session.commit()

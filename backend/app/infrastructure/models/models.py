@@ -182,7 +182,7 @@ class Badge(Base):
     uid = Column(ForeignKey("users.id"), index=True)
     name = Column(String(255))
     metadata_json = Column(Text)
-    awarded = Column(DateTime)
+    awarded = Column(DateTime, server_default=func.now(), default=func.now())
 
     user = relationship("User")
 
