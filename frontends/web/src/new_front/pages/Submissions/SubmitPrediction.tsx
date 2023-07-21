@@ -54,7 +54,7 @@ const SubmitPrediction = () => {
       return;
     }
     const predictionsFormat = predictions.name.split(".").pop().toLowerCase();
-    if (predictionsFormat !== "json" && predictionsFormat !== "jsonl") {
+    if (predictionsFormat !== "json" || predictionsFormat !== "jsonl") {
       Swal.fire({
         title: "Error!",
         text: "Please, upload a json file.",
@@ -91,7 +91,7 @@ const SubmitPrediction = () => {
         if (error.response.status === 400) {
           Swal.fire({
             title: "Error!",
-            text: "Please, upload a valid file.",
+            text: "Although uploaded, the submission failed to evaluate.",
             icon: "error",
             confirmButtonText: "Ok",
           }).then(() => {
