@@ -57,7 +57,7 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "Model has no all the scores!",
+        text: "Model is missing all the scores!",
       });
     }
   };

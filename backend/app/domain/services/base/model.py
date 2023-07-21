@@ -363,9 +363,9 @@ class ModelService:
             self.email_helper.send(
                 contact=user_email,
                 cc_contact="dynabench-site@mlcommons.org",
-                template_name="model_evaluation_fail.txt",
+                template_name="model_evaluation_failed.txt",
                 msg_dict={"name": model_name},
-                subject=f"Model {model_name} upload fail.",
+                subject=f"Model {model_name} evaluation failed.",
             )
             raise HTTPException(
                 status_code=400, detail="Model evaluation fail, please try again"
