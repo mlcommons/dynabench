@@ -20,7 +20,7 @@ from app.infrastructure.repositories.taskuserpermission import (
 )
 
 
-class Login:
+class LoginService:
     def __init__(self) -> None:
         self.AUTH_JWT_SECRET_KEY = os.getenv("AUTH_JWT_SECRET_KEY")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("AUTH_ACCESS_TOKEN_EXPIRE_MINUTES")
