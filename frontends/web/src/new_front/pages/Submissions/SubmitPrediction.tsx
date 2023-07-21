@@ -29,6 +29,9 @@ const SubmitPrediction = () => {
       history,
       `/tasks/${taskCode}/submit_prediction`
     );
+    if (!isLogin) {
+      return;
+    }
   };
 
   useEffect(() => {
@@ -39,7 +42,19 @@ const SubmitPrediction = () => {
   const handleSubmitModel = async (modelData: any) => {
     setLoading(true);
     const formData = new FormData();
-    formData.append("predictions", modelData.file[0]);
+    const predictions = modelData.file[0];
+    const predictionsFormat = predictions.name.split(".").pop().toLowerCase();
+    if (predictionsFormat !== "json" && predictionsFormat !== "jsonl") {
+      Swal.fire({
+        title: "Error!",
+        text: "Please, upload a json file.",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
+      setLoading(false);
+      return;
+    }
+    formData.append("predictions", predictions);
     const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
     await axios
       .post(`${BASE_URL_2}/model/upload_prediction_to_s3`, formData, {
@@ -52,12 +67,22 @@ const SubmitPrediction = () => {
           model_name: modelData.modelName.replace(/\s/g, "_"),
         },
       })
-      .then((response) => {
-        if (response.status === 200) {
+      .then(() => {
+        Swal.fire({
+          title: "Success!",
+          text: "Predictions uploaded successfully.",
+          icon: "success",
+          confirmButtonText: "Ok",
+        }).then(() => {
+          window.location.reload();
+        });
+      })
+      .catch((error) => {
+        if (error.response.status === 400) {
           Swal.fire({
-            title: "Success!",
-            text: "Dataset uploaded successfully.",
-            icon: "success",
+            title: "Error!",
+            text: "Please, upload a valid file.",
+            icon: "error",
             confirmButtonText: "Ok",
           }).then(() => {
             window.location.reload();
@@ -68,6 +93,8 @@ const SubmitPrediction = () => {
             text: "Something went wrong.",
             icon: "error",
             confirmButtonText: "Ok",
+          }).then(() => {
+            window.location.reload();
           });
         }
         setLoading(false);

@@ -1,0 +1,8 @@
+Hi there
+
+Your model $name has fail. Please check your model and try again. If you think this is a mistake, please contact
+the task organizer.
+
+Thanks,
+
+The Dynabench Team

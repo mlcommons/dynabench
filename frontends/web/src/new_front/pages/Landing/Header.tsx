@@ -61,7 +61,7 @@ const Header: FC = () => {
               </div>
               <div className="mb-12 md:mb-0 text-center">
                 <h2 className="text-3xl font-bold display-5 text-letter-color mb-2">
-                  50+
+                  100+
                 </h2>
                 <h5 className="mb-2 text-lg font-medium">Models</h5>
               </div>

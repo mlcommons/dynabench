@@ -333,17 +333,6 @@ class ModelService:
             Key=model_path,
             ContentType=predictions.content_type,
         )
-        centralize_host = os.getenv("CENTRALIZED_HOST")
-        endpoint = "/builder_evaluation/evaluation/evaluate_downstream_tasks"
-        url = f"{centralize_host}{endpoint}"
-        requests.post(
-            url,
-            json={
-                "task_id": task_id,
-                "predictions": file_name,
-                "model_id": model["id"],
-            },
-        )
         self.email_helper.send(
             contact=user_email,
             cc_contact="dynabench-site@mlcommons.org",
@@ -351,6 +340,36 @@ class ModelService:
             msg_dict={"name": model_name},
             subject=f"Model {model_name} upload succeeded.",
         )
+        centralize_host = os.getenv("CENTRALIZED_HOST")
+        endpoint = "/builder_evaluation/evaluation/evaluate_downstream_tasks"
+        url = f"{centralize_host}{endpoint}"
+        evaluate_model = requests.post(
+            url,
+            json={
+                "task_id": task_id,
+                "predictions": file_name,
+                "model_id": model["id"],
+            },
+        )
+        if evaluate_model.status_code == 200:
+            self.email_helper.send(
+                contact=user_email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_evaluation_sucessful.txt",
+                msg_dict={"name": model_name, "model_id": model["id"]},
+                subject=f"Model {model_name} evaluation succeeded.",
+            )
+        else:
+            self.email_helper.send(
+                contact=user_email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_evaluation_fail.txt",
+                msg_dict={"name": model_name},
+                subject=f"Model {model_name} upload fail.",
+            )
+            raise HTTPException(
+                status_code=400, detail="Model evaluation fail, please try again"
+            )
         return "Model evaluate successfully"
 
     def conversation_with_buffer_memory(

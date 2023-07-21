@@ -31,13 +31,17 @@ const SelectBetweenImagesGenerative: FC<
   setPartialSampleId,
 }) => {
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
-  const [firstMessageReceived, setFirstMessageReceived] = useState(false);
+  const [firstMessageReceived, setFirstMessageReceived] =
+    useState<boolean>(false);
+  const [allowsGeneration, setAllowsGeneration] = useState<boolean>(true);
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts
   );
-  const [prompt, setPrompt] = useState<string>("Type your prompt here");
+  const [prompt, setPrompt] = useState<string>(
+    "Type your prompt here (e.g. a kid sleeping in a red pool of paint)"
+  );
   const { post, response } = useFetch();
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
@@ -63,6 +67,8 @@ const SelectBetweenImagesGenerative: FC<
         `${process.env.REACT_APP_WS_HOST}/context/ws`
       );
       socket.onopen = () => {
+        setShowImages([]);
+        setAllowsGeneration(false);
         console.log("WebSocket connection established");
         if (socket && socket.readyState === WebSocket.OPEN) {
           socket.send(
@@ -83,8 +89,10 @@ const SelectBetweenImagesGenerative: FC<
       };
       socket.onerror = (error) => {
         console.error("WebSocket error:", error);
+        setAllowsGeneration(true);
       };
       socket.onclose = (event) => {
+        setAllowsGeneration(true);
         setFirstMessageReceived(false);
         console.log("WebSocket closed:", event.code, event.reason);
       };
@@ -126,7 +134,9 @@ const SelectBetweenImagesGenerative: FC<
     setShowLoader(true);
     const socket = new WebSocket(`${process.env.REACT_APP_WS_HOST}/context/ws`);
     socket.onopen = () => {
+      setShowImages([]);
       console.log("WebSocket connection established");
+      setAllowsGeneration(false);
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(
           JSON.stringify({
@@ -150,8 +160,11 @@ const SelectBetweenImagesGenerative: FC<
     };
     socket.onerror = (error) => {
       console.error("WebSocket error:", error);
+      setAllowsGeneration(true);
     };
     socket.onclose = (event) => {
+      setAllowsGeneration(true);
+      setFirstMessageReceived(false);
       console.log("WebSocket closed:", event.code, event.reason);
     };
     addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
@@ -290,6 +303,7 @@ const SelectBetweenImagesGenerative: FC<
                   onClick={generateImages}
                   text="Generate Images"
                   className="mt-4 border-0 font-weight-bold light-gray-bg task-action-btn"
+                  disabled={!allowsGeneration}
                 />
               </AnnotationInstruction>
             </div>

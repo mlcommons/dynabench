@@ -20,7 +20,8 @@ const BasicInputRemain: FC<BasicInputProps> = ({
 }) => {
   return (
     <Collapse in={open}>
-      {placeholder === "Type your prompt here" ? (
+      {placeholder ===
+      "Type your prompt here (e.g. a kid sleeping in a red pool of paint)" ? (
         <FormControl
           className="p-3 h-12 rounded-1 thick-border bg-[#f0f2f5]"
           placeholder={placeholder}

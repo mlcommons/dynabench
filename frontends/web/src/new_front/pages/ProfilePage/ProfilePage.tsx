@@ -38,8 +38,7 @@ const ProfilePage: FC<Props> = () => {
   const { get, response, loading } = useFetch();
   const history = useHistory();
 
-  // const userId = user.id
-  const userId = 1675;
+  const userId = user.id;
   const getUserInfo = async () => {
     if (!userId) {
       return;
@@ -74,6 +73,11 @@ const ProfilePage: FC<Props> = () => {
   useEffect(() => {
     handleData();
   }, [userId]);
+
+  useEffect(() => {
+    localStorage.removeItem("originalPath");
+  }, []);
+
   return (
     <>
       {!loading && user ? (
@@ -144,7 +148,7 @@ const ProfilePage: FC<Props> = () => {
                     <div className="">
                       <div className="p-8">
                         <h4 className="text-4xl font-bold text-center text-letter-color">
-                          {userStats.model_fooling_rate * 100}%
+                          {(userStats.model_fooling_rate * 100).toFixed(0)}%
                         </h4>
                         <p className="text-lg font-medium leading-tight text-center text-third-color">
                           Model fooling rate

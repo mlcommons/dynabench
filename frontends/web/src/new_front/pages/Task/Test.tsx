@@ -1,10 +1,10 @@
 import React from "react";
-import ModelOverview from "new_front/pages/Model/ModelOverview";
+import Register from "../Login/Register";
 
 const Test = () => {
   return (
     <div>
-      <ModelOverview />
+      <Register />
     </div>
   );
 };

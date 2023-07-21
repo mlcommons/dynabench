@@ -37,8 +37,10 @@ import TasksPage from "../new_front/pages/Task/TasksPage";
 import LoginPage from "new_front/pages/Login/LoginPage";
 import MLCubeTutorial from "./MLCubeTutorial";
 import ModelPage from "./ModelPage";
+import ModelOverview from "new_front/pages/Model/ModelOverview";
 import ProfilePage from "new_front/pages/ProfilePage/ProfilePage";
 import RegisterPage from "./RegisterPage";
+import Register from "new_front/pages/Login/Register";
 import ResetPassword from "./ResetPassword";
 import ScrollToTop from "./ScrollToTop.js";
 import SubmitInterface from "./SubmitInterface.js";
@@ -485,7 +487,7 @@ class App extends React.Component {
                         />
                         <Route
                           path="/tasks/:taskCode/models/:modelId"
-                          component={ModelPage}
+                          component={ModelOverview}
                         />
                         <Route
                           path="/tasks/:taskCode/round/:roundId"
@@ -533,9 +535,12 @@ class App extends React.Component {
                           path="/task-owner-interface/:taskCode"
                           component={TaskOwnerPage}
                         />
-                        <Route path="/register" component={RegisterPage} />
+                        <Route path="/register" component={Register} />
                         <Route path="/users/:userId" component={UserPage} />
-                        <Route path="/models/:modelId" component={ModelPage} />
+                        <Route
+                          path="/models/:modelId"
+                          component={ModelOverview}
+                        />
                         <Route path="/communities" component={TasksPage} />
                         <Route path="/" component={Landing} />
                       </Switch>
