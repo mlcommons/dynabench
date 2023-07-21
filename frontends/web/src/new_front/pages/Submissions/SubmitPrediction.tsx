@@ -43,6 +43,16 @@ const SubmitPrediction = () => {
     setLoading(true);
     const formData = new FormData();
     const predictions = modelData.file[0];
+    if (!predictions) {
+      Swal.fire({
+        title: "Error!",
+        text: "Please, upload the file again",
+        icon: "error",
+        confirmButtonText: "Ok",
+      });
+      setLoading(false);
+      return;
+    }
     const predictionsFormat = predictions.name.split(".").pop().toLowerCase();
     if (predictionsFormat !== "json" && predictionsFormat !== "jsonl") {
       Swal.fire({
@@ -172,7 +182,7 @@ const SubmitPrediction = () => {
                               </Card>
                             </div>
                             <Form.Control
-                              placeholder="Drag & drop your zip model here"
+                              placeholder="Click here to upload your json file (please don't drag and drop)"
                               autoFocus
                               type="file"
                               style={{
