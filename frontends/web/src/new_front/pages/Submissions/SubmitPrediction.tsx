@@ -43,72 +43,78 @@ const SubmitPrediction = () => {
     setLoading(true);
     const formData = new FormData();
     const predictions = modelData.file[0];
-    if (!predictions) {
+    if (predictions === undefined) {
+      console.log("predictions", predictions);
       Swal.fire({
         title: "Error!",
-        text: "Please, upload the file again",
+        text: "Please click on the upload button to upload a file.",
         icon: "error",
         confirmButtonText: "Ok",
-      });
-      setLoading(false);
-      return;
-    }
-    const predictionsFormat = predictions.name.split(".").pop().toLowerCase();
-    if (predictionsFormat !== "json" || predictionsFormat !== "jsonl") {
-      Swal.fire({
-        title: "Error!",
-        text: "Please, upload a json file.",
-        icon: "error",
-        confirmButtonText: "Ok",
-      });
-      setLoading(false);
-      return;
-    }
-    formData.append("predictions", predictions);
-    const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
-    await axios
-      .post(`${BASE_URL_2}/model/upload_prediction_to_s3`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        params: {
-          user_id: user.id,
-          task_code: taskCode,
-          model_name: modelData.modelName.replace(/\s/g, "_"),
-        },
-      })
-      .then(() => {
-        Swal.fire({
-          title: "Success!",
-          text: "Predictions uploaded successfully.",
-          icon: "success",
-          confirmButtonText: "Ok",
-        }).then(() => {
-          window.location.reload();
-        });
-      })
-      .catch((error) => {
-        if (error.response.status === 400) {
-          Swal.fire({
-            title: "Error!",
-            text: "Although uploaded, the submission failed to evaluate.",
-            icon: "error",
-            confirmButtonText: "Ok",
-          }).then(() => {
-            window.location.reload();
-          });
-        } else {
-          Swal.fire({
-            title: "Error!",
-            text: "Something went wrong.",
-            icon: "error",
-            confirmButtonText: "Ok",
-          }).then(() => {
-            window.location.reload();
-          });
-        }
+      }).then(() => {
         setLoading(false);
+        window.location.reload();
       });
+      return;
+    } else {
+      const predictionsFormat = predictions.name.split(".").pop().toLowerCase();
+      console.log("predictionsFormat", predictionsFormat);
+      if (predictionsFormat !== "json" && predictionsFormat !== "jsonl") {
+        Swal.fire({
+          title: "Error!",
+          text: "Please, upload a json file.",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+        setLoading(false);
+        window.location.reload();
+        return;
+      }
+      formData.append("predictions", predictions);
+      const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
+      await axios
+        .post(`${BASE_URL_2}/model/upload_prediction_to_s3`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          params: {
+            user_id: user.id,
+            task_code: taskCode,
+            model_name: modelData.modelName.replace(/\s/g, "_"),
+          },
+        })
+        .then(() => {
+          Swal.fire({
+            title: "Success!",
+            text: "Predictions uploaded successfully.",
+            icon: "success",
+            confirmButtonText: "Ok",
+          }).then(() => {
+            window.location.reload();
+          });
+        })
+        .catch((error) => {
+          if (error.response.status === 400) {
+            Swal.fire({
+              title: "Error!",
+              text: "Although uploaded, the submission failed to evaluate.",
+              icon: "error",
+              confirmButtonText: "Ok",
+            }).then(() => {
+              window.location.reload();
+            });
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "Something went wrong.",
+              icon: "error",
+              confirmButtonText: "Ok",
+            }).then(() => {
+              window.location.reload();
+            });
+          }
+          setLoading(false);
+        });
+    }
   };
 
   const onSubmit = (data: any) => {
@@ -195,10 +201,11 @@ const SubmitPrediction = () => {
                         ) : (
                           <>
                             <Form.Label className="text-base label-upload-file">
-                              Drag & drop your .json file with predictions here
+                              Click here to upload your json file (please don't
+                              drag and drop)
                             </Form.Label>
                             <Form.Control
-                              placeholder="Drag & drop your .json file with predictions here"
+                              placeholder="Click here to upload your json file (please don't drag and drop)"
                               autoFocus
                               type="file"
                               className="input-upload-file"

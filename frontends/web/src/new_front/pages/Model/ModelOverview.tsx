@@ -25,8 +25,6 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
   const getModelInfo = async () => {
     const modelInfo = await get(`/model/get_all_model_info_by_id/${modelId}`);
     if (response.ok) {
-      console.log(modelInfo);
-
       if (!modelInfo) {
         Swal.fire({
           icon: "error",
@@ -52,6 +50,8 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
         icon: "success",
         title: "Success",
         text: "Model status updated successfully",
+      }).then(() => {
+        window.location.reload();
       });
     } else {
       Swal.fire({
@@ -90,13 +90,13 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
             />
           </Modal>
           <div className="bg-gradient-to-b from-white to-[#ccebd44d] flex flex-col justify-center h-screen ">
-            <div className="relative flex flex-col p-16 md:flex-row md:space-x-5 space-y-3 md:space-y-0 rounded-xl shadow-lg  max-w-xs md:max-w-4xl mx-auto border border-white bg-white">
-              <div className="w-full md:w-1/3 grid place-items-center">
+            <div className="relative flex flex-col max-w-xs p-16 mx-auto space-y-3 bg-white border border-white shadow-lg md:flex-row md:space-x-5 md:space-y-0 rounded-xl md:max-w-4xl">
+              <div className="grid w-full md:w-1/3 place-items-center">
                 <Model className="w-full h-full" />
               </div>
-              <div className="w-full md:w-2/3 bg-white flex flex-col space-y-2 p-3">
+              <div className="flex flex-col w-full p-3 space-y-2 bg-white md:w-2/3">
                 <div className="flex justify-between item-center">
-                  <p className="text-letter-color font-bold hidden md:block">
+                  <p className="hidden font-bold text-letter-color md:block">
                     {modelInfo.upload_datetime.substring(0, 10)}
                   </p>
                   <div className="flex items-center">
@@ -130,9 +130,9 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
                         ></path>{" "}
                       </g>
                     </svg>
-                    <p className="text-letter-color font-bold text-sm ml-1">
+                    <p className="ml-1 text-sm font-bold text-letter-color">
                       {modelInfo.score.toFixed(2)} &nbsp;
-                      <span className="text-letter-color font-normal">
+                      <span className="font-normal text-letter-color">
                         (General score)
                       </span>
                     </p>
@@ -148,23 +148,19 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
                     {modelInfo.deployment_status}
                   </div>
                 </div>
-                <h3 className="font-black text-letter-color md:text-3xl text-xl capitalize">
+                <h3 className="text-xl font-black capitalize text-letter-color md:text-3xl">
                   {modelInfo.name}
                 </h3>
-                <p className="text-letter-color text-lg">{modelInfo.desc}</p>
-                <p className="text-letter-color text-base">
+                <p className="text-lg text-letter-color">{modelInfo.desc}</p>
+                <p className="text-base text-letter-color">
                   {modelInfo.longdesc}
                 </p>
                 <h6>
-                  <span className="text-letter-color font-bold text-xl">
+                  <span className="text-xl font-bold text-letter-color">
                     Data
                   </span>
                 </h6>
-                <ul
-                  className="
-          grid grid-cols-2 gap-2 text-letter-color
-        "
-                >
+                <ul className="grid grid-cols-2 gap-2  text-letter-color">
                   <li>
                     <strong>Community:</strong> {modelInfo.community}
                   </li>
@@ -184,14 +180,14 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
                     <strong>Paper:</strong> {modelInfo.source_url}
                   </li>
                 </ul>
-                <div className="flex justify-between items-center pt-8 gap-2">
+                <div className="flex items-center justify-between gap-2 pt-8">
                   <Button
                     onClick={() => setShowUpdateModelInfo(true)}
-                    className="px-4 text-lg border-0 bg-primary-color font-semibold"
+                    className="px-4 text-lg font-semibold border-0 bg-primary-color"
                   >
                     Update
                   </Button>
-                  {/* <Button className="px-4 text-lg border-0 bg-letter-color font-medium text-white hover:bg-letter-color hover:text-white">
+                  {/* <Button className="px-4 text-lg font-medium text-white border-0 bg-letter-color hover:bg-letter-color hover:text-white">
                     Predictions
                   </Button> */}
                   <Button
