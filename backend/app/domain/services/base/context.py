@@ -15,9 +15,8 @@ from fastapi import HTTPException
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
-
-from app.domain.services.utils.multi_generator import ImageGenerator
 from app.domain.services.utils.llm import OpenAIProvider
+from app.domain.services.utils.multi_generator import ImageGenerator
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
@@ -115,10 +114,12 @@ class ContextService:
         images = []
         start = time.time()
         multi_generator = ImageGenerator()
-        generated_images = multi_generator.generate_all_images(prompt, num_images, models, endpoint)
+        generated_images = multi_generator.generate_all_images(
+            prompt, num_images, models, endpoint
+        )
         images = []
         for generator_dict in generated_images:
-            for image in generator_dict['images']:
+            for image in generator_dict["images"]:
                 image_id = (
                     generator_dict["generator"]
                     + "_"
@@ -167,6 +168,9 @@ class ContextService:
             }
             all_answers.append(answer)
         return all_answers
+
+    async def generate_images_stream(self, model_info):
+        yield self.get_generative_contexts(model_info["type"], model_info["artifacts"])
 
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":

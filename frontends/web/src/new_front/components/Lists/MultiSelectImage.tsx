@@ -29,9 +29,9 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
           >
             <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
               {open ? (
-                <i className="pl-2 pr-3  " />
+                <i className="pl-2 pr-3 " />
               ) : (
-                <i className="pl-2 pr-3  " />
+                <i className="pl-2 pr-3 " />
               )}
               {parse(instructions)}
             </h3>
@@ -40,7 +40,7 @@ const MultiSelectImage: FC<MultiSelectImageProps> = ({
         <Collapse in={open}>
           <Carousel cols={3} rows={1} gap={10} showDots={true}>
             {images.map((image, index) => (
-              <Carousel.Item>
+              <Carousel.Item key={index}>
                 <div key={index} className="max-h-72">
                   <SelectImage
                     isSelected={selectedImage === image}

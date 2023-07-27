@@ -81,21 +81,25 @@ class ExampleRepository(AbstractRepository):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.total_verified: self.model.total_verified + 1}
         )
+        self.session.commit()
 
     def increment_counter_total_correct(self, example_id: int):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.verified_correct: self.model.verified_correct + 1}
         )
+        self.session.commit()
 
     def increment_counter_total_incorrect(self, example_id: int):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.verified_incorrect: self.model.verified_incorrect + 1}
         )
+        self.session.commit()
 
     def increment_counter_total_flagged(self, example_id: int):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.verified_flagged: self.model.verified_flagged + 1}
         )
+        self.session.commit()
 
     def mark_as_verified(self, example_id: int):
         example = self.get_by_id(example_id)

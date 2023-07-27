@@ -42,7 +42,7 @@ const ValidationButtonActions: FC<ValidationButtonActionsProps> = ({
         showConfirmButton: false,
         timer: 1500,
       });
-      window.location.reload();
+      // window.location.reload();
     } else {
       Swal.fire({
         icon: "error",

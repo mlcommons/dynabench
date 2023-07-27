@@ -17,6 +17,7 @@ import { getIdFromImageString } from "new_front/utils/helpers/functions/DataMani
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 const SelectBetweenImagesGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -42,7 +43,7 @@ const SelectBetweenImagesGenerative: FC<
   const [prompt, setPrompt] = useState<string>(
     "Type your prompt here (e.g. a kid sleeping in a red pool of paint)"
   );
-  const { post, response } = useFetch();
+  const { post, response } = useFetch("http://localhost:8000");
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
     CreateInterfaceContext
@@ -63,8 +64,46 @@ const SelectBetweenImagesGenerative: FC<
       )
     ) {
       setShowLoader(true);
+      // fetchEventSource('http://localhost:8000/context/stream', {
+      //   method: 'POST',
+      //   body: JSON.stringify({
+      //     type: generative_context.type,
+      //     artifacts: artifactsInput,
+      //   }),
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Cache-Control': 'public',
+      //   },
+      //   async onopen() {
+      //     console.log('connection opened')
+      //     setShowImages([])
+      //   },
+      //   onmessage(event) {
+      //     if (!firstMessageReceived) {
+      //       setShowLoader(false)
+      //       setFirstMessageReceived(true)
+      //     }
+      //     let imageData = event.data
+      //     if (imageData) {
+      //       if (typeof imageData === 'string') {
+      //         console.log('ecen', event)
+      //         imageData = JSON.parse(event.data)
+      //         setShowImages((prevImages) => [...prevImages, ...imageData])
+      //       } else {
+      //         setShowImages((prevImages) => [...prevImages, ...event.data])
+      //       }
+      //     }
+      //   },
+      //   onclose() {
+      //     setShowLoader(false)
+      //     setFirstMessageReceived(false)
+      //   },
+      //   onerror(err) {
+      //     throw err
+      //   },
+      // })
       const socket = new WebSocket(
-        `${process.env.REACT_APP_WS_HOST}/context/ws`
+        `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`
       );
       socket.onopen = () => {
         setShowImages([]);
@@ -132,7 +171,9 @@ const SelectBetweenImagesGenerative: FC<
       [field_names_for_the_model.original_prompt ?? "original_prompt"]: prompt,
     });
     setShowLoader(true);
-    const socket = new WebSocket(`${process.env.REACT_APP_WS_HOST}/context/ws`);
+    const socket = new WebSocket(
+      `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`
+    );
     socket.onopen = () => {
       setShowImages([]);
       console.log("WebSocket connection established");
@@ -254,6 +295,9 @@ const SelectBetweenImagesGenerative: FC<
     if (metadataExample) {
       console.log("metadataExample", metadataExample);
     }
+    console.log({
+      artifactsInput,
+    });
   }, [modelInputs, metadataExample]);
 
   return (
@@ -284,6 +328,7 @@ const SelectBetweenImagesGenerative: FC<
                 onChange={handlePromptChange}
                 onEnter={generateImages}
                 placeholder={prompt}
+                value={prompt}
               />
             </AnnotationInstruction>
             <div className="flex justify-end gap-2">
