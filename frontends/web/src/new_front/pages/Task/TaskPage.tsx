@@ -72,6 +72,10 @@ const TaskPage = () => {
     }
   }, [task]);
 
+  useEffect(() => {
+    localStorage.removeItem("originalPath");
+  }, []);
+
   return (
     <div>
       {!loading && task ? (
@@ -150,10 +154,10 @@ const TaskPage = () => {
                   <TaskActionButtons
                     configYaml={task.config_yaml}
                     dynamicAdversarialDataValidation={Boolean(
-                      task.dynamic_adversarial_data_validation
+                      task.dynamic_adversarial_data_validation,
                     )}
                     dynamicAdversarialDataCollection={Boolean(
-                      task.dynamic_adversarial_data_collection
+                      task.dynamic_adversarial_data_collection,
                     )}
                     submitable={Boolean(task.submitable)}
                     hasPredictionsUpload={Boolean(task.has_predictions_upload)}

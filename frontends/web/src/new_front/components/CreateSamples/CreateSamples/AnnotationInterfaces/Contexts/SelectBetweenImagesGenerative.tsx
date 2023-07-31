@@ -38,15 +38,15 @@ const SelectBetweenImagesGenerative: FC<
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<any>(
-    generative_context.artifacts
+    generative_context.artifacts,
   );
   const [prompt, setPrompt] = useState<string>(
-    "Type your prompt here (e.g. a kid sleeping in a red pool of paint)"
+    "Type your prompt here (e.g. a kid sleeping in a red pool of paint)",
   );
   const { post, response } = useFetch("http://localhost:8000");
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
-    CreateInterfaceContext
+    CreateInterfaceContext,
   );
   const neccessaryFields = ["original_prompt"];
   const [selectedImage, setSelectedImage] = useState<string>("");
@@ -60,7 +60,7 @@ const SelectBetweenImagesGenerative: FC<
       neccessaryFields.every(
         (item) =>
           modelInputs.hasOwnProperty(item) ||
-          metadataExample.hasOwnProperty(item)
+          metadataExample.hasOwnProperty(item),
       )
     ) {
       setShowLoader(true);
@@ -103,7 +103,7 @@ const SelectBetweenImagesGenerative: FC<
       //   },
       // })
       const socket = new WebSocket(
-        `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`
+        `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`,
       );
       socket.onopen = () => {
         setShowImages([]);
@@ -114,7 +114,7 @@ const SelectBetweenImagesGenerative: FC<
             JSON.stringify({
               type: generative_context.type,
               artifacts: artifactsInput,
-            })
+            }),
           );
         }
       };
@@ -172,7 +172,7 @@ const SelectBetweenImagesGenerative: FC<
     });
     setShowLoader(true);
     const socket = new WebSocket(
-      `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`
+      `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`,
     );
     socket.onopen = () => {
       setShowImages([]);
@@ -187,7 +187,7 @@ const SelectBetweenImagesGenerative: FC<
               prompt: prompt,
               user_id: user.id,
             },
-          })
+          }),
         );
       }
     };
@@ -232,7 +232,7 @@ const SelectBetweenImagesGenerative: FC<
           user_id: user.id,
           round_id: realRoundId,
           task_id: taskId,
-        }
+        },
       );
       if (response.ok) {
         setPartialSampleId(partialSampleId.id);
@@ -272,9 +272,9 @@ const SelectBetweenImagesGenerative: FC<
     setPromptHistory(getListFromLocalStorage("promptHistory"));
     saveListToLocalStorage(
       getListFromLocalStorage("promptHistory").filter(
-        (prompt: null) => prompt !== null
+        (prompt: null) => prompt !== null,
       ),
-      "promptHistory"
+      "promptHistory",
     );
   }, []);
 

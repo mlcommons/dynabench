@@ -51,7 +51,7 @@ const ValidateSamples: FC = () => {
         num_matching_validations: taskInfo?.num_matching_validations,
         validate_non_fooling: Boolean(taskInfo?.validate_non_fooling),
         task_id: taskId,
-      }
+      },
     );
     if (response.ok) {
       setTaskInfoName(taskInfo?.task_name);
@@ -65,7 +65,7 @@ const ValidateSamples: FC = () => {
   const handleData = async () => {
     const isLogin = await checkUserIsLoggedIn(
       history,
-      `/tasks/${taskCode}/validate`
+      `/tasks/${taskCode}/validate`,
     );
     if (isLogin) {
       loadTaskContextData();
@@ -80,7 +80,7 @@ const ValidateSamples: FC = () => {
   return (
     <>
       {loading || !validationConfigInfo || !infoExampleToValidate ? (
-        <div className="flex items-center justify-center ">
+        <div className="flex items-center justify-center h-screen">
           <PacmanLoader color="#ccebd4" loading={loading} size={50} />
         </div>
       ) : (
@@ -138,7 +138,7 @@ const ValidateSamples: FC = () => {
                   .toLowerCase()
                   .replace(
                     /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-                    ""
+                    "",
                   )
                   .replace(" ", "")}
                 metadataExample={metadataExample}

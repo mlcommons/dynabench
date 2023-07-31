@@ -28,12 +28,12 @@ const BasicInputRemain: FC<BasicInputProps> = ({
           className="p-3 h-12 rounded-1 thick-border bg-[#f0f2f5]"
           placeholder={placeholder}
           onChange={onChange}
-          value={value}
           onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === "Enter") {
               onEnter && onEnter(e);
             }
           }}
+          value=""
           disabled={disabled}
           required={required}
         />
