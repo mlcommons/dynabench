@@ -9,7 +9,7 @@
 from pydantic import Json
 from sqlalchemy import func
 
-from app.infrastructure.models.models import Context, Example, Round
+from app.infrastructure.models.models import Context, Example, Round, Validation
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -54,10 +54,16 @@ class ExampleRepository(AbstractRepository):
         return (
             self.session.query(Example, Context)
             .join(Context, Example.cid == Context.id)
+            .outerjoin(
+                Validation,
+                Validation.eid == Example.id & Validation.uid == user_id,
+                isouter=True,
+            )
             .filter(Context.r_realid == real_round_id)
             .filter(Example.uid != user_id)
             .filter(Example.retracted == 0)
             .filter(Example.total_verified < num_matching_validations)
+            .filter(Validation.id.is_(None))
             .order_by(func.random())
             .first()
         )
@@ -68,11 +74,17 @@ class ExampleRepository(AbstractRepository):
         return (
             self.session.query(Example, Context)
             .join(Context, Example.cid == Context.id)
+            .outerjoin(
+                Validation,
+                Validation.eid == Example.id & Validation.uid != user_id,
+                isouter=True,
+            )
             .filter(Context.r_realid == real_round_id)
             .filter(Example.uid != user_id)
             .filter(Example.retracted == 0)
             .filter(Example.total_verified < num_matching_validations)
             .filter(Example.model_wrong == 1)
+            .filter(Validation.id.is_(None))
             .order_by(func.random())
             .first()
         )
