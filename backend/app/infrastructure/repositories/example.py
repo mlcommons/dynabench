@@ -56,7 +56,7 @@ class ExampleRepository(AbstractRepository):
             .join(Context, Example.cid == Context.id)
             .outerjoin(
                 Validation,
-                Validation.eid == Example.id & Validation.uid == user_id,
+                Validation.eid == Example.id & Validation.uid != user_id,
                 isouter=True,
             )
             .filter(Context.r_realid == real_round_id)
