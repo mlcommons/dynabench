@@ -45,25 +45,26 @@ class ExampleRepository(AbstractRepository):
             }
         )
 
+    def get_validates_examples_per_user_id(self, user_id: int):
+        return (
+            self.session.query(Validation.eid).filter(Validation.uid == user_id).all()
+        )
+
     def get_example_to_validate(
         self,
         real_round_id: int,
         user_id: int,
         num_matching_validations: int,
     ):
+        validated_examples = self.get_validates_examples_per_user_id(user_id)
         return (
             self.session.query(Example, Context)
             .join(Context, Example.cid == Context.id)
-            .outerjoin(
-                Validation,
-                Validation.eid == Example.id & Validation.uid != user_id,
-                isouter=True,
-            )
             .filter(Context.r_realid == real_round_id)
             .filter(Example.uid != user_id)
             .filter(Example.retracted == 0)
             .filter(Example.total_verified < num_matching_validations)
-            .filter(Validation.id.is_(None))
+            .filter(Example.id.notin_(validated_examples))
             .order_by(func.random())
             .first()
         )
@@ -71,20 +72,16 @@ class ExampleRepository(AbstractRepository):
     def get_example_to_validate_fooling(
         self, real_round_id: int, user_id: int, num_matching_validations: int
     ):
+        validated_examples = self.get_validates_examples_per_user_id(user_id)
         return (
             self.session.query(Example, Context)
             .join(Context, Example.cid == Context.id)
-            .outerjoin(
-                Validation,
-                Validation.eid == Example.id & Validation.uid != user_id,
-                isouter=True,
-            )
             .filter(Context.r_realid == real_round_id)
             .filter(Example.uid != user_id)
             .filter(Example.retracted == 0)
             .filter(Example.total_verified < num_matching_validations)
             .filter(Example.model_wrong == 1)
-            .filter(Validation.id.is_(None))
+            .filter(Example.id.notin_(validated_examples))
             .order_by(func.random())
             .first()
         )
