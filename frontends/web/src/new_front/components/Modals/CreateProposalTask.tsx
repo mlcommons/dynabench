@@ -35,7 +35,7 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
       return;
     }
     const isValid = await get(
-      `task_proposals/validate_no_duplicate_task_code/${data.taskCode}`
+      `task_proposals/validate_no_duplicate_task_code/${data.taskCode}`,
     );
     if (isValid) {
       await post("task_proposals/add_task_proposal", {
@@ -64,12 +64,14 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
   };
 
   const isLogin = async () => {
-    await checkUserIsLoggedIn(history, `/`);
+    if (!user.id) {
+      await checkUserIsLoggedIn(history, `/`);
+    }
   };
 
   useEffect(() => {
     isLogin();
-  }, []);
+  }, [user]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>

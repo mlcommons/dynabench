@@ -17,7 +17,7 @@ import { getIdFromImageString } from "new_front/utils/helpers/functions/DataMani
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
-import { fetchEventSource } from "@microsoft/fetch-event-source";
+import useFetchSSE from "new_front/utils/helpers/functions/FetchSSE";
 
 const SelectBetweenImagesGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -43,18 +43,16 @@ const SelectBetweenImagesGenerative: FC<
   const [prompt, setPrompt] = useState<string>(
     "Type your prompt here (e.g. a kid sleeping in a red pool of paint)",
   );
-  const { post, response } = useFetch("http://localhost:8000");
+  const { post, response } = useFetch();
+  const { post: postSSE, clear: clearCache } = useFetchSSE(
+    "http://localhost:8000",
+  );
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
     CreateInterfaceContext,
   );
   const neccessaryFields = ["original_prompt"];
   const [selectedImage, setSelectedImage] = useState<string>("");
-
-  useEffect(() => {
-    console.log("showImages", showImages);
-  }, [showImages]);
-
   const generateImages = async () => {
     if (
       neccessaryFields.every(
@@ -63,44 +61,16 @@ const SelectBetweenImagesGenerative: FC<
           metadataExample.hasOwnProperty(item),
       )
     ) {
-      setShowLoader(true);
-      // fetchEventSource('http://localhost:8000/context/stream', {
-      //   method: 'POST',
-      //   body: JSON.stringify({
+      // await postSSE({
+      //   url: '/context/stream',
+      //   body: {
       //     type: generative_context.type,
       //     artifacts: artifactsInput,
-      //   }),
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Cache-Control': 'public',
       //   },
-      //   async onopen() {
-      //     console.log('connection opened')
-      //     setShowImages([])
-      //   },
-      //   onmessage(event) {
-      //     if (!firstMessageReceived) {
-      //       setShowLoader(false)
-      //       setFirstMessageReceived(true)
-      //     }
-      //     let imageData = event.data
-      //     if (imageData) {
-      //       if (typeof imageData === 'string') {
-      //         console.log('ecen', event)
-      //         imageData = JSON.parse(event.data)
-      //         setShowImages((prevImages) => [...prevImages, ...imageData])
-      //       } else {
-      //         setShowImages((prevImages) => [...prevImages, ...event.data])
-      //       }
-      //     }
-      //   },
-      //   onclose() {
-      //     setShowLoader(false)
-      //     setFirstMessageReceived(false)
-      //   },
-      //   onerror(err) {
-      //     throw err
-      //   },
+      //   setSaveData: setShowImages,
+      //   setExternalLoading: setShowLoader,
+      //   firstMessage: firstMessageReceived,
+      //   setFirstMessage: setFirstMessageReceived,
       // })
       const socket = new WebSocket(
         `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`,
@@ -266,6 +236,7 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   useEffect(() => {
+    clearCache();
     if (!localStorage.getItem("promptHistory")) {
       saveListToLocalStorage([], "promptHistory");
     }

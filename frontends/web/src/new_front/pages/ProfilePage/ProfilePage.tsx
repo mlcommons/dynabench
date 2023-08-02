@@ -25,14 +25,14 @@ type Props = {
 const ProfilePage: FC<Props> = () => {
   const [userInfo, setUserInfo] = useState<UserInfoProps>({} as UserInfoProps);
   const [userStats, setUserStats] = useState<UserStatsProps>(
-    {} as UserStatsProps
+    {} as UserStatsProps,
   );
   const [modelsInfo, setModelsInfo] = useState<ModelsInfo[]>(
-    [] as ModelsInfo[]
+    [] as ModelsInfo[],
   );
   const [tasksCategories, setTasksCategories] = useState<TaskCategories[]>([]);
   const [tasksInfo, setTasksInfo] = useState<TaskInfoType[]>(
-    [] as TaskInfoType[]
+    [] as TaskInfoType[],
   );
   const { user } = useContext(UserContext);
   const { get, response, loading } = useFetch();

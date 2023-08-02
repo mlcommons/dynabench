@@ -27,17 +27,12 @@ const SubmitPrediction = () => {
   const handleData = async () => {
     const isLogin = await checkUserIsLoggedIn(
       history,
-      `/tasks/${taskCode}/submit_prediction`
+      `/tasks/${taskCode}/submit_prediction`,
     );
     if (!isLogin) {
       return;
     }
   };
-
-  useEffect(() => {
-    handleData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleSubmitModel = async (modelData: any) => {
     setLoading(true);
@@ -120,6 +115,13 @@ const SubmitPrediction = () => {
   const onSubmit = (data: any) => {
     handleSubmitModel(data);
   };
+
+  useEffect(() => {
+    if (user.id) {
+      handleData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   return (
     <>
