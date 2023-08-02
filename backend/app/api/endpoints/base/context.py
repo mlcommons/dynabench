@@ -46,22 +46,18 @@ async def websocket_generative_context(websocket: WebSocket):
 
 @router.post("/get_generative_contexts")
 async def get_generative_contexts(model: GetGenerativeContextRequest):
-
     image_list = ContextService().get_generative_contexts(model.type, model.artifacts)
     return JSONResponse(content=image_list, headers={"Cache-Control": "private"})
 
 
 @router.post("/stream")
-async def stream_images(model_info: dict):
+async def stream_images(model_info: GetGenerativeContextRequest):
     async def event_generator():
         for _ in range(2):
             data = ContextService().get_generative_contexts(
-                model_info["type"], model_info["artifacts"]
+                model_info.type, model_info.artifacts
             )
             yield json.dumps(data)
             await asyncio.sleep(1)
 
-    headers = {
-        "Cache-Control": "private max-age=3600 no-cache no-store",
-    }
-    return EventSourceResponse(event_generator(), headers=headers)
+    return EventSourceResponse(event_generator())

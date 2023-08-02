@@ -64,7 +64,7 @@ class ExampleRepository(AbstractRepository):
             .filter(Example.uid != user_id)
             .filter(Example.retracted == 0)
             .filter(Example.total_verified < num_matching_validations)
-            .filter(Example.id.notin_([item[0] for item in validated_examples]))
+            .filter(~Example.id.in_([item[0] for item in validated_examples]))
             .order_by(func.random())
             .first()
         )
@@ -73,6 +73,7 @@ class ExampleRepository(AbstractRepository):
         self, real_round_id: int, user_id: int, num_matching_validations: int
     ):
         validated_examples = self.get_validates_examples_per_user_id(user_id)
+
         return (
             self.session.query(Example, Context)
             .join(Context, Example.cid == Context.id)
@@ -81,7 +82,7 @@ class ExampleRepository(AbstractRepository):
             .filter(Example.retracted == 0)
             .filter(Example.total_verified < num_matching_validations)
             .filter(Example.model_wrong == 1)
-            .filter(Example.id.notin_([item[0] for item in validated_examples]))
+            .filter(~Example.id.in_([item[0] for item in validated_examples]))
             .order_by(func.random())
             .first()
         )
