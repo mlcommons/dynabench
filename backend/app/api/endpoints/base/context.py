@@ -61,3 +61,9 @@ async def stream_images(model_info: GetGenerativeContextRequest):
             await asyncio.sleep(1)
 
     return EventSourceResponse(event_generator())
+    response = EventSourceResponse(event_generator())
+    while True:
+        if response.is_disconnected:
+            break
+        await asyncio.sleep(1)
+    return response

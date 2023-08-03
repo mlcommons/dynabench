@@ -1,4 +1,5 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 type FetchType<TData> = {
@@ -16,8 +17,16 @@ type FetchProps<TData> = {
   setAllowsGeneration?: (value: boolean) => void;
 };
 
+type cacheObject = {
+  [key: string]: any;
+};
+
 function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
-  const CACHE_PREFIX = "cache_";
+  const [cacheMemory, setCacheMemory] = useState<cacheObject>([]);
+
+  useEffect(() => {
+    console.log("cacheMemory", cacheMemory);
+  }, [cacheMemory]);
 
   const UseFetch = async ({
     url,
@@ -113,21 +122,18 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
   };
 
   const checkCachedRequest = (key: string) => {
-    const data = sessionStorage.getItem(CACHE_PREFIX + key);
+    const data = cacheMemory[key];
+    console.log("data", data);
     if (data) {
-      return JSON.parse(data);
+      return data;
     }
     return null;
   };
 
-  const generateKey = (key: string) => {
-    return CACHE_PREFIX + key;
-  };
-
   const persist = (body: any, res: TData) => {
     const key = body.artifacts.prompt.replace(/"|'/g, "");
-    const data = sessionStorage.getItem(CACHE_PREFIX + key);
-    const fullResponse = [];
+    const data = cacheMemory[key];
+    const fullResponse: any[] = [];
     if (data) {
       const localData = JSON.parse(data);
       for (const d of localData) {
@@ -135,16 +141,11 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
       }
     }
     fullResponse.push(...JSON.parse(res as any));
-    sessionStorage.setItem(generateKey(key), JSON.stringify(fullResponse));
+    setCacheMemory((prev: any) => ({ ...prev, [key]: fullResponse }));
   };
 
   const clear = () => {
-    const keys = Object.keys(sessionStorage);
-    for (const key of keys) {
-      if (key.includes(CACHE_PREFIX)) {
-        sessionStorage.removeItem(key);
-      }
-    }
+    setCacheMemory([]);
   };
 
   return {

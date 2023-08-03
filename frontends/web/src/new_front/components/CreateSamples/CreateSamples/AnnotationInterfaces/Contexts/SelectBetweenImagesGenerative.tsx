@@ -61,50 +61,50 @@ const SelectBetweenImagesGenerative: FC<
           metadataExample.hasOwnProperty(item),
       )
     ) {
-      // await postSSE({
-      //   url: '/context/stream',
-      //   body: {
-      //     type: generative_context.type,
-      //     artifacts: artifactsInput,
-      //   },
-      //   setSaveData: setShowImages,
-      //   setExternalLoading: setShowLoader,
-      //   firstMessage: firstMessageReceived,
-      //   setFirstMessage: setFirstMessageReceived,
-      // })
-      const socket = new WebSocket(
-        `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`,
-      );
-      socket.onopen = () => {
-        setShowImages([]);
-        setAllowsGeneration(false);
-        console.log("WebSocket connection established");
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(
-            JSON.stringify({
-              type: generative_context.type,
-              artifacts: artifactsInput,
-            }),
-          );
-        }
-      };
-      socket.onmessage = (event) => {
-        if (!firstMessageReceived) {
-          setShowLoader(false);
-          setFirstMessageReceived(true);
-        }
-        const imageContent = JSON.parse(event.data);
-        setShowImages((prevImages) => [...prevImages, ...imageContent]);
-      };
-      socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        setAllowsGeneration(true);
-      };
-      socket.onclose = (event) => {
-        setAllowsGeneration(true);
-        setFirstMessageReceived(false);
-        console.log("WebSocket closed:", event.code, event.reason);
-      };
+      await postSSE({
+        url: "/context/stream",
+        body: {
+          type: generative_context.type,
+          artifacts: artifactsInput,
+        },
+        setSaveData: setShowImages,
+        setExternalLoading: setShowLoader,
+        firstMessage: firstMessageReceived,
+        setFirstMessage: setFirstMessageReceived,
+      });
+      // const socket = new WebSocket(
+      //   `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`,
+      // );
+      // socket.onopen = () => {
+      //   setShowImages([]);
+      //   setAllowsGeneration(false);
+      //   console.log("WebSocket connection established");
+      //   if (socket && socket.readyState === WebSocket.OPEN) {
+      //     socket.send(
+      //       JSON.stringify({
+      //         type: generative_context.type,
+      //         artifacts: artifactsInput,
+      //       }),
+      //     );
+      //   }
+      // };
+      // socket.onmessage = (event) => {
+      //   if (!firstMessageReceived) {
+      //     setShowLoader(false);
+      //     setFirstMessageReceived(true);
+      //   }
+      //   const imageContent = JSON.parse(event.data);
+      //   setShowImages((prevImages) => [...prevImages, ...imageContent]);
+      // };
+      // socket.onerror = (error) => {
+      //   console.error("WebSocket error:", error);
+      //   setAllowsGeneration(true);
+      // };
+      // socket.onclose = (event) => {
+      //   setAllowsGeneration(true);
+      //   setFirstMessageReceived(false);
+      //   console.log("WebSocket closed:", event.code, event.reason);
+      // };
       addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
       setPromptHistory(getListFromLocalStorage("promptHistory"));
       setIsGenerativeContext(true);
