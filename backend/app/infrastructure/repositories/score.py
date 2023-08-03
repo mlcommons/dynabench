@@ -42,7 +42,7 @@ class ScoreRepository(AbstractRepository):
             .all()
         )
 
-    def get_maximun_principal_score_per_task(self, task_id: int, datasets: list):
+    def get_maximun_principal_score_by_task(self, task_id: int, datasets: list):
         return (
             self.session.query(Model.name, func.avg(Score.perf).label("perf"))
             .filter(Score.did.in_(datasets))

@@ -28,7 +28,6 @@ class ScoreService:
         order_metric_with_weight: dict,
         perf_metric_field_name: str,
     ):
-
         scores_by_dataset_and_model_id[
             perf_metric_field_name
         ] = scores_by_dataset_and_model_id.pop("perf")
@@ -293,10 +292,10 @@ class ScoreService:
             )
         return converted_data
 
-    def get_maximun_principal_score_per_task(self, task_id: int) -> float:
+    def get_maximun_principal_score_by_task(self, task_id: int) -> float:
         scoring_datasets = self.dataset_service.get_scoring_datasets_by_task_id(task_id)
         scoring_datasets = [dataset["id"] for dataset in scoring_datasets]
-        scores = self.score_repository.get_maximun_principal_score_per_task(
+        scores = self.score_repository.get_maximun_principal_score_by_task(
             task_id, scoring_datasets
         )
         if scores:

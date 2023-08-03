@@ -109,7 +109,7 @@ class ModelRepository(AbstractRepository):
     def get_user_id_by_model_id(self, id: int) -> int:
         return self.session.query(self.model.uid).filter(self.model.id == id).first()
 
-    def get_amount_of_models_per_task(self, task_id: int) -> int:
+    def get_amount_of_models_by_task(self, task_id: int) -> int:
         return (
             self.session.query(self.model)
             .filter(
@@ -139,7 +139,7 @@ class ModelRepository(AbstractRepository):
         self.session.flush()
         self.session.commit()
 
-    def get_models_per_user(self, user_id: int) -> list:
+    def get_models_by_user_id(self, user_id: int) -> list:
         return (
             self.session.query(
                 Model.id,
@@ -159,7 +159,7 @@ class ModelRepository(AbstractRepository):
             .all()
         )
 
-    def get_active_tasks_per_user_id(self, user_id):
+    def get_active_tasks_by_user_id(self, user_id):
         return (
             self.session.query(self.model.tid)
             .filter(self.model.uid == user_id)
@@ -167,7 +167,7 @@ class ModelRepository(AbstractRepository):
             .all()
         )
 
-    def get_total_models_per_user_id(self, user_id):
+    def get_total_models_by_user_id(self, user_id):
         return self.session.query(self.model).filter(self.model.uid == user_id).count()
 
     def delete_model(self, model_id: int):

@@ -229,15 +229,15 @@ class TaskService:
     def get_tasks_with_samples_created_by_user(self, user_id: int):
         return self.task_repository.get_tasks_with_samples_created_by_user(user_id)
 
-    def get_active_tasks_per_user_id(self, user_id: int):
-        tasks_with_models_activity = self.model_repository.get_active_tasks_per_user_id(
+    def get_active_tasks_by_user_id(self, user_id: int):
+        tasks_with_models_activity = self.model_repository.get_active_tasks_by_user_id(
             user_id
         )
         tasks_with_examples_activity = (
-            self.example_repository.get_active_tasks_per_user_id(user_id)
+            self.example_repository.get_active_tasks_by_user_id(user_id)
         )
         tasks_with_validation_activity = (
-            self.validation_repository.get_active_tasks_per_user_id(user_id)
+            self.validation_repository.get_active_tasks_by_user_id(user_id)
         )
         active_tasks = list(
             tasks_with_models_activity

@@ -45,7 +45,7 @@ class ExampleRepository(AbstractRepository):
             }
         )
 
-    def get_validates_examples_per_user_id(self, user_id: int):
+    def get_validates_examples_by_user_id(self, user_id: int):
         return (
             self.session.query(Validation.eid).filter(Validation.uid == user_id).all()
         )
@@ -56,7 +56,7 @@ class ExampleRepository(AbstractRepository):
         user_id: int,
         num_matching_validations: int,
     ):
-        validated_examples = self.get_validates_examples_per_user_id(user_id)
+        validated_examples = self.get_validates_examples_by_user_id(user_id)
         return (
             self.session.query(Example, Context)
             .join(Context, Example.cid == Context.id)
@@ -72,7 +72,7 @@ class ExampleRepository(AbstractRepository):
     def get_example_to_validate_fooling(
         self, real_round_id: int, user_id: int, num_matching_validations: int
     ):
-        validated_examples = self.get_validates_examples_per_user_id(user_id)
+        validated_examples = self.get_validates_examples_by_user_id(user_id)
 
         return (
             self.session.query(Example, Context)
@@ -145,7 +145,7 @@ class ExampleRepository(AbstractRepository):
             .all()
         )
 
-    def get_active_tasks_per_user_id(self, user_id: int):
+    def get_active_tasks_by_user_id(self, user_id: int):
         return (
             self.session.query(Round.tid)
             .join(Context, Round.id == Context.r_realid)
@@ -155,14 +155,14 @@ class ExampleRepository(AbstractRepository):
             .all()
         )
 
-    def get_total_examples_per_user_id(self, user_id: int):
+    def get_total_examples_by_user_id(self, user_id: int):
         return (
             self.session.query(func.count(Example.id))
             .filter(Example.uid == user_id)
             .scalar()
         )
 
-    def get_model_fooling_rate_per_user_id(self, user_id: int):
+    def get_model_fooling_rate_by_user_id(self, user_id: int):
         return (
             self.session.query(
                 func.round(

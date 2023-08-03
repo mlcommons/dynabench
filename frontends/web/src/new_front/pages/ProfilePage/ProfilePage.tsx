@@ -45,9 +45,9 @@ const ProfilePage: FC<Props> = () => {
     }
     const [userInfo, tasksInfo, modelsInfo, userStats] = await Promise.all([
       get(`/user/get_user_with_badges/${userId}`),
-      get(`/task/get_active_tasks_per_user_id/${userId}`),
-      get(`/model/get_models_per_user/${userId}`),
-      get(`/user/get_stats_per_user_id/${userId}`),
+      get(`/task/get_active_tasks_by_user_id/${userId}`),
+      get(`/model/get_models_by_user_id/${userId}`),
+      get(`/user/get_stats_by_user_id/${userId}`),
     ]);
     if (response.ok) {
       setUserInfo(userInfo);

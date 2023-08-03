@@ -40,8 +40,8 @@ const TaskPage = () => {
     const [taskData, maxScore, amountOfModels, adminOrOwner, taskInstructions] =
       await Promise.all([
         await get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
-        await get(`/score/get_maximun_principal_score_per_task/${taskId}`),
-        await get(`/model/get_amount_of_models_per_task/${taskId}`),
+        await get(`/score/get_maximun_principal_score_by_task/${taskId}`),
+        await get(`/model/get_amount_of_models_by_task/${taskId}`),
         await post("/auth/is_admin_or_owner", {
           task_id: taskId,
           user_id: user.id,

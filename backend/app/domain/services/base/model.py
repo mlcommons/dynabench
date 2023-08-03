@@ -280,7 +280,7 @@ class ModelService:
             print("Finished")
             time.sleep(320)
 
-    def get_model_prediction_per_dataset(
+    def get_model_prediction_by_dataset(
         self, user_id: int, model_id: int, dataset_id: int
     ):
         model_info = self.model_repository.get_model_info_by_id(model_id)
@@ -297,8 +297,8 @@ class ModelService:
         )
         return final_file
 
-    def get_amount_of_models_per_task(self, task_id: int):
-        return self.model_repository.get_amount_of_models_per_task(task_id)
+    def get_amount_of_models_by_task(self, task_id: int):
+        return self.model_repository.get_amount_of_models_by_task(task_id)
 
     def get_model_name_by_id(self, model_id: int):
         return self.model_repository.get_model_name_by_id(model_id)
@@ -409,8 +409,8 @@ class ModelService:
         else:
             raise HTTPException(status_code=400, detail="Model no has all the scores")
 
-    def get_models_per_user(self, user_id: int):
-        return self.model_repository.get_models_per_user(user_id)
+    def get_models_by_user_id(self, user_id: int):
+        return self.model_repository.get_models_by_user_id(user_id)
 
     def delete_model(self, model_id: int):
         return self.model_repository.delete_model(model_id)

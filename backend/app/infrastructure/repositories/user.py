@@ -94,8 +94,8 @@ class UserRepository(AbstractRepository):
         )
         self.session.commit()
 
-    def get_badges_per_user_id(self, user_id: int) -> dict:
+    def get_badges_by_user_id(self, user_id: int) -> dict:
         return self.session.query(Badge).filter(Badge.uid == user_id).all()
 
-    def get_info_per_user_id(self, user_id: int) -> dict:
+    def get_info_by_user_id(self, user_id: int) -> dict:
         return self.session.query(self.model).filter(self.model.id == user_id).first()

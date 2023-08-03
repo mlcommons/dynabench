@@ -1,8 +1,6 @@
 Greetings,
 
-Someone create the task: $name with the code: $code.
-
-The description is: $desc
+You're task $name with the code $code has been successfully created with the following description: $desc.
 
 Thanks,
 

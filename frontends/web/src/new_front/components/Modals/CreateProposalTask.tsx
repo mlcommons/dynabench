@@ -58,7 +58,7 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "Something happen, try with another task name or task code",
+        text: "Something happened, try with another task name or task code",
       });
     }
   };

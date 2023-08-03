@@ -27,7 +27,7 @@ class ValidationRepository(AbstractRepository):
             }
         )
 
-    def get_active_tasks_per_user_id(self, user_id: int):
+    def get_active_tasks_by_user_id(self, user_id: int):
         return (
             self.session.query(Round.tid)
             .join(Context, Round.id == Context.r_realid)
@@ -38,5 +38,5 @@ class ValidationRepository(AbstractRepository):
             .all()
         )
 
-    def get_total_validations_per_user_id(self, user_id: int):
+    def get_total_validations_by_user_id(self, user_id: int):
         return self.session.query(Validation).filter(Validation.uid == user_id).count()

@@ -46,23 +46,23 @@ class UserService:
         return self.user_repository.get_is_admin(user_id)
 
     def get_user_with_badges(self, user_id: int):
-        user_info = self.user_repository.get_info_per_user_id(user_id).__dict__
-        badges = self.user_repository.get_badges_per_user_id(user_id)
+        user_info = self.user_repository.get_info_by_user_id(user_id).__dict__
+        badges = self.user_repository.get_badges_by_user_id(user_id)
         user_info["badges"] = [badge for badge in badges]
         return user_info
 
-    def get_stats_per_user_id(self, user_id: int):
-        stats_per_user = {}
-        stats_per_user[
+    def get_stats_by_user_id(self, user_id: int):
+        stats_by_user = {}
+        stats_by_user[
             "total_examples"
-        ] = self.example_repository.get_total_examples_per_user_id(user_id)
-        stats_per_user[
+        ] = self.example_repository.get_total_examples_by_user_id(user_id)
+        stats_by_user[
             "total_validations"
-        ] = self.validation_repository.get_total_validations_per_user_id(user_id)
-        stats_per_user[
+        ] = self.validation_repository.get_total_validations_by_user_id(user_id)
+        stats_by_user[
             "total_models"
-        ] = self.model_repository.get_total_models_per_user_id(user_id)
-        stats_per_user[
+        ] = self.model_repository.get_total_models_by_user_id(user_id)
+        stats_by_user[
             "model_fooling_rate"
-        ] = self.example_repository.get_model_fooling_rate_per_user_id(user_id)
-        return stats_per_user
+        ] = self.example_repository.get_model_fooling_rate_by_user_id(user_id)
+        return stats_by_user
