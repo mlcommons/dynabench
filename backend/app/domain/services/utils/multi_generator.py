@@ -8,15 +8,16 @@ from app.domain.services.utils.image_generators import (
     DynabenchImageProvider,
     HFImageProvider,
     OpenAIImageProvider,
+    SDVariableAutoEncoder,
 )
 
-
-class ImageGenerator:
+class ImageGenerator():
     def __init__(self):
         self.image_providers = [
             HFImageProvider(),
             DynabenchImageProvider(),
             OpenAIImageProvider(),
+            SDVariableAutoEncoder(),
         ]
 
     def generate_images_parallel(self, generator, prompt, num_images, models, endpoint):
