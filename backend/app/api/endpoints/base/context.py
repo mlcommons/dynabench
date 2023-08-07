@@ -53,15 +53,16 @@ async def get_generative_contexts(model: GetGenerativeContextRequest):
 @router.post("/stream")
 async def stream_images(model_info: GetGenerativeContextRequest):
     async def event_generator():
-        try:
-            for _ in range(3):
-                data = ContextService().get_generative_contexts(
-                    model_info.type, model_info.artifacts
-                )
-                yield json.dumps(data)
-                await asyncio.sleep(1)
-        except asyncio.CancelledError:
-            raise StopAsyncIteration
+        # try:
+        for _ in range(3):
+            data = ContextService().get_generative_contexts(
+                model_info.type, model_info.artifacts
+            )
+            yield json.dumps(data)
+            await asyncio.sleep(1)
+
+    # except asyncio.CancelledError:
+    #     raise StopAsyncIteration
 
     try:
         return EventSourceResponse(event_generator())
