@@ -61,7 +61,7 @@ async def stream_images(model_info: GetGenerativeContextRequest):
                 yield json.dumps(data)
                 await asyncio.sleep(1)
         except asyncio.CancelledError:
-            raise StopAsyncIteration
+            pass
 
     try:
         return EventSourceResponse(event_generator())
