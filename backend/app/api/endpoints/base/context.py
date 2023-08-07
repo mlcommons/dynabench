@@ -54,7 +54,7 @@ async def get_generative_contexts(model: GetGenerativeContextRequest):
 async def stream_images(model_info: GetGenerativeContextRequest):
     async def event_generator():
         try:
-            for _ in range(1):
+            for _ in range(3):
                 data = ContextService().get_generative_contexts(
                     model_info.type, model_info.artifacts
                 )
