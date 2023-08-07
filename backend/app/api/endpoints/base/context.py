@@ -36,12 +36,17 @@ async def websocket_generative_context(websocket: WebSocket):
     await websocket.accept()
     model_info = await websocket.receive_json()
     model_info = dict(model_info)
-    for _ in range(4):
-        data = ContextService().get_generative_contexts(
-            model_info["type"], model_info["artifacts"]
-        )
-        await websocket.send_json(data)
-    await websocket.close()
+    try:
+        for _ in range(3):
+            data = ContextService().get_generative_contexts(
+                model_info["type"], model_info["artifacts"]
+            )
+            await websocket.send_json(data)
+            await asyncio.sleep(1)
+        await websocket.close()
+    except asyncio.CancelledError as e:
+        print("CancelledError", e)
+        raise e
 
 
 @router.post("/get_generative_contexts")
@@ -60,10 +65,8 @@ async def stream_images(model_info: GetGenerativeContextRequest):
                 )
                 yield json.dumps(data)
                 await asyncio.sleep(1)
-        except asyncio.CancelledError:
-            pass
+        except asyncio.CancelledError as e:
+            print("CancelledError", e)
+            raise e
 
-    try:
-        return EventSourceResponse(event_generator())
-    except asyncio.CancelledError:
-        pass
+    return EventSourceResponse(event_generator())
