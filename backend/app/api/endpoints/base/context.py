@@ -67,5 +67,4 @@ async def stream_images(model_info: GetGenerativeContextRequest):
             print("Error:", e)
             raise
 
-    async with event_generator() as gen:
-        return EventSourceResponse(gen)
+    return EventSourceResponse(event_generator())
