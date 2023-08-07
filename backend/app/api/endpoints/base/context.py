@@ -36,14 +36,17 @@ async def websocket_generative_context(websocket: WebSocket):
     await websocket.accept()
     model_info = await websocket.receive_json()
     model_info = dict(model_info)
+    iteration = 0
     try:
-        for _ in range(3):
+        while True:
             data = ContextService().get_generative_contexts(
                 model_info["type"], model_info["artifacts"]
             )
+            iteration += 1
             await websocket.send_json(data)
             await asyncio.sleep(1)
-        await websocket.close()
+            if iteration == 3:
+                break
     except asyncio.CancelledError as e:
         print("CancelledError", e)
         raise e
