@@ -1,4 +1,5 @@
 import React, { FC, useState } from "react";
+import { forbidden_image, black_image } from "new_front/utils/constants";
 
 type SelectImageProps = {
   image: string;
@@ -35,17 +36,19 @@ const SelectImage: FC<SelectImageProps> = ({
         } pb-2`}
         alt="src"
       />
-      <input
-        id="checkbox"
-        type="radio"
-        name="image"
-        value=""
-        defaultChecked={isSelected}
-        className={`items-center w-4 h-4 px-6`}
-        onChange={() => {
-          handleOnClicked(image);
-        }}
-      />
+      {!image.startsWith(forbidden_image) && !image.startsWith(black_image) && (
+        <input
+          id="checkbox"
+          type="radio"
+          name="image"
+          value=""
+          defaultChecked={isSelected}
+          className={`items-center w-4 h-4 px-6`}
+          onChange={() => {
+            handleOnClicked(image);
+          }}
+        />
+      )}
     </div>
   );
 };

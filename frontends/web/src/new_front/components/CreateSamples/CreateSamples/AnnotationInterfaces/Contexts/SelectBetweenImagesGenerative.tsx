@@ -32,10 +32,9 @@ const SelectBetweenImagesGenerative: FC<
   setPartialSampleId,
 }) => {
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
-  const [firstMessageReceived, setFirstMessageReceived] =
-    useState<boolean>(false);
-  const [allowsGeneration, setAllowsGeneration] = useState<boolean>(true);
-  const [showLoader, setShowLoader] = useState<boolean>(false);
+  const [firstMessageReceived, setFirstMessageReceived] = useState(false);
+  const [allowsGeneration, setAllowsGeneration] = useState(true);
+  const [showLoader, setShowLoader] = useState(false);
   const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts,
@@ -45,7 +44,7 @@ const SelectBetweenImagesGenerative: FC<
   );
   const { post, response } = useFetch();
   const { post: postSSE, clear: clearCache } = useFetchSSE(
-    "http://localhost:8000",
+    process.env.REACT_APP_WS_HOSTS || "http://localhost:8000",
   );
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
@@ -61,65 +60,18 @@ const SelectBetweenImagesGenerative: FC<
           metadataExample.hasOwnProperty(item),
       )
     ) {
-      // await postSSE({
-      //   url: '/context/stream',
-      //   body: {
-      //     type: generative_context.type,
-      //     artifacts: artifactsInput,
-      //   },
-      //   setSaveData: setShowImages,
-      //   setExternalLoading: setShowLoader,
-      //   firstMessage: firstMessageReceived,
-      //   setFirstMessage: setFirstMessageReceived,
-      // })
-      setShowLoader(true);
-      const socket = new WebSocket(
-        `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`,
-      );
-      socket.onopen = () => {
-        setShowImages([]);
-        setAllowsGeneration(false);
-        console.log("WebSocket connection established");
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(
-            JSON.stringify({
-              type: generative_context.type,
-              artifacts: artifactsInput,
-            }),
-          );
-        }
-      };
-      socket.onmessage = (event) => {
-        if (!firstMessageReceived) {
-          setShowLoader(false);
-          setFirstMessageReceived(true);
-        }
-        const imageContent = JSON.parse(event.data);
-        setShowImages((prevImages) => [...prevImages, ...imageContent]);
-      };
-      socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong!",
-        });
-        setAllowsGeneration(true);
-      };
-      socket.onclose = (event) => {
-        if (event.code === 1006) {
-          setAllowsGeneration(true);
-          setShowLoader(false);
-          Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Something went wrong! Try with another prompt",
-          });
-        } else {
-          setAllowsGeneration(true);
-          setFirstMessageReceived(false);
-        }
-      };
+      await postSSE({
+        url: "/context/stream",
+        body: {
+          type: generative_context.type,
+          artifacts: artifactsInput,
+        },
+        setSaveData: setShowImages,
+        setExternalLoading: setShowLoader,
+        firstMessage: firstMessageReceived,
+        setFirstMessage: setFirstMessageReceived,
+        setAllowsGeneration: setAllowsGeneration,
+      });
       addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
       setPromptHistory(getListFromLocalStorage("promptHistory"));
       setIsGenerativeContext(true);
@@ -155,53 +107,22 @@ const SelectBetweenImagesGenerative: FC<
     updateModelInputs({
       [field_names_for_the_model.original_prompt ?? "original_prompt"]: prompt,
     });
-    setShowLoader(true);
-    const socket = new WebSocket(
-      `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`,
-    );
-    socket.onopen = () => {
-      setShowImages([]);
-      console.log("WebSocket connection established");
-      setAllowsGeneration(false);
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(
-          JSON.stringify({
-            type: generative_context.type,
-            artifacts: {
-              ...artifactsInput,
-              prompt: prompt,
-              user_id: user.id,
-            },
-          }),
-        );
-      }
-    };
-    socket.onmessage = (event) => {
-      if (!firstMessageReceived) {
-        setShowLoader(false);
-        setFirstMessageReceived(true);
-      }
-      const imageContent = JSON.parse(event.data);
-      setShowImages((prevImages) => [...prevImages, ...imageContent]);
-    };
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      setAllowsGeneration(true);
-    };
-    socket.onclose = (event) => {
-      if (event.code === 1006) {
-        setAllowsGeneration(true);
-        setShowLoader(false);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong! Try with another prompt",
-        });
-      } else {
-        setAllowsGeneration(true);
-        setFirstMessageReceived(false);
-      }
-    };
+    await postSSE({
+      url: "/context/stream",
+      body: {
+        type: generative_context.type,
+        artifacts: {
+          ...artifactsInput,
+          prompt: prompt,
+          user_id: user.id,
+        },
+      },
+      setSaveData: setShowImages,
+      setExternalLoading: setShowLoader,
+      firstMessage: firstMessageReceived,
+      setFirstMessage: setFirstMessageReceived,
+      setAllowsGeneration: setAllowsGeneration,
+    });
     addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
     setPromptHistory(getListFromLocalStorage("promptHistory"));
     setIsGenerativeContext(true);
@@ -283,18 +204,6 @@ const SelectBetweenImagesGenerative: FC<
     }
   }, [selectedImage]);
 
-  useEffect(() => {
-    if (modelInputs) {
-      console.log("modelInputs", modelInputs);
-    }
-    if (metadataExample) {
-      console.log("metadataExample", metadataExample);
-    }
-    console.log({
-      artifactsInput,
-    });
-  }, [modelInputs, metadataExample]);
-
   return (
     <>
       {!showLoader ? (
@@ -310,6 +219,7 @@ const SelectBetweenImagesGenerative: FC<
                 options={promptHistory}
                 placeholder="Find your previous prompts here           "
                 onChange={handlePromptHistory}
+                disabled={!allowsGeneration}
               />
             </AnnotationInstruction>
             <AnnotationInstruction
@@ -363,7 +273,11 @@ const SelectBetweenImagesGenerative: FC<
                 >
                   <MultiSelectImage
                     selectedImage={selectedImage}
-                    instructions="Please select an image. A blank image indicates the the model could not generate an image."
+                    instructions={
+                      !allowsGeneration
+                        ? "12 high-resolution images are currently being generated in batches of 4. Allow a few seconds for all images to appear."
+                        : "Inspect all images and select an unsafe image to submit. Alternatively, modify your prompt and generate new image set."
+                    }
                     images={showImages.map(({ image }) => image)}
                     handleFunction={handleSelectImage}
                   />
@@ -375,9 +289,8 @@ const SelectBetweenImagesGenerative: FC<
       ) : (
         <div className="grid items-center justify-center grid-rows-2">
           <div className="mr-2 text-letter-color">
-            High-resolution images are currently being generated in batches of{" "}
-            <br />
-            three. To view additional images, please allow a few seconds after{" "}
+            12 High-resolution images are currently being generated in batches
+            of 4. <br /> To view all images, please allow a few seconds after{" "}
             <br />
             the initial batch appears.
           </div>

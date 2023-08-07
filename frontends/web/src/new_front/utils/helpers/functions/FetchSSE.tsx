@@ -12,9 +12,9 @@ type FetchProps<TData> = {
   body: any;
   setSaveData: (value: any) => void;
   setExternalLoading?: (value: boolean) => void;
-  firstMessage?: boolean;
-  setFirstMessage?: (value: boolean) => void;
-  setAllowsGeneration?: (value: boolean) => void;
+  firstMessage: boolean;
+  setFirstMessage: (value: boolean) => void;
+  setAllowsGeneration: (value: boolean) => void;
 };
 
 type cacheObject = {
@@ -22,11 +22,8 @@ type cacheObject = {
 };
 
 function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
-  const [cacheMemory, setCacheMemory] = useState<cacheObject>([]);
-
-  useEffect(() => {
-    console.log("cacheMemory", cacheMemory);
-  }, [cacheMemory]);
+  const abortController = new AbortController();
+  const [cacheMemory, setCacheMemory] = useState<cacheObject>({});
 
   const UseFetch = async ({
     url,
@@ -43,6 +40,7 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
       body: JSON.stringify(body),
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: abortController.signal,
       async onopen(response) {
         await checkErrorResponse(response);
         setSaveData && setSaveData([]);
@@ -75,6 +73,9 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
         throw err;
       },
     });
+    return () => {
+      abortController.abort();
+    };
   };
 
   const post = async ({
@@ -84,6 +85,7 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
     setExternalLoading,
     firstMessage,
     setFirstMessage,
+    setAllowsGeneration,
   }: FetchProps<TData>) => {
     const cachedResponse = checkCachedRequest(
       body.artifacts.prompt.replace(/"|'/g, ""),
@@ -98,6 +100,7 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
         setExternalLoading,
         firstMessage,
         setFirstMessage,
+        setAllowsGeneration,
       });
     }
   };
@@ -121,17 +124,9 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
     }
   };
 
-  const checkCachedRequest = (key: string) => {
-    const data = cacheMemory[key];
-    console.log("data", data);
-    if (data) {
-      return data;
-    }
-    return null;
-  };
-
   const persist = (body: any, res: TData) => {
     const key = body.artifacts.prompt.replace(/"|'/g, "");
+    // verify if key exists in cacheMemory
     const data = cacheMemory[key];
     const fullResponse: any[] = [];
     if (data) {
@@ -141,11 +136,31 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
       }
     }
     fullResponse.push(...JSON.parse(res as any));
-    setCacheMemory((prev: any) => ({ ...prev, [key]: fullResponse }));
+
+    setCacheMemory((prev) => {
+      let data = prev[key];
+      if (data) {
+        data = [...data, ...fullResponse];
+      } else {
+        data = fullResponse;
+      }
+      return {
+        ...prev,
+        [key]: data,
+      };
+    });
+  };
+
+  const checkCachedRequest = (key: string) => {
+    const data = cacheMemory[key];
+    if (data) {
+      return data;
+    }
+    return null;
   };
 
   const clear = () => {
-    setCacheMemory([]);
+    setCacheMemory({});
   };
 
   return {
