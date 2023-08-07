@@ -6,7 +6,8 @@ import asyncio
 import json
 
 from fastapi import APIRouter, WebSocket
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse
+from sse_starlette.sse import EventSourceResponse
 
 from app.domain.schemas.base.context import (
     GetContextRequest,
@@ -67,6 +68,6 @@ async def stream_images(model_info: GetGenerativeContextRequest):
             print("Error:", e)
             raise
         finally:
-            print("Finally")
+            print("finally")
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return EventSourceResponse(event_generator())
