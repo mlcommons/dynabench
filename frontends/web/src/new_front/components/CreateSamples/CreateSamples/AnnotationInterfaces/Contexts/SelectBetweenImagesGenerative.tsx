@@ -39,7 +39,7 @@ const SelectBetweenImagesGenerative: FC<
   );
   const { post, response } = useFetch();
   const { post: postSSE, clear: clearCache } = useFetchSSE(
-    process.env.REACT_APP_API_HOST_2_s || "http://localhost:8000",
+    process.env.REACT_APP_API_HOST_2 || "http://localhost:8000",
   );
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
