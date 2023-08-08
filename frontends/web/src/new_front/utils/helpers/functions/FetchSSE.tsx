@@ -1,6 +1,7 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+class RetriableError extends Error {}
 
 type FetchType<TData> = {
   post: (props: FetchProps<TData>) => Promise<void>;
@@ -24,6 +25,7 @@ type cacheObject = {
 function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
   const abortController = new AbortController();
   const [cacheMemory, setCacheMemory] = useState<cacheObject>({});
+  const [amountMessages, setAmountMessages] = useState<number>(0);
 
   const UseFetch = async ({
     url,
@@ -55,27 +57,23 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
           persist(body, ev.data as TData);
           setSaveData((prev: any) => [...prev, ...JSON.parse(ev.data)] as any);
         }
+        setAmountMessages((prev) => prev + 1);
+        if (amountMessages === 3) {
+          abortController.abort();
+        }
       },
       onclose: () => {
         setExternalLoading && setExternalLoading(false);
         setFirstMessage && setFirstMessage(false);
         setAllowsGeneration && setAllowsGeneration(true);
       },
-      onerror(err) {
+      onerror(error) {
         setExternalLoading && setExternalLoading(false);
         setFirstMessage && setFirstMessage(false);
         setAllowsGeneration && setAllowsGeneration(true);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong!",
-        });
-        throw err;
+        console.log("Error", error);
       },
     });
-    return () => {
-      abortController.abort();
-    };
   };
 
   const post = async ({

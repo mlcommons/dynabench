@@ -61,8 +61,8 @@ async def stream_images(model_info: GetGenerativeContextRequest):
             if data:
                 iterations += 1
                 yield json.dumps(data)
-            if iterations == 3:
-                raise StopAsyncIteration
+            if iterations > 3:
+                raise StopIteration("No more data")
             await asyncio.sleep(1)
 
     return EventSourceResponse(event_generator())

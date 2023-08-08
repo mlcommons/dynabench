@@ -8,11 +8,6 @@ import { CreateInterfaceContext } from "new_front/context/CreateInterface/Contex
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import React, { FC, useState, useContext, useEffect } from "react";
-import {
-  saveListToLocalStorage,
-  getListFromLocalStorage,
-  addElementToListInLocalStorage,
-} from "new_front/utils/helpers/functions/LocalStorage";
 import { getIdFromImageString } from "new_front/utils/helpers/functions/DataManipulation";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
@@ -39,12 +34,12 @@ const SelectBetweenImagesGenerative: FC<
   const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts,
   );
-  const [prompt, setPrompt] = useState<string>(
+  const [prompt, setPrompt] = useState(
     "Type your prompt here (e.g. a kid sleeping in a red pool of paint)",
   );
   const { post, response } = useFetch();
   const { post: postSSE, clear: clearCache } = useFetchSSE(
-    process.env.REACT_APP_API_HOST_2 || "http://localhost:8000",
+    process.env.REACT_APP_API_HOST_2_s || "http://localhost:8000",
   );
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
@@ -52,6 +47,34 @@ const SelectBetweenImagesGenerative: FC<
   );
   const neccessaryFields = ["original_prompt"];
   const [selectedImage, setSelectedImage] = useState<string>("");
+
+  const getHistoricalData = async () => {
+    const history = await post(
+      "/historical_data/get_historical_data_by_task_and_user",
+      {
+        task_id: taskId,
+        user_id: user.id,
+      },
+    );
+    if (response.ok) {
+      setPromptHistory(history);
+    }
+  };
+
+  const saveHistoricalData = async (
+    text: string,
+    setPromptHistory: (value: any[]) => void,
+  ) => {
+    const history = await post("/historical_data/save_historical_data", {
+      task_id: taskId,
+      user_id: user.id,
+      data: text.trim(),
+    });
+    if (response.ok) {
+      setPromptHistory(history);
+    }
+  };
+
   const generateImages = async () => {
     if (
       neccessaryFields.every(
@@ -72,8 +95,7 @@ const SelectBetweenImagesGenerative: FC<
         setFirstMessage: setFirstMessageReceived,
         setAllowsGeneration: setAllowsGeneration,
       });
-      addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
-      setPromptHistory(getListFromLocalStorage("promptHistory"));
+      await saveHistoricalData(prompt, setPromptHistory);
       setIsGenerativeContext(true);
     } else {
       Swal.fire({
@@ -123,8 +145,6 @@ const SelectBetweenImagesGenerative: FC<
       setFirstMessage: setFirstMessageReceived,
       setAllowsGeneration: setAllowsGeneration,
     });
-    addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
-    setPromptHistory(getListFromLocalStorage("promptHistory"));
     setIsGenerativeContext(true);
   };
 
@@ -171,8 +191,11 @@ const SelectBetweenImagesGenerative: FC<
       cancelButtonText: "No, keep it",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        saveListToLocalStorage([], "promptHistory");
-        setPromptHistory(getListFromLocalStorage("promptHistory"));
+        await post("/historical_data/delete_historical_data", {
+          task_id: taskId,
+          user_id: user.id,
+        });
+        setPromptHistory([]);
         Swal.fire("Deleted!", "Your history has been deleted.", "success");
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         Swal.fire("Cancelled", "Your history is safe :)", "error");
@@ -181,22 +204,9 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   useEffect(() => {
+    getHistoricalData();
     clearCache();
-    if (!localStorage.getItem("promptHistory")) {
-      saveListToLocalStorage([], "promptHistory");
-    }
-    setPromptHistory(getListFromLocalStorage("promptHistory"));
-    saveListToLocalStorage(
-      getListFromLocalStorage("promptHistory").filter(
-        (prompt: null) => prompt !== null,
-      ),
-      "promptHistory",
-    );
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("promptHistory", JSON.stringify(promptHistory));
-  }, [promptHistory]);
 
   useEffect(() => {
     if (modelInputs.hasOwnProperty("select_image")) {
@@ -216,7 +226,7 @@ const SelectBetweenImagesGenerative: FC<
               }
             >
               <Dropdown
-                options={promptHistory}
+                options={promptHistory.map((item) => item.history)}
                 placeholder="Find your previous prompts here           "
                 onChange={handlePromptHistory}
                 disabled={!allowsGeneration}
@@ -275,7 +285,7 @@ const SelectBetweenImagesGenerative: FC<
                     selectedImage={selectedImage}
                     instructions={
                       !allowsGeneration
-                        ? "12 high-resolution images are currently being generated in batches of 4. Allow a few seconds for all images to appear."
+                        ? "12 high-resolution images are currently being generated in batches of 4. Allow a few seconds for all images to appear. In the meantime, you can select one of the images below."
                         : "Inspect all images and select an unsafe image to submit. Alternatively, modify your prompt and generate new image set."
                     }
                     images={showImages.map(({ image }) => image)}
@@ -290,9 +300,10 @@ const SelectBetweenImagesGenerative: FC<
         <div className="grid items-center justify-center grid-rows-2">
           <div className="mr-2 text-letter-color">
             12 High-resolution images are currently being generated in batches
-            of 4. <br /> To view all images, please allow a few seconds after{" "}
-            <br />
+            of 4. <br /> To view all images, please allow a few seconds after
             the initial batch appears.
+            <br />
+            Please do not refresh the page or leave it.
           </div>
           <PacmanLoader
             color="#ccebd4"

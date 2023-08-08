@@ -467,3 +467,12 @@ class Validation(Base):
 
     example = relationship("Example")
     user = relationship("User")
+
+
+class HistoricalData(Base):
+    __tablename__ = "historical_data"
+    id = Column(Integer, primary_key=True)
+    task_id = Column(ForeignKey("tasks.id"), nullable=False, index=True)
+    user_id = Column(ForeignKey("users.id"), nullable=False, index=True)
+    history = Column(Text)
+    created_at = Column(DateTime, server_default=func.now(), default=func.now())
