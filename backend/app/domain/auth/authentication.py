@@ -15,12 +15,13 @@ from app.domain.helpers.exceptions import (
     user_with_email_already_exists,
 )
 from app.domain.services.base.user import UserService
+from app.infrastructure.repositories.badge import BadgeRepository
 from app.infrastructure.repositories.taskuserpermission import (
     TaskUserPermissionRepository,
 )
 
 
-class Login:
+class LoginService:
     def __init__(self) -> None:
         self.AUTH_JWT_SECRET_KEY = os.getenv("AUTH_JWT_SECRET_KEY")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("AUTH_ACCESS_TOKEN_EXPIRE_MINUTES")
@@ -30,6 +31,7 @@ class Login:
         self.AUTH_HASH_ALGORITHM = os.getenv("AUTH_HASH_ALGORITHM")
         self.users_service = UserService()
         self.task_user_permission_repository = TaskUserPermissionRepository()
+        self.badges_repository = BadgeRepository()
 
     def get_hashed_password(self, password: str) -> str:
         return generate_password_hash(password)
@@ -70,7 +72,8 @@ class Login:
         if user:
             user_with_email_already_exists(email)
         password = self.get_hashed_password(password)
-        return self.users_service.create_user(email, password, username)
+        user_id = self.users_service.create_user(email, password, username)["id"]
+        self.badges_repository.add_badge(user_id, "WELCOME_NOOB")
 
     def login(self, email: str, password: str) -> dict:
         user = self.users_service.get_by_email(email)
@@ -80,8 +83,8 @@ class Login:
         if not self.verify_password(password, hashed_pass):
             password_is_incorrect()
         return {
-            "access_token": self.create_access_token(user["email"]),
-            "token_type": "bearer",
+            "token": self.create_access_token(user["email"]),
+            "user": user,
         }
 
     def is_admin_or_owner(self, user_id: int, task_id: int):

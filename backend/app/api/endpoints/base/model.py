@@ -11,6 +11,7 @@ from app.domain.schemas.base.model import (
     ModelPredictionPerDatasetRequest,
     SingleModelEvaluationRequest,
     SingleModelEvaluationResponse,
+    UpdateModelInfoRequest,
     UploadModelToS3AndEvaluateRequest,
 )
 from app.domain.services.base.model import ModelService
@@ -89,9 +90,9 @@ def initiate_lambda_models() -> None:
     return ModelService().initiate_lambda_models()
 
 
-@router.post("/get_model_prediction_per_dataset")
-def get_model_prediction_per_dataset(model: ModelPredictionPerDatasetRequest):
-    file_name = ModelService().get_model_prediction_per_dataset(
+@router.post("/get_model_prediction_by_dataset")
+def get_model_prediction_by_dataset(model: ModelPredictionPerDatasetRequest):
+    file_name = ModelService().get_model_prediction_by_dataset(
         model.user_id, model.model_id, model.dataset_id
     )
     return FileResponse(
@@ -101,9 +102,9 @@ def get_model_prediction_per_dataset(model: ModelPredictionPerDatasetRequest):
     )
 
 
-@router.get("/get_amount_of_models_per_task/{task_id}", response_model=int)
-def get_amount_of_models_per_task(task_id: int):
-    return ModelService().get_amount_of_models_per_task(task_id)
+@router.get("/get_amount_of_models_by_task/{task_id}", response_model=int)
+def get_amount_of_models_by_task(task_id: int):
+    return ModelService().get_amount_of_models_by_task(task_id)
 
 
 @router.post("/upload_prediction_to_s3")
@@ -117,7 +118,6 @@ def upload_prediction_to_s3(
 
 @router.post("/conversation_with_buffer_memory")
 def conversation_with_buffer_memory(model: ConversationWithBufferMemoryRequest):
-    print("model.history", model.history)
     return ModelService().conversation_with_buffer_memory(
         model.history, model.model_name, model.provider, model.prompt, model.num_answers
     )
@@ -126,3 +126,32 @@ def conversation_with_buffer_memory(model: ConversationWithBufferMemoryRequest):
 @router.get("/update_model_status/{model_id}")
 def update_model_status(model_id: int):
     return ModelService().update_model_status(model_id)
+
+
+@router.get("/get_models_by_user_id/{user_id}")
+def get_models_by_user_id(user_id: int):
+    return ModelService().get_models_by_user_id(user_id)
+
+
+@router.get("/delete_model/{model_id}")
+def delete_model(model_id: int):
+    return ModelService().delete_model(model_id)
+
+
+@router.get("/get_all_model_info_by_id/{model_id}")
+def get_all_model_info_by_id(model_id: int):
+    return ModelService().get_all_model_info_by_id(model_id)
+
+
+@router.post("/update_model_info")
+def update_model_info(model: UpdateModelInfoRequest):
+    return ModelService().update_model_info(
+        model.model_id,
+        model.name,
+        model.desc,
+        model.longdesc,
+        model.params,
+        model.languages,
+        model.license,
+        model.source_url,
+    )

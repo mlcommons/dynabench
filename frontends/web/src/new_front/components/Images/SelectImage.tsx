@@ -40,9 +40,9 @@ const SelectImage: FC<SelectImageProps> = ({
         type="radio"
         name="image"
         value=""
-        checked={isSelected}
+        defaultChecked={isSelected}
         className={`items-center w-4 h-4 px-6`}
-        onClick={() => {
+        onChange={() => {
           handleOnClicked(image);
         }}
       />

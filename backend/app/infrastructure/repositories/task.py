@@ -129,3 +129,10 @@ class TaskRepository(AbstractRepository):
             .distinct()
             .all()
         )
+
+    def validate_no_duplicate_task_code(self, task_code: str):
+        return (
+            self.session.query(self.model)
+            .filter(self.model.task_code == task_code)
+            .first()
+        )

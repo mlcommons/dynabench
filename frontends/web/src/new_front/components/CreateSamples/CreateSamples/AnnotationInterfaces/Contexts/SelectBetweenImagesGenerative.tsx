@@ -17,6 +17,7 @@ import { getIdFromImageString } from "new_front/utils/helpers/functions/DataMani
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
+import useFetchSSE from "new_front/utils/helpers/functions/FetchSSE";
 
 const SelectBetweenImagesGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -31,46 +32,97 @@ const SelectBetweenImagesGenerative: FC<
   setPartialSampleId,
 }) => {
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
+  const [firstMessageReceived, setFirstMessageReceived] =
+    useState<boolean>(false);
+  const [allowsGeneration, setAllowsGeneration] = useState<boolean>(true);
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [showImages, setShowImages] = useState<any[]>([]);
   const [artifactsInput, setArtifactsInput] = useState<any>(
-    generative_context.artifacts
+    generative_context.artifacts,
   );
-  const [prompt, setPrompt] = useState<string>("Type your prompt here");
+  const [prompt, setPrompt] = useState<string>(
+    "Type your prompt here (e.g. a kid sleeping in a red pool of paint)",
+  );
   const { post, response } = useFetch();
+  const { post: postSSE, clear: clearCache } = useFetchSSE(
+    "http://localhost:8000",
+  );
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
-    CreateInterfaceContext
+    CreateInterfaceContext,
   );
   const neccessaryFields = ["original_prompt"];
   const [selectedImage, setSelectedImage] = useState<string>("");
-
   const generateImages = async () => {
     if (
       neccessaryFields.every(
         (item) =>
           modelInputs.hasOwnProperty(item) ||
-          metadataExample.hasOwnProperty(item)
+          metadataExample.hasOwnProperty(item),
       )
     ) {
+      // await postSSE({
+      //   url: '/context/stream',
+      //   body: {
+      //     type: generative_context.type,
+      //     artifacts: artifactsInput,
+      //   },
+      //   setSaveData: setShowImages,
+      //   setExternalLoading: setShowLoader,
+      //   firstMessage: firstMessageReceived,
+      //   setFirstMessage: setFirstMessageReceived,
+      // })
       setShowLoader(true);
-      setIsGenerativeContext(true);
-      const generatedImages = await post("/context/get_generative_contexts", {
-        type: generative_context.type,
-        artifacts: artifactsInput,
-      });
-      if (response.ok) {
-        setShowImages(generatedImages);
-        addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
-        setPromptHistory(getListFromLocalStorage("promptHistory"));
-        setShowLoader(false);
-      } else {
+      const socket = new WebSocket(
+        `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`,
+      );
+      socket.onopen = () => {
+        setShowImages([]);
+        setAllowsGeneration(false);
+        console.log("WebSocket connection established");
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(
+            JSON.stringify({
+              type: generative_context.type,
+              artifacts: artifactsInput,
+            }),
+          );
+        }
+      };
+      socket.onmessage = (event) => {
+        if (!firstMessageReceived) {
+          setShowLoader(false);
+          setFirstMessageReceived(true);
+        }
+        const imageContent = JSON.parse(event.data);
+        setShowImages((prevImages) => [...prevImages, ...imageContent]);
+      };
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: "Something went wrong!",
         });
-      }
+        setAllowsGeneration(true);
+      };
+      socket.onclose = (event) => {
+        if (event.code === 1006) {
+          setAllowsGeneration(true);
+          setShowLoader(false);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong! Try with another prompt",
+          });
+        } else {
+          setAllowsGeneration(true);
+          setFirstMessageReceived(false);
+        }
+      };
+      addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
+      setPromptHistory(getListFromLocalStorage("promptHistory"));
+      setIsGenerativeContext(true);
     } else {
       Swal.fire({
         icon: "error",
@@ -104,20 +156,54 @@ const SelectBetweenImagesGenerative: FC<
       [field_names_for_the_model.original_prompt ?? "original_prompt"]: prompt,
     });
     setShowLoader(true);
-    const generatedImages = await post("/context/get_generative_contexts", {
-      type: generative_context.type,
-      artifacts: {
-        ...artifactsInput,
-        prompt: prompt,
-        user_id: user.id,
-      },
-    });
-    if (response.ok) {
-      setShowImages(generatedImages);
-      addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
-      setPromptHistory(getListFromLocalStorage("promptHistory"));
-      setShowLoader(false);
-    }
+    const socket = new WebSocket(
+      `${process.env.REACT_APP_WS_HOST}/context/ws/get_generative_contexts`,
+    );
+    socket.onopen = () => {
+      setShowImages([]);
+      console.log("WebSocket connection established");
+      setAllowsGeneration(false);
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            type: generative_context.type,
+            artifacts: {
+              ...artifactsInput,
+              prompt: prompt,
+              user_id: user.id,
+            },
+          }),
+        );
+      }
+    };
+    socket.onmessage = (event) => {
+      if (!firstMessageReceived) {
+        setShowLoader(false);
+        setFirstMessageReceived(true);
+      }
+      const imageContent = JSON.parse(event.data);
+      setShowImages((prevImages) => [...prevImages, ...imageContent]);
+    };
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      setAllowsGeneration(true);
+    };
+    socket.onclose = (event) => {
+      if (event.code === 1006) {
+        setAllowsGeneration(true);
+        setShowLoader(false);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong! Try with another prompt",
+        });
+      } else {
+        setAllowsGeneration(true);
+        setFirstMessageReceived(false);
+      }
+    };
+    addElementToListInLocalStorage(artifactsInput.prompt, "promptHistory");
+    setPromptHistory(getListFromLocalStorage("promptHistory"));
     setIsGenerativeContext(true);
   };
 
@@ -140,7 +226,7 @@ const SelectBetweenImagesGenerative: FC<
           user_id: user.id,
           round_id: realRoundId,
           task_id: taskId,
-        }
+        },
       );
       if (response.ok) {
         setPartialSampleId(partialSampleId.id);
@@ -174,15 +260,16 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   useEffect(() => {
+    clearCache();
     if (!localStorage.getItem("promptHistory")) {
       saveListToLocalStorage([], "promptHistory");
     }
     setPromptHistory(getListFromLocalStorage("promptHistory"));
     saveListToLocalStorage(
       getListFromLocalStorage("promptHistory").filter(
-        (prompt: null) => prompt !== null
+        (prompt: null) => prompt !== null,
       ),
-      "promptHistory"
+      "promptHistory",
     );
   }, []);
 
@@ -203,6 +290,9 @@ const SelectBetweenImagesGenerative: FC<
     if (metadataExample) {
       console.log("metadataExample", metadataExample);
     }
+    console.log({
+      artifactsInput,
+    });
   }, [modelInputs, metadataExample]);
 
   return (
@@ -233,6 +323,8 @@ const SelectBetweenImagesGenerative: FC<
                 onChange={handlePromptChange}
                 onEnter={generateImages}
                 placeholder={prompt}
+                value={prompt}
+                disabled={!allowsGeneration}
               />
             </AnnotationInstruction>
             <div className="flex justify-end gap-2">
@@ -252,6 +344,7 @@ const SelectBetweenImagesGenerative: FC<
                   onClick={generateImages}
                   text="Generate Images"
                   className="mt-4 border-0 font-weight-bold light-gray-bg task-action-btn"
+                  disabled={!allowsGeneration}
                 />
               </AnnotationInstruction>
             </div>
@@ -282,13 +375,17 @@ const SelectBetweenImagesGenerative: FC<
       ) : (
         <div className="grid items-center justify-center grid-rows-2">
           <div className="mr-2 text-letter-color">
-            Images are being generated, bear with the model
+            High-resolution images are currently being generated in batches of{" "}
+            <br />
+            three. To view additional images, please allow a few seconds after{" "}
+            <br />
+            the initial batch appears.
           </div>
           <PacmanLoader
             color="#ccebd4"
             loading={showLoader}
             size={50}
-            className="align-center"
+            className="flex align-center"
           />
         </div>
       )}

@@ -70,3 +70,14 @@ class ConversationWithBufferMemoryRequest(BaseModel):
     provider: str
     prompt: str
     num_answers: int
+
+
+class UpdateModelInfoRequest(BaseModel):
+    model_id: int
+    name: Optional[str]
+    desc: Optional[str]
+    longdesc: Optional[str]
+    params: Optional[int]
+    languages: Optional[str]
+    license: Optional[str]
+    source_url: Optional[str] = ""

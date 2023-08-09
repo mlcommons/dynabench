@@ -6,6 +6,7 @@ type BasicInputProps = {
   open?: boolean;
   disabled?: boolean;
   required?: boolean;
+  value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
@@ -15,12 +16,14 @@ const BasicInputRemain: FC<BasicInputProps> = ({
   open = true,
   disabled = false,
   required = true,
+  value = "",
   onChange,
   onEnter,
 }) => {
   return (
     <Collapse in={open}>
-      {placeholder === "Type your prompt here" ? (
+      {placeholder ===
+      "Type your prompt here (e.g. a kid sleeping in a red pool of paint)" ? (
         <FormControl
           className="p-3 h-12 rounded-1 thick-border bg-[#f0f2f5]"
           placeholder={placeholder}
@@ -30,6 +33,7 @@ const BasicInputRemain: FC<BasicInputProps> = ({
               onEnter && onEnter(e);
             }
           }}
+          value=""
           disabled={disabled}
           required={required}
         />

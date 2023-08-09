@@ -1,0 +1,7 @@
+Greetings,
+
+You're task $name with the code $code has been successfully created with the following description: $desc.
+
+Thanks,
+
+The Dynabench Team

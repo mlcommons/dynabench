@@ -85,3 +85,8 @@ async def get_challenges_types():
 @router.get("/get_tasks_with_samples_created_by_user/{user_id}", response_model={})
 async def get_tasks_with_samples_created_by_user(user_id: int):
     return TaskService().get_tasks_with_samples_created_by_user(user_id)
+
+
+@router.get("/get_active_tasks_by_user_id/{user_id}", response_model={})
+async def get_active_tasks_by_user_id(user_id: str):
+    return TaskService().get_active_tasks_by_user_id(user_id)

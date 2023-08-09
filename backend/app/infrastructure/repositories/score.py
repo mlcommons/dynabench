@@ -42,7 +42,7 @@ class ScoreRepository(AbstractRepository):
             .all()
         )
 
-    def get_maximun_principal_score_per_task(self, task_id: int, datasets: list):
+    def get_maximun_principal_score_by_task(self, task_id: int, datasets: list):
         return (
             self.session.query(Model.name, func.avg(Score.perf).label("perf"))
             .filter(Score.did.in_(datasets))
@@ -65,6 +65,6 @@ class ScoreRepository(AbstractRepository):
     def check_if_model_has_all_scoring_datasets(
         self, model_id: int, scoring_datasets: list
     ) -> bool:
-        return self.session.query(Score).filter(Score.mid == model_id).filter(
-            Score.did.in_(scoring_datasets)
-        ).count() == len(scoring_datasets)
+        return self.session.query(func.count(Score.did.distinct())).filter(
+            Score.mid == model_id
+        ).filter(Score.did.in_(scoring_datasets)).scalar() == len(scoring_datasets)

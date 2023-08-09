@@ -6,7 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from app.infrastructure.models.models import User
+from app.infrastructure.models.models import Badge, User
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -93,3 +93,9 @@ class UserRepository(AbstractRepository):
             {self.model.examples_submitted: self.model.examples_submitted + 1}
         )
         self.session.commit()
+
+    def get_badges_by_user_id(self, user_id: int) -> dict:
+        return self.session.query(Badge).filter(Badge.uid == user_id).all()
+
+    def get_info_by_user_id(self, user_id: int) -> dict:
+        return self.session.query(self.model).filter(self.model.id == user_id).first()

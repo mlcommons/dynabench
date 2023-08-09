@@ -358,8 +358,8 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
             )}
           </thead>
           <tbody>
-            {data?.map((data: any) => (
-              <TaskModelLeaderboardRow data={data} />
+            {data?.map((data: any, key: number) => (
+              <TaskModelLeaderboardRow key={key} data={data} />
             ))}
           </tbody>
         </>

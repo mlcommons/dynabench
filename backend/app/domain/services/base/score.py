@@ -28,7 +28,6 @@ class ScoreService:
         order_metric_with_weight: dict,
         perf_metric_field_name: str,
     ):
-
         scores_by_dataset_and_model_id[
             perf_metric_field_name
         ] = scores_by_dataset_and_model_id.pop("perf")
@@ -37,11 +36,19 @@ class ScoreService:
             for row in order_metric_with_weight
         ]
         for metric_with_score_and_weight in metrics_with_score_and_weight:
-            print(scores_by_dataset_and_model_id["metadata_json"])
-            score = json.loads(scores_by_dataset_and_model_id["metadata_json"])[
-                metric_with_score_and_weight["field_name"]
-            ]
-            metric_with_score_and_weight["score"] = score
+            if metric_with_score_and_weight["field_name"] in [
+                "examples_per_second",
+                "memory_utilization",
+            ]:
+                score = scores_by_dataset_and_model_id[
+                    metric_with_score_and_weight["field_name"]
+                ]
+                metric_with_score_and_weight["score"] = score
+            else:
+                score = json.loads(scores_by_dataset_and_model_id["metadata_json"])[
+                    metric_with_score_and_weight["field_name"]
+                ]
+                metric_with_score_and_weight["score"] = score
         return metrics_with_score_and_weight
 
     def get_score_info_by_dataset_and_model_id(
@@ -72,7 +79,6 @@ class ScoreService:
         scores = [
             metric_score["score"] for metric_score in metrics_with_score_and_weight
         ]
-
         final_scores_by_dataset_and_model_id["scores"] = scores
         final_scores_by_dataset_and_model_id["variances"] = [0] * len(scores)
         if dataset_has_downstream:
@@ -122,6 +128,7 @@ class ScoreService:
         offset: int,
         limit: int,
         metrics: list,
+        perf_metric_info: dict,
     ):
         models_dynaboard_info = []
         for model_id in model_ids:
@@ -154,6 +161,11 @@ class ScoreService:
         ]
 
         # Sort
+        if isinstance(perf_metric_info, list):
+            perf_metric_info = perf_metric_info[0]
+        utility_direction = perf_metric_info.get("utility_direction", None)
+        if utility_direction == -1:
+            sort_direction = "desc" if sort_direction == "asc" else "asc"
         if sort_by != "dynascore":
             models_dynaboard_info = sorted(
                 models_dynaboard_info,
@@ -192,6 +204,7 @@ class ScoreService:
                 dataset_id, model_id, order_metric_with_weight, perf_metric_field_name
             )
             datasets_info.append(dataset_info)
+
         averaged_scores = self.get_averaged_scores(
             datasets_info, order_scoring_datasets_with_weight
         )
@@ -279,10 +292,10 @@ class ScoreService:
             )
         return converted_data
 
-    def get_maximun_principal_score_per_task(self, task_id: int) -> float:
+    def get_maximun_principal_score_by_task(self, task_id: int) -> float:
         scoring_datasets = self.dataset_service.get_scoring_datasets_by_task_id(task_id)
         scoring_datasets = [dataset["id"] for dataset in scoring_datasets]
-        scores = self.score_repository.get_maximun_principal_score_per_task(
+        scores = self.score_repository.get_maximun_principal_score_by_task(
             task_id, scoring_datasets
         )
         if scores:

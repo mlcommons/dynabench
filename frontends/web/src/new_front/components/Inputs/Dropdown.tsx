@@ -54,8 +54,9 @@ const Dropdown: FC<DropdownProps> = ({
         aria-labelledby="menu-button"
       >
         <div className="py-1" role="none">
-          {options.map((option) => (
+          {options.map((option, key) => (
             <button
+              key={key}
               type="button"
               className="block w-full px-4 py-2 text-left text-gray-700 border-solid rounded-sm focus:outline-none hover:bg-gray-100 hover:text-gray-900"
               role="menuitem"

@@ -27,56 +27,101 @@ const SubmitPrediction = () => {
   const handleData = async () => {
     const isLogin = await checkUserIsLoggedIn(
       history,
-      `/tasks/${taskCode}/submit_prediction`
+      `/tasks/${taskCode}/submit_prediction`,
     );
+    if (!isLogin) {
+      return;
+    }
   };
-
-  useEffect(() => {
-    handleData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleSubmitModel = async (modelData: any) => {
     setLoading(true);
     const formData = new FormData();
-    formData.append("predictions", modelData.file[0]);
-    const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
-    await axios
-      .post(`${BASE_URL_2}/model/upload_prediction_to_s3`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        params: {
-          user_id: user.id,
-          task_code: taskCode,
-          model_name: modelData.modelName.replace(/\s/g, "_"),
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
+    const predictions = modelData.file[0];
+    if (predictions === undefined) {
+      console.log("predictions", predictions);
+      Swal.fire({
+        title: "Error!",
+        text: "Please click on the upload button to upload a file.",
+        icon: "error",
+        confirmButtonText: "Ok",
+      }).then(() => {
+        setLoading(false);
+        window.location.reload();
+      });
+      return;
+    } else {
+      const predictionsFormat = predictions.name.split(".").pop().toLowerCase();
+      console.log("predictionsFormat", predictionsFormat);
+      if (predictionsFormat !== "json" && predictionsFormat !== "jsonl") {
+        Swal.fire({
+          title: "Error!",
+          text: "Please, upload a json file.",
+          icon: "error",
+          confirmButtonText: "Ok",
+        });
+        setLoading(false);
+        window.location.reload();
+        return;
+      }
+      formData.append("predictions", predictions);
+      const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
+      await axios
+        .post(`${BASE_URL_2}/model/upload_prediction_to_s3`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          params: {
+            user_id: user.id,
+            task_code: taskCode,
+            model_name: modelData.modelName.replace(/\s/g, "_"),
+          },
+        })
+        .then(() => {
           Swal.fire({
             title: "Success!",
-            text: "Dataset uploaded successfully.",
+            text: "Predictions uploaded successfully.",
             icon: "success",
             confirmButtonText: "Ok",
           }).then(() => {
             window.location.reload();
           });
-        } else {
-          Swal.fire({
-            title: "Error!",
-            text: "Something went wrong.",
-            icon: "error",
-            confirmButtonText: "Ok",
-          });
-        }
-        setLoading(false);
-      });
+        })
+        .catch((error) => {
+          if (error.response.status === 400) {
+            Swal.fire({
+              title: "Error!",
+              text: "Although uploaded, the submission failed to evaluate.",
+              icon: "error",
+              confirmButtonText: "Ok",
+            }).then(() => {
+              window.location.reload();
+            });
+          } else {
+            Swal.fire({
+              title: "Error!",
+              text: "Something went wrong.",
+              icon: "error",
+              confirmButtonText: "Ok",
+            }).then(() => {
+              window.location.reload();
+            });
+          }
+          setLoading(false);
+        });
+    }
   };
 
   const onSubmit = (data: any) => {
     handleSubmitModel(data);
   };
+
+  useEffect(() => {
+    if (user.id) {
+      handleData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   return (
     <>
@@ -145,7 +190,7 @@ const SubmitPrediction = () => {
                               </Card>
                             </div>
                             <Form.Control
-                              placeholder="Drag & drop your zip model here"
+                              placeholder="Click here to upload your json file (please don't drag and drop)"
                               autoFocus
                               type="file"
                               style={{
@@ -158,10 +203,11 @@ const SubmitPrediction = () => {
                         ) : (
                           <>
                             <Form.Label className="text-base label-upload-file">
-                              Drag & drop your .json file with predictions here
+                              Click here to upload your json file (please don't
+                              drag and drop)
                             </Form.Label>
                             <Form.Control
-                              placeholder="Drag & drop your .json file with predictions here"
+                              placeholder="Click here to upload your json file (please don't drag and drop)"
                               autoFocus
                               type="file"
                               className="input-upload-file"

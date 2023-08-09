@@ -59,14 +59,14 @@ const CreateInterface = () => {
       setTaskInfo(taskInfo);
       setTaskId(taskId);
       setIsGenerativeContext(
-        taskConfiguration.context.generative_context?.is_generative
+        taskConfiguration.context.generative_context?.is_generative,
       );
       const amountsExamplesCreatedToday = await post(
         `/rounduserexample/amounts_examples_created_today`,
         {
           round_id: taskContextInfo.real_round_id,
           user_id: user.id!,
-        }
+        },
       );
       if (response.ok) {
         setAmountsExamplesCreatedToday(amountsExamplesCreatedToday);
@@ -74,20 +74,22 @@ const CreateInterface = () => {
     }
   };
 
-  const handleData = async () => {
-    const isLogin = await checkUserIsLoggedIn(
-      history,
-      `/tasks/${taskCode}/create`
-    );
-    if (isLogin) {
-      loadTaskContextData();
+  const isLogin = async () => {
+    if (!user.id) {
+      await checkUserIsLoggedIn(history, `/`);
     }
   };
 
   useEffect(() => {
-    handleData();
+    isLogin();
+  }, [user]);
+
+  useEffect(() => {
+    if (user.id) {
+      loadTaskContextData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user.id]);
 
   return (
     <>
@@ -179,7 +181,7 @@ const CreateInterface = () => {
                     isGenerativeContext={isGenerativeContext}
                     userId={user.id!}
                     accept_sandbox_creation={Boolean(
-                      taskInfo.accept_sandbox_creation
+                      taskInfo.accept_sandbox_creation,
                     )}
                     maxAmountExamplesOnADay={
                       taskInfo.max_amount_examples_on_a_day

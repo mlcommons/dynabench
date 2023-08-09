@@ -13,6 +13,7 @@ import { checkUserIsLoggedIn } from "new_front/utils/helpers/functions/LoginFunc
 import { PacmanLoader } from "react-spinners";
 import RadioButton from "new_front/components/Lists/RadioButton";
 import { ExampleInfoType } from "new_front/types/createSamples/validateSamples/exampleInfo";
+import Swal from "sweetalert2";
 
 const ValidateSamples: FC = () => {
   const [taskInfoName, setTaskInfoName] = useState<string>("");
@@ -28,6 +29,7 @@ const ValidateSamples: FC = () => {
     useState<ValidationConfigurationTask>();
   const { hidden, setHidden } = useContext(OverlayContext);
   const { user } = useContext(UserContext);
+
   let { taskCode } = useParams<{ taskCode: string }>();
   const history = useHistory();
 
@@ -43,29 +45,46 @@ const ValidateSamples: FC = () => {
       get(`/example/get_validate_configuration?task_id=${taskId}`),
       get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
     ]);
-    const infoExampleToValidate = await post(
-      "/example/get_example_to_validate",
-      {
-        real_round_id: taskInfo?.round.id,
-        user_id: 1675,
-        num_matching_validations: taskInfo?.num_matching_validations,
-        validate_non_fooling: Boolean(taskInfo?.validate_non_fooling),
-        task_id: taskId,
-      }
-    );
+    const example = await post("/example/get_example_to_validate", {
+      real_round_id: taskInfo?.round.id,
+      user_id: user.id,
+      num_matching_validations: taskInfo?.num_matching_validations,
+      validate_non_fooling: Boolean(taskInfo?.validate_non_fooling),
+      task_id: taskId,
+    });
     if (response.ok) {
       setTaskInfoName(taskInfo?.task_name);
       setRoundId(taskInfo?.round.id);
       setValidateNonFooling(Boolean(taskInfo?.validate_non_fooling));
       setValidationConfigInfo(validationConfigInfo);
-      setInfoExampleToValidate(infoExampleToValidate);
+    }
+    console.log("example", example);
+
+    if (example.example_id) {
+      setInfoExampleToValidate(example);
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "There are no examples to validate",
+      });
     }
   };
+
+  const isLogin = async () => {
+    if (!user.id) {
+      await checkUserIsLoggedIn(history, `/`);
+    }
+  };
+
+  useEffect(() => {
+    isLogin();
+  }, [user]);
 
   const handleData = async () => {
     const isLogin = await checkUserIsLoggedIn(
       history,
-      `/tasks/${taskCode}/validate`
+      `/tasks/${taskCode}/validate`,
     );
     if (isLogin) {
       loadTaskContextData();
@@ -73,14 +92,18 @@ const ValidateSamples: FC = () => {
   };
 
   useEffect(() => {
-    handleData();
+    if (user.id) {
+      handleData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user.id]);
 
   return (
     <>
-      {loading || !validationConfigInfo || !infoExampleToValidate ? (
-        <div className="flex items-center justify-center ">
+      {loading ||
+      !validationConfigInfo ||
+      !infoExampleToValidate?.example_id ? (
+        <div className="flex items-center justify-center h-screen">
           <PacmanLoader color="#ccebd4" loading={loading} size={50} />
         </div>
       ) : (
@@ -138,7 +161,7 @@ const ValidateSamples: FC = () => {
                   .toLowerCase()
                   .replace(
                     /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
-                    ""
+                    "",
                   )
                   .replace(" ", "")}
                 metadataExample={metadataExample}

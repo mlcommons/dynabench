@@ -280,7 +280,7 @@ class ModelService:
             print("Finished")
             time.sleep(320)
 
-    def get_model_prediction_per_dataset(
+    def get_model_prediction_by_dataset(
         self, user_id: int, model_id: int, dataset_id: int
     ):
         model_info = self.model_repository.get_model_info_by_id(model_id)
@@ -297,8 +297,8 @@ class ModelService:
         )
         return final_file
 
-    def get_amount_of_models_per_task(self, task_id: int):
-        return self.model_repository.get_amount_of_models_per_task(task_id)
+    def get_amount_of_models_by_task(self, task_id: int):
+        return self.model_repository.get_amount_of_models_by_task(task_id)
 
     def get_model_name_by_id(self, model_id: int):
         return self.model_repository.get_model_name_by_id(model_id)
@@ -333,17 +333,6 @@ class ModelService:
             Key=model_path,
             ContentType=predictions.content_type,
         )
-        centralize_host = os.getenv("CENTRALIZED_HOST")
-        endpoint = "/builder_evaluation/evaluation/evaluate_downstream_tasks"
-        url = f"{centralize_host}{endpoint}"
-        requests.post(
-            url,
-            json={
-                "task_id": task_id,
-                "predictions": file_name,
-                "model_id": model["id"],
-            },
-        )
         self.email_helper.send(
             contact=user_email,
             cc_contact="dynabench-site@mlcommons.org",
@@ -351,6 +340,36 @@ class ModelService:
             msg_dict={"name": model_name},
             subject=f"Model {model_name} upload succeeded.",
         )
+        centralize_host = os.getenv("CENTRALIZED_HOST")
+        endpoint = "/builder_evaluation/evaluation/evaluate_downstream_tasks"
+        url = f"{centralize_host}{endpoint}"
+        evaluate_model = requests.post(
+            url,
+            json={
+                "task_id": task_id,
+                "predictions": file_name,
+                "model_id": model["id"],
+            },
+        )
+        if evaluate_model.status_code == 200:
+            self.email_helper.send(
+                contact=user_email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_evaluation_sucessful.txt",
+                msg_dict={"name": model_name, "model_id": model["id"]},
+                subject=f"Model {model_name} evaluation succeeded.",
+            )
+        else:
+            self.email_helper.send(
+                contact=user_email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_evaluation_failed.txt",
+                msg_dict={"name": model_name},
+                subject=f"Model {model_name} evaluation failed.",
+            )
+            raise HTTPException(
+                status_code=400, detail="Model evaluation fail, please try again"
+            )
         return "Model evaluate successfully"
 
     def conversation_with_buffer_memory(
@@ -389,3 +408,27 @@ class ModelService:
             self.model_repository.update_published_status(model_id)
         else:
             raise HTTPException(status_code=400, detail="Model no has all the scores")
+
+    def get_models_by_user_id(self, user_id: int):
+        return self.model_repository.get_models_by_user_id(user_id)
+
+    def delete_model(self, model_id: int):
+        return self.model_repository.delete_model(model_id)
+
+    def get_all_model_info_by_id(self, model_id: int):
+        return self.model_repository.get_all_model_info_by_id(model_id)
+
+    def update_model_info(
+        self,
+        model_id: int,
+        name: str,
+        desc: str,
+        longdesc: str,
+        params: float,
+        languages: str,
+        license: str,
+        source_url: str,
+    ):
+        return self.model_repository.update_model_info(
+            model_id, name, desc, longdesc, params, languages, license, source_url
+        )

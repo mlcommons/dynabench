@@ -16,7 +16,7 @@ import ReactGA from "react-ga";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import { Provider as FetchProvider } from "use-http";
 import { OverlayProvider } from "new_front/components/OverlayInstructions/Provider";
-
+import { ParallaxProvider } from "react-scroll-parallax";
 import CreateInterface from "new_front/pages/CreateSamples/CreateInterface";
 import ValidateInterface from "../common/Annotation/ValidateInterface.js";
 import SubmitPrediction from "new_front/pages/Submissions/SubmitPrediction";
@@ -33,11 +33,14 @@ import FloresTop5Page from "./FloresTop5Page";
 import ForgotPassword from "./ForgotPassword";
 import GenerateAPITokenPage from "./GenerateAPITokenPage.js";
 import TasksPage from "../new_front/pages/Task/TasksPage";
-import LoginPage from "./LoginPage";
+// import LoginPage from './LoginPage'
+import LoginPage from "new_front/pages/Login/LoginPage";
 import MLCubeTutorial from "./MLCubeTutorial";
 import ModelPage from "./ModelPage";
-import ProfilePage from "./ProfilePage";
+import ModelOverview from "new_front/pages/Model/ModelOverview";
+import ProfilePage from "new_front/pages/ProfilePage/ProfilePage";
 import RegisterPage from "./RegisterPage";
+import Register from "new_front/pages/Login/Register";
 import ResetPassword from "./ResetPassword";
 import ScrollToTop from "./ScrollToTop.js";
 import SubmitInterface from "./SubmitInterface.js";
@@ -150,440 +153,429 @@ class App extends React.Component {
     return (
       <FetchProvider url={BASE_URL_2}>
         <OverlayInstructionsProvider>
-          <UserContext.Provider
-            value={{
-              user: this.state.user,
-              updateState: this.updateState,
-              api: this.api,
-            }}
-          >
-            <TasksContext.Provider
+          <ParallaxProvider>
+            <UserContext.Provider
               value={{
-                tasks: this.state.tasks,
+                user: this.state.user,
+                updateState: this.updateState,
+                api: this.api,
               }}
             >
-              <BrowserRouter>
-                <OverlayProvider>
-                  <ScrollToTop />
-                  <Route
-                    render={(props) => (
-                      <RouterMonitor {...props} api={this.api} />
-                    )}
-                  />
-                  {!showContentOnly && (
-                    <Navbar
-                      expand="lg"
-                      variant="dark"
-                      className="px-12 shadow principal-color-bg justify-content-start"
-                    >
-                      <Navbar.Toggle
-                        aria-controls="basic-navbar-nav"
-                        className="mr-2 border-0"
-                      />
-                      <Navbar.Brand as={Link} to="/">
-                        <img
-                          src={logoWhite}
-                          style={{
-                            width: 28,
-                            marginLeft: 1,
-                          }}
-                          alt="MLCommons Logo"
+              <TasksContext.Provider
+                value={{
+                  tasks: this.state.tasks,
+                }}
+              >
+                <BrowserRouter>
+                  <OverlayProvider>
+                    <ScrollToTop />
+                    <Route
+                      render={(props) => (
+                        <RouterMonitor {...props} api={this.api} />
+                      )}
+                    />
+                    {!showContentOnly && (
+                      <Navbar
+                        expand="lg"
+                        variant="dark"
+                        className="px-12 shadow principal-color-bg justify-content-start"
+                      >
+                        <Navbar.Toggle
+                          aria-controls="basic-navbar-nav"
+                          className="mr-2 border-0"
                         />
-                      </Navbar.Brand>
-                      <Navbar.Brand as={Link} to="/">
-                        <img
-                          src={logoBlack}
-                          style={{ width: 80, marginRight: 25 }}
-                          alt="Dynabench"
-                        />
-                      </Navbar.Brand>
-                      <Navbar.Collapse>
-                        <Nav className="mr-auto">
-                          <Nav.Item>
-                            <Nav.Link as={Link} to="/about">
-                              About
-                            </Nav.Link>
-                          </Nav.Item>
-                          <NavDropdown title="Tasks" id="basic-nav-dropdown">
-                            <ul className="cl-menu ul-nav">
-                              <li id="original" className="li-nav">
-                                <a href="/dadc" className="second-nav-a">
-                                  DADC
-                                </a>
-                                <ul className="ul-nav">
-                                  {this.state &&
-                                    this.state.tasks
-                                      .filter((t) => t.challenge_type === 1)
-                                      .map((task, index) => (
-                                        <li
-                                          key={task.task_code}
-                                          className="li-nav"
-                                        >
-                                          <a href={`/tasks/${task.task_code}`}>
-                                            {task.name}
-                                          </a>
-                                        </li>
-                                      ))}
-                                </ul>
-                              </li>
-                              <li id="dataperf" className="li-nav">
-                                <a className="second-nav-a" href="/dataperf">
-                                  Dataperf
-                                </a>
-                                <ul className="ul-nav">
-                                  {this.state &&
-                                    this.state.tasks
-                                      .filter((t) => t.challenge_type === 2)
-                                      .map((task, index) => (
-                                        <li
-                                          key={task.task_code}
-                                          className="li-nav"
-                                        >
-                                          <a href={`/tasks/${task.task_code}`}>
-                                            {task.name}
-                                          </a>
-                                        </li>
-                                      ))}
-                                </ul>
-                              </li>
-                              <li id="babylm" className="li-nav">
-                                <a className="second-nav-a" href="/babylm">
-                                  BabyLM
-                                </a>
-                                <ul className="ul-nav">
-                                  {this.state &&
-                                    this.state.tasks
-                                      .filter((t) => t.challenge_type === 3)
-                                      .map((task, index) => (
-                                        <li
-                                          key={task.task_code}
-                                          className="li-nav"
-                                        >
-                                          <a href={`/tasks/${task.task_code}`}>
-                                            {task.name}
-                                          </a>
-                                        </li>
-                                      ))}
-                                </ul>
-                              </li>
-                              <li id="lmms" className="li-nav">
-                                <a className="second-nav-a" href="/lmms">
-                                  LLMs
-                                </a>
-                                <ul className="ul-nav">
-                                  {this.state &&
-                                    this.state.tasks
-                                      .filter((t) => t.challenge_type === 4)
-                                      .map((task, index) => (
-                                        <li
-                                          key={task.task_code}
-                                          className="li-nav"
-                                        >
-                                          <a href={`/tasks/${task.task_code}`}>
-                                            {task.name}
-                                          </a>
-                                        </li>
-                                      ))}
-                                </ul>
-                              </li>
-                              <li id="flores" className="li-nav">
-                                <a className="second-nav-a" href="/flores">
-                                  Flores
-                                </a>
-                                <ul className="ul-nav">
-                                  {this.state &&
-                                    this.state.tasks
-                                      .filter((t) => t.challenge_type === 5)
-                                      .map((task, index) => (
-                                        <li
-                                          key={task.task_code}
-                                          className="li-nav"
-                                        >
-                                          <a href={`/tasks/${task.task_code}`}>
-                                            {task.name}
-                                          </a>
-                                        </li>
-                                      ))}
-                                </ul>
-                              </li>
-                              <li id="contributed" className="li-nav">
-                                <a href="/others" className="second-nav-a">
-                                  Others
-                                </a>
-                                <ul className="ul-nav">
-                                  {this.state &&
-                                    this.state.tasks
-                                      .filter((t) => t.challenge_type === 6)
-                                      .map((task, index) => (
-                                        <li
-                                          className="li-nav"
-                                          key={task.task_code}
-                                        >
-                                          <a href={`/tasks/${task.task_code}`}>
-                                            {task.name}
-                                          </a>
-                                        </li>
-                                      ))}
-                                </ul>
-                              </li>
-                            </ul>
-                            <div className="my-0 dropdown-divider"></div>
-                          </NavDropdown>
-                        </Nav>
-                        <Nav className="justify-content-end">
-                          {this.state.user.id ? (
-                            <>
-                              <SearchBar />
-                              <NavDropdown
-                                onToggle={this.refreshData}
-                                alignRight
-                                className="no-chevron"
-                                title={
-                                  <Avatar
-                                    avatar_url={this.state.user.avatar_url}
-                                    username={this.state.user.username}
-                                    isThumbnail={true}
-                                    theme="light"
-                                  />
-                                }
-                                id="collasible-nav-dropdown"
-                              >
-                                <NavDropdown.Item
-                                  as={Link}
-                                  to="/account#profile"
-                                >
-                                  Profile
-                                </NavDropdown.Item>
-                                <NavDropdown.Divider />
-                                <NavDropdown.Item
-                                  as={Link}
-                                  to="/account#notifications"
-                                >
-                                  Notifications{" "}
-                                  {this.state.user &&
-                                  this.state.user.unseen_notifications
-                                    ? "(" +
-                                      this.state.user?.unseen_notifications +
-                                      ")"
-                                    : ""}
-                                </NavDropdown.Item>
-                                <NavDropdown.Item as={Link} to="/account#stats">
-                                  Stats &amp; Badges
-                                </NavDropdown.Item>
-                                <NavDropdown.Item
-                                  as={Link}
-                                  to="/account#models"
-                                >
-                                  Models
-                                </NavDropdown.Item>
-                                <NavDropdown.Item
-                                  as={Link}
-                                  to="/account#forks-and-snapshots"
-                                >
-                                  Forks &amp; Snapshots
-                                </NavDropdown.Item>
-                                <NavDropdown.Item as={Link} to="/account#tasks">
-                                  Tasks
-                                </NavDropdown.Item>
-                                {this.state.user?.admin && (
-                                  <>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item
-                                      as={Link}
-                                      to="/account#admin_task_proposals"
-                                    >
-                                      Admin Task Proposals
-                                    </NavDropdown.Item>
-                                  </>
-                                )}
-                                <NavDropdown.Divider />
-                                <NavDropdown.Item as={Link} to="/logout">
-                                  Logout
-                                </NavDropdown.Item>
-                              </NavDropdown>
-                            </>
-                          ) : (
-                            <>
-                              <Nav.Item className="relative z-0">
+                        <Navbar.Brand as={Link} to="/">
+                          <img
+                            src={logoWhite}
+                            style={{
+                              width: 28,
+                              marginLeft: 1,
+                            }}
+                            alt="MLCommons Logo"
+                          />
+                        </Navbar.Brand>
+                        <Navbar.Brand as={Link} to="/">
+                          <img
+                            src={logoBlack}
+                            style={{ width: 80, marginRight: 25 }}
+                            alt="Dynabench"
+                          />
+                        </Navbar.Brand>
+                        <Navbar.Collapse>
+                          <Nav className="mr-auto">
+                            <Nav.Item>
+                              <Nav.Link as={Link} to="/about">
+                                About
+                              </Nav.Link>
+                            </Nav.Item>
+                            <NavDropdown
+                              title="Communities"
+                              id="basic-nav-dropdown"
+                            >
+                              <ul className="cl-menu ul-nav">
+                                <li id="original" className="li-nav">
+                                  <a href="/dadc" className="second-nav-a">
+                                    DADC
+                                  </a>
+                                  <ul className="ul-nav">
+                                    {this.state &&
+                                      this.state.tasks
+                                        .filter((t) => t.challenge_type === 1)
+                                        .map((task, index) => (
+                                          <li
+                                            key={task.task_code}
+                                            className="li-nav"
+                                          >
+                                            <a
+                                              href={`/tasks/${task.task_code}`}
+                                            >
+                                              {task.name}
+                                            </a>
+                                          </li>
+                                        ))}
+                                  </ul>
+                                </li>
+                                <li id="dataperf" className="li-nav">
+                                  <a className="second-nav-a" href="/dataperf">
+                                    Dataperf
+                                  </a>
+                                  <ul className="ul-nav">
+                                    {this.state &&
+                                      this.state.tasks
+                                        .filter((t) => t.challenge_type === 2)
+                                        .map((task, index) => (
+                                          <li
+                                            key={task.task_code}
+                                            className="li-nav"
+                                          >
+                                            <a
+                                              href={`/tasks/${task.task_code}`}
+                                            >
+                                              {task.name}
+                                            </a>
+                                          </li>
+                                        ))}
+                                  </ul>
+                                </li>
+                                <li id="babylm" className="li-nav">
+                                  <a className="second-nav-a" href="/babylm">
+                                    BabyLM
+                                  </a>
+                                  <ul className="ul-nav">
+                                    {this.state &&
+                                      this.state.tasks
+                                        .filter((t) => t.challenge_type === 3)
+                                        .map((task, index) => (
+                                          <li
+                                            key={task.task_code}
+                                            className="li-nav"
+                                          >
+                                            <a
+                                              href={`/tasks/${task.task_code}`}
+                                            >
+                                              {task.name}
+                                            </a>
+                                          </li>
+                                        ))}
+                                  </ul>
+                                </li>
+                                <li id="lmms" className="li-nav">
+                                  <a className="second-nav-a" href="/lmms">
+                                    LLMs
+                                  </a>
+                                  <ul className="ul-nav">
+                                    {this.state &&
+                                      this.state.tasks
+                                        .filter((t) => t.challenge_type === 4)
+                                        .map((task, index) => (
+                                          <li
+                                            key={task.task_code}
+                                            className="li-nav"
+                                          >
+                                            <a
+                                              href={`/tasks/${task.task_code}`}
+                                            >
+                                              {task.name}
+                                            </a>
+                                          </li>
+                                        ))}
+                                  </ul>
+                                </li>
+                                <li id="flores" className="li-nav">
+                                  <a className="second-nav-a" href="/flores">
+                                    Flores
+                                  </a>
+                                  <ul className="ul-nav">
+                                    {this.state &&
+                                      this.state.tasks
+                                        .filter((t) => t.challenge_type === 5)
+                                        .map((task, index) => (
+                                          <li
+                                            key={task.task_code}
+                                            className="li-nav"
+                                          >
+                                            <a
+                                              href={`/tasks/${task.task_code}`}
+                                            >
+                                              {task.name}
+                                            </a>
+                                          </li>
+                                        ))}
+                                  </ul>
+                                </li>
+                                <li id="contributed" className="li-nav">
+                                  <a href="/others" className="second-nav-a">
+                                    Others
+                                  </a>
+                                  <ul className="ul-nav">
+                                    {this.state &&
+                                      this.state.tasks
+                                        .filter((t) => t.challenge_type === 6)
+                                        .map((task, index) => (
+                                          <li
+                                            className="li-nav"
+                                            key={task.task_code}
+                                          >
+                                            <a
+                                              href={`/tasks/${task.task_code}`}
+                                            >
+                                              {task.name}
+                                            </a>
+                                          </li>
+                                        ))}
+                                  </ul>
+                                </li>
+                              </ul>
+                              <div className="my-0 dropdown-divider"></div>
+                            </NavDropdown>
+                          </Nav>
+                          <Nav className="justify-content-end">
+                            {this.state.user.id ? (
+                              <>
                                 <SearchBar />
-                              </Nav.Item>
-                              <Nav.Item>
-                                <Nav.Link
-                                  as={Link}
-                                  to="/login"
-                                  className="signup-nav-link login-fix-space"
+                                <NavDropdown
+                                  // onToggle={this.refreshData}
+                                  alignRight
+                                  className="no-chevron"
+                                  title={
+                                    <Avatar
+                                      avatar_url={this.state.user.avatar_url}
+                                      username={this.state.user.username}
+                                      isThumbnail={true}
+                                      theme="light"
+                                    />
+                                  }
+                                  id="collasible-nav-dropdown"
                                 >
-                                  Login
-                                </Nav.Link>
-                              </Nav.Item>
-                              <Nav.Item>
-                                <Nav.Link
-                                  as={Link}
-                                  to="/register"
-                                  className="signup-nav-link"
-                                >
-                                  Sign up
-                                </Nav.Link>
-                              </Nav.Item>
-                            </>
-                          )}
-                        </Nav>
-                      </Navbar.Collapse>
-                    </Navbar>
-                  )}
-                  <div id={showContentOnly ? "" : "content"}>
-                    <Switch>
-                      <Route path="/about" component={About} />
-                      <Route path="/contact" component={ContactPage} />
-                      <Route path="/termsofuse" component={TermsPage} />
-                      <Route path="/datapolicy" component={DataPolicyPage} />
-                      <Route
-                        path="/tasks/top/:taskCode"
-                        component={TaskModelLeaderboardPage}
-                      />
-                      <Route
-                        path="/tasks/:taskCode/create"
-                        component={CreateInterface}
-                      />
-                      <Route
-                        path="/tasks/:taskCode/validate"
-                        component={ValidateSamples}
-                      />
-                      <Route
-                        path="/tasks/:taskCode/uploadModel"
-                        component={SubmitModel}
-                      />
-                      <Route
-                        path="/tasks/:taskCode/models/:modelId/updateModelInfo"
-                        component={UpdateModelInfoInterface}
-                      />
-                      <Route
-                        path="/tasks/:taskCode/submit_prediction"
-                        render={(props) => <SubmitPrediction />}
-                      />
-                      <Route
-                        path="/tasks/:taskId/submit_predictions"
-                        render={(props) => (
-                          <SubmitInterface
-                            history={props.history}
-                            location={props.location}
-                            staticContext={props.staticContext}
-                            match={props.match}
-                            submission_type="predictions"
-                          />
-                        )}
-                      />
-                      <Route
-                        path="/tasks/:taskId/submit_train_files"
-                        render={(props) => (
-                          <SubmitInterface
-                            history={props.history}
-                            location={props.location}
-                            staticContext={props.staticContext}
-                            match={props.match}
-                            submission_type="train_files"
-                          />
-                        )}
-                      />
-                      <Route
-                        path="/tasks/:taskId/mlcube_tutorial"
-                        render={(props) => (
-                          <MLCubeTutorial
-                            history={props.history}
-                            location={props.location}
-                            staticContext={props.staticContext}
-                            match={props.match}
-                            submission_type="train_files"
-                          />
-                        )}
-                      />
-                      <Route
-                        path="/tasks/:taskCode/models/:modelId"
-                        component={ModelPage}
-                      />
-                      <Route
-                        path="/tasks/:taskCode/round/:roundId"
-                        component={TaskPage}
-                      />
-                      <Route
-                        path="/tasks/:taskCode/:forkOrSnapshotName"
-                        component={ForkAndSnapshotRouter}
-                      />
-                      <Route path="/tasks/:taskCode" component={TaskPage} />
-                      <Route path="/test" component={Test} />
-                      <Route
-                        path="/flores/top5/:taskShortName"
-                        component={FloresTop5Page}
-                      />
-                      <Route
-                        path="/flores/:taskShortName?"
-                        component={FloresTaskPage}
-                      />
-                      <Route path="/dataperf" component={DataperfLanding} />
-                      <Route path="/dadc" component={DADCLanding} />
-                      <Route path="/babylm" component={BabyLMLanding} />
+                                  <NavDropdown.Item as={Link} to="/account">
+                                    Profile
+                                  </NavDropdown.Item>
+                                  <NavDropdown.Divider />
+                                  <NavDropdown.Item
+                                    as={Link}
+                                    to="/account#notifications"
+                                  >
+                                    Notifications{" "}
+                                    {this.state.user &&
+                                    this.state.user.unseen_notifications
+                                      ? "(" +
+                                        this.state.user?.unseen_notifications +
+                                        ")"
+                                      : ""}
+                                  </NavDropdown.Item>
 
-                      <Route
-                        path="/others_tasks"
-                        component={OthersTaskLanding}
-                      />
-                      <Route path="/tasks" component={FilterTasks} />
-                      <Route path="/login" component={LoginPage} />
-                      <Route
-                        path="/generate_api_token"
-                        component={GenerateAPITokenPage}
-                      />
-                      <Route
-                        path="/forgot-password"
-                        component={ForgotPassword}
-                      />
-                      <Route
-                        path="/reset-password/:token"
-                        component={ResetPassword}
-                      />
-                      <Route path="/logout" component={Logout} />
-                      <Route path="/account" component={ProfilePage} />
-                      <Route
-                        path="/task-owner-interface/:taskCode"
-                        component={TaskOwnerPage}
-                      />
-                      <Route path="/register" component={RegisterPage} />
-                      <Route path="/users/:userId" component={UserPage} />
-                      <Route path="/models/:modelId" component={ModelPage} />
-                      <Route path="/communities" component={TasksPage} />
-                      <Route path="/" component={Landing} />
-                    </Switch>
-                  </div>
-                  {!showContentOnly && (
-                    <footer className="text-white footer">
-                      <Container fluid>
-                        <Row>
-                          <div className="footer-nav-link">
-                            Copyright © 2023 MLCommons, Inc.
-                          </div>
-                          <div className="footer-nav-link">
-                            <Link to="/contact" className="text-reset">
-                              Contact
-                            </Link>
-                          </div>
-                          <div className="footer-nav-link">
-                            <Link to="/termsofuse" className="text-reset">
-                              Terms of Use
-                            </Link>
-                          </div>
-                          <div className="footer-nav-link">
-                            <Link to="/datapolicy" className="text-reset">
-                              Data Policy
-                            </Link>
-                          </div>
-                        </Row>
-                      </Container>
-                    </footer>
-                  )}
-                </OverlayProvider>
-              </BrowserRouter>
-            </TasksContext.Provider>
-          </UserContext.Provider>
+                                  <NavDropdown.Divider />
+                                  <NavDropdown.Item as={Link} to="/logout">
+                                    Logout
+                                  </NavDropdown.Item>
+                                </NavDropdown>
+                              </>
+                            ) : (
+                              <>
+                                <Nav.Item className="relative z-0">
+                                  <SearchBar />
+                                </Nav.Item>
+                                <Nav.Item>
+                                  <Nav.Link
+                                    as={Link}
+                                    to="/login"
+                                    className="signup-nav-link login-fix-space"
+                                  >
+                                    Login
+                                  </Nav.Link>
+                                </Nav.Item>
+                                <Nav.Item>
+                                  <Nav.Link
+                                    as={Link}
+                                    to="/register"
+                                    className="signup-nav-link"
+                                  >
+                                    Sign up
+                                  </Nav.Link>
+                                </Nav.Item>
+                              </>
+                            )}
+                          </Nav>
+                        </Navbar.Collapse>
+                      </Navbar>
+                    )}
+                    <div id={showContentOnly ? "" : "content"}>
+                      <Switch>
+                        <Route path="/about" component={About} />
+                        <Route path="/contact" component={ContactPage} />
+                        <Route path="/termsofuse" component={TermsPage} />
+                        <Route path="/datapolicy" component={DataPolicyPage} />
+                        <Route
+                          path="/tasks/top/:taskCode"
+                          component={TaskModelLeaderboardPage}
+                        />
+                        <Route
+                          path="/tasks/:taskCode/create"
+                          component={CreateInterface}
+                        />
+                        <Route
+                          path="/tasks/:taskCode/validate"
+                          component={ValidateSamples}
+                        />
+                        <Route
+                          path="/tasks/:taskCode/uploadModel"
+                          component={SubmitModel}
+                        />
+                        <Route
+                          path="/tasks/:taskCode/models/:modelId/updateModelInfo"
+                          component={UpdateModelInfoInterface}
+                        />
+                        <Route
+                          path="/tasks/:taskCode/submit_prediction"
+                          render={(props) => <SubmitPrediction />}
+                        />
+                        <Route
+                          path="/tasks/:taskId/submit_predictions"
+                          render={(props) => (
+                            <SubmitInterface
+                              history={props.history}
+                              location={props.location}
+                              staticContext={props.staticContext}
+                              match={props.match}
+                              submission_type="predictions"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/tasks/:taskId/submit_train_files"
+                          render={(props) => (
+                            <SubmitInterface
+                              history={props.history}
+                              location={props.location}
+                              staticContext={props.staticContext}
+                              match={props.match}
+                              submission_type="train_files"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/tasks/:taskId/mlcube_tutorial"
+                          render={(props) => (
+                            <MLCubeTutorial
+                              history={props.history}
+                              location={props.location}
+                              staticContext={props.staticContext}
+                              match={props.match}
+                              submission_type="train_files"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/tasks/:taskCode/models/:modelId"
+                          component={ModelOverview}
+                        />
+                        <Route
+                          path="/tasks/:taskCode/round/:roundId"
+                          component={TaskPage}
+                        />
+                        <Route
+                          path="/tasks/:taskCode/:forkOrSnapshotName"
+                          component={ForkAndSnapshotRouter}
+                        />
+                        <Route path="/tasks/:taskCode" component={TaskPage} />
+                        <Route path="/test" component={Test} />
+                        <Route
+                          path="/flores/top5/:taskShortName"
+                          component={FloresTop5Page}
+                        />
+                        <Route
+                          path="/flores/:taskShortName?"
+                          component={FloresTaskPage}
+                        />
+                        <Route path="/dataperf" component={DataperfLanding} />
+                        <Route path="/dadc" component={DADCLanding} />
+                        <Route path="/babylm" component={BabyLMLanding} />
+
+                        <Route
+                          path="/others_tasks"
+                          component={OthersTaskLanding}
+                        />
+                        <Route path="/tasks" component={FilterTasks} />
+                        <Route path="/login" component={LoginPage} />
+                        <Route
+                          path="/generate_api_token"
+                          component={GenerateAPITokenPage}
+                        />
+                        <Route
+                          path="/forgot-password"
+                          component={ForgotPassword}
+                        />
+                        <Route
+                          path="/reset-password/:token"
+                          component={ResetPassword}
+                        />
+                        <Route path="/logout" component={Logout} />
+                        <Route path="/account" component={ProfilePage} />
+                        <Route
+                          path="/task-owner-interface/:taskCode"
+                          component={TaskOwnerPage}
+                        />
+                        <Route path="/register" component={Register} />
+                        <Route path="/users/:userId" component={UserPage} />
+                        <Route
+                          path="/models/:modelId"
+                          component={ModelOverview}
+                        />
+                        <Route path="/communities" component={TasksPage} />
+                        <Route path="/" component={Landing} />
+                      </Switch>
+                    </div>
+                    {!showContentOnly && (
+                      <footer className="text-white footer">
+                        <Container fluid>
+                          <Row>
+                            <div className="footer-nav-link">
+                              Copyright © 2023 MLCommons, Inc.
+                            </div>
+                            <div className="footer-nav-link">
+                              <Link to="/contact" className="text-reset">
+                                Contact
+                              </Link>
+                            </div>
+                            <div className="footer-nav-link">
+                              <Link to="/termsofuse" className="text-reset">
+                                Terms of Use
+                              </Link>
+                            </div>
+                            <div className="footer-nav-link">
+                              <Link to="/datapolicy" className="text-reset">
+                                Data Policy
+                              </Link>
+                            </div>
+                          </Row>
+                        </Container>
+                      </footer>
+                    )}
+                  </OverlayProvider>
+                </BrowserRouter>
+              </TasksContext.Provider>
+            </UserContext.Provider>
+          </ParallaxProvider>
         </OverlayInstructionsProvider>
       </FetchProvider>
     );

@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) MLCommons and its affiliates.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
  * Copyright (c) Facebook, Inc. and its affiliates.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -8,9 +14,9 @@ import React from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import Moment from "react-moment";
 
-const Badge = (props) => {
+const Badge = ({ name, awarded }) => {
   var desc = "Unknown badge";
-  switch (props.name) {
+  switch (name) {
     case "ALL_TASKS_COVERED":
       desc = "All tasks covered!";
       break;
@@ -167,10 +173,8 @@ const Badge = (props) => {
     default:
       break;
   }
-  var awarded = props.awarded;
-  return props.format && props.format === "text" ? (
-    desc
-  ) : (
+
+  return (
     <OverlayTrigger
       placement="top"
       delay={{ show: 250, hide: 400 }}
@@ -185,11 +189,14 @@ const Badge = (props) => {
         </Tooltip>
       )}
     >
-      <img
-        src={"/badges/" + props.name + ".png"}
-        style={{ width: 50, marginBottom: 10 }}
-        alt="badge"
-      />
+      <>
+        <img
+          src={"/badges/" + name + ".png"}
+          style={{ width: 50, marginBottom: 10 }}
+          alt="badge"
+        />
+        <p className="text-center text-letter-color ">{desc}</p>
+      </>
     </OverlayTrigger>
   );
 };

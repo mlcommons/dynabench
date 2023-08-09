@@ -40,8 +40,8 @@ const TaskPage = () => {
     const [taskData, maxScore, amountOfModels, adminOrOwner, taskInstructions] =
       await Promise.all([
         await get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
-        await get(`/score/get_maximun_principal_score_per_task/${taskId}`),
-        await get(`/model/get_amount_of_models_per_task/${taskId}`),
+        await get(`/score/get_maximun_principal_score_by_task/${taskId}`),
+        await get(`/model/get_amount_of_models_by_task/${taskId}`),
         await post("/auth/is_admin_or_owner", {
           task_id: taskId,
           user_id: user.id,
@@ -72,7 +72,9 @@ const TaskPage = () => {
     }
   }, [task]);
 
-  console.log("task", task);
+  useEffect(() => {
+    localStorage.removeItem("originalPath");
+  }, []);
 
   return (
     <div>
@@ -130,13 +132,14 @@ const TaskPage = () => {
                         setOpenTab={setOpenTab}
                       />
                     )}
-
-                    <TabOption
-                      optionTab={2}
-                      tabName="Overview"
-                      openTab={openTab}
-                      setOpenTab={setOpenTab}
-                    />
+                    {Object.entries(taskInstructions).length !== 0 && (
+                      <TabOption
+                        optionTab={2}
+                        tabName="Overview"
+                        openTab={openTab}
+                        setOpenTab={setOpenTab}
+                      />
+                    )}
                     {task.documentation_url && (
                       <TabOption
                         optionTab={3}
@@ -151,10 +154,10 @@ const TaskPage = () => {
                   <TaskActionButtons
                     configYaml={task.config_yaml}
                     dynamicAdversarialDataValidation={Boolean(
-                      task.dynamic_adversarial_data_validation
+                      task.dynamic_adversarial_data_validation,
                     )}
                     dynamicAdversarialDataCollection={Boolean(
-                      task.dynamic_adversarial_data_collection
+                      task.dynamic_adversarial_data_collection,
                     )}
                     submitable={Boolean(task.submitable)}
                     hasPredictionsUpload={Boolean(task.has_predictions_upload)}
@@ -178,13 +181,15 @@ const TaskPage = () => {
                       />
                     )}
                   </div>
-                  <div className={openTab === 2 ? "block " : "hidden"}>
-                    <OverviewTask
-                      roundDescription={task.round?.longdesc}
-                      generalDescription={task.instructions_md}
-                      taskInstructions={taskInstructions!}
-                    />
-                  </div>
+                  {Object.entries(taskInstructions).length !== 0 && (
+                    <div className={openTab === 2 ? "block " : "hidden"}>
+                      <OverviewTask
+                        roundDescription={task.round?.longdesc}
+                        generalDescription={task.instructions_md}
+                        taskInstructions={taskInstructions!}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

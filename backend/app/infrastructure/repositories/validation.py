@@ -6,7 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from app.infrastructure.models.models import Validation
+from app.infrastructure.models.models import Context, Example, Round, Validation
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -26,3 +26,17 @@ class ValidationRepository(AbstractRepository):
                 "eid": example_id,
             }
         )
+
+    def get_active_tasks_by_user_id(self, user_id: int):
+        return (
+            self.session.query(Round.tid)
+            .join(Context, Round.id == Context.r_realid)
+            .join(Example, Context.id == Example.cid)
+            .join(self.model, Example.id == self.model.eid)
+            .filter(Validation.uid == user_id)
+            .distinct()
+            .all()
+        )
+
+    def get_total_validations_by_user_id(self, user_id: int):
+        return self.session.query(Validation).filter(Validation.uid == user_id).count()

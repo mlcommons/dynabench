@@ -37,7 +37,7 @@ class CreateExampleRequest(BaseModel):
     tag: Optional[str] = "generative"
 
 
-class PartiallyCreationExampleGenerativeRequest(BaseModel):
+class PartialCreationExampleRequest(BaseModel):
     example_info: dict
     context_id: int
     user_id: int

@@ -2,12 +2,18 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from app.infrastructure.repositories.example import ExampleRepository
+from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.user import UserRepository
+from app.infrastructure.repositories.validation import ValidationRepository
 
 
 class UserService:
     def __init__(self):
         self.user_repository = UserRepository()
+        self.example_repository = ExampleRepository()
+        self.validation_repository = ValidationRepository()
+        self.model_repository = ModelRepository()
 
     def increment_examples_fooled(self, user_id: int):
         self.user_repository.increment_examples_fooled(user_id)
@@ -38,3 +44,25 @@ class UserService:
 
     def get_is_admin(self, user_id: int):
         return self.user_repository.get_is_admin(user_id)
+
+    def get_user_with_badges(self, user_id: int):
+        user_info = self.user_repository.get_info_by_user_id(user_id).__dict__
+        badges = self.user_repository.get_badges_by_user_id(user_id)
+        user_info["badges"] = [badge for badge in badges]
+        return user_info
+
+    def get_stats_by_user_id(self, user_id: int):
+        stats_by_user = {}
+        stats_by_user[
+            "total_examples"
+        ] = self.example_repository.get_total_examples_by_user_id(user_id)
+        stats_by_user[
+            "total_validations"
+        ] = self.validation_repository.get_total_validations_by_user_id(user_id)
+        stats_by_user[
+            "total_models"
+        ] = self.model_repository.get_total_models_by_user_id(user_id)
+        stats_by_user[
+            "model_fooling_rate"
+        ] = self.example_repository.get_model_fooling_rate_by_user_id(user_id)
+        return stats_by_user

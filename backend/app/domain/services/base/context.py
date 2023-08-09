@@ -5,9 +5,9 @@
 import base64
 import hashlib
 import json
-import multiprocessing
 import os
 import random
+import time
 
 import boto3
 import yaml
@@ -15,11 +15,8 @@ from fastapi import HTTPException
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
-from app.domain.services.utils.image_generators import (
-    OpenAIImageProvider,
-    StableDiffusionImageProvider,
-)
 from app.domain.services.utils.llm import OpenAIProvider
+from app.domain.services.utils.multi_generator import ImageGenerator
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
@@ -29,10 +26,6 @@ class ContextService:
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
         self.task_service = TaskService()
-        self.image_providers = [
-            StableDiffusionImageProvider(),
-            OpenAIImageProvider(),
-        ]
         self.llm_provider = OpenAIProvider()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -119,27 +112,16 @@ class ContextService:
         self, prompt: str, user_id: int, num_images: int, models: list, endpoint: str
     ) -> dict:
         images = []
-        for generator in self.image_providers:
-            if generator.provider_name() == "openai":
-                n = 2
-                generated_images = generator.generate_images(
-                    prompt, n, models, endpoint
-                )
-            else:
-                n = 8
-                with multiprocessing.Pool(2) as p:
-                    generated_images = p.starmap(
-                        generator.generate_images,
-                        [(prompt, n, models, endpoint)] * 2,
-                    )
-                    p.close()
-                    p.join()
-                generated_images = [
-                    image for sublist in generated_images for image in sublist
-                ]
-            for image in generated_images:
+        start = time.time()
+        multi_generator = ImageGenerator()
+        generated_images = multi_generator.generate_all_images(
+            prompt, num_images, models, endpoint
+        )
+        images = []
+        for generator_dict in generated_images:
+            for image in generator_dict["images"]:
                 image_id = (
-                    generator.provider_name()
+                    generator_dict["generator"]
                     + "_"
                     + prompt
                     + "_"
@@ -167,6 +149,7 @@ class ContextService:
                     )
                     images.append(new_dict)
         random.shuffle(images)
+        print(f"Time to generate images: {time.time() - start}")
         return images
 
     def get_perdi_contexts(
@@ -186,14 +169,17 @@ class ContextService:
             all_answers.append(answer)
         return all_answers
 
+    async def generate_images_stream(self, model_info):
+        yield self.get_generative_contexts(model_info["type"], model_info["artifacts"])
+
     def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
             return self.get_nibbler_contexts(
                 prompt=artifacts["prompt"],
                 user_id=artifacts["user_id"],
                 models=artifacts["model"],
-                endpoint=artifacts["endpoint"],
-                num_images=30,
+                endpoint=artifacts["model"],
+                num_images=6,
             )
         elif type == "perdi":
             return self.get_perdi_contexts(

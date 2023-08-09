@@ -8,7 +8,13 @@
 
 from sqlalchemy.sql import func
 
-from app.infrastructure.models.models import Model
+from app.infrastructure.models.models import (
+    ChallengesTypes,
+    Dataset,
+    Model,
+    Score,
+    Task,
+)
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -20,8 +26,7 @@ class ModelRepository(AbstractRepository):
         instance = (
             self.session.query(self.model).filter(self.model.id == model_id).one()
         )
-        instance = self.instance_converter.instance_to_dict(instance)
-        return instance
+        return self.instance_converter.instance_to_dict(instance)
 
     def get_model_in_the_loop(self, task_id: int) -> dict:
         models_in_the_loop = (
@@ -104,7 +109,7 @@ class ModelRepository(AbstractRepository):
     def get_user_id_by_model_id(self, id: int) -> int:
         return self.session.query(self.model.uid).filter(self.model.id == id).first()
 
-    def get_amount_of_models_per_task(self, task_id: int) -> int:
+    def get_amount_of_models_by_task(self, task_id: int) -> int:
         return (
             self.session.query(self.model)
             .filter(
@@ -133,3 +138,108 @@ class ModelRepository(AbstractRepository):
         )
         self.session.flush()
         self.session.commit()
+
+    def get_models_by_user_id(self, user_id: int) -> list:
+        return (
+            self.session.query(
+                Model.id,
+                Model.name,
+                Model.is_published,
+                Model.upload_datetime,
+                ChallengesTypes.name.label("community"),
+                Task.name.label("task"),
+                func.avg(Score.perf).label("score"),
+            )
+            .join(Task, Task.id == self.model.tid)
+            .join(ChallengesTypes, ChallengesTypes.id == Task.challenge_type)
+            .join(Score, Score.mid == self.model.id)
+            .filter(self.model.uid == user_id)
+            .group_by(self.model.id)
+            .order_by(self.model.id.desc())
+            .all()
+        )
+
+    def get_active_tasks_by_user_id(self, user_id):
+        return (
+            self.session.query(self.model.tid)
+            .filter(self.model.uid == user_id)
+            .distinct()
+            .all()
+        )
+
+    def get_total_models_by_user_id(self, user_id):
+        return self.session.query(self.model).filter(self.model.uid == user_id).count()
+
+    def delete_model(self, model_id: int):
+        self.session.query(Score).filter(Score.mid == model_id).delete()
+        self.session.query(self.model).filter(self.model.id == model_id).delete()
+        self.session.flush()
+        self.session.commit()
+
+    def get_all_model_info_by_id(self, model_id: int):
+        valid_datasets = (
+            self.session.query(Dataset.id)
+            .join(Model, Model.tid == Dataset.tid)
+            .join(Task, Task.id == Model.tid)
+            .filter(Dataset.access_type == "scoring")
+            .filter(Dataset.tid == Task.id)
+            .filter(Model.id == model_id)
+            .all()
+        )
+        has_scores = self.session.query(Score.mid).filter(Score.mid == model_id).all()
+        query = (
+            self.session.query(
+                Model.id,
+                Model.name,
+                Model.desc,
+                Model.longdesc,
+                Model.params,
+                Model.languages,
+                Model.license,
+                Model.source_url,
+                Model.light_model,
+                Model.deployment_status,
+                Model.is_in_the_loop,
+                Model.is_published,
+                Model.upload_datetime,
+                ChallengesTypes.name.label("community"),
+                Task.name.label("task"),
+                func.coalesce(func.avg(Score.perf), 0).label("score"),
+            )
+            .join(Task, Task.id == self.model.tid)
+            .join(ChallengesTypes, ChallengesTypes.id == Task.challenge_type)
+            .outerjoin(Score, Score.mid == self.model.id)
+            .filter(self.model.id == model_id)
+            .group_by(self.model.id)
+        )
+        if len(has_scores) != 0:
+            query = query.filter(Score.did.in_([item[0] for item in valid_datasets]))
+        return query.one()
+
+    def update_model_info(
+        self,
+        model_id: int,
+        name: str,
+        desc: str,
+        longdesc: str,
+        params: float,
+        languages: str,
+        license: str,
+        source_url: str,
+    ):
+        (
+            self.session.query(self.model)
+            .filter(self.model.id == model_id)
+            .update(
+                {
+                    "name": name,
+                    "desc": desc,
+                    "longdesc": longdesc,
+                    "params": params,
+                    "languages": languages,
+                    "license": license,
+                    "source_url": source_url,
+                }
+            )
+        )
+        return self.session.commit()

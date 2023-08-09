@@ -9,7 +9,7 @@
 from pydantic import Json
 from sqlalchemy import func
 
-from app.infrastructure.models.models import Context, Example, Round
+from app.infrastructure.models.models import Context, Example, Round, Validation
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -45,12 +45,18 @@ class ExampleRepository(AbstractRepository):
             }
         )
 
+    def get_validates_examples_by_user_id(self, user_id: int):
+        return (
+            self.session.query(Validation.eid).filter(Validation.uid == user_id).all()
+        )
+
     def get_example_to_validate(
         self,
         real_round_id: int,
         user_id: int,
         num_matching_validations: int,
     ):
+        validated_examples = self.get_validates_examples_by_user_id(user_id)
         return (
             self.session.query(Example, Context)
             .join(Context, Example.cid == Context.id)
@@ -58,6 +64,7 @@ class ExampleRepository(AbstractRepository):
             .filter(Example.uid != user_id)
             .filter(Example.retracted == 0)
             .filter(Example.total_verified < num_matching_validations)
+            .filter(~Example.id.in_([item[0] for item in validated_examples]))
             .order_by(func.random())
             .first()
         )
@@ -65,6 +72,8 @@ class ExampleRepository(AbstractRepository):
     def get_example_to_validate_fooling(
         self, real_round_id: int, user_id: int, num_matching_validations: int
     ):
+        validated_examples = self.get_validates_examples_by_user_id(user_id)
+
         return (
             self.session.query(Example, Context)
             .join(Context, Example.cid == Context.id)
@@ -73,6 +82,7 @@ class ExampleRepository(AbstractRepository):
             .filter(Example.retracted == 0)
             .filter(Example.total_verified < num_matching_validations)
             .filter(Example.model_wrong == 1)
+            .filter(~Example.id.in_([item[0] for item in validated_examples]))
             .order_by(func.random())
             .first()
         )
@@ -81,21 +91,25 @@ class ExampleRepository(AbstractRepository):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.total_verified: self.model.total_verified + 1}
         )
+        self.session.commit()
 
     def increment_counter_total_correct(self, example_id: int):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.verified_correct: self.model.verified_correct + 1}
         )
+        self.session.commit()
 
     def increment_counter_total_incorrect(self, example_id: int):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.verified_incorrect: self.model.verified_incorrect + 1}
         )
+        self.session.commit()
 
     def increment_counter_total_flagged(self, example_id: int):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.verified_flagged: self.model.verified_flagged + 1}
         )
+        self.session.commit()
 
     def mark_as_verified(self, example_id: int):
         example = self.get_by_id(example_id)
@@ -129,4 +143,35 @@ class ExampleRepository(AbstractRepository):
             .join(Round, Context.r_realid == Round.id)
             .filter(Round.tid == task_id)
             .all()
+        )
+
+    def get_active_tasks_by_user_id(self, user_id: int):
+        return (
+            self.session.query(Round.tid)
+            .join(Context, Round.id == Context.r_realid)
+            .join(Example, Context.id == Example.cid)
+            .filter(Example.uid == user_id)
+            .distinct()
+            .all()
+        )
+
+    def get_total_examples_by_user_id(self, user_id: int):
+        return (
+            self.session.query(func.count(Example.id))
+            .filter(Example.uid == user_id)
+            .scalar()
+        )
+
+    def get_model_fooling_rate_by_user_id(self, user_id: int):
+        return (
+            self.session.query(
+                func.round(
+                    func.coalesce(
+                        func.sum(Example.model_wrong) / func.count(Example.id), 0
+                    ),
+                    2,
+                )
+            )
+            .filter(Example.uid == user_id)
+            .scalar()
         )

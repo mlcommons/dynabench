@@ -1,0 +1,8 @@
+Hi there
+
+Your model $name has been successfully evaluated.
+You can find and publish the model at https://dynabench.org/models/$model_id.
+
+Thanks,
+
+The Dynabench Team

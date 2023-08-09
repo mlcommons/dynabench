@@ -10,6 +10,6 @@ from app.domain.services.base.score import ScoreService
 router = APIRouter()
 
 
-@router.get("/get_maximun_principal_score_per_task/{task_id}", response_model={})
-async def get_maximun_principal_score_per_task(task_id: int):
-    return ScoreService().get_maximun_principal_score_per_task(task_id)
+@router.get("/get_maximun_principal_score_by_task/{task_id}", response_model={})
+async def get_maximun_principal_score_by_task(task_id: int):
+    return ScoreService().get_maximun_principal_score_by_task(task_id)

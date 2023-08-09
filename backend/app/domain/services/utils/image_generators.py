@@ -2,6 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import base64
 import os
 from abc import ABC, abstractmethod
 
@@ -35,19 +36,120 @@ class OpenAIImageProvider(ImageProvider):
     def generate_images(
         self, prompt: str, num_images: int, models: list = [], endpoint: str = ""
     ) -> list:
+        openai.api_key = self.api_key
         try:
             response = openai.Image.create(
-                prompt=prompt, n=num_images, size="256x256", response_format="b64_json"
+                prompt=prompt, n=1, size="256x256", response_format="b64_json"
             )
             image_response = [x["b64_json"] for x in response["data"]]
-            return image_response
+            return {"generator": self.provider_name(), "images": image_response}
 
-        except openai.error.OpenAIError as e:
-            print(e)
-            return [forbidden_image] * num_images
+        except Exception as e:
+            print(e, "This was the exception")
+            images = [forbidden_image]
+            return {"generator": self.provider_name(), "images": images}
 
     def provider_name(self):
         return "openai"
+
+
+class DynabenchImageProvider(ImageProvider):
+    def __init__(self):
+        pass
+
+    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
+        payload = {"prompt": prompt, "num_images": 1}
+        response = requests.post(f"{endpoint['dynabench']['endpoint']}", json=payload)
+        if response.status_code == 200:
+            return {"generator": self.provider_name(), "images": response.json()}
+
+    def provider_name(self):
+        return "dynabench"
+
+
+class SDVariableAutoEncoder(ImageProvider):
+    def __init__(self):
+        self.api_key = os.getenv("HF")
+
+    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
+        print("Trying model", endpoint["hf_inference_1"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        response = requests.post(
+            f"{endpoint['hf_inference_1']['endpoint']}", json=payload, headers=headers
+        )
+        if response.status_code == 200:
+            new_image = response.json()[0]["image"]["images"][0]
+            return {"generator": self.provider_name(), "images": [new_image]}
+
+    def provider_name(self):
+        return "sd+vae_ft_mse"
+
+
+class SDXL(ImageProvider):
+    def __init__(self):
+        self.api_key = os.getenv("HF")
+
+    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
+        print("Trying model", endpoint["hf_inference_2"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        response = requests.post(
+            f"{endpoint['hf_inference_2']['endpoint']}", json=payload, headers=headers
+        )
+        if response.status_code == 200:
+            new_image = response.json()[0]["image"]["images"][0]
+            return {"generator": self.provider_name(), "images": [new_image]}
+
+    def provider_name(self):
+        return "sdxl_1.0"
+
+
+class HFInferenceEndpointImageProvider(ImageProvider):
+    def __init__(self):
+        self.api_key = os.getenv("HF")
+
+    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
+        print("Trying model", endpoint["hf_inference_1"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        response = requests.post(
+            f"{endpoint['hf_inference_1']['endpoint']}", json=payload, headers=headers
+        )
+        if response.status_code == 200:
+            new_image = response.json()[0]["image"]["images"][0]
+            return {"generator": self.provider_name(), "images": [new_image]}
+
+    def provider_name(self):
+        return "sd+vae_ft_mse"
+
+
+class HFImageProvider(ImageProvider):
+    def __init__(self):
+        self.api_key = os.getenv("HF")
+
+    def generate_images(
+        self, prompt: str, num_images: int, models: list, endpoint: str
+    ):
+        payload = {"inputs": prompt}
+        headers = {
+            "Authorization": self.api_key,
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "x-use-cache": "false",
+        }
+        model = models["huggingface"]["models"][0]
+        endpoint = f"{endpoint['huggingface']['endpoint']}/{model}"
+        response = requests.post(endpoint, json=payload, headers=headers)
+        images = []
+        print("Trying model", endpoint, "with status code", response.status_code)
+        if response.status_code == 200:
+            base64_image = base64.b64encode(response.content)
+            images.append(base64_image.decode("utf-8"))
+        return {"generator": self.provider_name(), "images": images}
+
+    def provider_name(self):
+        return "hf"
 
 
 class StableDiffusionImageProvider(ImageProvider):
@@ -57,7 +159,7 @@ class StableDiffusionImageProvider(ImageProvider):
     def generate_images(
         self, prompt: str, num_images: int, models: list, endpoint: str
     ) -> list:
-        for model in models:
+        for model in models["together"]["models"]:
             print(f"Trying model {model}")
             res = requests.post(
                 endpoint,
