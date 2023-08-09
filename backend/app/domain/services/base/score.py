@@ -175,7 +175,7 @@ class ScoreService:
         else:
             models_dynaboard_info = sorted(
                 models_dynaboard_info,
-                key=lambda x: x["averaged_scores"][-1],
+                key=lambda x: x["dynascore"],
                 reverse=(sort_direction == "desc"),
             )
         return models_dynaboard_info
