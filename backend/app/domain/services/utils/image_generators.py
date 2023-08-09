@@ -59,9 +59,7 @@ class DynabenchImageProvider(ImageProvider):
 
     def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
         payload = {"prompt": prompt, "num_images": 1}
-        response = requests.post(
-            f"{endpoint['dynabench']['endpoint']}", json=payload, timeout=25
-        )
+        response = requests.post(f"{endpoint['dynabench']['endpoint']}", json=payload)
         try:
             if response.status_code == 200:
                 return {"generator": self.provider_name(), "images": response.json()}
@@ -84,7 +82,6 @@ class SDVariableAutoEncoder(ImageProvider):
             f"{endpoint['hf_inference_1']['endpoint']}",
             json=payload,
             headers=headers,
-            timeout=25,
         )
         try:
             if response.status_code == 200:
@@ -153,9 +150,7 @@ class HFImageProvider(ImageProvider):
         endpoint = f"{endpoint['huggingface']['endpoint']}/{model}"
         images = []
         try:
-            response = requests.post(
-                endpoint, json=payload, headers=headers, timeout=25
-            )
+            response = requests.post(endpoint, json=payload, headers=headers)
             print("Trying model", endpoint, "with status code", response.status_code)
             if response.status_code == 200:
                 base64_image = base64.b64encode(response.content)
@@ -189,7 +184,6 @@ class StableDiffusionImageProvider(ImageProvider):
                     "Authorization": f"Bearer {self.api_key}",
                     "User-Agent": "",
                 },
-                timeout=25,
             )
             try:
                 if res.status_code == 200:
