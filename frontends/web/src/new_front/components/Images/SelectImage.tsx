@@ -1,5 +1,6 @@
 import React, { FC, useState } from "react";
 import { forbidden_image, black_image } from "new_front/utils/constants";
+import Zoom from "react-img-zoom";
 
 type SelectImageProps = {
   image: string;
@@ -14,27 +15,21 @@ const SelectImage: FC<SelectImageProps> = ({
   handleSelectImage,
   isSelected,
 }) => {
-  const [expandImage, setExpandImage] = useState<boolean>(false);
-
   const handleOnClicked = (image: string) => {
     handleSelectImage(image);
   };
 
   return (
-    <div key={index} className="flex flex-col items-center py-2 align-center">
-      <img
+    <div
+      key={index}
+      className="flex flex-col items-center py-2 space-y-4 align-center"
+    >
+      <Zoom
         height={240}
-        width={240}
-        src={`data:image/jpeg;base64,${image}`}
-        onClick={() => {
-          setExpandImage(!expandImage);
-        }}
-        className={`${
-          expandImage
-            ? "relative scale-[2.7] z-50 rounded-lg"
-            : "scale-[1] rounded-lg"
-        } pb-2`}
-        alt="src"
+        width={300}
+        img={`data:image/jpeg;base64,${image}`}
+        className={`scale-[1] rounded-lg pb-4`}
+        zoomScale={1.9}
       />
       {!image.startsWith(forbidden_image) && !image.startsWith(black_image) && (
         <input
@@ -43,7 +38,7 @@ const SelectImage: FC<SelectImageProps> = ({
           name="image"
           value=""
           defaultChecked={isSelected}
-          className={`items-center w-4 h-4 px-6`}
+          className={`items-center w-4 h-4 px-6 py-2`}
           onChange={() => {
             handleOnClicked(image);
           }}
