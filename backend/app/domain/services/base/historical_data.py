@@ -15,9 +15,12 @@ class HistoricalDataService:
         )
 
     def save_historical_data(self, task_id: int, user_id: int, data: str):
-        return self.historical_data_repository.save_historical_data(
+        if not self.historical_data_repository.check_if_historical_data_exists(
             task_id, user_id, data
-        )
+        ):
+            return self.historical_data_repository.save_historical_data(
+                task_id, user_id, data
+            )
 
     def delete_historical_data(self, task_id: int, user_id: int):
         self.historical_data_repository.delete_historical_data(task_id, user_id)

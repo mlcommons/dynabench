@@ -35,3 +35,12 @@ class HistoricalDataRepository(AbstractRepository):
         ).filter(HistoricalData.user_id == user_id).delete()
         self.session.flush()
         self.session.commit()
+
+    def check_if_historical_data_exists(self, task_id: int, user_id: int, data: str):
+        return (
+            self.session.query(HistoricalData)
+            .filter(HistoricalData.task_id == task_id)
+            .filter(HistoricalData.user_id == user_id)
+            .filter(HistoricalData.history == data)
+            .first()
+        )

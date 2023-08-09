@@ -3,6 +3,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from fastapi import APIRouter
+from fastapi.exceptions import HTTPException
 
 from app.domain.schemas.base.historical_data import (
     GetDeleteHistoricalDataRequest,
@@ -24,9 +25,15 @@ async def get_historical_data_by_task_and_user(model: GetHistoricalDataRequest):
 
 @router.post("/save_historical_data")
 async def save_historical_data(model: GetSaveHistoricalDataRequest):
-    return HistoricalDataService().save_historical_data(
+    history = HistoricalDataService().save_historical_data(
         model.task_id, model.user_id, model.data
     )
+    if history:
+        return history
+    else:
+        raise HTTPException(
+            status_code=400, detail="Historical data already exists for this task"
+        )
 
 
 @router.post("/delete_historical_data")
