@@ -1,6 +1,7 @@
 import React, { FC, useState } from "react";
 import { forbidden_image, black_image } from "new_front/utils/constants";
-import Zoom from "react-medium-image-zoom";
+import ZoomImage from "new_front/components/Images/ZoomImage";
+import Modal from "react-bootstrap/Modal";
 
 type SelectImageProps = {
   image: string;
@@ -18,19 +19,38 @@ const SelectImage: FC<SelectImageProps> = ({
   const handleOnClicked = (image: string) => {
     handleSelectImage(image);
   };
-  const [expandImage, setExpandImage] = useState(false);
+  const [showZoom, setShowZoom] = useState(false);
 
   return (
-    <div key={index} className="flex flex-col items-center py-2 align-center">
+    <div
+      key={index}
+      className="flex flex-col items-center py-2 align-center space-y-3"
+    >
       <img
         height={240}
         width={240}
         src={`data:image/jpeg;base64,${image}`}
         onClick={() => {
-          setExpandImage(!expandImage);
+          setShowZoom(true);
         }}
         alt="src"
+        className="cursor-pointer rounded-lg"
       />
+      {showZoom && (
+        <Modal
+          show={true}
+          onHide={() => {
+            setShowZoom(false);
+          }}
+          size="lg"
+          aria-labelledby="contained-modal-title-vcenter"
+          centered
+        >
+          <Modal.Body>
+            <ZoomImage image={image} />
+          </Modal.Body>
+        </Modal>
+      )}
       {!image.startsWith(forbidden_image) && !image.startsWith(black_image) && (
         <input
           id="checkbox"

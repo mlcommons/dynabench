@@ -16,6 +16,7 @@ type FetchProps<TData> = {
   firstMessage: boolean;
   setFirstMessage: (value: boolean) => void;
   setAllowsGeneration: (value: boolean) => void;
+  setIsGenerativeContext: (value: boolean) => void;
 };
 
 type cacheObject = {
@@ -35,9 +36,11 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
     firstMessage,
     setFirstMessage,
     setAllowsGeneration,
+    setIsGenerativeContext,
   }: FetchProps<TData>) => {
     const fullUrl = new URL(url, baseUrl);
     setExternalLoading && setExternalLoading(true);
+    setIsGenerativeContext && setIsGenerativeContext(true);
     await fetchEventSource(fullUrl.toString(), {
       body: JSON.stringify(body),
       method: "POST",
@@ -84,6 +87,7 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
     firstMessage,
     setFirstMessage,
     setAllowsGeneration,
+    setIsGenerativeContext,
   }: FetchProps<TData>) => {
     const cachedResponse = checkCachedRequest(
       body.artifacts.prompt.replace(/"|'/g, ""),
@@ -99,6 +103,7 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
         firstMessage,
         setFirstMessage,
         setAllowsGeneration,
+        setIsGenerativeContext,
       });
     }
   };

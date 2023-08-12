@@ -61,6 +61,11 @@ const SelectBetweenImagesGenerative: FC<
     }
   };
 
+  useEffect(() => {
+    console.log("metadataExample", metadataExample);
+    console.log("modelInputs", modelInputs);
+  }, [metadataExample, modelInputs]);
+
   const saveHistoricalData = async (
     text: string,
     setPromptHistory: (value: any[]) => void,
@@ -94,9 +99,9 @@ const SelectBetweenImagesGenerative: FC<
         firstMessage: firstMessageReceived,
         setFirstMessage: setFirstMessageReceived,
         setAllowsGeneration: setAllowsGeneration,
+        setIsGenerativeContext: setIsGenerativeContext,
       });
       await saveHistoricalData(prompt, setPromptHistory);
-      setIsGenerativeContext(true);
     } else {
       Swal.fire({
         icon: "error",
@@ -144,8 +149,8 @@ const SelectBetweenImagesGenerative: FC<
       firstMessage: firstMessageReceived,
       setFirstMessage: setFirstMessageReceived,
       setAllowsGeneration: setAllowsGeneration,
+      setIsGenerativeContext: setIsGenerativeContext,
     });
-    setIsGenerativeContext(true);
   };
 
   const handleSelectImage = async (image: string) => {
@@ -303,7 +308,9 @@ const SelectBetweenImagesGenerative: FC<
             of 4. <br /> To view all images, please allow a few seconds after
             the initial batch appears.
             <br />
-            Please do not refresh the page or leave it.
+            <p className="text-red-500">
+              PLEASE DO NOT REFRESH OR LEAVE THIS TAB
+            </p>
           </div>
           <PacmanLoader
             color="#ccebd4"
