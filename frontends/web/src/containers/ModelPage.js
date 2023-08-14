@@ -103,8 +103,8 @@ const EvalStatusRow = ({
                         (error) => {
                           console.log(error);
                           setShowSpinner(false);
-                        },
-                      ),
+                        }
+                      )
                     );
                   }}
                 >
@@ -131,8 +131,8 @@ const EvalStatusRow = ({
                         (error) => {
                           console.log(error);
                           setShowSpinner(false);
-                        },
-                      ),
+                        }
+                      )
                     );
                   }}
                 >
@@ -187,7 +187,7 @@ const ScoreRow = ({
       },
       {
         responseType: "blob",
-      },
+      }
     );
     if (response.ok) {
       setShowSpinner(false);
@@ -393,7 +393,7 @@ class ModelPage extends React.Component {
                   this.props.history.replace({
                     pathname: this.props.location.pathname.replace(
                       `/tasks/${taskCodeFromParams}`,
-                      `/tasks/${result.task_code}`,
+                      `/tasks/${result.task_code}`
                     ),
                     search: this.props.location.search,
                   });
@@ -401,7 +401,7 @@ class ModelPage extends React.Component {
               },
               (error) => {
                 console.log(error);
-              },
+              }
             )
             .then(
               this.context.api.getAdminOrOwner(this.state.model.tid).then(
@@ -412,8 +412,8 @@ class ModelPage extends React.Component {
                 },
                 (error) => {
                   console.log(error);
-                },
-              ),
+                }
+              )
             );
         });
       },
@@ -423,7 +423,7 @@ class ModelPage extends React.Component {
         if (error.status_code === 404 || error.status_code === 405) {
           this.props.history.push("/");
         }
-      },
+      }
     );
   };
 
@@ -456,7 +456,7 @@ class ModelPage extends React.Component {
       },
       (error) => {
         console.log(error);
-      },
+      }
     );
   };
 
@@ -538,7 +538,7 @@ class ModelPage extends React.Component {
     scoresArr = (scoresArr || []).sort((a, b) => b.accuracy - a.accuracy);
     scoresArr.forEach((score) => {
       tableContentForScores += `        ${this.escapeLatexCharacters(
-        score.dataset_name,
+        score.dataset_name
       )} & ${score.accuracy} \\\\\n`;
     });
     return tableContentForScores;
@@ -553,7 +553,7 @@ class ModelPage extends React.Component {
 
     latexTableContent += this.processScoresArrayForLatex(leaderboard_scores);
     latexTableContent += this.processScoresArrayForLatex(
-      non_leaderboard_scores,
+      non_leaderboard_scores
     );
 
     const modelUrl = window.location.href;
@@ -569,14 +569,14 @@ class ModelPage extends React.Component {
     \\begin{tabular}{l|r}
         \\toprule
         \\textbf{Dataset} & \\textbf{${this.escapeLatexCharacters(
-          task.perf_metric_field_name,
+          task.perf_metric_field_name
         )}} \\\\
         \\midrule
 ${latexTableContent}
         \\bottomrule
     \\end{tabular}
     \\caption{${this.escapeLatexCharacters(
-      taskName,
+      taskName
     )} results: \\url{${modelUrl}}}
     \\label{tab:results}
 \\end{table}
@@ -614,7 +614,7 @@ ${latexTableContent}
     this.processScoresArrayForCsv(
       rows,
       non_leaderboard_scores,
-      "non-leaderboard",
+      "non-leaderboard"
     );
 
     let csvContent = "data:text/csv;charset=utf-8,";
@@ -650,10 +650,10 @@ ${latexTableContent}
     const { non_leaderboard_evaluation_statuses } = this.state.model;
     const { hidden_evaluation_statuses } = this.state.model;
     let orderedLeaderboardScores = (leaderboard_scores || []).sort(
-      (a, b) => a.round_id - b.round_id,
+      (a, b) => a.round_id - b.round_id
     );
     let orderedNonLeaderboardScores = (non_leaderboard_scores || []).sort(
-      (a, b) => a.round_id - b.round_id,
+      (a, b) => a.round_id - b.round_id
     );
     return (
       <OverlayProvider initiallyHide={true}>
@@ -969,7 +969,7 @@ ${latexTableContent}
                           isAdminOrTaskOwner={this.state.isAdminOrTaskOwner}
                           modelId={this.state.modelId}
                         />
-                      ),
+                      )
                     )}
                     {hidden_evaluation_statuses.length ? (
                       <Table>
