@@ -275,7 +275,7 @@ class ProfilePage extends React.Component {
       this.props.history.push(
         "/login?msg=" +
           encodeURIComponent("Please login first.") +
-          "&src=/account#profile",
+          "&src=/account#profile"
       );
     } else {
       this.refreshData();
@@ -290,7 +290,7 @@ class ProfilePage extends React.Component {
       },
       (error) => {
         console.log(error);
-      },
+      }
     );
   };
 
@@ -305,7 +305,7 @@ class ProfilePage extends React.Component {
       },
       () => {
         this.fetchNotifications(this.state.notificationsPage);
-      },
+      }
     );
   };
 
@@ -323,12 +323,12 @@ class ProfilePage extends React.Component {
           function () {
             this.context.api.setNotificationsSeen();
             this.context.user.unseen_notifications = 0;
-          },
+          }
         );
       },
       (error) => {
         console.log(error);
-      },
+      }
     );
   };
 
@@ -349,24 +349,24 @@ class ProfilePage extends React.Component {
         console.log(error);
         setFieldError(
           "accept",
-          "Profile could not be updated (" + error.error + ")",
+          "Profile could not be updated (" + error.error + ")"
         );
         setSubmitting(false);
-      },
+      }
     );
   };
 
   handleProposalSubmit = (
     values,
     { setFieldError, setSubmitting, resetForm },
-    callback,
+    callback
   ) => {
     this.context.api
       .createTaskProposal(
         values.name,
         values.task_code,
         values.desc,
-        values.longdesc,
+        values.longdesc
       )
       .then(
         (result) => {
@@ -382,10 +382,10 @@ class ProfilePage extends React.Component {
           console.log(error);
           setFieldError(
             "accept",
-            "Profile could not be updated (" + error.error + ")",
+            "Profile could not be updated (" + error.error + ")"
           );
           setSubmitting(false);
-        },
+        }
       );
   };
 
@@ -421,7 +421,7 @@ class ProfilePage extends React.Component {
       (error) => {
         console.log(error);
         this.setState({ invalidFileUpload: true, loader: false });
-      },
+      }
     );
   };
 
