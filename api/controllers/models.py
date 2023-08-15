@@ -364,7 +364,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
         did = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
         if isinstance(task_config.get("perf_metric"), list):
-            metric = task_config.get("perf_metric").get("type")
+            metric = task_config.get("perf_metric")[0].get("type")
         elif isinstance(task_config.get("perf_metric"), dict):
             metric = task_config.get("perf_metric").get("type")
         new_score = {
