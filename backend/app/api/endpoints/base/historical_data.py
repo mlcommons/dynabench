@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 
 from app.domain.schemas.base.historical_data import (
-    GetDeleteHistoricalDataRequest,
+    DeleteHistoricalDataRequest,
     GetHistoricalDataRequest,
     GetSaveHistoricalDataRequest,
 )
@@ -37,5 +37,5 @@ async def save_historical_data(model: GetSaveHistoricalDataRequest):
 
 
 @router.post("/delete_historical_data")
-async def delete_historical_data(model: GetDeleteHistoricalDataRequest):
+async def delete_historical_data(model: DeleteHistoricalDataRequest):
     return HistoricalDataService().delete_historical_data(model.task_id, model.user_id)

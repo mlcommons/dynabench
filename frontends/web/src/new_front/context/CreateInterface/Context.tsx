@@ -23,8 +23,6 @@ export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
       });
     } else {
       setMetadataExample((prevModelInputs) => {
-        console.log("input", input);
-
         return { ...prevModelInputs, ...input };
       });
     }

@@ -16,6 +16,6 @@ class GetSaveHistoricalDataRequest(BaseModel):
     data: str
 
 
-class GetDeleteHistoricalDataRequest(BaseModel):
+class DeleteHistoricalDataRequest(BaseModel):
     task_id: int
     user_id: int
