@@ -15,6 +15,7 @@ from app.api.endpoints.base import (
     context,
     dataset,
     example,
+    historical_data,
     model,
     rounduserexample,
     score,
@@ -65,4 +66,7 @@ app.include_router(
 app.include_router(user.router, prefix="/user", tags=["user"])
 app.include_router(
     task_proposals.router, prefix="/task_proposals", tags=["task_proposals"]
+)
+app.include_router(
+    historical_data.router, prefix="/historical_data", tags=["historical_data"]
 )

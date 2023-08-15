@@ -5,11 +5,13 @@
 from app.domain.helpers.email import EmailHelper
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.taskproposal import TaskProposalRepository
+from app.infrastructure.repositories.user import UserRepository
 
 
 class TaskProposalService:
     def __init__(self):
         self.task_proposal_repository = TaskProposalRepository()
+        self.user_repository = UserRepository()
         self.task_repository = TaskRepository()
         self.email_helper = EmailHelper()
 
@@ -24,6 +26,14 @@ class TaskProposalService:
     def add_task_proposal(
         self, user_id: int, task_code: str, name: str, desc: str, longdesc: str
     ):
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        self.email_helper.send(
+            contact=user_email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="task_proposal_update.txt",
+            msg_dict={"name": name, "code": task_code, "desc": longdesc},
+            subject=f"Proposal for task {task_code}",
+        )
         self.email_helper.send(
             contact="juan.ciro@factored.ai",
             cc_contact="dynabench-site@mlcommons.org",

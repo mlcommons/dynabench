@@ -172,7 +172,7 @@ class ContextService:
     async def generate_images_stream(self, model_info):
         yield self.get_generative_contexts(model_info["type"], model_info["artifacts"])
 
-    def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
+    async def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
             return self.get_nibbler_contexts(
                 prompt=artifacts["prompt"],

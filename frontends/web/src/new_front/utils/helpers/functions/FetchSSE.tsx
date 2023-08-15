@@ -1,5 +1,7 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+class RetriableError extends Error {}
 
 type FetchType<TData> = {
   post: (props: FetchProps<TData>) => Promise<void>;
@@ -11,13 +13,20 @@ type FetchProps<TData> = {
   body: any;
   setSaveData: (value: any) => void;
   setExternalLoading?: (value: boolean) => void;
-  firstMessage?: boolean;
-  setFirstMessage?: (value: boolean) => void;
-  setAllowsGeneration?: (value: boolean) => void;
+  firstMessage: boolean;
+  setFirstMessage: (value: boolean) => void;
+  setAllowsGeneration: (value: boolean) => void;
+  setIsGenerativeContext: (value: boolean) => void;
+};
+
+type cacheObject = {
+  [key: string]: any;
 };
 
 function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
-  const CACHE_PREFIX = "cache_";
+  const abortController = new AbortController();
+  const [cacheMemory, setCacheMemory] = useState<cacheObject>({});
+  const [amountMessages, setAmountMessages] = useState<number>(0);
 
   const UseFetch = async ({
     url,
@@ -27,13 +36,16 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
     firstMessage,
     setFirstMessage,
     setAllowsGeneration,
+    setIsGenerativeContext,
   }: FetchProps<TData>) => {
     const fullUrl = new URL(url, baseUrl);
     setExternalLoading && setExternalLoading(true);
+    setIsGenerativeContext && setIsGenerativeContext(true);
     await fetchEventSource(fullUrl.toString(), {
       body: JSON.stringify(body),
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: abortController.signal,
       async onopen(response) {
         await checkErrorResponse(response);
         setSaveData && setSaveData([]);
@@ -48,22 +60,21 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
           persist(body, ev.data as TData);
           setSaveData((prev: any) => [...prev, ...JSON.parse(ev.data)] as any);
         }
+        setAmountMessages((prev) => prev + 1);
+        if (amountMessages === 3) {
+          abortController.abort();
+        }
       },
       onclose: () => {
         setExternalLoading && setExternalLoading(false);
         setFirstMessage && setFirstMessage(false);
         setAllowsGeneration && setAllowsGeneration(true);
       },
-      onerror(err) {
+      onerror(error) {
         setExternalLoading && setExternalLoading(false);
         setFirstMessage && setFirstMessage(false);
         setAllowsGeneration && setAllowsGeneration(true);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong!",
-        });
-        throw err;
+        console.log("Error", error);
       },
     });
   };
@@ -75,6 +86,8 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
     setExternalLoading,
     firstMessage,
     setFirstMessage,
+    setAllowsGeneration,
+    setIsGenerativeContext,
   }: FetchProps<TData>) => {
     const cachedResponse = checkCachedRequest(
       body.artifacts.prompt.replace(/"|'/g, ""),
@@ -89,6 +102,8 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
         setExternalLoading,
         firstMessage,
         setFirstMessage,
+        setAllowsGeneration,
+        setIsGenerativeContext,
       });
     }
   };
@@ -112,22 +127,11 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
     }
   };
 
-  const checkCachedRequest = (key: string) => {
-    const data = sessionStorage.getItem(CACHE_PREFIX + key);
-    if (data) {
-      return JSON.parse(data);
-    }
-    return null;
-  };
-
-  const generateKey = (key: string) => {
-    return CACHE_PREFIX + key;
-  };
-
   const persist = (body: any, res: TData) => {
     const key = body.artifacts.prompt.replace(/"|'/g, "");
-    const data = sessionStorage.getItem(CACHE_PREFIX + key);
-    const fullResponse = [];
+    // verify if key exists in cacheMemory
+    const data = cacheMemory[key];
+    const fullResponse: any[] = [];
     if (data) {
       const localData = JSON.parse(data);
       for (const d of localData) {
@@ -135,16 +139,31 @@ function useFetchSSE<TData = unknown>(baseUrl: string): FetchType<TData> {
       }
     }
     fullResponse.push(...JSON.parse(res as any));
-    sessionStorage.setItem(generateKey(key), JSON.stringify(fullResponse));
+
+    setCacheMemory((prev) => {
+      let data = prev[key];
+      if (data) {
+        data = [...data, ...fullResponse];
+      } else {
+        data = fullResponse;
+      }
+      return {
+        ...prev,
+        [key]: data,
+      };
+    });
+  };
+
+  const checkCachedRequest = (key: string) => {
+    const data = cacheMemory[key];
+    if (data) {
+      return data;
+    }
+    return null;
   };
 
   const clear = () => {
-    const keys = Object.keys(sessionStorage);
-    for (const key of keys) {
-      if (key.includes(CACHE_PREFIX)) {
-        sessionStorage.removeItem(key);
-      }
-    }
+    setCacheMemory({});
   };
 
   return {

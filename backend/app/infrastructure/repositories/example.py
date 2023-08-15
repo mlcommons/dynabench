@@ -91,29 +91,34 @@ class ExampleRepository(AbstractRepository):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.total_verified: self.model.total_verified + 1}
         )
+        self.session.flush()
         self.session.commit()
 
     def increment_counter_total_correct(self, example_id: int):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.verified_correct: self.model.verified_correct + 1}
         )
+        self.session.flush()
         self.session.commit()
 
     def increment_counter_total_incorrect(self, example_id: int):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.verified_incorrect: self.model.verified_incorrect + 1}
         )
+        self.session.flush()
         self.session.commit()
 
     def increment_counter_total_flagged(self, example_id: int):
         self.session.query(self.model).filter(self.model.id == example_id).update(
             {self.model.verified_flagged: self.model.verified_flagged + 1}
         )
+        self.session.flush()
         self.session.commit()
 
     def mark_as_verified(self, example_id: int):
         example = self.get_by_id(example_id)
         example["verified"] = 1
+        self.session.flush()
         self.session.commit()
 
     def update_creation_generative_example_by_example_id(
@@ -122,6 +127,7 @@ class ExampleRepository(AbstractRepository):
         self.session.query(self.model).filter_by(id=example_id).update(
             {"input_json": model_input, "metadata_json": metadata}
         )
+        self.session.flush()
         self.session.commit()
 
     def download_created_examples_user(self, task_id: int, user_id: int, amount: int):
