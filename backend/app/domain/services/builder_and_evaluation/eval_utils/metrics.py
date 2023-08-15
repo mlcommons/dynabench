@@ -236,6 +236,14 @@ def get_macro_f1_meta(task=None):
     return {"unit": "%", "pretty_name": "Macro F1", "utility_direction": 1, "offset": 0}
 
 
+def get_f1(predictions: list, targets: list):
+    return f1_score(targets, predictions, average="micro")
+
+
+def get_f1_meta(task=None):
+    return {"unit": "%", "pretty_name": "F1", "utility_direction": 1, "offset": 0}
+
+
 def get_squad_f1(predictions: list, targets: list):
     """
     Here, t can be a list of acceptable answers, instead of just one answer. There
