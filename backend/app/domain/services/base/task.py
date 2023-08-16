@@ -112,6 +112,7 @@ class TaskService:
             metric: meta_metrics_dict.get(metric)(task_info)
             for metric in ordered_metric_field_names
         }
+        print("metrics_metadata", metrics_metadata)
         order_metrics = [
             dict(
                 {

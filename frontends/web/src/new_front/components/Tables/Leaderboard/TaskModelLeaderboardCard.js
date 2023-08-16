@@ -111,7 +111,6 @@ const TaskModelLeaderboardCard = ({
       setMetrics(result.orderedMetricWeights);
       setDatasetWeights(result.orderedDatasetWeights);
       setDescription(result.description);
-      console.log("result", result);
     });
   }, [context.api, task, getInitialWeights]);
 
@@ -120,11 +119,11 @@ const TaskModelLeaderboardCard = ({
       const datasetWeightsList = datasetWeights.map(
         (obj) =>
           obj.weight /
-          datasetWeights.reduce((sum, item) => sum + item.weight, 0)
+          datasetWeights.reduce((sum, item) => sum + item.weight, 0),
       );
       const metricWeightsList = metrics.map(
         (obj) =>
-          obj.weight / metrics.reduce((sum, item) => sum + item.weight, 0)
+          obj.weight / metrics.reduce((sum, item) => sum + item.weight, 0),
       );
       const scoreData = await post("/task/get_dynaboard_info_by_task_id/", {
         task_id: taskId,
@@ -301,9 +300,9 @@ const TaskModelLeaderboardCard = ({
                       history.push(
                         "/login?msg=" +
                           encodeURIComponent(
-                            "You need to login to create a leaderboard snapshot."
+                            "You need to login to create a leaderboard snapshot.",
                           ) +
-                          `&src=/tasks/${taskCode}`
+                          `&src=/tasks/${taskCode}`,
                       );
                     }
                   }}
@@ -330,9 +329,9 @@ const TaskModelLeaderboardCard = ({
                       history.push(
                         "/login?msg=" +
                           encodeURIComponent(
-                            "You need to login to fork a leaderboard."
+                            "You need to login to fork a leaderboard.",
                           ) +
-                          `&src=/tasks/${taskCode}`
+                          `&src=/tasks/${taskCode}`,
                       );
                     }
                   }}
@@ -415,6 +414,7 @@ const TaskModelLeaderboardCard = ({
             sort={sort}
             toggleSort={toggleSort}
             modelColumnTitle={modelColumnTitle}
+            showUserNames={task.show_username_leaderboard}
           />
         )}
       </Card.Body>

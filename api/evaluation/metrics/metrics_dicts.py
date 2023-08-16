@@ -38,7 +38,7 @@ metrics_meta_dict = {
     "accuracy": metrics.get_accuracy_meta,
     "macro_f1": metrics.get_macro_f1_meta,
     "squad_f1": metrics.get_squad_f1_meta,
-    "new_accuracy": metrics.get_accuracy_meta,
+    "new_accuracy": metrics.get_new_accuracy_meta,
     "bleu": metrics.get_bleu_meta,
     "sp_bleu": metrics.get_sp_bleu_meta,
     "chrf_pp": metrics.get_chrf_pp_meta,

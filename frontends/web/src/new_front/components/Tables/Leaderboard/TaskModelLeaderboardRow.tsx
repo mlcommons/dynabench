@@ -4,10 +4,14 @@ import ChevronExpandButton from "new_front/components/Buttons/ChevronExpandButto
 
 type TaskModelLeaderboardRowProps = {
   data: any;
+  showDynascore: boolean;
+  showUserNames: boolean;
 };
 
 const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
   data,
+  showDynascore,
+  showUserNames,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [secondExpanded, setSecondExpanded] = useState(false);
@@ -19,9 +23,11 @@ const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
           <Link to={`/models/${data.model_id}`} className="btn-link">
             {data.model_name}
           </Link>
-          <Link to={`/users/${data.uid}#profile`} className="btn-link">
-            ({data.username})
-          </Link>
+          {showUserNames && (
+            <Link to={`/users/${data.uid}#profile`} className="btn-link">
+              ({data.username})
+            </Link>
+          )}
           <div style={{ float: "right" }}>
             <ChevronExpandButton expanded={expanded} />
           </div>
@@ -29,15 +35,17 @@ const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
         {data.averaged_scores.map((score: any) => (
           <td className="text-right">{parseFloat(score).toFixed(2)}</td>
         ))}
-        <td className="text-right align-middle pr-4 " rowSpan={totalRows}>
-          <span>
-            {expanded ? (
-              <h1>{parseFloat(data.dynascore).toFixed(2)}</h1>
-            ) : (
-              parseFloat(data.dynascore).toFixed(2)
-            )}
-          </span>
-        </td>
+        {showDynascore && (
+          <td className="text-right align-middle pr-4 " rowSpan={totalRows}>
+            <span>
+              {expanded ? (
+                <h1>{parseFloat(data.dynascore).toFixed(2)}</h1>
+              ) : (
+                parseFloat(data.dynascore).toFixed(2)
+              )}
+            </span>
+          </td>
+        )}
       </tr>
       {expanded &&
         data.datasets.map((dataset: any) => (
@@ -57,55 +65,54 @@ type TaskModelLeaderboardRowFirstLevelProps = {
   setSecondExpanded: any;
 };
 
-const TaskModelLeaderboardRowFirstLevel: FC<TaskModelLeaderboardRowFirstLevelProps> =
-  ({ dataset, secondExpanded, setSecondExpanded }) => {
-    return (
-      <>
-        <tr
-          key={dataset.name}
-          onClick={() => setSecondExpanded(!secondExpanded)}
-        >
-          <td>
-            {dataset.name}
-            {dataset.downstream_info && (
-              <div style={{ float: "right" }}>
-                <ChevronExpandButton expanded={secondExpanded} />
-              </div>
-            )}
+const TaskModelLeaderboardRowFirstLevel: FC<
+  TaskModelLeaderboardRowFirstLevelProps
+> = ({ dataset, secondExpanded, setSecondExpanded }) => {
+  return (
+    <>
+      <tr key={dataset.name} onClick={() => setSecondExpanded(!secondExpanded)}>
+        <td>
+          {dataset.name}
+          {dataset.downstream_info && (
+            <div style={{ float: "right" }}>
+              <ChevronExpandButton expanded={secondExpanded} />
+            </div>
+          )}
+        </td>
+        {dataset.scores.map((score: any, i: number) => (
+          <td className="text-right" key={`score-${dataset.id}-${i}-overall`}>
+            {parseFloat(score).toFixed(2)}
           </td>
-          {dataset.scores.map((score: any, i: number) => (
-            <td className="text-right" key={`score-${dataset.id}-${i}-overall`}>
-              {parseFloat(score).toFixed(2)}
-            </td>
-          ))}
-        </tr>
-        {secondExpanded &&
-          dataset.downstream_info.map((downstream: any, i: number) => (
-            <TaskModelLeaderboardRowSecondLevel downstream={downstream} />
-          ))}
-      </>
-    );
-  };
+        ))}
+      </tr>
+      {secondExpanded &&
+        dataset.downstream_info.map((downstream: any, i: number) => (
+          <TaskModelLeaderboardRowSecondLevel downstream={downstream} />
+        ))}
+    </>
+  );
+};
 
 type TaskModelLeaderboardRowSecondLevelProps = {
   downstream: any;
 };
 
-const TaskModelLeaderboardRowSecondLevel: FC<TaskModelLeaderboardRowSecondLevelProps> =
-  ({ downstream }) => {
-    return (
-      <>
-        <tr key={downstream.name}>
-          <td>{downstream.sub_task}</td>
-          <td
-            className="text-right"
-            key={`score-${downstream.sub_task}-downstream`}
-          >
-            {parseFloat(downstream.score).toFixed(2)}
-          </td>
-        </tr>
-      </>
-    );
-  };
+const TaskModelLeaderboardRowSecondLevel: FC<
+  TaskModelLeaderboardRowSecondLevelProps
+> = ({ downstream }) => {
+  return (
+    <>
+      <tr key={downstream.name}>
+        <td>{downstream.sub_task}</td>
+        <td
+          className="text-right"
+          key={`score-${downstream.sub_task}-downstream`}
+        >
+          {parseFloat(downstream.score).toFixed(2)}
+        </td>
+      </tr>
+    </>
+  );
+};
 
 export default TaskModelLeaderboardRow;

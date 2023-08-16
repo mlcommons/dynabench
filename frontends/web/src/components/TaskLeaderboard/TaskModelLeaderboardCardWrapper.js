@@ -16,7 +16,7 @@ import { useParams } from "react-router-dom";
 
 const taskModelLeaderboardCardWrapper = (
   getInitialWeights,
-  fetchLeaderboardData
+  fetchLeaderboardData,
 ) => {
   return (props) => {
     const { forkOrSnapshotName } = useParams();
@@ -69,17 +69,17 @@ const loadDefaultWeights = (metricIdToDataObj, datasetIdToDataObj, task) => {
 export const getOrderedWeights = (metricWeights, datasetWeights) => {
   const metricSum = metricWeights?.reduce(
     (acc, entry) => acc + entry.weight,
-    0
+    0,
   );
   const orderedMetricWeights = metricWeights?.map((entry) =>
-    metricSum === 0 ? 0.0 : entry.weight / metricSum
+    metricSum === 0 ? 0.0 : entry.weight / metricSum,
   );
   const dataSetSum = datasetWeights?.reduce(
     (acc, entry) => acc + entry.weight,
-    0
+    0,
   );
   const orderedDatasetWeights = datasetWeights?.map((entry) =>
-    dataSetSum === 0 ? 0.0 : entry.weight / dataSetSum
+    dataSetSum === 0 ? 0.0 : entry.weight / dataSetSum,
   );
 
   return { orderedMetricWeights, orderedDatasetWeights };
@@ -93,11 +93,11 @@ const loadDefaultData = (
   sort,
   metrics,
   datasetWeights,
-  updateResultCallback
+  updateResultCallback,
 ) => {
   const { orderedMetricWeights, orderedDatasetWeights } = getOrderedWeights(
     metrics,
-    datasetWeights
+    datasetWeights,
   );
 
   if (
@@ -114,7 +114,7 @@ const loadDefaultData = (
         sort.field,
         sort.direction,
         orderedMetricWeights,
-        orderedDatasetWeights
+        orderedDatasetWeights,
       )
       .then(
         (result) => {
@@ -124,7 +124,7 @@ const loadDefaultData = (
         (error) => {
           console.log(error);
           updateResultCallback(null);
-        }
+        },
       );
   }
 };
@@ -132,13 +132,13 @@ const loadDefaultData = (
 const getOrderedWeightObjects = (
   metricIdToDataObj,
   datasetIdToDataObj,
-  task
+  task,
 ) => {
   const orderedMetricWeights = task.ordered_metrics.map(
-    (m) => metricIdToDataObj[m.name]
+    (m) => metricIdToDataObj[m.name],
   );
   const orderedDatasetWeights = task.ordered_scoring_datasets.map(
-    (ds) => datasetIdToDataObj[ds.id]
+    (ds) => datasetIdToDataObj[ds.id],
   );
   return { orderedMetricWeights, orderedDatasetWeights };
 };
@@ -147,13 +147,13 @@ export const TaskModelDefaultLeaderboard = taskModelLeaderboardCardWrapper(
   (task, api, setWeightsCallback) => {
     const metricIdToDataObj = {};
     const datasetIdToDataObj = {};
-
+    console.log("metrics", task);
     loadDefaultWeights(metricIdToDataObj, datasetIdToDataObj, task);
     setWeightsCallback(
-      getOrderedWeightObjects(metricIdToDataObj, datasetIdToDataObj, task)
+      getOrderedWeightObjects(metricIdToDataObj, datasetIdToDataObj, task),
     );
   },
-  loadDefaultData
+  loadDefaultData,
 );
 
 export const TaskModelForkLeaderboard = taskModelLeaderboardCardWrapper(
@@ -188,7 +188,7 @@ export const TaskModelForkLeaderboard = taskModelLeaderboardCardWrapper(
           ...getOrderedWeightObjects(
             metricIdToDataObj,
             datasetIdToDataObj,
-            task
+            task,
           ),
           description: result.desc,
         });
@@ -201,12 +201,12 @@ export const TaskModelForkLeaderboard = taskModelLeaderboardCardWrapper(
           });
         }
         setWeightsCallback(
-          getOrderedWeightObjects(metricIdToDataObj, datasetIdToDataObj, task)
+          getOrderedWeightObjects(metricIdToDataObj, datasetIdToDataObj, task),
         );
-      }
+      },
     );
   },
-  loadDefaultData
+  loadDefaultData,
 );
 
 export const TaskModelSnapshotLeaderboard = taskModelLeaderboardCardWrapper(
@@ -227,7 +227,7 @@ export const TaskModelSnapshotLeaderboard = taskModelLeaderboardCardWrapper(
     metrics,
     datasetWeights,
     updateResultCallback,
-    dataFromProps
+    dataFromProps,
   ) => {
     const { snapshotData } = dataFromProps;
     updateResultCallback({
@@ -235,5 +235,5 @@ export const TaskModelSnapshotLeaderboard = taskModelLeaderboardCardWrapper(
       count: snapshotData.count,
       sort: snapshotData.miscInfoJson.sort,
     });
-  }
+  },
 );

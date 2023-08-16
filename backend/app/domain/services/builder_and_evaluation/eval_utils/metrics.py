@@ -188,8 +188,17 @@ def get_accuracy_meta(task=None):
     return {"unit": "%", "pretty_name": "Accuracy", "utility_direction": 1, "offset": 0}
 
 
+def get_new_accuracy_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Performance",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
 def get_matthews_correlation_meta(task=None):
-    return {"unit": "%", "pretty_name": "Accuracy", "utility_direction": 1, "offset": 0}
+    return {"unit": "%", "pretty_name": "Matthews", "utility_direction": 1, "offset": 0}
 
 
 def get_vqa_accuracy(predictions: list, targets: list):

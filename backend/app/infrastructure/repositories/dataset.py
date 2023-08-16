@@ -107,8 +107,10 @@ class DatasetRepository(AbstractRepository):
         return dataset
 
     def get_downstream_datasets(self, task_id: int) -> dict:
-        downstream_datasets = self.session.query(self.model).filter(
-            self.model.tid == task_id
+        downstream_datasets = (
+            self.session.query(self.model)
+            .filter(self.model.tid == task_id)
+            .filter(self.model.access_type == "scoring")
         )
         jsonl_downstream_datasets = []
         for downstream_dataset in downstream_datasets:
