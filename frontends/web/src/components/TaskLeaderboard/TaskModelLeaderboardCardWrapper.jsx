@@ -140,7 +140,6 @@ export const TaskModelDefaultLeaderboard = taskModelLeaderboardCardWrapper(
   (task, api, setWeightsCallback) => {
     const metricIdToDataObj = {};
     const datasetIdToDataObj = {};
-    console.log("metrics", task);
     loadDefaultWeights(metricIdToDataObj, datasetIdToDataObj, task);
     setWeightsCallback(
       getOrderedWeightObjects(metricIdToDataObj, datasetIdToDataObj, task)
