@@ -111,7 +111,6 @@ const TaskModelLeaderboardCard = ({
       setMetrics(result.orderedMetricWeights);
       setDatasetWeights(result.orderedDatasetWeights);
       setDescription(result.description);
-      console.log("result", result);
     });
   }, [context.api, task, getInitialWeights]);
 
@@ -415,6 +414,7 @@ const TaskModelLeaderboardCard = ({
             sort={sort}
             toggleSort={toggleSort}
             modelColumnTitle={modelColumnTitle}
+            showUserNames={task.show_username_leaderboard}
           />
         )}
       </Card.Body>

@@ -188,8 +188,22 @@ def get_accuracy_meta(task=None):
     return {"unit": "%", "pretty_name": "Accuracy", "utility_direction": 1, "offset": 0}
 
 
+def get_new_accuracy_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Performance",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
 def get_matthews_correlation_meta(task=None):
-    return {"unit": "%", "pretty_name": "Accuracy", "utility_direction": 1, "offset": 0}
+    return {
+        "unit": "%",
+        "pretty_name": "Matthews's Correlation",
+        "utility_direction": 1,
+        "offset": 0,
+    }
 
 
 def get_vqa_accuracy(predictions: list, targets: list):
@@ -234,6 +248,14 @@ def get_macro_f1(predictions: list, targets: list):
 
 def get_macro_f1_meta(task=None):
     return {"unit": "%", "pretty_name": "Macro F1", "utility_direction": 1, "offset": 0}
+
+
+def get_f1(predictions: list, targets: list):
+    return f1_score(targets, predictions, average="binary", pos_label="1")
+
+
+def get_f1_meta(task=None):
+    return {"unit": "%", "pretty_name": "F1", "utility_direction": 1, "offset": 0}
 
 
 def get_squad_f1(predictions: list, targets: list):

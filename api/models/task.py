@@ -299,7 +299,6 @@ class AnnotationVerifierMode(enum.Enum):
 
 
 class AnnotationComponent:
-
     # This is re-implemented for cases where an annotation component requires that we
     # store different info in the db compared to the info that we send models.
     # For example, we might want to send image blobs to a model but store a url
@@ -690,6 +689,7 @@ class Task(Base):
     show_leaderboard = db.Column(db.Integer())
     show_trends = db.Column(db.Integer())
     show_user_leaderboard = db.Column(db.Integer())
+    show_username_leaderboard = db.Column(db.Integer())
 
     def __repr__(self):
         return f"<Task {self.name}>"

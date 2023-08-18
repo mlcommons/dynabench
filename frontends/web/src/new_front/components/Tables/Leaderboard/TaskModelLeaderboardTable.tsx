@@ -231,6 +231,7 @@ type TaskModelLeaderboardTableProps = {
   sort: any;
   toggleSort: any;
   modelColumnTitle: any;
+  showUserNames: boolean;
 };
 
 const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
@@ -244,9 +245,12 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
   sort,
   toggleSort,
   modelColumnTitle,
+  showUserNames,
 }) => {
   const metricColumnWidth =
     60 / ((metrics?.length ?? 0) === 0 ? 1 : metrics.length);
+
+  const showDynascore = metrics && metrics.length !== 1;
 
   return (
     <Table hover className="mb-0">
@@ -281,32 +285,34 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
                   />
                 );
               })}
-              <th
-                className="pr-4 text-right align-baseline "
-                style={{ width: "15%" }}
-              >
-                <SortContainer
-                  sortKey={"dynascore"}
-                  toggleSort={toggleSort}
-                  currentSort={sort}
-                  className="d-flex justify-content-end align-items-center"
+              {showDynascore && (
+                <th
+                  className="pr-4 text-right align-baseline "
+                  style={{ width: "15%" }}
                 >
-                  <WarningPopover
-                    direction="left"
-                    warning={
-                      "Warning, this score is dynamic and will change over time."
-                    }
+                  <SortContainer
+                    sortKey={"dynascore"}
+                    toggleSort={toggleSort}
+                    currentSort={sort}
+                    className="d-flex justify-content-end align-items-center"
                   >
-                    <i
-                      style={{ color: "red", fontSize: 10 }}
-                      className="fas fa-exclamation"
+                    <WarningPopover
+                      direction="left"
+                      warning={
+                        "Warning, this score is dynamic and will change over time."
+                      }
                     >
-                      &nbsp;
-                    </i>
-                  </WarningPopover>
-                  Dynascore
-                </SortContainer>
-              </th>
+                      <i
+                        style={{ color: "red", fontSize: 10 }}
+                        className="fas fa-exclamation"
+                      >
+                        &nbsp;
+                      </i>
+                    </WarningPopover>
+                    Dynascore
+                  </SortContainer>
+                </th>
+              )}
             </tr>
             {enableDatasetWeights && (
               <>
@@ -359,7 +365,12 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
           </thead>
           <tbody>
             {data?.map((data: any, key: number) => (
-              <TaskModelLeaderboardRow key={key} data={data} />
+              <TaskModelLeaderboardRow
+                key={key}
+                data={data}
+                showDynascore={showDynascore}
+                showUserNames={showUserNames}
+              />
             ))}
           </tbody>
         </>
