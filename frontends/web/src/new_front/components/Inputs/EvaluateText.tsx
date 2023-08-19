@@ -7,6 +7,7 @@ type EvaluateTextProps = {
   texts: any;
   setTexts: any;
   name?: string;
+  options_slider?: string[];
 };
 
 const EvaluateText: FC<EvaluateTextProps> = ({
@@ -15,6 +16,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
   name,
   texts,
   setTexts,
+  options_slider = ["0", "100"],
 }) => {
   const [score, setScore] = useState<number>(50);
 
@@ -29,7 +31,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
           };
         }
         return text;
-      })
+      }),
     );
   };
 
@@ -45,39 +47,17 @@ const EvaluateText: FC<EvaluateTextProps> = ({
         <div className="px-2 py-2 bg-white rounded-t-lg ">
           <textarea
             id="comment"
-            className="w-full h-32 px-0 font-medium text-black bg-white border-0"
+            className="w-full h-32 pl-1 font-medium text-black bg-white border-0"
             placeholder={text}
             required
             disabled
           ></textarea>
         </div>
-        <div className="flex items-center justify-between w-full px-3 pt-4 border-t ">
-          <div className="relative ">
-            <div className="px-4 py-1 -mt-8 truncate rounded bg-gray-50 text-letter">
-              {score}
-            </div>
-            <svg
-              className="absolute left-0 w-full h-2 text-letter top-100"
-              x="0px"
-              y="0px"
-              viewBox="0 0 20 20"
-            >
-              <polygon
-                className="fill-current"
-                points="5,0 20,10 5,20"
-                fill="black"
-              ></polygon>
-            </svg>
-          </div>
+        <div className="flex items-center justify-between w-full gap-2 pt-4 border-t px-4 pb-2">
+          <span className="text-gray-500 ">{options_slider[0]}</span>
           <input
             id={id}
-            className={`rounded-full w-full cursor-pointer ${
-              score < 33
-                ? "accent-red-500"
-                : score < 66
-                ? "accent-yellow-500"
-                : "accent-green-500"
-            }`}
+            className={`rounded-full w-full cursor-pointer `}
             type="range"
             step={1}
             defaultValue={50}
@@ -85,12 +65,11 @@ const EvaluateText: FC<EvaluateTextProps> = ({
             max={100}
             onChange={handleUpdateScore}
           />
+
+          <span className=" text-gray-500 ">{options_slider[1]}</span>
         </div>
 
-        <div className="flex justify-between w-full">
-          <span className="pl-20 text-gray-500 ">0</span>
-          <span className="pr-3 text-gray-500 ">100</span>
-        </div>
+        <div className="flex justify-between w-full"></div>
       </div>
     </form>
   );

@@ -15,6 +15,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import 
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.example import ExampleRepository
+from app.infrastructure.repositories.historical_data import HistoricalDataRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.taskcategories import TaskCategoriesRepository
@@ -32,6 +33,7 @@ class TaskService:
         self.task_categories_repository = TaskCategoriesRepository()
         self.user_repository = UserRepository()
         self.validation_repository = ValidationRepository()
+        self.historical_task_repository = HistoricalDataRepository()
 
     def update_last_activity_date(self, task_id: int):
         self.task_repository.update_last_activity_date(task_id)
@@ -248,3 +250,13 @@ class TaskService:
         all_tasks = self.get_active_tasks_with_round_info()
         active_tasks = [task for task in all_tasks if task["id"] in active_tasks]
         return active_tasks
+
+    def check_sign_consent(self, task_id: int, user_id: int):
+        if self.historical_task_repository.check_sign_consent(task_id, user_id):
+            return True
+        return False
+
+    def sign_in_consent(self, task_id: int, user_id: int):
+        return self.historical_task_repository.save_historical_data(
+            task_id, user_id, "consent"
+        )

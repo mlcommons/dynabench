@@ -4,7 +4,9 @@
 from fastapi import APIRouter
 
 from app.domain.schemas.base.task import (
+    CheckSignConsentRequest,
     GetDynaboardInfoByTaskIdRequest,
+    SignInConsentRequest,
     UpdateTaskInstructions,
 )
 from app.domain.services.base.task import TaskService
@@ -90,3 +92,13 @@ async def get_tasks_with_samples_created_by_user(user_id: int):
 @router.get("/get_active_tasks_by_user_id/{user_id}", response_model={})
 async def get_active_tasks_by_user_id(user_id: str):
     return TaskService().get_active_tasks_by_user_id(user_id)
+
+
+@router.post("/sign_in_consent", response_model={})
+async def sign_in_consent(model: SignInConsentRequest):
+    return TaskService().sign_in_consent(model.task_id, model.user_id)
+
+
+@router.post("/check_sign_consent", response_model={})
+async def check_sign_consent(model: CheckSignConsentRequest):
+    return TaskService().check_sign_consent(model.task_id, model.user_id)
