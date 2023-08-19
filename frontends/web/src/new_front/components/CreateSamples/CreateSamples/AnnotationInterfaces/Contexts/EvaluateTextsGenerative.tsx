@@ -24,6 +24,7 @@ const EvaluateTextsGenerative: FC<
   instruction,
   contextId,
   taskId,
+  setIsGenerativeContext,
 }) => {
   const [signInConsent, setSignInConsent] = useState(true);
   const [showInput, setShowInput] = useState(false);
@@ -306,6 +307,7 @@ const EvaluateTextsGenerative: FC<
                   setChatHistory={setChatHistory}
                   setShowExtraInfo={setShowExtraInfo}
                   updateModelInputs={updateModelInputs}
+                  setIsGenerativeContext={setIsGenerativeContext}
                 />
               )}
             </div>
