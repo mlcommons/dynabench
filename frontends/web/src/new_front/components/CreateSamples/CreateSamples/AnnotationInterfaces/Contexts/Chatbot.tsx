@@ -14,8 +14,11 @@ type ChatbotProps = {
   provider: string;
   num_of_samples_chatbot: number;
   num_interactions_chatbot: number;
+  finishConversation: boolean;
+  optionsSlider?: string[];
   setChatHistory: (chatHistory: ChatHistoryType) => void;
-  setShowExtraInfo: (showExtraInfo: boolean) => void;
+  showOriginalInteractions: () => void;
+  setFinishConversation: (finishConversation: boolean) => void;
   updateModelInputs: (modelInputs: any) => void;
   setIsGenerativeContext: (isGenerativeContext: boolean) => void;
 };
@@ -26,12 +29,16 @@ const Chatbot: FC<ChatbotProps> = ({
   provider,
   num_of_samples_chatbot,
   num_interactions_chatbot,
+  finishConversation,
+  optionsSlider,
   setChatHistory,
-  setShowExtraInfo,
+  showOriginalInteractions,
+  setFinishConversation,
   updateModelInputs,
   setIsGenerativeContext,
 }) => {
   const [prompt, setPrompt] = useState("");
+
   const [numInteractions, setNumInteractions] = useState(0);
   const [isAskingQuestion, setIsAskingQuestion] = useState(true);
   const [newRespones, setNewResponses] = useState<any[]>([]);
@@ -61,8 +68,9 @@ const Chatbot: FC<ChatbotProps> = ({
       // if (response.ok) {
       //   setNewResponses(generatedTexts)
       //   setIsAskingQuestion(false)
+      //   setPrompt('')
+
       // }
-      setNumInteractions((prev) => prev + 1);
       const generatedTexts = [
         {
           id: "1",
@@ -95,13 +103,7 @@ const Chatbot: FC<ChatbotProps> = ({
     setIsAskingQuestion(false);
   };
 
-  useEffect(() => {
-    if (numInteractions === num_interactions_chatbot + 1) {
-      finishSection();
-    }
-  }, [numInteractions]);
-
-  const handleUpdateHistory = () => {
+  const saveHistory = () => {
     setChatHistory({
       ...chatHistory,
       user: [
@@ -125,22 +127,67 @@ const Chatbot: FC<ChatbotProps> = ({
     setNewResponses([]);
     setIsAskingQuestion(true);
     setPrompt("");
-    if (numInteractions === num_interactions_chatbot) {
-      finishSection();
-      setIsGenerativeContext(false);
-      setNumInteractions((prev) => prev + 1);
-    }
+    setNumInteractions((prev) => prev + 1);
   };
+
+  const handleFinishInteraction = () => {
+    showOriginalInteractions();
+    finishSection();
+    setIsGenerativeContext(false);
+    setFinishConversation(true);
+  };
+
+  useEffect(() => {
+    console.log("numInteractions", numInteractions);
+  }, [numInteractions]);
 
   return (
     <>
       {!loading ? (
         <>
-          <div id="history-chat">
-            {chatHistory.user.length > 0 &&
-              chatHistory.bot.length > 0 &&
-              chatHistory.user.map((message, index) => (
-                <div key={index}>
+          {!finishConversation && (
+            <>
+              <div id="history-chat">
+                {chatHistory.user.length > 0 &&
+                  chatHistory.bot.length > 0 &&
+                  chatHistory.user.map((message, index) => (
+                    <div key={index}>
+                      <div className="chat-message">
+                        <div className="flex items-end">
+                          <div className="flex flex-col items-start order-2 max-w-lg mx-2 space-y-2">
+                            <div>
+                              <Avatar
+                                avatar_url={null}
+                                username="ciroye"
+                                isThumbnail={true}
+                                theme="dark"
+                              />
+                              <span className="px-3 py-1 rounded-lg inline-block rounded-br-none bg-[#f0f2f5] text-letter-color">
+                                {message.text}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="chat-message">
+                        <div className="flex items-end justify-end">
+                          <div className="flex flex-col items-end order-1 max-w-lg mx-2 space-y-2">
+                            <div>
+                              <span className="inline-block px-3 py-1 text-white rounded-lg rounded-br-none bg-third-color ">
+                                {chatHistory.bot[index].text}
+                              </span>
+                            </div>
+                          </div>
+                          <img
+                            src="https://cdn-icons-png.flaticon.com/512/427/427995.png?w=1060&t=st=1687313158~exp=1687313758~hmac=a9f0bae6d29fe6f316f7fa531188e34fe0f562db16c7ea5fa53b3105bab66f6f"
+                            alt="My profile"
+                            className="order-2 rounded-full w-7 h-7"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                {prompt !== "" && !isAskingQuestion && (
                   <div className="chat-message">
                     <div className="flex items-end">
                       <div className="flex flex-col items-start order-2 max-w-lg mx-2 space-y-2">
@@ -152,91 +199,71 @@ const Chatbot: FC<ChatbotProps> = ({
                             theme="dark"
                           />
                           <span className="px-3 py-1 rounded-lg inline-block rounded-br-none bg-[#f0f2f5] text-letter-color">
-                            {message.text}
+                            {prompt}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="chat-message">
-                    <div className="flex items-end justify-end">
-                      <div className="flex flex-col items-end order-1 max-w-lg mx-2 space-y-2">
-                        <div>
-                          <span className="inline-block px-3 py-1 text-white rounded-lg rounded-br-none bg-third-color ">
-                            {chatHistory.bot[index].text}
-                          </span>
-                        </div>
-                      </div>
-                      <img
-                        src="https://cdn-icons-png.flaticon.com/512/427/427995.png?w=1060&t=st=1687313158~exp=1687313758~hmac=a9f0bae6d29fe6f316f7fa531188e34fe0f562db16c7ea5fa53b3105bab66f6f"
-                        alt="My profile"
-                        className="order-2 rounded-full w-7 h-7"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-
-          <div id="interacion block">
-            <div className="flex items-end">
-              <div className="flex flex-col items-start order-2 w-full max-w-lg mx-2 space-y-2">
-                {numInteractions < num_interactions_chatbot && (
-                  <>
-                    {isAskingQuestion ? (
+                )}
+              </div>
+              <div id="interacion block">
+                <div className="flex items-end">
+                  <div className="flex flex-col items-start order-2 w-full max-w-lg mx-2 space-y-2">
+                    {isAskingQuestion && (
                       <BasicInput
                         placeholder="ask"
                         onChange={(e) => setPrompt(e.target.value)}
                         onEnter={askQuestion}
                       />
-                    ) : (
-                      <div>
-                        <span className="px-3 py-1 rounded-lg inline-block rounded-br-none bg-[#f0f2f5] text-letter-color">
-                          {prompt}
-                        </span>
-                      </div>
                     )}
-                  </>
-                )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-6 pt-8">
+                  {newRespones &&
+                    newRespones.map((response, key) => (
+                      <EvaluateText
+                        key={key}
+                        name={response.model_letter}
+                        text={response.text}
+                        id={response.id}
+                        texts={newRespones}
+                        setTexts={setNewResponses}
+                        optionsSlider={optionsSlider}
+                      />
+                    ))}
+                </div>
+                <div className="flex justify-end gap-2 ">
+                  {isAskingQuestion ? (
+                    <div>
+                      <GeneralButton
+                        onClick={askQuestion}
+                        text="Ask"
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn px-4 py-1 font-semibold "
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <GeneralButton
+                        onClick={saveHistory}
+                        text="Save"
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn px-4 py-1 font-semibold "
+                      />
+                    </div>
+                  )}
+                  {numInteractions >= num_interactions_chatbot && (
+                    <div>
+                      <GeneralButton
+                        onClick={handleFinishInteraction}
+                        text="Finish"
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn px-4 py-1 font-semibold"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6 pt-8">
-              {newRespones &&
-                newRespones.map((response, key) => (
-                  <>
-                    <EvaluateText
-                      key={key}
-                      name={response.model_letter}
-                      text={response.text}
-                      id={response.id}
-                      texts={newRespones}
-                      setTexts={setNewResponses}
-                    />
-                  </>
-                ))}
-            </div>
-            {numInteractions < num_interactions_chatbot + 1 && (
-              <>
-                {isAskingQuestion ? (
-                  <div className="flex justify-end col-span-3 gap-2">
-                    <GeneralButton
-                      onClick={askQuestion}
-                      text="Ask"
-                      className="border-0 font-weight-bold light-gray-bg task-action-btn px-4 py-1 font-semibold "
-                    />
-                  </div>
-                ) : (
-                  <div className="grid col-span-1 py-3 justify-items-end">
-                    <GeneralButton
-                      onClick={handleUpdateHistory}
-                      text="Continue"
-                      className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                    />
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+            </>
+          )}
         </>
       ) : (
         <div className="grid items-center justify-center grid-rows-2">

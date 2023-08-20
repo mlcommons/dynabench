@@ -18,7 +18,7 @@ const RadioButtonOptions: FC<AnnotationFactoryType & AnnotationUserInput> = ({
       {options && instructions && (
         <>
           <AnnotationInstruction
-            placement="top"
+            placement="left"
             tooltip={instruction || "Select one of the options below"}
           >
             <RadioButton

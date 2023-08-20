@@ -35,7 +35,6 @@ const MultiSelectWithExtraExplanation: FC<
     option: string,
     extraInfo?: string,
   ) => {
-    console.log("extraInfo", extraInfo);
     if (extraInfo) {
       finalData["extraInfos"] = { ...extraInfos, [option]: extraInfo };
     }

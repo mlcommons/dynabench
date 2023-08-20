@@ -19,7 +19,7 @@ const SelectMultipleImages: FC<AnnotationFactoryType & AnnotationUserInput> = ({
       {
         [field_name_for_the_model]: value,
       },
-      metadata
+      metadata,
     );
   };
 
@@ -27,7 +27,7 @@ const SelectMultipleImages: FC<AnnotationFactoryType & AnnotationUserInput> = ({
     <>
       {options && instructions && (
         <AnnotationInstruction
-          placement="top"
+          placement="left"
           tooltip={instruction || "Select one of the options below"}
         >
           <MultiSelectImages

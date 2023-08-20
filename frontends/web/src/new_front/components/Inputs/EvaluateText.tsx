@@ -7,21 +7,21 @@ type EvaluateTextProps = {
   texts: any;
   setTexts: any;
   name?: string;
-  options_slider?: string[];
+  optionsSlider?: string[];
+  disabled?: boolean;
+  bestAnswer?: string;
 };
 
 const EvaluateText: FC<EvaluateTextProps> = ({
   text,
   id,
-  name,
   texts,
   setTexts,
-  options_slider = ["0", "100"],
+  optionsSlider = ["0", "100"],
+  disabled = false,
+  bestAnswer = "",
 }) => {
-  const [score, setScore] = useState<number>(50);
-
   const handleUpdateScore = (event: any) => {
-    setScore(parseInt(event.target.value));
     setTexts(
       texts.map((text: any) => {
         if (text.id === id) {
@@ -37,24 +37,22 @@ const EvaluateText: FC<EvaluateTextProps> = ({
 
   return (
     <form id={id}>
-      <label
-        htmlFor="comment"
-        className="block pl-1 text-lg font-medium text-letter-color"
-      >
-        {name}
-      </label>
       <div className="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 ">
-        <div className="px-2 py-2 bg-white rounded-t-lg ">
+        <div className=" bg-white rounded-t-lg text-black">
           <textarea
             id="comment"
-            className="w-full h-32 pl-1 font-medium text-black bg-white border-0"
+            className={`${
+              bestAnswer === text
+                ? "bg-primary-color font-bold"
+                : "bg-white font-semibold"
+            } w-full h-32 pl-1 border-0 px-2 py-2  text-letter-color `}
             placeholder={text}
             required
-            disabled
+            disabled={disabled}
           ></textarea>
         </div>
         <div className="flex items-center justify-between w-full gap-2 pt-4 border-t px-4 pb-2">
-          <span className="text-gray-500 ">{options_slider[0]}</span>
+          <span className="text-gray-500 ">{optionsSlider[0]}</span>
           <input
             id={id}
             className={`rounded-full w-full cursor-pointer `}
@@ -64,11 +62,10 @@ const EvaluateText: FC<EvaluateTextProps> = ({
             min={1}
             max={100}
             onChange={handleUpdateScore}
+            disabled={disabled}
           />
-
-          <span className=" text-gray-500 ">{options_slider[1]}</span>
+          <span className=" text-gray-500 ">{optionsSlider[1]}</span>
         </div>
-
         <div className="flex justify-between w-full"></div>
       </div>
     </form>

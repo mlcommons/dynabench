@@ -29,13 +29,15 @@ const EvaluateTextsGenerative: FC<
   const [signInConsent, setSignInConsent] = useState(true);
   const [showInput, setShowInput] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
+  const [showCategory, setShowCategory] = useState(true);
+  const [finishConversation, setFinishConversation] = useState(false);
+  const [disabledInput, setDisabledInput] = useState(false);
   const [bestAnswer, setBestAnswer] = useState<any>({});
   const [texts, setTexts] = useState<any[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
     user: [],
     bot: [],
   });
-  const [showExtraInfo, setShowExtraInfo] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [showAnswers, setShowAnswers] = useState(false);
   const [artifactsInput, setArtifactsInput] = useState<any>(
@@ -52,6 +54,7 @@ const EvaluateTextsGenerative: FC<
       category: category,
     });
     setShowInput(true);
+    setShowCategory(false);
   };
 
   const checkIfUserIsSignedInConsent = async () => {
@@ -133,6 +136,7 @@ const EvaluateTextsGenerative: FC<
         ],
       });
       setShowAnswers(true);
+      setDisabledInput(true);
     } else {
       Swal.fire({
         title: "Please fill in all the fields",
@@ -182,6 +186,7 @@ const EvaluateTextsGenerative: FC<
     });
     setShowChatbot(true);
     setShowAnswers(false);
+    setShowInput(false);
   };
 
   const handleSignInConsent = async () => {
@@ -190,6 +195,11 @@ const EvaluateTextsGenerative: FC<
       task_id: taskId,
     });
     setSignInConsent(true);
+  };
+
+  const showOriginalInteractions = () => {
+    setShowAnswers(true);
+    setShowInput(true);
   };
 
   useEffect(() => {
@@ -206,10 +216,6 @@ const EvaluateTextsGenerative: FC<
   }, [modelInputs, texts]);
 
   useEffect(() => {
-    console.log("artifactsInput", artifactsInput);
-  }, [artifactsInput]);
-
-  useEffect(() => {
     checkIfUserIsSignedInConsent();
   }, []);
 
@@ -220,12 +226,12 @@ const EvaluateTextsGenerative: FC<
           {signInConsent ? (
             <div>
               <div>
-                {!showInput && (
+                {showCategory && (
                   <div>
                     <AnnotationInstruction
                       placement="left"
                       tooltip={
-                        "“Click here to view a log of all your previously attempted prompts”"
+                        "Select the category that best describes the text"
                       }
                     >
                       <RadioButton
@@ -242,7 +248,16 @@ const EvaluateTextsGenerative: FC<
 
                 {showInput && (
                   <>
-                    <div className="py-3">
+                    {finishConversation ? (
+                      <h4 className="pl-2 text-lg font-semibold text-letter-color pb-3">
+                        {artifactsInput.finish_instruction}
+                      </h4>
+                    ) : (
+                      <h4 className="pl-2 text-lg font-semibold text-letter-color pb-3">
+                        {artifactsInput.general_instruction}
+                      </h4>
+                    )}
+                    <div>
                       <AnnotationInstruction
                         placement="left"
                         tooltip={
@@ -254,30 +269,40 @@ const EvaluateTextsGenerative: FC<
                           onChange={handlePromptChange}
                           onEnter={generateTexts}
                           placeholder={prompt}
+                          disabled={disabledInput}
                         />
                       </AnnotationInstruction>
                     </div>
-                    <div className="grid col-span-1 py-3 justify-items-end">
-                      <AnnotationInstruction
-                        placement="top"
-                        tooltip={
-                          instruction.generate_button ||
-                          "Select one of the options below"
-                        }
-                      >
-                        <GeneralButton
-                          onClick={generateTexts}
-                          text="Ask the model a question"
-                          className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                        />
-                      </AnnotationInstruction>
-                    </div>
+
+                    {!finishConversation && (
+                      <div className="grid col-span-1 py-3 justify-items-end">
+                        <AnnotationInstruction
+                          placement="top"
+                          tooltip={
+                            instruction.generate_button ||
+                            "Select one of the options below"
+                          }
+                        >
+                          <GeneralButton
+                            onClick={generateTexts}
+                            text="Ask the model a question"
+                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                            disabled={disabledInput}
+                          />
+                        </AnnotationInstruction>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
               {showAnswers && (
                 <>
-                  <div className="grid grid-cols-2 gap-6">
+                  {!finishConversation && (
+                    <h4 className="pl-2 text-lg font-semibold text-letter-color pb-3">
+                      {artifactsInput.general_instruction_multiple_models}
+                    </h4>
+                  )}
+                  <div className="grid grid-cols-2 gap-6 pt-2">
                     {texts.map((text) => (
                       <EvaluateText
                         key={text.id}
@@ -286,26 +311,37 @@ const EvaluateTextsGenerative: FC<
                         id={text.id}
                         texts={texts}
                         setTexts={setTexts}
-                        options_slider={artifactsInput.options_slider}
+                        optionsSlider={artifactsInput.options_slider}
+                        disabled={finishConversation}
+                        bestAnswer={bestAnswer.text}
                       />
                     ))}
                   </div>
-                  <div className="grid col-span-1 py-3 justify-items-end">
-                    <GeneralButton
-                      onClick={handleSelectedText}
-                      text="Save"
-                      className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                    />
-                  </div>
+                  {!finishConversation && (
+                    <div className="grid col-span-1 py-3 justify-items-end">
+                      <GeneralButton
+                        onClick={handleSelectedText}
+                        text="Save"
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                      />
+                    </div>
+                  )}
                 </>
               )}
               {showChatbot && (
                 <Chatbot
                   chatHistory={chatHistory}
-                  model_name={bestAnswer.model}
+                  model_name={bestAnswer.model_name}
                   provider={bestAnswer.provider}
+                  num_of_samples_chatbot={artifactsInput.num_of_samples_chatbot}
+                  num_interactions_chatbot={
+                    artifactsInput.num_interactions_chatbot
+                  }
+                  finishConversation={finishConversation}
+                  optionsSlider={artifactsInput.options_slider}
                   setChatHistory={setChatHistory}
-                  setShowExtraInfo={setShowExtraInfo}
+                  showOriginalInteractions={showOriginalInteractions}
+                  setFinishConversation={setFinishConversation}
                   updateModelInputs={updateModelInputs}
                   setIsGenerativeContext={setIsGenerativeContext}
                 />

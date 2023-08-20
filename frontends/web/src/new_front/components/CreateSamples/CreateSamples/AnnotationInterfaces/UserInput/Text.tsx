@@ -19,7 +19,7 @@ const Text: FC<AnnotationFactoryType & AnnotationUserInput> = ({
   };
   return (
     <AnnotationInstruction
-      placement="top"
+      placement="left"
       tooltip={instruction || "Select one of the options below"}
     >
       <div className="py-1">
