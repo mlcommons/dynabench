@@ -168,7 +168,7 @@ const TaskPage = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap mt-3">
+            <div className="flex flex-wrap mt-3 pb-6">
               <div className="flex-auto">
                 <div className="tab-content tab-space">
                   <div className={openTab === 1 ? "block  px-4" : "hidden"}>
@@ -183,11 +183,7 @@ const TaskPage = () => {
                   </div>
                   {Object.entries(taskInstructions).length !== 0 && (
                     <div className={openTab === 2 ? "block " : "hidden"}>
-                      <OverviewTask
-                        roundDescription={task.round?.longdesc}
-                        generalDescription={task.instructions_md}
-                        taskInstructions={taskInstructions!}
-                      />
+                      <OverviewTask taskInstructions={taskInstructions!} />
                     </div>
                   )}
                 </div>
