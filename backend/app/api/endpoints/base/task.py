@@ -8,6 +8,7 @@ from app.domain.schemas.base.task import (
     GetDynaboardInfoByTaskIdRequest,
     SignInConsentRequest,
     UpdateTaskInstructions,
+    UpdateYamlConfiguration,
 )
 from app.domain.services.base.task import TaskService
 
@@ -102,3 +103,8 @@ async def sign_in_consent(model: SignInConsentRequest):
 @router.post("/check_sign_consent", response_model={})
 async def check_sign_consent(model: CheckSignConsentRequest):
     return TaskService().check_sign_consent(model.task_id, model.user_id)
+
+
+@router.post("/update_config_yaml", response_model={})
+async def update_config_yaml(model: UpdateYamlConfiguration):
+    return TaskService().update_config_yaml(model.task_id, model.config_yaml)

@@ -260,3 +260,6 @@ class TaskService:
         return self.historical_task_repository.save_historical_data(
             task_id, user_id, "consent"
         )
+
+    def update_config_yaml(self, task_id: int, config_yaml: str):
+        return self.task_repository.update_config_yaml(task_id, config_yaml)
