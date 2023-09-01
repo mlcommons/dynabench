@@ -178,6 +178,12 @@ const TaskPage = () => {
                         taskCode={task.task_code}
                         showLeaderboard={Boolean(task.show_leaderboard)}
                         showTrends={Boolean(task.show_trends)}
+                        showUserLeaderboard={Boolean(
+                          task.show_user_leaderboard,
+                        )}
+                        showUserLeaderboardCSV={Boolean(
+                          task.show_user_leaderboard_csv,
+                        )}
                       />
                     )}
                   </div>

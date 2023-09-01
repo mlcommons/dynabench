@@ -3,7 +3,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import json
+import os
 
+import boto3
 import numpy as np
 import pandas as pd
 
@@ -21,6 +23,12 @@ class ScoreService:
         self.dataset_service = DatasetService()
         self.model_repository = ModelRepository()
         self.user_repository = UserRepository()
+        self.session = boto3.Session(
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.getenv("AWS_REGION"),
+        )
+        self.s3 = self.session.client("s3")
 
     def get_scores_by_dataset_and_model_id(
         self,
@@ -310,3 +318,15 @@ class ScoreService:
         return self.score_repository.check_if_model_has_all_scoring_datasets(
             model_id, scoring_datasets
         )
+
+    def read_users_score_csv(self, task_id: int):
+        s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+        task_code = self.task_repository.get_task_code_by_task_id(task_id)[0]
+        final_file = f"./app/resources/predictions/{task_code}_users_scores.csv"
+        self.s3.download_file(
+            s3_bucket,
+            f"{task_code}/users_scores.csv",
+            final_file,
+        )
+        csv_file = pd.read_csv(final_file)
+        return csv_file.to_json(orient="records")
