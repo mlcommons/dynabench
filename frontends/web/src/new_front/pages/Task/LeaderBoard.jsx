@@ -10,6 +10,7 @@ import {
   TaskModelForkLeaderboard,
 } from "components/TaskLeaderboard/TaskModelLeaderboardCardWrapper";
 import UserLeaderboardCard from "components/TaskPageComponents/UserLeaderboardCard";
+import UserLeaderBoardCSV from "new_front/components/Tables/Leaderboard/UserLeaderBoardCSV";
 import TaskTrend from "new_front/components/TaskPage/TaskTrend";
 import { Annotation, OverlayProvider } from "containers/Overlay";
 import UserContext from "containers/UserContext";
@@ -29,7 +30,9 @@ class Leaderboard extends React.Component {
     this.taskCode = this.props.taskCode;
     this.showLeaderboard = this.props.showLeaderboard;
     this.showTrends = this.props.showTrends;
+    this.showUserLeaderboardCSV = this.props.showUserLeaderboardCSV;
     this.getCurrentTaskData = this.getCurrentTaskData.bind(this);
+    this.showUserLeaderboard = this.props.showUserLeaderboard;
   }
 
   getCurrentTaskData() {
@@ -117,7 +120,7 @@ class Leaderboard extends React.Component {
                   {this.state.task &&
                     (this.state.task.submitable ||
                       hasTrainFileUpload ||
-                      this.state.task.submitable_predictions) && (
+                      Boolean(this.state.task.submitable_predictions)) && (
                       <Row className="justify-content-center">
                         <Col xs={12} md={12}>
                           <Annotation
@@ -161,7 +164,8 @@ class Leaderboard extends React.Component {
                     {this.state.task.id &&
                       this.state.task.dynamic_adversarial_data_collection &&
                       this.state.task.round &&
-                      this.state.task.cur_round && (
+                      this.state.task.cur_round &&
+                      this.showUserLeaderboard && (
                         <Col xs={12} md={6}>
                           <UserLeaderboardCard
                             taskId={this.state.task.id}
@@ -186,6 +190,9 @@ class Leaderboard extends React.Component {
                             </>
                           </Annotation>
                         </>
+                      )}
+                      {this.showUserLeaderboardCSV && (
+                        <UserLeaderBoardCSV taskId={this.state.task.id} />
                       )}
                     </Col>
                   </Row>

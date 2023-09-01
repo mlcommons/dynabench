@@ -41,6 +41,7 @@ class TaskProposalService:
             msg_dict={"name": name, "code": task_code, "desc": longdesc},
             subject=f"Proposal for task {task_code}",
         )
+        task_code = f"{task_code}-{user_id}"
         return self.task_proposal_repository.add_task_proposal(
             user_id, task_code, name, desc, longdesc
         )

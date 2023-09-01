@@ -132,6 +132,7 @@ class Task(Base):
     show_trends = Column(TINYINT(1), server_default=text("'1'"))
     show_user_leaderboard = Column(TINYINT(1), server_default=text("'1'"))
     show_username_leaderboard = Column(TINYINT(1), server_default=text("'1'"))
+    show_user_leaderboard_csv = Column(TINYINT(1), server_default=text("'1'"))
 
 
 class User(Base):
