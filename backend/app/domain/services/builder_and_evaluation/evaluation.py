@@ -590,6 +590,8 @@ class EvaluationService:
         downstream_predictions = load_dataset(download_predictions)
         for downstream_dataset in downstream_datasets_info:
             dataset_name = downstream_dataset["dataset"].split("-")[0]
+            if dataset_name.split("_")[0] == "msgs":
+                dataset_name = dataset_name.split("_")[0]
             print("dataset_name", dataset_name)
             downstream_datasets_filename = self.download_downstream_dataset(
                 task_code, downstream_dataset
@@ -603,7 +605,7 @@ class EvaluationService:
             dataset_id = downstream_dataset["dataset_id"]
             for sub_task in downstream_tasks:
                 print("sub_task", sub_task)
-                self.logger.info("Evaluate downstream task", sub_task)
+                self.logger.info("Evaluate downstream task={sub_task}")
                 labels = [
                     data for data in downstream_datasets if data["sub_task"] == sub_task
                 ][0]["labels"]

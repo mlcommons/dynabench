@@ -70,7 +70,11 @@ class TaskService:
             return 4
         return 1
 
-    def get_dataset_weight(self):
+    def get_dataset_weight(self, dataset_id: int = None):
+        print("dataset_id", dataset_id)
+        dataset_weight = self.dataset_repository.get_dataset_weight(dataset_id)
+        if dataset_weight is not None:
+            return dataset_weight
         return 5
 
     def get_order_datasets_by_task_id(self, task_id: int):
@@ -83,7 +87,9 @@ class TaskService:
         )
         scoring_datasets = [dataset.__dict__ for dataset in scoring_datasets]
         for scoring_dataset in scoring_datasets:
-            scoring_dataset["default_weight"] = self.get_dataset_weight()
+            scoring_dataset["default_weight"] = self.get_dataset_weight(
+                scoring_dataset.get("id")
+            )
         return scoring_datasets
 
     def get_task_info_by_task_id(self, task_id: int):
