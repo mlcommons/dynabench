@@ -7,6 +7,7 @@ from multiprocessing import Pool
 from app.domain.services.utils.image_generators import (  # DynabenchImageProvider,
     HFImageProvider,
     OpenAIImageProvider,
+    SDVariableAutoEncoder,
 )
 
 
@@ -15,7 +16,7 @@ class ImageGenerator:
         self.image_providers = [
             HFImageProvider(),
             # DynabenchImageProvider(),
-            # SDVariableAutoEncoder(),
+            SDVariableAutoEncoder(),
             OpenAIImageProvider(),
         ]
 
