@@ -28,3 +28,4 @@ openai==0.27.2
 nltk==3.6.5
 langchain==0.0.218
 sse_starlette==1.6.1
+pillow==10.0.0
