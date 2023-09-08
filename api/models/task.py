@@ -865,8 +865,10 @@ class TaskModel(BaseModel):
         tasks = [x.to_dict() for x in rows]
         return tasks
 
-    def get_default_dataset_weight(self, task, name):
-        # TODO:  allow this to be settable by the task owner?
+    def get_default_dataset_weight(self, weight: float):
+        print("weight", weight)
+        if weight is not None:
+            return weight
         return 5
 
     def get_default_metric_weight(
@@ -908,7 +910,7 @@ class TaskModel(BaseModel):
                             "id": dataset.id,
                             "name": dataset.name,
                             "default_weight": self.get_default_dataset_weight(
-                                t, dataset.name
+                                dataset.weight
                             ),
                         }
                     )

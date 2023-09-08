@@ -71,8 +71,7 @@ class TaskService:
         return 1
 
     def get_dataset_weight(self, dataset_id: int = None):
-        print("dataset_id", dataset_id)
-        dataset_weight = self.dataset_repository.get_dataset_weight(dataset_id)
+        dataset_weight = self.dataset_repository.get_dataset_weight(dataset_id)[0]
         if dataset_weight is not None:
             return dataset_weight
         return 5
