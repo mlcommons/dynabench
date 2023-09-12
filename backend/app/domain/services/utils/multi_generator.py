@@ -4,20 +4,23 @@
 
 from multiprocessing import Pool
 
-from app.domain.services.utils.image_generators import (  # DynabenchImageProvider,
+from app.domain.services.utils.image_generators import (
     HFImageProvider,
     OpenAIImageProvider,
+    SDRunwayMLImageProvider,
     SDVariableAutoEncoder,
+    SDXLImageProvider,
 )
 
 
 class ImageGenerator:
     def __init__(self):
         self.image_providers = [
-            HFImageProvider(),
-            # DynabenchImageProvider(),
             SDVariableAutoEncoder(),
             OpenAIImageProvider(),
+            SDRunwayMLImageProvider(),
+            # SD2ImageProvider(),
+            SDXLImageProvider(),
         ]
 
     def generate_images_parallel(self, generator, prompt, num_images, models, endpoint):
