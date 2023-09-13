@@ -20,6 +20,7 @@
         "multioptions": "Multioptions",
         "multioptions-with-instructions": "MultioptionsWithInstructions",
         "radio-button-options": "RadioButtonOptions",
-        "select-multiple-images": "SelectMultipleImages"
+        "select-multiple-images": "SelectMultipleImages",
+        "multi-slider-selection": "MultiSliderSelection"
     }
 }

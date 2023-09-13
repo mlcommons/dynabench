@@ -3,21 +3,15 @@ import MDEditor from "@uiw/react-md-editor";
 import TabOptionVertical from "new_front/components/Buttons/TabOptionVertical";
 
 type OverviewTaskProps = {
-  roundDescription: string;
-  generalDescription: string;
   taskInstructions: any;
 };
 
-const OverviewTask: FC<OverviewTaskProps> = ({
-  roundDescription,
-  generalDescription,
-  taskInstructions,
-}) => {
+const OverviewTask: FC<OverviewTaskProps> = ({ taskInstructions }) => {
   console.log(taskInstructions, "3");
   const [openTab, setOpenTab] = useState(1);
   return (
     <>
-      <div className="grid grid-cols-6 border">
+      <div className="grid grid-cols-6 border pb-8">
         <div>
           <aside className="flex flex-col w-40 h-screen px-3 py-1 overflow-y-auto bg-white border-r rtl:border-r-0 rtl:border-l ">
             <div className="flex flex-col justify-between flex-1 mt-6">

@@ -1,16 +1,16 @@
-import MultiSelect from "new_front/components/Lists/MultiSelect";
-import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
-import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
+import React, { FC, useContext } from "react";
 import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
-import React, { FC, useContext } from "react";
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
+import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
+import MultiSlider from "new_front/components/Inputs/MultiSlider";
 
-const Multioptions: FC<AnnotationFactoryType & AnnotationUserInput> = ({
+const MultiSliderSelection: FC<AnnotationFactoryType & AnnotationUserInput> = ({
   instructions,
   options,
-  metadata,
-  instruction,
   field_name_for_the_model,
+  instruction,
+  metadata,
 }) => {
   const { updateModelInputs } = useContext(CreateInterfaceContext);
 
@@ -21,9 +21,10 @@ const Multioptions: FC<AnnotationFactoryType & AnnotationUserInput> = ({
           placement="left"
           tooltip={instruction || "Select one of the options below"}
         >
-          <MultiSelect
+          <MultiSlider
             options={options}
             instructions={instructions}
+            optionsSlider={["0", "100"]}
             field_name_for_the_model={field_name_for_the_model}
             metadata={metadata}
             onInputChange={updateModelInputs}
@@ -34,4 +35,4 @@ const Multioptions: FC<AnnotationFactoryType & AnnotationUserInput> = ({
   );
 };
 
-export default Multioptions;
+export default MultiSliderSelection;

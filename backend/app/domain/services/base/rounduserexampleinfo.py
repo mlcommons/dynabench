@@ -4,14 +4,18 @@
 
 import datetime
 
+from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.rounduserexampleinfo import (
     RoundUserExampleInfoRepository,
 )
+from app.infrastructure.repositories.task import TaskRepository
 
 
 class RoundUserExampleInfoService:
     def __init__(self):
         self.rounds_user_example_info_repository = RoundUserExampleInfoRepository()
+        self.round_repository = RoundRepository()
+        self.task_repository = TaskRepository()
 
     def verify_user_and_round(self, user_id: int, round_id: int):
         return self.rounds_user_example_info_repository.verify_user_and_round_exist(
@@ -53,10 +57,11 @@ class RoundUserExampleInfoService:
             round_id, user_id
         )
 
-    def still_allowed_to_submit(
-        self, round_id: int, user_id: int, max_amount_examples_on_a_day: int
-    ):
+    def still_allowed_to_submit(self, round_id: int, user_id: int):
         get_last_date_used = self.get_last_date_used(round_id, user_id)[0]
+        if not get_last_date_used:
+            self.create_first_entry_for_day(round_id, user_id)
+            get_last_date_used = self.get_last_date_used(round_id, user_id)[0]
         if get_last_date_used < datetime.date.today():
             self.rounds_user_example_info_repository.update_last_used_and_counter(
                 round_id, user_id
@@ -66,4 +71,9 @@ class RoundUserExampleInfoService:
         )[0]
         if not amounts_examples_created_today:
             amounts_examples_created_today = 0
+        task_id = self.round_repository.get_task_id_by_round_id(round_id)[0]
+        max_amount_examples_on_a_day = (
+            self.task_repository.get_max_amount_examples_on_a_day(task_id)[0]
+        )
+        print("amounts_examples_created_today", amounts_examples_created_today)
         return amounts_examples_created_today < max_amount_examples_on_a_day

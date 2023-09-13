@@ -34,18 +34,21 @@ class RoundUserExampleInfoRepository(AbstractRepository):
                 total_verified_not_correct_fooled=0,
             )
         )
+        self.session.flush()
         self.session.commit()
 
     def increment_counter_examples_submitted(self, round_id: int, user_id: int):
         self.session.query(self.model).filter(
             (self.model.r_realid == round_id) & (self.model.uid == user_id)
         ).update({self.model.examples_submitted: self.model.examples_submitted + 1})
+        self.session.flush()
         self.session.commit()
 
     def increment_counter_examples_fooled(self, round_id: int, user_id: int):
         self.session.query(self.model).filter(
             (self.model.r_realid == round_id) & (self.model.uid == user_id)
         ).update({self.model.total_fooled: self.model.total_fooled + 1})
+        self.session.flush()
         self.session.commit()
 
     def increment_examples_submitted_today(self, round_id: int, user_id: int):
@@ -57,6 +60,7 @@ class RoundUserExampleInfoRepository(AbstractRepository):
                 + 1
             }
         )
+        self.session.flush()
         self.session.commit()
 
     def amounts_examples_created_today(self, round_id: int, user_id: int):
@@ -65,7 +69,10 @@ class RoundUserExampleInfoRepository(AbstractRepository):
             .filter(
                 (self.model.r_realid == round_id)
                 & (self.model.uid == user_id)
-                & (self.model.last_used == datetime.date.today())
+                & (
+                    self.model.last_used
+                    == datetime.date.today() + datetime.timedelta(days=1)
+                )
             )
             .first()
         )
@@ -86,10 +93,17 @@ class RoundUserExampleInfoRepository(AbstractRepository):
                 self.model.amount_examples_on_a_day: 0,
             }
         )
+        self.session.flush()
         self.session.commit()
 
     def create_first_entry_for_day(self, round_id: int, user_id: int):
         self.session.query(self.model).filter(
             (self.model.r_realid == round_id) & (self.model.uid == user_id)
-        ).update({self.model.amount_examples_on_a_day: 1})
+        ).update(
+            {
+                self.model.amount_examples_on_a_day: 1,
+                self.model.last_used: datetime.date.today(),
+            }
+        )
+        self.session.flush()
         self.session.commit()

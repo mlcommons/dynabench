@@ -24,13 +24,9 @@ const SubmitPrediction = () => {
     defaultValues: initState,
   });
 
-  const handleData = async () => {
-    const isLogin = await checkUserIsLoggedIn(
-      history,
-      `/tasks/${taskCode}/submit_prediction`,
-    );
-    if (!isLogin) {
-      return;
+  const isLogin = async () => {
+    if (!user.id) {
+      await checkUserIsLoggedIn(history, `/`);
     }
   };
 
@@ -117,10 +113,7 @@ const SubmitPrediction = () => {
   };
 
   useEffect(() => {
-    if (user.id) {
-      handleData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    isLogin();
   }, [user]);
 
   return (

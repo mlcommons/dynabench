@@ -41,3 +41,8 @@ class RoundRepository(AbstractRepository):
             {self.model.total_verified_fooled: self.model.total_verified_fooled + 1}
         )
         self.session.commit()
+
+    def get_task_id_by_round_id(self, round_id: int):
+        return (
+            self.session.query(self.model.tid).filter(self.model.id == round_id).first()
+        )

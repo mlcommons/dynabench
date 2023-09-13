@@ -44,3 +44,12 @@ class HistoricalDataRepository(AbstractRepository):
             .filter(HistoricalData.history == data)
             .first()
         )
+
+    def check_sign_consent(self, task_id: int, user_id: int):
+        return (
+            self.session.query(HistoricalData)
+            .filter(HistoricalData.task_id == task_id)
+            .filter(HistoricalData.user_id == user_id)
+            .filter(HistoricalData.history == "consent")
+            .first()
+        )

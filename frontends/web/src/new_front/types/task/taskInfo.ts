@@ -54,6 +54,7 @@ export type TaskInfoType = {
   show_leaderboard: number;
   show_trends: number;
   show_user_leaderboard: number;
+  show_user_leaderboard_csv: number;
 };
 
 type roundInfoType = {

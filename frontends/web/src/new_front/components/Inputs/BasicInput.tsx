@@ -21,7 +21,7 @@ const BasicInput: FC<BasicInputProps> = ({
   return (
     <Collapse in={open}>
       <FormControl
-        className="p-3 h-12 rounded-1 thick-border bg-[#f0f2f5]"
+        className="p3 h-10 rounded-1 thick-border bg-[#f0f2f5]"
         placeholder={placeholder}
         onChange={onChange}
         onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {

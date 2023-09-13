@@ -13,11 +13,24 @@
 import React from "react";
 import { Container, Row, Form, Col, Card, Button } from "react-bootstrap";
 import { Formik } from "formik";
+import useFetch from "use-http";
 
 const Advanced = (props) => {
+  const { post, response } = useFetch();
+
+  const saveYamlConfig = async (values) => {
+    await post("task/update_config_yaml", {
+      task_id: props.task.id,
+      config_yaml: values.config_yaml,
+    });
+    if (response.ok) {
+      window.location.reload();
+    }
+  };
+
   return (
-    <Container className="mb-5 pb-5">
-      <h1 className="my-4 pt-3 text-uppercase text-center">
+    <Container className="pb-5 mb-5">
+      <h1 className="pt-3 my-4 text-center text-uppercase">
         Advanced Settings
       </h1>
       <Col>
@@ -28,9 +41,7 @@ const Advanced = (props) => {
                 config_yaml: props.task.config_yaml,
               }}
               onSubmit={
-                props.task.active
-                  ? props.handleTaskUpdate
-                  : props.handleTaskActivate
+                props.task.active ? saveYamlConfig : props.handleTaskActivate
               }
             >
               {({
@@ -104,8 +115,9 @@ const Advanced = (props) => {
                             <Button
                               type="submit"
                               variant="primary"
-                              className="text-uppercase my-4 border-0 font-weight-bold light-gray-bg btn-primary"
+                              className="my-4 border-0 text-uppercase font-weight-bold light-gray-bg btn-primary"
                               disabled={isSubmitting}
+                              onClick={saveYamlConfig}
                             >
                               Save
                             </Button>
@@ -114,16 +126,11 @@ const Advanced = (props) => {
                               type="submit"
                               variant="danger"
                               size="lg"
-                              className="text-uppercase my-4 border-0 font-weight-bold light-gray-bg btn-primary"
+                              className="my-4 border-0 text-uppercase font-weight-bold light-gray-bg btn-primary"
                               disabled={isSubmitting}
                             >
                               Activate Task
                               <br />{" "}
-                              <small>
-                                (WARNING: You will not be able to change this
-                                config while we're in beta beyond the fields
-                                listed above)
-                              </small>
                             </Button>
                           ))}
                       </Row>
