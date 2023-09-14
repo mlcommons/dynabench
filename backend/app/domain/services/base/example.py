@@ -10,6 +10,7 @@ import os
 import zipfile
 
 import boto3
+import requests
 import yaml
 from fastapi.encoders import jsonable_encoder
 from pydantic import Json
@@ -332,3 +333,8 @@ class ExampleService:
         image = self.s3.get_object(Bucket=bucket_name, Key=image_name)
         image_content = image["Body"].read()
         return base64.b64encode(image_content).decode("utf-8")
+
+    def validate_examples_created_by_user_for_external_provider(
+        self, url_provider: str
+    ):
+        return requests.post(url_provider)
