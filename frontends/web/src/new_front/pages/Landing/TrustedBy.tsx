@@ -8,11 +8,11 @@ import "react-multi-carousel/lib/styles.css";
 
 const TrustedBy = () => {
   return (
-    <div className="container pt-16 ">
+    <div className="container pt-4">
       <h2 className="w-full my-2 text-5xl font-bold leading-tight text-center text-letter-color">
         Used By
       </h2>
-      <div className="grid grid-cols-1 pt-16">
+      <div className="grid grid-cols-1 pt-8">
         <Carousel
           responsive={responsiveCarouselCompanies}
           infinite={true}
