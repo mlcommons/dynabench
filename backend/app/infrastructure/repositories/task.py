@@ -146,7 +146,6 @@ class TaskRepository(AbstractRepository):
         self.session.flush()
         self.session.commit()
 
-
     def get_s3_bucket_by_task_id(self, task_id: int):
         return (
             self.session.query(self.model.s3_bucket)
