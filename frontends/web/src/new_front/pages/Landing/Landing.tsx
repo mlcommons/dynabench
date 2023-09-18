@@ -23,11 +23,11 @@ const Landing = () => {
           <TrustedBy />
         </section>
       </div>
-      <div className="absolute w-full top-[1600px]">
+      {/* <div className="absolute w-full top-[1600px]">
         <Parallax translateY={[-100, 100]} className="mix-blend-overlay">
           <Layer5 className="mix-blend-overlay" />
         </Parallax>
-      </div>
+      </div> */}
       <div className="bg-gradient-to-b from-[#ccebd466] via-[#ccebd41a] to-[#ccebd4b3] z-50">
         <section id="communities" className="pt-16">
           <Communities />
