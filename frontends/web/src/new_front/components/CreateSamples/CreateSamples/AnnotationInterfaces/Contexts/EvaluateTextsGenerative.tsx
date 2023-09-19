@@ -15,6 +15,7 @@ import useFetch from "use-http";
 import SignContract from "new_front/components/Modals/SignContract";
 import Modal from "react-bootstrap/Modal";
 import RadioButton from "new_front/components/Lists/RadioButton";
+import parse from "html-react-parser";
 
 const EvaluateTextsGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -250,11 +251,11 @@ const EvaluateTextsGenerative: FC<
                   <>
                     {finishConversation ? (
                       <h4 className="pb-3 pl-2 text-lg font-semibold text-letter-color">
-                        {artifactsInput.finish_instruction}
+                        {parse(artifactsInput.finish_instruction)}
                       </h4>
                     ) : (
                       <h4 className="pb-3 pl-2 text-lg font-semibold text-letter-color">
-                        {artifactsInput.general_instruction}
+                        {parse(artifactsInput.general_instruction)}
                       </h4>
                     )}
                     <div>
@@ -330,6 +331,7 @@ const EvaluateTextsGenerative: FC<
               )}
               {showChatbot && (
                 <Chatbot
+                  instructions={artifactsInput.general_instruction_chatbot}
                   chatHistory={chatHistory}
                   model_name={bestAnswer.model_name}
                   provider={bestAnswer.provider}
