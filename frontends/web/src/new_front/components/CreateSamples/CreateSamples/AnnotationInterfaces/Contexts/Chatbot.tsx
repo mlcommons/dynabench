@@ -9,6 +9,7 @@ import { ChatHistoryType } from "new_front/types/createSamples/createSamples/uti
 import { Avatar } from "components/Avatar/Avatar";
 
 type ChatbotProps = {
+  instructions: string;
   chatHistory: ChatHistoryType;
   model_name: string;
   provider: string;
@@ -24,6 +25,7 @@ type ChatbotProps = {
 };
 
 const Chatbot: FC<ChatbotProps> = ({
+  instructions,
   chatHistory,
   model_name,
   provider,
@@ -147,6 +149,9 @@ const Chatbot: FC<ChatbotProps> = ({
         <>
           {!finishConversation && (
             <>
+              <h3 className="pt-1 pb-6 pl-6 text-lg font-bold text-letter-color">
+                {instructions}
+              </h3>
               <div id="history-chat">
                 {chatHistory.user.length > 0 &&
                   chatHistory.bot.length > 0 &&
@@ -239,7 +244,7 @@ const Chatbot: FC<ChatbotProps> = ({
                       <GeneralButton
                         onClick={askQuestion}
                         text="Ask"
-                        className="border-0 font-weight-bold light-gray-bg task-action-btn px-4 py-1 font-semibold "
+                        className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                       />
                     </div>
                   ) : (
@@ -247,7 +252,7 @@ const Chatbot: FC<ChatbotProps> = ({
                       <GeneralButton
                         onClick={saveHistory}
                         text="Save"
-                        className="border-0 font-weight-bold light-gray-bg task-action-btn px-4 py-1 font-semibold "
+                        className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                       />
                     </div>
                   )}
@@ -256,7 +261,7 @@ const Chatbot: FC<ChatbotProps> = ({
                       <GeneralButton
                         onClick={handleFinishInteraction}
                         text="Finish"
-                        className="border-0 font-weight-bold light-gray-bg task-action-btn px-4 py-1 font-semibold"
+                        className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn"
                       />
                     </div>
                   )}
