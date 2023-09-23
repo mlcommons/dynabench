@@ -645,6 +645,8 @@ class EvaluationService:
                 final_score["sub_task"] = sub_task
                 new_score["metadata_json"] = json.dumps(final_score)
                 self.score_repository.add(new_score)
+                self.score_repository.fix_matthews_correlation(model_id)
+                self.score_repository.fix_f1_score(model_id)
                 self.logger.info("Save score")
         self.model_repository.update_model_status(model_id)
         user_id = self.model_repository.get_user_id_by_model_id(model_id)[0]
