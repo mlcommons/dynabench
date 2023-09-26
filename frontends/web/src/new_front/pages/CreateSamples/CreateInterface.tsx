@@ -20,6 +20,7 @@ import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import { CreateInterfaceProvider } from "new_front/context/CreateInterface/Context";
 import Swal from "sweetalert2";
+import { useLocation } from "react-router-dom";
 
 const CreateInterface = () => {
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
@@ -37,6 +38,11 @@ const CreateInterface = () => {
   let { taskCode } = useParams<{ taskCode: string }>();
   const { user } = useContext(UserContext);
   const history = useHistory();
+  const location = useLocation();
+
+  // Parse the query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const assignmentId = queryParams.get("assignmentId");
 
   const checkIfUserCanCreateSample = async () => {
     if (response.ok) {
@@ -85,14 +91,14 @@ const CreateInterface = () => {
     }
   };
 
-  const isLogin = async () => {
+  const isLogin = async (assignmentId: string | null, taskCode: string) => {
     if (!user.id) {
-      await checkUserIsLoggedIn(history, `/`);
+      await checkUserIsLoggedIn(history, `/`, assignmentId, taskCode);
     }
   };
 
   useEffect(() => {
-    isLogin();
+    isLogin(assignmentId, taskCode);
   }, [user]);
 
   useEffect(() => {

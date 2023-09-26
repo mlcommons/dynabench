@@ -44,10 +44,14 @@ const EvaluateTextsGenerative: FC<
   const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts,
   );
-  const [prompt, setPrompt] = useState("Ask the model a question");
+  const [prompt, setPrompt] = useState(
+    "Enter text here. Do not copy and paste",
+  );
   const { post, response } = useFetch();
   const { user } = useContext(UserContext);
-  const { modelInputs, updateModelInputs } = useContext(CreateInterfaceContext);
+  const { metadataExample, modelInputs, updateModelInputs } = useContext(
+    CreateInterfaceContext,
+  );
   const neccessaryFields = ["original_prompt", "category"];
 
   const handleSaveCategory = async (category: string) => {
@@ -95,36 +99,34 @@ const EvaluateTextsGenerative: FC<
           id: "1",
           model_name: "GPT-3",
           provider: "openai",
-          model_letter: "A",
           text: "The secret of life is a philosophical and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
-          score: 50,
         },
         {
           id: "2",
           model_name: "text-davinci-003",
           provider: "openai",
           text: "Good and you?",
-          model_letter: "B",
-          score: 50,
         },
         {
           id: "3",
           model_name: "GPT-1",
           provider: "openai",
-          model_letter: "C",
           text: "The secret of life is a profound and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.",
-          score: 50,
         },
         {
           id: "4",
           model_name: "GPT-4",
           provider: "openai",
-          model_letter: "D",
           text: "Ultimately, the secret of life may be found in the journey of self-reflection, introspection, and living in alignment with one's values and authentic self. It is an ongoing process of seeking purpose, finding joy and fulfillment, and embracing the experiences and lessons that life offers.",
-          score: 50,
         },
       ];
-      setTexts(generatedTexts);
+
+      setTexts(
+        generatedTexts.map((text) => ({
+          ...text,
+          score: 50,
+        })),
+      );
 
       setChatHistory({
         ...chatHistory,
@@ -160,34 +162,45 @@ const EvaluateTextsGenerative: FC<
   };
 
   const handleSelectedText = () => {
-    updateModelInputs({
-      [field_names_for_the_model.best_answer ?? "best_answer"]: texts.reduce(
-        (max: { score: number }, answer: { score: number }) =>
-          answer.score > max.score ? answer : max,
-      ),
-    });
-    setBestAnswer(
-      texts.reduce((max: { score: number }, answer: { score: number }) =>
-        answer.score > max.score ? answer : max,
-      ),
-    );
-
-    setChatHistory({
-      ...chatHistory,
-      bot: [
-        ...chatHistory.bot,
-        {
-          id: "1",
-          text: texts.reduce(
-            (max: { score: number }, answer: { score: number }) =>
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      confirmButtonColor: "#0574fd",
+      confirmButtonText: "Yes, I'm sure!",
+      showCancelButton: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        updateModelInputs({
+          [field_names_for_the_model.best_answer ?? "best_answer"]:
+            texts.reduce((max: { score: number }, answer: { score: number }) =>
               answer.score > max.score ? answer : max,
-          ).text,
-        },
-      ],
+            ),
+        });
+        setBestAnswer(
+          texts.reduce((max: { score: number }, answer: { score: number }) =>
+            answer.score > max.score ? answer : max,
+          ),
+        );
+
+        setChatHistory({
+          ...chatHistory,
+          bot: [
+            ...chatHistory.bot,
+            {
+              id: "1",
+              text: texts.reduce(
+                (max: { score: number }, answer: { score: number }) =>
+                  answer.score > max.score ? answer : max,
+              ).text,
+            },
+          ],
+        });
+        setShowChatbot(true);
+        setShowAnswers(false);
+        setShowInput(false);
+      }
     });
-    setShowChatbot(true);
-    setShowAnswers(false);
-    setShowInput(false);
   };
 
   const handleSignInConsent = async () => {
@@ -196,6 +209,7 @@ const EvaluateTextsGenerative: FC<
       task_id: taskId,
     });
     setSignInConsent(true);
+    window.location.reload();
   };
 
   const showOriginalInteractions = () => {
@@ -214,12 +228,14 @@ const EvaluateTextsGenerative: FC<
     if (modelInputs) {
       console.log("modelInputs", modelInputs);
     }
-  }, [modelInputs, texts]);
+    if (metadataExample) {
+      console.log("metadataExample", metadataExample);
+    }
+  }, [modelInputs, texts, metadataExample]);
 
-  // useEffect(() => {
-  //   checkIfUserIsSignedInConsent();
-  //   console.log("signInConsent", signInConsent);
-  // }, [signInConsent]);
+  useEffect(() => {
+    checkIfUserIsSignedInConsent();
+  }, [signInConsent]);
 
   return (
     <>
@@ -232,9 +248,7 @@ const EvaluateTextsGenerative: FC<
                   <div>
                     <AnnotationInstruction
                       placement="left"
-                      tooltip={
-                        "Select the category that best describes the text"
-                      }
+                      tooltip={artifactsInput.user_input.instruction}
                     >
                       <RadioButton
                         instructions={artifactsInput.user_input.instructions}
@@ -286,7 +300,7 @@ const EvaluateTextsGenerative: FC<
                         >
                           <GeneralButton
                             onClick={generateTexts}
-                            text="Ask the model a question"
+                            text="Send"
                             className="border-0 font-weight-bold light-gray-bg task-action-btn"
                             disabled={disabledInput}
                           />
@@ -322,7 +336,7 @@ const EvaluateTextsGenerative: FC<
                     <div className="grid col-span-1 py-3 justify-items-end">
                       <GeneralButton
                         onClick={handleSelectedText}
-                        text="Save"
+                        text="Send"
                         className="border-0 font-weight-bold light-gray-bg task-action-btn"
                       />
                     </div>
@@ -333,6 +347,7 @@ const EvaluateTextsGenerative: FC<
                 <Chatbot
                   instructions={artifactsInput.general_instruction_chatbot}
                   chatHistory={chatHistory}
+                  username={user.username}
                   model_name={bestAnswer.model_name}
                   provider={bestAnswer.provider}
                   num_of_samples_chatbot={artifactsInput.num_of_samples_chatbot}

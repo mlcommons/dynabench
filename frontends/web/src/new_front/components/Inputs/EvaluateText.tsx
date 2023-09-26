@@ -38,7 +38,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
   return (
     <form id={id}>
       <div className="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 ">
-        <div className=" bg-white rounded-t-lg text-black">
+        <div className="text-black bg-white rounded-t-lg ">
           <textarea
             id="comment"
             className={`${
@@ -51,7 +51,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
             disabled={disabled}
           ></textarea>
         </div>
-        <div className="flex items-center justify-between w-full gap-2 pt-4 border-t px-4 pb-2">
+        <div className="flex items-center justify-between w-full gap-2 px-4 pt-4 pb-2 border-t">
           <span className="text-gray-500 ">{optionsSlider[0]}</span>
           <input
             id={id}
@@ -64,7 +64,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
             onChange={handleUpdateScore}
             disabled={disabled}
           />
-          <span className=" text-gray-500 ">{optionsSlider[1]}</span>
+          <span className="text-gray-500 ">{optionsSlider[1]}</span>
         </div>
         <div className="flex justify-between w-full"></div>
       </div>

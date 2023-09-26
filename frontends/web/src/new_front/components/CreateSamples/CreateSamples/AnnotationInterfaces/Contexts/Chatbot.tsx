@@ -11,6 +11,7 @@ import { Avatar } from "components/Avatar/Avatar";
 type ChatbotProps = {
   instructions: string;
   chatHistory: ChatHistoryType;
+  username: string;
   model_name: string;
   provider: string;
   num_of_samples_chatbot: number;
@@ -27,6 +28,7 @@ type ChatbotProps = {
 const Chatbot: FC<ChatbotProps> = ({
   instructions,
   chatHistory,
+  username,
   model_name,
   provider,
   num_of_samples_chatbot,
@@ -100,7 +102,7 @@ const Chatbot: FC<ChatbotProps> = ({
 
   const finishSection = () => {
     updateModelInputs({
-      chat_history: chatHistory.bot,
+      chat_history: chatHistory,
     });
     setIsAskingQuestion(false);
   };
@@ -163,7 +165,7 @@ const Chatbot: FC<ChatbotProps> = ({
                             <div>
                               <Avatar
                                 avatar_url={null}
-                                username="ciroye"
+                                username={username}
                                 isThumbnail={true}
                                 theme="dark"
                               />
@@ -199,7 +201,7 @@ const Chatbot: FC<ChatbotProps> = ({
                         <div>
                           <Avatar
                             avatar_url={null}
-                            username="ciroye"
+                            username={username}
                             isThumbnail={true}
                             theme="dark"
                           />
@@ -217,7 +219,7 @@ const Chatbot: FC<ChatbotProps> = ({
                   <div className="flex flex-col items-start order-2 w-full max-w-lg mx-2 space-y-2">
                     {isAskingQuestion && (
                       <BasicInput
-                        placeholder="ask"
+                        placeholder="Enter text here. Do not copy and paste"
                         onChange={(e) => setPrompt(e.target.value)}
                         onEnter={askQuestion}
                       />

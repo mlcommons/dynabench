@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -5,6 +9,7 @@
 import secrets
 
 import bottle
+import requests
 
 import common.auth as _auth
 import common.helpers as util
@@ -18,6 +23,17 @@ def authenticate():
     data = bottle.request.json
     if not data or "email" not in data or "password" not in data:
         bottle.abort(400, "Missing or bad credentials")
+    email_provider = data["email"].split("@")[1]
+    user_name = data["email"].split("@")[0]
+    if any(provider in email_provider for provider in ["prolific", "amazonturk"]):
+        requests.post(
+            "http://127.0.0.1:8000/user/create_user",
+            json={
+                "email": data["email"],
+                "password": data["password"],
+                "username": user_name,
+            },
+        )
     try:
         u = UserModel()
         user = u.getByEmailAndPassword(data["email"], data["password"])
@@ -49,7 +65,7 @@ def get_trial_auth_token():
 def refresh_auth():
     payload = _auth.get_expired_token_payload()
     refresh_token = _auth.get_refresh_token()
-    logger.info(f"Received refresh token request with token")
+    logger.info("Received refresh token request with token")
     rtm = RefreshTokenModel()
     rt = rtm.getByToken(refresh_token)
     if rt:

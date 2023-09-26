@@ -77,3 +77,13 @@ class RoundUserExampleInfoService:
         )
         print("amounts_examples_created_today", amounts_examples_created_today)
         return amounts_examples_created_today < max_amount_examples_on_a_day
+
+    def get_counter_examples_submitted(self, round_id: int, user_id: int):
+        return self.rounds_user_example_info_repository.get_counter_examples_submitted(
+            round_id, user_id
+        )[0]
+
+    def reset_counter_examples_submitted(self, round_id: int, user_id: int):
+        self.rounds_user_example_info_repository.reset_counter_examples_submitted(
+            round_id, user_id
+        )

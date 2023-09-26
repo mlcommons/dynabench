@@ -6,9 +6,9 @@ type MultiSliderProps = {
   options: any[];
   instructions: string;
   optionsSlider: string[];
-  field_name_for_the_model?: string;
+  field_name_for_the_model: string;
   metadata?: boolean;
-  onInputChange?: (data: any, metadata?: boolean) => void;
+  onInputChange: (data: any, metadata?: boolean) => void;
 };
 
 const MultiSlider: FC<MultiSliderProps> = ({
@@ -20,12 +20,26 @@ const MultiSlider: FC<MultiSliderProps> = ({
   onInputChange,
 }) => {
   const [open, setOpen] = useState(false);
+  const [responses, setResponses] = useState<any[]>([]);
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     option: string,
     extraInfo?: string,
   ) => {
-    console.log("hello");
+    const newResponses = responses.map((response) => {
+      if (response.option === option) {
+        return {
+          ...response,
+          value: parseInt(event.target.value),
+        };
+      }
+      return response;
+    });
+    setResponses(newResponses);
+    onInputChange({
+      [field_name_for_the_model]: responses,
+      extraInfo,
+    });
   };
 
   return (
@@ -52,7 +66,7 @@ const MultiSlider: FC<MultiSliderProps> = ({
                   <label className="w-full pt-2 ml-2 text-base font-medium text-letter-color">
                     {parse(option.label)}
                   </label>
-                  <div className="flex items-center justify-between w-full gap-2 pt-4 border-t px-4 pb-2">
+                  <div className="flex items-center justify-between w-full gap-2 px-4 pt-4 pb-2 border-t">
                     <span className="text-gray-500 ">{optionsSlider[0]}</span>
                     <input
                       className={`rounded-full w-full cursor-pointer `}
@@ -65,7 +79,7 @@ const MultiSlider: FC<MultiSliderProps> = ({
                         handleChange(event, option.label, event.target.value)
                       }
                     />
-                    <span className=" text-gray-500 ">{optionsSlider[1]}</span>
+                    <span className="text-gray-500 ">{optionsSlider[1]}</span>
                   </div>
                 </div>
               </li>

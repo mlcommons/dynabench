@@ -167,10 +167,10 @@ class ModelService:
         model_evaluation_metric_info: dict,
     ) -> str:
         response = {}
+        task_config = self.task_service.get_task_info_by_task_id(task_id)
+        config_yaml = yaml.safe_load(task_config.config_yaml)
         if model_url:
             prediction = self.single_model_prediction(model_url, model_input)
-            task_config = self.task_service.get_task_info_by_task_id(task_id)
-            config_yaml = yaml.safe_load(task_config.config_yaml)
             response["prediction"] = prediction[model_prediction_label]
             if "cast_output" in config_yaml:
                 response["prediction"] = next(
@@ -188,13 +188,21 @@ class ModelService:
                 model_evaluation_metric_info,
             )
         else:
-            response["prediction"] = model_input["label"]
+            response["prediction"] = model_input.get("label", "")
             response["probabilities"] = {}
+            prediction = {}
             model_wrong = False
-        response["label"] = model_input["label"]
-        response["input"] = model_input[model_input["input_by_user"]]
+        response["label"] = model_input.get("label", "")
+        response["input"] = model_input.get(model_input.get("input_by_user", None), "")
         response["fooled"] = model_wrong
         response["sandBox"] = sandbox_mode
+        external_validator = config_yaml.get("external_validator", None)
+        if external_validator:
+            amount_require_examples = external_validator.get(
+                "amount_require_examples", -1
+            )
+            external_validator_url = external_validator.get("url", None)
+            external_validator_artifacts = external_validator.get("artifacts", None)
         if not sandbox_mode:
             self.example_service.create_example_and_increment_counters(
                 context_id,
@@ -207,6 +215,9 @@ class ModelService:
                 tag,
                 round_id,
                 task_id,
+                amount_require_examples,
+                external_validator_url,
+                external_validator_artifacts,
             )
         return response
 

@@ -1,43 +1,27 @@
-import React, { FC, useContext, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import React, { FC, useContext, useEffect, useState } from "react";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import { ReactComponent as Login } from "new_front/assets/login.svg";
 import axios from "axios";
 import UserContext from "containers/UserContext";
-import useFetch from "use-http";
 import Swal from "sweetalert2";
 
 const LoginPage: FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { post, response } = useFetch();
   const { updateState } = useContext(UserContext);
   const originalPath = localStorage.getItem("originalPath");
   const history = useHistory();
+  const location = useLocation();
 
-  // const handleLogin = async () => {
-  //   await post('user/authenticate', {
-  //     email: email,
-  //     password: password,
-  //   })
-  //   if (response.ok) {
-  //     localStorage.setItem('id_token', response.data.token)
-  //     updateState({
-  //       user: response.data.user,
-  //     })
-  //     if (originalPath) {
-  //       history.push(originalPath)
-  //     } else {
-  //       history.goBack()
-  //     }
-  //   } else {
-  //     Swal.fire({
-  //       icon: 'error',
-  //       title: 'Oops...',
-  //       text: 'Something went wrong! try another email or password',
-  //     })
-  //   }
-  // }
+  const queryParams = new URLSearchParams(location.search);
+  const assignmentId = queryParams.get("assignmentId");
+  const taskCode = queryParams.get("taskCode");
+
+  const handleAmazonTurk = (assignmentId: string) => {
+    setEmail(`${assignmentId}@amazonturk.com`);
+    setPassword(assignmentId);
+  };
 
   const handleLogin = () => {
     axios
@@ -50,7 +34,9 @@ const LoginPage: FC = () => {
         updateState({
           user: response.data.user,
         });
-        if (originalPath === "/") {
+        if (taskCode) {
+          history.push(`/tasks/${taskCode}/create`);
+        } else if (originalPath === "/") {
           history.push("/account");
         } else {
           history.goBack();
@@ -64,6 +50,15 @@ const LoginPage: FC = () => {
         });
       });
   };
+
+  useEffect(() => {
+    if (assignmentId) {
+      // handleAmazonTurk(assignmentId);
+      if (email && password) {
+        handleLogin();
+      }
+    }
+  }, [email]);
 
   return (
     <section className="h-screen bg-gradient-to-b from-white to-[#ccebd466]">

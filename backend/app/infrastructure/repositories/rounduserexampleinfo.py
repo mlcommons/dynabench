@@ -107,3 +107,17 @@ class RoundUserExampleInfoRepository(AbstractRepository):
         )
         self.session.flush()
         self.session.commit()
+
+    def get_counter_examples_submitted(self, round_id: int, user_id: int):
+        return (
+            self.session.query(self.model.examples_submitted)
+            .filter((self.model.r_realid == round_id) & (self.model.uid == user_id))
+            .first()
+        )
+
+    def reset_counter_examples_submitted(self, round_id: int, user_id: int):
+        self.session.query(self.model).filter(
+            (self.model.r_realid == round_id) & (self.model.uid == user_id)
+        ).update({self.model.examples_submitted: 0})
+        self.session.flush()
+        self.session.commit()
