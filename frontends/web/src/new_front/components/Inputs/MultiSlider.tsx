@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Collapse } from "react-bootstrap";
 import parse from "html-react-parser";
 
@@ -20,27 +20,36 @@ const MultiSlider: FC<MultiSliderProps> = ({
   onInputChange,
 }) => {
   const [open, setOpen] = useState(false);
-  const [responses, setResponses] = useState<any[]>([]);
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    option: string,
-    extraInfo?: string,
-  ) => {
-    const newResponses = responses.map((response) => {
-      if (response.option === option) {
-        return {
-          ...response,
-          value: parseInt(event.target.value),
-        };
-      }
-      return response;
-    });
-    setResponses(newResponses);
-    onInputChange({
-      [field_name_for_the_model]: responses,
-      extraInfo,
-    });
+  const [responses, setResponses] = useState<any[]>([
+    options.map((option) => {
+      return { label: option.label, value: 50 };
+    }),
+  ]);
+
+  const handleChange = (option: string, value: string) => {
+    const index = responses.findIndex((response) => response.label === option);
+    if (index > -1) {
+      responses[index] = { label: option, value };
+    } else {
+      responses.push({ label: option, value });
+    }
+    setResponses([...responses]);
+    onInputChange(
+      {
+        [field_name_for_the_model]: [...responses],
+      },
+      metadata,
+    );
   };
+
+  useEffect(() => {
+    onInputChange(
+      {
+        [field_name_for_the_model]: [...responses],
+      },
+      metadata,
+    );
+  }, []);
 
   return (
     <div className="py-2 ">
@@ -76,7 +85,7 @@ const MultiSlider: FC<MultiSliderProps> = ({
                       min={1}
                       max={100}
                       onChange={(event) =>
-                        handleChange(event, option.label, event.target.value)
+                        handleChange(option.label, event.target.value)
                       }
                     />
                     <span className="text-gray-500 ">{optionsSlider[1]}</span>
