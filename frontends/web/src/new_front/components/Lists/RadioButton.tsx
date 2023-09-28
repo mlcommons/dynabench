@@ -21,7 +21,7 @@ const RadioButton: FC<RadioButtonProps> = ({
 }) => {
   const [open, setOpen] = useState(InitialOpen);
   const [selectedOption, setSelectedOption] = useState<string>(
-    options[0] || ""
+    options[0] || "",
   );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,7 +30,7 @@ const RadioButton: FC<RadioButtonProps> = ({
         {
           [field_name_for_the_model]: event.target.value,
         },
-        metadata || false
+        metadata || false,
       );
     }
   };

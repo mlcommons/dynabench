@@ -118,8 +118,7 @@ class ScoreService:
             ]
             scores = []
             for field_score_name in field_scores_names:
-                score_name = field_score_name
-                scores.append(downstream_info_metadata[score_name])
+                scores.append(downstream_info_metadata[field_score_name])
             downstream_info.append(
                 {"sub_task": downstream_info_metadata["sub_task"], "score": scores}
             )
@@ -329,4 +328,11 @@ class ScoreService:
             final_file,
         )
         csv_file = pd.read_csv(final_file)
+        csv_file["username"] = csv_file["uid"].apply(
+            lambda x: self.user_repository.get_user_name_by_id(x)[0]
+        )
+        csv_file.drop(columns=["uid"], inplace=True)
+        csv_file = csv_file[
+            ["username"] + [col for col in csv_file.columns if col != "username"]
+        ]
         return csv_file.to_json(orient="records")

@@ -242,4 +242,5 @@ class ModelRepository(AbstractRepository):
                 }
             )
         )
+        self.session.flush()
         return self.session.commit()

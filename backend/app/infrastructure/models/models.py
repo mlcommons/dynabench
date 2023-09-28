@@ -203,6 +203,7 @@ class Dataset(Base):
     log_access_type = Column(Enum("owner", "user"))
     tags = Column(Integer)
     has_downstream = Column(TINYINT(1))
+    weight = Column(Float)
 
     task = relationship("Task")
 

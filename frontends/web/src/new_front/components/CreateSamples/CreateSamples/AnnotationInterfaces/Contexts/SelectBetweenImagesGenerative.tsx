@@ -102,6 +102,13 @@ const SelectBetweenImagesGenerative: FC<
         setIsGenerativeContext: setIsGenerativeContext,
       });
       await saveHistoricalData(prompt, setPromptHistory);
+      await post(
+        "/rounduserexample/increment_counter_examples_submitted_today",
+        {
+          round_id: realRoundId,
+          user_id: user.id,
+        },
+      );
     } else {
       Swal.fire({
         icon: "error",

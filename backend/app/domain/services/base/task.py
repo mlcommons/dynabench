@@ -15,6 +15,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import 
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.example import ExampleRepository
+from app.infrastructure.repositories.historical_data import HistoricalDataRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.taskcategories import TaskCategoriesRepository
@@ -32,6 +33,7 @@ class TaskService:
         self.task_categories_repository = TaskCategoriesRepository()
         self.user_repository = UserRepository()
         self.validation_repository = ValidationRepository()
+        self.historical_task_repository = HistoricalDataRepository()
 
     def update_last_activity_date(self, task_id: int):
         self.task_repository.update_last_activity_date(task_id)
@@ -68,7 +70,10 @@ class TaskService:
             return 4
         return 1
 
-    def get_dataset_weight(self):
+    def get_dataset_weight(self, dataset_id: int = None):
+        dataset_weight = self.dataset_repository.get_dataset_weight(dataset_id)[0]
+        if dataset_weight is not None:
+            return dataset_weight
         return 5
 
     def get_order_datasets_by_task_id(self, task_id: int):
@@ -81,7 +86,9 @@ class TaskService:
         )
         scoring_datasets = [dataset.__dict__ for dataset in scoring_datasets]
         for scoring_dataset in scoring_datasets:
-            scoring_dataset["default_weight"] = self.get_dataset_weight()
+            scoring_dataset["default_weight"] = self.get_dataset_weight(
+                scoring_dataset.get("id")
+            )
         return scoring_datasets
 
     def get_task_info_by_task_id(self, task_id: int):
@@ -248,3 +255,16 @@ class TaskService:
         all_tasks = self.get_active_tasks_with_round_info()
         active_tasks = [task for task in all_tasks if task["id"] in active_tasks]
         return active_tasks
+
+    def check_sign_consent(self, task_id: int, user_id: int):
+        if self.historical_task_repository.check_sign_consent(task_id, user_id):
+            return True
+        return False
+
+    def sign_in_consent(self, task_id: int, user_id: int):
+        return self.historical_task_repository.save_historical_data(
+            task_id, user_id, "consent"
+        )
+
+    def update_config_yaml(self, task_id: int, config_yaml: str):
+        return self.task_repository.update_config_yaml(task_id, config_yaml)

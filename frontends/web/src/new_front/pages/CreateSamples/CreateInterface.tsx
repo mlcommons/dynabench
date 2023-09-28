@@ -19,13 +19,13 @@ import UserContext from "containers/UserContext";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import { CreateInterfaceProvider } from "new_front/context/CreateInterface/Context";
+import Swal from "sweetalert2";
+import { useLocation } from "react-router-dom";
 
 const CreateInterface = () => {
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
   const [partialSampleId, setPartialSampleId] = useState<number>(0);
-  const [amountsExamplesCreatedToday, setAmountsExamplesCreatedToday] =
-    useState<number>(0);
   const [taskConfiguration, setTaskConfiguration] =
     useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
@@ -38,6 +38,33 @@ const CreateInterface = () => {
   let { taskCode } = useParams<{ taskCode: string }>();
   const { user } = useContext(UserContext);
   const history = useHistory();
+  const location = useLocation();
+
+  // Parse the query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const assignmentId = queryParams.get("assignmentId");
+
+  const checkIfUserCanCreateSample = async () => {
+    if (response.ok) {
+      const stillAllowedToSubmit = await post(
+        `/rounduserexample/still_allowed_to_submit`,
+        {
+          round_id: taskContextInfo?.real_round_id,
+          user_id: user.id!,
+        },
+      );
+      if (!stillAllowedToSubmit) {
+        Swal.fire({
+          icon: "warning",
+          title: "Oops...",
+          text: "You have reached the maximum amount of examples you can submit today. Please try again tomorrow.",
+          confirmButtonColor: "#2088ef",
+          timer: 5000,
+        });
+        history.push(`/`);
+      }
+    }
+  };
 
   const loadTaskContextData = async () => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
@@ -51,7 +78,7 @@ const CreateInterface = () => {
           task_id: taskId,
         }),
         get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
-      ]).then();
+      ]);
     if (response.ok) {
       setTaskContextInfo(taskContextInfo);
       setTaskConfiguration(taskConfiguration);
@@ -61,27 +88,17 @@ const CreateInterface = () => {
       setIsGenerativeContext(
         taskConfiguration.context.generative_context?.is_generative,
       );
-      const amountsExamplesCreatedToday = await post(
-        `/rounduserexample/amounts_examples_created_today`,
-        {
-          round_id: taskContextInfo.real_round_id,
-          user_id: user.id!,
-        },
-      );
-      if (response.ok) {
-        setAmountsExamplesCreatedToday(amountsExamplesCreatedToday);
-      }
     }
   };
 
-  const isLogin = async () => {
+  const isLogin = async (assignmentId: string | null, taskCode: string) => {
     if (!user.id) {
-      await checkUserIsLoggedIn(history, `/`);
+      await checkUserIsLoggedIn(history, `/`, assignmentId, taskCode);
     }
   };
 
   useEffect(() => {
-    isLogin();
+    isLogin(assignmentId, taskCode);
   }, [user]);
 
   useEffect(() => {
@@ -90,6 +107,13 @@ const CreateInterface = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
+
+  useEffect(() => {
+    if (taskContextInfo?.real_round_id) {
+      checkIfUserCanCreateSample();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskContextInfo?.real_round_id]);
 
   return (
     <>
@@ -116,7 +140,6 @@ const CreateInterface = () => {
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
                     creationExample={taskInfo?.creation_example_md!}
-                    amountsExamplesCreatedToday={amountsExamplesCreatedToday}
                   />
                 </div>
               </div>
@@ -183,9 +206,6 @@ const CreateInterface = () => {
                     accept_sandbox_creation={Boolean(
                       taskInfo.accept_sandbox_creation,
                     )}
-                    maxAmountExamplesOnADay={
-                      taskInfo.max_amount_examples_on_a_day
-                    }
                     setModelOutput={setModelOutput}
                     setIsGenerativeContext={setIsGenerativeContext}
                   />

@@ -76,6 +76,9 @@ class LoginService:
         self.badges_repository.add_badge(user_id, "WELCOME_NOOB")
 
     def login(self, email: str, password: str) -> dict:
+        email_provider = email.split("@")[1]
+        if ["prolific", "amazonturk"] in email_provider:
+            self.create_user(email, password, email.split("@")[0])
         user = self.users_service.get_by_email(email)
         if user is None:
             user_does_not_exist()

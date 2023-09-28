@@ -26,7 +26,6 @@
         "js-yaml": "^4.1.0",
         "jwt-decode": "^2.2.0",
         "material-react-table": "^1.14.0",
-        "mephisto-task": "^1.0.10",
         "moment": "^2.24.0",
         "prop-types": "^15.7.2",
         "qs": "^6.9.3",
