@@ -6,14 +6,6 @@ type SignContractProps = {
 };
 
 const SignContract: FC<SignContractProps> = ({ handleClose }) => {
-  const [checkboxDisabled, setCheckboxDisabled] = useState(true);
-  const handleScroll = (e: any) => {
-    const element = e.target;
-    if (element.scrollHeight - element.scrollTop === element.clientHeight) {
-      setCheckboxDisabled(false);
-    }
-  };
-
   return (
     <div className="p-4 rounded-lg">
       <Modal.Header closeButton>
@@ -21,8 +13,8 @@ const SignContract: FC<SignContractProps> = ({ handleClose }) => {
           Consent
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body onScroll={handleScroll}>
-        <div className="overflow-auto max-h-64" onScroll={handleScroll}>
+      <Modal.Body>
+        <div className="overflow-auto max-h-64">
           <p className="text-sm text-letter-color">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id
             velit ut velit dictum hendrerit. Fusce tincidunt lorem at velit
@@ -70,7 +62,6 @@ const SignContract: FC<SignContractProps> = ({ handleClose }) => {
           <input
             type="checkbox"
             className="form-check-input"
-            disabled={checkboxDisabled}
             onClick={handleClose}
           />
           <label className="form-check-label text-letter-color">
