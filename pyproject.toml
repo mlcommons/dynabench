@@ -26,7 +26,7 @@ line-length = 88
 exclude = '''
 /(
     \.git
-    \node_modules
+  |  \node_modules
   | \.hg
   | \.mypy_cache
   | \.tox
