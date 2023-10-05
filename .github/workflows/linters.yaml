@@ -67,7 +67,8 @@ jobs:
       run: |
         conda activate dynabench
         black --version
-        black --check .
+        black --check --exclude frontends/web/node_modules .
+
 
     - name: Run linter
       if: matrix.lint == 'stylelint'
