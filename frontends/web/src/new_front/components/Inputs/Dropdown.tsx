@@ -64,6 +64,7 @@ const Dropdown: FC<DropdownProps> = ({
                 setOpen(false);
                 onChange(option);
               }}
+              disabled={disabled}
             >
               {option}
             </button>
@@ -71,24 +72,6 @@ const Dropdown: FC<DropdownProps> = ({
         </div>
       </div>
     </div>
-
-    // <div classNameName="w-full py-2 ">
-    //   <DropdownButton
-    //     id="dropdown-basic-button"
-    //     title={placeholder}
-    //     classNameName="flex w-full pb-2"
-    //     variant="secondary"
-    //   >
-    //     {options.map((option) => (
-    //       <BootsDropdown.Item
-    //         onClick={() => onChange(option)}
-    //         classNameName="flex  w-full"
-    //       >
-    //         {option}
-    //       </BootsDropdown.Item>
-    //     ))}
-    //   </DropdownButton>
-    // </div>
   );
 };
 

@@ -4,7 +4,6 @@ import { fadeIn } from "new_front/utils/helpers/motion";
 import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
-import Landing1 from "new_front/assets/landing-1.png";
 import Modal from "react-bootstrap/Modal";
 import CreateProposalTask from "new_front/components/Modals/CreateProposalTask";
 
@@ -18,69 +17,67 @@ const Header: FC = () => {
       <Modal show={showProposeTask} onHide={handleClose}>
         <CreateProposalTask handleClose={handleClose} />
       </Modal>
-      <div className="mx-auto pt-16">
-        <div className="grid items-center gap-16 lg:grid-cols-2">
+      <div className="flex flex-col items-center justify-center w-full pt-2">
+        <div className="flex flex-col items-center justify-center px-4 md:w-9/12 lg:flex-row lg:px-0">
           <motion.div
-            className="mt-12 lg:mt-0"
+            className="md:mt-12"
             variants={fadeIn("right", "tween", 0.5, 0.5)}
           >
-            <h2 className="font-sans text-5xl font-bold  text-letter-color text-center">
-              Challenging the Limits of Benchmarking AI
-            </h2>
-            <p className="mt-4 mb-16 text-2xl text-center font-medium">
-              Collaborate with AI enthusiasts and experts to solve pressing AI
-              challenges through innovation.
-            </p>
-            <div className="flex flex-row items-center justify-center gap-6">
-              <Button
-                as={Link}
-                className="py-[9px] px-7 text-xl font-semibold border-0 bg-primary-color "
-                to="/tasks"
-              >
-                Challenges
-              </Button>
-              <Button
-                as="div"
-                onClick={handleShow}
-                className="py-[9px] px-7 text-xl font-semibold  border-0 light-gray-bg"
-              >
-                Create your own task
-              </Button>
+            <div className="flex items-center justify-center flex-column">
+              <h2 className="font-sans text-4xl font-bold text-center lg:text-5xl text-letter-color">
+                Challenging the Limits of Benchmarking AI
+              </h2>
+              <p className="items-center mt-4 mb-8 text-xl font-medium text-center lg:text-2xl">
+                Collaborate with AI enthusiasts and experts to tackle vital AI
+                challenges. Dynabench lets you create and join AI challenges,
+                enhancing skills and advancing AI together.
+              </p>
             </div>
-            <div className="flex flex-row w-full gap-12 mt-4 mx-4">
-              <div className="mb-12 md:mb-0 text-center">
-                <h2 className="text-3xl font-bold display-5 text-letter-color mb-2">
+            <div className="flex items-center justify-center">
+              <div className="grid items-center justify-center grid-cols-1 gap-6 md:grid-cols-2">
+                <Button
+                  as={Link}
+                  className="max-w-sm py-2 text-lg font-semibold border-0 px-7 lg:text-xl bg-primary-color"
+                  to="/tasks"
+                >
+                  Challenges
+                </Button>
+                <Button
+                  as="div"
+                  onClick={handleShow}
+                  className="py-2 text-lg font-semibold border-0 px-7 lg:text-xl light-gray-bg"
+                >
+                  Create your own task
+                </Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4">
+              <div className="mb-4 text-center lg:mb-12 md:mb-0">
+                <h2 className="mb-2 text-2xl font-bold lg:text-3xl display-5 text-letter-color">
                   20+
                 </h2>
-                <h5 className="mb-2 text-lg font-medium">Challenges</h5>
+                <h5 className="mb-2 text-xl font-medium">Challenges</h5>
               </div>
-              <div className="mb-12 md:mb-0 text-center">
-                <h2 className="text-3xl font-bold display-5 text-letter-color mb-2">
+              <div className="mb-4 text-center lg:mb-12 md:mb-0">
+                <h2 className="mb-2 text-2xl font-bold lg:text-3xl display-5 text-letter-color">
                   40+
                 </h2>
-                <h5 className="mb-2 text-lg font-medium">Partipants</h5>
+                <h5 className="mb-2 text-xl font-medium">Partipants</h5>
               </div>
-              <div className="mb-12 md:mb-0 text-center">
-                <h2 className="text-3xl font-bold display-5 text-letter-color mb-2">
+              <div className="mb-4 text-center lg:mb-12 md:mb-0">
+                <h2 className="mb-2 text-2xl font-bold lg:text-3xl display-5 text-letter-color">
                   100+
                 </h2>
-                <h5 className="mb-2 text-lg font-medium">Models</h5>
+                <h5 className="mb-2 text-xl font-medium">Models</h5>
               </div>
-              <div className="mb-12 md:mb-0 text-center">
-                <h2 className="text-3xl font-bold display-5 text-letter-color mb-2 text-center">
+              <div className="mb-4 text-center lg:mb-12 md:mb-0">
+                <h2 className="mb-2 text-2xl font-bold text-center lg:text-3xl display-5 text-letter-color">
                   6
                 </h2>
-                <h5 className="mb-2 text-lg font-medium">Communities</h5>
+                <h5 className="mb-2 text-xl font-medium">Communities</h5>
               </div>
             </div>
           </motion.div>
-          <div className="p-4">
-            <img
-              className="object-cover w-full h-full"
-              src={Landing1}
-              alt="Landing"
-            />
-          </div>
         </div>
       </div>
       <div className="mt-8">

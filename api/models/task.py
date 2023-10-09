@@ -299,7 +299,6 @@ class AnnotationVerifierMode(enum.Enum):
 
 
 class AnnotationComponent:
-
     # This is re-implemented for cases where an annotation component requires that we
     # store different info in the db compared to the info that we send models.
     # For example, we might want to send image blobs to a model but store a url
@@ -690,6 +689,8 @@ class Task(Base):
     show_leaderboard = db.Column(db.Integer())
     show_trends = db.Column(db.Integer())
     show_user_leaderboard = db.Column(db.Integer())
+    show_username_leaderboard = db.Column(db.Integer())
+    show_user_leaderboard_csv = db.Column(db.Integer())
 
     def __repr__(self):
         return f"<Task {self.name}>"
@@ -864,8 +865,10 @@ class TaskModel(BaseModel):
         tasks = [x.to_dict() for x in rows]
         return tasks
 
-    def get_default_dataset_weight(self, task, name):
-        # TODO:  allow this to be settable by the task owner?
+    def get_default_dataset_weight(self, weight: float):
+        print("weight", weight)
+        if weight is not None:
+            return weight
         return 5
 
     def get_default_metric_weight(
@@ -907,7 +910,7 @@ class TaskModel(BaseModel):
                             "id": dataset.id,
                             "name": dataset.name,
                             "default_weight": self.get_default_dataset_weight(
-                                t, dataset.name
+                                dataset.weight
                             ),
                         }
                     )

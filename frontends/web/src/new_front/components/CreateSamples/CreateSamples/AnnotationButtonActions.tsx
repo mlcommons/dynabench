@@ -23,7 +23,6 @@ type Props = {
   partialSampleId?: any;
   neccessaryFields: string[];
   accept_sandbox_creation: boolean;
-  maxAmountExamplesOnADay: number;
   setModelOutput: (modelOutput: ModelOutputType) => void;
   setIsGenerativeContext: (isGenerativeContext: boolean) => void;
 };
@@ -43,7 +42,6 @@ const AnnotationButtonActions: FC<Props> = ({
   partialSampleId,
   neccessaryFields,
   accept_sandbox_creation,
-  maxAmountExamplesOnADay,
   setModelOutput,
   setIsGenerativeContext,
 }) => {
@@ -57,29 +55,11 @@ const AnnotationButtonActions: FC<Props> = ({
       ...modelInputs,
       input_by_user: inputByUser,
     };
-    // const stillAllowedToSubmit = await post(
-    //   `/rounduserexample/still_allowed_to_submit`,
-    //   {
-    //     round_id: realRoundId,
-    //     user_id: userId,
-    //     max_amount_examples_on_a_day: maxAmountExamplesOnADay,
-    //   },
-    // )
-    // if (!stillAllowedToSubmit) {
-    //   Swal.fire({
-    //     icon: 'warning',
-    //     title: 'Oops...',
-    //     text:
-    //       'You have reached the maximum amount of examples you can submit today',
-    //     confirmButtonColor: '#2088ef',
-    //   })
-    //   return
-    // }
     if (
       neccessaryFields.every(
         (item) =>
           modelInputs.hasOwnProperty(item) ||
-          metadataExample.hasOwnProperty(item)
+          metadataExample.hasOwnProperty(item),
       )
     ) {
       const finaModelInputs = {
@@ -97,7 +77,7 @@ const AnnotationButtonActions: FC<Props> = ({
       if (partialSampleId === 0) {
         const modelOutput = await post(
           `/model/single_model_prediction_submit`,
-          finaModelInputs
+          finaModelInputs,
         );
         setModelOutput(modelOutput);
       } else {
@@ -111,7 +91,7 @@ const AnnotationButtonActions: FC<Props> = ({
             user_id: userId,
             context_id: contextId,
             task_id: taskID,
-          }
+          },
         );
         if (response.ok) {
           Swal.fire({
@@ -138,7 +118,7 @@ const AnnotationButtonActions: FC<Props> = ({
         icon: "warning",
         title: "Oops...",
         html: `Please fill the missing fields: <br/> ${neccessaryFields.filter(
-          (field) => !modelInputs.hasOwnProperty(field)
+          (field) => !modelInputs.hasOwnProperty(field),
         )}  `,
         confirmButtonColor: "#2088ef",
       });

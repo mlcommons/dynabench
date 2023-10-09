@@ -10,6 +10,7 @@ import os
 import zipfile
 
 import boto3
+import requests
 import yaml
 from fastapi.encoders import jsonable_encoder
 from pydantic import Json
@@ -105,6 +106,9 @@ class ExampleService:
         tag: str,
         round_id: int,
         task_id: int,
+        amount_necessary_examples: int = -1,
+        url_external_provider: str = None,
+        provider_artifacts: dict = None,
     ) -> dict:
         new_sample_info = self.create_example(
             context_id,
@@ -119,6 +123,18 @@ class ExampleService:
         self.increment_counter_examples_submitted(
             round_id, user_id, context_id, task_id, model_wrong
         )
+        amount_examples_submitted = (
+            self.round_user_example_info.get_counter_examples_submitted(
+                round_id, user_id
+            )
+        )
+        print("amount_examples_submitted", amount_examples_submitted)
+        print("amount_necessary_examples", amount_necessary_examples)
+        if amount_examples_submitted == amount_necessary_examples:
+            requests.post(url_external_provider, json=provider_artifacts)
+            self.round_user_example_info.reset_counter_examples_submitted(
+                round_id, user_id
+            )
         return new_sample_info["id"]
 
     def get_example_to_validate(

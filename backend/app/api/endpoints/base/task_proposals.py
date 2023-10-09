@@ -4,6 +4,7 @@
 
 from fastapi import APIRouter
 
+from app.domain.schemas.base.task_proposals import AddTaskProposalRequest
 from app.domain.services.base.task_proposals import TaskProposalService
 
 
@@ -16,9 +17,7 @@ async def validate_no_duplicate_task_code(task_code: str):
 
 
 @router.post("/add_task_proposal", response_model={})
-async def add_task_proposal(
-    user_id: int, task_code: str, name: str, desc: str, longdesc: str
-):
+async def add_task_proposal(model: AddTaskProposalRequest):
     return TaskProposalService().add_task_proposal(
-        user_id, task_code, name, desc, longdesc
+        model.user_id, model.task_code, model.name, model.desc, model.longdesc
     )

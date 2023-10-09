@@ -28,3 +28,18 @@ class GetDynaboardInfoByTaskIdRequest(BaseModel):
     offset: int
     limit: int
     metrics: List[str]
+
+
+class SignInConsentRequest(BaseModel):
+    task_id: int
+    user_id: int
+
+
+class CheckSignConsentRequest(BaseModel):
+    task_id: int
+    user_id: int
+
+
+class UpdateYamlConfiguration(BaseModel):
+    task_id: int
+    config_yaml: str

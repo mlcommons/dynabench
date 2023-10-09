@@ -5,11 +5,14 @@
 import base64
 import os
 from abc import ABC, abstractmethod
+from io import BytesIO
 
 import openai
 import requests
+from requests.adapters import HTTPAdapter
 
 from app.domain.services.base.task import TaskService
+from app.domain.services.utils.adapters import RequestSession
 from app.domain.services.utils.constant import forbidden_image
 
 
@@ -60,49 +63,115 @@ class DynabenchImageProvider(ImageProvider):
     def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
         payload = {"prompt": prompt, "num_images": 1}
         response = requests.post(f"{endpoint['dynabench']['endpoint']}", json=payload)
-        if response.status_code == 200:
-            return {"generator": self.provider_name(), "images": response.json()}
+        try:
+            if response.status_code == 200:
+                return {"generator": self.provider_name(), "images": response.json()}
+        except:
+            return {"generator": self.provider_name(), "images": [forbidden_image]}
 
     def provider_name(self):
         return "dynabench"
 
 
-class SDVariableAutoEncoder(ImageProvider):
+class SD2ImageProvider(ImageProvider):
     def __init__(self):
         self.api_key = os.getenv("HF")
+        self.session = RequestSession()
 
     def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
-        print("Trying model", endpoint["hf_inference_1"]["endpoint"])
+        print("Trying model", endpoint["hf_inference_3"]["endpoint"])
         payload = {"inputs": prompt, "steps": 30}
         headers = {"Authorization": self.api_key}
-        response = requests.post(
-            f"{endpoint['hf_inference_1']['endpoint']}", json=payload, headers=headers
-        )
-        if response.status_code == 200:
-            new_image = response.json()[0]["image"]["images"][0]
-            return {"generator": self.provider_name(), "images": [new_image]}
+        try:
+            response = self.session.session.post(
+                f"{endpoint['hf_inference_3']['endpoint']}",
+                json=payload,
+                headers=headers,
+            )
+            if response.status_code == 200:
+                new_image = response.json()
+                return {"generator": self.provider_name(), "images": [new_image]}
+        except:
+            return {"generator": self.provider_name(), "images": [forbidden_image]}
 
     def provider_name(self):
-        return "sd+vae_ft_mse"
+        return "sd2.1-base"
 
 
-class SDXL(ImageProvider):
+class SDXLImageProvider(ImageProvider):
     def __init__(self):
         self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
+        print("Trying model", endpoint["hf_inference_4"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = self.session.session.post(
+                f"{endpoint['hf_inference_4']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            if response.status_code == 200:
+                new_image = response.json()[0]["image"]["images"][0]
+                return {"generator": self.provider_name(), "images": [new_image]}
+        except:
+            return {"generator": self.provider_name(), "images": [forbidden_image]}
+
+    def provider_name(self):
+        return "sdxl1.0"
+
+
+class SDRunwayMLImageProvider(ImageProvider):
+    def __init__(self):
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
 
     def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
         print("Trying model", endpoint["hf_inference_2"]["endpoint"])
         payload = {"inputs": prompt, "steps": 30}
         headers = {"Authorization": self.api_key}
-        response = requests.post(
-            f"{endpoint['hf_inference_2']['endpoint']}", json=payload, headers=headers
-        )
-        if response.status_code == 200:
-            new_image = response.json()[0]["image"]["images"][0]
-            return {"generator": self.provider_name(), "images": [new_image]}
+        try:
+            response = self.session.session.post(
+                f"{endpoint['hf_inference_2']['endpoint']}",
+                json=payload,
+                headers=headers,
+            )
+            if response.status_code == 200:
+                new_image = response.json()
+                return {"generator": self.provider_name(), "images": [new_image]}
+        except:
+            return {"generator": self.provider_name(), "images": [forbidden_image]}
 
     def provider_name(self):
-        return "sdxl_1.0"
+        return "runwayml-sd1.5"
+
+
+class SDVariableAutoEncoder(ImageProvider):
+    def __init__(self):
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
+        print("Trying model", endpoint["hf_inference_1"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = self.session.session.post(
+                f"{endpoint['hf_inference_1']['endpoint']}",
+                json=payload,
+                headers=headers,
+            )
+            if response.status_code == 200:
+                new_image = response.json()[0]["image"]["images"][0]
+                return {"generator": self.provider_name(), "images": [new_image]}
+        except:
+            return {"generator": self.provider_name(), "images": [forbidden_image]}
+
+    def provider_name(self):
+        return "sd+vae_ft_mse"
 
 
 class HFInferenceEndpointImageProvider(ImageProvider):
@@ -113,6 +182,7 @@ class HFInferenceEndpointImageProvider(ImageProvider):
         print("Trying model", endpoint["hf_inference_1"]["endpoint"])
         payload = {"inputs": prompt, "steps": 30}
         headers = {"Authorization": self.api_key}
+
         response = requests.post(
             f"{endpoint['hf_inference_1']['endpoint']}", json=payload, headers=headers
         )
@@ -140,12 +210,15 @@ class HFImageProvider(ImageProvider):
         }
         model = models["huggingface"]["models"][0]
         endpoint = f"{endpoint['huggingface']['endpoint']}/{model}"
-        response = requests.post(endpoint, json=payload, headers=headers)
         images = []
-        print("Trying model", endpoint, "with status code", response.status_code)
-        if response.status_code == 200:
-            base64_image = base64.b64encode(response.content)
-            images.append(base64_image.decode("utf-8"))
+        try:
+            response = requests.post(endpoint, json=payload, headers=headers)
+            print("Trying model", endpoint, "with status code", response.status_code)
+            if response.status_code == 200:
+                base64_image = base64.b64encode(response.content)
+                images.append(base64_image.decode("utf-8"))
+        except response.exceptions.Timeout:
+            print("Timeout error")
         return {"generator": self.provider_name(), "images": images}
 
     def provider_name(self):
@@ -174,11 +247,14 @@ class StableDiffusionImageProvider(ImageProvider):
                     "User-Agent": "",
                 },
             )
-            if res.status_code == 200:
-                image_response = res.json().get("output").get("choices")
-                image_response = [x["image_base64"] for x in image_response]
-                print(f"Model {model} worked")
-                return image_response
+            try:
+                if res.status_code == 200:
+                    image_response = res.json().get("output").get("choices")
+                    image_response = [x["image_base64"] for x in image_response]
+                    print(f"Model {model} worked")
+                    return image_response
+            except requests.exceptions.Timeout:
+                continue
             else:
                 continue
 

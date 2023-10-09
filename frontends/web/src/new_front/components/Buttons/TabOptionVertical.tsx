@@ -16,7 +16,7 @@ const TabOptionVertical: FC<TabOptionVerticalProps> = ({
   setOpenTab,
 }) => {
   return (
-    <li className="flex-auto text-center last:mr-0">
+    <li className="flex-auto text-left last:mr-0">
       <a
         className="relative block py-3"
         onClick={(e) => {

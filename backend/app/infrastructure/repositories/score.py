@@ -6,7 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, text
 
 from app.infrastructure.models.models import Dataset, Model, Score, User
 from app.infrastructure.repositories.abstract import AbstractRepository
@@ -68,3 +68,35 @@ class ScoreRepository(AbstractRepository):
         return self.session.query(func.count(Score.did.distinct())).filter(
             Score.mid == model_id
         ).filter(Score.did.in_(scoring_datasets)).scalar() == len(scoring_datasets)
+
+    def fix_matthews_correlation(self, model_id: int):
+        sql = text(
+            """
+            UPDATE dynabench.scores
+            SET metadata_json = JSON_SET(
+                metadata_json,
+                '$.new_accuracy',
+                CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata_json, '$.matthews_correlation'))
+                AS DECIMAL(18, 9))
+            )
+            WHERE JSON_UNQUOTE(JSON_EXTRACT(metadata_json, '$.matthews_correlation'))
+            IS NOT NULL AND mid = :model_id
+        """
+        )
+        self.session.execute(sql, {"model_id": model_id})
+
+    def fix_f1_score(self, model_id: int):
+        sql = text(
+            """
+            UPDATE dynabench.scores
+            SET metadata_json = JSON_SET(
+                metadata_json,
+                '$.new_accuracy',
+                CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata_json, '$.f1'))
+                AS DECIMAL(18, 9))
+            )
+            WHERE JSON_UNQUOTE(JSON_EXTRACT(metadata_json, '$.f1'))
+            IS NOT NULL AND mid = :model_id
+        """
+        )
+        self.session.execute(sql, {"model_id": model_id})

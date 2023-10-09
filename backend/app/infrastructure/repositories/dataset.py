@@ -107,8 +107,10 @@ class DatasetRepository(AbstractRepository):
         return dataset
 
     def get_downstream_datasets(self, task_id: int) -> dict:
-        downstream_datasets = self.session.query(self.model).filter(
-            self.model.tid == task_id
+        downstream_datasets = (
+            self.session.query(self.model)
+            .filter(self.model.tid == task_id)
+            .filter(self.model.access_type == "scoring")
         )
         jsonl_downstream_datasets = []
         for downstream_dataset in downstream_datasets:
@@ -119,3 +121,10 @@ class DatasetRepository(AbstractRepository):
             jsonl_downstream_datasets.append(jsonl_downstream_dataset)
 
         return jsonl_downstream_datasets
+
+    def get_dataset_weight(self, dataset_id: int) -> dict:
+        return (
+            self.session.query(self.model.weight)
+            .filter(self.model.id == dataset_id)
+            .one()
+        )

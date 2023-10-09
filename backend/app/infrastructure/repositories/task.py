@@ -44,6 +44,7 @@ class TaskRepository(AbstractRepository):
 
     def update_last_activity_date(self, task_id: int):
         self.session.query(self.model).filter(self.model.id == task_id).update({})
+        self.session.flush()
         self.session.commit()
 
     def get_active_tasks_with_round_info(self):
@@ -114,6 +115,7 @@ class TaskRepository(AbstractRepository):
         self.session.query(self.model).filter_by(id=task_id).update(
             {"general_instructions": instructions}
         )
+        self.session.flush()
         self.session.commit()
 
     def get_challenges_types(self):
@@ -134,5 +136,26 @@ class TaskRepository(AbstractRepository):
         return (
             self.session.query(self.model)
             .filter(self.model.task_code == task_code)
+            .first()
+        )
+
+    def update_config_yaml(self, task_id: int, config_yaml: dict):
+        self.session.query(self.model).filter_by(id=task_id).update(
+            {"config_yaml": config_yaml}
+        )
+        self.session.flush()
+        self.session.commit()
+
+    def get_s3_bucket_by_task_id(self, task_id: int):
+        return (
+            self.session.query(self.model.s3_bucket)
+            .filter(self.model.id == task_id)
+            .first()
+        )
+
+    def get_max_amount_examples_on_a_day(self, task_id: int):
+        return (
+            self.session.query(self.model.max_amount_examples_on_a_day)
+            .filter(self.model.id == task_id)
             .first()
         )

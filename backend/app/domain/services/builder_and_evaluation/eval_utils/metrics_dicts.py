@@ -22,6 +22,8 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
     get_dataperf_fraction_of_fixes_meta,
     get_examples_per_second,
     get_examples_per_second_meta,
+    get_f1,
+    get_f1_meta,
     get_fairness_meta,
     get_macro_f1,
     get_macro_f1_meta,
@@ -30,6 +32,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
     get_memory_utilization,
     get_memory_utilization_meta,
     get_new_accuracy,
+    get_new_accuracy_meta,
     get_robustness_meta,
     get_sp_bleu,
     get_sp_bleu_meta,
@@ -44,6 +47,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
 # all eval_metrics takes predictions and targets as input, and output a metric number
 eval_metrics_dict = {
     "accuracy": get_accuracy,
+    "f1": get_f1,
     "macro_f1": get_macro_f1,
     "squad_f1": get_squad_f1,
     "bleu": get_bleu,
@@ -69,9 +73,10 @@ job_metrics_dict = {
 
 meta_metrics_dict = {
     "accuracy": get_accuracy_meta,
-    "new_accuracy": get_accuracy_meta,
+    "new_accuracy": get_new_accuracy_meta,
     "perf": get_accuracy_meta,
     "matthews_correlation": get_matthews_correlation_meta,
+    "f1": get_f1_meta,
     "macro_f1": get_macro_f1_meta,
     "squad_f1": get_squad_f1_meta,
     "bleu": get_bleu_meta,

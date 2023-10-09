@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -36,6 +40,9 @@ class Dataset(Base):
     log_access_type = db.Column(
         db.Enum(LogAccessTypeEnum), default=LogAccessTypeEnum.owner
     )
+    tags = db.Column(db.Text)
+    has_downstream = db.Column(db.Boolean, default=False)
+    weight = db.Column(db.Float, default=0)
 
     def __repr__(self):
         return f"<Dataset {self.name}>"

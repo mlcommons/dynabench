@@ -16,11 +16,11 @@ import "./Avatar.css";
 export const Avatar = ({
   avatar_url,
   username,
-  isEditable,
+  isEditable = false,
   theme = "light",
-  isThumbnail,
-  handleUpdate,
-  loader,
+  isThumbnail = false,
+  handleUpdate = () => {},
+  loader = false,
 }) => {
   const getInitial = (name) => {
     return (
@@ -48,7 +48,7 @@ export const Avatar = ({
           {isEditable ? (
             <div
               className={`editPic ${
-                theme === "light" ? "white-bg" : "principal-color-bg"
+                theme === "light" ? "white-bg" : "bg-black"
               }`}
             >
               <img className="edit-pic-icon" src="/camera.png" alt="edit pic" />
@@ -64,12 +64,12 @@ export const Avatar = ({
       ) : (
         <div
           className={`avatar-circle ${
-            theme === "light" ? "white-bg" : "principal-color-bg"
+            theme === "light" ? "white-bg" : "bg-third-color"
           } ${isThumbnail ? "sm inline-block mr-1" : null}`}
         >
           <span
             className={`initials ${
-              theme === "light" ? "principal-color" : "white-color"
+              theme === "light" ? "principal-color" : "text-white"
             }`}
           >
             {getInitial(username)}

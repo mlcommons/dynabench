@@ -6,9 +6,14 @@
 
 import decode from "jwt-decode";
 
-export const checkUserIsLoggedIn = async (history, url) => {
+export const checkUserIsLoggedIn = async (
+  history,
+  url,
+  assignmentId,
+  taskCode
+) => {
   const login = await isLogin();
-  return sendUserToLogin(login, history, url);
+  return sendUserToLogin(login, history, url, assignmentId, taskCode);
 };
 
 const isLogin = async () => {
@@ -23,7 +28,7 @@ const isLogin = async () => {
   return true;
 };
 
-const sendUserToLogin = (login, history, url) => {
+const sendUserToLogin = (login, history, url, assignmentId, taskCode) => {
   if (!login) {
     history.push(
       "/login?msg=" +
@@ -31,7 +36,9 @@ const sendUserToLogin = (login, history, url) => {
           "Please sign up or log in so that you can upload a model"
         ) +
         "&src=" +
-        encodeURIComponent(url)
+        encodeURIComponent(url),
+      "&assignmentId=" + encodeURIComponent(assignmentId),
+      "&taskCode=" + encodeURIComponent(taskCode)
     );
   } else {
     return true;

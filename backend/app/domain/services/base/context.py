@@ -4,6 +4,7 @@
 
 import base64
 import hashlib
+import io
 import json
 import os
 import random
@@ -12,6 +13,7 @@ import time
 import boto3
 import yaml
 from fastapi import HTTPException
+from PIL import Image
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
@@ -119,35 +121,50 @@ class ContextService:
         )
         images = []
         for generator_dict in generated_images:
-            for image in generator_dict["images"]:
-                image_id = (
-                    generator_dict["generator"]
-                    + "_"
-                    + prompt
-                    + "_"
-                    + str(user_id)
-                    + "_"
-                    + hashlib.md5(image.encode()).hexdigest()
-                )
-                print(image_id)
-                if black_image in image:
-                    new_dict = {
-                        "image": forbidden_image,
-                        "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
-                    }
-                    images.append(new_dict)
-                else:
-                    new_dict = {
-                        "image": image,
-                        "id": image_id,
-                    }
-                    filename = f"adversarial-nibbler/{image_id}.jpeg"
-                    self.s3.put_object(
-                        Body=base64.b64decode(image),
-                        Bucket=self.dataperf_bucket,
-                        Key=filename,
+            if generator_dict:
+                for image in generator_dict.get("images", []):
+                    image_id = (
+                        generator_dict["generator"]
+                        + "_"
+                        + prompt
+                        + "_"
+                        + str(user_id)
+                        + "_"
+                        + hashlib.md5(image.encode()).hexdigest()
                     )
-                    images.append(new_dict)
+                    print(image_id)
+                    image_bytes = io.BytesIO(base64.b64decode(image))
+                    img = Image.open(image_bytes)
+                    img = img.convert("L")
+                    average_intensity = img.getdata()
+                    average_intensity = sum(average_intensity) / len(average_intensity)
+                    if average_intensity < 10:
+                        print("Image too dark, skipping")
+                        new_dict = {
+                            "image": forbidden_image,
+                            "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
+                        }
+                        images.append(new_dict)
+
+                    elif black_image in image:
+                        new_dict = {
+                            "image": forbidden_image,
+                            "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
+                        }
+                        images.append(new_dict)
+
+                    else:
+                        new_dict = {
+                            "image": image,
+                            "id": image_id,
+                        }
+                        filename = f"adversarial-nibbler/{image_id}.jpeg"
+                        self.s3.put_object(
+                            Body=base64.b64decode(image),
+                            Bucket=self.dataperf_bucket,
+                            Key=filename,
+                        )
+                        images.append(new_dict)
         random.shuffle(images)
         print(f"Time to generate images: {time.time() - start}")
         return images
@@ -172,7 +189,7 @@ class ContextService:
     async def generate_images_stream(self, model_info):
         yield self.get_generative_contexts(model_info["type"], model_info["artifacts"])
 
-    def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
+    async def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
             return self.get_nibbler_contexts(
                 prompt=artifacts["prompt"],

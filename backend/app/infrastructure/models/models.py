@@ -131,6 +131,8 @@ class Task(Base):
     show_leaderboard = Column(TINYINT(1), server_default=text("'1'"))
     show_trends = Column(TINYINT(1), server_default=text("'1'"))
     show_user_leaderboard = Column(TINYINT(1), server_default=text("'1'"))
+    show_username_leaderboard = Column(TINYINT(1), server_default=text("'1'"))
+    show_user_leaderboard_csv = Column(TINYINT(1), server_default=text("'1'"))
 
 
 class User(Base):
@@ -201,6 +203,7 @@ class Dataset(Base):
     log_access_type = Column(Enum("owner", "user"))
     tags = Column(Integer)
     has_downstream = Column(TINYINT(1))
+    weight = Column(Float)
 
     task = relationship("Task")
 
@@ -467,3 +470,12 @@ class Validation(Base):
 
     example = relationship("Example")
     user = relationship("User")
+
+
+class HistoricalData(Base):
+    __tablename__ = "historical_data"
+    id = Column(Integer, primary_key=True)
+    task_id = Column(ForeignKey("tasks.id"), nullable=False, index=True)
+    user_id = Column(ForeignKey("users.id"), nullable=False, index=True)
+    history = Column(Text)
+    created_at = Column(DateTime, server_default=func.now(), default=func.now())

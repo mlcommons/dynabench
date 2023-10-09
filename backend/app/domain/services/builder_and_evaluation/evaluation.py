@@ -462,7 +462,6 @@ class EvaluationService:
         arn_service: str,
         current_round: int = 1,
     ):
-
         try:
             print("dataset", dataset)
             (
@@ -591,6 +590,8 @@ class EvaluationService:
         downstream_predictions = load_dataset(download_predictions)
         for downstream_dataset in downstream_datasets_info:
             dataset_name = downstream_dataset["dataset"].split("-")[0]
+            if dataset_name.split("_")[0] == "msgs":
+                dataset_name = dataset_name.split("_")[0]
             print("dataset_name", dataset_name)
             downstream_datasets_filename = self.download_downstream_dataset(
                 task_code, downstream_dataset
@@ -604,7 +605,7 @@ class EvaluationService:
             dataset_id = downstream_dataset["dataset_id"]
             for sub_task in downstream_tasks:
                 print("sub_task", sub_task)
-                self.logger.info("Evaluate downstream task", sub_task)
+                self.logger.info("Evaluate downstream task={sub_task}")
                 labels = [
                     data for data in downstream_datasets if data["sub_task"] == sub_task
                 ][0]["labels"]
@@ -613,6 +614,11 @@ class EvaluationService:
                     for data in downstream_prediction
                     if data["sub_task"] == sub_task
                 ][0]["predictions"]
+                predicts = [
+                    item
+                    for item in predicts
+                    if any(item["id"] == entry["id"] for entry in labels)
+                ]
                 metric = [
                     data for data in downstream_datasets if data["sub_task"] == sub_task
                 ][0]["metric"]
@@ -639,6 +645,8 @@ class EvaluationService:
                 final_score["sub_task"] = sub_task
                 new_score["metadata_json"] = json.dumps(final_score)
                 self.score_repository.add(new_score)
+                self.score_repository.fix_matthews_correlation(model_id)
+                self.score_repository.fix_f1_score(model_id)
                 self.logger.info("Save score")
         self.model_repository.update_model_status(model_id)
         user_id = self.model_repository.get_user_id_by_model_id(model_id)[0]
@@ -652,67 +660,7 @@ class EvaluationService:
         )
 
     def test(self):
-        task_id = 48
-        predictions = "1161-test_prediction-1675"
-        model_id = 1146
-        downstream_datasets_info = self.dataset_repository.get_downstream_datasets(
-            task_id
-        )
-        task_code = self.task_repository.get_by_id(task_id)["task_code"]
-        print(downstream_datasets_info)
-        download_predictions = self.download_predictions(task_code, predictions)
-        downstream_predictions = load_dataset(download_predictions)
-        for downstream_dataset in downstream_datasets_info:
-            dataset_name = downstream_dataset["dataset"].split("-")[0]
-            print("dataset_name", dataset_name)
-            downstream_datasets_filename = self.download_downstream_dataset(
-                task_code, downstream_dataset
-            )
-            downstream_datasets = load_dataset(downstream_datasets_filename)
-            downstream_tasks = [item["sub_task"] for item in downstream_datasets]
-            downstream_prediction = [
-                d for d in downstream_predictions if d["task"].lower() == dataset_name
-            ]
-            current_round = downstream_dataset["round_id"]
-            dataset_id = downstream_dataset["dataset_id"]
-            print("downstream_prediction", downstream_prediction)
-            for sub_task in downstream_tasks:
-                print("sub_task", sub_task)
-                self.logger.info("Evaluate downstream task", sub_task)
-                labels = [
-                    data for data in downstream_datasets if data["sub_task"] == sub_task
-                ][0]["labels"]
-                predicts = [
-                    data
-                    for data in downstream_prediction
-                    if data["sub_task"] == sub_task
-                ][0]["predictions"]
-                metric = [
-                    data for data in downstream_datasets if data["sub_task"] == sub_task
-                ][0]["metric"]
-                round_info = self.round_repository.get_round_info_by_round_and_task(
-                    task_id, current_round
-                )
-                score = evaluation_without_tags(metric, predicts, labels)
-                print(score)
-
-                new_score = {
-                    "perf": score["perf"],
-                    "pretty_perf": score["pretty_perf"],
-                    "fairness": 0,
-                    "robustness": 0,
-                    "mid": model_id,
-                    "r_realid": round_info.id,
-                    "did": dataset_id,
-                    "memory_utilization": 0,
-                    "examples_per_second": 0,
-                }
-                final_score = new_score.copy()
-                metric_name = str(metric)
-                final_score[metric_name] = final_score["perf"]
-                new_score["metadata_json"] = json.dumps(final_score)
-                self.score_repository.add(new_score)
-                self.logger.info("Save score")
+        return "test"
 
     def initialize_model_evaluation(
         self, task_code: str, s3_url: str, model_id: int, user_id: int

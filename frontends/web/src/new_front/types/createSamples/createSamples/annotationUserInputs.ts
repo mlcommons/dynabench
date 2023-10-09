@@ -7,4 +7,5 @@ export type AnnotationUserInput = {
   instructions?: string;
   options?: string[];
   field_name_for_the_model: string;
+  options_slider?: any;
 };
