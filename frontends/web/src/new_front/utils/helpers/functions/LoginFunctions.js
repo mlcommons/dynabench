@@ -36,9 +36,11 @@ const sendUserToLogin = (login, history, url, assignmentId, taskCode) => {
           "Please sign up or log in so that you can upload a model"
         ) +
         "&src=" +
-        encodeURIComponent(url),
-      "&assignmentId=" + encodeURIComponent(assignmentId),
-      "&taskCode=" + encodeURIComponent(taskCode)
+        encodeURIComponent(url) +
+        "&assignmentId=" +
+        encodeURIComponent(assignmentId) +
+        "&taskCode=" +
+        encodeURIComponent(taskCode)
     );
   } else {
     return true;

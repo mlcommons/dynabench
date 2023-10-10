@@ -15,7 +15,10 @@ const LoginPage: FC = () => {
   const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
-  const assignmentId = queryParams.get("assignmentId");
+  const assignmentId =
+    queryParams.get("assignmentId") === "null"
+      ? null
+      : queryParams.get("assignmentId");
   const taskCode = queryParams.get("taskCode");
 
   const handleAmazonTurk = (assignmentId: string) => {
@@ -53,7 +56,7 @@ const LoginPage: FC = () => {
 
   useEffect(() => {
     if (assignmentId) {
-      // handleAmazonTurk(assignmentId);
+      handleAmazonTurk(assignmentId);
       if (email && password) {
         handleLogin();
       }
