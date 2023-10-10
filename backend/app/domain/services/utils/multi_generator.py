@@ -4,13 +4,40 @@
 
 from multiprocessing import Pool
 
+from app.domain.services.utils.llm import HuggingFaceProvider, OpenAIProvider
+
 from app.domain.services.utils.image_generators import (  # SD2ImageProvider,
     OpenAIImageProvider,
     SDRunwayMLImageProvider,
     SDVariableAutoEncoder,
     SDXLImageProvider,
 )
+class LLMGenerator:
+    def __init__(self):
+        self.llm_providers = [
+            OpenAIProvider(),
+            HuggingFaceProvider(),
+        ]
 
+    def generate_texts(self, prompt: str, model: str, endpoint: str) -> list:
+        return self.generate_all_texts(prompt, model, endpoint)
+
+    def generate_texts_parallel(self, generator, prompt, model, endpoint):
+        return generator.generate_text(prompt, model, endpoint)
+
+    def generate_all_images(self, prompt: str, model: str, endpoint: str) -> list:
+        with Pool(len(self.llm_providers)) as _:
+            with Pool() as pool:
+                results = pool.starmap(
+                    self.generate_texts_parallel,
+                    [
+                        (generator, prompt, model, endpoint)
+                        for generator in self.llm_providers
+                    ],
+                )
+            pool.close()
+            pool.join()
+        return results
 
 class ImageGenerator:
     def __init__(self):
