@@ -216,7 +216,7 @@ const Chatbot: FC<ChatbotProps> = ({
               </div>
               <div id="interacion block">
                 <div className="flex items-end">
-                  <div className="flex flex-col items-start order-2 w-full max-w-lg mx-2 space-y-2">
+                  <div className="flex flex-col items-start order-2 w-full max-w-lg pt-2 mx-2 space-y-2">
                     {isAskingQuestion && (
                       <BasicInput
                         placeholder="Enter text here. Do not copy and paste"

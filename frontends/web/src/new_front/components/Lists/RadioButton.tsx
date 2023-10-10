@@ -8,6 +8,7 @@ type RadioButtonProps = {
   field_name_for_the_model?: string;
   metadata?: boolean;
   InitialOpen?: boolean;
+  disabled?: boolean;
   onInputChange?: (value: any, metadata: boolean) => void;
 };
 
@@ -17,6 +18,7 @@ const RadioButton: FC<RadioButtonProps> = ({
   field_name_for_the_model,
   metadata,
   InitialOpen = true,
+  disabled,
   onInputChange,
 }) => {
   const [open, setOpen] = useState(InitialOpen);
@@ -61,6 +63,7 @@ const RadioButton: FC<RadioButtonProps> = ({
                   name="radio"
                   className="w-4 h-5 bg-gray-100 border-gray-300 rounded text-third-color focus:ring-third-color"
                   onChange={handleChange}
+                  disabled={disabled}
                 />
                 <label
                   className="w-full pt-2 ml-2 text-base font-medium text-letter-color"

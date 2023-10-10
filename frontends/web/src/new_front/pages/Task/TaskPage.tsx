@@ -126,7 +126,7 @@ const TaskPage = () => {
                     {(task.show_user_leaderboard !== 0 ||
                       task.show_leaderboard !== 0) && (
                       <TabOption
-                        optionTab={1}
+                        optionTab={task.id === 45 ? 2 : 1}
                         tabName="Leaderboard"
                         openTab={openTab}
                         setOpenTab={setOpenTab}
@@ -134,7 +134,7 @@ const TaskPage = () => {
                     )}
                     {Object.entries(taskInstructions).length !== 0 && (
                       <TabOption
-                        optionTab={2}
+                        optionTab={task.id === 45 ? 1 : 2}
                         tabName="Overview"
                         openTab={openTab}
                         setOpenTab={setOpenTab}
@@ -168,29 +168,67 @@ const TaskPage = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap mt-3 pb-6">
+            <div className="flex flex-wrap pb-6 mt-3">
               <div className="flex-auto">
                 <div className="tab-content tab-space">
-                  <div className={openTab === 1 ? "block  px-4" : "hidden"}>
-                    {(task.show_user_leaderboard !== 0 ||
-                      task.show_leaderboard !== 0) && (
-                      <Leaderboard
-                        taskCode={task.task_code}
-                        showLeaderboard={Boolean(task.show_leaderboard)}
-                        showTrends={Boolean(task.show_trends)}
-                        showUserLeaderboard={Boolean(
-                          task.show_user_leaderboard,
-                        )}
-                        showUserLeaderboardCSV={Boolean(
-                          task.show_user_leaderboard_csv,
-                        )}
-                      />
-                    )}
-                  </div>
-                  {Object.entries(taskInstructions).length !== 0 && (
-                    <div className={openTab === 2 ? "block " : "hidden"}>
-                      <OverviewTask taskInstructions={taskInstructions!} />
+                  {/* Remove after Nibbler finish */}
+                  {task.id !== 45 ? (
+                    <div className={openTab === 1 ? "block  px-4" : "hidden"}>
+                      {(task.show_user_leaderboard !== 0 ||
+                        task.show_leaderboard !== 0) && (
+                        <Leaderboard
+                          taskCode={task.task_code}
+                          showLeaderboard={Boolean(task.show_leaderboard)}
+                          showTrends={Boolean(task.show_trends)}
+                          showUserLeaderboard={Boolean(
+                            task.show_user_leaderboard,
+                          )}
+                          showUserLeaderboardCSV={Boolean(
+                            task.show_user_leaderboard_csv,
+                          )}
+                        />
+                      )}
                     </div>
+                  ) : (
+                    <div className={openTab === 2 ? "block  px-4" : "hidden"}>
+                      {(task.show_user_leaderboard !== 0 ||
+                        task.show_leaderboard !== 0) && (
+                        <Leaderboard
+                          taskCode={task.task_code}
+                          showLeaderboard={Boolean(task.show_leaderboard)}
+                          showTrends={Boolean(task.show_trends)}
+                          showUserLeaderboard={Boolean(
+                            task.show_user_leaderboard,
+                          )}
+                          showUserLeaderboardCSV={Boolean(
+                            task.show_user_leaderboard_csv,
+                          )}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* Remove after Nibbler finish */}
+                  {task.id !== 45 ? (
+                    <>
+                      {Object.entries(taskInstructions).length !== 0 && (
+                        <div
+                          className={openTab === 2 ? "block  px-4" : "hidden"}
+                        >
+                          <OverviewTask taskInstructions={taskInstructions!} />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {Object.entries(taskInstructions).length !== 0 && (
+                        <div
+                          className={openTab === 1 ? "block  px-4" : "hidden"}
+                        >
+                          <OverviewTask taskInstructions={taskInstructions!} />
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

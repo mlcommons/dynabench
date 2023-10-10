@@ -41,6 +41,7 @@ const EvaluateTextsGenerative: FC<
   });
   const [showChatbot, setShowChatbot] = useState(false);
   const [showAnswers, setShowAnswers] = useState(false);
+  const [isTied, setIsTied] = useState(true);
   const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts,
   );
@@ -161,46 +162,50 @@ const EvaluateTextsGenerative: FC<
     });
   };
 
-  const handleSelectedText = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      confirmButtonColor: "#0574fd",
-      confirmButtonText: "Yes, I'm sure!",
-      showCancelButton: true,
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        updateModelInputs({
-          [field_names_for_the_model.best_answer ?? "best_answer"]:
-            texts.reduce((max: { score: number }, answer: { score: number }) =>
-              answer.score > max.score ? answer : max,
-            ),
-        });
-        setBestAnswer(
-          texts.reduce((max: { score: number }, answer: { score: number }) =>
-            answer.score > max.score ? answer : max,
-          ),
-        );
+  const checkIsTied = () => {
+    const isTied = texts.every(
+      (text) => text.score === texts[0].score && texts.length > 1,
+    );
+    setIsTied(isTied);
+  };
 
-        setChatHistory({
-          ...chatHistory,
-          bot: [
-            ...chatHistory.bot,
-            {
-              id: "1",
-              text: texts.reduce(
-                (max: { score: number }, answer: { score: number }) =>
-                  answer.score > max.score ? answer : max,
-              ).text,
-            },
-          ],
-        });
-        setShowChatbot(true);
-        setShowAnswers(false);
-        setShowInput(false);
-      }
-    });
+  const handleSelectedText = () => {
+    if (isTied) {
+      Swal.fire({
+        title: "Rate at least one of the answers",
+        icon: "error",
+      });
+    }
+    if (!isTied) {
+      updateModelInputs({
+        [field_names_for_the_model.best_answer ?? "best_answer"]: texts.reduce(
+          (max: { score: number }, answer: { score: number }) =>
+            answer.score > max.score ? answer : max,
+        ),
+      });
+      setBestAnswer(
+        texts.reduce((max: { score: number }, answer: { score: number }) =>
+          answer.score > max.score ? answer : max,
+        ),
+      );
+
+      setChatHistory({
+        ...chatHistory,
+        bot: [
+          ...chatHistory.bot,
+          {
+            id: "1",
+            text: texts.reduce(
+              (max: { score: number }, answer: { score: number }) =>
+                answer.score > max.score ? answer : max,
+            ).text,
+          },
+        ],
+      });
+      setShowChatbot(true);
+      setShowAnswers(false);
+      setShowInput(false);
+    }
   };
 
   const handleSignInConsent = async () => {
@@ -222,6 +227,7 @@ const EvaluateTextsGenerative: FC<
       [field_names_for_the_model.generated_answers ?? "generated_answers"]:
         texts,
     });
+    checkIsTied();
   }, [texts]);
 
   useEffect(() => {
@@ -257,6 +263,7 @@ const EvaluateTextsGenerative: FC<
                           artifactsInput.user_input.field_name_for_the_model
                         }
                         onInputChange={handleSaveCategory}
+                        disabled={disabledInput}
                       />
                     </AnnotationInstruction>
                   </div>
