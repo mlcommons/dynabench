@@ -5,9 +5,11 @@
 import os
 from abc import ABC, abstractmethod
 
+import cohere
 import openai
+import requests
+from anthropic import AI_PROMPT, HUMAN_PROMPT, Anthropic
 from langchain.llms import OpenAI
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from app.domain.services.base.task import TaskService
 
@@ -32,31 +34,65 @@ class OpenAIProvider(LLMProvider):
         self.api_key = os.getenv("OPENAI")
         openai.api_key = self.api_key
 
-    def initialize(self, model_name: str):
-        return OpenAI(temperature=0.6, model_name=model_name)
-
-    def generate_text(self, prompt: str, model: str) -> str:
-        response = openai.Completion.create(
+    def generate_text(self, prompt: str, model: dict) -> str:
+        model = model[self.provider_name()]
+        messages = [{"role": "user", "content": prompt}]
+        response = openai.ChatCompletion.create(
             model=model,
-            prompt=prompt,
+            messages=messages,
         )
-        return response.choices[0].text
+        return response["choices"][0]["message"]["content"]
 
     def provider_name(self):
         return "openai"
 
 
-class HFProvider(LLMProvider):
+class HuggingFaceProvider(LLMProvider):
     def __init__(self):
+        self.headers = {"Authorization": os.getenv("HF")}
         pass
 
-    def generate_text(self, prompt: str, model: str) -> str:
-        tokenizer = AutoTokenizer.from_pretrained(model)
-        model = AutoModelForCausalLM.from_pretrained(model)
-        final_prompt = f"<|prompter|>{prompt}<|endoftext|><|assistant|>"
-        input_ids = tokenizer.encode(final_prompt, return_tensors="pt")
-        output = model.generate(input_ids, max_length=1000, do_sample=True)
-        return tokenizer.decode(output[0], skip_special_tokens=True)
+    def generate_text(self, prompt: str, model: dict) -> str:
+        endpoint = model[self.provider_name()]["endpoint"]
+        payload = {"inputs": prompt, "max_new_tokens": 100}
+        response = requests.post(endpoint, json=payload, headers=self.headers)
+        if response.status_code == 200:
+            sample = response.json()[0]["generated_text"]
+            return sample
 
     def provider_name(self):
-        return "HF"
+        return "huggingface"
+
+
+class AnthropicProvider(LLMProvider):
+    def __init__(self):
+        self.api_key = os.getenv("ANTHROPIC")
+        self.anthropic = Anthropic(api_key=self.api_key)
+        pass
+
+    def generate_text(self, prompt: str, model: dict) -> str:
+        completion = self.anthropic.completions.create(
+            model=model[self.provider_name()],
+            max_tokens_to_sample=300,
+            prompt=f"{HUMAN_PROMPT}{prompt}{AI_PROMPT}",
+        )
+
+        return completion.completion
+
+    def provider_name(self):
+        return "anthropic"
+
+
+class CohereProvider(LLMProvider):
+    def __init__(self):
+        self.api_key = os.getenv("COHERE")
+        self.cohere = cohere.Client(self.api_key)
+        pass
+
+    def generate_text(self, prompt: str, model: dict) -> str:
+        response = self.cohere.generate(prompt=prompt, max_tokens=300, model=model)
+        print(response)
+        return response[0].text
+
+    def provider_name(self):
+        return "cohere"

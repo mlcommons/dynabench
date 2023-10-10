@@ -46,7 +46,9 @@ async def websocket_generative_context(websocket: WebSocket):
 
 @router.post("/get_generative_contexts")
 async def get_generative_contexts(model: GetGenerativeContextRequest):
-    image_list = ContextService().get_generative_contexts(model.type, model.artifacts)
+    image_list = await ContextService().get_generative_contexts(
+        model.type, model.artifacts
+    )
     return JSONResponse(content=image_list, headers={"Cache-Control": "private"})
 
 
