@@ -4,14 +4,15 @@
 
 from multiprocessing import Pool
 
-from app.domain.services.utils.llm import HuggingFaceProvider, OpenAIProvider
-
 from app.domain.services.utils.image_generators import (  # SD2ImageProvider,
     OpenAIImageProvider,
     SDRunwayMLImageProvider,
     SDVariableAutoEncoder,
     SDXLImageProvider,
 )
+from app.domain.services.utils.llm import HuggingFaceProvider, OpenAIProvider
+
+
 class LLMGenerator:
     def __init__(self):
         self.llm_providers = [
@@ -38,6 +39,7 @@ class LLMGenerator:
             pool.close()
             pool.join()
         return results
+
 
 class ImageGenerator:
     def __init__(self):
