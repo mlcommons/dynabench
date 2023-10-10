@@ -28,7 +28,7 @@ const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({ taskId }) => {
         <Card className="my-4">
           <Card.Header className="light-gray-bg d-flex align-items-center">
             <h2 className="m-0 text-uppercase text-reset">
-              Example Leaderboard
+              Validated Attack Success Rate
             </h2>
           </Card.Header>
           <Table hover className="mb-0">
