@@ -64,7 +64,7 @@ const ProfilePage: FC<Props> = () => {
   };
 
   const handleData = async () => {
-    const isLogin = await checkUserIsLoggedIn(history, `/account`);
+    const isLogin = await checkUserIsLoggedIn(history, `/account`, null, null);
     if (isLogin) {
       getUserInfo();
     }

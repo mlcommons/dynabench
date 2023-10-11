@@ -51,14 +51,14 @@ class Leaderboard extends React.Component {
                 this.props.history.replace({
                   pathname: this.props.location.pathname.replace(
                     `/tasks/${this.taskCode}`,
-                    `/tasks/${this.state.taskCode}`
+                    `/tasks/${this.state.taskCode}`,
                   ),
                   search: this.props.location.search,
                 });
               }
               this.state.loading = true;
               this.fetchTrend();
-            }
+            },
           );
           this.context.api.getAdminOrOwner(result.id).then(
             (adminOrOwnerResult) => {
@@ -68,7 +68,7 @@ class Leaderboard extends React.Component {
             },
             (error) => {
               console.log(error);
-            }
+            },
           );
         },
         (error) => {
@@ -76,7 +76,7 @@ class Leaderboard extends React.Component {
           if (error.status_code === 404 || error.status_code === 405) {
             this.props.history.push("/");
           }
-        }
+        },
       );
     });
   }
@@ -100,7 +100,7 @@ class Leaderboard extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   }
 
@@ -192,7 +192,13 @@ class Leaderboard extends React.Component {
                         </>
                       )}
                       {this.showUserLeaderboardCSV && (
-                        <UserLeaderBoardCSV taskId={this.state.task.id} />
+                        <UserLeaderBoardCSV
+                          taskId={this.state.task.id}
+                          title={
+                            yaml.load(this.state.task.config_yaml)
+                              .leaderboard_csv_title
+                          }
+                        />
                       )}
                     </Col>
                   </Row>

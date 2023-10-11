@@ -4,9 +4,12 @@ import useFetch from "use-http";
 
 type UserLeaderBoardCSVProps = {
   taskId: number;
+  title?: string;
 };
 
-const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({ taskId }) => {
+const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({ taskId, title }) => {
+  console.log(title);
+
   const [data, setData] = useState([]);
   const { get, response } = useFetch();
 
@@ -28,7 +31,7 @@ const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({ taskId }) => {
         <Card className="my-4">
           <Card.Header className="light-gray-bg d-flex align-items-center">
             <h2 className="m-0 text-uppercase text-reset">
-              Example Leaderboard
+              {title ? title : "Example Leaderboard"}
             </h2>
           </Card.Header>
           <Table hover className="mb-0">

@@ -73,7 +73,7 @@ const ValidateSamples: FC = () => {
 
   const isLogin = async () => {
     if (!user.id) {
-      await checkUserIsLoggedIn(history, `/`);
+      await checkUserIsLoggedIn(history, `/`, null, null);
     }
   };
 
@@ -85,6 +85,8 @@ const ValidateSamples: FC = () => {
     const isLogin = await checkUserIsLoggedIn(
       history,
       `/tasks/${taskCode}/validate`,
+      null,
+      null,
     );
     if (isLogin) {
       loadTaskContextData();

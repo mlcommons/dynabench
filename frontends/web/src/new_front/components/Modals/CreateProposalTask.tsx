@@ -18,7 +18,7 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
   const history = useHistory();
   const { get, post, response } = useFetch();
   const initState = {
-    nameTask: "",
+    nameChallenge: "",
     taskCode: "",
     shortDescription: "",
     description: "",
@@ -65,7 +65,7 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
 
   const isLogin = async () => {
     if (!user.id) {
-      await checkUserIsLoggedIn(history, `/`);
+      await checkUserIsLoggedIn(history, `/`, null, null);
     }
   };
 
@@ -83,17 +83,17 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
       <Modal.Body>
         <Form.Group className="mb-3" controlId="nameTask">
           <Form.Label className="text-lg font-bold text-letter-color">
-            Model name
+            Challenge name
           </Form.Label>
           <Form.Control
             placeholder="Task name"
             autoFocus
-            {...register("nameTask", { required: true })}
+            {...register("nameChallenge", { required: true })}
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="taskCode">
           <Form.Label className="text-lg font-bold text-letter-color">
-            Task code
+            Challenge code
           </Form.Label>
           <Form.Control
             placeholder="Task code"

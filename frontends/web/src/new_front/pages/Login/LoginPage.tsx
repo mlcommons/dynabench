@@ -19,12 +19,18 @@ const LoginPage: FC = () => {
     queryParams.get("assignmentId") === "null"
       ? null
       : queryParams.get("assignmentId");
-  const taskCode = queryParams.get("taskCode");
+  const taskCode =
+    queryParams.get("taskCode") === "null" ? null : queryParams.get("taskCode");
 
   const handleAmazonTurk = (assignmentId: string) => {
     setEmail(`${assignmentId}@amazonturk.com`);
     setPassword(assignmentId);
   };
+
+  useEffect(() => {
+    console.log("assignmentId", assignmentId);
+    console.log("taskCode", taskCode);
+  }, []);
 
   const handleLogin = () => {
     axios
