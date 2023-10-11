@@ -165,6 +165,7 @@ class ModelService:
         sandbox_mode: bool,
         model_prediction_label: str,
         model_evaluation_metric_info: dict,
+        model_metadata: Json,
     ) -> str:
         response = {}
         task_config = self.task_service.get_task_info_by_task_id(task_id)
@@ -211,7 +212,7 @@ class ModelService:
                 model_url,
                 json.dumps(model_input),
                 json.dumps(prediction),
-                json.dumps({}),
+                json.dumps(model_metadata),
                 tag,
                 round_id,
                 task_id,
