@@ -245,7 +245,7 @@ const Chatbot: FC<ChatbotProps> = ({
                     <div>
                       <GeneralButton
                         onClick={askQuestion}
-                        text="Ask"
+                        text="Send"
                         className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                       />
                     </div>

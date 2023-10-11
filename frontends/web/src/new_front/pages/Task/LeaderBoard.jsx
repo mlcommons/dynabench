@@ -192,7 +192,13 @@ class Leaderboard extends React.Component {
                         </>
                       )}
                       {this.showUserLeaderboardCSV && (
-                        <UserLeaderBoardCSV taskId={this.state.task.id} />
+                        <UserLeaderBoardCSV
+                          taskId={this.state.task.id}
+                          title={
+                            yaml.load(this.state.task.config_yaml)
+                              .leaderboard_csv_title
+                          }
+                        />
                       )}
                     </Col>
                   </Row>

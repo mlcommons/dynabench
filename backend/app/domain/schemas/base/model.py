@@ -20,6 +20,7 @@ class SingleModelEvaluationRequest(BaseModel):
     sandbox_mode: bool
     model_prediction_label: str
     model_evaluation_metric_info: dict
+    model_metadata: Optional[dict]
 
 
 class SingleModelEvaluationResponse(BaseModel):

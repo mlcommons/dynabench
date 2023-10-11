@@ -10,6 +10,7 @@ type EvaluateTextProps = {
   optionsSlider?: string[];
   disabled?: boolean;
   bestAnswer?: string;
+  score?: number;
 };
 
 const EvaluateText: FC<EvaluateTextProps> = ({
@@ -20,6 +21,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
   optionsSlider = ["0", "100"],
   disabled = false,
   bestAnswer = "",
+  score = 50,
 }) => {
   const handleUpdateScore = (event: any) => {
     setTexts(
@@ -58,7 +60,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
             className={`rounded-full w-full cursor-pointer `}
             type="range"
             step={1}
-            defaultValue={50}
+            defaultValue={score}
             min={1}
             max={100}
             onChange={handleUpdateScore}
