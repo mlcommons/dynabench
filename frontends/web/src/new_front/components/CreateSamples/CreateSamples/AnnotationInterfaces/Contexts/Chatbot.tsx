@@ -72,7 +72,6 @@ const Chatbot: FC<ChatbotProps> = ({
       if (response.ok) {
         setNewResponses(generatedTexts);
         setIsAskingQuestion(false);
-        setPrompt("");
       }
       // const generatedTexts = [
       //   {

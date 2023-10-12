@@ -128,7 +128,7 @@ class AnthropicProvider(LLMProvider):
         conversation = self.generate_text(
             formatted_conversation, model, is_conversational=True
         )
-        return conversation.completion
+        return conversation
 
     def provider_name(self):
         return "anthropic"
