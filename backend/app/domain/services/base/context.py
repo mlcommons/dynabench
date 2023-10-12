@@ -190,6 +190,7 @@ class ContextService:
         ]
         random.shuffle(all_models)
         selected_models = all_models[:number_of_samples]
+        print("Selected models were", selected_models)
         all_answers = []
         for id, model in enumerate(selected_models):
             model_name = list(model.keys())[0]

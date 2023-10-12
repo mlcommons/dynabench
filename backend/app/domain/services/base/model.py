@@ -28,7 +28,12 @@ from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoSe
 from app.domain.services.base.score import ScoreService
 from app.domain.services.base.task import TaskService
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
-from app.domain.services.utils.llm import OpenAIProvider
+from app.domain.services.utils.llm import (
+    AnthropicProvider,
+    CohereProvider,
+    HuggingFaceProvider,
+    OpenAIProvider,
+)
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
@@ -54,7 +59,12 @@ class ModelService:
         self.s3 = self.session.client("s3")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.email_helper = EmailHelper()
-        self.openai_provider = OpenAIProvider()
+        self.providers = {
+            "openai": OpenAIProvider(),
+            "cohere": CohereProvider(),
+            "huggingface": HuggingFaceProvider(),
+            "anthropic": AnthropicProvider(),
+        }
 
     def get_model_in_the_loop(self, task_id: str) -> str:
         model_in_the_loop_info = self.model_repository.get_model_in_the_loop(task_id)
@@ -387,29 +397,18 @@ class ModelService:
     def conversation_with_buffer_memory(
         self,
         history: dict,
-        model_name: str,
+        model_name: dict,
         provider: str,
         prompt: str,
         num_answers: int,
     ):
-        if provider == "openai":
-            llm = self.openai_provider.initialize(
-                model_name=model_name,
-            )
-        memory = ConversationBufferMemory()
-        for entry in history["user"]:
-            user_message = entry["text"]
-            memory.chat_memory.add_user_message(user_message)
-            if history["bot"]:
-                ai_message = history["bot"].pop(0)["text"]
-                memory.chat_memory.add_ai_message(ai_message)
+        print("Selected model was", model_name)
         responses = []
+        llm = self.providers[provider]
         for i in range(num_answers):
-            conversation = ConversationChain(llm=llm, memory=memory)
             response = {
                 "id": i,
-                "model_name": model_name,
-                "text": conversation.predict(input=prompt),
+                "text": llm.conversational_generation(prompt, model_name, history),
                 "score": 0.5,
             }
             responses.append(response)
