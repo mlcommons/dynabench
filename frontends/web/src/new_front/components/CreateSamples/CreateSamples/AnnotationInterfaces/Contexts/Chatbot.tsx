@@ -51,7 +51,7 @@ const Chatbot: FC<ChatbotProps> = ({
   const askQuestion = async () => {
     if (prompt !== "") {
       const generatedTexts = await post(
-        '/model/conversation_with_buffer_memory',
+        "/model/conversation_with_buffer_memory",
         {
           history: {
             ...chatHistory,
@@ -68,12 +68,11 @@ const Chatbot: FC<ChatbotProps> = ({
           prompt: prompt,
           num_answers: num_of_samples_chatbot,
         },
-      )
+      );
       if (response.ok) {
-        setNewResponses(generatedTexts)
-        setIsAskingQuestion(false)
-        setPrompt('')
-
+        setNewResponses(generatedTexts);
+        setIsAskingQuestion(false);
+        setPrompt("");
       }
       // const generatedTexts = [
       //   {

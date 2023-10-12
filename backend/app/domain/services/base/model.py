@@ -28,7 +28,12 @@ from app.domain.services.base.rounduserexampleinfo import RoundUserExampleInfoSe
 from app.domain.services.base.score import ScoreService
 from app.domain.services.base.task import TaskService
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
-from app.domain.services.utils.llm import OpenAIProvider, CohereProvider, AnthropicProvider, HuggingFaceProvider
+from app.domain.services.utils.llm import (
+    AnthropicProvider,
+    CohereProvider,
+    HuggingFaceProvider,
+    OpenAIProvider,
+)
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.task import TaskRepository
@@ -54,7 +59,12 @@ class ModelService:
         self.s3 = self.session.client("s3")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.email_helper = EmailHelper()
-        self.providers = {'openai': OpenAIProvider(), 'cohere': CohereProvider(), 'huggingface': HuggingFaceProvider(), 'anthropic': AnthropicProvider()}
+        self.providers = {
+            "openai": OpenAIProvider(),
+            "cohere": CohereProvider(),
+            "huggingface": HuggingFaceProvider(),
+            "anthropic": AnthropicProvider(),
+        }
 
     def get_model_in_the_loop(self, task_id: str) -> str:
         model_in_the_loop_info = self.model_repository.get_model_in_the_loop(task_id)
@@ -398,9 +408,7 @@ class ModelService:
         for i in range(num_answers):
             response = {
                 "id": i,
-                "text": llm.conversational_generation(
-                    prompt, model_name, history
-                ),
+                "text": llm.conversational_generation(prompt, model_name, history),
                 "score": 0.5,
             }
             responses.append(response)

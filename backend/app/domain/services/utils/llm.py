@@ -37,8 +37,10 @@ class OpenAIProvider(LLMProvider):
         self.api_key = os.getenv("OPENAI")
         openai.api_key = self.api_key
 
-    def generate_text(self, prompt: str, model: dict, is_conversational: bool = False) -> str:
-        model = model[self.provider_name()]['model_name']
+    def generate_text(
+        self, prompt: str, model: dict, is_conversational: bool = False
+    ) -> str:
+        model = model[self.provider_name()]["model_name"]
         if is_conversational:
             messages = prompt
         else:
@@ -51,14 +53,16 @@ class OpenAIProvider(LLMProvider):
 
     def conversational_generation(self, prompt: str, model: dict, history: dict) -> str:
         formatted_conversation = []
-        formatted_conversation.append({"role": "system", "content": "You are a helpful assistant."})
-        for user_entry, bot_entry in zip(history['user'], history['bot']):
-            user_text = user_entry['text']
-            bot_text = bot_entry['text']
+        formatted_conversation.append(
+            {"role": "system", "content": "You are a helpful assistant."}
+        )
+        for user_entry, bot_entry in zip(history["user"], history["bot"]):
+            user_text = user_entry["text"]
+            bot_text = bot_entry["text"]
             formatted_conversation.append({"role": "user", "content": user_text})
             formatted_conversation.append({"role": "assistant", "content": bot_text})
 
-        formatted_conversation.append({'role': 'user', 'content': prompt})
+        formatted_conversation.append({"role": "user", "content": prompt})
         return self.generate_text(formatted_conversation, model, is_conversational=True)
 
     def provider_name(self):
@@ -92,14 +96,16 @@ class AnthropicProvider(LLMProvider):
         self.anthropic = Anthropic(api_key=self.api_key)
         pass
 
-    def generate_text(self, prompt: str, model: dict, is_conversational: bool = False) -> str:
+    def generate_text(
+        self, prompt: str, model: dict, is_conversational: bool = False
+    ) -> str:
         if is_conversational:
             final_prompt = prompt
         else:
             final_prompt = f"{HUMAN_PROMPT}{prompt}{AI_PROMPT}"
 
         completion = self.anthropic.completions.create(
-            model=model[self.provider_name()]['model_name'],
+            model=model[self.provider_name()]["model_name"],
             max_tokens_to_sample=300,
             prompt=final_prompt,
         )
@@ -108,18 +114,20 @@ class AnthropicProvider(LLMProvider):
 
     def conversational_generation(self, prompt: str, model: dict, history: dict) -> str:
         formatted_conversation = []
-        for user_entry, bot_entry in zip(history['user'], history['bot']):
-            user_text = user_entry['text']
-            bot_text = bot_entry['text']
-            formatted_conversation.append(f'Human: {user_text}')
-            formatted_conversation.append(f'Assistant: {bot_text}')
+        for user_entry, bot_entry in zip(history["user"], history["bot"]):
+            user_text = user_entry["text"]
+            bot_text = bot_entry["text"]
+            formatted_conversation.append(f"Human: {user_text}")
+            formatted_conversation.append(f"Assistant: {bot_text}")
 
-        formatted_conversation.append(f'Human: {prompt}')
-        formatted_conversation.append('Assistant: ')
+        formatted_conversation.append(f"Human: {prompt}")
+        formatted_conversation.append("Assistant: ")
 
         formatted_conversation = "\n\n".join(formatted_conversation)
 
-        conversation = self.generate_text(formatted_conversation, model, is_conversational=True)
+        conversation = self.generate_text(
+            formatted_conversation, model, is_conversational=True
+        )
         return conversation.completion
 
     def provider_name(self):
@@ -132,11 +140,15 @@ class CohereProvider(LLMProvider):
         self.cohere = cohere.Client(self.api_key)
         pass
 
-    def generate_text(self, prompt: str, model: dict, is_conversational: bool = False, chat_history = []) -> str:
-        model = model[self.provider_name()]['model_name']
+    def generate_text(
+        self, prompt: str, model: dict, is_conversational: bool = False, chat_history=[]
+    ) -> str:
+        model = model[self.provider_name()]["model_name"]
 
         if is_conversational:
-            response = self.cohere.chat(message=prompt, max_tokens=300, model=model, chat_history=chat_history)
+            response = self.cohere.chat(
+                message=prompt, max_tokens=300, model=model, chat_history=chat_history
+            )
         else:
             response = self.cohere.chat(message=prompt, max_tokens=300, model=model)
 
@@ -144,14 +156,15 @@ class CohereProvider(LLMProvider):
 
     def conversational_generation(self, prompt: str, model: dict, history: dict) -> str:
         formatted_conversation = []
-        for user_entry, bot_entry in zip(history['user'], history['bot']):
-            user_text = user_entry['text']
-            bot_text = bot_entry['text']
+        for user_entry, bot_entry in zip(history["user"], history["bot"]):
+            user_text = user_entry["text"]
+            bot_text = bot_entry["text"]
             formatted_conversation.append({"user_name": "User", "text": user_text})
             formatted_conversation.append({"user_name": "Chatbot", "text": bot_text})
 
-
-        return self.generate_text(prompt, model, is_conversational=True, chat_history=formatted_conversation)
+        return self.generate_text(
+            prompt, model, is_conversational=True, chat_history=formatted_conversation
+        )
 
     def provider_name(self):
         return "cohere"
