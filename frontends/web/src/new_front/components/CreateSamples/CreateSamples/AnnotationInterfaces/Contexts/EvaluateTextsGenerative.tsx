@@ -33,6 +33,8 @@ const EvaluateTextsGenerative: FC<
   const [showCategory, setShowCategory] = useState(true);
   const [finishConversation, setFinishConversation] = useState(false);
   const [disabledInput, setDisabledInput] = useState(false);
+  const [disableTypeOfConversation, setDisableTypeOfConversation] =
+    useState(false);
   const [bestAnswer, setBestAnswer] = useState<any>({});
   const [texts, setTexts] = useState<any[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
@@ -41,6 +43,7 @@ const EvaluateTextsGenerative: FC<
   });
   const [showChatbot, setShowChatbot] = useState(false);
   const [showAnswers, setShowAnswers] = useState(false);
+  const [isCreatingTexts, setIsCreatingTexts] = useState(false);
   const [isTied, setIsTied] = useState(true);
   const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts,
@@ -75,62 +78,31 @@ const EvaluateTextsGenerative: FC<
 
   const generateTexts = async () => {
     if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
-      setShowLoader(true);
+      setIsCreatingTexts(true);
+      setDisableTypeOfConversation(true);
       const generatedTexts = await post("/context/get_generative_contexts", {
         type: generative_context.type,
         artifacts: artifactsInput,
       });
       if (response.ok) {
-        setTexts(generatedTexts);
+        setTexts(
+          generatedTexts.map((text: any) => ({
+            ...text,
+            score: 50,
+          })),
+        );
         updateModelInputs({
           [field_names_for_the_model.generated_answers ?? "generated_answers"]:
             generatedTexts,
         });
-        setShowLoader(false);
+        setIsCreatingTexts(false);
       } else {
-        setShowLoader(false);
+        setIsCreatingTexts(false);
         Swal.fire({
           title: "Something went wrong",
           icon: "error",
         });
       }
-
-      // const generatedTexts = [
-      //   {
-      //     id: '1',
-      //     model_name: 'GPT-3',
-      //     provider: 'openai',
-      //     text:
-      //       'The secret of life is a philosophical and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.',
-      //   },
-      //   {
-      //     id: '2',
-      //     model_name: 'text-davinci-003',
-      //     provider: 'openai',
-      //     text: 'Good and you?',
-      //   },
-      //   {
-      //     id: '3',
-      //     model_name: 'GPT-1',
-      //     provider: 'openai',
-      //     text:
-      //       'The secret of life is a profound and existential question that has been contemplated by humans for centuries. It is a deeply personal and subjective topic, and different individuals may have different perspectives and beliefs regarding the meaning and purpose of life.',
-      //   },
-      //   {
-      //     id: '4',
-      //     model_name: 'GPT-4',
-      //     provider: 'openai',
-      //     text:
-      //       "Ultimately, the secret of life may be found in the journey of self-reflection, introspection, and living in alignment with one's values and authentic self. It is an ongoing process of seeking purpose, finding joy and fulfillment, and embracing the experiences and lessons that life offers.",
-      //   },
-      // ]
-
-      setTexts(
-        generatedTexts.map((text: any) => ({
-          ...text,
-          score: 50,
-        })),
-      );
 
       setChatHistory({
         ...chatHistory,
@@ -151,6 +123,10 @@ const EvaluateTextsGenerative: FC<
       });
     }
   };
+
+  useEffect(() => {
+    console.log("isCreatingTexts", isCreatingTexts);
+  }, [isCreatingTexts]);
 
   const handlePromptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setArtifactsInput({
@@ -266,14 +242,14 @@ const EvaluateTextsGenerative: FC<
                           artifactsInput.user_input.field_name_for_the_model
                         }
                         onInputChange={handleSaveCategory}
-                        disabled={disabledInput}
+                        disabled={disableTypeOfConversation}
                       />
                     </AnnotationInstruction>
                   </div>
                 )}
                 {showInput && (
                   <>
-                    {finishConversation ? (
+                    {finishConversation && !isCreatingTexts ? (
                       <h4 className="pb-3 pl-2 text-lg font-semibold text-letter-color">
                         {parse(artifactsInput.finish_instruction)}
                       </h4>
@@ -282,24 +258,37 @@ const EvaluateTextsGenerative: FC<
                         {parse(artifactsInput.general_instruction)}
                       </h4>
                     )}
-                    <div>
-                      <AnnotationInstruction
-                        placement="left"
-                        tooltip={
-                          instruction.prompt ||
-                          "Select the text that best exemplifies the harm"
-                        }
-                      >
-                        <BasicInput
-                          onChange={handlePromptChange}
-                          onEnter={generateTexts}
-                          placeholder={prompt}
-                          disabled={disabledInput}
+                    {!isCreatingTexts ? (
+                      <div>
+                        <AnnotationInstruction
+                          placement="left"
+                          tooltip={
+                            instruction.prompt ||
+                            "Select the text that best exemplifies the harm"
+                          }
+                        >
+                          <BasicInput
+                            onChange={handlePromptChange}
+                            onEnter={generateTexts}
+                            placeholder={prompt}
+                            disabled={disabledInput}
+                          />
+                        </AnnotationInstruction>
+                      </div>
+                    ) : (
+                      <div className="grid items-center justify-center grid-rows-2">
+                        <div className="mr-2 text-letter-color">
+                          Texts are being generated, bear with the models
+                        </div>
+                        <PacmanLoader
+                          color="#ccebd4"
+                          loading={isCreatingTexts}
+                          size={50}
+                          className="align-center"
                         />
-                      </AnnotationInstruction>
-                    </div>
-
-                    {!finishConversation && (
+                      </div>
+                    )}
+                    {!finishConversation && !isCreatingTexts && (
                       <div className="grid col-span-1 py-3 justify-items-end">
                         <AnnotationInstruction
                           placement="top"
@@ -327,22 +316,24 @@ const EvaluateTextsGenerative: FC<
                       {artifactsInput.general_instruction_multiple_models}
                     </h4>
                   )}
-                  <div className="grid grid-cols-2 gap-6 pt-2">
-                    {texts.map((text) => (
-                      <EvaluateText
-                        key={text.id}
-                        name={text.model_letter}
-                        text={text.text}
-                        id={text.id}
-                        texts={texts}
-                        setTexts={setTexts}
-                        optionsSlider={artifactsInput.options_slider}
-                        disabled={finishConversation}
-                        bestAnswer={bestAnswer.text}
-                        score={text.score}
-                      />
-                    ))}
-                  </div>
+                  {!isCreatingTexts && (
+                    <div className="grid grid-cols-2 gap-6 pt-2">
+                      {texts.map((text) => (
+                        <EvaluateText
+                          key={text.id}
+                          name={text.model_letter}
+                          text={text.text}
+                          id={text.id}
+                          texts={texts}
+                          setTexts={setTexts}
+                          optionsSlider={artifactsInput.options_slider}
+                          disabled={finishConversation}
+                          bestAnswer={bestAnswer.text}
+                          score={text.score}
+                        />
+                      ))}
+                    </div>
+                  )}
                   {!finishConversation && (
                     <div className="grid col-span-1 py-3 justify-items-end">
                       <GeneralButton
