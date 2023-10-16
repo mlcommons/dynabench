@@ -106,30 +106,43 @@ const Chatbot: FC<ChatbotProps> = ({
   };
 
   const saveHistory = () => {
-    setChatHistory({
-      ...chatHistory,
-      user: [
-        ...chatHistory.user,
-        {
-          id: chatHistory.user[chatHistory.user.length - 1].id + 1,
-          text: prompt,
-        },
-      ],
-      bot: [
-        ...chatHistory.bot,
-        {
-          id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
-          text: newRespones.reduce(
-            (max: { score: number }, answer: { score: number }) =>
-              answer.score > max.score ? answer : max,
-          ).text,
-        },
-      ],
-    });
-    setNewResponses([]);
-    setIsAskingQuestion(true);
-    setPrompt("");
-    setNumInteractions((prev) => prev + 1);
+    const isTied = newRespones.every(
+      (text) => text.score === newRespones[0].score && newRespones.length > 1,
+    );
+    console.log("isTied", isTied);
+
+    if (isTied) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Rate at least one of the answers",
+      });
+    } else {
+      setChatHistory({
+        ...chatHistory,
+        user: [
+          ...chatHistory.user,
+          {
+            id: chatHistory.user[chatHistory.user.length - 1].id + 1,
+            text: prompt,
+          },
+        ],
+        bot: [
+          ...chatHistory.bot,
+          {
+            id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
+            text: newRespones.reduce(
+              (max: { score: number }, answer: { score: number }) =>
+                answer.score > max.score ? answer : max,
+            ).text,
+          },
+        ],
+      });
+      setNewResponses([]);
+      setIsAskingQuestion(true);
+      setPrompt("");
+      setNumInteractions((prev) => prev + 1);
+    }
   };
 
   const handleFinishInteraction = () => {
