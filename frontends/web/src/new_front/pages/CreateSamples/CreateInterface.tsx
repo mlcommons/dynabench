@@ -25,12 +25,13 @@ import { useLocation } from "react-router-dom";
 const CreateInterface = () => {
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
-  const [partialSampleId, setPartialSampleId] = useState<number>(0);
+  const [partialSampleId, setPartialSampleId] = useState(0);
   const [taskConfiguration, setTaskConfiguration] =
     useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
   const [taskInfo, setTaskInfo] = useState<TaskInfoType>();
-  const [taskId, setTaskId] = useState<number>(0);
+  const [taskId, setTaskId] = useState(0);
+  const [amountExamples, setAmountExamples] = useState(0);
   const [isGenerativeContext, setIsGenerativeContext] =
     useState<boolean>(false);
   const { hidden, setHidden } = useContext(OverlayContext);
@@ -91,6 +92,19 @@ const CreateInterface = () => {
     }
   };
 
+  const loadAmountExamples = async () => {
+    const amountExamples = await post(
+      `/rounduserexample/number_of_examples_created`,
+      {
+        round_id: taskContextInfo?.real_round_id,
+        user_id: user.id!,
+      },
+    );
+    if (response.ok) {
+      setAmountExamples(amountExamples);
+    }
+  };
+
   const isLogin = async (assignmentId: string | null, taskCode: string) => {
     if (!user.id) {
       await checkUserIsLoggedIn(history, `/`, assignmentId, taskCode);
@@ -107,6 +121,13 @@ const CreateInterface = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
+
+  useEffect(() => {
+    if (taskContextInfo?.real_round_id) {
+      loadAmountExamples();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskContextInfo?.real_round_id]);
 
   useEffect(() => {
     if (taskContextInfo?.real_round_id) {
@@ -136,10 +157,12 @@ const CreateInterface = () => {
                     }`}
                   />
                 </div>
+
                 <div className="flex items-start justify-end pr-4 pt-14">
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
                     creationExample={taskInfo?.creation_example_md!}
+                    amountsExamplesCreatedToday={Number(amountExamples)}
                   />
                 </div>
               </div>

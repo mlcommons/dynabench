@@ -86,3 +86,8 @@ class RoundUserExampleInfoService:
         self.rounds_user_example_info_repository.reset_counter_examples_submitted(
             round_id, user_id
         )
+
+    def number_of_examples_created(self, round_id: int, user_id: int):
+        return self.rounds_user_example_info_repository.number_of_examples_created(
+            round_id, user_id
+        )[0]
