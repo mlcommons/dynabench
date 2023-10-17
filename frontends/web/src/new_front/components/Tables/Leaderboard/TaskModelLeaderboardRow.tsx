@@ -6,12 +6,14 @@ type TaskModelLeaderboardRowProps = {
   data: any;
   showDynascore: boolean;
   showUserNames: boolean;
+  multiplyResultsByHundred?: boolean;
 };
 
 const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
   data,
   showDynascore,
   showUserNames,
+  multiplyResultsByHundred = false,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [secondExpanded, setSecondExpanded] = useState(false);
@@ -32,11 +34,24 @@ const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
             <ChevronExpandButton expanded={expanded} />
           </div>
         </td>
-        {data.averaged_scores.map((score: any) => (
-          <td className="text-right">{parseFloat(score).toFixed(2)}</td>
-        ))}
+        {multiplyResultsByHundred ? (
+          <>
+            {data.averaged_scores.map((score: any) => (
+              <td className="text-right">
+                {(parseFloat(score) * 100).toFixed(2)}
+              </td>
+            ))}
+          </>
+        ) : (
+          <>
+            {data.averaged_scores.map((score: any) => (
+              <td className="text-right">{parseFloat(score).toFixed(2)}</td>
+            ))}
+          </>
+        )}
+
         {showDynascore && (
-          <td className="text-right align-middle pr-4 " rowSpan={totalRows}>
+          <td className="pr-4 text-right align-middle " rowSpan={totalRows}>
             <span>
               {expanded ? (
                 <h1>{parseFloat(data.dynascore).toFixed(2)}</h1>
@@ -48,11 +63,13 @@ const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
         )}
       </tr>
       {expanded &&
-        data.datasets.map((dataset: any) => (
+        data.datasets.map((dataset: any, i: number) => (
           <TaskModelLeaderboardRowFirstLevel
+            key={i}
             dataset={dataset}
             secondExpanded={secondExpanded}
             setSecondExpanded={setSecondExpanded}
+            multiplyResultsByHundred={multiplyResultsByHundred}
           />
         ))}
     </>
@@ -63,11 +80,17 @@ type TaskModelLeaderboardRowFirstLevelProps = {
   dataset: any;
   secondExpanded: boolean;
   setSecondExpanded: any;
+  multiplyResultsByHundred?: boolean;
 };
 
 const TaskModelLeaderboardRowFirstLevel: FC<
   TaskModelLeaderboardRowFirstLevelProps
-> = ({ dataset, secondExpanded, setSecondExpanded }) => {
+> = ({
+  dataset,
+  secondExpanded,
+  setSecondExpanded,
+  multiplyResultsByHundred = false,
+}) => {
   return (
     <>
       <tr key={dataset.name} onClick={() => setSecondExpanded(!secondExpanded)}>
@@ -79,15 +102,37 @@ const TaskModelLeaderboardRowFirstLevel: FC<
             </div>
           )}
         </td>
-        {dataset.scores.map((score: any, i: number) => (
-          <td className="text-right" key={`score-${dataset.id}-${i}-overall`}>
-            {parseFloat(score).toFixed(2)}
-          </td>
-        ))}
+        {multiplyResultsByHundred ? (
+          <>
+            {dataset.scores.map((score: any, i: number) => (
+              <td
+                className="text-right"
+                key={`score-${dataset.id}-${i}-overall`}
+              >
+                {(parseFloat(score) * 100).toFixed(2)}
+              </td>
+            ))}
+          </>
+        ) : (
+          <>
+            {dataset.scores.map((score: any, i: number) => (
+              <td
+                className="text-right"
+                key={`score-${dataset.id}-${i}-overall`}
+              >
+                {parseFloat(score).toFixed(2)}
+              </td>
+            ))}
+          </>
+        )}
       </tr>
       {secondExpanded &&
         dataset.downstream_info.map((downstream: any, i: number) => (
-          <TaskModelLeaderboardRowSecondLevel downstream={downstream} />
+          <TaskModelLeaderboardRowSecondLevel
+            key={i}
+            downstream={downstream}
+            multiplyResultsByHundred={multiplyResultsByHundred}
+          />
         ))}
     </>
   );
@@ -95,20 +140,26 @@ const TaskModelLeaderboardRowFirstLevel: FC<
 
 type TaskModelLeaderboardRowSecondLevelProps = {
   downstream: any;
+  multiplyResultsByHundred?: boolean;
 };
 
 const TaskModelLeaderboardRowSecondLevel: FC<
   TaskModelLeaderboardRowSecondLevelProps
-> = ({ downstream }) => {
+> = ({ downstream, multiplyResultsByHundred = false }) => {
   return (
     <>
       <tr key={downstream.name}>
         <td>{downstream.sub_task}</td>
+
         <td
           className="text-right"
           key={`score-${downstream.sub_task}-downstream`}
         >
-          {parseFloat(downstream.score).toFixed(2)}
+          {multiplyResultsByHundred ? (
+            <>{(parseFloat(downstream.score) * 100).toFixed(2)}</>
+          ) : (
+            <>{parseFloat(downstream.score).toFixed(2)}</>
+          )}
         </td>
       </tr>
     </>

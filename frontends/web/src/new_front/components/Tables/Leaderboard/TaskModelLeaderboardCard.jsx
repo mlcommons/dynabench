@@ -29,6 +29,7 @@ const TaskModelLeaderboardCard = ({
   task,
   history,
   taskCode,
+  percentageFormat,
   disableForkAndSnapshot,
   disableToggleSort,
   disableAdjustWeights,
@@ -55,6 +56,8 @@ const TaskModelLeaderboardCard = ({
   const [showForkModal, setShowForkModal] = useState(false);
   const [showSnapshotModal, setShowSnapshotModal] = useState(false);
   const [description, setDescription] = useState(null);
+  const [multiplyResultsByHundred, setMultiplyResultsByHundred] =
+    useState(false);
   const { post, loading, response } = useFetch();
   const context = useContext(UserContext);
 
@@ -174,6 +177,20 @@ const TaskModelLeaderboardCard = ({
           </OverlayTrigger>
         )}
         <div className="d-flex justify-content-end flex-fill">
+          {percentageFormat && (
+            <>
+              <span className="mt-1 mr-2">
+                <small>Percentage</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={multiplyResultsByHundred}
+                onChange={() =>
+                  setMultiplyResultsByHundred(!multiplyResultsByHundred)
+                }
+              />
+            </>
+          )}
           <ForkModal
             metricWeights={metrics}
             datasetWeights={datasetWeights}
@@ -415,6 +432,7 @@ const TaskModelLeaderboardCard = ({
             toggleSort={toggleSort}
             modelColumnTitle={modelColumnTitle}
             showUserNames={task.show_username_leaderboard}
+            multiplyResultsByHundred={multiplyResultsByHundred}
           />
         )}
       </Card.Body>
