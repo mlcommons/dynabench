@@ -73,22 +73,6 @@ const Chatbot: FC<ChatbotProps> = ({
         setNewResponses(generatedTexts);
         setIsAskingQuestion(false);
       }
-      // const generatedTexts = [
-      //   {
-      //     id: "1",
-      //     model_name: "GPT-3",
-      //     text: "As an AI language model, I do not have personal experiences or direct interactions with individuals who taught me specific information. My responses are generated based on a vast amount of pre-existing human knowledge that has been processed and organized by machine learning algorithms.",
-      //     score: 0.9,
-      //   },
-      //   {
-      //     id: "2",
-      //     model_name: "GPT-2",
-      //     text: "My training involved analyzing and learning from a wide range of text sources, such as books, articles, websites, and other textual materials available on the internet. The information I provide is a combination of general knowledge and patterns derived from the training data.",
-      //     score: 0.8,
-      //   },
-      // ];
-      // setNewResponses(generatedTexts);
-      // setIsAskingQuestion(false);
     } else {
       Swal.fire({
         icon: "error",
@@ -109,8 +93,6 @@ const Chatbot: FC<ChatbotProps> = ({
     const isTied = newRespones.every(
       (text) => text.score === newRespones[0].score && newRespones.length > 1,
     );
-    console.log("isTied", isTied);
-
     if (isTied) {
       Swal.fire({
         icon: "error",
@@ -152,10 +134,6 @@ const Chatbot: FC<ChatbotProps> = ({
     setFinishConversation(true);
   };
 
-  useEffect(() => {
-    console.log("numInteractions", numInteractions);
-  }, [numInteractions]);
-
   return (
     <>
       {!loading ? (
@@ -190,10 +168,13 @@ const Chatbot: FC<ChatbotProps> = ({
                       <div className="chat-message">
                         <div className="flex items-end justify-end">
                           <div className="flex flex-col items-end order-1 max-w-lg mx-2 space-y-2">
-                            <div>
-                              <span className="inline-block px-3 py-1 text-white rounded-lg rounded-br-none bg-third-color ">
-                                {chatHistory.bot[index].text}
-                              </span>
+                            <div className="min-w-[16rem] md:min-w-[26rem] lg:min-w-[32rem]">
+                              <textarea
+                                className="inline-block w-full px-3 py-2 text-white rounded-lg rounded-bl-none bg-third-color"
+                                disabled={true}
+                                value={chatHistory.bot[index].text}
+                                rows={5}
+                              />
                             </div>
                           </div>
                           <img

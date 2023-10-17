@@ -19,7 +19,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
   texts,
   setTexts,
   optionsSlider = ["0", "100"],
-  disabled = true,
+  disabled = false,
   bestAnswer = "",
   score = 50,
 }) => {
@@ -51,7 +51,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
             placeholder={text}
             required
             disabled={true}
-          ></textarea>
+          />
         </div>
         <div className="flex items-center justify-between w-full gap-2 px-4 pt-4 pb-2 border-t">
           <span className="text-gray-500 ">{optionsSlider[0]}</span>

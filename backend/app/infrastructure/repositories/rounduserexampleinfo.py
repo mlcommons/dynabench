@@ -121,3 +121,10 @@ class RoundUserExampleInfoRepository(AbstractRepository):
         ).update({self.model.examples_submitted: 0})
         self.session.flush()
         self.session.commit()
+
+    def number_of_examples_created(self, round_id: int, user_id: int):
+        return (
+            self.session.query(self.model.examples_submitted)
+            .filter((self.model.r_realid == round_id) & (self.model.uid == user_id))
+            .first()
+        )[0]
