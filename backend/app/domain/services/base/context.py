@@ -18,6 +18,7 @@ from PIL import Image
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
 from app.domain.services.utils.llm import (
+    AlephAlphaProvider,
     AnthropicProvider,
     CohereProvider,
     HuggingFaceProvider,
@@ -45,6 +46,7 @@ class ContextService:
             OpenAIProvider(),
             AnthropicProvider(),
             CohereProvider(),
+            AlephAlphaProvider(),
         ]
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:

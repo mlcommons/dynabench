@@ -11,8 +11,6 @@ import boto3
 import requests
 import yaml
 from fastapi import HTTPException, UploadFile
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
 from pydantic import Json
 
 from app.domain.helpers.email import EmailHelper
@@ -29,6 +27,7 @@ from app.domain.services.base.score import ScoreService
 from app.domain.services.base.task import TaskService
 from app.domain.services.builder_and_evaluation.evaluation import EvaluationService
 from app.domain.services.utils.llm import (
+    AlephAlphaProvider,
     AnthropicProvider,
     CohereProvider,
     HuggingFaceProvider,
@@ -64,6 +63,7 @@ class ModelService:
             "cohere": CohereProvider(),
             "huggingface": HuggingFaceProvider(),
             "anthropic": AnthropicProvider(),
+            "aleph": AlephAlphaProvider(),
         }
 
     def get_model_in_the_loop(self, task_id: str) -> str:
