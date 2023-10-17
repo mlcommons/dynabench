@@ -29,6 +29,7 @@ const TaskModelLeaderboardCard = ({
   task,
   history,
   taskCode,
+  decimalFormat,
   disableForkAndSnapshot,
   disableToggleSort,
   disableAdjustWeights,
@@ -55,6 +56,8 @@ const TaskModelLeaderboardCard = ({
   const [showForkModal, setShowForkModal] = useState(false);
   const [showSnapshotModal, setShowSnapshotModal] = useState(false);
   const [description, setDescription] = useState(null);
+  const [multiplyResultsByHundred, setMultiplyResultsByHundred] =
+    useState(false);
   const { post, loading, response } = useFetch();
   const context = useContext(UserContext);
 
@@ -119,11 +122,11 @@ const TaskModelLeaderboardCard = ({
       const datasetWeightsList = datasetWeights.map(
         (obj) =>
           obj.weight /
-          datasetWeights.reduce((sum, item) => sum + item.weight, 0)
+          datasetWeights.reduce((sum, item) => sum + item.weight, 0),
       );
       const metricWeightsList = metrics.map(
         (obj) =>
-          obj.weight / metrics.reduce((sum, item) => sum + item.weight, 0)
+          obj.weight / metrics.reduce((sum, item) => sum + item.weight, 0),
       );
       const scoreData = await post("/task/get_dynaboard_info_by_task_id/", {
         task_id: taskId,
@@ -174,6 +177,20 @@ const TaskModelLeaderboardCard = ({
           </OverlayTrigger>
         )}
         <div className="d-flex justify-content-end flex-fill">
+          {decimalFormat && (
+            <>
+              <span className="mt-1 mr-2">
+                <small>Percentage</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={multiplyResultsByHundred}
+                onChange={() =>
+                  setMultiplyResultsByHundred(!multiplyResultsByHundred)
+                }
+              />
+            </>
+          )}
           <ForkModal
             metricWeights={metrics}
             datasetWeights={datasetWeights}
@@ -300,9 +317,9 @@ const TaskModelLeaderboardCard = ({
                       history.push(
                         "/login?msg=" +
                           encodeURIComponent(
-                            "You need to login to create a leaderboard snapshot."
+                            "You need to login to create a leaderboard snapshot.",
                           ) +
-                          `&src=/tasks/${taskCode}`
+                          `&src=/tasks/${taskCode}`,
                       );
                     }
                   }}
@@ -329,9 +346,9 @@ const TaskModelLeaderboardCard = ({
                       history.push(
                         "/login?msg=" +
                           encodeURIComponent(
-                            "You need to login to fork a leaderboard."
+                            "You need to login to fork a leaderboard.",
                           ) +
-                          `&src=/tasks/${taskCode}`
+                          `&src=/tasks/${taskCode}`,
                       );
                     }
                   }}
@@ -415,6 +432,7 @@ const TaskModelLeaderboardCard = ({
             toggleSort={toggleSort}
             modelColumnTitle={modelColumnTitle}
             showUserNames={task.show_username_leaderboard}
+            multiplyResultsByHundred={multiplyResultsByHundred}
           />
         )}
       </Card.Body>
