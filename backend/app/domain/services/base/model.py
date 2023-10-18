@@ -33,6 +33,7 @@ from app.domain.services.utils.llm import (
     GoogleProvider,
     HuggingFaceProvider,
     OpenAIProvider,
+    ReplicateProvider,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
@@ -66,6 +67,7 @@ class ModelService:
             "anthropic": AnthropicProvider(),
             "aleph": AlephAlphaProvider(),
             "google": GoogleProvider(),
+            "replicate": ReplicateProvider(),
         }
 
     def get_model_in_the_loop(self, task_id: str) -> str:

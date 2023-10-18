@@ -24,6 +24,7 @@ from app.domain.services.utils.llm import (
     GoogleProvider,
     HuggingFaceProvider,
     OpenAIProvider,
+    ReplicateProvider,
 )
 from app.domain.services.utils.multi_generator import ImageGenerator
 from app.infrastructure.repositories.context import ContextRepository
@@ -49,6 +50,7 @@ class ContextService:
             CohereProvider(),
             AlephAlphaProvider(),
             GoogleProvider(),
+            ReplicateProvider(),
         ]
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
