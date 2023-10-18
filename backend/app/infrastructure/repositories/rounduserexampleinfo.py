@@ -118,7 +118,7 @@ class RoundUserExampleInfoRepository(AbstractRepository):
     def reset_counter_examples_submitted(self, round_id: int, user_id: int):
         self.session.query(self.model).filter(
             (self.model.r_realid == round_id) & (self.model.uid == user_id)
-        ).update({self.model.examples_submitted: 0})
+        ).update({self.model.amount_examples_on_a_day: 0})
         self.session.flush()
         self.session.commit()
 
