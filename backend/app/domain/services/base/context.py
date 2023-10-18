@@ -21,6 +21,7 @@ from app.domain.services.utils.llm import (
     AlephAlphaProvider,
     AnthropicProvider,
     CohereProvider,
+    GoogleProvider,
     HuggingFaceProvider,
     OpenAIProvider,
 )
@@ -47,6 +48,7 @@ class ContextService:
             AnthropicProvider(),
             CohereProvider(),
             AlephAlphaProvider(),
+            GoogleProvider(),
         ]
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
