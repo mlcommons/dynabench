@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 import cohere
 import google.generativeai as palm
 import openai
+import replicate
 import requests
 from aleph_alpha_client import Client, CompletionRequest, Prompt
 from anthropic import Anthropic
@@ -325,9 +326,60 @@ class GoogleProvider(LLMProvider):
         formatted_conversation.append("Assistant: ")
 
         formatted_conversation = "\n\n".join(formatted_conversation)
-        print(formatted_conversation)
 
         return self.generate_text(formatted_conversation, model, is_conversational=True)
 
     def provider_name(self):
         return "google"
+
+
+class ReplicateProvider(LLMProvider):
+    def __init__(self):
+        self.api_key = os.getenv("REPLICATE")
+        os.environ["REPLICATE_API_TOKEN"] = self.api_key
+        pass
+
+    def generate_text(
+        self, prompt: str, model: dict, is_conversational: bool = False
+    ) -> str:
+        head_template = model[self.provider_name()]["templates"]["header"]
+        foot_template = model[self.provider_name()]["templates"]["footer"]
+        model_name = model[self.provider_name()]["model_name"]
+        input = {
+            "max_new_tokens": model[self.provider_name()]["max_tokens"],
+            "min_new_tokens": model[self.provider_name()]["min_tokens"],
+            "temperature": model[self.provider_name()]["temperature"],
+            "top_p": model[self.provider_name()]["top_p"],
+            "top_k": model[self.provider_name()]["top_k"],
+        }
+
+        if is_conversational:
+            input["prompt"] = prompt
+        else:
+            input["prompt"] = f"{head_template} {prompt} {foot_template}"
+
+        output = replicate.run(model_name, input=input)
+        final_string = ""
+        for items in output:
+            final_string += items
+        return final_string
+
+    def conversational_generation(self, prompt: str, model: dict, history: dict) -> str:
+        head_template = model[self.provider_name()]["templates"]["header"]
+        foot_template = model[self.provider_name()]["templates"]["footer"]
+        formatted_conversation = []
+        formatted_conversation.append(f"Human: {head_template}")
+        for user_entry, bot_entry in zip(history["user"], history["bot"]):
+            user_text = user_entry["text"]
+            bot_text = bot_entry["text"]
+            formatted_conversation.append(f"Human: {user_text}")
+            formatted_conversation.append(f"Assistant: {bot_text}")
+
+        formatted_conversation.append(f"Human: {prompt} {foot_template}")
+        formatted_conversation.append("Assistant: ")
+
+        formatted_conversation = "\n\n".join(formatted_conversation)
+        return self.generate_text(formatted_conversation, model, is_conversational=True)
+
+    def provider_name(self):
+        return "replicate"
