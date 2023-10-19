@@ -33,6 +33,7 @@ from app.domain.services.utils.llm import (
     GoogleProvider,
     HuggingFaceProvider,
     OpenAIProvider,
+    ReplicateProvider,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
@@ -66,6 +67,7 @@ class ModelService:
             "anthropic": AnthropicProvider(),
             "aleph": AlephAlphaProvider(),
             "google": GoogleProvider(),
+            "replicate": ReplicateProvider(),
         }
 
     def get_model_in_the_loop(self, task_id: str) -> str:
@@ -396,7 +398,7 @@ class ModelService:
             )
         return "Model evaluate successfully"
 
-    def conversation_with_buffer_memory(
+    async def conversation_with_buffer_memory(
         self,
         history: dict,
         model_name: dict,
@@ -404,13 +406,15 @@ class ModelService:
         prompt: str,
         num_answers: int,
     ):
-        print("Selected model was", model_name)
+        print("Selected model was", model_name[provider]["model_name"])
         responses = []
         llm = self.providers[provider]
         for i in range(num_answers):
             response = {
                 "id": i,
-                "text": llm.conversational_generation(prompt, model_name, history),
+                "text": await llm.conversational_generation(
+                    prompt, model_name, history
+                ),
                 "score": 0.5,
             }
             responses.append(response)
