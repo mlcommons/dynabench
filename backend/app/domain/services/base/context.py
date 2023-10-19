@@ -24,8 +24,9 @@ from app.domain.services.utils.llm import (
     GoogleProvider,
     HuggingFaceProvider,
     OpenAIProvider,
+    ReplicateProvider,
 )
-from app.domain.services.utils.multi_generator import ImageGenerator
+from app.domain.services.utils.multi_generator import ImageGenerator, LLMGenerator
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
@@ -49,6 +50,7 @@ class ContextService:
             CohereProvider(),
             AlephAlphaProvider(),
             GoogleProvider(),
+            ReplicateProvider(),
         ]
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
@@ -183,31 +185,33 @@ class ContextService:
         print(f"Time to generate images: {time.time() - start}")
         return images
 
-    def get_perdi_contexts(
+    async def get_perdi_contexts(
         self, prompt: str, number_of_samples: int, models: dict
-    ) -> dict:
+    ) -> list:
         all_models = [
             {provider: model}
             for provider, provider_data in models.items()
             for model_data in provider_data
-            for model in (model_data if isinstance(model_data, list) else [model_data])
+            for model in [model_data]
         ]
         random.shuffle(all_models)
         selected_models = all_models[:number_of_samples]
         print("Selected models were", selected_models)
+        multigenerator = LLMGenerator()
+        start = time.time()
+        all_artifacts = await multigenerator.generate_all_texts(
+            prompt, selected_models, is_conversational=False
+        )
+        print(f"Time to generate texts: {time.time() - start}")
         all_answers = []
-        for id, model in enumerate(selected_models):
-            model_name = list(model.keys())[0]
-            for provider in self.llm_providers:
-                if provider.provider_name() == model_name:
-                    answer = {
-                        "id": id,
-                        "text": provider.generate_text(prompt, model),
-                        "model_name": model,
-                        "provider": provider.provider_name(),
-                    }
-                    all_answers.append(answer)
-
+        for id, artifact in enumerate(all_artifacts):
+            answer = {
+                "id": id,
+                "text": artifact["text"],
+                "model_name": artifact["artifacts"],
+                "provider": artifact["provider_name"],
+            }
+            all_answers.append(answer)
         return all_answers
 
     async def generate_images_stream(self, model_info):
@@ -223,7 +227,7 @@ class ContextService:
                 num_images=6,
             )
         elif type == "perdi":
-            return self.get_perdi_contexts(
+            return await self.get_perdi_contexts(
                 prompt=artifacts["prompt"],
                 number_of_samples=artifacts["number_of_samples"],
                 models=artifacts["providers"],
