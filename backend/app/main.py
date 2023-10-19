@@ -17,6 +17,7 @@ from app.api.endpoints.base import (
     example,
     historical_data,
     model,
+    round,
     rounduserexample,
     score,
     task,
@@ -70,3 +71,4 @@ app.include_router(
 app.include_router(
     historical_data.router, prefix="/historical_data", tags=["historical_data"]
 )
+app.include_router(round.router, prefix="/round", tags=["round"])

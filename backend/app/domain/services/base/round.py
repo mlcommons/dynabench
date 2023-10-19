@@ -19,3 +19,8 @@ class RoundService:
         self.round_repository.increment_counter_examples_verified_fooled(
             round_id, task_id
         )
+
+    def get_examples_collected_per_round(self, round_id: int, task_id: int):
+        return self.round_repository.get_examples_collected_per_round(
+            round_id, task_id
+        ).total_collected
