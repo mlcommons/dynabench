@@ -34,3 +34,4 @@ pillow==10.0.0
 cohere==4.27.0
 anthropic==0.3.11
 aleph_alpha_client==3.5.1
+google-generativeai==0.2.1
