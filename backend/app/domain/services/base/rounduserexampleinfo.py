@@ -91,7 +91,7 @@ class RoundUserExampleInfoService:
         number_of_examples_created = (
             self.rounds_user_example_info_repository.number_of_examples_created(
                 round_id, user_id
-            )[0]
+            )
         )
         if number_of_examples_created is None:
             return 0

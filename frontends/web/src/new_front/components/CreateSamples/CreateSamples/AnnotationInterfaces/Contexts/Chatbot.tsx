@@ -7,6 +7,7 @@ import useFetch from "use-http";
 import Swal from "sweetalert2";
 import { ChatHistoryType } from "new_front/types/createSamples/createSamples/utils";
 import { Avatar } from "components/Avatar/Avatar";
+import parse from "html-react-parser";
 
 type ChatbotProps = {
   instructions: string;
@@ -95,35 +96,38 @@ const Chatbot: FC<ChatbotProps> = ({
     );
     if (isTied) {
       Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Rate at least one of the answers",
+        title: "There's a tie",
+        text: "Are you sure that you want to continue?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+      }).then(() => {
+        setChatHistory({
+          ...chatHistory,
+          user: [
+            ...chatHistory.user,
+            {
+              id: chatHistory.user[chatHistory.user.length - 1].id + 1,
+              text: prompt,
+            },
+          ],
+          bot: [
+            ...chatHistory.bot,
+            {
+              id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
+              text: newRespones.reduce(
+                (max: { score: number }, answer: { score: number }) =>
+                  answer.score > max.score ? answer : max,
+              ).text,
+            },
+          ],
+        });
+        setNewResponses([]);
+        setIsAskingQuestion(true);
+        setPrompt("");
+        setNumInteractions((prev) => prev + 1);
       });
-    } else {
-      setChatHistory({
-        ...chatHistory,
-        user: [
-          ...chatHistory.user,
-          {
-            id: chatHistory.user[chatHistory.user.length - 1].id + 1,
-            text: prompt,
-          },
-        ],
-        bot: [
-          ...chatHistory.bot,
-          {
-            id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
-            text: newRespones.reduce(
-              (max: { score: number }, answer: { score: number }) =>
-                answer.score > max.score ? answer : max,
-            ).text,
-          },
-        ],
-      });
-      setNewResponses([]);
-      setIsAskingQuestion(true);
-      setPrompt("");
-      setNumInteractions((prev) => prev + 1);
     }
   };
 
@@ -141,7 +145,7 @@ const Chatbot: FC<ChatbotProps> = ({
           {!finishConversation && (
             <>
               <h3 className="pt-1 pb-6 pl-6 text-lg font-bold text-letter-color">
-                {instructions}
+                {parse(instructions)}
               </h3>
               <div id="history-chat">
                 {chatHistory.user.length > 0 &&
