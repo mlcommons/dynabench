@@ -91,6 +91,33 @@ const Chatbot: FC<ChatbotProps> = ({
   };
 
   const saveHistory = () => {
+    setChatHistory({
+      ...chatHistory,
+      user: [
+        ...chatHistory.user,
+        {
+          id: chatHistory.user[chatHistory.user.length - 1].id + 1,
+          text: prompt,
+        },
+      ],
+      bot: [
+        ...chatHistory.bot,
+        {
+          id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
+          text: newRespones.reduce(
+            (max: { score: number }, answer: { score: number }) =>
+              answer.score > max.score ? answer : max,
+          ).text,
+        },
+      ],
+    });
+    setNewResponses([]);
+    setIsAskingQuestion(true);
+    setPrompt("");
+    setNumInteractions((prev) => prev + 1);
+  };
+
+  const saveHistoryValidation = () => {
     const isTied = newRespones.every(
       (text) => text.score === newRespones[0].score && newRespones.length > 1,
     );
@@ -102,32 +129,13 @@ const Chatbot: FC<ChatbotProps> = ({
         showCancelButton: true,
         confirmButtonText: "Yes",
         cancelButtonText: "No",
-      }).then(() => {
-        setChatHistory({
-          ...chatHistory,
-          user: [
-            ...chatHistory.user,
-            {
-              id: chatHistory.user[chatHistory.user.length - 1].id + 1,
-              text: prompt,
-            },
-          ],
-          bot: [
-            ...chatHistory.bot,
-            {
-              id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
-              text: newRespones.reduce(
-                (max: { score: number }, answer: { score: number }) =>
-                  answer.score > max.score ? answer : max,
-              ).text,
-            },
-          ],
-        });
-        setNewResponses([]);
-        setIsAskingQuestion(true);
-        setPrompt("");
-        setNumInteractions((prev) => prev + 1);
+      }).then((result: any) => {
+        if (result.isConfirmed) {
+          saveHistory();
+        }
       });
+    } else {
+      saveHistory();
     }
   };
 
@@ -248,7 +256,7 @@ const Chatbot: FC<ChatbotProps> = ({
                   ) : (
                     <div>
                       <GeneralButton
-                        onClick={saveHistory}
+                        onClick={saveHistoryValidation}
                         text="Save"
                         className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                       />
