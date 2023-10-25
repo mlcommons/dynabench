@@ -254,7 +254,7 @@ class AlephAlphaProvider(LLMProvider):
         self, prompt: str, model: dict, is_conversational: bool = False
     ) -> str:
         head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        # foot_template = model[self.provider_name()]["templates"]["footer"]
         params = {
             "prompt": Prompt.from_text(prompt),
             "maximum_tokens": model[self.provider_name()]["max_tokens"],
@@ -275,7 +275,9 @@ class AlephAlphaProvider(LLMProvider):
                 )
                 completion = response.completions[0].completion
         else:
-            prompt = f"{head_template} {prompt} {foot_template}"
+            prompt = f"""### Instruction \n{head_template}
+ \n###Input \nLast user message: {prompt} \n\n### Response: \nAssistant:"""
+            print(prompt)
             params["prompt"] = Prompt.from_text(prompt)
             async with AsyncClient(token=self.api_key) as client:
                 response = await client.complete(request=request, model=model_name)
@@ -292,19 +294,21 @@ class AlephAlphaProvider(LLMProvider):
         self, prompt: str, model: dict, history: dict
     ) -> str:
         head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        # foot_template = model[self.provider_name()]["templates"]["footer"]
         formatted_conversation = []
-        formatted_conversation.append(f"Human: {head_template}")
+        formatted_conversation.append(
+            f"### Instruction:\n{head_template} \n\n### Input:"
+        )
         for user_entry, bot_entry in zip(history["user"], history["bot"]):
             user_text = user_entry["text"]
             bot_text = bot_entry["text"]
-            formatted_conversation.append(f"Human: {user_text}")
+            formatted_conversation.append(f"User: {user_text}")
             formatted_conversation.append(f"Assistant: {bot_text}")
 
-        formatted_conversation.append(f"Human: {prompt} {foot_template}")
+        formatted_conversation.append(f"Last user message: {prompt} \n\n### Response:")
         formatted_conversation.append("Assistant: ")
 
-        formatted_conversation = "\n\n".join(formatted_conversation)
+        formatted_conversation = "\n".join(formatted_conversation)
         result = await self.generate_text(
             formatted_conversation, model, is_conversational=True
         )
