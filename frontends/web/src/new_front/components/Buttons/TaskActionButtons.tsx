@@ -38,7 +38,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
           <Nav.Item className="task-action-btn">
             <Annotation
               placement="bottom"
-              tooltip="Click here to get creative and start writing examples that fool the model"
+              tooltip="Click here to create new examples"
             >
               <OverlayTrigger
                 placement="bottom"

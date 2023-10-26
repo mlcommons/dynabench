@@ -10,6 +10,7 @@ type EvaluateTextProps = {
   optionsSlider?: string[];
   disabled?: boolean;
   bestAnswer?: string;
+  score?: number;
 };
 
 const EvaluateText: FC<EvaluateTextProps> = ({
@@ -20,6 +21,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
   optionsSlider = ["0", "100"],
   disabled = false,
   bestAnswer = "",
+  score = 50,
 }) => {
   const handleUpdateScore = (event: any) => {
     setTexts(
@@ -48,8 +50,8 @@ const EvaluateText: FC<EvaluateTextProps> = ({
             } w-full h-32 pl-1 border-0 px-2 py-2  text-letter-color `}
             placeholder={text}
             required
-            disabled={disabled}
-          ></textarea>
+            disabled={true}
+          />
         </div>
         <div className="flex items-center justify-between w-full gap-2 px-4 pt-4 pb-2 border-t">
           <span className="text-gray-500 ">{optionsSlider[0]}</span>
@@ -58,7 +60,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
             className={`rounded-full w-full cursor-pointer `}
             type="range"
             step={1}
-            defaultValue={50}
+            defaultValue={score}
             min={1}
             max={100}
             onChange={handleUpdateScore}

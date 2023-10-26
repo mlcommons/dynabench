@@ -26,7 +26,7 @@ const SubmitPrediction = () => {
 
   const isLogin = async () => {
     if (!user.id) {
-      await checkUserIsLoggedIn(history, `/`);
+      await checkUserIsLoggedIn(history, `/`, null, null);
     }
   };
 

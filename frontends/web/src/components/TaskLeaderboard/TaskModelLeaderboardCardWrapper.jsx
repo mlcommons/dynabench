@@ -24,6 +24,7 @@ const taskModelLeaderboardCardWrapper = (
         task={props.task}
         history={props.history}
         taskCode={props.taskCode}
+        percentageFormat={props.percentageFormat}
         disableForkAndSnapshot={props.disableForkAndSnapshot}
         disableToggleSort={props.disableToggleSort}
         disableAdjustWeights={props.disableAdjustWeights}

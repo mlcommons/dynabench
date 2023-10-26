@@ -17,8 +17,16 @@ from PIL import Image
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
-from app.domain.services.utils.llm import OpenAIProvider
-from app.domain.services.utils.multi_generator import ImageGenerator
+from app.domain.services.utils.llm import (
+    AlephAlphaProvider,
+    AnthropicProvider,
+    CohereProvider,
+    GoogleProvider,
+    HuggingFaceProvider,
+    OpenAIProvider,
+    ReplicateProvider,
+)
+from app.domain.services.utils.multi_generator import ImageGenerator, LLMGenerator
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
@@ -28,7 +36,6 @@ class ContextService:
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
         self.task_service = TaskService()
-        self.llm_provider = OpenAIProvider()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
@@ -36,6 +43,15 @@ class ContextService:
         )
         self.s3 = self.session.client("s3")
         self.dataperf_bucket = os.getenv("AWS_S3_DATAPERF_BUCKET")
+        self.llm_providers = [
+            HuggingFaceProvider(),
+            OpenAIProvider(),
+            AnthropicProvider(),
+            CohereProvider(),
+            AlephAlphaProvider(),
+            GoogleProvider(),
+            ReplicateProvider(),
+        ]
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
         self.context_repository.increment_counter_total_samples_and_update_date(
@@ -169,19 +185,31 @@ class ContextService:
         print(f"Time to generate images: {time.time() - start}")
         return images
 
-    def get_perdi_contexts(
-        self, prompt: str, number_of_samples: int, models: list
-    ) -> dict:
-        random.shuffle(models)
+    async def get_perdi_contexts(
+        self, prompt: str, number_of_samples: int, models: dict
+    ) -> list:
+        all_models = [
+            {provider: model}
+            for provider, provider_data in models.items()
+            for model_data in provider_data
+            for model in [model_data]
+        ]
+        random.shuffle(all_models)
+        selected_models = all_models[:number_of_samples]
+        print("Selected models were", selected_models)
+        multigenerator = LLMGenerator()
+        start = time.time()
+        all_artifacts = await multigenerator.generate_all_texts(
+            prompt, selected_models, is_conversational=False
+        )
+        print(f"Time to generate texts: {time.time() - start}")
         all_answers = []
-        for id, model in enumerate(models[:number_of_samples]):
+        for id, artifact in enumerate(all_artifacts):
             answer = {
-                "id": f"perdi_{id + 1}",
-                "text": self.llm_provider.generate_text(prompt, model["name"]),
-                "model": model["name"],
-                "model_letter": chr(ord("A") + id),
-                "provider": model["provider"],
-                "score": 50,
+                "id": id,
+                "text": artifact["text"],
+                "model_name": artifact["artifacts"],
+                "provider": artifact["provider_name"],
             }
             all_answers.append(answer)
         return all_answers
@@ -199,8 +227,8 @@ class ContextService:
                 num_images=6,
             )
         elif type == "perdi":
-            return self.get_perdi_contexts(
+            return await self.get_perdi_contexts(
                 prompt=artifacts["prompt"],
                 number_of_samples=artifacts["number_of_samples"],
-                models=artifacts["models"],
+                models=artifacts["providers"],
             )

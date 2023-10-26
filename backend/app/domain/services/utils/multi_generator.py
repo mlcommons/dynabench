@@ -2,6 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import asyncio
 from multiprocessing import Pool
 
 from app.domain.services.utils.image_generators import (  # SD2ImageProvider,
@@ -10,6 +11,62 @@ from app.domain.services.utils.image_generators import (  # SD2ImageProvider,
     SDVariableAutoEncoder,
     SDXLImageProvider,
 )
+from app.domain.services.utils.llm import (
+    AlephAlphaProvider,
+    AnthropicProvider,
+    CohereProvider,
+    GoogleProvider,
+    HuggingFaceProvider,
+    OpenAIProvider,
+    ReplicateProvider,
+)
+
+
+class LLMGenerator:
+    def __init__(self):
+        self.llm_providers = {
+            "openai": OpenAIProvider(),
+            "cohere": CohereProvider(),
+            "huggingface": HuggingFaceProvider(),
+            "anthropic": AnthropicProvider(),
+            "aleph": AlephAlphaProvider(),
+            "google": GoogleProvider(),
+            "replicate": ReplicateProvider(),
+        }
+
+    async def generate_one_text(
+        self, generator, prompt, model, is_conversational: bool = False
+    ):
+        text = await generator.generate_text(prompt, model, is_conversational)
+        return text
+
+    async def generate_all_texts(
+        self, prompt: str, model, is_conversational: bool = False
+    ) -> list:
+        """Generate text from all LLM providers asynchronously
+
+        Args:
+            prompt (str): The text to generate from
+            model (dict): Contains all relevant info for the model
+            is_conversational (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            list: A list of dictionaries with the metadata and generated text
+        """
+        selected_providers = [list(providers.keys())[0] for providers in model]
+        parameters = []
+        for provider, cur_model in zip(selected_providers, model):
+            if list(cur_model.keys())[0] == provider:
+                parameters.append(
+                    [self.llm_providers[provider], prompt, cur_model, is_conversational]
+                )
+
+        all_tasks = set()
+        for parameter in parameters:
+            task = asyncio.create_task(self.generate_one_text(*parameter))
+            all_tasks.add(task)
+        results = await asyncio.gather(*all_tasks)
+        return results
 
 
 class ImageGenerator:

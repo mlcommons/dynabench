@@ -146,6 +146,10 @@ class Leaderboard extends React.Component {
                                 {...this.props}
                                 task={this.state.task}
                                 taskCode={this.state.taskCode}
+                                percentageFormat={
+                                  yaml.load(this.state.task.config_yaml)
+                                    .decimal_format
+                                }
                                 title={
                                   hasTrainFileUpload
                                     ? "Coreset Selection Algorithm Leaderboard"
@@ -192,7 +196,13 @@ class Leaderboard extends React.Component {
                         </>
                       )}
                       {this.showUserLeaderboardCSV && (
-                        <UserLeaderBoardCSV taskId={this.state.task.id} />
+                        <UserLeaderBoardCSV
+                          taskId={this.state.task.id}
+                          title={
+                            yaml.load(this.state.task.config_yaml)
+                              .leaderboard_csv_title
+                          }
+                        />
                       )}
                     </Col>
                   </Row>

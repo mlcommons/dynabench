@@ -35,6 +35,7 @@ def single_model_prediction_submit(model: SingleModelEvaluationRequest):
         model.sandbox_mode,
         model.model_prediction_label,
         model.model_evaluation_metric_info,
+        model.model_metadata,
     )
 
 
@@ -117,8 +118,8 @@ def upload_prediction_to_s3(
 
 
 @router.post("/conversation_with_buffer_memory")
-def conversation_with_buffer_memory(model: ConversationWithBufferMemoryRequest):
-    return ModelService().conversation_with_buffer_memory(
+async def conversation_with_buffer_memory(model: ConversationWithBufferMemoryRequest):
+    return await ModelService().conversation_with_buffer_memory(
         model.history, model.model_name, model.provider, model.prompt, model.num_answers
     )
 

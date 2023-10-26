@@ -75,7 +75,6 @@ class RoundUserExampleInfoService:
         max_amount_examples_on_a_day = (
             self.task_repository.get_max_amount_examples_on_a_day(task_id)[0]
         )
-        print("amounts_examples_created_today", amounts_examples_created_today)
         return amounts_examples_created_today < max_amount_examples_on_a_day
 
     def get_counter_examples_submitted(self, round_id: int, user_id: int):
@@ -87,3 +86,13 @@ class RoundUserExampleInfoService:
         self.rounds_user_example_info_repository.reset_counter_examples_submitted(
             round_id, user_id
         )
+
+    def number_of_examples_created(self, round_id: int, user_id: int):
+        number_of_examples_created = (
+            self.rounds_user_example_info_repository.number_of_examples_created(
+                round_id, user_id
+            )
+        )
+        if number_of_examples_created is None:
+            return 0
+        return number_of_examples_created

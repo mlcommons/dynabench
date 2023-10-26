@@ -47,7 +47,7 @@ const Header: FC = () => {
                   onClick={handleShow}
                   className="py-2 text-lg font-semibold border-0 px-7 lg:text-xl light-gray-bg"
                 >
-                  Create your own task
+                  Create your own challenge
                 </Button>
               </div>
             </div>

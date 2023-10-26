@@ -20,6 +20,7 @@ class SingleModelEvaluationRequest(BaseModel):
     sandbox_mode: bool
     model_prediction_label: str
     model_evaluation_metric_info: dict
+    model_metadata: Optional[dict]
 
 
 class SingleModelEvaluationResponse(BaseModel):
@@ -66,7 +67,7 @@ class ModelPredictionPerDatasetRequest(BaseModel):
 
 class ConversationWithBufferMemoryRequest(BaseModel):
     history: dict
-    model_name: str
+    model_name: dict
     provider: str
     prompt: str
     num_answers: int

@@ -20,36 +20,28 @@ const MultiSlider: FC<MultiSliderProps> = ({
   onInputChange,
 }) => {
   const [open, setOpen] = useState(false);
-  const [responses, setResponses] = useState<any[]>([
+  const [responses, setResponses] = useState<any[]>(
     options.map((option) => {
       return { label: option.label, value: 50 };
     }),
-  ]);
+  );
 
   const handleChange = (option: string, value: string) => {
-    const index = responses.findIndex((response) => response.label === option);
-    if (index > -1) {
-      responses[index] = { label: option, value };
-    } else {
-      responses.push({ label: option, value });
+    const updatedResponses = [...responses];
+    const responseIndex = updatedResponses.findIndex(
+      (response) => response.label === option,
+    );
+    if (responseIndex !== -1) {
+      updatedResponses[responseIndex].value = value;
     }
-    setResponses([...responses]);
+    setResponses(updatedResponses);
     onInputChange(
       {
-        [field_name_for_the_model]: [...responses],
+        [field_name_for_the_model]: updatedResponses,
       },
       metadata,
     );
   };
-
-  useEffect(() => {
-    onInputChange(
-      {
-        [field_name_for_the_model]: [...responses],
-      },
-      metadata,
-    );
-  }, []);
 
   return (
     <div className="py-2 ">
@@ -89,6 +81,15 @@ const MultiSlider: FC<MultiSliderProps> = ({
                       }
                     />
                     <span className="text-gray-500 ">{optionsSlider[1]}</span>
+                    <input
+                      className="w-10 text-center text-gray-500 bg-gray-100 border-gray-300 rounded"
+                      type="checkbox"
+                      value="N/A"
+                      onChange={(event) =>
+                        handleChange(option.label, event.target.value)
+                      }
+                    />
+                    <span className="text-gray-500 ">N/A</span>
                   </div>
                 </div>
               </li>

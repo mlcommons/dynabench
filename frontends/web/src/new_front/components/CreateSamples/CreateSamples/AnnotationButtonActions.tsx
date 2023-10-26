@@ -50,6 +50,10 @@ const AnnotationButtonActions: FC<Props> = ({
 
   const { post, loading, response } = useFetch();
 
+  useEffect(() => {
+    console.log(partialSampleId);
+  }, [partialSampleId]);
+
   const onSubmission = async () => {
     modelInputs = {
       ...modelInputs,
@@ -73,13 +77,26 @@ const AnnotationButtonActions: FC<Props> = ({
         model_url: modelInTheLoop,
         model_prediction_label: modelPredictionLabel,
         model_evaluation_metric_info: modelEvaluationMetricInfo,
+        model_metadata: metadataExample,
       };
       if (partialSampleId === 0) {
         const modelOutput = await post(
           `/model/single_model_prediction_submit`,
           finaModelInputs,
         );
-        setModelOutput(modelOutput);
+        if (response.ok) {
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Your example has been saved",
+            confirmButtonColor: "#2088ef",
+          });
+          setIsGenerativeContext(true);
+          setModelOutput(modelOutput);
+          if (modelOutput.input === "") {
+            window.location.reload();
+          }
+        }
       } else {
         const modelOutput = await post(
           `/example/update_creation_generative_example_by_example_id`,

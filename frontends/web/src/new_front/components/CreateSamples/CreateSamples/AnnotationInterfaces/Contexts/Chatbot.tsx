@@ -7,6 +7,7 @@ import useFetch from "use-http";
 import Swal from "sweetalert2";
 import { ChatHistoryType } from "new_front/types/createSamples/createSamples/utils";
 import { Avatar } from "components/Avatar/Avatar";
+import parse from "html-react-parser";
 
 type ChatbotProps = {
   instructions: string;
@@ -50,47 +51,29 @@ const Chatbot: FC<ChatbotProps> = ({
 
   const askQuestion = async () => {
     if (prompt !== "") {
-      // const generatedTexts = await post(
-      //   '/model/conversation_with_buffer_memory',
-      //   {
-      //     history: {
-      //       ...chatHistory,
-      //       user: [
-      //         ...chatHistory.user,
-      //         {
-      //           id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
-      //           text: prompt,
-      //         },
-      //       ],
-      //     },
-      //     model_name: model_name,
-      //     provider: provider,
-      //     prompt: prompt,
-      //     num_answers: num_of_samples_chatbot,
-      //   },
-      // )
-      // if (response.ok) {
-      //   setNewResponses(generatedTexts)
-      //   setIsAskingQuestion(false)
-      //   setPrompt('')
-
-      // }
-      const generatedTexts = [
+      const generatedTexts = await post(
+        "/model/conversation_with_buffer_memory",
         {
-          id: "1",
-          model_name: "GPT-3",
-          text: "As an AI language model, I do not have personal experiences or direct interactions with individuals who taught me specific information. My responses are generated based on a vast amount of pre-existing human knowledge that has been processed and organized by machine learning algorithms.",
-          score: 0.9,
+          history: {
+            ...chatHistory,
+            user: [
+              ...chatHistory.user,
+              {
+                id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
+                text: prompt,
+              },
+            ],
+          },
+          model_name: model_name,
+          provider: provider,
+          prompt: prompt,
+          num_answers: num_of_samples_chatbot,
         },
-        {
-          id: "2",
-          model_name: "GPT-2",
-          text: "My training involved analyzing and learning from a wide range of text sources, such as books, articles, websites, and other textual materials available on the internet. The information I provide is a combination of general knowledge and patterns derived from the training data.",
-          score: 0.8,
-        },
-      ];
-      setNewResponses(generatedTexts);
-      setIsAskingQuestion(false);
+      );
+      if (response.ok) {
+        setNewResponses(generatedTexts);
+        setIsAskingQuestion(false);
+      }
     } else {
       Swal.fire({
         icon: "error",
@@ -134,16 +117,34 @@ const Chatbot: FC<ChatbotProps> = ({
     setNumInteractions((prev) => prev + 1);
   };
 
+  const saveHistoryValidation = () => {
+    const isTied = newRespones.every(
+      (text) => text.score === newRespones[0].score && newRespones.length > 1,
+    );
+    if (isTied) {
+      Swal.fire({
+        title: "There's a tie",
+        text: "Are you sure that you want to continue?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+      }).then((result: any) => {
+        if (result.isConfirmed) {
+          saveHistory();
+        }
+      });
+    } else {
+      saveHistory();
+    }
+  };
+
   const handleFinishInteraction = () => {
     showOriginalInteractions();
     finishSection();
     setIsGenerativeContext(false);
     setFinishConversation(true);
   };
-
-  useEffect(() => {
-    console.log("numInteractions", numInteractions);
-  }, [numInteractions]);
 
   return (
     <>
@@ -152,7 +153,7 @@ const Chatbot: FC<ChatbotProps> = ({
           {!finishConversation && (
             <>
               <h3 className="pt-1 pb-6 pl-6 text-lg font-bold text-letter-color">
-                {instructions}
+                {parse(instructions)}
               </h3>
               <div id="history-chat">
                 {chatHistory.user.length > 0 &&
@@ -179,10 +180,13 @@ const Chatbot: FC<ChatbotProps> = ({
                       <div className="chat-message">
                         <div className="flex items-end justify-end">
                           <div className="flex flex-col items-end order-1 max-w-lg mx-2 space-y-2">
-                            <div>
-                              <span className="inline-block px-3 py-1 text-white rounded-lg rounded-br-none bg-third-color ">
-                                {chatHistory.bot[index].text}
-                              </span>
+                            <div className="min-w-[16rem] md:min-w-[26rem] lg:min-w-[32rem]">
+                              <textarea
+                                className="inline-block w-full px-3 py-2 text-white rounded-lg rounded-bl-none bg-third-color"
+                                disabled={true}
+                                value={chatHistory.bot[index].text}
+                                rows={5}
+                              />
                             </div>
                           </div>
                           <img
@@ -245,14 +249,14 @@ const Chatbot: FC<ChatbotProps> = ({
                     <div>
                       <GeneralButton
                         onClick={askQuestion}
-                        text="Ask"
+                        text="Send"
                         className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                       />
                     </div>
                   ) : (
                     <div>
                       <GeneralButton
-                        onClick={saveHistory}
+                        onClick={saveHistoryValidation}
                         text="Save"
                         className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                       />

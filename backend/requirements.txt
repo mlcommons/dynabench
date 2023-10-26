@@ -31,3 +31,8 @@ sse_starlette==1.6.1
 ujson==4.2.0
 greenlet==1.1.2
 pillow==10.0.0
+cohere==4.27.0
+anthropic==0.3.11
+aleph_alpha_client==3.5.1
+google-generativeai==0.2.1
+replicate==0.15.4

@@ -49,3 +49,10 @@ class RoundRepository(AbstractRepository):
         return (
             self.session.query(self.model.tid).filter(self.model.id == round_id).first()
         )
+
+    def get_examples_collected_per_round(self, round_id: int, task_id: int):
+        return (
+            self.session.query(self.model.total_collected)
+            .filter((self.model.rid == round_id) & (self.model.tid == task_id))
+            .first()
+        )

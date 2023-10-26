@@ -114,6 +114,7 @@ const TaskPage = () => {
                     totalCollected={task.round.total_collected}
                     maxScore={maxScore}
                     amountOfModels={amountOfModels}
+                    taskId={task.id}
                   />
                 </div>
               </div>

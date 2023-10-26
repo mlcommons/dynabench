@@ -128,8 +128,6 @@ class ExampleService:
                 round_id, user_id
             )
         )
-        print("amount_examples_submitted", amount_examples_submitted)
-        print("amount_necessary_examples", amount_necessary_examples)
         if amount_examples_submitted == amount_necessary_examples:
             requests.post(url_external_provider, json=provider_artifacts)
             self.round_user_example_info.reset_counter_examples_submitted(

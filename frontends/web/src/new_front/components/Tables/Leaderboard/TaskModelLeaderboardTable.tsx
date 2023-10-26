@@ -232,6 +232,7 @@ type TaskModelLeaderboardTableProps = {
   toggleSort: any;
   modelColumnTitle: any;
   showUserNames: boolean;
+  multiplyResultsByHundred: boolean;
 };
 
 const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
@@ -246,6 +247,7 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
   toggleSort,
   modelColumnTitle,
   showUserNames,
+  multiplyResultsByHundred,
 }) => {
   const metricColumnWidth =
     60 / ((metrics?.length ?? 0) === 0 ? 1 : metrics.length);
@@ -370,6 +372,7 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = ({
                 data={data}
                 showDynascore={showDynascore}
                 showUserNames={showUserNames}
+                multiplyResultsByHundred={multiplyResultsByHundred}
               />
             ))}
           </tbody>
