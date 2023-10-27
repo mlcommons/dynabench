@@ -50,10 +50,6 @@ const AnnotationButtonActions: FC<Props> = ({
 
   const { post, loading, response } = useFetch();
 
-  useEffect(() => {
-    console.log(partialSampleId);
-  }, [partialSampleId]);
-
   const onSubmission = async () => {
     modelInputs = {
       ...modelInputs,

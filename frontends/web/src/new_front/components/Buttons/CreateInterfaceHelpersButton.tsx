@@ -17,8 +17,6 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
   const [showInstructions, setShowInstructions] = useState(false);
   const [showCreationExample, setShowCreationExample] = useState(false);
 
-  console.log("amountsExamplesCreatedToday", amountsExamplesCreatedToday);
-
   return (
     <div className="flex items-center justify-between gap-2">
       {amountsExamplesCreatedToday !== null ? (
