@@ -43,11 +43,13 @@ const Chatbot: FC<ChatbotProps> = ({
   setIsGenerativeContext,
 }) => {
   const [prompt, setPrompt] = useState("");
-
   const [numInteractions, setNumInteractions] = useState(0);
   const [isAskingQuestion, setIsAskingQuestion] = useState(true);
   const [newRespones, setNewResponses] = useState<any[]>([]);
   const { post, response, loading } = useFetch();
+  const [responsesHistory, setResponsesHistory] = useState<
+    { iteration: number; responses_model: any[] }[]
+  >([]);
 
   const askQuestion = async () => {
     if (prompt !== "") {
@@ -71,7 +73,12 @@ const Chatbot: FC<ChatbotProps> = ({
         },
       );
       if (response.ok) {
-        setNewResponses(generatedTexts);
+        setNewResponses(
+          generatedTexts.map((text: any) => ({
+            ...text,
+            score: 50,
+          })) as any,
+        );
         setIsAskingQuestion(false);
       }
     } else {
@@ -108,6 +115,10 @@ const Chatbot: FC<ChatbotProps> = ({
             (max: { score: number }, answer: { score: number }) =>
               answer.score > max.score ? answer : max,
           ).text,
+          score: newRespones.reduce(
+            (max: { score: number }, answer: { score: number }) =>
+              answer.score > max.score ? answer : max,
+          ).score,
         },
       ],
     });
@@ -115,6 +126,22 @@ const Chatbot: FC<ChatbotProps> = ({
     setIsAskingQuestion(true);
     setPrompt("");
     setNumInteractions((prev) => prev + 1);
+    setResponsesHistory((prevResponses) => [
+      ...prevResponses,
+      {
+        iteration: numInteractions,
+        responses_model: newRespones,
+      },
+    ]);
+    updateModelInputs({
+      historical_responses_model: [
+        ...responsesHistory,
+        {
+          iteration: numInteractions,
+          responses_model: newRespones,
+        },
+      ],
+    });
   };
 
   const saveHistoryValidation = () => {
@@ -241,6 +268,7 @@ const Chatbot: FC<ChatbotProps> = ({
                         texts={newRespones}
                         setTexts={setNewResponses}
                         optionsSlider={optionsSlider}
+                        score={response.score}
                       />
                     ))}
                 </div>

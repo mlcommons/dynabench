@@ -50,13 +50,10 @@ const AnnotationButtonActions: FC<Props> = ({
 
   const { post, loading, response } = useFetch();
 
-  useEffect(() => {
-    console.log(partialSampleId);
-  }, [partialSampleId]);
-
   const onSubmission = async () => {
     modelInputs = {
       ...modelInputs,
+      final_timestamp: Date.now(),
       input_by_user: inputByUser,
     };
     if (

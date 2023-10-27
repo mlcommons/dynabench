@@ -62,6 +62,9 @@ const EvaluateTextsGenerative: FC<
     updateModelInputs({
       category: category,
     });
+    updateModelInputs({
+      initial_timestamp: Date.now(),
+    });
     setShowInput(true);
     setShowCategory(true);
   };
@@ -123,10 +126,6 @@ const EvaluateTextsGenerative: FC<
       });
     }
   };
-
-  useEffect(() => {
-    console.log("isCreatingTexts", isCreatingTexts);
-  }, [isCreatingTexts]);
 
   const handlePromptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setArtifactsInput({
