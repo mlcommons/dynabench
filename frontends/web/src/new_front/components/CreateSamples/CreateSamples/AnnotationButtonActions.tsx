@@ -53,6 +53,7 @@ const AnnotationButtonActions: FC<Props> = ({
   const onSubmission = async () => {
     modelInputs = {
       ...modelInputs,
+      final_timestamp: Date.now(),
       input_by_user: inputByUser,
     };
     if (

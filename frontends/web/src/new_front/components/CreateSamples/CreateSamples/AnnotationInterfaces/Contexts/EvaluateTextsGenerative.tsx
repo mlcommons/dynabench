@@ -62,6 +62,9 @@ const EvaluateTextsGenerative: FC<
     updateModelInputs({
       category: category,
     });
+    updateModelInputs({
+      initial_timestamp: Date.now(),
+    });
     setShowInput(true);
     setShowCategory(true);
   };
