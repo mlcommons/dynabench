@@ -157,7 +157,6 @@ const CreateInterface = () => {
                     }`}
                   />
                 </div>
-
                 <div className="flex items-start justify-end pr-4 pt-14">
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}

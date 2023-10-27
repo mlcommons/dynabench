@@ -415,7 +415,6 @@ class ModelService:
                 "text": await llm.conversational_generation(
                     prompt, model_name, history
                 ),
-                "score": 0.5,
             }
             responses.append(response)
         return responses
