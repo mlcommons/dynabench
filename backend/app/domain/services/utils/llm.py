@@ -2,6 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import json
 import os
 from abc import ABC, abstractmethod
 
@@ -10,6 +11,7 @@ import google.generativeai as palm
 import openai
 import replicate
 import requests
+from aiohttp import ClientSession
 from aleph_alpha_client import AsyncClient, CompletionRequest, Prompt
 from anthropic import AsyncAnthropic
 
@@ -69,6 +71,7 @@ class OpenAIProvider(LLMProvider):
             temperature=temperature,
             top_p=top_p,
             max_tokens=max_tokens,
+            timeout=30,
         )
 
         return {
@@ -127,7 +130,7 @@ class HuggingFaceProvider(LLMProvider):
 class AnthropicProvider(LLMProvider):
     def __init__(self):
         self.api_key = os.getenv("ANTHROPIC")
-        self.anthropic = AsyncAnthropic(api_key=self.api_key)
+        self.anthropic = AsyncAnthropic(api_key=self.api_key, timeout=30)
 
     async def generate_text(
         self, prompt: str, model: dict, is_conversational: bool = False
@@ -191,7 +194,7 @@ class AnthropicProvider(LLMProvider):
 class CohereProvider(LLMProvider):
     def __init__(self):
         self.api_key = os.getenv("COHERE")
-        self.cohere = cohere.AsyncClient(self.api_key)
+        self.cohere = cohere.AsyncClient(self.api_key, timeout=30)
 
     async def generate_text(
         self, prompt: str, model: dict, is_conversational: bool = False, chat_history=[]
@@ -268,7 +271,9 @@ class AlephAlphaProvider(LLMProvider):
         model_name = model[self.provider_name()]["model_name"]
 
         if is_conversational:
-            async with AsyncClient(token=self.api_key) as client:
+            async with AsyncClient(
+                token=self.api_key, request_timeout_seconds=30
+            ) as client:
                 response = await client.complete(
                     request=request,
                     model=model_name,
@@ -435,3 +440,97 @@ class ReplicateProvider(LLMProvider):
 
     def provider_name(self):
         return "replicate"
+
+
+class HuggingFaceAPIProvider(LLMProvider):
+    def __init__(self):
+        self.api_key = os.getenv("HF_API")
+        self.headers = {
+            "Authorization": os.getenv("HF"),
+            "Content-Type": "application/json",
+        }
+
+    async def generate_text(
+        self, prompt: str, model: dict, is_conversational=False
+    ) -> str:
+        is_llama = model[self.provider_name()]["is_llama"]
+        base = "https://api-inference.huggingface.co/models/"
+        model_name = model[self.provider_name()]["model_name"]
+        endpoint = base + model_name
+        head_template = model[self.provider_name()]["templates"]["header"]
+        foot_template = model[self.provider_name()]["templates"]["footer"]
+        if is_conversational:
+            prompt = prompt
+        else:
+            if is_llama == 1:
+                prompt = f"<s>[INST] {head_template} {prompt} {foot_template} [/INST]"
+            else:
+                prompt = prompt
+
+        max_new_tokens = model[self.provider_name()]["max_tokens"]
+        min_new_tokens = model[self.provider_name()]["min_tokens"]
+        temperature = model[self.provider_name()]["temperature"]
+        top_p = model[self.provider_name()]["top_p"]
+        top_k = model[self.provider_name()]["top_k"]
+        payload = {
+            "inputs": prompt,
+            "parameters": {
+                "max_new_tokens": max_new_tokens,
+                "min_new_tokens": min_new_tokens,
+                "temperature": temperature,
+                "top_p": top_p,
+                "top_k": top_k,
+                "return_full_text": False,
+            },
+        }
+
+        data = json.dumps(payload)
+        async with ClientSession() as session:
+            async with session.post(
+                endpoint, data=data, headers=self.headers
+            ) as response:
+                answer = await response.json()
+        final_string = answer[0]["generated_text"]
+
+        return {
+            "text": final_string,
+            "provider_name": self.provider_name(),
+            "model_name": model_name,
+            "artifacts": model,
+        }
+
+    async def conversational_generation(
+        self, prompt: str, model: dict, history: dict
+    ) -> str:
+        head_template = model[self.provider_name()]["templates"]["header"]
+        foot_template = model[self.provider_name()]["templates"]["footer"]
+        is_llama = model[self.provider_name()]["is_llama"]
+        formatted_conversation = []
+        if is_llama:
+            formatted_conversation.append(f"<s>[INST] {head_template} [/INST]")
+            for user_entry, bot_entry in zip(history["user"], history["bot"]):
+                user_text = user_entry["text"]
+                bot_text = bot_entry["text"]
+                formatted_conversation.append(f"[INST] {user_text} [/INST]")
+                formatted_conversation.append(f"{bot_text} </s>")
+
+            formatted_conversation.append(f"[INST] {prompt} {foot_template} [/INST]")
+            formatted_conversation = "\n".join(formatted_conversation)
+        else:
+            formatted_conversation.append(f"Human: {head_template}")
+            for user_entry, bot_entry in zip(history["user"], history["bot"]):
+                user_text = user_entry["text"]
+                bot_text = bot_entry["text"]
+                formatted_conversation.append(f"Human: {user_text}")
+                formatted_conversation.append(f"Assistant: {bot_text}")
+            formatted_conversation.append(f"Human: {prompt} {foot_template}")
+            formatted_conversation.append("Assistant: ")
+            formatted_conversation = "\n".join(formatted_conversation)
+
+        response = await self.generate_text(
+            formatted_conversation, model, is_conversational=True
+        )
+        return response["text"]
+
+    def provider_name(self):
+        return "huggingface_api"

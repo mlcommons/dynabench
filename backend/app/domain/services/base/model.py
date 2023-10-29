@@ -31,6 +31,7 @@ from app.domain.services.utils.llm import (
     AnthropicProvider,
     CohereProvider,
     GoogleProvider,
+    HuggingFaceAPIProvider,
     HuggingFaceProvider,
     OpenAIProvider,
     ReplicateProvider,
@@ -68,6 +69,7 @@ class ModelService:
             "aleph": AlephAlphaProvider(),
             "google": GoogleProvider(),
             "replicate": ReplicateProvider(),
+            "huggingface_api": HuggingFaceAPIProvider(),
         }
 
     def get_model_in_the_loop(self, task_id: str) -> str:
