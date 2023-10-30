@@ -220,6 +220,10 @@ class ModelService:
             )
             external_validator_url = external_validator.get("url", None)
             external_validator_artifacts = external_validator.get("artifacts", None)
+        else:
+            amount_require_examples = -1
+            external_validator_url = None
+            external_validator_artifacts = None
         if not sandbox_mode:
             self.example_service.create_example_and_increment_counters(
                 context_id,
@@ -423,6 +427,7 @@ class ModelService:
 
     def update_model_status(self, model_id: int):
         if self.score_service.verify_scores_for_all_the_datasets(model_id):
+            self.score_service.fix_metrics_with_custom_names(model_id)
             self.model_repository.update_published_status(model_id)
         else:
             raise HTTPException(status_code=400, detail="Model no has all the scores")

@@ -336,3 +336,7 @@ class ScoreService:
             ["username"] + [col for col in csv_file.columns if col != "username"]
         ]
         return csv_file.to_json(orient="records")
+
+    def fix_metrics_with_custom_names(self, model_id: int):
+        self.score_repository.fix_matthews_correlation(model_id)
+        self.score_repository.fix_f1_score(model_id)
