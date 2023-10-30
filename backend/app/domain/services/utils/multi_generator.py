@@ -16,6 +16,7 @@ from app.domain.services.utils.llm import (
     AnthropicProvider,
     CohereProvider,
     GoogleProvider,
+    HuggingFaceAPIProvider,
     HuggingFaceProvider,
     OpenAIProvider,
     ReplicateProvider,
@@ -32,6 +33,7 @@ class LLMGenerator:
             "aleph": AlephAlphaProvider(),
             "google": GoogleProvider(),
             "replicate": ReplicateProvider(),
+            "huggingface_api": HuggingFaceAPIProvider(),
         }
 
     async def generate_one_text(
