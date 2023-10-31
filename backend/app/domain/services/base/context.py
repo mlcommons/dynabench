@@ -17,16 +17,6 @@ from PIL import Image
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
-from app.domain.services.utils.llm import (
-    AlephAlphaProvider,
-    AnthropicProvider,
-    CohereProvider,
-    GoogleProvider,
-    HuggingFaceAPIProvider,
-    HuggingFaceProvider,
-    OpenAIProvider,
-    ReplicateProvider,
-)
 from app.domain.services.utils.multi_generator import ImageGenerator, LLMGenerator
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
@@ -44,16 +34,6 @@ class ContextService:
         )
         self.s3 = self.session.client("s3")
         self.dataperf_bucket = os.getenv("AWS_S3_DATAPERF_BUCKET")
-        self.llm_providers = [
-            HuggingFaceProvider(),
-            OpenAIProvider(),
-            AnthropicProvider(),
-            CohereProvider(),
-            AlephAlphaProvider(),
-            GoogleProvider(),
-            ReplicateProvider(),
-            HuggingFaceAPIProvider(),
-        ]
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
         self.context_repository.increment_counter_total_samples_and_update_date(
