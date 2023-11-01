@@ -1,69 +1,69 @@
-import React, { FC } from "react";
-import { Button } from "react-bootstrap";
-import { PacmanLoader } from "react-spinners";
-import useFetch from "use-http";
-import Swal from "sweetalert2";
+import React, { FC } from 'react'
+import { Button } from 'react-bootstrap'
+import { PacmanLoader } from 'react-spinners'
+import useFetch from 'use-http'
+import Swal from 'sweetalert2'
 
 type ExamplesCreatedProps = {
-  taskId: number;
-  s3Bucket?: string;
-};
+  taskId: number
+  s3Bucket?: string
+}
 
 const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
-  const { post, response, loading } = useFetch();
+  const { post, response, loading } = useFetch()
 
   const downloadExamples = async () => {
     await post(`/example/download_all_created_examples`, {
       task_id: taskId,
-    });
+    })
     if (response.ok) {
       response.blob().then((blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `${taskId}_examples_created.json`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      });
+        const url = window.URL.createObjectURL(new Blob([blob]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `${taskId}_examples_created.json`)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+      })
     }
-  };
+  }
 
   const downloadModelResults = async () => {
-    await post(`/model/download_results_models`, {
+    await post(`/model/download_model_results`, {
       task_id: taskId,
-    });
+    })
     if (response.ok) {
       response.blob().then((blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `${taskId}_model_results.json`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      });
+        const url = window.URL.createObjectURL(new Blob([blob]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `${taskId}_model_results.json`)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+      })
     }
-  };
+  }
 
   const downloadAdditionalData = async () => {
     const urlSigned = await post(`/example/download_additional_data`, {
       folder_direction: s3Bucket,
-    });
+    })
     if (response.ok) {
       Swal.fire({
-        icon: "success",
-        title: "Success",
+        icon: 'success',
+        title: 'Success',
         text: `Here you can download the additional data: ${urlSigned}`,
-      });
+      })
     } else {
       Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Something went wrong!",
-      });
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Something went wrong!',
+      })
     }
-  };
+  }
 
   return (
     <>
@@ -114,7 +114,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
-export default ExamplesCreated;
+export default ExamplesCreated
