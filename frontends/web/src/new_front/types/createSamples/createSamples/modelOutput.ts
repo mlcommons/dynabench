@@ -5,6 +5,7 @@ export type ModelOutputType = {
   probabilities?: Probabilities[];
   fooled: boolean;
   sandBox: boolean;
+  isGenerativeContext?: boolean;
 };
 
 export type Probabilities = {

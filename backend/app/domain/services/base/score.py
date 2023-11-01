@@ -318,7 +318,7 @@ class ScoreService:
             model_id, scoring_datasets
         )
 
-    def read_users_score_csv(self, task_id: int):
+    def read_users_score_csv(self, task_id: int, round_id: int):
         s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
         task_code = self.task_repository.get_task_code_by_task_id(task_id)[0]
         final_file = f"./app/resources/predictions/{task_code}_users_scores.csv"
@@ -335,4 +335,20 @@ class ScoreService:
         csv_file = csv_file[
             ["username"] + [col for col in csv_file.columns if col != "username"]
         ]
+        if "round" in csv_file.columns:
+            if round_id:
+                csv_file = csv_file[csv_file["round"] == round_id]
+                print(round_id)
+                csv_file.drop(columns=["round"], inplace=True)
+            else:
+                csv_file = (
+                    csv_file.groupby(["username"])
+                    .agg({"SubmissionsRated": "sum", "Score": "mean"})
+                    .reset_index()
+                    .sort_values(by=["Score"], ascending=False)
+                )
         return csv_file.to_json(orient="records")
+
+    def fix_metrics_with_custom_names(self, model_id: int):
+        self.score_repository.fix_matthews_correlation(model_id)
+        self.score_repository.fix_f1_score(model_id)

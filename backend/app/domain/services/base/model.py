@@ -18,6 +18,7 @@ from app.domain.helpers.task.model_evaluation_metrics.model_evaluation_metric im
     ModelEvaluationStrategy,
 )
 from app.domain.helpers.transform_data_objects import (
+    CustomJSONEncoder,
     load_json_lines,
     transform_list_to_csv,
 )
@@ -215,11 +216,15 @@ class ModelService:
         response["sandBox"] = sandbox_mode
         external_validator = config_yaml.get("external_validator", None)
         if external_validator:
-            amount_require_examples = external_validator.get(
-                "amount_require_examples", -1
+            total_required_examples = external_validator.get(
+                "total_required_examples", -1
             )
             external_validator_url = external_validator.get("url", None)
             external_validator_artifacts = external_validator.get("artifacts", None)
+        else:
+            total_required_examples = -1
+            external_validator_url = None
+            external_validator_artifacts = None
         if not sandbox_mode:
             self.example_service.create_example_and_increment_counters(
                 context_id,
@@ -232,7 +237,7 @@ class ModelService:
                 tag,
                 round_id,
                 task_id,
-                amount_require_examples,
+                total_required_examples,
                 external_validator_url,
                 external_validator_artifacts,
             )
@@ -423,6 +428,7 @@ class ModelService:
 
     def update_model_status(self, model_id: int):
         if self.score_service.verify_scores_for_all_the_datasets(model_id):
+            self.score_service.fix_metrics_with_custom_names(model_id)
             self.model_repository.update_published_status(model_id)
         else:
             raise HTTPException(status_code=400, detail="Model no has all the scores")
@@ -450,3 +456,27 @@ class ModelService:
         return self.model_repository.update_model_info(
             model_id, name, desc, longdesc, params, languages, license, source_url
         )
+
+    def download_model_results(self, task_id: int):
+        results_models = self.model_repository.download_model_results(task_id)
+        results_models_list = []
+        for result_model in results_models:
+            results_models_list.append(
+                {
+                    "model_id": result_model.model_id,
+                    "model_name": result_model.model_name,
+                    "shortname": result_model.shortname,
+                    "upload_datetime": result_model.upload_datetime,
+                    "is_published": result_model.is_published,
+                    "task_name": result_model.task_name,
+                    "score_id": result_model.score_id,
+                    "performance": result_model.performance,
+                    "metadata_json": result_model.metadata_json,
+                    "user_id": result_model.user_id,
+                    "username": result_model.username,
+                    "email": result_model.email,
+                    "dataset_id": result_model.dataset_id,
+                    "dataset_name": result_model.dataset_name,
+                }
+            )
+        return json.dumps(results_models_list, cls=CustomJSONEncoder)

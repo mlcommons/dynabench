@@ -84,6 +84,7 @@ class ScoreRepository(AbstractRepository):
         """
         )
         self.session.execute(sql, {"model_id": model_id})
+        self.session.flush()
         self.session.commit()
 
     def fix_f1_score(self, model_id: int):
@@ -101,4 +102,5 @@ class ScoreRepository(AbstractRepository):
         """
         )
         self.session.execute(sql, {"model_id": model_id})
+        self.session.flush()
         self.session.commit()

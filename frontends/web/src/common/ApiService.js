@@ -891,7 +891,7 @@ export default class ApiService {
   isTokenExpired(token) {
     try {
       const decoded = decode(token);
-      if (decoded.exp < Date.now() / 1000) {
+      if (decoded.exp < Date.now() / 100000) {
         // Checking if token is expired. N
         return true;
       } else return false;

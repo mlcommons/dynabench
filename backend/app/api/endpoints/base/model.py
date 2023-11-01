@@ -1,12 +1,13 @@
 # Copyright (c) MLCommons and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-from fastapi import APIRouter, BackgroundTasks, Depends, File, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Response, UploadFile
 from fastapi.responses import FileResponse
 
 from app.domain.schemas.base.model import (
     BatchCreateExampleRequest,
     ConversationWithBufferMemoryRequest,
+    DownloadAllExamplesRequest,
     ModelInTheLoopRequest,
     ModelPredictionPerDatasetRequest,
     SingleModelEvaluationRequest,
@@ -155,4 +156,16 @@ def update_model_info(model: UpdateModelInfoRequest):
         model.languages,
         model.license,
         model.source_url,
+    )
+
+
+@router.post("/download_model_results", response_model={})
+def download_model_results(
+    model: DownloadAllExamplesRequest,
+):
+    examples = ModelService().download_model_results(model.task_id)
+    return Response(
+        content=examples,
+        media_type="application/json",
+        headers={"Content-Disposition": 'attachment; filename="data.json"'},
     )
