@@ -159,11 +159,11 @@ def update_model_info(model: UpdateModelInfoRequest):
     )
 
 
-@router.post("/download_results_models", response_model={})
-def download_results_models(
+@router.post("/download_model_results", response_model={})
+def download_model_results(
     model: DownloadAllExamplesRequest,
 ):
-    examples = ModelService().download_results_models(model.task_id)
+    examples = ModelService().download_model_results(model.task_id)
     return Response(
         content=examples,
         media_type="application/json",

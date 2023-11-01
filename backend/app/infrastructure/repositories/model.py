@@ -247,7 +247,7 @@ class ModelRepository(AbstractRepository):
         self.session.flush()
         return self.session.commit()
 
-    def download_results_models(self, task_id: int):
+    def download_model_results(self, task_id: int):
         m = aliased(Model)
         s = aliased(Score)
         u = aliased(User)

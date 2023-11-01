@@ -216,13 +216,13 @@ class ModelService:
         response["sandBox"] = sandbox_mode
         external_validator = config_yaml.get("external_validator", None)
         if external_validator:
-            amount_require_examples = external_validator.get(
-                "amount_require_examples", -1
+            total_required_examples = external_validator.get(
+                "total_required_examples", -1
             )
             external_validator_url = external_validator.get("url", None)
             external_validator_artifacts = external_validator.get("artifacts", None)
         else:
-            amount_require_examples = -1
+            total_required_examples = -1
             external_validator_url = None
             external_validator_artifacts = None
         if not sandbox_mode:
@@ -237,7 +237,7 @@ class ModelService:
                 tag,
                 round_id,
                 task_id,
-                amount_require_examples,
+                total_required_examples,
                 external_validator_url,
                 external_validator_artifacts,
             )
@@ -457,8 +457,8 @@ class ModelService:
             model_id, name, desc, longdesc, params, languages, license, source_url
         )
 
-    def download_results_models(self, task_id: int):
-        results_models = self.model_repository.download_results_models(task_id)
+    def download_model_results(self, task_id: int):
+        results_models = self.model_repository.download_model_results(task_id)
         results_models_list = []
         for result_model in results_models:
             results_models_list.append(
