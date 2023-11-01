@@ -82,3 +82,7 @@ class UpdateModelInfoRequest(BaseModel):
     languages: Optional[str]
     license: Optional[str]
     source_url: Optional[str] = ""
+
+
+class DownloadAllExamplesRequest(BaseModel):
+    task_id: int

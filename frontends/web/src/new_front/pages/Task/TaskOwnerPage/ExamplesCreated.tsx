@@ -29,6 +29,23 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
     }
   };
 
+  const downloadModelResults = async () => {
+    await post(`/model/download_results_models`, {
+      task_id: taskId,
+    });
+    if (response.ok) {
+      response.blob().then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${taskId}_model_results.json`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      });
+    }
+  };
+
   const downloadAdditionalData = async () => {
     const urlSigned = await post(`/example/download_additional_data`, {
       folder_direction: s3Bucket,
@@ -51,8 +68,8 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
   return (
     <>
       {!loading ? (
-        <div className=" col-span-1 py-4">
-          <div className="items-center justify-center grid grid-cols-6">
+        <div className="col-span-1 py-4 ">
+          <div className="grid items-center justify-center grid-cols-6">
             <div className="flex justify-end col-span-3 ">
               <div className="col-span-1 pl-2 pr-3" id="submit">
                 <Button
@@ -72,6 +89,14 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
                   </Button>
                 </div>
               )}
+              <div className="col-span-1 pl-2 pr-3" id="submit">
+                <Button
+                  className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                  onClick={() => downloadModelResults()}
+                >
+                  Download model results
+                </Button>
+              </div>
             </div>
           </div>
         </div>

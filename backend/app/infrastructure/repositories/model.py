@@ -6,6 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
 
 from app.infrastructure.models.models import (
@@ -14,6 +15,7 @@ from app.infrastructure.models.models import (
     Model,
     Score,
     Task,
+    User,
 )
 from app.infrastructure.repositories.abstract import AbstractRepository
 
@@ -244,3 +246,36 @@ class ModelRepository(AbstractRepository):
         )
         self.session.flush()
         return self.session.commit()
+
+    def download_results_models(self, task_id: int):
+        m = aliased(Model)
+        s = aliased(Score)
+        u = aliased(User)
+        t = aliased(Task)
+        d = aliased(Dataset)
+
+        query = (
+            self.session.query(
+                m.id.label("model_id"),
+                m.name.label("model_name"),
+                m.shortname,
+                m.upload_datetime,
+                m.is_published,
+                t.name.label("task_name"),
+                s.id.label("score_id"),
+                s.perf.label("performance"),
+                s.metadata_json,
+                u.id.label("user_id"),
+                u.username,
+                u.email,
+                d.id.label("dataset_id"),
+                d.name.label("dataset_name"),
+            )
+            .join(s, m.id == s.mid)
+            .join(u, m.uid == u.id)
+            .join(t, m.tid == t.id)
+            .join(d, s.did == d.id)
+            .filter(m.tid == task_id)
+            .all()
+        )
+        return query

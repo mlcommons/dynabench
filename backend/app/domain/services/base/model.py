@@ -18,6 +18,7 @@ from app.domain.helpers.task.model_evaluation_metrics.model_evaluation_metric im
     ModelEvaluationStrategy,
 )
 from app.domain.helpers.transform_data_objects import (
+    CustomJSONEncoder,
     load_json_lines,
     transform_list_to_csv,
 )
@@ -455,3 +456,27 @@ class ModelService:
         return self.model_repository.update_model_info(
             model_id, name, desc, longdesc, params, languages, license, source_url
         )
+
+    def download_results_models(self, task_id: int):
+        results_models = self.model_repository.download_results_models(task_id)
+        results_models_list = []
+        for result_model in results_models:
+            results_models_list.append(
+                {
+                    "model_id": result_model.model_id,
+                    "model_name": result_model.model_name,
+                    "shortname": result_model.shortname,
+                    "upload_datetime": result_model.upload_datetime,
+                    "is_published": result_model.is_published,
+                    "task_name": result_model.task_name,
+                    "score_id": result_model.score_id,
+                    "performance": result_model.performance,
+                    "metadata_json": result_model.metadata_json,
+                    "user_id": result_model.user_id,
+                    "username": result_model.username,
+                    "email": result_model.email,
+                    "dataset_id": result_model.dataset_id,
+                    "dataset_name": result_model.dataset_name,
+                }
+            )
+        return json.dumps(results_models_list, cls=CustomJSONEncoder)
