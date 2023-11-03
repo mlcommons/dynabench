@@ -930,7 +930,7 @@ export default class ApiService {
   refreshTokenWrapper(callback, error) {
     if (this.updating_already) {
       // TODO: Make this actually wait for an event?
-      return delay(1000).then(() => {
+      return delay(100000).then(() => {
         if (this.updating_already) {
           return this.refreshTokenWrapper(callback, error);
         }

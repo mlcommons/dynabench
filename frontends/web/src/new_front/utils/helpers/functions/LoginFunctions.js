@@ -49,7 +49,7 @@ const sendUserToLogin = (login, history, url, assignmentId, taskCode) => {
 
 const isTokenExpired = (token) => {
   const decoded = decode(token);
-  const currentTime = Date.now() / 10000000;
+  const currentTime = Date.now() / 100000;
   if (decoded.exp < currentTime) {
     return true;
   }
