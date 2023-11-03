@@ -14,6 +14,7 @@ from app.infrastructure.models.models import (
     Example,
     Round,
     Task,
+    TaskProposal,
 )
 from app.infrastructure.repositories.abstract import AbstractRepository
 
@@ -132,10 +133,13 @@ class TaskRepository(AbstractRepository):
             .all()
         )
 
-    def validate_no_duplicate_task_code(self, task_code: str):
+    def validate_no_duplicate_task_name(self, task_name: str):
         return (
-            self.session.query(self.model)
-            .filter(self.model.task_code == task_code)
+            self.session.query(self.model, TaskProposal)
+            .filter(
+                self.model.name == task_name.lower()
+                or TaskProposal.name == task_name.lower()
+            )
             .first()
         )
 
