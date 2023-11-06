@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 class AddTaskProposalRequest(BaseModel):
     user_id: int
-    task_code: str
     name: str
     desc: str
     longdesc: str
