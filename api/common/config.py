@@ -28,7 +28,7 @@ config = {
     "eval_aws_secret_access_key": os.environ["EVAL_AWS_SECRET_ACCESS_KEY"],
     "evaluation_sqs_queue": os.environ["SQS_EVAL"],
     "jwtalgo": "HS256",
-    "jwtexp": 900,
+    "jwtexp": 1048576,
     "jwtsecret": os.environ["JWT_SECRET"],
     "profile_img_max_size": 5242880,
     "refreshexp": 90,
