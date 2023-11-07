@@ -142,7 +142,6 @@ class TaskService:
         task_and_round_info = self.task_repository.get_task_with_round_info_by_task_id(
             task_id
         )
-        print(task_and_round_info)
         task = task_and_round_info["Task"].__dict__
         task["round"] = task_and_round_info["Round"].__dict__
         task["challenge_type_name"] = task_and_round_info["ChallengesTypes"].__dict__[

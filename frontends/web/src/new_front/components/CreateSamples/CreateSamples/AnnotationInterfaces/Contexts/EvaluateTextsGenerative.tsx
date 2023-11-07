@@ -26,6 +26,7 @@ const EvaluateTextsGenerative: FC<
   contextId,
   taskId,
   setIsGenerativeContext,
+  realRoundId,
 }) => {
   const [signInConsent, setSignInConsent] = useState(true);
   const [showInput, setShowInput] = useState(false);
@@ -78,6 +79,33 @@ const EvaluateTextsGenerative: FC<
       setSignInConsent(signConsent);
     }
   };
+
+  const checkIfUserReachedNecessaryExamples = async () => {
+    const redirectUrl = await post(
+      "/rounduserexample/redirect_to_third_party_provider",
+      {
+        task_id: taskId,
+        user_id: user.id,
+        round_id: realRoundId,
+      },
+    );
+    if (response.ok) {
+      if (redirectUrl) {
+        Swal.fire({
+          title: "You have reached the necessary examples",
+          text: "You will be redirected to the third party provider",
+          icon: "success",
+          confirmButtonText: "Ok",
+        }).then(() => {
+          window.location.href = redirectUrl;
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkIfUserReachedNecessaryExamples();
+  }, []);
 
   const generateTexts = async () => {
     if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
