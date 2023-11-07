@@ -37,31 +37,30 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
     const isValid = await get(
       `task_proposals/validate_no_duplicate_task_name/${data.nameChallenge}`,
     );
-    console.log(isValid);
-    // if (isValid) {
-    //   await post('task_proposals/add_task_proposal', {
-    //     user_id: user.id,
-    //     task_code: data.taskCode,
-    //     name: data.nameChallenge,
-    //     desc: data.shortDescription,
-    //     longdesc: data.description,
-    //   })
-    //   if (response.ok) {
-    //     Swal.fire({
-    //       icon: 'success',
-    //       title: 'Success!',
-    //       text: 'Your task proposal has been submitted',
-    //       confirmButtonText: 'Ok',
-    //     })
-    //     handleClose()
-    //   }
-    // } else {
-    //   Swal.fire({
-    //     icon: 'error',
-    //     title: 'Oops...',
-    //     text: 'This task name already exists',
-    //   })
-    // }
+    if (isValid) {
+      await post("task_proposals/add_task_proposal", {
+        user_id: user.id,
+        task_code: data.taskCode,
+        name: data.nameChallenge,
+        desc: data.shortDescription,
+        longdesc: data.description,
+      });
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Your task proposal has been submitted",
+          confirmButtonText: "Ok",
+        });
+        handleClose();
+      }
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "This task name already exists",
+      });
+    }
   };
 
   const isLogin = async () => {
