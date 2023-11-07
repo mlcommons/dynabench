@@ -45,10 +45,6 @@ const CreateInterface = () => {
   const queryParams = new URLSearchParams(location.search);
   const assignmentId = queryParams.get("assignmentId");
 
-  useEffect(() => {
-    console.log("isGenerativeContext", isGenerativeContext);
-  }, [isGenerativeContext]);
-
   const checkIfUserCanCreateSample = async () => {
     if (response.ok) {
       const stillAllowedToSubmit = await post(

@@ -88,7 +88,6 @@ const AnnotationButtonActions: FC<Props> = ({
             text: "Your example has been saved",
             confirmButtonColor: "#2088ef",
           });
-          setIsGenerativeContext(true);
           setModelOutput(modelOutput);
           if (modelOutput.input === "") {
             window.location.reload();
