@@ -2,6 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import asyncio
 import json
 import os
 from abc import ABC, abstractmethod
@@ -16,6 +17,20 @@ from aleph_alpha_client import AsyncClient, CompletionRequest, Prompt
 from anthropic import AsyncAnthropic
 
 from app.domain.services.base.task import TaskService
+
+
+def async_timeout(seconds, default_return=None):
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            try:
+                result = await asyncio.wait_for(func(*args, **kwargs), timeout=seconds)
+            except asyncio.TimeoutError:
+                result = default_return
+            return result
+
+        return wrapper
+
+    return decorator
 
 
 class LLMProvider(ABC):
@@ -42,6 +57,7 @@ class OpenAIProvider(LLMProvider):
         self.api_key = os.getenv("OPENAI")
         openai.api_key = self.api_key
 
+    @async_timeout(30)
     async def generate_text(
         self, prompt: str, model: dict, is_conversational: bool = False
     ) -> str:
@@ -53,7 +69,6 @@ class OpenAIProvider(LLMProvider):
         max_tokens = model[self.provider_name()]["max_tokens"]
         head_template = model[self.provider_name()]["templates"]["header"]
         foot_template = model[self.provider_name()]["templates"]["footer"]
-
         if is_conversational:
             messages = prompt
         else:
@@ -63,6 +78,7 @@ class OpenAIProvider(LLMProvider):
                     "content": f"{head_template} {prompt} {foot_template}",
                 }
             ]
+
         response = await openai.ChatCompletion.acreate(
             model=model_name,
             messages=messages,
@@ -111,6 +127,7 @@ class HuggingFaceProvider(LLMProvider):
     def __init__(self):
         self.headers = {"Authorization": os.getenv("HF")}
 
+    @async_timeout(30)
     def generate_text(self, prompt: str, model: dict) -> str:
         return "I am HF"
         endpoint = model[self.provider_name()]["endpoint"]
@@ -132,6 +149,7 @@ class AnthropicProvider(LLMProvider):
         self.api_key = os.getenv("ANTHROPIC")
         self.anthropic = AsyncAnthropic(api_key=self.api_key, timeout=30)
 
+    @async_timeout(30)
     async def generate_text(
         self, prompt: str, model: dict, is_conversational: bool = False
     ) -> str:
@@ -147,7 +165,6 @@ class AnthropicProvider(LLMProvider):
         temperature = model[self.provider_name()]["temperature"]
         top_p = model[self.provider_name()]["top_p"]
         top_k = model[self.provider_name()]["top_k"]
-
         completion = await self.anthropic.completions.create(
             model=model[self.provider_name()]["model_name"],
             max_tokens_to_sample=max_tokens,
@@ -196,6 +213,7 @@ class CohereProvider(LLMProvider):
         self.api_key = os.getenv("COHERE")
         self.cohere = cohere.AsyncClient(self.api_key, timeout=30)
 
+    @async_timeout(30)
     async def generate_text(
         self, prompt: str, model: dict, is_conversational: bool = False, chat_history=[]
     ) -> str:
@@ -253,6 +271,7 @@ class AlephAlphaProvider(LLMProvider):
     def __init__(self):
         self.api_key = os.getenv("ALEPHALPHA")
 
+    @async_timeout(30)
     async def generate_text(
         self, prompt: str, model: dict, is_conversational: bool = False
     ) -> str:
@@ -282,7 +301,6 @@ class AlephAlphaProvider(LLMProvider):
         else:
             prompt = f"""### Instruction \n{head_template}
  \n###Input \nLast user message: {prompt} \n\n### Response: \nAssistant:"""
-            print(prompt)
             params["prompt"] = Prompt.from_text(prompt)
             async with AsyncClient(token=self.api_key) as client:
                 response = await client.complete(request=request, model=model_name)
@@ -329,6 +347,7 @@ class GoogleProvider(LLMProvider):
         self.api_key = os.getenv("GOOGLE")
         palm.configure(api_key=self.api_key)
 
+    @async_timeout(30)
     async def generate_text(
         self, prompt: str, model: dict, is_conversational: bool = False
     ) -> str:
@@ -391,6 +410,7 @@ class ReplicateProvider(LLMProvider):
         os.environ["REPLICATE_API_TOKEN"] = self.api_key
         pass
 
+    @async_timeout(30)
     def generate_text(
         self, prompt: str, model: dict, is_conversational: bool = False
     ) -> str:
@@ -450,6 +470,7 @@ class HuggingFaceAPIProvider(LLMProvider):
             "Content-Type": "application/json",
         }
 
+    @async_timeout(30)
     async def generate_text(
         self, prompt: str, model: dict, is_conversational=False
     ) -> str:

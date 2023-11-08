@@ -68,7 +68,23 @@ class LLMGenerator:
             task = asyncio.create_task(self.generate_one_text(*parameter))
             all_tasks.add(task)
         results = await asyncio.gather(*all_tasks)
-        return results
+
+        final_results = []
+        for result in results:
+            if result is not None:
+                final_results.append(result)
+
+        if len(final_results) == 0:
+            return [
+                {
+                    "text": "No models are available right now",
+                    "provider_name": "None",
+                    "model_name": "none",
+                    "artifacts": {},
+                }
+            ]
+        else:
+            return final_results
 
 
 class ImageGenerator:
