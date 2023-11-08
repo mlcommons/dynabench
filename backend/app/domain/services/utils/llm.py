@@ -5,7 +5,6 @@
 import asyncio
 import json
 import os
-import time
 from abc import ABC, abstractmethod
 
 import cohere
@@ -70,7 +69,6 @@ class OpenAIProvider(LLMProvider):
         max_tokens = model[self.provider_name()]["max_tokens"]
         head_template = model[self.provider_name()]["templates"]["header"]
         foot_template = model[self.provider_name()]["templates"]["footer"]
-        time.sleep(9)
         if is_conversational:
             messages = prompt
         else:
