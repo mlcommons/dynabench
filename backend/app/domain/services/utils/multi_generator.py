@@ -72,7 +72,8 @@ class LLMGenerator:
         final_results = []
         for result in results:
             if result is not None:
-                final_results.append(result)
+                if result["text"] != "":
+                    final_results.append(result)
 
         if len(final_results) == 0:
             return [
