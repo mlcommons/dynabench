@@ -78,24 +78,27 @@ class OpenAIProvider(LLMProvider):
                     "content": f"{head_template} {prompt} {foot_template}",
                 }
             ]
+        try:
+            response = await openai.ChatCompletion.acreate(
+                model=model_name,
+                messages=messages,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty,
+                temperature=temperature,
+                top_p=top_p,
+                max_tokens=max_tokens,
+                timeout=30,
+            )
 
-        response = await openai.ChatCompletion.acreate(
-            model=model_name,
-            messages=messages,
-            frequency_penalty=frequency_penalty,
-            presence_penalty=presence_penalty,
-            temperature=temperature,
-            top_p=top_p,
-            max_tokens=max_tokens,
-            timeout=30,
-        )
-
-        return {
-            "text": response["choices"][0]["message"]["content"],
-            "provider_name": self.provider_name(),
-            "model_name": model_name,
-            "artifacts": model,
-        }
+            return {
+                "text": response["choices"][0]["message"]["content"],
+                "provider_name": self.provider_name(),
+                "model_name": model_name,
+                "artifacts": model,
+            }
+        except Exception as e:
+            print(e)
+            return None
 
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict
@@ -165,21 +168,26 @@ class AnthropicProvider(LLMProvider):
         temperature = model[self.provider_name()]["temperature"]
         top_p = model[self.provider_name()]["top_p"]
         top_k = model[self.provider_name()]["top_k"]
-        completion = await self.anthropic.completions.create(
-            model=model[self.provider_name()]["model_name"],
-            max_tokens_to_sample=max_tokens,
-            prompt=final_prompt,
-            temperature=temperature,
-            top_p=top_p,
-            top_k=top_k,
-        )
 
-        return {
-            "text": completion.completion,
-            "provider_name": self.provider_name(),
-            "model_name": model[self.provider_name()]["model_name"],
-            "artifacts": model,
-        }
+        try:
+            completion = await self.anthropic.completions.create(
+                model=model[self.provider_name()]["model_name"],
+                max_tokens_to_sample=max_tokens,
+                prompt=final_prompt,
+                temperature=temperature,
+                top_p=top_p,
+                top_k=top_k,
+            )
+
+            return {
+                "text": completion.completion,
+                "provider_name": self.provider_name(),
+                "model_name": model[self.provider_name()]["model_name"],
+                "artifacts": model,
+            }
+        except Exception as e:
+            print(e)
+            return None
 
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict
@@ -221,28 +229,31 @@ class CohereProvider(LLMProvider):
         foot_template = model[self.provider_name()]["templates"]["footer"]
         model_name = model[self.provider_name()]["model_name"]
         temperature = model[self.provider_name()]["temperature"]
+        try:
+            if is_conversational:
+                response = await self.cohere.chat(
+                    message=prompt,
+                    model=model_name,
+                    chat_history=chat_history,
+                    temperature=temperature,
+                )
+            else:
+                prompt = f"{head_template} {prompt} {foot_template}"
+                response = await self.cohere.chat(
+                    message=prompt,
+                    model=model_name,
+                    temperature=temperature,
+                )
 
-        if is_conversational:
-            response = await self.cohere.chat(
-                message=prompt,
-                model=model_name,
-                chat_history=chat_history,
-                temperature=temperature,
-            )
-        else:
-            prompt = f"{head_template} {prompt} {foot_template}"
-            response = await self.cohere.chat(
-                message=prompt,
-                model=model_name,
-                temperature=temperature,
-            )
-
-        return {
-            "text": response.text,
-            "provider_name": self.provider_name(),
-            "model_name": model_name,
-            "artifacts": model,
-        }
+            return {
+                "text": response.text,
+                "provider_name": self.provider_name(),
+                "model_name": model_name,
+                "artifacts": model,
+            }
+        except Exception as e:
+            print(e)
+            return None
 
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict
@@ -289,29 +300,33 @@ class AlephAlphaProvider(LLMProvider):
         request = CompletionRequest(**params)
         model_name = model[self.provider_name()]["model_name"]
 
-        if is_conversational:
-            async with AsyncClient(
-                token=self.api_key, request_timeout_seconds=30
-            ) as client:
-                response = await client.complete(
-                    request=request,
-                    model=model_name,
-                )
+        try:
+            if is_conversational:
+                async with AsyncClient(
+                    token=self.api_key, request_timeout_seconds=30
+                ) as client:
+                    response = await client.complete(
+                        request=request,
+                        model=model_name,
+                    )
+                    completion = response.completions[0].completion
+            else:
+                prompt = f"""### Instruction \n{head_template}
+    \n###Input \nLast user message: {prompt} \n\n### Response: \nAssistant:"""
+                params["prompt"] = Prompt.from_text(prompt)
+                async with AsyncClient(token=self.api_key) as client:
+                    response = await client.complete(request=request, model=model_name)
                 completion = response.completions[0].completion
-        else:
-            prompt = f"""### Instruction \n{head_template}
- \n###Input \nLast user message: {prompt} \n\n### Response: \nAssistant:"""
-            params["prompt"] = Prompt.from_text(prompt)
-            async with AsyncClient(token=self.api_key) as client:
-                response = await client.complete(request=request, model=model_name)
-            completion = response.completions[0].completion
 
-        return {
-            "text": completion,
-            "provider_name": self.provider_name(),
-            "model_name": model_name,
-            "artifacts": model,
-        }
+            return {
+                "text": completion,
+                "provider_name": self.provider_name(),
+                "model_name": model_name,
+                "artifacts": model,
+            }
+        except Exception as e:
+            print(e)
+            return None
 
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict
@@ -362,20 +377,23 @@ class GoogleProvider(LLMProvider):
             messages = prompt
         else:
             messages = f"{head_template} {prompt} {foot_template}"
-
-        response = await palm.chat_async(
-            model=model_name,
-            messages=messages,
-            temperature=temperature,
-            top_p=top_p,
-            top_k=top_k,
-        )
-        return {
-            "text": response.last,
-            "provider_name": self.provider_name(),
-            "model_name": model_name,
-            "artifacts": model,
-        }
+        try:
+            response = await palm.chat_async(
+                model=model_name,
+                messages=messages,
+                temperature=temperature,
+                top_p=top_p,
+                top_k=top_k,
+            )
+            return {
+                "text": response.last,
+                "provider_name": self.provider_name(),
+                "model_name": model_name,
+                "artifacts": model,
+            }
+        except Exception as e:
+            print(e)
+            return None
 
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict
@@ -430,16 +448,20 @@ class ReplicateProvider(LLMProvider):
         else:
             input["prompt"] = f"{head_template} {prompt} {foot_template}"
 
-        output = replicate.run(model_name, input=input)
-        final_string = ""
-        for items in output:
-            final_string += items
-        return {
-            "text": final_string,
-            "provider_name": self.provider_name(),
-            "model_name": model_name,
-            "artifacts": model,
-        }
+        try:
+            output = replicate.run(model_name, input=input)
+            final_string = ""
+            for items in output:
+                final_string += items
+            return {
+                "text": final_string,
+                "provider_name": self.provider_name(),
+                "model_name": model_name,
+                "artifacts": model,
+            }
+        except Exception as e:
+            print(e)
+            return None
 
     def conversational_generation(self, prompt: str, model: dict, history: dict) -> str:
         head_template = model[self.provider_name()]["templates"]["header"]
@@ -468,6 +490,9 @@ class HuggingFaceAPIProvider(LLMProvider):
         self.headers = {
             "Authorization": os.getenv("HF"),
             "Content-Type": "application/json",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "x-use-cache": "false",
         }
 
     @async_timeout(30)
@@ -511,14 +536,17 @@ class HuggingFaceAPIProvider(LLMProvider):
                 endpoint, data=data, headers=self.headers
             ) as response:
                 answer = await response.json()
-        final_string = answer[0]["generated_text"]
 
-        return {
-            "text": final_string,
-            "provider_name": self.provider_name(),
-            "model_name": model_name,
-            "artifacts": model,
-        }
+        if response.status == 200:
+            final_string = answer[0]["generated_text"]
+            return {
+                "text": final_string,
+                "provider_name": self.provider_name(),
+                "model_name": model_name,
+                "artifacts": model,
+            }
+        else:
+            return None
 
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict
