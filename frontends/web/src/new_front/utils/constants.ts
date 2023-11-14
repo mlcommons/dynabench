@@ -88,6 +88,14 @@ export const companies = [
     name: "Oxford University",
     logo: "https://logodownload.org/wp-content/uploads/2020/12/university-of-oxford-logo-2.png",
   },
+  {
+    name: "University of Birmingham",
+    logo: "https://intranet.birmingham.ac.uk/staff/images/brand/download/png/crested-wm-full-colour.png",
+  },
+  {
+    name: "University of Maryland",
+    logo: "https://logos-world.net/wp-content/uploads/2023/01/University-of-Maryland-Emblem.png",
+  },
 ];
 
 export const forbidden_image =
