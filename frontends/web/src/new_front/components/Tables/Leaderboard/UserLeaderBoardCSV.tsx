@@ -60,7 +60,7 @@ const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({
                   className="border-0 font-weight-bold light-gray-bg"
                   style={{ marginRight: 10 }}
                   id="dropdown-basic-button"
-                  title={round ? `Round ${round}` : "Select Round"}
+                  title={round ? `Round ${round}` : "All"}
                 >
                   <Dropdown.Item
                     key={round}

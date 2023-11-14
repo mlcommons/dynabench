@@ -338,15 +338,9 @@ class ScoreService:
         if "round" in csv_file.columns:
             if round_id:
                 csv_file = csv_file[csv_file["round"] == round_id]
-                print(round_id)
-                csv_file.drop(columns=["round"], inplace=True)
             else:
-                csv_file = (
-                    csv_file.groupby(["username"])
-                    .agg({"SubmissionsRated": "sum", "Score": "mean"})
-                    .reset_index()
-                    .sort_values(by=["Score"], ascending=False)
-                )
+                csv_file = csv_file.groupby(["username"]).sum().reset_index()
+            csv_file.drop(columns=["round"], inplace=True)
         return csv_file.to_json(orient="records")
 
     def fix_metrics_with_custom_names(self, model_id: int):
