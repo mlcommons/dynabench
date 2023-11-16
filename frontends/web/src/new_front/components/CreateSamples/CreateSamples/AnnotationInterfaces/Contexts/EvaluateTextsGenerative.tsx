@@ -175,42 +175,53 @@ const EvaluateTextsGenerative: FC<
     setIsTied(isTied);
   };
 
+  const handleSaveText = () => {
+    updateModelInputs({
+      [field_names_for_the_model.best_answer ?? "best_answer"]: texts.reduce(
+        (max: { score: number }, answer: { score: number }) =>
+          answer.score > max.score ? answer : max,
+      ),
+    });
+    setBestAnswer(
+      texts.reduce((max: { score: number }, answer: { score: number }) =>
+        answer.score > max.score ? answer : max,
+      ),
+    );
+
+    setChatHistory({
+      ...chatHistory,
+      bot: [
+        ...chatHistory.bot,
+        {
+          id: "1",
+          text: texts.reduce(
+            (max: { score: number }, answer: { score: number }) =>
+              answer.score > max.score ? answer : max,
+          ).text,
+        },
+      ],
+    });
+    setShowChatbot(true);
+    setShowAnswers(false);
+    setShowInput(false);
+  };
+
   const handleSelectedText = () => {
     if (isTied) {
       Swal.fire({
-        title: "Rate at least one of the answers",
-        icon: "error",
+        title: "There's a tie",
+        text: "Are you sure that you want to continue?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+      }).then((result: any) => {
+        if (result.isConfirmed) {
+          handleSaveText();
+        }
       });
-    }
-    if (!isTied) {
-      updateModelInputs({
-        [field_names_for_the_model.best_answer ?? "best_answer"]: texts.reduce(
-          (max: { score: number }, answer: { score: number }) =>
-            answer.score > max.score ? answer : max,
-        ),
-      });
-      setBestAnswer(
-        texts.reduce((max: { score: number }, answer: { score: number }) =>
-          answer.score > max.score ? answer : max,
-        ),
-      );
-
-      setChatHistory({
-        ...chatHistory,
-        bot: [
-          ...chatHistory.bot,
-          {
-            id: "1",
-            text: texts.reduce(
-              (max: { score: number }, answer: { score: number }) =>
-                answer.score > max.score ? answer : max,
-            ).text,
-          },
-        ],
-      });
-      setShowChatbot(true);
-      setShowAnswers(false);
-      setShowInput(false);
+    } else {
+      handleSaveText();
     }
   };
 
@@ -315,31 +326,33 @@ const EvaluateTextsGenerative: FC<
                         />
                       </div>
                     )}
-                    {!finishConversation && !isCreatingTexts && (
-                      <div className="grid col-span-1 py-3 justify-items-end">
-                        <AnnotationInstruction
-                          placement="top"
-                          tooltip={
-                            instruction.generate_button ||
-                            "Select one of the options below"
-                          }
-                        >
-                          <GeneralButton
-                            onClick={generateTexts}
-                            text="Send"
-                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                            disabled={disabledInput}
-                          />
-                        </AnnotationInstruction>
-                      </div>
-                    )}
+                    {!finishConversation &&
+                      !isCreatingTexts &&
+                      !disabledInput && (
+                        <div className="grid col-span-1 py-3 justify-items-end">
+                          <AnnotationInstruction
+                            placement="top"
+                            tooltip={
+                              instruction.generate_button ||
+                              "Select one of the options below"
+                            }
+                          >
+                            <GeneralButton
+                              onClick={generateTexts}
+                              text="Send"
+                              className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                              disabled={disabledInput}
+                            />
+                          </AnnotationInstruction>
+                        </div>
+                      )}
                   </>
                 )}
               </div>
               {showAnswers && (
                 <>
                   {!finishConversation && (
-                    <h4 className="pb-3 pl-2 text-lg font-semibold text-letter-color">
+                    <h4 className="pt-4 pb-3 pl-2 text-lg font-semibold text-letter-color">
                       {artifactsInput.general_instruction_multiple_models}
                     </h4>
                   )}
