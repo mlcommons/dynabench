@@ -500,6 +500,8 @@ class HuggingFaceAPIProvider(LLMProvider):
         self, prompt: str, model: dict, is_conversational=False
     ) -> str:
         is_llama = model[self.provider_name()]["is_llama"]
+        is_falcon = model[self.provider_name()]["is_falcon"]
+        is_pythia = model[self.provider_name()]["is_pythia"]
         base = "https://api-inference.huggingface.co/models/"
         model_name = model[self.provider_name()]["model_name"]
         endpoint = base + model_name
@@ -510,6 +512,12 @@ class HuggingFaceAPIProvider(LLMProvider):
         else:
             if is_llama == 1:
                 prompt = f"<s>[INST] {head_template} {prompt} {foot_template} [/INST]"
+            elif is_falcon == 1:
+                prompt = f"{head_template} User: {prompt}\n {foot_template} Falcon:"
+            elif is_pythia == 1:
+                prompt = (
+                    f"{head_template}\n<|prompter|>{prompt}<|endoftext|><|assistant|>"
+                )
             else:
                 prompt = prompt
 
@@ -554,6 +562,8 @@ class HuggingFaceAPIProvider(LLMProvider):
         head_template = model[self.provider_name()]["templates"]["header"]
         foot_template = model[self.provider_name()]["templates"]["footer"]
         is_llama = model[self.provider_name()]["is_llama"]
+        is_falcon = model[self.provider_name()]["is_falcon"]
+        is_pythia = model[self.provider_name()]["is_pythia"]
         formatted_conversation = []
         if is_llama:
             formatted_conversation.append(f"<s>[INST] {head_template} [/INST]")
@@ -565,6 +575,27 @@ class HuggingFaceAPIProvider(LLMProvider):
 
             formatted_conversation.append(f"[INST] {prompt} {foot_template} [/INST]")
             formatted_conversation = "\n".join(formatted_conversation)
+        elif is_falcon:
+            formatted_conversation.append(f"{head_template}")
+            for user_entry, bot_entry in zip(history["user"], history["bot"]):
+                user_text = user_entry["text"]
+                bot_text = bot_entry["text"]
+                formatted_conversation.append(f"User: {user_text}")
+                formatted_conversation.append(f"Falcon: {bot_text}")
+            formatted_conversation.append(f"User: {prompt} {foot_template}")
+            formatted_conversation.append("Falcon:")
+            formatted_conversation = "\n".join(formatted_conversation)
+        elif is_pythia:
+            formatted_conversation.append(f"{head_template}")
+            for user_entry, bot_entry in zip(history["user"], history["bot"]):
+                user_text = user_entry["text"]
+                bot_text = bot_entry["text"]
+                formatted_conversation.append(f"<|prompter|>{user_text}<|endoftext|>")
+                formatted_conversation.append(f"<|assistant|>{bot_text}<|endoftext|>")
+
+            formatted_conversation.append(
+                f"<|prompter|>{prompt}<|endoftext|><|assistant|>"
+            )
         else:
             formatted_conversation.append(f"Human: {head_template}")
             for user_entry, bot_entry in zip(history["user"], history["bot"]):
