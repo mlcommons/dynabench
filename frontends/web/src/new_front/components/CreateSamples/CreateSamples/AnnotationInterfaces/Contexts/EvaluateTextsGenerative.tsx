@@ -116,6 +116,15 @@ const EvaluateTextsGenerative: FC<
         artifacts: artifactsInput,
       });
       if (response.ok) {
+        const noAnswers = await checkNotAnswers(generatedTexts);
+        if (noAnswers) {
+          Swal.fire({
+            title: "The models could not generate any answer at this moment.",
+            text: "Please try again",
+            icon: "error",
+          });
+          window.location.reload();
+        }
         setTexts(
           generatedTexts.map((text: any) => ({
             ...text,
@@ -173,6 +182,17 @@ const EvaluateTextsGenerative: FC<
       (text) => text.score === texts[0].score && texts.length > 1,
     );
     setIsTied(isTied);
+  };
+
+  const checkNotAnswers = async (generatedTexts: any) => {
+    // check if in some of the texts the provider name is None, in that case return True
+    const notAnswers = generatedTexts.every(
+      (text: any) => text.provider === "None",
+    );
+    const allTheAnswersAreEmpty = generatedTexts.every(
+      (text: any) => text.text === "\n",
+    );
+    return notAnswers || allTheAnswersAreEmpty;
   };
 
   const handleSaveText = () => {

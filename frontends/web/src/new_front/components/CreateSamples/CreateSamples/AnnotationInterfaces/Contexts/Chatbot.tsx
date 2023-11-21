@@ -274,28 +274,30 @@ const Chatbot: FC<ChatbotProps> = ({
                 </div>
                 <div className="flex justify-end gap-2 ">
                   {isAskingQuestion ? (
-                    <div>
-                      <GeneralButton
-                        onClick={askQuestion}
-                        text="Send"
-                        className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <GeneralButton
+                          onClick={askQuestion}
+                          text="Send"
+                          className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
+                        />
+                      </div>
+                      {numInteractions >= num_interactions_chatbot && (
+                        <div>
+                          <GeneralButton
+                            onClick={handleFinishInteraction}
+                            text="Finish"
+                            className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn"
+                          />
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div>
                       <GeneralButton
                         onClick={saveHistoryValidation}
                         text="Save"
                         className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
-                      />
-                    </div>
-                  )}
-                  {numInteractions >= num_interactions_chatbot && (
-                    <div>
-                      <GeneralButton
-                        onClick={handleFinishInteraction}
-                        text="Finish"
-                        className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn"
                       />
                     </div>
                   )}
