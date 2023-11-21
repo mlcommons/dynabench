@@ -119,7 +119,7 @@ const EvaluateTextsGenerative: FC<
         const noAnswers = await checkNotAnswers(generatedTexts);
         if (noAnswers) {
           Swal.fire({
-            title: "The models could not generate any answer",
+            title: "The models could not generate any answer at this moment.",
             text: "Please try again",
             icon: "error",
           });
