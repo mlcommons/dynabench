@@ -229,6 +229,9 @@ class CohereProvider(LLMProvider):
         foot_template = model[self.provider_name()]["templates"]["footer"]
         model_name = model[self.provider_name()]["model_name"]
         temperature = model[self.provider_name()]["temperature"]
+        top_p = model[self.provider_name()]["top_p"]
+        top_k = model[self.provider_name()]["top_k"]
+        max_tokens = model[self.provider_name()]["max_tokens"]
         try:
             if is_conversational:
                 response = await self.cohere.chat(
@@ -236,6 +239,9 @@ class CohereProvider(LLMProvider):
                     model=model_name,
                     chat_history=chat_history,
                     temperature=temperature,
+                    p=top_p,
+                    k=top_k,
+                    max_tokens=max_tokens,
                 )
             else:
                 prompt = f"{head_template} {prompt} {foot_template}"
@@ -243,6 +249,9 @@ class CohereProvider(LLMProvider):
                     message=prompt,
                     model=model_name,
                     temperature=temperature,
+                    p=top_p,
+                    k=top_k,
+                    max_tokens=max_tokens,
                 )
 
             return {
