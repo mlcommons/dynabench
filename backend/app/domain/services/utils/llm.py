@@ -229,6 +229,9 @@ class CohereProvider(LLMProvider):
         foot_template = model[self.provider_name()]["templates"]["footer"]
         model_name = model[self.provider_name()]["model_name"]
         temperature = model[self.provider_name()]["temperature"]
+        top_p = model[self.provider_name()]["top_p"]
+        top_k = model[self.provider_name()]["top_k"]
+        max_tokens = model[self.provider_name()]["max_tokens"]
         try:
             if is_conversational:
                 response = await self.cohere.chat(
@@ -236,6 +239,9 @@ class CohereProvider(LLMProvider):
                     model=model_name,
                     chat_history=chat_history,
                     temperature=temperature,
+                    p=top_p,
+                    k=top_k,
+                    max_tokens=max_tokens,
                 )
             else:
                 prompt = f"{head_template} {prompt} {foot_template}"
@@ -243,6 +249,9 @@ class CohereProvider(LLMProvider):
                     message=prompt,
                     model=model_name,
                     temperature=temperature,
+                    p=top_p,
+                    k=top_k,
+                    max_tokens=max_tokens,
                 )
 
             return {
@@ -490,8 +499,6 @@ class HuggingFaceAPIProvider(LLMProvider):
         self.headers = {
             "Authorization": os.getenv("HF"),
             "Content-Type": "application/json",
-            "Cache-Control": "no-cache",
-            "Pragma": "no-cache",
             "x-use-cache": "false",
         }
 
@@ -502,6 +509,9 @@ class HuggingFaceAPIProvider(LLMProvider):
         is_llama = model[self.provider_name()]["is_llama"]
         is_falcon = model[self.provider_name()]["is_falcon"]
         is_pythia = model[self.provider_name()]["is_pythia"]
+        is_zephyr = model[self.provider_name()]["is_zephyr"]
+        is_guanaco = model[self.provider_name()]["is_guanaco"]
+        is_vicuna = model[self.provider_name()]["is_vicuna"]
         base = "https://api-inference.huggingface.co/models/"
         model_name = model[self.provider_name()]["model_name"]
         endpoint = base + model_name
@@ -518,6 +528,14 @@ class HuggingFaceAPIProvider(LLMProvider):
                 prompt = (
                     f"{head_template}\n<|prompter|>{prompt}<|endoftext|><|assistant|>"
                 )
+            elif is_vicuna == 1:
+                prompt = f"{head_template}\nUSER:{prompt}\nASSISTANT:"
+            elif is_zephyr == 1:
+                prompt = (
+                    f"<|system|>{head_template}</s>\n<|user|>{prompt}</s><|assistant|>"
+                )
+            elif is_guanaco == 1:
+                prompt = f"{head_template}\n### Human: {prompt}\n### Assistant:"
             else:
                 prompt = prompt
 
@@ -539,6 +557,10 @@ class HuggingFaceAPIProvider(LLMProvider):
         }
 
         data = json.dumps(payload)
+        ## The following code can be used to debug HF API if it fails again.
+        # async with httpx.AsyncClient() as client:
+        #     response = await client.post(endpoint, data=data, headers=self.headers)
+        #     answer = response.json()
         async with ClientSession() as session:
             async with session.post(
                 endpoint, data=data, headers=self.headers
@@ -554,6 +576,8 @@ class HuggingFaceAPIProvider(LLMProvider):
                 "artifacts": model,
             }
         else:
+            print(response.status)
+            print(response.content)
             return None
 
     async def conversational_generation(
@@ -564,6 +588,10 @@ class HuggingFaceAPIProvider(LLMProvider):
         is_llama = model[self.provider_name()]["is_llama"]
         is_falcon = model[self.provider_name()]["is_falcon"]
         is_pythia = model[self.provider_name()]["is_pythia"]
+        is_vicuna = model[self.provider_name()]["is_vicuna"]
+        is_zephyr = model[self.provider_name()]["is_zephyr"]
+        is_guanaco = model[self.provider_name()]["is_guanaco"]
+
         formatted_conversation = []
         if is_llama:
             formatted_conversation.append(f"<s>[INST] {head_template} [/INST]")
@@ -572,7 +600,6 @@ class HuggingFaceAPIProvider(LLMProvider):
                 bot_text = bot_entry["text"]
                 formatted_conversation.append(f"[INST] {user_text} [/INST]")
                 formatted_conversation.append(f"{bot_text} </s>")
-
             formatted_conversation.append(f"[INST] {prompt} {foot_template} [/INST]")
             formatted_conversation = "\n".join(formatted_conversation)
         elif is_falcon:
@@ -592,10 +619,39 @@ class HuggingFaceAPIProvider(LLMProvider):
                 bot_text = bot_entry["text"]
                 formatted_conversation.append(f"<|prompter|>{user_text}<|endoftext|>")
                 formatted_conversation.append(f"<|assistant|>{bot_text}<|endoftext|>")
-
             formatted_conversation.append(
                 f"<|prompter|>{prompt}<|endoftext|><|assistant|>"
             )
+            formatted_conversation = "\n".join(formatted_conversation)
+        elif is_vicuna:
+            formatted_conversation.append(f"{head_template}")
+            for user_entry, bot_entry in zip(history["user"], history["bot"]):
+                user_text = user_entry["text"]
+                bot_text = bot_entry["text"]
+                formatted_conversation.append(f"USER: {user_text}")
+                formatted_conversation.append(f"ASSISTANT: {bot_text}</s>")
+            formatted_conversation.append(f"USER: {prompt} {foot_template}")
+            formatted_conversation.append("ASSISTANT:")
+            formatted_conversation = "\n".join(formatted_conversation)
+        elif is_zephyr:
+            formatted_conversation.append(f"{head_template}")
+            for user_entry, bot_entry in zip(history["user"], history["bot"]):
+                user_text = user_entry["text"]
+                bot_text = bot_entry["text"]
+                formatted_conversation.append(f"<|user|>{user_text}</s>")
+                formatted_conversation.append(f"<|assistant|>{bot_text}</s>")
+            formatted_conversation.append(f"<|user|>{prompt}</s><|assistant|>")
+            formatted_conversation = "\n".join(formatted_conversation)
+        elif is_guanaco:
+            formatted_conversation.append(f"{head_template}")
+            for user_entry, bot_entry in zip(history["user"], history["bot"]):
+                user_text = user_entry["text"]
+                bot_text = bot_entry["text"]
+                formatted_conversation.append(f"### Human: {user_text}")
+                formatted_conversation.append(f"### Assistant: {bot_text}")
+            formatted_conversation.append(f"### Human: {prompt} {foot_template}")
+            formatted_conversation.append("### Assistant: ")
+            formatted_conversation = "\n".join(formatted_conversation)
         else:
             formatted_conversation.append(f"Human: {head_template}")
             for user_entry, bot_entry in zip(history["user"], history["bot"]):
