@@ -291,6 +291,7 @@ class TaskOwnerPage extends React.Component {
       "task_gateway_predict_prefix",
       "config_yaml",
       "context",
+      "leaderboard_description",
     ];
 
     const data = Object.keys(values)

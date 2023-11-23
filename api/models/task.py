@@ -691,6 +691,7 @@ class Task(Base):
     show_user_leaderboard = db.Column(db.Integer())
     show_username_leaderboard = db.Column(db.Integer())
     show_user_leaderboard_csv = db.Column(db.Integer())
+    leaderboard_description = db.Column(db.Text)
 
     def __repr__(self):
         return f"<Task {self.name}>"

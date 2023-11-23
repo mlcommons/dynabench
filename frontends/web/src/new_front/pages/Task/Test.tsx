@@ -1,12 +1,7 @@
-import React, { useState } from "react";
-import UserLeaderBoardCSV from "new_front/components/Tables/Leaderboard/UserLeaderBoardCSV";
+import React from "react";
 
 const Test = () => {
-  return (
-    <div>
-      <UserLeaderBoardCSV taskId={45} />
-    </div>
-  );
+  return <div>test</div>;
 };
 
 export default Test;

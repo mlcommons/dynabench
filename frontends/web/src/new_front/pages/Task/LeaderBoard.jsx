@@ -14,6 +14,7 @@ import UserLeaderBoardCSV from "new_front/components/Tables/Leaderboard/UserLead
 import TaskTrend from "new_front/components/TaskPage/TaskTrend";
 import { Annotation, OverlayProvider } from "containers/Overlay";
 import UserContext from "containers/UserContext";
+import LeaderboardDescription from "new_front/components/Tables/Leaderboard/LeaderboardDescription";
 
 const yaml = require("js-yaml");
 
@@ -182,7 +183,7 @@ class Leaderboard extends React.Component {
                           />
                         </Col>
                       )}
-                    <Col xs={12} md={6}>
+                    <Col xs={12} md={6} className="mt-3">
                       {this.state.trendScore.length > 0 && this.showTrends && (
                         <>
                           <Annotation
@@ -206,6 +207,17 @@ class Leaderboard extends React.Component {
                             { length: this.state.task.cur_round },
                             (_, i) => i + 1
                           )}
+                          leaderBoardHeaderValues={
+                            yaml.load(this.state.task.config_yaml)
+                              .leaderboard_csv_header
+                          }
+                        />
+                      )}
+                    </Col>
+                    <Col xs={6} md={6}>
+                      {this.state.task.leaderboard_description && (
+                        <LeaderboardDescription
+                          description={this.state.task.leaderboard_description}
                         />
                       )}
                     </Col>
