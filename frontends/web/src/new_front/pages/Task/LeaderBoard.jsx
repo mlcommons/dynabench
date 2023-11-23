@@ -14,6 +14,7 @@ import UserLeaderBoardCSV from "new_front/components/Tables/Leaderboard/UserLead
 import TaskTrend from "new_front/components/TaskPage/TaskTrend";
 import { Annotation, OverlayProvider } from "containers/Overlay";
 import UserContext from "containers/UserContext";
+import LeaderboardDescription from "new_front/components/Tables/Leaderboard/LeaderboardDescription";
 
 const yaml = require("js-yaml");
 
@@ -51,14 +52,14 @@ class Leaderboard extends React.Component {
                 this.props.history.replace({
                   pathname: this.props.location.pathname.replace(
                     `/tasks/${this.taskCode}`,
-                    `/tasks/${this.state.taskCode}`
+                    `/tasks/${this.state.taskCode}`,
                   ),
                   search: this.props.location.search,
                 });
               }
               this.state.loading = true;
               this.fetchTrend();
-            }
+            },
           );
           this.context.api.getAdminOrOwner(result.id).then(
             (adminOrOwnerResult) => {
@@ -68,7 +69,7 @@ class Leaderboard extends React.Component {
             },
             (error) => {
               console.log(error);
-            }
+            },
           );
         },
         (error) => {
@@ -76,7 +77,7 @@ class Leaderboard extends React.Component {
           if (error.status_code === 404 || error.status_code === 405) {
             this.props.history.push("/");
           }
-        }
+        },
       );
     });
   }
@@ -100,7 +101,7 @@ class Leaderboard extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   }
 
@@ -182,7 +183,7 @@ class Leaderboard extends React.Component {
                           />
                         </Col>
                       )}
-                    <Col xs={12} md={6}>
+                    <Col xs={12} md={6} className="mt-3">
                       {this.state.trendScore.length > 0 && this.showTrends && (
                         <>
                           <Annotation
@@ -204,8 +205,19 @@ class Leaderboard extends React.Component {
                           }
                           rounds={Array.from(
                             { length: this.state.task.cur_round },
-                            (_, i) => i + 1
+                            (_, i) => i + 1,
                           )}
+                          leaderBoardHeaderValues={
+                            yaml.load(this.state.task.config_yaml)
+                              .leaderboard_csv_header
+                          }
+                        />
+                      )}
+                    </Col>
+                    <Col xs={6} md={6}>
+                      {this.state.task.leaderboard_description && (
+                        <LeaderboardDescription
+                          description={this.state.task.leaderboard_description}
                         />
                       )}
                     </Col>

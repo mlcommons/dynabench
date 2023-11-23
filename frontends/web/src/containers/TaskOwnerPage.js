@@ -51,7 +51,7 @@ class TaskOwnerPage extends React.Component {
       return this.fetchTask(() => this.fetchOwners());
     } else if (this.props.location.hash === "#rounds") {
       return this.fetchTask(() =>
-        this.fetchRounds(() => this.fetchModelIdentifiersForTargetSelection())
+        this.fetchRounds(() => this.fetchModelIdentifiersForTargetSelection()),
       );
     } else if (this.props.location.hash === "#models") {
       return this.fetchTask(() => this.fetchModelIdentifiers());
@@ -59,9 +59,9 @@ class TaskOwnerPage extends React.Component {
       return this.fetchTask(() =>
         this.fetchDatasets(() =>
           this.fetchAvailableDatasetAccessTypes(() =>
-            this.fetchAvailableDatasetLogAccessTypes()
-          )
-        )
+            this.fetchAvailableDatasetLogAccessTypes(),
+          ),
+        ),
       );
     }
   }
@@ -71,7 +71,7 @@ class TaskOwnerPage extends React.Component {
       this.props.history.push(
         "/login?msg=" +
           encodeURIComponent("Please login first.") +
-          "&src=/owner#profile"
+          "&src=/owner#profile",
       );
     } else {
       this.fetchTask(() => {
@@ -79,9 +79,9 @@ class TaskOwnerPage extends React.Component {
           this.props.history.push(
             "/login?msg=" +
               encodeURIComponent(
-                "You are not an admin or owner of this task. Please login with an admin or owner account."
+                "You are not an admin or owner of this task. Please login with an admin or owner account.",
               ) +
-              "&src=/owner#profile"
+              "&src=/owner#profile",
           );
         } else {
           this.refreshData();
@@ -100,17 +100,17 @@ class TaskOwnerPage extends React.Component {
                 admin_or_owner: adminOrOwnerResult.admin_or_owner,
                 task: result,
               },
-              callback
+              callback,
             );
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   };
 
@@ -121,7 +121,7 @@ class TaskOwnerPage extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   };
 
@@ -132,7 +132,7 @@ class TaskOwnerPage extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   };
 
@@ -143,7 +143,7 @@ class TaskOwnerPage extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   };
 
@@ -154,7 +154,7 @@ class TaskOwnerPage extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   };
 
@@ -165,7 +165,7 @@ class TaskOwnerPage extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   };
 
@@ -176,7 +176,7 @@ class TaskOwnerPage extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   };
 
@@ -196,7 +196,7 @@ class TaskOwnerPage extends React.Component {
         var newDict = { ...this.state.dataExporting };
         newDict[rid] = false;
         this.setState({ dataExporting: newDict });
-      }
+      },
     );
   };
 
@@ -209,7 +209,7 @@ class TaskOwnerPage extends React.Component {
         },
         (error) => {
           console.log(error);
-        }
+        },
       );
   };
 
@@ -221,7 +221,7 @@ class TaskOwnerPage extends React.Component {
 
   handleContextsSubmit = (
     values,
-    { setFieldError, setFieldValue, resetForm, setSubmitting }
+    { setFieldError, setFieldValue, resetForm, setSubmitting },
   ) => {
     const data = {
       file: values.contexts_file,
@@ -240,17 +240,17 @@ class TaskOwnerPage extends React.Component {
           resetForm({ values: values });
           setFieldError(
             "accept",
-            "File could not be submitted (" + error.error + ")"
+            "File could not be submitted (" + error.error + ")",
           );
           setSubmitting(false);
           console.log(error);
-        }
+        },
       );
   };
 
   handleTaskActivate = (
     values,
-    { setFieldError, setSubmitting, resetForm }
+    { setFieldError, setSubmitting, resetForm },
   ) => {
     this.context.api.activateTask(this.state.task.id, values.config_yaml).then(
       (result) => {
@@ -263,10 +263,10 @@ class TaskOwnerPage extends React.Component {
         console.log(error);
         setFieldError(
           "accept",
-          "Task could not be activated (" + error.error + ")"
+          "Task could not be activated (" + error.error + ")",
         );
         setSubmitting(false);
-      }
+      },
     );
   };
 
@@ -291,6 +291,7 @@ class TaskOwnerPage extends React.Component {
       "task_gateway_predict_prefix",
       "config_yaml",
       "context",
+      "leaderboard_description",
     ];
 
     const data = Object.keys(values)
@@ -311,10 +312,10 @@ class TaskOwnerPage extends React.Component {
         console.log(error);
         setFieldError(
           "accept",
-          "Task could not be updated (" + error.error + ")"
+          "Task could not be updated (" + error.error + ")",
         );
         setSubmitting(false);
-      }
+      },
     );
   };
 
@@ -337,16 +338,16 @@ class TaskOwnerPage extends React.Component {
           console.log(error);
           setFieldError(
             "accept",
-            "Owners could not be updated (" + error.error + ")"
+            "Owners could not be updated (" + error.error + ")",
           );
           setSubmitting(false);
-        }
+        },
       );
   };
 
   handleDatasetUpdate = (
     values,
-    { setFieldError, setSubmitting, resetForm }
+    { setFieldError, setSubmitting, resetForm },
   ) => {
     const allowed = [
       "longdesc",
@@ -376,10 +377,10 @@ class TaskOwnerPage extends React.Component {
         console.log(error);
         setFieldError(
           "accept",
-          "Dataset could not be updated (" + error.error + ")"
+          "Dataset could not be updated (" + error.error + ")",
         );
         setSubmitting(false);
-      }
+      },
     );
   };
 
@@ -391,7 +392,7 @@ class TaskOwnerPage extends React.Component {
 
   handleRoundUpdate = (
     values,
-    { setFieldError, setSubmitting, setFieldValue, resetForm }
+    { setFieldError, setSubmitting, setFieldValue, resetForm },
   ) => {
     const model_ids = [];
 
@@ -422,7 +423,7 @@ class TaskOwnerPage extends React.Component {
                   values: values,
                 });
                 setSubmitting(false);
-              })
+              }),
             );
           } else {
             this.fetchRounds(() => {
@@ -437,10 +438,10 @@ class TaskOwnerPage extends React.Component {
           console.log(error);
           setFieldError(
             "accept",
-            "Round could not be updated (" + error.error + ")"
+            "Round could not be updated (" + error.error + ")",
           );
           setSubmitting(false);
-        }
+        },
       );
   };
 
@@ -451,13 +452,13 @@ class TaskOwnerPage extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   };
 
   handleUploadAndCreateDataset = (
     values,
-    { setFieldError, setSubmitting, setFieldValue, resetForm }
+    { setFieldError, setSubmitting, setFieldValue, resetForm },
   ) => {
     const files = { file: values.file };
     const config = yaml.load(this.state.task.config_yaml);
@@ -483,10 +484,10 @@ class TaskOwnerPage extends React.Component {
           console.log(error);
           setFieldError(
             "accept",
-            "Dataset could not be added (" + error.error + ")"
+            "Dataset could not be added (" + error.error + ")",
           );
           setSubmitting(false);
-        }
+        },
       );
   };
 
