@@ -125,7 +125,7 @@ const Settings = (props) => {
                           className="py-3 my-0"
                         >
                           <Form.Label column className="text-base">
-                            Instructions for leaderboard
+                            Leaderboard instructions
                           </Form.Label>
                           <Col sm="12">
                             <Form.Control
