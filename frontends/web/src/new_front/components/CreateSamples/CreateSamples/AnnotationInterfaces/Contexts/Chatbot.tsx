@@ -102,7 +102,7 @@ const Chatbot: FC<ChatbotProps> = ({
   const checkNotAnswers = async (generatedTexts: any) => {
     // check if in some of the texts the provider name is None, in that case return True
     const notAnswers = generatedTexts.every(
-      (text: any) => text.provider === "None",
+      (text: any) => text.text === "None",
     );
     const allTheAnswersAreEmpty = generatedTexts.every(
       (text: any) => text.text === "\n",
