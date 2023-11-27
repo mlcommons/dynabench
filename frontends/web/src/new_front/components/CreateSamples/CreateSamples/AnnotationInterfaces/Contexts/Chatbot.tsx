@@ -79,10 +79,9 @@ const Chatbot: FC<ChatbotProps> = ({
             title: "It seems like the model you selected went down.",
             text: "Please try again",
             icon: "error",
-          });
-          setTimeout(() => {
+          }).then(() => {
             window.location.reload();
-          }, 4000);
+          });
         }
         setNewResponses(
           generatedTexts.map((text: any) => ({
