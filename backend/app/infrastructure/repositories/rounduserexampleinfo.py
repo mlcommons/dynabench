@@ -127,4 +127,4 @@ class RoundUserExampleInfoRepository(AbstractRepository):
             self.session.query(self.model.examples_submitted)
             .filter((self.model.r_realid == round_id) & (self.model.uid == user_id))
             .first()
-        )[0]
+        )
