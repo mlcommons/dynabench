@@ -76,7 +76,7 @@ const Chatbot: FC<ChatbotProps> = ({
         const noAnswers = await checkNotAnswers(generatedTexts);
         if (noAnswers) {
           Swal.fire({
-            title: "The models could not generate any answer at this moment.",
+            title: "It seems like the model you selected went down.",
             text: "Please try again",
             icon: "error",
           });
