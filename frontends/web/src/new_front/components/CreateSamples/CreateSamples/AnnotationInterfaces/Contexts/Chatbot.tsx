@@ -73,6 +73,16 @@ const Chatbot: FC<ChatbotProps> = ({
         },
       );
       if (response.ok) {
+        const noAnswers = await checkNotAnswers(generatedTexts);
+        if (noAnswers) {
+          Swal.fire({
+            title: "It seems like the model you selected went down.",
+            text: "Please try again",
+            icon: "error",
+          }).then(() => {
+            window.location.reload();
+          });
+        }
         setNewResponses(
           generatedTexts.map((text: any) => ({
             ...text,
@@ -88,6 +98,17 @@ const Chatbot: FC<ChatbotProps> = ({
         text: "Please enter a question",
       });
     }
+  };
+
+  const checkNotAnswers = async (generatedTexts: any) => {
+    // check if in some of the texts the provider name is None, in that case return True
+    const notAnswers = generatedTexts.every(
+      (text: any) => text.text === "None",
+    );
+    const allTheAnswersAreEmpty = generatedTexts.every(
+      (text: any) => text.text === "\n",
+    );
+    return notAnswers || allTheAnswersAreEmpty;
   };
 
   const finishSection = () => {
