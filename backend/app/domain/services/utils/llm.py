@@ -120,7 +120,12 @@ class OpenAIProvider(LLMProvider):
         result = await self.generate_text(
             formatted_conversation, model, is_conversational=True
         )
-        return result["text"]
+
+        try:
+            return result["text"]
+        except Exception as e:
+            print(e)
+            return "None"
 
     def provider_name(self):
         return "openai"
@@ -210,7 +215,11 @@ class AnthropicProvider(LLMProvider):
         conversation = await self.generate_text(
             formatted_conversation, model, is_conversational=True
         )
-        return conversation["text"]
+        try:
+            return conversation["text"]
+        except Exception as e:
+            print(e)
+            return "None"
 
     def provider_name(self):
         return "anthropic"
@@ -281,7 +290,11 @@ class CohereProvider(LLMProvider):
         result = await self.generate_text(
             prompt, model, is_conversational=True, chat_history=formatted_conversation
         )
-        return result["text"]
+        try:
+            return result["text"]
+        except Exception as e:
+            print(e)
+            return "None"
 
     def provider_name(self):
         return "cohere"
@@ -359,8 +372,11 @@ class AlephAlphaProvider(LLMProvider):
         result = await self.generate_text(
             formatted_conversation, model, is_conversational=True
         )
-
-        return result["text"]
+        try:
+            return result["text"]
+        except Exception as e:
+            print(e)
+            return "None"
 
     def provider_name(self):
         return "aleph"
@@ -425,7 +441,11 @@ class GoogleProvider(LLMProvider):
             formatted_conversation, model, is_conversational=True
         )
 
-        return result["text"]
+        try:
+            return result["text"]
+        except Exception as e:
+            print(e)
+            return "None"
 
     def provider_name(self):
         return "google"
@@ -487,7 +507,15 @@ class ReplicateProvider(LLMProvider):
         formatted_conversation.append("Assistant: ")
 
         formatted_conversation = "\n\n".join(formatted_conversation)
-        return self.generate_text(formatted_conversation, model, is_conversational=True)
+        result = self.generate_text(
+            formatted_conversation, model, is_conversational=True
+        )
+
+        try:
+            return result["text"]
+        except Exception as e:
+            print(e)
+            return "None"
 
     def provider_name(self):
         return "replicate"
@@ -576,8 +604,6 @@ class HuggingFaceAPIProvider(LLMProvider):
                 "artifacts": model,
             }
         else:
-            print(response.status)
-            print(response.content)
             return None
 
     async def conversational_generation(
@@ -666,7 +692,11 @@ class HuggingFaceAPIProvider(LLMProvider):
         response = await self.generate_text(
             formatted_conversation, model, is_conversational=True
         )
-        return response["text"]
+        try:
+            return response["text"]
+        except Exception as e:
+            print(e)
+            return "None"
 
     def provider_name(self):
         return "huggingface_api"
