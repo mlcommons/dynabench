@@ -80,7 +80,9 @@ const Chatbot: FC<ChatbotProps> = ({
             text: "Please try again",
             icon: "error",
           });
-          window.location.reload();
+          setTimeout(() => {
+            window.location.reload();
+          }, 4000);
         }
         setNewResponses(
           generatedTexts.map((text: any) => ({
