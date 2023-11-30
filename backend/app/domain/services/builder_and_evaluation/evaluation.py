@@ -480,7 +480,7 @@ class EvaluationService:
         throughput = self.get_throughput(num_samples, minutes_time_prediction)
         self.logger.info("Calculate score")
         final_scores, main_metric, metric = self.get_finals_scores(
-            tasks.id, prediction_dict, tags
+            tasks.id, prediction_dict, False
         )
         print("current_round", current_round)
         round_info = self.round_repository.get_round_info_by_round_and_task(
