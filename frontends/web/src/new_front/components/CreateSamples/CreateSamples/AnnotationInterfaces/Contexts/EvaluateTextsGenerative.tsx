@@ -26,6 +26,7 @@ const EvaluateTextsGenerative: FC<
   contextId,
   taskId,
   setIsGenerativeContext,
+  realRoundId,
 }) => {
   const [signInConsent, setSignInConsent] = useState(true);
   const [showInput, setShowInput] = useState(false);
@@ -62,6 +63,9 @@ const EvaluateTextsGenerative: FC<
     updateModelInputs({
       category: category,
     });
+    updateModelInputs({
+      initial_timestamp: Date.now(),
+    });
     setShowInput(true);
     setShowCategory(true);
   };
@@ -76,6 +80,33 @@ const EvaluateTextsGenerative: FC<
     }
   };
 
+  const checkIfUserReachedNecessaryExamples = async () => {
+    const redirectUrl = await post(
+      "/rounduserexample/redirect_to_third_party_provider",
+      {
+        task_id: taskId,
+        user_id: user.id,
+        round_id: realRoundId,
+      },
+    );
+    if (response.ok) {
+      if (redirectUrl) {
+        Swal.fire({
+          title: "You have reached the necessary examples",
+          text: "You will be redirected to the third party provider",
+          icon: "success",
+          confirmButtonText: "Ok",
+        }).then(() => {
+          window.location.href = redirectUrl;
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkIfUserReachedNecessaryExamples();
+  }, []);
+
   const generateTexts = async () => {
     if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
       setIsCreatingTexts(true);
@@ -85,6 +116,15 @@ const EvaluateTextsGenerative: FC<
         artifacts: artifactsInput,
       });
       if (response.ok) {
+        const noAnswers = await checkNotAnswers(generatedTexts);
+        if (noAnswers) {
+          Swal.fire({
+            title: "The models could not generate any answer at this moment.",
+            text: "Please try again",
+            icon: "error",
+          });
+          window.location.reload();
+        }
         setTexts(
           generatedTexts.map((text: any) => ({
             ...text,
@@ -124,10 +164,6 @@ const EvaluateTextsGenerative: FC<
     }
   };
 
-  useEffect(() => {
-    console.log("isCreatingTexts", isCreatingTexts);
-  }, [isCreatingTexts]);
-
   const handlePromptChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setArtifactsInput({
       ...artifactsInput,
@@ -148,42 +184,64 @@ const EvaluateTextsGenerative: FC<
     setIsTied(isTied);
   };
 
+  const checkNotAnswers = async (generatedTexts: any) => {
+    // check if in some of the texts the provider name is None, in that case return True
+    const notAnswers = generatedTexts.every(
+      (text: any) => text.provider === "None",
+    );
+    const allTheAnswersAreEmpty = generatedTexts.every(
+      (text: any) => text.text === "\n",
+    );
+    return notAnswers || allTheAnswersAreEmpty;
+  };
+
+  const handleSaveText = () => {
+    updateModelInputs({
+      [field_names_for_the_model.best_answer ?? "best_answer"]: texts.reduce(
+        (max: { score: number }, answer: { score: number }) =>
+          answer.score > max.score ? answer : max,
+      ),
+    });
+    setBestAnswer(
+      texts.reduce((max: { score: number }, answer: { score: number }) =>
+        answer.score > max.score ? answer : max,
+      ),
+    );
+
+    setChatHistory({
+      ...chatHistory,
+      bot: [
+        ...chatHistory.bot,
+        {
+          id: "1",
+          text: texts.reduce(
+            (max: { score: number }, answer: { score: number }) =>
+              answer.score > max.score ? answer : max,
+          ).text,
+        },
+      ],
+    });
+    setShowChatbot(true);
+    setShowAnswers(false);
+    setShowInput(false);
+  };
+
   const handleSelectedText = () => {
     if (isTied) {
       Swal.fire({
-        title: "Rate at least one of the answers",
-        icon: "error",
+        title: "There's a tie",
+        text: "Are you sure that you want to continue?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+      }).then((result: any) => {
+        if (result.isConfirmed) {
+          handleSaveText();
+        }
       });
-    }
-    if (!isTied) {
-      updateModelInputs({
-        [field_names_for_the_model.best_answer ?? "best_answer"]: texts.reduce(
-          (max: { score: number }, answer: { score: number }) =>
-            answer.score > max.score ? answer : max,
-        ),
-      });
-      setBestAnswer(
-        texts.reduce((max: { score: number }, answer: { score: number }) =>
-          answer.score > max.score ? answer : max,
-        ),
-      );
-
-      setChatHistory({
-        ...chatHistory,
-        bot: [
-          ...chatHistory.bot,
-          {
-            id: "1",
-            text: texts.reduce(
-              (max: { score: number }, answer: { score: number }) =>
-                answer.score > max.score ? answer : max,
-            ).text,
-          },
-        ],
-      });
-      setShowChatbot(true);
-      setShowAnswers(false);
-      setShowInput(false);
+    } else {
+      handleSaveText();
     }
   };
 
@@ -288,31 +346,33 @@ const EvaluateTextsGenerative: FC<
                         />
                       </div>
                     )}
-                    {!finishConversation && !isCreatingTexts && (
-                      <div className="grid col-span-1 py-3 justify-items-end">
-                        <AnnotationInstruction
-                          placement="top"
-                          tooltip={
-                            instruction.generate_button ||
-                            "Select one of the options below"
-                          }
-                        >
-                          <GeneralButton
-                            onClick={generateTexts}
-                            text="Send"
-                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                            disabled={disabledInput}
-                          />
-                        </AnnotationInstruction>
-                      </div>
-                    )}
+                    {!finishConversation &&
+                      !isCreatingTexts &&
+                      !disabledInput && (
+                        <div className="grid col-span-1 py-3 justify-items-end">
+                          <AnnotationInstruction
+                            placement="top"
+                            tooltip={
+                              instruction.generate_button ||
+                              "Select one of the options below"
+                            }
+                          >
+                            <GeneralButton
+                              onClick={generateTexts}
+                              text="Send"
+                              className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                              disabled={disabledInput}
+                            />
+                          </AnnotationInstruction>
+                        </div>
+                      )}
                   </>
                 )}
               </div>
               {showAnswers && (
                 <>
                   {!finishConversation && (
-                    <h4 className="pb-3 pl-2 text-lg font-semibold text-letter-color">
+                    <h4 className="pt-4 pb-3 pl-2 text-lg font-semibold text-letter-color">
                       {artifactsInput.general_instruction_multiple_models}
                     </h4>
                   )}

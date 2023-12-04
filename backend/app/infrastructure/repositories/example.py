@@ -144,7 +144,7 @@ class ExampleRepository(AbstractRepository):
 
     def download_all_created_examples(self, task_id: int):
         return (
-            self.session.query(self.model, Context)
+            self.session.query(self.model, Context, Round.rid)
             .join(Context, Example.cid == Context.id)
             .join(Round, Context.r_realid == Round.id)
             .filter(Round.tid == task_id)

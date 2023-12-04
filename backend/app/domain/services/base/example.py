@@ -269,8 +269,12 @@ class ExampleService:
         for example in examples_data:
             example_necessary_info = {}
             example_info = example[0].__dict__
+            example_info["user_name"] = self.user_service.get_user_name_by_id(
+                example_info["uid"]
+            )[0]
             example_necessary_info["example_info"] = example_info
             example_necessary_info["context_info"] = example[1].__dict__
+            example_necessary_info["round_info"] = example[2]
             examples_data_list.append(example_necessary_info)
         return json.dumps(examples_data_list, cls=CustomJSONEncoder)
 

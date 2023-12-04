@@ -891,7 +891,7 @@ export default class ApiService {
   isTokenExpired(token) {
     try {
       const decoded = decode(token);
-      if (decoded.exp < Date.now() / 1000) {
+      if (decoded.exp < Date.now() / 1048576) {
         // Checking if token is expired. N
         return true;
       } else return false;
@@ -930,7 +930,7 @@ export default class ApiService {
   refreshTokenWrapper(callback, error) {
     if (this.updating_already) {
       // TODO: Make this actually wait for an event?
-      return delay(1000).then(() => {
+      return delay(1048576).then(() => {
         if (this.updating_already) {
           return this.refreshTokenWrapper(callback, error);
         }

@@ -405,11 +405,12 @@ def update(credentials, tid):
             "task_gateway_predict_prefix",
             "config_yaml",
             "context",
+            "leaderboard_description",
         ):
             bottle.abort(
                 403,
                 """Can only modify unpublished_models_in_leaderboard,
-                validate_non_fooling, num_matching_validations,
+                validate_non_fooling, num_matching_validations, leaderboard_description,
                 instructions_md, hidden, predictions_upload_instructions_md,
                 train_file_upload_instructions_md, mlcube_tutorial_markdown, submitable,
                 dynamic_adversarial_data_collection, create_endpoint, config_yaml""",

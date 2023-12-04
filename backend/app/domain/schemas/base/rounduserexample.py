@@ -17,3 +17,9 @@ class AmountExamplesCreatedToday(BaseModel):
 class IncrementExamplesSubmittedToday(BaseModel):
     round_id: int
     user_id: int
+
+
+class RedirectThirdPartyProvider(BaseModel):
+    task_id: int
+    user_id: int
+    round_id: int

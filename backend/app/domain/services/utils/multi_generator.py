@@ -16,6 +16,7 @@ from app.domain.services.utils.llm import (
     AnthropicProvider,
     CohereProvider,
     GoogleProvider,
+    HuggingFaceAPIProvider,
     HuggingFaceProvider,
     OpenAIProvider,
     ReplicateProvider,
@@ -32,6 +33,7 @@ class LLMGenerator:
             "aleph": AlephAlphaProvider(),
             "google": GoogleProvider(),
             "replicate": ReplicateProvider(),
+            "huggingface_api": HuggingFaceAPIProvider(),
         }
 
     async def generate_one_text(
@@ -66,7 +68,24 @@ class LLMGenerator:
             task = asyncio.create_task(self.generate_one_text(*parameter))
             all_tasks.add(task)
         results = await asyncio.gather(*all_tasks)
-        return results
+
+        final_results = []
+        for result in results:
+            if result is not None:
+                if result["text"] != "":
+                    final_results.append(result)
+
+        if len(final_results) == 0:
+            return [
+                {
+                    "text": "No models are available right now",
+                    "provider_name": "None",
+                    "model_name": "none",
+                    "artifacts": {},
+                }
+            ]
+        else:
+            return final_results
 
 
 class ImageGenerator:

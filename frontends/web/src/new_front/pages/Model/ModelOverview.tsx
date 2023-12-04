@@ -18,7 +18,7 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
 
   const [showUpdateModelInfo, setShowUpdateModelInfo] = useState(false);
   const [modelInfo, setModelInfo] = useState<AllModelsInfo>(
-    {} as AllModelsInfo
+    {} as AllModelsInfo,
   );
   const { get, response, loading } = useFetch();
 
@@ -160,7 +160,7 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
                     Data
                   </span>
                 </h6>
-                <ul className="grid grid-cols-2 gap-2  text-letter-color">
+                <ul className="grid grid-cols-2 gap-2 text-letter-color">
                   <li>
                     <strong>Community:</strong> {modelInfo.community}
                   </li>
@@ -171,7 +171,7 @@ const ModelOverview: FC<ModelOverviewProps> = () => {
                     <strong>Params:</strong> {modelInfo.params}
                   </li>
                   <li>
-                    <strong>Languagues:</strong> {modelInfo.languages}
+                    <strong>Languages:</strong> {modelInfo.languages}
                   </li>
                   <li>
                     <strong>License:</strong> {modelInfo.license}

@@ -20,7 +20,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
   setTexts,
   optionsSlider = ["0", "100"],
   disabled = false,
-  bestAnswer = "",
+  bestAnswer,
   score = 50,
 }) => {
   const handleUpdateScore = (event: any) => {
@@ -47,10 +47,11 @@ const EvaluateText: FC<EvaluateTextProps> = ({
               bestAnswer === text
                 ? "bg-primary-color font-bold"
                 : "bg-white font-semibold"
-            } w-full h-32 pl-1 border-0 px-2 py-2  text-letter-color `}
+            } w-full pl-1 border-0 px-2 py-2  text-letter-color `}
             placeholder={text}
             required
             disabled={true}
+            rows={7}
           />
         </div>
         <div className="flex items-center justify-between w-full gap-2 px-4 pt-4 pb-2 border-t">

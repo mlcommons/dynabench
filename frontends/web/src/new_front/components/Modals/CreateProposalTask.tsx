@@ -35,13 +35,13 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
       return;
     }
     const isValid = await get(
-      `task_proposals/validate_no_duplicate_task_code/${data.taskCode}`,
+      `task_proposals/validate_no_duplicate_task_name/${data.nameChallenge}`,
     );
     if (isValid) {
       await post("task_proposals/add_task_proposal", {
         user_id: user.id,
         task_code: data.taskCode,
-        name: data.nameTask,
+        name: data.nameChallenge,
         desc: data.shortDescription,
         longdesc: data.description,
       });
@@ -58,7 +58,7 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "Something happened, try with another task name or task code",
+        text: "This task name already exists",
       });
     }
   };
@@ -89,16 +89,6 @@ const CreateProposalTask: FC<CreateProposalTaskProps> = ({ handleClose }) => {
             placeholder="Task name"
             autoFocus
             {...register("nameChallenge", { required: true })}
-          />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="taskCode">
-          <Form.Label className="text-lg font-bold text-letter-color">
-            Challenge code
-          </Form.Label>
-          <Form.Control
-            placeholder="Task code"
-            autoFocus
-            {...register("taskCode", { required: true })}
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="shortDescription">

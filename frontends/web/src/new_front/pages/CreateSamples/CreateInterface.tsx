@@ -157,7 +157,6 @@ const CreateInterface = () => {
                     }`}
                   />
                 </div>
-
                 <div className="flex items-start justify-end pr-4 pt-14">
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
@@ -243,6 +242,7 @@ const CreateInterface = () => {
                     probabilities={modelOutput.probabilities}
                     fooled={modelOutput.fooled}
                     sandBox={modelOutput.sandBox}
+                    isGenerativeContext={isGenerativeContext}
                   />
                 )}
               </div>

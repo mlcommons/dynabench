@@ -2,6 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import random
+
 from app.domain.helpers.email import EmailHelper
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.taskproposal import TaskProposalRepository
@@ -15,17 +17,18 @@ class TaskProposalService:
         self.task_repository = TaskRepository()
         self.email_helper = EmailHelper()
 
-    def validate_no_duplicate_task_code(self, task_code: str):
+    def validate_no_duplicate_task_name(self, task_name: str):
         return (
             False
-            if self.task_repository.validate_no_duplicate_task_code(task_code)
+            if self.task_repository.validate_no_duplicate_task_name(task_name)
             is not None
             else True
         )
 
-    def add_task_proposal(
-        self, user_id: int, task_code: str, name: str, desc: str, longdesc: str
-    ):
+    def add_task_proposal(self, user_id: int, name: str, desc: str, longdesc: str):
+        task_code = "{}-{}".format(
+            name.replace(" ", "-").lower(), random.randint(1, 100)
+        )
         user_email = self.user_repository.get_user_email(user_id)[0]
         self.email_helper.send(
             contact=user_email,

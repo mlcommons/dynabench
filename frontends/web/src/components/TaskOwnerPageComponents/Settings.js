@@ -11,8 +11,8 @@ const yaml = require("js-yaml");
 
 const Settings = (props) => {
   return (
-    <Container className="mb-5 pb-5">
-      <h1 className="my-4 pt-3 text-uppercase text-center">Settings</h1>
+    <Container className="pb-5 mb-5">
+      <h1 className="pt-3 my-4 text-center text-uppercase">Settings</h1>
       <Col>
         <Card>
           <Card.Body className="mt-4">
@@ -44,6 +44,7 @@ const Settings = (props) => {
                 decen_queue: props.task.decen_queue,
                 decen_bucket: props.task.decen_bucket,
                 decen_aws_region: props.task.decen_aws_region,
+                leaderboard_description: props.task.leaderboard_description,
               }}
               onSubmit={props.handleTaskUpdate}
             >
@@ -104,6 +105,32 @@ const Settings = (props) => {
                               defaultValue={
                                 values.predictions_upload_instructions_md
                               }
+                              rows="12"
+                              onChange={handleChange}
+                            />
+                            <Form.Text id="paramsHelpBlock" muted>
+                              <Markdown>
+                                The text will be rendered as
+                                [markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
+                                in the prediction submission interface.
+                              </Markdown>
+                            </Form.Text>
+                          </Col>
+                        </Form.Group>
+                      )}
+                      {props.task.leaderboard_description && (
+                        <Form.Group
+                          as={Row}
+                          controlId="leaderboard_description"
+                          className="py-3 my-0"
+                        >
+                          <Form.Label column className="text-base">
+                            Leaderboard instructions
+                          </Form.Label>
+                          <Col sm="12">
+                            <Form.Control
+                              as="textarea"
+                              defaultValue={values.leaderboard_description}
                               rows="12"
                               onChange={handleChange}
                             />
@@ -439,7 +466,7 @@ const Settings = (props) => {
                             <Button
                               type="submit"
                               variant="primary"
-                              className="submit-btn button-ellipse text-uppercase my-4"
+                              className="my-4 submit-btn button-ellipse text-uppercase"
                               disabled={isSubmitting}
                             >
                               Save

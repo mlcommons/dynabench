@@ -43,11 +43,13 @@ const Chatbot: FC<ChatbotProps> = ({
   setIsGenerativeContext,
 }) => {
   const [prompt, setPrompt] = useState("");
-
   const [numInteractions, setNumInteractions] = useState(0);
   const [isAskingQuestion, setIsAskingQuestion] = useState(true);
   const [newRespones, setNewResponses] = useState<any[]>([]);
   const { post, response, loading } = useFetch();
+  const [responsesHistory, setResponsesHistory] = useState<
+    { iteration: number; responses_model: any[] }[]
+  >([]);
 
   const askQuestion = async () => {
     if (prompt !== "") {
@@ -71,7 +73,22 @@ const Chatbot: FC<ChatbotProps> = ({
         },
       );
       if (response.ok) {
-        setNewResponses(generatedTexts);
+        const noAnswers = await checkNotAnswers(generatedTexts);
+        if (noAnswers) {
+          Swal.fire({
+            title: "It seems like the model you selected went down.",
+            text: "Please try again",
+            icon: "error",
+          }).then(() => {
+            window.location.reload();
+          });
+        }
+        setNewResponses(
+          generatedTexts.map((text: any) => ({
+            ...text,
+            score: 50,
+          })) as any,
+        );
         setIsAskingQuestion(false);
       }
     } else {
@@ -81,6 +98,17 @@ const Chatbot: FC<ChatbotProps> = ({
         text: "Please enter a question",
       });
     }
+  };
+
+  const checkNotAnswers = async (generatedTexts: any) => {
+    // check if in some of the texts the provider name is None, in that case return True
+    const notAnswers = generatedTexts.every(
+      (text: any) => text.text === "None",
+    );
+    const allTheAnswersAreEmpty = generatedTexts.every(
+      (text: any) => text.text === "\n",
+    );
+    return notAnswers || allTheAnswersAreEmpty;
   };
 
   const finishSection = () => {
@@ -108,6 +136,10 @@ const Chatbot: FC<ChatbotProps> = ({
             (max: { score: number }, answer: { score: number }) =>
               answer.score > max.score ? answer : max,
           ).text,
+          score: newRespones.reduce(
+            (max: { score: number }, answer: { score: number }) =>
+              answer.score > max.score ? answer : max,
+          ).score,
         },
       ],
     });
@@ -115,6 +147,22 @@ const Chatbot: FC<ChatbotProps> = ({
     setIsAskingQuestion(true);
     setPrompt("");
     setNumInteractions((prev) => prev + 1);
+    setResponsesHistory((prevResponses) => [
+      ...prevResponses,
+      {
+        iteration: numInteractions,
+        responses_model: newRespones,
+      },
+    ]);
+    updateModelInputs({
+      historical_responses_model: [
+        ...responsesHistory,
+        {
+          iteration: numInteractions,
+          responses_model: newRespones,
+        },
+      ],
+    });
   };
 
   const saveHistoryValidation = () => {
@@ -241,33 +289,36 @@ const Chatbot: FC<ChatbotProps> = ({
                         texts={newRespones}
                         setTexts={setNewResponses}
                         optionsSlider={optionsSlider}
+                        score={response.score}
                       />
                     ))}
                 </div>
                 <div className="flex justify-end gap-2 ">
                   {isAskingQuestion ? (
-                    <div>
-                      <GeneralButton
-                        onClick={askQuestion}
-                        text="Send"
-                        className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <GeneralButton
+                          onClick={askQuestion}
+                          text="Send"
+                          className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
+                        />
+                      </div>
+                      {numInteractions >= num_interactions_chatbot && (
+                        <div>
+                          <GeneralButton
+                            onClick={handleFinishInteraction}
+                            text="Finish"
+                            className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn"
+                          />
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div>
                       <GeneralButton
                         onClick={saveHistoryValidation}
                         text="Save"
                         className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
-                      />
-                    </div>
-                  )}
-                  {numInteractions >= num_interactions_chatbot && (
-                    <div>
-                      <GeneralButton
-                        onClick={handleFinishInteraction}
-                        text="Finish"
-                        className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn"
                       />
                     </div>
                   )}

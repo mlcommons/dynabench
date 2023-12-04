@@ -50,13 +50,10 @@ const AnnotationButtonActions: FC<Props> = ({
 
   const { post, loading, response } = useFetch();
 
-  useEffect(() => {
-    console.log(partialSampleId);
-  }, [partialSampleId]);
-
   const onSubmission = async () => {
     modelInputs = {
       ...modelInputs,
+      final_timestamp: Date.now(),
       input_by_user: inputByUser,
     };
     if (
@@ -91,7 +88,6 @@ const AnnotationButtonActions: FC<Props> = ({
             text: "Your example has been saved",
             confirmButtonColor: "#2088ef",
           });
-          setIsGenerativeContext(true);
           setModelOutput(modelOutput);
           if (modelOutput.input === "") {
             window.location.reload();

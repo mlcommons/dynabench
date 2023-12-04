@@ -4,11 +4,14 @@
 
 import datetime
 
+import yaml
+
 from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.rounduserexampleinfo import (
     RoundUserExampleInfoRepository,
 )
 from app.infrastructure.repositories.task import TaskRepository
+from app.infrastructure.repositories.user import UserRepository
 
 
 class RoundUserExampleInfoService:
@@ -16,6 +19,7 @@ class RoundUserExampleInfoService:
         self.rounds_user_example_info_repository = RoundUserExampleInfoRepository()
         self.round_repository = RoundRepository()
         self.task_repository = TaskRepository()
+        self.user_repository = UserRepository()
 
     def verify_user_and_round(self, user_id: int, round_id: int):
         return self.rounds_user_example_info_repository.verify_user_and_round_exist(
@@ -95,4 +99,31 @@ class RoundUserExampleInfoService:
         )
         if number_of_examples_created is None:
             return 0
-        return number_of_examples_created
+        return number_of_examples_created[0]
+
+    def redirect_to_third_party_provider(
+        self, task_id: int, user_id: int, round_id: int
+    ):
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        print(user_email.split("@")[1])
+        if user_email.split("@")[1] == "amazonturk.com":
+            number_of_examples_created = (
+                self.rounds_user_example_info_repository.number_of_examples_created(
+                    round_id, user_id
+                )
+            )
+            if number_of_examples_created is None:
+                number_of_examples_created = 0
+            else:
+                number_of_examples_created = number_of_examples_created[0]
+
+            task_info = self.task_repository.get_task_info_by_task_id(task_id).__dict__
+            task_configuration = yaml.load(
+                task_info.get("config_yaml"), yaml.SafeLoader
+            )
+            required_number_of_examples = task_configuration["external_validator"][
+                "required_number_of_examples"
+            ]
+            redirect_url = task_configuration["external_validator"]["url"]
+            if number_of_examples_created == required_number_of_examples:
+                return redirect_url
