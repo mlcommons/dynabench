@@ -207,10 +207,6 @@ class Leaderboard extends React.Component {
                             { length: this.state.task.cur_round },
                             (_, i) => i + 1
                           )}
-                          leaderBoardHeaderValues={
-                            yaml.load(this.state.task.config_yaml)
-                              .leaderboard_csv_header
-                          }
                         />
                       )}
                     </Col>

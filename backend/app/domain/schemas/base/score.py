@@ -10,3 +10,8 @@ from pydantic import BaseModel
 class GetCsvScore(BaseModel):
     task_id: int
     round_id: Optional[int] = None
+
+
+class GetLeaderboardMetadata(BaseModel):
+    task_id: int
+    round_id: Optional[int] = None
