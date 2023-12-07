@@ -346,3 +346,15 @@ class ScoreService:
     def fix_metrics_with_custom_names(self, model_id: int):
         self.score_repository.fix_matthews_correlation(model_id)
         self.score_repository.fix_f1_score(model_id)
+
+    def read_leaderboard_metadata(self, task_id: int, round_id: int):
+        s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+        task_code = self.task_repository.get_task_code_by_task_id(task_id)[0]
+        final_file = f"./app/resources/predictions/{task_code}_leaderboard_metadata.csv"
+        self.s3.download_file(
+            s3_bucket,
+            f"{task_code}/leaderboard_metadata.csv",
+            final_file,
+        )
+        csv_file = pd.read_csv(final_file)
+        return csv_file.to_dict(orient="records")
