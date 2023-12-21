@@ -10,6 +10,7 @@ import os
 import zipfile
 
 import boto3
+import pytz
 import requests
 import yaml
 from fastapi.encoders import jsonable_encoder
@@ -296,7 +297,8 @@ class ExampleService:
         examples_data = json.dumps(examples_data_list, cls=CustomJSONEncoder)
         s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
         task_code = self.task_repository.get_task_code_by_task_id(task_id)[0]
-        current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        est_timezone = pytz.timezone("US/Eastern")
+        current_date = datetime.datetime.now(est_timezone).strftime("%Y-%m-%d")
         print("current_date", current_date)
         file_key = f"{task_code}/{current_date}.json"
         print("file_key", file_key)
