@@ -127,6 +127,7 @@ const TaskModelLeaderboardRowFirstLevel: FC<
         )}
       </tr>
       {secondExpanded &&
+        dataset.downstream_info &&
         dataset.downstream_info.map((downstream: any, i: number) => (
           <TaskModelLeaderboardRowSecondLevel
             key={i}
