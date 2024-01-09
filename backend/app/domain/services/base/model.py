@@ -480,3 +480,12 @@ class ModelService:
                 }
             )
         return json.dumps(results_models_list, cls=CustomJSONEncoder)
+
+    def amount_of_models_uploaded_in_hr_diff(self, task_id: int, user_id: int):
+        hr_diff = self.task_repository.get_dynalab_hr_diff(task_id)
+        amount_of_models_uploaded_in_hr_diff = (
+            self.model_repository.get_amount_of_models_uploaded_in_hr_diff(
+                task_id, user_id, hr_diff
+            )
+        )
+        return amount_of_models_uploaded_in_hr_diff

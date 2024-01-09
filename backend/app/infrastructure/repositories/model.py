@@ -279,3 +279,18 @@ class ModelRepository(AbstractRepository):
             .all()
         )
         return query
+
+    def get_amount_of_models_uploaded_in_hr_diff(
+        self, task_id: int, user_id: int, hr_diff: int
+    ):
+        # hr_diff is in hours
+        return (
+            self.session.query(func.count(self.model.id))
+            .filter(
+                self.model.tid == task_id,
+                self.model.uid == user_id,
+                func.timediff(func.now(), self.model.upload_datetime)
+                < f"0:{hr_diff}:0",
+            )
+            .scalar()
+        )
