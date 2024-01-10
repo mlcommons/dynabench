@@ -109,6 +109,13 @@ def download_all_created_examples(
     )
 
 
+@router.post("/download_created_examples_every_day_in_s3", response_model={})
+def download_created_examples_every_day_in_s3(
+    model: DownloadAllExamplesRequest,
+):
+    return ExampleService().download_created_examples_every_day_in_s3(model.task_id)
+
+
 @router.post("/download_created_examples_user", response_model={})
 def download_created_examples_user(
     model: DownloadExamplesRequest,
