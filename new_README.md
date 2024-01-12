@@ -9,10 +9,10 @@ Dynabench is a research platform for dynamic data collection and benchmarking.
 Go to [Dynabench's repository](https://github.com/mlcommons/dynabench) and clone the repo locally by copying the following command to your terminal:
 
     git clone https://github.com/mlcommons/dynabench.git
-    
+
 This should take a minute to clone, time after which you should be able to head to the dynabench directory on the same terminal using:
-    
-    cd dynabench
+
+ cd dynabench
 
 ### 2. Basic setup
 
@@ -22,15 +22,15 @@ You'll also need to run a local version of the database, as we cannot provide pu
 
 ### 3. First Backend
 
-The first backend is located at the  `api` directory, and runs using Bottle's framework. 
+The first backend is located at the `api` directory, and runs using Bottle's framework.
 
 First, we'll create a new conda environment. The following command creates a new environment named dynabench_api with Python 3.9.
 
-    conda create -n dynabench_api python=3.9 
+    conda create -n dynabench_api python=3.9
 
-Next, we must activate the environment. 
-    
-    conda activate dynabench_api
+Next, we must activate the environment.
+
+ conda activate dynabench_api
 
 Using the `python=3.9` option should install pip, the library we'll be using to install the other dependencies. Nevertheless, to make sure this is the case, you can run `which pip` in the terminal. The path printed in the terminal should include "dynabench_api". If that's not the case, you can install pip manually using `conda install pip`.
 
@@ -41,7 +41,7 @@ Asumming pip was installed correctly, we'll now proceed to install the dependenc
 
 After all the dependencies are installed, we're only missing two steps: defining the environment variables, and running the server. We've included a `.env.example` file, which should be used to create a new `.env` file in the `api` directory.
 
-Finally, once you've set up all the environment variables, run: 
+Finally, once you've set up all the environment variables, run:
 
     python3 server.py dev
 
@@ -59,7 +59,7 @@ As before, use the `.env.example` file to create a new `.env` file. Once done, y
 
     uvicorn app.main:app --reload
 
-Once this  is working you'll receive the following message: `INFO:     Application startup complete.`
+Once this is working you'll receive the following message: `INFO: Application startup complete.`
 
 We just finished setting up both backends. We're just missing the frontend!
 
@@ -76,6 +76,12 @@ Once installed, in a third terminal, head to the `frontends/web` directory. Let'
 
 After running this, setup the environment variables for the frontend just as before, creating a `.env` file in this directory.
 
+## 6. DB
 
+To set up the database, ensure that you have MySQL installed on your machine. The installation process may vary depending on your operating system.
 
+For database access, we recommend using the DBeaver viewer.
 
+Once MySQL is installed, proceed to the backend/resources/dbs/db.sql folder and execute the script.
+
+You're almost done! The final step is to navigate to the task, admin configuration, and update the YAML file.
