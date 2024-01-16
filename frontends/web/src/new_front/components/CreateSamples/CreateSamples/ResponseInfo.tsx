@@ -14,7 +14,11 @@ const ResponseInfo: FC<ModelOutputType> = ({
   return (
     <>
       {!isGenerativeContext && (
-        <div className="rounded border m-3 bg-[#e9ffe8]">
+        <div
+          className={`rounded border m-3 ${
+            fooled ? "bg-[#eafce8]" : "bg-[#fce8e8]"
+          }`}
+        >
           <div className="grid grid-cols-12">
             <div className="col-span-9">
               <div id="foolModel" className="p-2 font-bold">
