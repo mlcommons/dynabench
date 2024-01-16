@@ -37,8 +37,8 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
   }, [selectedRound]);
 
   return (
-    <div className="grid grid-rows-2 pl-32">
-      <div className="grid items-center justify-end grid-cols-2 px-8 py-4">
+    <div className="pl-32 md:grid md:grid-rows-2">
+      <div className="grid items-center justify-end px-8 py-4 gap-y-8 md:grid-cols-2">
         {totalRounds !== 0 && (
           <div className="text-center ">
             <h6 className="text-3xl font-bold text-white">{selectedRound}</h6>
@@ -58,7 +58,7 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
           </div>
         )}
       </div>
-      <div className="grid items-center justify-end grid-cols-2 px-8 py-4">
+      <div className="grid items-center justify-end px-8 py-4 md:grid-cols-2">
         {maxScore !== 0 && (
           <div className="text-center ">
             <h6 className="text-3xl font-bold text-white">
