@@ -108,3 +108,8 @@ async def check_sign_consent(model: CheckSignConsentRequest):
 @router.post("/update_config_yaml", response_model={})
 async def update_config_yaml(model: UpdateYamlConfiguration):
     return TaskService().update_config_yaml(model.task_id, model.config_yaml)
+
+
+@router.get("/allow_update_dynalab_submissions/{task_id}/{user_id}", response_model={})
+async def allow_update_dynalab_submissions(task_id: int, user_id: int):
+    return TaskService().allow_update_dynalab_submissions(task_id, user_id)

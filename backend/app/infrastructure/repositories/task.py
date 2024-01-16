@@ -163,3 +163,17 @@ class TaskRepository(AbstractRepository):
             .filter(self.model.id == task_id)
             .first()
         )
+
+    def get_dynalab_threshold(self, task_id: int):
+        return (
+            self.session.query(self.model.dynalab_threshold)
+            .filter(self.model.id == task_id)
+            .first()
+        )
+
+    def get_dynalab_hr_diff(self, task_id: int):
+        return (
+            self.session.query(self.model.dynalab_hr_diff)
+            .filter(self.model.id == task_id)
+            .first()
+        )

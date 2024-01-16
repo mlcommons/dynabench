@@ -268,3 +268,15 @@ class TaskService:
 
     def update_config_yaml(self, task_id: int, config_yaml: str):
         return self.task_repository.update_config_yaml(task_id, config_yaml)
+
+    def allow_update_dynalab_submissions(self, task_id: int, user_id: int):
+        dynalab_threshold = self.task_repository.get_dynalab_threshold(
+            task_id
+        ).dynalab_threshold
+        hr_diff = self.task_repository.get_dynalab_hr_diff(task_id)
+        amount_of_models_uploaded_in_hr_diff = (
+            self.model_repository.get_amount_of_models_uploaded_in_hr_diff(
+                task_id, user_id, hr_diff
+            )
+        )
+        return amount_of_models_uploaded_in_hr_diff < dynalab_threshold
