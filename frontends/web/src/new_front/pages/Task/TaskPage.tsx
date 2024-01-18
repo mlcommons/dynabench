@@ -21,6 +21,7 @@ import Leaderboard from "new_front/pages/Task/LeaderBoard";
 import OverviewTask from "../../components/TaskPage/OverviewTask";
 import PrincipalTaskStats from "new_front/components/TaskPage/PrincipalTaskStats";
 import UserContext from "containers/UserContext";
+import MultipleLeaderboard from "new_front/components/Tables/Leaderboard/MultipleLeaderboard";
 
 const TaskPage = () => {
   const [task, setTask] = useState<TaskInfoType>();
@@ -175,19 +176,33 @@ const TaskPage = () => {
                   {/* Remove after Nibbler finish */}
                   {task.id !== 45 ? (
                     <div className={openTab === 1 ? "block  px-4" : "hidden"}>
-                      {(task.show_user_leaderboard !== 0 ||
-                        task.show_leaderboard !== 0) && (
-                        <Leaderboard
-                          taskCode={task.task_code}
-                          showLeaderboard={Boolean(task.show_leaderboard)}
-                          showTrends={Boolean(task.show_trends)}
-                          showUserLeaderboard={Boolean(
-                            task.show_user_leaderboard,
-                          )}
-                          showUserLeaderboardCSV={Boolean(
-                            task.show_user_leaderboard_csv,
-                          )}
-                        />
+                      {task.show_user_leaderboard !== 0 &&
+                      task.show_leaderboard !== 0 ? (
+                        task.id !== 16 ? (
+                          <Leaderboard
+                            taskCode={task.task_code}
+                            showLeaderboard={Boolean(task.show_leaderboard)}
+                            showTrends={Boolean(task.show_trends)}
+                            showUserLeaderboard={Boolean(
+                              task.show_user_leaderboard,
+                            )}
+                            showUserLeaderboardCSV={Boolean(
+                              task.show_user_leaderboard_csv,
+                            )}
+                          />
+                        ) : (
+                          <div>
+                            <MultipleLeaderboard taskCode={task.task_code} />
+                          </div>
+                        )
+                      ) : (
+                        <div className="flex items-center justify-center h-screen">
+                          <PacmanLoader
+                            color="#ccebd4"
+                            loading={loading}
+                            size={50}
+                          />
+                        </div>
                       )}
                     </div>
                   ) : (
