@@ -12,12 +12,14 @@ import FileUpload from "new_front/components/DragAndDrop/FileUpload";
 
 interface CreateModelProps {
   isDynalab: boolean;
+  languagePairs?: any;
   handleClose: () => void;
   handleSubmitModel: (values: any) => void;
 }
 
 const CreateModel = ({
   isDynalab,
+  languagePairs,
   handleClose,
   handleSubmitModel,
 }: CreateModelProps) => {
@@ -85,16 +87,36 @@ const CreateModel = ({
             {...register("numParams")}
           />
         </BootstrapForm.Group>
-        <BootstrapForm.Group className="mb-3" controlId="languages">
-          <BootstrapForm.Label className="text-base">
-            Languages (optional)
-          </BootstrapForm.Label>
-          <BootstrapForm.Control
-            placeholder="Languages"
-            autoFocus
-            {...register("languages")}
-          />
-        </BootstrapForm.Group>
+        {languagePairs && languagePairs.length > 0 ? (
+          <>
+            <BootstrapForm.Group className="mb-3" controlId="languages">
+              <BootstrapForm.Label className="text-base">
+                Languages
+              </BootstrapForm.Label>
+              <BootstrapForm.Control
+                as="select"
+                multiple
+                {...register("languages")}
+              >
+                {/* Create a multiselect dropdown */}
+                {languagePairs.map((lang: any) => (
+                  <option value={lang}>{lang}</option>
+                ))}
+              </BootstrapForm.Control>
+            </BootstrapForm.Group>
+          </>
+        ) : (
+          <BootstrapForm.Group className="mb-3" controlId="languages">
+            <BootstrapForm.Label className="text-base">
+              Languages (optional)
+            </BootstrapForm.Label>
+            <BootstrapForm.Control
+              placeholder="Languages"
+              autoFocus
+              {...register("languages")}
+            />
+          </BootstrapForm.Group>
+        )}
         <BootstrapForm.Group className="mb-3" controlId="license">
           <BootstrapForm.Label className="text-base">
             License (optional)
