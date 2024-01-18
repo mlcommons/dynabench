@@ -15,18 +15,19 @@ type UserLeaderBoardCSVProps = {
   taskId: number;
   rounds?: number[];
   title?: string;
-  leaderBoardHeaderValues: LeaderBoardHeaderValuesProps[];
 };
 
 const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({
   taskId,
   title,
   rounds,
-  leaderBoardHeaderValues,
 }) => {
   const [data, setData] = useState([]);
   const [round, setRound] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+  const [leaderBoardHeaderValues, setLeaderBoardHeaderValues] = useState<
+    LeaderBoardHeaderValuesProps[]
+  >([]);
   const { post, response } = useFetch();
 
   const downloadCSV = async ({
@@ -45,8 +46,27 @@ const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({
     }
   };
 
+  const getLeaderBoardHeaderValues = async () => {
+    setIsLoading(true);
+    const leaderBoardHeaderValues = await post(
+      "/score/read_leaderboard_metadata/",
+      {
+        task_id: taskId,
+        round_id: round,
+      },
+    );
+    if (response.ok) {
+      setLeaderBoardHeaderValues(leaderBoardHeaderValues);
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    downloadCSV();
+    async function fetchData() {
+      await downloadCSV();
+      await getLeaderBoardHeaderValues();
+    }
+    fetchData();
   }, []);
 
   function priceFormatter(column: { text: string }) {
@@ -102,8 +122,8 @@ const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({
         <>
           {leaderBoardHeaderValues.length > 0 && (
             <div className="flex flex-col gap-2 pb-2">
-              {leaderBoardHeaderValues.map((headerValue) => (
-                <div className="flex flex-row justify-between">
+              {leaderBoardHeaderValues.map((headerValue, key) => (
+                <div className="flex flex-row justify-between" key={key}>
                   <h2 className="m-0 text-base text-reset">
                     {headerValue.title}:
                   </h2>

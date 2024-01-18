@@ -10,6 +10,7 @@ import os
 import zipfile
 
 import boto3
+import pytz
 import requests
 import yaml
 from fastapi.encoders import jsonable_encoder
@@ -23,6 +24,7 @@ from app.domain.services.base.task import TaskService
 from app.domain.services.base.user import UserService
 from app.domain.services.base.validation import ValidationService
 from app.infrastructure.repositories.example import ExampleRepository
+from app.infrastructure.repositories.task import TaskRepository
 
 
 class ExampleService:
@@ -30,6 +32,7 @@ class ExampleService:
         self.example_repository = ExampleRepository()
         self.context_service = ContextService()
         self.task_service = TaskService()
+        self.task_repository = TaskRepository()
         self.round_service = RoundService()
         self.round_user_example_info = RoundUserExampleInfoService()
         self.user_service = UserService()
@@ -277,6 +280,30 @@ class ExampleService:
             example_necessary_info["round_info"] = example[2]
             examples_data_list.append(example_necessary_info)
         return json.dumps(examples_data_list, cls=CustomJSONEncoder)
+
+    def download_created_examples_every_day_in_s3(self, task_id: int) -> dict:
+        examples_data = self.example_repository.download_all_created_examples(task_id)
+        examples_data_list = []
+        for example in examples_data:
+            example_necessary_info = {}
+            example_info = example[0].__dict__
+            example_info["user_name"] = self.user_service.get_user_name_by_id(
+                example_info["uid"]
+            )[0]
+            example_necessary_info["example_info"] = example_info
+            example_necessary_info["context_info"] = example[1].__dict__
+            example_necessary_info["round_info"] = example[2]
+            examples_data_list.append(example_necessary_info)
+        examples_data = json.dumps(examples_data_list, cls=CustomJSONEncoder)
+        s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+        task_code = self.task_repository.get_task_code_by_task_id(task_id)[0]
+        est_timezone = pytz.timezone("US/Eastern")
+        current_date = datetime.datetime.now(est_timezone).strftime("%Y-%m-%d")
+        print("current_date", current_date)
+        file_key = f"{task_code}/{current_date}.json"
+        print("file_key", file_key)
+        self.s3.put_object(Body=examples_data, Bucket=s3_bucket, Key=file_key)
+        return True
 
     def download_created_examples_user(
         self, task_id: int, user_id: int, amount: int

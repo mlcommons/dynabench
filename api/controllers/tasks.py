@@ -238,19 +238,23 @@ def get_datasets(credentials, tid):
 @_auth.requires_auth_or_turk
 @_auth.turk_endpoint
 def get_admin_or_owner(credentials, tid):
-    if credentials["id"] == "turk":
+    try:
+        if credentials["id"] == "turk":
+            return util.json_encode({"admin_or_owner": False})
+
+        um = UserModel()
+        user = um.get(credentials["id"])
+        admin_or_owner = True
+        if not user.admin:
+            if not (tid, "owner") in [
+                (perm.tid, perm.type) for perm in user.task_permissions
+            ]:
+                admin_or_owner = False
+
+        return util.json_encode({"admin_or_owner": admin_or_owner})
+    except Exception as ex:
+        logger.exception("Error getting admin_or_owner: (%s)" % (ex))
         return util.json_encode({"admin_or_owner": False})
-
-    um = UserModel()
-    user = um.get(credentials["id"])
-    admin_or_owner = True
-    if not user.admin:
-        if not (tid, "owner") in [
-            (perm.tid, perm.type) for perm in user.task_permissions
-        ]:
-            admin_or_owner = False
-
-    return util.json_encode({"admin_or_owner": admin_or_owner})
 
 
 @bottle.post("/tasks/create_round/<tid:int>")

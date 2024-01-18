@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import os
 import sys
 
 import boto3
@@ -15,7 +18,6 @@ from common.cors import *  # noqa
 from common.helpers import check_fields, is_fields_blank
 from common.logging import init_logger
 from common.mail_service import get_mail_session
-from common.migrator import run_migrations
 from controllers.auth import *  # noqa
 from controllers.badges import *  # noqa
 from controllers.contexts import *  # noqa
@@ -40,9 +42,9 @@ running_mode = sys.argv[1]
 init_logger(running_mode)
 
 
-# Run migration only for the parent
-if not os.environ.get("BOTTLE_CHILD", False):
-    run_migrations()
+# # Run migration only for the parent
+# if not os.environ.get("BOTTLE_CHILD", False):
+#     run_migrations()
 
 app = bottle.default_app()
 for k in [
@@ -111,7 +113,6 @@ if running_mode == "dev":
         timeout=60,
     )
 elif running_mode == "prod":
-
     # Assertion for necessary configuration
     if not check_fields(
         config, ["smtp_user", "smtp_host", "smtp_port", "smtp_secret"]
