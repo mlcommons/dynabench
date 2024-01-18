@@ -44,7 +44,7 @@ import Register from "new_front/pages/Login/Register";
 import ResetPassword from "./ResetPassword";
 import ScrollToTop from "./ScrollToTop.js";
 import SubmitInterface from "./SubmitInterface.js";
-import SubmitModel from "./SubmitModel";
+import SubmitModel from "new_front/pages/SubmitModel/SubmitModel";
 import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
 import TaskPage from "new_front/pages/Task/TaskPage";
