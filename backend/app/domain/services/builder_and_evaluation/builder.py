@@ -227,7 +227,7 @@ class BuilderService:
         zip_name, model_name = self.download_zip(os.getenv("AWS_S3_BUCKET"), model)
         folder_name = self.decompress_zip_to_folder(zip_name)
         logger.info("Decompress model")
-        repo_name = "{}-{}".format(folder_name, randbelow(100000))
+        repo_name = f"{folder_name}-{randbelow(100000)}"
         repo = self.create_repository(repo_name)
         logger.info(f"Create repo: {repo}")
         tag = "latest"
@@ -301,13 +301,14 @@ class BuilderService:
         )
         digest = self.get_digest_repo(repo_name)
         repo = repo + "@" + digest
-        lambda_function_name = "{}-{}".format(model_name, randbelow(100000))
+        lambda_function_name = f"{model_name}-{randbelow(100000)}"
         self.light_model_deployment(lambda_function_name, repo)
         self.create_permission_lambda_function(lambda_function_name)
         return self.create_url_light_model(lambda_function_name)
 
     def delete_repository(self, repo_name: str):
-        self.ecr.delete_repository(
-            repositoryName=repo_name,
-            force=True,
-        )
+        if repo_name:
+            self.ecr.delete_repository(
+                repositoryName=repo_name,
+                force=True,
+            )
