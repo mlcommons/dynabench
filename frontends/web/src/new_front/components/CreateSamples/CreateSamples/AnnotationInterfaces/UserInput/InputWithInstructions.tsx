@@ -32,10 +32,10 @@ const InputWithInstructions: FC<
       placement="left"
       tooltip={instruction || "Select one of the options below"}
     >
-      <div className="py-3">
+      <div className="flex flex-col gap-16 py-3">
         {instructions && (
           <div
-            className="flex items-center h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
+            className="flex items-center gap-8 h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
             onClick={() => setOpen(!open)}
           >
             <h3 className="mb-1 text-base normal-case text-letter-color">

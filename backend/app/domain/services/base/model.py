@@ -156,6 +156,7 @@ class ModelService:
                     "s3_url": model_path,
                     "model_id": model["id"],
                     "user_id": user_id,
+                    "selected_langs": languages,
                 },
             )
             self.email_helper.send(
@@ -489,3 +490,8 @@ class ModelService:
             )
         )
         return amount_of_models_uploaded_in_hr_diff
+
+    def get_dynalab_model(self, task_code: str):
+        bucket = "https://models-dynalab.s3.eu-west-3.amazonaws.com"
+        dynalab_link = f"{bucket}/{task_code}/dynalab-base-{task_code}.zip"
+        return dynalab_link

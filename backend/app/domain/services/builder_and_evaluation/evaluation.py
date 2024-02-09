@@ -32,7 +32,8 @@ from app.domain.services.builder_and_evaluation.eval_utils.evaluator import (
 )
 from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
     load_dataset,
-    neccesary_format_for_evaluation,
+    necessary_format_for_evaluation,
+    necessary_format_for_multilingual_evaluation,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
@@ -115,8 +116,28 @@ class EvaluationService:
             final_predictions = final_predictions + responses
         return final_predictions
 
-    def get_scoring_datasets(self, task_id: int):
-        return self.dataset_repository.get_scoring_datasets(task_id)
+    def get_scoring_datasets(self, task_id: int, dataset_name: str = None):
+        return self.dataset_repository.get_scoring_datasets(task_id, dataset_name)
+
+    def download_dataset(self, task_code: str, scoring_dataset: dict, folder_name: str):
+        final_dataset = {}
+        base_dataset_name = "datasets/{}/{}.jsonl".format(
+            task_code, scoring_dataset["dataset"]
+        )
+        print("base_dataset_name", base_dataset_name)
+        self.s3.download_file(
+            self.s3_bucket,
+            base_dataset_name,
+            "./app/models/{}/datasets/{}.jsonl".format(
+                folder_name, scoring_dataset["dataset"]
+            ),
+        )
+        final_dataset["dataset_type"] = "base"
+        final_dataset["round_id"] = scoring_dataset["round_id"]
+        final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
+        final_dataset["tags"] = scoring_dataset["tags"]
+        final_dataset["dataset"] = "{}.jsonl".format(scoring_dataset["dataset"])
+        return final_dataset
 
     def downloads_scoring_datasets(
         self,
@@ -131,22 +152,9 @@ class EvaluationService:
         os.mkdir(f"./app/models/{folder_name}/datasets/")
         final_datasets = []
         for scoring_dataset in jsonl_scoring_datasets:
-            final_dataset = {}
-            base_dataset_name = "datasets/{}/{}.jsonl".format(
-                task_code, scoring_dataset["dataset"]
+            final_dataset = self.download_dataset(
+                task_code, scoring_dataset, folder_name
             )
-            self.s3.download_file(
-                bucket_name,
-                base_dataset_name,
-                "./app/models/{}/datasets/{}.jsonl".format(
-                    folder_name, scoring_dataset["dataset"]
-                ),
-            )
-            final_dataset["dataset_type"] = "base"
-            final_dataset["round_id"] = scoring_dataset["round_id"]
-            final_dataset["dataset_id"] = scoring_dataset["dataset_id"]
-            final_dataset["tags"] = scoring_dataset["tags"]
-            final_dataset["dataset"] = "{}.jsonl".format(scoring_dataset["dataset"])
             final_datasets.append(final_dataset)
             for delta_metric in delta_metrics_task:
                 final_dataset = {}
@@ -212,6 +220,51 @@ class EvaluationService:
     def build_single_request(self, schema: list, sample_dataset: dict):
         return {param: sample_dataset.get(param) for param in schema}
 
+    def evaluate_dataset(
+        self,
+        ip: str,
+        dataset: dict,
+        folder_name: str,
+        model_id: int,
+        task_code: str,
+        num_samples: int = 0,
+    ):
+        self.logger.info(f"Evaluated {dataset}")
+        dict_dataset_type = {}
+        with jsonlines.open(
+            "./app/models/{}/datasets/{}".format(folder_name, dataset["dataset"]),
+            "r",
+        ) as jsonl_f:
+            dataset_samples = [json.loads(json.dumps(obj)) for obj in jsonl_f]
+        responses = []
+        # schema = self.require_fields_task(folder_name)
+        schema = ["statement"]
+        self.validate_input_schema(schema, dataset_samples)
+        print(len(dataset_samples))
+        responses = self.batch_evaluation_ecs(ip, dataset_samples, schema)
+        predictions = "./app/models/{}/datasets/{}.out".format(
+            folder_name, dataset["dataset"]
+        )
+        num_samples += len(dataset_samples)
+        with jsonlines.open(predictions, "w") as writer:
+            writer.write_all(responses)
+        name_prediction = predictions.split("/")[-1]
+        self.s3.upload_file(
+            predictions,
+            self.s3_bucket,
+            f"predictions/{task_code}/{model_id}/{name_prediction}",
+        )
+        dict_dataset_type["dataset"] = "./app/models/{}/datasets/{}".format(
+            folder_name, dataset["dataset"]
+        )
+        dict_dataset_type[
+            "predictions"
+        ] = f"./app/models/{folder_name}/datasets/{name_prediction}"
+        dataset_type = dataset["dataset_type"]
+        dataset_id = dataset["dataset_id"]
+        tags = dataset["tags"]
+        return dict_dataset_type, dataset_type, dataset_id, tags, num_samples
+
     def heavy_prediction(
         self, datasets: list, task_code: str, ip: str, model_id: int, folder_name: str
     ):
@@ -219,40 +272,16 @@ class EvaluationService:
         start_prediction = time.time()
         num_samples = 0
         for dataset in datasets:
-            self.logger.info(f"Evaluated {dataset}")
-            dict_dataset_type = {}
-            with jsonlines.open(
-                "./app/models/{}/datasets/{}".format(folder_name, dataset["dataset"]),
-                "r",
-            ) as jsonl_f:
-                dataset_samples = [json.loads(json.dumps(obj)) for obj in jsonl_f]
-            responses = []
-            schema = self.require_fields_task(folder_name)
-            self.validate_input_schema(schema, dataset_samples)
-            print(len(dataset_samples))
-            responses = self.batch_evaluation_ecs(ip, dataset_samples, schema)
-            predictions = "./app/models/{}/datasets/{}.out".format(
-                folder_name, dataset["dataset"]
+            (
+                eval_dataset,
+                dataset_type,
+                dataset_id,
+                tags,
+                num_samples,
+            ) = self.evaluate_dataset(
+                ip, dataset, folder_name, model_id, task_code, num_samples
             )
-            num_samples += len(dataset_samples)
-            with jsonlines.open(predictions, "w") as writer:
-                writer.write_all(responses)
-            name_prediction = predictions.split("/")[-1]
-            self.s3.upload_file(
-                predictions,
-                self.s3_bucket,
-                f"predictions/{task_code}/{model_id}/{name_prediction}",
-            )
-            dict_dataset_type["dataset"] = "./app/models/{}/datasets/{}".format(
-                folder_name, dataset["dataset"]
-            )
-            dict_dataset_type[
-                "predictions"
-            ] = f"./app/models/{folder_name}/datasets/{name_prediction}"
-            dataset_type = dataset["dataset_type"]
-            final_dict_prediction[dataset_type] = dict_dataset_type
-            dataset_id = dataset["dataset_id"]
-            tags = dataset["tags"]
+            final_dict_prediction[dataset_type] = eval_dataset
         end_prediction = time.time()
         seconds_time_prediction = end_prediction - start_prediction
         return (
@@ -292,14 +321,108 @@ class EvaluationService:
     def get_throughput(self, num_samples: int, seconds_time_prediction: float):
         return round(num_samples / seconds_time_prediction, 2)
 
+    def get_model_ip(self, model_s3_zip: str):
+        (
+            ip,
+            model_name,
+            folder_name,
+            arn_service,
+            repo_name,
+        ) = self.builder.get_ip_ecs_task(model_s3_zip, self.logger)
+        return ip, model_name, folder_name, arn_service, repo_name
+
+    def necessary_datasets(
+        self, task_id: int, task_code: str, model_s3_zip: str, delta_metrics_task: list
+    ):
+        jsonl_scoring_datasets = self.get_scoring_datasets(task_id)
+        scoring_datasets = self.downloads_scoring_datasets(
+            jsonl_scoring_datasets,
+            self.s3_bucket,
+            task_code,
+            delta_metrics_task,
+            model_s3_zip,
+        )
+        return scoring_datasets
+
+    def evaluation_with_selected_langs(
+        self,
+        task_id: str,
+        task_code: str,
+        model_s3_zip: str,
+        model_id: int,
+        user_id: int,
+        selected_langs: str,
+    ) -> dict:
+        selected_langs = selected_langs.split(",")
+        task_configuration = self.get_task_configuration(task_id)
+        genders = task_configuration["submit_config"]["genders"]
+        ip, model_name, folder_name, arn_service, repo_name = self.get_model_ip(
+            model_s3_zip
+        )
+        print("ciro_ip", ip)
+        folder_name = model_s3_zip.split("/")[-1].split(".")[0]
+        os.mkdir(f"./app/models/{folder_name}")
+        os.mkdir(f"./app/models/{folder_name}/datasets/")
+        for lang in selected_langs:
+            dataset = self.dataset_repository.get_scoring_datasets(task_id, lang)[0]
+            dataset = self.download_dataset(task_code, dataset, folder_name)
+            dict_dataset_type, _, dataset_id, tags, num_samples = self.evaluate_dataset(
+                ip, dataset, folder_name, model_id, task_code
+            )
+            for gender in genders:
+                final_scores, main_metric, metric = self.get_finals_scores(
+                    task_id, dict_dataset_type, False, True, gender
+                )
+                print("dataset::", dataset)
+                round_info = self.round_repository.get_round_info_by_round_and_task(
+                    task_id, dataset["round_id"]
+                )
+                print("final_scores", final_scores)
+                print("main_metric", main_metric)
+                print("metric", metric)
+                new_score = {
+                    "perf": main_metric["perf"],
+                    "pretty_perf": main_metric["pretty_perf"],
+                    "fairness": final_scores["fairness"],
+                    "robustness": final_scores["robustness"],
+                    "mid": model_id,
+                    "r_realid": round_info.id,
+                    "did": dataset_id,
+                    "memory_utilization": 0,
+                    "examples_per_second": 0,
+                }
+                final_score = new_score.copy()
+                metric_name = str(metric)
+                final_score[metric_name] = main_metric["perf"]
+                new_score["metadata_json"] = json.dumps(final_score)
+                self.score_repository.add(new_score)
+        self.builder.delete_repository(repo_name)
+        self.clean_folder_and_service(folder_name, arn_service)
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        self.email_helper.send(
+            contact=user_email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": model_name, "model_id": model_id},
+            subject=f"Model {model_name} training succeeded.",
+        )
+        return
+
     def evaluation(
         self,
-        task: str,
+        task_code: str,
         model_s3_zip: str,
         model_id: int,
         user_id: int,
         evaluate_no_scoring_datasets: bool = False,
+        selected_langs: str = None,
     ) -> dict:
+        tasks = self.task_repository.get_model_id_and_task_code(task_code)
+        if selected_langs is not None and len(selected_langs) > 0:
+            new_scores = self.evaluation_with_selected_langs(
+                tasks.id, task_code, model_s3_zip, model_id, user_id, selected_langs
+            )
+            return new_scores
         logs_name = "logs-{}".format(
             (model_s3_zip.split("/")[-1].split(".")[0]).split("-")[0]
         )
@@ -313,7 +436,7 @@ class EvaluationService:
         formatter = logging.Formatter("%(asctime)s : %(levelname)s - %(message)s")
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
-        tasks = self.task_repository.get_model_id_and_task_code(task)
+
         self.logger.info(f"Task: {tasks.id}")
         delta_metrics_task = self.get_task_configuration(tasks.id).get(
             "delta_metrics", []
@@ -321,15 +444,9 @@ class EvaluationService:
         delta_metrics_task = [
             delta_metric_task["type"] for delta_metric_task in delta_metrics_task
         ]
-        jsonl_scoring_datasets = self.get_scoring_datasets(tasks.id)
-        scoring_datasets = self.downloads_scoring_datasets(
-            jsonl_scoring_datasets,
-            self.s3_bucket,
-            tasks.task_code,
-            delta_metrics_task,
-            model_s3_zip,
+        scoring_datasets = self.necessary_datasets(
+            tasks.id, tasks.task_code, model_s3_zip, delta_metrics_task
         )
-
         self.logger.info("Datasets downloaded")
         rounds = list(
             map(
@@ -341,14 +458,10 @@ class EvaluationService:
                 },
             )
         )
+        ip, model_name, folder_name, arn_service, repo_name = self.get_model_ip(
+            model_s3_zip
+        )
         new_scores = []
-        (
-            ip,
-            model_name,
-            folder_name,
-            arn_service,
-            repo_name,
-        ) = self.builder.get_ip_ecs_task(model_s3_zip, self.logger)
         self.logger.info(f"Create endpoint for evaluation: {ip}")
         for current_round in rounds:
             round_datasets = [
@@ -366,6 +479,7 @@ class EvaluationService:
                 model_id,
                 arn_service,
                 current_round,
+                selected_langs,
             )
             new_scores.append(new_score)
         if evaluate_no_scoring_datasets:
@@ -413,16 +527,32 @@ class EvaluationService:
             self.builder.delete_ecs_service(str(arn_service))
         shutil.rmtree(f"./app/models/{folder_name}")
 
-    def get_finals_scores(self, task_id: int, prediction_dict: dict, tags: bool):
+    def get_finals_scores(
+        self,
+        task_id: int,
+        prediction_dict: dict,
+        tags: bool,
+        multilingual: bool = False,
+        gender: str = None,
+    ):
         task_configuration = self.get_task_configuration(task_id)
         if isinstance(task_configuration["perf_metric"], list):
             metric_info = task_configuration["perf_metric"]
         elif isinstance(task_configuration["perf_metric"], dict):
             metric_info = task_configuration["perf_metric"]
 
-        formatted_dict, perturb_exists = neccesary_format_for_evaluation(
-            prediction_dict, metric_info["reference_name"]
-        )
+        if multilingual:
+            (
+                formatted_dict,
+                perturb_exists,
+            ) = necessary_format_for_multilingual_evaluation(
+                prediction_dict, "translation", gender
+            )
+        else:
+            formatted_dict, perturb_exists = necessary_format_for_evaluation(
+                prediction_dict, metric_info["reference_name"]
+            )
+
         if tags:
             main_metric = evaluate(
                 metric_info["type"],
@@ -434,6 +564,7 @@ class EvaluationService:
                 metric_info["type"],
                 formatted_dict["formatted_base_predictions"],
                 formatted_dict["formatted_base_dataset"],
+                multilingual,
             )
         delta_metrics = {}
         if perturb_exists:
@@ -462,54 +593,56 @@ class EvaluationService:
         model_id: int,
         arn_service: str,
         current_round: int = 1,
+        selected_langs: str = None,
     ):
-        # try:
-        print("dataset", dataset)
-        (
-            prediction_dict,
-            dataset_id,
-            model_id,
-            minutes_time_prediction,
-            num_samples,
-            folder_name,
-            tags,
-        ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_id, folder_name)
-        self.logger.info("Calculate memory utilization")
-        memory = self.get_memory_utilization(model_name)
-        self.logger.info("Calculate throughput")
-        throughput = self.get_throughput(num_samples, minutes_time_prediction)
-        self.logger.info("Calculate score")
-        final_scores, main_metric, metric = self.get_finals_scores(
-            tasks.id, prediction_dict, False
-        )
-        print("current_round", current_round)
-        round_info = self.round_repository.get_round_info_by_round_and_task(
-            tasks.id, current_round
-        )
-        print("final_scores", final_scores)
-        print("main_metric", main_metric)
-        print("metric", metric)
-        new_score = {
-            "perf": main_metric["perf"],
-            "pretty_perf": main_metric["pretty_perf"],
-            "fairness": final_scores["fairness"],
-            "robustness": final_scores["robustness"],
-            "mid": model_id,
-            "r_realid": round_info.id,
-            "did": dataset_id,
-            "memory_utilization": memory,
-            "examples_per_second": throughput,
-        }
-        final_score = new_score.copy()
-        metric_name = str(metric)
-        final_score[metric_name] = main_metric["perf"]
-        new_score["metadata_json"] = json.dumps(final_score)
-        self.score_repository.add(new_score)
-        self.logger.info("Save score")
-        return new_score
-
-    # except Exception:
-    #     self.clean_folder_and_service(folder_name, arn_service)
+        try:
+            print("dataset", dataset)
+            (
+                prediction_dict,
+                dataset_id,
+                model_id,
+                minutes_time_prediction,
+                num_samples,
+                folder_name,
+                tags,
+            ) = self.heavy_prediction(
+                dataset, tasks.task_code, ip, model_id, folder_name
+            )
+            self.logger.info("Calculate memory utilization")
+            memory = self.get_memory_utilization(model_name)
+            self.logger.info("Calculate throughput")
+            throughput = self.get_throughput(num_samples, minutes_time_prediction)
+            self.logger.info("Calculate score")
+            final_scores, main_metric, metric = self.get_finals_scores(
+                tasks.id, prediction_dict, False
+            )
+            print("current_round", current_round)
+            round_info = self.round_repository.get_round_info_by_round_and_task(
+                tasks.id, current_round
+            )
+            print("final_scores", final_scores)
+            print("main_metric", main_metric)
+            print("metric", metric)
+            new_score = {
+                "perf": main_metric["perf"],
+                "pretty_perf": main_metric["pretty_perf"],
+                "fairness": final_scores["fairness"],
+                "robustness": final_scores["robustness"],
+                "mid": model_id,
+                "r_realid": round_info.id,
+                "did": dataset_id,
+                "memory_utilization": memory,
+                "examples_per_second": throughput,
+            }
+            final_score = new_score.copy()
+            metric_name = str(metric)
+            final_score[metric_name] = main_metric["perf"]
+            new_score["metadata_json"] = json.dumps(final_score)
+            self.score_repository.add(new_score)
+            self.logger.info("Save score")
+            return new_score
+        except Exception:
+            self.clean_folder_and_service(folder_name, arn_service)
 
     def evaluate_dataperf_decentralized(self, dataperf_response: dict):
         model_id = dataperf_response["model_id"]
@@ -659,13 +792,19 @@ class EvaluationService:
             subject=f"Model {model_id} training succeeded.",
         )
 
-    def test(self):
-        model_id = 1608
-        self.score_repository.fix_matthews_correlation(model_id)
-        self.score_repository.fix_f1_score(model_id)
-        return "test"
+    # def test(self):
+    #     task_code = "multilingual-holistic-bias"
+    #     self.evaluation_with_selected_langs(
+    #         task_id, task_code, "models/1608.zip", model_id, 1675, "eng-spa,eng-ita"
+    #     )
+    #     return "test"
 
     def initialize_model_evaluation(
-        self, task_code: str, s3_url: str, model_id: int, user_id: int
+        self,
+        task_code: str,
+        s3_url: str,
+        model_id: int,
+        user_id: int,
+        selected_langs: str,
     ):
-        return self.evaluation(task_code, s3_url, model_id, user_id)
+        return self.evaluation(task_code, s3_url, model_id, user_id, selected_langs)

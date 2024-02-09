@@ -91,8 +91,13 @@ def evaluate(metric: str, formatted_predictions: list, formatted_labels: list) -
     return score_obj
 
 
-def evaluation_without_tags(metric: str, predictions: list, labels: list) -> dict:
-    predictions, labels = format_data_for_evaluation(predictions, labels, tags=False)
+def evaluation_without_tags(
+    metric: str, predictions: list, labels: list, multilingual: bool = False
+) -> dict:
+    if not multilingual:
+        predictions, labels = format_data_for_evaluation(
+            predictions, labels, tags=False
+        )
     perf, perf_dict = _compute_metric(metric, predictions, labels)
     score_obj = {}
     score_obj["perf"] = perf

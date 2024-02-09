@@ -6,25 +6,29 @@ import ShowInstructionsButton from "new_front/components/Buttons/ShowInstruction
 type CreateInterfaceHelpersButtonProps = {
   generalInstructions: string;
   creationExample?: string;
-  amountsExamplesCreatedToday?: number;
+  amountExamplesCreatedToday?: number;
 };
 
 const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
   generalInstructions,
   creationExample,
-  amountsExamplesCreatedToday,
+  amountExamplesCreatedToday,
 }) => {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showCreationExample, setShowCreationExample] = useState(false);
 
   return (
     <div className="flex items-center justify-between gap-2">
-      {amountsExamplesCreatedToday !== null ? (
-        <div className="text-xs text-gray-500">
-          {amountsExamplesCreatedToday} examples created
-        </div>
-      ) : null}
-      <ShowInstructionsButton />
+      <div className="col-span-2 ">
+        {amountExamplesCreatedToday !== null ? (
+          <div className="text-xs text-gray-500">
+            {amountExamplesCreatedToday} examples created
+          </div>
+        ) : null}
+      </div>
+      <div className="hidden md:block">
+        <ShowInstructionsButton />
+      </div>
 
       {generalInstructions && (
         <button

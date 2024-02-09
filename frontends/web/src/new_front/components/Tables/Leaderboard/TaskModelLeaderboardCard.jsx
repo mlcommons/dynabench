@@ -36,7 +36,6 @@ const TaskModelLeaderboardCard = ({
   disablePagination,
   modelColumnTitle,
   getInitialWeights,
-  fetchLeaderboardData,
 }) => {
   const taskId = task.id;
   const [data, setData] = useState([]);

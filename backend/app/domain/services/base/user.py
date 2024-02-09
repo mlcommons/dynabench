@@ -66,3 +66,6 @@ class UserService:
             "model_fooling_rate"
         ] = self.example_repository.get_model_fooling_rate_by_user_id(user_id)
         return stats_by_user
+
+    def download_users_info(self):
+        return self.user_repository.download_users_info()

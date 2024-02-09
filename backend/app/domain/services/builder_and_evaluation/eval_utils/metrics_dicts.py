@@ -11,6 +11,8 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
     get_accuracy_meta,
     get_bleu,
     get_bleu_meta,
+    get_chrf,
+    get_chrf_meta,
     get_chrf_pp_meta,
     get_dataperf_auc,
     get_dataperf_auc_meta,
@@ -59,6 +61,7 @@ eval_metrics_dict = {
     "dataperf_balanced_accuracy": get_dataperf_balanced_accuracy,
     "new_accuracy": get_new_accuracy,
     "matthews_correlation": get_matthews_correlation,
+    "chrf": get_chrf,
 }
 
 delta_metrics_dict = {
@@ -91,4 +94,5 @@ meta_metrics_dict = {
     "dataperf_auc": get_dataperf_auc_meta,
     "dataperf_fraction_of_fixes": get_dataperf_fraction_of_fixes_meta,
     "dataperf_balanced_accuracy": get_dataperf_balanced_accuracy_meta,
+    "chrf": get_chrf_meta,
 }

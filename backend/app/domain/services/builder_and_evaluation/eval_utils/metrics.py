@@ -157,6 +157,15 @@ def get_dataperf_balanced_accuracy_meta(task=None):
     }
 
 
+def get_chrf_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Balanced Accuracy",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
 def get_chrf_pp(predictions: list, targets: list):
     """Chrf++ metric.
 
@@ -326,6 +335,11 @@ def get_robustness_meta(task=None):
 def get_bleu(predictions: list, targets: list):
     bleu = sacrebleu.corpus_bleu(predictions, [targets])
     return bleu.score
+
+
+def get_chrf(predictions: list, targets: list):
+    chrf = sacrebleu.corpus_chrf(predictions, [targets])
+    return chrf.score
 
 
 def get_bleu_meta(task=None):

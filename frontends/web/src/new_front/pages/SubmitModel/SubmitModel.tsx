@@ -23,6 +23,7 @@ const SubmitModel = () => {
   const [hfModel, setHfModel] = useState(false);
   const [languagePairs, setLanguagePairs] = useState<any>();
   const [configYaml, setConfigYaml] = useState<any>();
+  const [dynalabModel, setDynalabModel] = useState<string>();
   const { user } = useContext(UserContext);
   const history = useHistory();
   let { taskCode } = useParams<{ taskCode: string }>();
@@ -34,7 +35,7 @@ const SubmitModel = () => {
     }
   };
   const handleSubmitModel = (modelData: any) => {
-    if (modelData.file.length !== 0) {
+    if (modelData.file && modelData.file.length !== 0) {
       setLoading({
         loading: false,
         text: "Your model is being uploaded.",
@@ -64,15 +65,18 @@ const SubmitModel = () => {
       setLoading({ loading: true, text: "Done" });
     }
   };
+
   const getTaskData = async () => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
     const taskData = await get(
       `/task/get_task_with_round_info_by_task_id/${taskId}`,
     );
+    const dynalabModel = await get(`/model/get_dynalab_model/${taskCode}`);
     if (response.ok) {
       setConfigYaml(
         JSON.parse(JSON.stringify(yaml.load(taskData.config_yaml))),
       );
+      setDynalabModel(dynalabModel);
     }
   };
 
@@ -138,8 +142,27 @@ const SubmitModel = () => {
             <div className="flex flex-col items-center justify-center mt-4 border-2 border-gray-200 rounded-md">
               <h3 className="pt-4 text-xl font-semibold">Dynalab</h3>
               <p className="text-lg">Upload a Dynalab model</p>
-              <span className="pt-2 pb-4 text-gray-400">
-                Here you can find the instructions to create a Dynalab model
+              <span className="pt-2 pb-2 text-gray-400">
+                <a
+                  href="https://docs.dynabench.org/docs/dynalab/upload_a_model"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-500"
+                >
+                  Here
+                </a>{" "}
+                you can find the instructions to create a Dynalab model
+              </span>
+              <span className="pb-4 text-gray-400">
+                You can download the base model{" "}
+                <a
+                  href={dynalabModel}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-500"
+                >
+                  here
+                </a>
               </span>
               {showDynalab ? (
                 <CreateModel

@@ -7,17 +7,8 @@ import React from "react";
 import TaskModelLeaderboardCard from "new_front/components/Tables/Leaderboard/TaskModelLeaderboardCard";
 import { useParams } from "react-router-dom";
 
-const taskModelLeaderboardCardWrapper = (
-  getInitialWeights,
-  fetchLeaderboardData
-) => {
+const taskModelLeaderboardCardWrapper = (getInitialWeights) => {
   return (props) => {
-    const { forkOrSnapshotName } = useParams();
-    const dataFromProps = {
-      leaderboardName: forkOrSnapshotName,
-      history: props.history,
-      snapshotData: props.snapshotData,
-    };
     return (
       <TaskModelLeaderboardCard
         title={props.title}
@@ -30,12 +21,7 @@ const taskModelLeaderboardCardWrapper = (
         disableAdjustWeights={props.disableAdjustWeights}
         disablePagination={props.disablePagination}
         modelColumnTitle={props.modelColumnTitle}
-        getInitialWeights={(...args) =>
-          getInitialWeights(...args, dataFromProps)
-        }
-        fetchLeaderboardData={(...args) =>
-          fetchLeaderboardData(...args, dataFromProps)
-        }
+        getInitialWeights={(...args) => getInitialWeights(...args, {})}
       />
     );
   };
@@ -138,7 +124,7 @@ const getOrderedWeightObjects = (
 };
 
 export const TaskModelDefaultLeaderboard = taskModelLeaderboardCardWrapper(
-  (task, api, setWeightsCallback) => {
+  (task, _, setWeightsCallback) => {
     const metricIdToDataObj = {};
     const datasetIdToDataObj = {};
     loadDefaultWeights(metricIdToDataObj, datasetIdToDataObj, task);
