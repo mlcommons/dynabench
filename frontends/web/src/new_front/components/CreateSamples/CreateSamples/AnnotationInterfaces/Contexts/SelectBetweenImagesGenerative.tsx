@@ -31,6 +31,7 @@ const SelectBetweenImagesGenerative: FC<
   const [allowsGeneration, setAllowsGeneration] = useState(true);
   const [showLoader, setShowLoader] = useState(false);
   const [showImages, setShowImages] = useState<any[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
   const [artifactsInput, setArtifactsInput] = useState<any>(
     generative_context.artifacts,
   );
@@ -60,6 +61,21 @@ const SelectBetweenImagesGenerative: FC<
       setPromptHistory(history);
     }
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768); // Adjust the breakpoint according to your design
+    };
+    // Initial check on component mount
+    handleResize();
+    // Add event listener to handle window resize
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup function to remove event listener
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     console.log("metadataExample", metadataExample);
@@ -302,6 +318,7 @@ const SelectBetweenImagesGenerative: FC<
                     }
                     images={showImages.map(({ image }) => image)}
                     handleFunction={handleSelectImage}
+                    isMobile={isMobile}
                   />
                 </AnnotationInstruction>
               </div>

@@ -19,12 +19,16 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
 
   return (
     <div className="flex items-center justify-between gap-2">
-      {amountsExamplesCreatedToday !== null ? (
-        <div className="text-xs text-gray-500">
-          {amountsExamplesCreatedToday} examples created
-        </div>
-      ) : null}
-      <ShowInstructionsButton />
+      <div className="col-span-2 ">
+        {amountsExamplesCreatedToday !== null ? (
+          <div className="text-xs text-gray-500">
+            {amountsExamplesCreatedToday} examples created
+          </div>
+        ) : null}
+      </div>
+      <div className="hidden md:block">
+        <ShowInstructionsButton />
+      </div>
 
       {generalInstructions && (
         <button

@@ -5,6 +5,7 @@ import paginationFactory from "react-bootstrap-table2-paginator";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import filterFactory, { textFilter } from "react-bootstrap-table2-filter";
+import { Modal } from "react-bootstrap";
 
 type LeaderBoardHeaderValuesProps = {
   title: string;
@@ -17,6 +18,142 @@ type UserLeaderBoardCSVProps = {
   title?: string;
 };
 
+type HeaderLeaderboardValuesProps = {
+  leaderBoardHeaderValues: any[];
+};
+
+const HeaderLeaderboardValues = ({
+  leaderBoardHeaderValues,
+}: HeaderLeaderboardValuesProps) => {
+  return (
+    <div className="flex flex-col gap-2 pb-2">
+      {leaderBoardHeaderValues.map((headerValue, key) => (
+        <div className="flex flex-row justify-between" key={key}>
+          <h2 className="m-0 text-base text-reset">{headerValue.title}:</h2>
+          <span className="text-base font-semibold text-letter-color">
+            {headerValue.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+type BodyLeaderboardValuesProps = {
+  title: string | undefined;
+  data: any[];
+  columns: any[];
+  rounds: number[] | undefined;
+  round: number | undefined;
+  setRound: (round: number | undefined) => void;
+  downloadCSV: (round?: { round: number }) => void;
+  showModal: boolean;
+  setShowModal: (showModal: boolean) => void;
+};
+
+const BodyLeaderboardValues = ({
+  title,
+  data,
+  columns,
+  rounds,
+  round,
+  setRound,
+  downloadCSV,
+  showModal,
+  setShowModal,
+}: BodyLeaderboardValuesProps) => {
+  const pageButtonRenderer = ({ page, onPageChange }: any) => {
+    const handleClick = (e: any) => {
+      e.preventDefault();
+      onPageChange(page);
+    };
+
+    return (
+      <li className="mb-2 page-item ">
+        <a
+          href="/"
+          className="page-link"
+          onClick={handleClick}
+          style={{ color: "#4a5568" }}
+        >
+          {page}
+        </a>
+      </li>
+    );
+  };
+
+  return (
+    <div className="overflow-x-auto border border-gray-200 rounded-lg bg-gray-100/40">
+      <div className="">
+        <div className="flex flex-row items-center justify-between px-4 py-2">
+          <div className="flex flex-col">
+            <h2 className="m-0 text-base text-uppercase text-reset">
+              {title ? title : "Example Leaderboard"}
+            </h2>
+          </div>
+          <DropdownButton
+            variant="light"
+            className="font-bold border-0 font-weight-bold text-letter-color"
+            style={{ marginRight: 10 }}
+            id="dropdown-basic-button"
+            title={round ? `Round ${round}` : "All"}
+          >
+            <Dropdown.Item
+              key={round}
+              onClick={() => {
+                setRound(undefined);
+                downloadCSV();
+              }}
+            >
+              All
+            </Dropdown.Item>
+            {rounds &&
+              rounds.map((round) => (
+                <Dropdown.Item
+                  key={round}
+                  onClick={() => {
+                    setRound(round);
+                    downloadCSV({ round });
+                  }}
+                >
+                  Round {round}
+                </Dropdown.Item>
+              ))}
+          </DropdownButton>
+          <button onClick={() => setShowModal(!showModal)} id="amplyfi-button">
+            <i className="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+      <div className="bg-white">
+        <BootstrapTable
+          keyField="id"
+          data={data}
+          columns={columns}
+          sort={{ dataField: "score", order: "desc" }}
+          filter={filterFactory()}
+          pagination={paginationFactory({
+            sizePerPage: 15,
+            showTotal: true,
+            pageButtonRenderer,
+            hideSizePerPage: true,
+            hidePageListOnlyOnePage: true,
+            paginationTotalRenderer(from, to, size) {
+              return (
+                <div className="flex flex-row items-center justify-between">
+                  <span className="pt-2 ml-3 ">
+                    Showing {from} to {to} of {size}
+                  </span>
+                </div>
+              );
+            },
+          })}
+        />
+      </div>
+    </div>
+  );
+};
+
 const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({
   taskId,
   title,
@@ -25,6 +162,7 @@ const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({
   const [data, setData] = useState([]);
   const [round, setRound] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [leaderBoardHeaderValues, setLeaderBoardHeaderValues] = useState<
     LeaderBoardHeaderValuesProps[]
   >([]);
@@ -85,26 +223,6 @@ const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({
     );
   }
 
-  const pageButtonRenderer = ({ page, onPageChange }: any) => {
-    const handleClick = (e: any) => {
-      e.preventDefault();
-      onPageChange(page);
-    };
-
-    return (
-      <li className="mb-2 page-item ">
-        <a
-          href="/"
-          className="page-link"
-          onClick={handleClick}
-          style={{ color: "#4a5568" }}
-        >
-          {page}
-        </a>
-      </li>
-    );
-  };
-
   const columns =
     data.length > 0
       ? Object.keys(data[0]).map((key) => ({
@@ -121,85 +239,53 @@ const UserLeaderBoardCSV: FC<UserLeaderBoardCSVProps> = ({
       {!isLoading ? (
         <>
           {leaderBoardHeaderValues.length > 0 && (
-            <div className="flex flex-col gap-2 pb-2">
-              {leaderBoardHeaderValues.map((headerValue, key) => (
-                <div className="flex flex-row justify-between" key={key}>
-                  <h2 className="m-0 text-base text-reset">
-                    {headerValue.title}:
-                  </h2>
-                  <span className="text-base font-semibold text-letter-color">
-                    {headerValue.value}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <HeaderLeaderboardValues
+              leaderBoardHeaderValues={leaderBoardHeaderValues}
+            />
           )}
           {data.length > 0 && (
-            <div className="overflow-x-auto border border-gray-200 rounded-lg bg-gray-100/40">
-              <div className="">
-                <div className="flex flex-row items-center justify-between px-4 py-2">
-                  <div className="flex flex-col">
-                    <h2 className="m-0 text-base text-uppercase text-reset">
-                      {title ? title : "Example Leaderboard"}
-                    </h2>
-                  </div>
-                  <DropdownButton
-                    variant="light"
-                    className="font-bold border-0 font-weight-bold text-letter-color"
-                    style={{ marginRight: 10 }}
-                    id="dropdown-basic-button"
-                    title={round ? `Round ${round}` : "All"}
-                  >
-                    <Dropdown.Item
-                      key={round}
-                      onClick={() => {
-                        setRound(undefined);
-                        downloadCSV();
-                      }}
-                    >
-                      All
-                    </Dropdown.Item>
-                    {rounds &&
-                      rounds.map((round) => (
-                        <Dropdown.Item
-                          key={round}
-                          onClick={() => {
-                            setRound(round);
-                            downloadCSV({ round });
-                          }}
-                        >
-                          Round {round}
-                        </Dropdown.Item>
-                      ))}
-                  </DropdownButton>
-                </div>
-              </div>
-              <div className="bg-white">
-                <BootstrapTable
-                  keyField="id"
-                  data={data}
-                  columns={columns}
-                  sort={{ dataField: "score", order: "desc" }}
-                  filter={filterFactory()}
-                  pagination={paginationFactory({
-                    sizePerPage: 15,
-                    showTotal: true,
-                    pageButtonRenderer,
-                    hideSizePerPage: true,
-                    hidePageListOnlyOnePage: true,
-                    paginationTotalRenderer(from, to, size) {
-                      return (
-                        <div className="flex flex-row items-center justify-between">
-                          <span className="pt-2 ml-3 ">
-                            Showing {from} to {to} of {size}
-                          </span>
-                        </div>
-                      );
-                    },
-                  })}
-                />
-              </div>
-            </div>
+            <BodyLeaderboardValues
+              title={title}
+              data={data}
+              columns={columns}
+              rounds={rounds}
+              round={round}
+              setRound={setRound}
+              downloadCSV={downloadCSV}
+              showModal={showModal}
+              setShowModal={setShowModal}
+            />
+          )}
+          {showModal && (
+            <>
+              <Modal
+                show={showModal}
+                onHide={() => setShowModal(!showModal)}
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Leaderboard Options</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <HeaderLeaderboardValues
+                    leaderBoardHeaderValues={leaderBoardHeaderValues}
+                  />
+                  <BodyLeaderboardValues
+                    title={title}
+                    data={data}
+                    columns={columns}
+                    rounds={rounds}
+                    round={round}
+                    setRound={setRound}
+                    downloadCSV={downloadCSV}
+                    showModal={showModal}
+                    setShowModal={setShowModal}
+                  />
+                </Modal.Body>
+              </Modal>
+            </>
           )}
         </>
       ) : (

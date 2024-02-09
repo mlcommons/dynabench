@@ -99,3 +99,8 @@ class UserRepository(AbstractRepository):
 
     def get_info_by_user_id(self, user_id: int) -> dict:
         return self.session.query(self.model).filter(self.model.id == user_id).first()
+
+    def download_users_info(self):
+        return self.session.query(
+            self.model.id, self.model.email, self.model.username
+        ).all()

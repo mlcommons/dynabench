@@ -34,6 +34,7 @@ async def initialize_model_evaluation(
         model.s3_url,
         model.model_id,
         model.user_id,
+        model.selected_langs,
     )
     return {"response": "The model will be evaluated in the background"}
 

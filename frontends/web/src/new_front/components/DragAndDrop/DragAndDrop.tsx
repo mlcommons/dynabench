@@ -13,7 +13,7 @@ const DragAndDrop: FC<DragAndDropProps> = ({
 }) => {
   return (
     <>
-      <div className="browse-wrap principal-color">
+      <div className="cursor-pointer browse-wrap principal-color">
         <div>Drag & drop your files here</div>
         <input
           disabled={disabled}

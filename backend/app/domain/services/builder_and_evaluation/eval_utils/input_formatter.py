@@ -91,6 +91,21 @@ def group_labels(examples: list) -> dict:
     return final_labels
 
 
+def neccesary_format_for_evaluation_multilingual(
+    prediction_dict: dict, label: str, gender: str
+):
+    formated_dict = {}
+    list_of_labels = [
+        entry[gender] for entry in load_dataset(prediction_dict["dataset"])
+    ]
+    list_of_predictions = [
+        entry[label] for entry in load_dataset(prediction_dict["predictions"])
+    ]
+    formated_dict["formatted_base_predictions"] = list_of_predictions
+    formated_dict["formatted_base_dataset"] = list_of_labels
+    return formated_dict, False
+
+
 def neccesary_format_for_evaluation(prediction_dict: dict, label: str):
     data_dict = {}
     for data_version, data_types in prediction_dict.items():

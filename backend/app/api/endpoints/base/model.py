@@ -169,3 +169,8 @@ def download_model_results(
         media_type="application/json",
         headers={"Content-Disposition": 'attachment; filename="data.json"'},
     )
+
+
+@router.get("/get_dynalab_model/{task_code}")
+def get_dynalab_model(task_code: str):
+    return ModelService().get_dynalab_model(task_code)

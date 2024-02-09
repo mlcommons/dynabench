@@ -1,11 +1,13 @@
 import { OverlayInstructionsContext } from "new_front/context/OverlayInstructions/Context";
 import React, { FC } from "react";
 
-type Props = {
+type ShowInstructionsButtonProps = {
   color?: "black" | "white";
 };
 
-const ShowInstructionsButton: FC<Props> = ({ color = "black" }) => {
+const ShowInstructionsButton = ({
+  color = "black",
+}: ShowInstructionsButtonProps) => {
   const { hidden, setHidden } = React.useContext(OverlayInstructionsContext);
   return (
     <button

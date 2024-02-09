@@ -146,8 +146,8 @@ const CreateInterface = () => {
         <CreateInterfaceProvider>
           <div className="container">
             <div id="title">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                <div className="md:col-span-2">
                   <AnnotationTitle
                     taskName={taskInfo?.name!}
                     subtitle={`${
@@ -194,7 +194,7 @@ const CreateInterface = () => {
                   />
                 )}
               </div>
-              <div id="inputUser" className="">
+              <div id="inputUser" className="flex flex-col gap-12">
                 {taskConfiguration?.user_input && (
                   <AnnotationUserInputStrategy
                     config={taskConfiguration?.user_input as any}
