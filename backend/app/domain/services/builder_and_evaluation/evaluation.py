@@ -32,8 +32,8 @@ from app.domain.services.builder_and_evaluation.eval_utils.evaluator import (
 )
 from app.domain.services.builder_and_evaluation.eval_utils.input_formatter import (
     load_dataset,
-    neccesary_format_for_evaluation,
-    neccesary_format_for_evaluation_multilingual,
+    necessary_format_for_evaluation,
+    necessary_format_for_multilingual_evaluation,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
@@ -545,11 +545,11 @@ class EvaluationService:
             (
                 formatted_dict,
                 perturb_exists,
-            ) = neccesary_format_for_evaluation_multilingual(
+            ) = necessary_format_for_multilingual_evaluation(
                 prediction_dict, "translation", gender
             )
         else:
-            formatted_dict, perturb_exists = neccesary_format_for_evaluation(
+            formatted_dict, perturb_exists = necessary_format_for_evaluation(
                 prediction_dict, metric_info["reference_name"]
             )
 

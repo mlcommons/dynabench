@@ -161,7 +161,7 @@ const CreateInterface = () => {
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
                     creationExample={taskInfo?.creation_example_md!}
-                    amountsExamplesCreatedToday={Number(amountExamples)}
+                    amountExamplesCreatedToday={Number(amountExamples)}
                   />
                 </div>
               </div>

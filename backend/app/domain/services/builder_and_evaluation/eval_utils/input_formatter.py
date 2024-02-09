@@ -106,7 +106,7 @@ def necessary_format_for_multilingual_evaluation(
     return formated_dict, False
 
 
-def neccesary_format_for_evaluation(prediction_dict: dict, label: str):
+def necessary_format_for_evaluation(prediction_dict: dict, label: str):
     data_dict = {}
     for data_version, data_types in prediction_dict.items():
         for data_type in data_types:
