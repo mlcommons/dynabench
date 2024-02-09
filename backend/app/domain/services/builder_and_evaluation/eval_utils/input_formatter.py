@@ -91,7 +91,7 @@ def group_labels(examples: list) -> dict:
     return final_labels
 
 
-def neccesary_format_for_evaluation_multilingual(
+def necessary_format_for_multilingual_evaluation(
     prediction_dict: dict, label: str, gender: str
 ):
     formated_dict = {}
