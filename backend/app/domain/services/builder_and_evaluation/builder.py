@@ -164,12 +164,11 @@ class BuilderService:
 
     def create_ecs_endpoint(self, name_task: str, repo: str) -> str:
         task_definition = self.create_task_definition(name_task, repo)
-        service_name = f"{name_task}-{randbelow(100000)}"
         launch_type = os.getenv("LAUNCH_TYPE")
         if launch_type == "FARGATE":
             run_service = self.ecs.create_service(
                 cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
-                serviceName=service_name,
+                serviceName=name_task,
                 taskDefinition=task_definition,
                 desiredCount=1,
                 networkConfiguration={
@@ -187,7 +186,7 @@ class BuilderService:
         else:
             run_service = self.ecs.create_service(
                 cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
-                serviceName=service_name,
+                serviceName=name_task,
                 taskDefinition=task_definition,
                 desiredCount=1,
                 launchType=launch_type,
@@ -205,8 +204,7 @@ class BuilderService:
             else:
                 arn_service = describe_service["services"][0]["serviceArn"]
                 run_task = self.ecs.list_tasks(
-                    cluster=os.getenv("CLUSTER_TASK_EVALUATION"),
-                    serviceName=service_name,
+                    cluster=os.getenv("CLUSTER_TASK_EVALUATION"), serviceName=name_task
                 )["taskArns"]
                 describe_task = self.ecs.describe_tasks(
                     cluster=os.getenv("CLUSTER_TASK_EVALUATION"), tasks=run_task
