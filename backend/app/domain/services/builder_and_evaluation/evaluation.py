@@ -506,8 +506,6 @@ class EvaluationService:
                 new_scores.append(new_score)
         self.builder.delete_repository(repo_name)
         self.logger.info("Create light model")
-        url_light_model = self.builder.create_light_model(model_name, folder_name)
-        self.model_repository.update_light_model(model_id, url_light_model)
         self.model_repository.update_model_status(model_id)
         self.logger.info("Clean folder and service")
         self.clean_folder_and_service(folder_name, arn_service)
