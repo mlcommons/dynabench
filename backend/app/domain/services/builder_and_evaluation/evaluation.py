@@ -353,7 +353,6 @@ class EvaluationService:
         user_id: int,
         selected_langs: str,
     ) -> dict:
-        print("ciroto", selected_langs)
         selected_langs = selected_langs.split(",")
         task_configuration = self.get_task_configuration(task_id)
         genders = task_configuration["submit_config"]["genders"]
@@ -415,8 +414,8 @@ class EvaluationService:
         model_s3_zip: str,
         model_id: int,
         user_id: int,
-        evaluate_no_scoring_datasets: bool = False,
         selected_langs: str = None,
+        evaluate_no_scoring_datasets: bool = False,
     ) -> dict:
         tasks = self.task_repository.get_model_id_and_task_code(task_code)
         if selected_langs is not None and len(selected_langs) > 0:
@@ -594,53 +593,54 @@ class EvaluationService:
         current_round: int = 1,
         selected_langs: str = None,
     ):
-        # try:
-        print("dataset", dataset)
-        (
-            prediction_dict,
-            dataset_id,
-            model_id,
-            minutes_time_prediction,
-            num_samples,
-            folder_name,
-            tags,
-        ) = self.heavy_prediction(dataset, tasks.task_code, ip, model_id, folder_name)
-        self.logger.info("Calculate memory utilization")
-        memory = self.get_memory_utilization(model_name)
-        self.logger.info("Calculate throughput")
-        throughput = self.get_throughput(num_samples, minutes_time_prediction)
-        self.logger.info("Calculate score")
-        final_scores, main_metric, metric = self.get_finals_scores(
-            tasks.id, prediction_dict, False
-        )
-        print("current_round", current_round)
-        round_info = self.round_repository.get_round_info_by_round_and_task(
-            tasks.id, current_round
-        )
-        print("final_scores", final_scores)
-        print("main_metric", main_metric)
-        print("metric", metric)
-        new_score = {
-            "perf": main_metric["perf"],
-            "pretty_perf": main_metric["pretty_perf"],
-            "fairness": final_scores["fairness"],
-            "robustness": final_scores["robustness"],
-            "mid": model_id,
-            "r_realid": round_info.id,
-            "did": dataset_id,
-            "memory_utilization": memory,
-            "examples_per_second": throughput,
-        }
-        final_score = new_score.copy()
-        metric_name = str(metric)
-        final_score[metric_name] = main_metric["perf"]
-        new_score["metadata_json"] = json.dumps(final_score)
-        self.score_repository.add(new_score)
-        self.logger.info("Save score")
-        return new_score
-
-    # except Exception:
-    #     self.clean_folder_and_service(folder_name, arn_service)
+        try:
+            print("dataset", dataset)
+            (
+                prediction_dict,
+                dataset_id,
+                model_id,
+                minutes_time_prediction,
+                num_samples,
+                folder_name,
+                tags,
+            ) = self.heavy_prediction(
+                dataset, tasks.task_code, ip, model_id, folder_name
+            )
+            self.logger.info("Calculate memory utilization")
+            memory = self.get_memory_utilization(model_name)
+            self.logger.info("Calculate throughput")
+            throughput = self.get_throughput(num_samples, minutes_time_prediction)
+            self.logger.info("Calculate score")
+            final_scores, main_metric, metric = self.get_finals_scores(
+                tasks.id, prediction_dict, False
+            )
+            print("current_round", current_round)
+            round_info = self.round_repository.get_round_info_by_round_and_task(
+                tasks.id, current_round
+            )
+            print("final_scores", final_scores)
+            print("main_metric", main_metric)
+            print("metric", metric)
+            new_score = {
+                "perf": main_metric["perf"],
+                "pretty_perf": main_metric["pretty_perf"],
+                "fairness": final_scores["fairness"],
+                "robustness": final_scores["robustness"],
+                "mid": model_id,
+                "r_realid": round_info.id,
+                "did": dataset_id,
+                "memory_utilization": memory,
+                "examples_per_second": throughput,
+            }
+            final_score = new_score.copy()
+            metric_name = str(metric)
+            final_score[metric_name] = main_metric["perf"]
+            new_score["metadata_json"] = json.dumps(final_score)
+            self.score_repository.add(new_score)
+            self.logger.info("Save score")
+            return new_score
+        except Exception:
+            self.clean_folder_and_service(folder_name, arn_service)
 
     def evaluate_dataperf_decentralized(self, dataperf_response: dict):
         model_id = dataperf_response["model_id"]
