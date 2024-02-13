@@ -355,14 +355,13 @@ class EvaluationService:
     ) -> dict:
         selected_langs = selected_langs.split(",")
         task_configuration = self.get_task_configuration(task_id)
+        folder_name = model_s3_zip.split("/")[-1].split(".")[0]
+        os.mkdir(f"./app/models/{folder_name}")
+        os.mkdir(f"./app/models/{folder_name}/datasets/")
         genders = task_configuration["submit_config"]["genders"]
         ip, model_name, folder_name, arn_service, repo_name = self.get_model_ip(
             model_s3_zip
         )
-        print("ciro_ip", ip)
-        folder_name = model_s3_zip.split("/")[-1].split(".")[0]
-        os.mkdir(f"./app/models/{folder_name}")
-        os.mkdir(f"./app/models/{folder_name}/datasets/")
         for lang in selected_langs:
             dataset = self.dataset_repository.get_scoring_datasets(task_id, lang)[0]
             dataset = self.download_dataset(task_code, dataset, folder_name)
