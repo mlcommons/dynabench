@@ -1,6 +1,6 @@
 certifi==2020.12.5
 click==7.1.2
-fastapi==0.63.0
+fastapi==0.109.1
 h11==0.11.0
 httptools==0.1.1
 mangum==0.10.0
