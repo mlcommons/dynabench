@@ -1,6 +1,6 @@
 uvicorn>=0.15.0,<0.16.0
 boto3==1.24.56
-fastapi==0.87.0
+fastapi==0.109.1
 sqlalchemy==1.4.25
 python-dotenv==0.19.0
 PyMySQL[rsa]==1.0.2
