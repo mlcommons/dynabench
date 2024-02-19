@@ -256,8 +256,8 @@ class TaskService:
         active_tasks = [task for task in all_tasks if task["id"] in active_tasks]
         return active_tasks
 
-    def check_sign_consent(self, task_id: int, user_id: int):
-        if self.historical_task_repository.check_sign_consent(task_id, user_id):
+    def check_signed_consent(self, task_id: int, user_id: int):
+        if self.historical_task_repository.check_signed_consent(task_id, user_id):
             return True
         return False
 

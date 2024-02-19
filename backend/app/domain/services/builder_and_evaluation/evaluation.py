@@ -355,14 +355,13 @@ class EvaluationService:
     ) -> dict:
         selected_langs = selected_langs.split(",")
         task_configuration = self.get_task_configuration(task_id)
+        folder_name = model_s3_zip.split("/")[-1].split(".")[0]
+        os.mkdir(f"./app/models/{folder_name}")
+        os.mkdir(f"./app/models/{folder_name}/datasets/")
         genders = task_configuration["submit_config"]["genders"]
         ip, model_name, folder_name, arn_service, repo_name = self.get_model_ip(
             model_s3_zip
         )
-        print("ciro_ip", ip)
-        folder_name = model_s3_zip.split("/")[-1].split(".")[0]
-        os.mkdir(f"./app/models/{folder_name}")
-        os.mkdir(f"./app/models/{folder_name}/datasets/")
         for lang in selected_langs:
             dataset = self.dataset_repository.get_scoring_datasets(task_id, lang)[0]
             dataset = self.download_dataset(task_code, dataset, folder_name)
@@ -414,8 +413,8 @@ class EvaluationService:
         model_s3_zip: str,
         model_id: int,
         user_id: int,
-        evaluate_no_scoring_datasets: bool = False,
         selected_langs: str = None,
+        evaluate_not_scoring_datasets: bool = False,
     ) -> dict:
         tasks = self.task_repository.get_model_id_and_task_code(task_code)
         if selected_langs is not None and len(selected_langs) > 0:
@@ -482,7 +481,7 @@ class EvaluationService:
                 selected_langs,
             )
             new_scores.append(new_score)
-        if evaluate_no_scoring_datasets:
+        if evaluate_not_scoring_datasets:
             jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
             not_scoring_datasets = self.downloads_not_scoring_datasets(
                 jsonl_not_scoring_datasets,
@@ -506,8 +505,6 @@ class EvaluationService:
                 new_scores.append(new_score)
         self.builder.delete_repository(repo_name)
         self.logger.info("Create light model")
-        url_light_model = self.builder.create_light_model(model_name, folder_name)
-        self.model_repository.update_light_model(model_id, url_light_model)
         self.model_repository.update_model_status(model_id)
         self.logger.info("Clean folder and service")
         self.clean_folder_and_service(folder_name, arn_service)

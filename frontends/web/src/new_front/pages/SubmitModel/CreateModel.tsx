@@ -3,10 +3,11 @@ import React, { useState } from "react";
 import { Form as BootstrapForm, Button } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import Select from "react-select";
+import { LanguagePair } from "new_front/types/uploadModel/uploadModel";
 
 interface CreateModelProps {
   isDynalab: boolean;
-  languagePairs?: any;
+  languagePairs?: LanguagePair[];
   handleClose: () => void;
   handleSubmitModel: (values: any) => void;
 }
@@ -28,22 +29,30 @@ const CreateModel = ({
     repoUrl: " ",
   };
 
-  const options = languagePairs.map((pair: string, index: number) => {
+  const options = languagePairs.map((pair, index) => {
     return {
       value: `option${index + 1}`,
-      label: pair,
+      label: pair.alias,
+      dataset_name: pair.dataset_name,
     };
   });
 
   const onSubmit = (values: any) => {
     if (languagePairs && languagePairs.length > 0) {
-      values.languages = selectedLanguages
-        .map((lang: any) => lang.label)
-        .join(",");
+      // Extract dataset_name based on the selected alias
+      const selectedDatasets = selectedLanguages.map((lang: any) => {
+        const pair = languagePairs.find(
+          (pair: any) => pair.alias === lang.label,
+        );
+        return pair ? pair.dataset_name : "";
+      });
+      values.languages = selectedDatasets.join(", "); // Save dataset_names
     }
 
+    console.log("values", values);
+
     handleSubmitModel(values);
-    // handleClose();
+    handleClose();
   };
 
   const { register, handleSubmit } = useForm({

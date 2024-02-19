@@ -9,6 +9,7 @@ import UserContext from "containers/UserContext";
 import { checkUserIsLoggedIn } from "new_front/utils/helpers/functions/LoginFunctions";
 import { useHistory, useParams } from "react-router-dom";
 import useFetch from "use-http";
+import { LanguagePair } from "new_front/types/uploadModel/uploadModel";
 const yaml = require("js-yaml");
 
 const SubmitModel = () => {
@@ -21,7 +22,7 @@ const SubmitModel = () => {
   const [showHuggingFace, setShowHuggingFace] = useState(false);
   const [showDynalab, setShowDynalab] = useState(false);
   const [hfModel, setHfModel] = useState(false);
-  const [languagePairs, setLanguagePairs] = useState<any>();
+  const [languagePairs, setLanguagePairs] = useState<LanguagePair[]>([]);
   const [configYaml, setConfigYaml] = useState<any>();
   const [dynalabModel, setDynalabModel] = useState<string>();
   const { user } = useContext(UserContext);
