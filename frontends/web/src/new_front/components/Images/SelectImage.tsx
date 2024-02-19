@@ -8,6 +8,7 @@ type SelectImageProps = {
   index: number;
   isSelected: boolean;
   handleSelectImage: (image: string) => void;
+  input?: boolean;
 };
 
 const SelectImage: FC<SelectImageProps> = ({
@@ -15,6 +16,7 @@ const SelectImage: FC<SelectImageProps> = ({
   index,
   handleSelectImage,
   isSelected,
+  input = true,
 }) => {
   const handleOnClicked = (image: string) => {
     handleSelectImage(image);
@@ -24,7 +26,7 @@ const SelectImage: FC<SelectImageProps> = ({
   return (
     <div
       key={index}
-      className="flex flex-col items-center py-2 align-center space-y-3"
+      className="flex flex-col items-center py-2 space-y-3 align-center"
     >
       <img
         height={240}
@@ -34,7 +36,7 @@ const SelectImage: FC<SelectImageProps> = ({
           setShowZoom(true);
         }}
         alt="src"
-        className="cursor-pointer rounded-lg"
+        className="rounded-lg cursor-pointer"
       />
       {showZoom && (
         <Modal
@@ -51,19 +53,21 @@ const SelectImage: FC<SelectImageProps> = ({
           </Modal.Body>
         </Modal>
       )}
-      {!image.startsWith(forbidden_image) && !image.startsWith(black_image) && (
-        <input
-          id="checkbox"
-          type="radio"
-          name="image"
-          value=""
-          defaultChecked={isSelected}
-          className={`items-center w-4 h-4 px-6`}
-          onChange={() => {
-            handleOnClicked(image);
-          }}
-        />
-      )}
+      {!image.startsWith(forbidden_image) &&
+        !image.startsWith(black_image) &&
+        input && (
+          <input
+            id="checkbox"
+            type="radio"
+            name="image"
+            value=""
+            defaultChecked={isSelected}
+            className={`items-center w-4 h-4 px-6`}
+            onChange={() => {
+              handleOnClicked(image);
+            }}
+          />
+        )}
     </div>
   );
 };

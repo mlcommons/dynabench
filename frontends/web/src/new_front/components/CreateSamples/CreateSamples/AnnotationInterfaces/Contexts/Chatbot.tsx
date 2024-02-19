@@ -1,30 +1,13 @@
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import BasicInput from "new_front/components/Inputs/BasicInput";
 import EvaluateText from "new_front/components/Inputs/EvaluateText";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import Swal from "sweetalert2";
-import { ChatHistoryType } from "new_front/types/createSamples/createSamples/utils";
+import { ChatbotProps } from "new_front/types/createSamples/createSamples/utils";
 import { Avatar } from "components/Avatar/Avatar";
 import parse from "html-react-parser";
-
-type ChatbotProps = {
-  instructions: string;
-  chatHistory: ChatHistoryType;
-  username: string;
-  model_name: string;
-  provider: string;
-  num_of_samples_chatbot: number;
-  num_interactions_chatbot: number;
-  finishConversation: boolean;
-  optionsSlider?: string[];
-  setChatHistory: (chatHistory: ChatHistoryType) => void;
-  showOriginalInteractions: () => void;
-  setFinishConversation: (finishConversation: boolean) => void;
-  updateModelInputs: (modelInputs: any) => void;
-  setIsGenerativeContext: (isGenerativeContext: boolean) => void;
-};
 
 const Chatbot: FC<ChatbotProps> = ({
   instructions,
