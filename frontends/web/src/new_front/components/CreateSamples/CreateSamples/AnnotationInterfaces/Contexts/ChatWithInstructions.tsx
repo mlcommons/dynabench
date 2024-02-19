@@ -28,7 +28,7 @@ const ChatWithInstructions: FC<
   const { user } = useContext(UserContext);
 
   const checkIfUserIsSignedInConsent = async () => {
-    const signConsent = await post("/task/check_sign_consent", {
+    const signConsent = await post("/task/check_signed_consent", {
       user_id: user.id,
       task_id: taskId,
     });

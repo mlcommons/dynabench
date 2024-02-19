@@ -414,7 +414,7 @@ class EvaluationService:
         model_id: int,
         user_id: int,
         selected_langs: str = None,
-        evaluate_no_scoring_datasets: bool = False,
+        evaluate_not_scoring_datasets: bool = False,
     ) -> dict:
         tasks = self.task_repository.get_model_id_and_task_code(task_code)
         if selected_langs is not None and len(selected_langs) > 0:
@@ -481,7 +481,7 @@ class EvaluationService:
                 selected_langs,
             )
             new_scores.append(new_score)
-        if evaluate_no_scoring_datasets:
+        if evaluate_not_scoring_datasets:
             jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
             not_scoring_datasets = self.downloads_not_scoring_datasets(
                 jsonl_not_scoring_datasets,

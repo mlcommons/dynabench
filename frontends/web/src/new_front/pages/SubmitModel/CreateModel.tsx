@@ -51,8 +51,8 @@ const CreateModel = ({
 
     console.log("values", values);
 
-    // handleSubmitModel(values);
-    // handleClose();
+    handleSubmitModel(values);
+    handleClose();
   };
 
   const { register, handleSubmit } = useForm({

@@ -45,7 +45,7 @@ class HistoricalDataRepository(AbstractRepository):
             .first()
         )
 
-    def check_sign_consent(self, task_id: int, user_id: int):
+    def check_signed_consent(self, task_id: int, user_id: int):
         return (
             self.session.query(HistoricalData)
             .filter(HistoricalData.task_id == task_id)
