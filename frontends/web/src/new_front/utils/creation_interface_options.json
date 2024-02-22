@@ -23,6 +23,8 @@
     "multioptions-with-instructions": "MultioptionsWithInstructions",
     "radio-button-options": "RadioButtonOptions",
     "select-multiple-images": "SelectMultipleImages",
-    "multi-slider-selection": "MultiSliderSelection"
+    "multi-slider-selection": "MultiSliderSelection",
+    "select-option-with-slider": "SelectOptionWithSliderSelection",
+    "basic-input-select-option-with-instructions": "BasicInputSelectOptionWithInstructions"
   }
 }

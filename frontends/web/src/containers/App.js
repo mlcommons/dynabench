@@ -92,7 +92,7 @@ class RouterMonitor extends React.Component {
       ) {
         this.props.history.push(
           "/login?msg=" +
-            encodeURIComponent("You need to be logged in to access this beta.")
+            encodeURIComponent("You need to be logged in to access this beta."),
         );
       }
     }
@@ -127,7 +127,7 @@ class App extends React.Component {
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
       });
     }
@@ -137,7 +137,7 @@ class App extends React.Component {
       },
       (error) => {
         console.log(error);
-      }
+      },
     );
   }
   componentDidMount() {
@@ -287,6 +287,31 @@ class App extends React.Component {
                                     {this.state &&
                                       this.state.tasks
                                         .filter((t) => t.challenge_type === 4)
+                                        .map((task, index) => (
+                                          <li
+                                            key={task.task_code}
+                                            className="li-nav"
+                                          >
+                                            <a
+                                              href={`/tasks/${task.task_code}`}
+                                            >
+                                              {task.name}
+                                            </a>
+                                          </li>
+                                        ))}
+                                  </ul>
+                                </li>
+                                <li id="machine_translation" className="li-nav">
+                                  <a
+                                    className="second-nav-a"
+                                    href="/machine_translation"
+                                  >
+                                    Machine Translation
+                                  </a>
+                                  <ul className="ul-nav">
+                                    {this.state &&
+                                      this.state.tasks
+                                        .filter((t) => t.challenge_type === 7)
                                         .map((task, index) => (
                                           <li
                                             key={task.task_code}

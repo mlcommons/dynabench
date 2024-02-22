@@ -13,10 +13,10 @@ const Chatbot: FC<ChatbotProps> = ({
   instructions,
   chatHistory,
   username,
-  model_name,
+  modelName,
   provider,
-  num_of_samples_chatbot,
-  num_interactions_chatbot,
+  numOfSamplesChatbot,
+  numInteractionsChatbot,
   finishConversation,
   optionsSlider,
   setChatHistory,
@@ -44,15 +44,18 @@ const Chatbot: FC<ChatbotProps> = ({
             user: [
               ...chatHistory.user,
               {
-                id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
+                id:
+                  chatHistory.bot.length > 0
+                    ? chatHistory.bot[chatHistory.bot.length - 1].id + 1
+                    : 1,
                 text: prompt,
               },
             ],
           },
-          model_name: model_name,
+          model_name: modelName,
           provider: provider,
           prompt: prompt,
-          num_answers: num_of_samples_chatbot,
+          num_answers: numOfSamplesChatbot,
         },
       );
       if (response.ok) {
@@ -107,14 +110,19 @@ const Chatbot: FC<ChatbotProps> = ({
       user: [
         ...chatHistory.user,
         {
-          id: chatHistory.user[chatHistory.user.length - 1].id + 1,
+          id: chatHistory.user.length
+            ? chatHistory.user[chatHistory.user.length - 1].id + 1
+            : 1,
           text: prompt,
         },
       ],
       bot: [
         ...chatHistory.bot,
         {
-          id: chatHistory.bot[chatHistory.bot.length - 1].id + 1,
+          id:
+            chatHistory.bot.length > 0
+              ? chatHistory.bot[chatHistory.bot.length - 1].id + 1
+              : 1,
           text: newRespones.reduce(
             (max: { score: number }, answer: { score: number }) =>
               answer.score > max.score ? answer : max,
@@ -174,7 +182,7 @@ const Chatbot: FC<ChatbotProps> = ({
     showOriginalInteractions();
     finishSection();
     setIsGenerativeContext(false);
-    setFinishConversation(true);
+    // setFinishConversation(true);
   };
 
   return (
@@ -286,7 +294,7 @@ const Chatbot: FC<ChatbotProps> = ({
                           className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                         />
                       </div>
-                      {numInteractions >= num_interactions_chatbot && (
+                      {numInteractions >= numInteractionsChatbot && (
                         <div>
                           <GeneralButton
                             onClick={handleFinishInteraction}

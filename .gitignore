@@ -6,3 +6,8 @@ env/
 envs/
 .env
 backend/app/models
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

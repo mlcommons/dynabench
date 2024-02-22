@@ -1,0 +1,17 @@
+{
+  "name": "dynabench",
+  "version": "1.0.0",
+  "description": "Dynabench is a research platform for dynamic data collection and benchmarking.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.41.2",
+    "@types/node": "^20.11.17"
+  }
+}
