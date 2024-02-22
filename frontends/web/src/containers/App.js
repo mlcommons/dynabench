@@ -92,7 +92,7 @@ class RouterMonitor extends React.Component {
       ) {
         this.props.history.push(
           "/login?msg=" +
-            encodeURIComponent("You need to be logged in to access this beta."),
+            encodeURIComponent("You need to be logged in to access this beta.")
         );
       }
     }
@@ -127,7 +127,7 @@ class App extends React.Component {
           },
           (error) => {
             console.log(error);
-          },
+          }
         );
       });
     }
@@ -137,7 +137,7 @@ class App extends React.Component {
       },
       (error) => {
         console.log(error);
-      },
+      }
     );
   }
   componentDidMount() {
