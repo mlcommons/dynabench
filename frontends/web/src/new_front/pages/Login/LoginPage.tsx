@@ -77,7 +77,7 @@ const LoginPage: FC = () => {
             <Login className="w-full h-full" />
           </div>
           <div className="md:w-8/12 lg:ml-6 lg:w-5/12">
-            <h1 className="pb-8 mb-6 text-4xl font-bold text-letter-color dark:text-gray-100">
+            <h1 className="pb-8 mb-6 text-4xl font-bold text-letter-color">
               Welcome back!
             </h1>
             <form className="flex flex-col space-y-6">

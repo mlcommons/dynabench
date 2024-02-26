@@ -1,6 +1,6 @@
-import React, { FC, useEffect, useState } from "react";
-import { Collapse } from "react-bootstrap";
 import parse from "html-react-parser";
+import React, { FC, useState } from "react";
+import { Collapse } from "react-bootstrap";
 
 type MultiSliderProps = {
   options: any[];
@@ -64,9 +64,11 @@ const MultiSlider: FC<MultiSliderProps> = ({
             return (
               <li className="w-full border-gray-600 rounded-t-lg" key={index}>
                 <div className="flex items-center pl-3">
-                  <label className="w-full pt-2 ml-2 text-base font-medium text-letter-color">
-                    {parse(option.label)}
-                  </label>
+                  {option.label && (
+                    <label className="w-full pt-2 ml-2 text-base font-medium text-letter-color">
+                      {parse(option.label)}
+                    </label>
+                  )}
                   <div className="flex items-center justify-between w-full gap-2 px-4 pt-4 pb-2 border-t">
                     <span className="text-gray-500 ">{optionsSlider[0]}</span>
                     <input

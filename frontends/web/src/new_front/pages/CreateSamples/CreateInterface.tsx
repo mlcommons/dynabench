@@ -194,7 +194,7 @@ const CreateInterface = () => {
                   />
                 )}
               </div>
-              <div id="inputUser" className="flex flex-col gap-12">
+              <div id="inputUser" className="flex flex-col gap-12 md:gap-4">
                 {taskConfiguration?.user_input && (
                   <AnnotationUserInputStrategy
                     config={taskConfiguration?.user_input as any}

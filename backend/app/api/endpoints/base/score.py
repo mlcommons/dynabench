@@ -4,7 +4,11 @@
 
 from fastapi import APIRouter
 
-from app.domain.schemas.base.score import GetCsvScore, GetLeaderboardMetadata
+from app.domain.schemas.base.score import (
+    CsvResponseModel,
+    GetCsvScore,
+    GetLeaderboardMetadata,
+)
 from app.domain.services.base.score import ScoreService
 
 
@@ -16,7 +20,7 @@ async def get_maximun_principal_score_by_task(task_id: int):
     return ScoreService().get_maximun_principal_score_by_task(task_id)
 
 
-@router.post("/read_users_score_csv/", response_model={})
+@router.post("/read_users_score_csv/", response_model=CsvResponseModel)
 async def read_users_score_csv(model: GetCsvScore):
     return ScoreService().read_users_score_csv(model.task_id, model.round_id)
 

@@ -7,10 +7,10 @@ export type ChatbotProps = {
   instructions: string;
   chatHistory: ChatHistoryType;
   username: string;
-  model_name: string;
+  modelName: any;
   provider: string;
-  num_of_samples_chatbot: number;
-  num_interactions_chatbot: number;
+  numOfSamplesChatbot: number;
+  numInteractionsChatbot: number;
   finishConversation: boolean;
   optionsSlider?: string[];
   setChatHistory: (chatHistory: ChatHistoryType) => void;

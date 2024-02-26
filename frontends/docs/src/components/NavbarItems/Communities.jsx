@@ -1767,6 +1767,25 @@ const Communities = () => {
               </ul>
             </li>
             <li id="flores" className="li-nav">
+              <a
+                className="second-nav-a"
+                href="https://dynabench.org/machine-translation"
+              >
+                Machine Translation
+              </a>
+              <ul className="ul-nav">
+                {tasks
+                  .filter((t) => t.challenge_type === 7)
+                  .map((task, index) => (
+                    <li key={task.task_code} className="li-nav">
+                      <a href={`https://dynabench.org/tasks/${task.task_code}`}>
+                        {task.name}
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </li>
+            <li id="flores" className="li-nav">
               <a className="second-nav-a" href="https://dynabench.org/flores">
                 Flores
               </a>

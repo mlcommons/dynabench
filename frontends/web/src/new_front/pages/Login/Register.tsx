@@ -53,12 +53,12 @@ const Register = () => {
   return (
     <section className="h-screen bg-gradient-to-b from-white to-[#ccebd466]">
       <div className="container h-full p-32">
-        <div className="g-6 flex h-full flex-wrap items-center justify-center lg:justify-between">
+        <div className="flex flex-wrap items-center justify-center h-full g-6 lg:justify-between">
           <div className="mb-12 md:mb-0 md:w-8/12 lg:w-6/12">
-            <RegisterLogo className="w-full h-full hidden md:block" />
+            <RegisterLogo className="hidden w-full h-full md:block" />
           </div>
           <div className="md:w-8/12 lg:ml-6 lg:w-5/12">
-            <h1 className="mb-6 text-4xl text-letter-color font-bold dark:text-gray-100 pb-8">
+            <h1 className="pb-8 mb-6 text-4xl font-bold text-letter-color">
               Welcome to Dynabench!
             </h1>
             <Formik
@@ -131,7 +131,7 @@ const Register = () => {
                   .
                 </div>
                 <Button
-                  className="px-7 text-xl font-semibold border-0 bg-gray-200 w-full"
+                  className="w-full text-xl font-semibold bg-gray-200 border-0 px-7"
                   type="submit"
                   disabled={!acceptTerms}
                 >

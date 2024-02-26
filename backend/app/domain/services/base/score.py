@@ -336,12 +336,13 @@ class ScoreService:
             ["username"] + [col for col in csv_file.columns if col != "username"]
         ]
         if "round" in csv_file.columns:
+            rounds = csv_file["round"].unique()
             if round_id:
                 csv_file = csv_file[csv_file["round"] == round_id]
             else:
                 csv_file = csv_file.groupby(["username"]).sum().reset_index()
             csv_file.drop(columns=["round"], inplace=True)
-        return csv_file.to_json(orient="records")
+        return {"data": csv_file.to_json(orient="records"), "rounds": list(rounds)}
 
     def fix_metrics_with_custom_names(self, model_id: int):
         self.score_repository.fix_matthews_correlation(model_id)
