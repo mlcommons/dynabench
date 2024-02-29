@@ -69,7 +69,7 @@ const ChatWithInstructions: FC<
 
   return (
     <>
-      {!signInConsent ? (
+      {signInConsent ? (
         <>
           {!readInstructions ? (
             <div className="flex flex-col justify-center gap-8">
