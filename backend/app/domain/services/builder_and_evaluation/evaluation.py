@@ -358,43 +358,92 @@ class EvaluationService:
         folder_name = model_s3_zip.split("/")[-1].split(".")[0]
         os.mkdir(f"./app/models/{folder_name}")
         os.mkdir(f"./app/models/{folder_name}/datasets/")
-        genders = task_configuration["submit_config"]["genders"]
+        genders = task_configuration.get("submit_config", {}).get("genders", [])
+        multigender = task_configuration.get("submit_config", {}).get(
+            "multigender", False
+        )
         ip, model_name, folder_name, arn_service, repo_name = self.get_model_ip(
             model_s3_zip
         )
         for lang in selected_langs:
-            dataset = self.dataset_repository.get_scoring_datasets(task_id, lang)[0]
-            dataset = self.download_dataset(task_code, dataset, folder_name)
-            dict_dataset_type, _, dataset_id, tags, num_samples = self.evaluate_dataset(
-                ip, dataset, folder_name, model_id, task_code
-            )
-            for gender in genders:
-                final_scores, main_metric, metric = self.get_finals_scores(
-                    task_id, dict_dataset_type, False, True, gender
-                )
-                print("dataset::", dataset)
-                round_info = self.round_repository.get_round_info_by_round_and_task(
-                    task_id, dataset["round_id"]
-                )
-                print("final_scores", final_scores)
-                print("main_metric", main_metric)
-                print("metric", metric)
-                new_score = {
-                    "perf": main_metric["perf"],
-                    "pretty_perf": main_metric["pretty_perf"],
-                    "fairness": final_scores["fairness"],
-                    "robustness": final_scores["robustness"],
-                    "mid": model_id,
-                    "r_realid": round_info.id,
-                    "did": dataset_id,
-                    "memory_utilization": 0,
-                    "examples_per_second": 0,
-                }
-                final_score = new_score.copy()
-                metric_name = str(metric)
-                final_score[metric_name] = main_metric["perf"]
-                new_score["metadata_json"] = json.dumps(final_score)
-                self.score_repository.add(new_score)
+            if multigender:
+                for gender in genders:
+                    dataset = self.dataset_repository.get_scoring_datasets(
+                        task_id, f"{lang}-{gender}"
+                    )[0]
+                    dataset = self.download_dataset(task_code, dataset, folder_name)
+                    (
+                        dict_dataset_type,
+                        _,
+                        dataset_id,
+                        tags,
+                        num_samples,
+                    ) = self.evaluate_dataset(
+                        ip, dataset, folder_name, model_id, task_code
+                    )
+                    final_scores, main_metric, metric = self.get_finals_scores(
+                        task_id, dict_dataset_type, False, True, "statement"
+                    )
+                    print("dataset::", dataset)
+                    round_info = self.round_repository.get_round_info_by_round_and_task(
+                        task_id, dataset["round_id"]
+                    )
+                    print("final_scores", final_scores)
+                    print("main_metric", main_metric)
+                    print("metric", metric)
+                    new_score = {
+                        "perf": main_metric["perf"],
+                        "pretty_perf": main_metric["pretty_perf"],
+                        "fairness": final_scores["fairness"],
+                        "robustness": final_scores["robustness"],
+                        "mid": model_id,
+                        "r_realid": round_info.id,
+                        "did": dataset_id,
+                        "memory_utilization": 0,
+                        "examples_per_second": 0,
+                    }
+                    final_score = new_score.copy()
+                    metric_name = str(metric)
+                    final_score[metric_name] = main_metric["perf"]
+                    new_score["metadata_json"] = json.dumps(final_score)
+                    self.score_repository.add(new_score)
+            else:
+                dataset = self.dataset_repository.get_scoring_datasets(task_id, lang)[0]
+                dataset = self.download_dataset(task_code, dataset, folder_name)
+                (
+                    dict_dataset_type,
+                    _,
+                    dataset_id,
+                    tags,
+                    num_samples,
+                ) = self.evaluate_dataset(ip, dataset, folder_name, model_id, task_code)
+                for gender in genders:
+                    final_scores, main_metric, metric = self.get_finals_scores(
+                        task_id, dict_dataset_type, False, True, gender
+                    )
+                    print("dataset::", dataset)
+                    round_info = self.round_repository.get_round_info_by_round_and_task(
+                        task_id, dataset["round_id"]
+                    )
+                    print("final_scores", final_scores)
+                    print("main_metric", main_metric)
+                    print("metric", metric)
+                    new_score = {
+                        "perf": main_metric["perf"],
+                        "pretty_perf": main_metric["pretty_perf"],
+                        "fairness": final_scores["fairness"],
+                        "robustness": final_scores["robustness"],
+                        "mid": model_id,
+                        "r_realid": round_info.id,
+                        "did": dataset_id,
+                        "memory_utilization": 0,
+                        "examples_per_second": 0,
+                    }
+                    final_score = new_score.copy()
+                    metric_name = str(metric)
+                    final_score[metric_name] = main_metric["perf"]
+                    new_score["metadata_json"] = json.dumps(final_score)
+                    self.score_repository.add(new_score)
         self.builder.delete_repository(repo_name)
         self.clean_folder_and_service(folder_name, arn_service)
         user_email = self.user_repository.get_user_email(user_id)[0]
@@ -791,8 +840,10 @@ class EvaluationService:
 
     # def test(self):
     #     task_code = "multilingual-holistic-bias"
+    #     task_id = 54
+    #     model_id = 1674
     #     self.evaluation_with_selected_langs(
-    #         task_id, task_code, "models/1608.zip", model_id, 1675, "eng-spa,eng-ita"
+    #         task_id, task_code, "models/1608.zip", model_id, 1675, "eng-spa_Latn"
     #     )
     #     return "test"
 
