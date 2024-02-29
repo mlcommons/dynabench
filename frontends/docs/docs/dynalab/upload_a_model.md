@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Uploading Your Model to Dynabench
 
-Welcome to the exciting journey of contributing your model to Dynabench! Follow these engaging steps to showcase your AI prowess:
+Welcome to the exciting journey of contributing your model to Dynabench! Our current maximum recommended sizes are models no larger than 8 GBs. Follow these engaging steps to showcase your AI prowess:
 
 ## Step 1: Download Dynalab 2.0
 
@@ -13,6 +13,10 @@ Download and unzip the Dynalab 2.0 project on your computer. This project is you
 ## Step 2: Navigate the Repository
 
 Explore the project repository, and you'll encounter a folder named `app`. Inside, discover three key folders: `api`, `domain`, and `resources`. The `api` holds logic you won't need to touch, while `resources` is your designated space for storing model components. Dive into the `domain` folder, specifically locating the `model.py` file.
+
+## Step 2.1: Pre-trained Model Consideration
+
+If you're utilizing a pre-trained model from a hub like Hugging Face, it's advisable to download the model beforehand and integrate it directly into your codebase. This approach helps mitigate potential download errors during evaluation, ensuring smoother execution.
 
 ## Step 3: Customize Evaluation Functions
 
