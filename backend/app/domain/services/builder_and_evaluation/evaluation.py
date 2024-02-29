@@ -445,6 +445,7 @@ class EvaluationService:
                     final_score[metric_name] = main_metric["perf"]
                     new_score["metadata_json"] = json.dumps(final_score)
                     self.score_repository.add(new_score)
+        self.score_repository.remove_duplicates(model_id)
         self.builder.delete_repository(repo_name)
         self.clean_folder_and_service(folder_name, arn_service)
         user_email = self.user_repository.get_user_email(user_id)[0]
