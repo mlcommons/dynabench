@@ -381,10 +381,9 @@ class EvaluationService:
                     ) = self.evaluate_dataset(
                         ip, dataset, folder_name, model_id, task_code
                     )
-                    for gender in genders:
-                        final_scores, main_metric, metric = self.get_finals_scores(
-                            task_id, dict_dataset_type, False, True, "statement"
-                        )
+                    final_scores, main_metric, metric = self.get_finals_scores(
+                        task_id, dict_dataset_type, False, True, "statement"
+                    )
                     print("dataset::", dataset)
                     round_info = self.round_repository.get_round_info_by_round_and_task(
                         task_id, dataset["round_id"]
@@ -445,7 +444,6 @@ class EvaluationService:
                     final_score[metric_name] = main_metric["perf"]
                     new_score["metadata_json"] = json.dumps(final_score)
                     self.score_repository.add(new_score)
-        self.score_repository.remove_duplicates(model_id)
         self.builder.delete_repository(repo_name)
         self.clean_folder_and_service(folder_name, arn_service)
         user_email = self.user_repository.get_user_email(user_id)[0]
