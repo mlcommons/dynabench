@@ -234,3 +234,13 @@ class ContextService:
                 number_of_samples=artifacts["number_of_samples"],
                 models=artifacts["providers"],
             )
+
+    def get_filter_context(self, real_round_id: int, filters: dict) -> dict:
+        contexts = self.context_repository.get_context_by_real_round_id(real_round_id)
+        contexts = [json.loads(context.context_json) for context in contexts]
+        filter_contexts = []
+        for context in contexts:
+            for key, value in filters.items():
+                if context.get(key).lower() == value.lower():
+                    filter_contexts.append(context)
+        return random.choice(filter_contexts)

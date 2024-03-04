@@ -22,6 +22,7 @@ eval_metrics_dict = {
     "dataperf_auc": metrics.get_dataperf_auc,
     "dataperf_fraction_of_fixes": metrics.get_dataperf_fraction_of_fixes,
     "dataperf_balanced_accuracy": metrics.get_dataperf_balanced_accuracy,
+    "chrf": metrics.get_chrf,
 }
 
 delta_metrics_dict = {
@@ -51,4 +52,5 @@ metrics_meta_dict = {
     "dataperf_auc": metrics.get_dataperf_auc_meta,
     "dataperf_fraction_of_fixes": metrics.get_dataperf_fraction_of_fixes_meta,
     "dataperf_balanced_accuracy": metrics.get_dataperf_balanced_accuracy_meta,
+    "chrf": metrics.get_chrf_meta,
 }

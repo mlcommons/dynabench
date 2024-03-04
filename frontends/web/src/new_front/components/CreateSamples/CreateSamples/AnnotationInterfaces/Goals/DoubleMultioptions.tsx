@@ -26,9 +26,9 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
   useEffect(() => {
     updateModelInputs(
       {
-        [field_name_for_the_model + "primary" || "goal_input"]: primaryOption,
-        [field_name_for_the_model + "secondary" || "goal_input"]:
-          secondaryOptions,
+        [field_name_for_the_model + "_primary" || "goal_input"]: primaryOption,
+        [field_name_for_the_model + "_secondary" || "goal_input"]:
+          secondaryOption,
       },
       metadata,
     );
@@ -75,7 +75,20 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
             title={secondaryOption}
           >
             {secondaryOptions.map((option, index) => (
-              <Dropdown.Item key={index} eventKey={option}>
+              <Dropdown.Item
+                key={index}
+                eventKey={option}
+                onClick={() => {
+                  setSecondaryOption(option);
+                  updateModelInputs(
+                    {
+                      [field_name_for_the_model + "secondary" || "goal_input"]:
+                        option,
+                    },
+                    metadata,
+                  );
+                }}
+              >
                 {option}
               </Dropdown.Item>
             ))}
