@@ -119,7 +119,8 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
           name: "language",
           //  @ts-ignore
           value: modelInputs.origin_secondary
-            ? modelInputs.origin_secondary
+            ? //  @ts-ignore
+              modelInputs.origin_secondary
             : "en",
         },
       ],
