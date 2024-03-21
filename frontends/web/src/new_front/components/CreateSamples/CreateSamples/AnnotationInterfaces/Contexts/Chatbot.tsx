@@ -1,7 +1,7 @@
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import BasicInput from "new_front/components/Inputs/BasicInput";
 import EvaluateText from "new_front/components/Inputs/EvaluateText";
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
 import Swal from "sweetalert2";
@@ -33,6 +33,13 @@ const Chatbot: FC<ChatbotProps> = ({
   const [responsesHistory, setResponsesHistory] = useState<
     { iteration: number; responses_model: any[] }[]
   >([]);
+
+  // If optionsSlider does not exist always put isAskingQuestion to false
+  // useEffect(() => {
+  //   if (!optionsSlider) {
+  //     setIsAskingQuestion(false);
+  //   }
+  // }, [optionsSlider]);
 
   const askQuestion = async () => {
     if (prompt !== "") {

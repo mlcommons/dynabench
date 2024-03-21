@@ -76,7 +76,7 @@ const ChatWithInstructions: FC<
               <BasicInstructions instructions={context} />
               <div className="flex items-end justify-end gap-4">
                 <GeneralButton
-                  text="I agree"
+                  text="I have read the instructions"
                   onClick={() => setReadInstructions(true)}
                   className="border-0 font-weight-bold light-gray-bg task-action-btn"
                 />
@@ -105,18 +105,7 @@ const ChatWithInstructions: FC<
               </div>
               <div className="col-span-1">
                 <div className="p-4 bg-white">
-                  <h2 className="mb-4 text-2xl font-bold">Instructions</h2>
-                  <p className="text-gray-600">
-                    You are playing the part of a 47-year-old female patient who
-                    is concerned about having problems with her memory. She
-                    keeps forgetting basic things around the house, like where
-                    she put her keys or why she walked into a room. She has
-                    sticky notes all over the house to help her remember
-                    everything. She first started noticing about six months ago,
-                    but it has gotten worse, to the point that some of her
-                    colleagues at work have also asked about it. She is worried
-                    that it could be something to do with dementia.
-                  </p>
+                  <BasicInstructions instructions={context} />
                 </div>
               </div>
             </div>

@@ -1,0 +1,7 @@
+Hey submitter,
+
+Your model $name failed. Please ensure that your model follows the submission guidelines and that the provided code is correct. If you believe that this is an error, please contact us.
+
+Thanks,
+
+The Dynabench Team

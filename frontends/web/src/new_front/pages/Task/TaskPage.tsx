@@ -176,7 +176,7 @@ const TaskPage = () => {
                   {/* Remove after Nibbler finish */}
                   {task.id !== 45 ? (
                     <div className={openTab === 1 ? "block  px-4" : "hidden"}>
-                      {task.show_user_leaderboard !== 0 &&
+                      {task.show_user_leaderboard !== 0 ||
                       task.show_leaderboard !== 0 ? (
                         task.id !== 16 ? (
                           <Leaderboard
