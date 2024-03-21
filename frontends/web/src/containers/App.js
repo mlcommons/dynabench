@@ -61,6 +61,7 @@ import UserPage from "./UserPage";
 import DataperfLanding from "../new_front/pages/CommunitiesLandingPages/DataperfLanding";
 import DADCLanding from "new_front/pages/CommunitiesLandingPages/DADCLanding";
 import BabyLMLanding from "new_front/pages/CommunitiesLandingPages/BabyLMLanding";
+import MachineTranslationLanding from "new_front/pages/CommunitiesLandingPages/MachineTranslationLanding";
 import OthersTaskLanding from "new_front/pages/CommunitiesLandingPages/OthersTaskLanding";
 import logoBlack from "new_front/assets/logo_black.png";
 import logoWhite from "new_front/assets/logo_mlcommos_white.png";
@@ -535,6 +536,10 @@ class App extends React.Component {
                         <Route path="/dataperf" component={DataperfLanding} />
                         <Route path="/dadc" component={DADCLanding} />
                         <Route path="/babylm" component={BabyLMLanding} />
+                        <Route
+                          path="/machine_translation"
+                          component={MachineTranslationLanding}
+                        />
 
                         <Route
                           path="/others_tasks"
