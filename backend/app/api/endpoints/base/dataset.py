@@ -15,3 +15,12 @@ async def upload_dataset(
     task_id: int, task_code: str, dataset_name: str, dataset: UploadFile = File(...)
 ):
     return DatasetService().upload_dataset(task_id, task_code, dataset_name, dataset)
+
+
+@router.post("/create_dataset_in_db")
+async def create_dataset_in_db(
+    task_id: str,
+    dataset_name: str,
+    access_type: str,
+):
+    return DatasetService().create_dataset_in_db(task_id, dataset_name, access_type)
