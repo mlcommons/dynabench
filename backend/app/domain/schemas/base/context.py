@@ -16,3 +16,8 @@ class GetContextRequest(BaseModel):
 class GetGenerativeContextRequest(BaseModel):
     type: str
     artifacts: dict
+
+
+class GetFilterContext(BaseModel):
+    real_round_id: int
+    filters: dict

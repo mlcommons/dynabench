@@ -18,7 +18,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
   id,
   texts,
   setTexts,
-  optionsSlider = ["0", "100"],
+  optionsSlider,
   disabled = false,
   bestAnswer,
   score = 50,
@@ -54,21 +54,24 @@ const EvaluateText: FC<EvaluateTextProps> = ({
             rows={7}
           />
         </div>
-        <div className="flex items-center justify-between w-full gap-2 px-4 pt-4 pb-2 border-t">
-          <span className="text-gray-500 ">{optionsSlider[0]}</span>
-          <input
-            id={id}
-            className={`rounded-full w-full cursor-pointer `}
-            type="range"
-            step={1}
-            defaultValue={score}
-            min={1}
-            max={100}
-            onChange={handleUpdateScore}
-            disabled={disabled}
-          />
-          <span className="text-gray-500 ">{optionsSlider[1]}</span>
-        </div>
+        {optionsSlider && (
+          <div className="flex items-center justify-between w-full gap-2 px-4 pt-4 pb-2 border-t">
+            <span className="text-gray-500 ">{optionsSlider[0]}</span>
+            <input
+              id={id}
+              className={`rounded-full w-full cursor-pointer `}
+              type="range"
+              step={1}
+              defaultValue={score}
+              min={1}
+              max={100}
+              onChange={handleUpdateScore}
+              disabled={disabled}
+            />
+            <span className="text-gray-500 ">{optionsSlider[1]}</span>
+          </div>
+        )}
+
         <div className="flex justify-between w-full"></div>
       </div>
     </form>

@@ -8,6 +8,7 @@ type MultiSliderProps = {
   optionsSlider: string[];
   field_name_for_the_model: string;
   metadata?: boolean;
+  show_na_checkbox?: boolean;
   onInputChange: (data: any, metadata?: boolean) => void;
 };
 
@@ -17,6 +18,7 @@ const MultiSlider: FC<MultiSliderProps> = ({
   optionsSlider = ["0", "100"],
   field_name_for_the_model,
   metadata,
+  show_na_checkbox = true,
   onInputChange,
 }) => {
   const [open, setOpen] = useState(false);
@@ -83,15 +85,19 @@ const MultiSlider: FC<MultiSliderProps> = ({
                       }
                     />
                     <span className="text-gray-500 ">{optionsSlider[1]}</span>
-                    <input
-                      className="w-10 text-center text-gray-500 bg-gray-100 border-gray-300 rounded"
-                      type="checkbox"
-                      value="N/A"
-                      onChange={(event) =>
-                        handleChange(option.label, event.target.value)
-                      }
-                    />
-                    <span className="text-gray-500 ">N/A</span>
+                    {show_na_checkbox && (
+                      <>
+                        <input
+                          className="w-10 text-center text-gray-500 bg-gray-100 border-gray-300 rounded"
+                          type="checkbox"
+                          value="N/A"
+                          onChange={(event) =>
+                            handleChange(option.label, event.target.value)
+                          }
+                        />
+                        <span className="text-gray-500 ">N/A</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </li>

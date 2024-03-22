@@ -465,107 +465,118 @@ class EvaluationService:
         selected_langs: str = None,
         evaluate_not_scoring_datasets: bool = False,
     ) -> dict:
-        tasks = self.task_repository.get_model_id_and_task_code(task_code)
-        if selected_langs is not None and len(selected_langs) > 0:
-            new_scores = self.evaluation_with_selected_langs(
-                tasks.id, task_code, model_s3_zip, model_id, user_id, selected_langs
+        try:
+            tasks = self.task_repository.get_model_id_and_task_code(task_code)
+            if selected_langs is not None and len(selected_langs) > 0:
+                new_scores = self.evaluation_with_selected_langs(
+                    tasks.id, task_code, model_s3_zip, model_id, user_id, selected_langs
+                )
+                return new_scores
+            logs_name = "logs-{}".format(
+                (model_s3_zip.split("/")[-1].split(".")[0]).split("-")[0]
             )
-            return new_scores
-        logs_name = "logs-{}".format(
-            (model_s3_zip.split("/")[-1].split(".")[0]).split("-")[0]
-        )
-        handler = cloudwatch.CloudwatchHandler(
-            log_group="test_logging_new_builder",
-            log_stream=logs_name,
-            access_id=os.getenv("AWS_ACCESS_KEY_ID"),
-            access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-            region=os.getenv("AWS_REGION"),
-        )
-        formatter = logging.Formatter("%(asctime)s : %(levelname)s - %(message)s")
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
+            handler = cloudwatch.CloudwatchHandler(
+                log_group="test_logging_new_builder",
+                log_stream=logs_name,
+                access_id=os.getenv("AWS_ACCESS_KEY_ID"),
+                access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+                region=os.getenv("AWS_REGION"),
+            )
+            formatter = logging.Formatter("%(asctime)s : %(levelname)s - %(message)s")
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
 
-        self.logger.info(f"Task: {tasks.id}")
-        delta_metrics_task = self.get_task_configuration(tasks.id).get(
-            "delta_metrics", []
-        )
-        delta_metrics_task = [
-            delta_metric_task["type"] for delta_metric_task in delta_metrics_task
-        ]
-        scoring_datasets = self.necessary_datasets(
-            tasks.id, tasks.task_code, model_s3_zip, delta_metrics_task
-        )
-        self.logger.info("Datasets downloaded")
-        rounds = list(
-            map(
-                int,
-                {
-                    current_round
-                    for rounds in scoring_datasets
-                    for current_round in str(rounds["round_id"])
-                },
+            self.logger.info(f"Task: {tasks.id}")
+            delta_metrics_task = self.get_task_configuration(tasks.id).get(
+                "delta_metrics", []
             )
-        )
-        ip, model_name, folder_name, arn_service, repo_name = self.get_model_ip(
-            model_s3_zip
-        )
-        new_scores = []
-        self.logger.info(f"Create endpoint for evaluation: {ip}")
-        for current_round in rounds:
-            round_datasets = [
-                dataset
-                for dataset in scoring_datasets
-                if dataset["round_id"] == current_round
+            delta_metrics_task = [
+                delta_metric_task["type"] for delta_metric_task in delta_metrics_task
             ]
-            self.logger.info("Evaluate scoring datasets")
-            new_score = self.save_predictions_dataset(
-                round_datasets,
-                tasks,
-                ip,
-                model_name,
-                folder_name,
-                model_id,
-                arn_service,
-                current_round,
-                selected_langs,
+            scoring_datasets = self.necessary_datasets(
+                tasks.id, tasks.task_code, model_s3_zip, delta_metrics_task
             )
-            new_scores.append(new_score)
-        if evaluate_not_scoring_datasets:
-            jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
-            not_scoring_datasets = self.downloads_not_scoring_datasets(
-                jsonl_not_scoring_datasets,
-                self.s3_bucket,
-                tasks.task_code,
-                model_s3_zip,
+            self.logger.info("Datasets downloaded")
+            rounds = list(
+                map(
+                    int,
+                    {
+                        current_round
+                        for rounds in scoring_datasets
+                        for current_round in str(rounds["round_id"])
+                    },
+                )
             )
-            for not_scoring_dataset in not_scoring_datasets:
-                self.logger.info("Evaluate non-scoring datasets")
-                send_not_scoring_dataset = []
-                send_not_scoring_dataset.append(not_scoring_dataset)
+            ip, model_name, folder_name, arn_service, repo_name = self.get_model_ip(
+                model_s3_zip
+            )
+            new_scores = []
+            self.logger.info(f"Create endpoint for evaluation: {ip}")
+            for current_round in rounds:
+                round_datasets = [
+                    dataset
+                    for dataset in scoring_datasets
+                    if dataset["round_id"] == current_round
+                ]
+                self.logger.info("Evaluate scoring datasets")
                 new_score = self.save_predictions_dataset(
-                    send_not_scoring_dataset,
+                    round_datasets,
                     tasks,
                     ip,
                     model_name,
                     folder_name,
                     model_id,
                     arn_service,
+                    current_round,
+                    selected_langs,
                 )
                 new_scores.append(new_score)
-        self.builder.delete_repository(repo_name)
-        self.logger.info("Create light model")
-        self.model_repository.update_model_status(model_id)
-        self.logger.info("Clean folder and service")
-        self.clean_folder_and_service(folder_name, arn_service)
-        user_email = self.user_repository.get_user_email(user_id)[0]
-        self.email_helper.send(
-            contact=user_email,
-            cc_contact="dynabench-site@mlcommons.org",
-            template_name="model_train_successful.txt",
-            msg_dict={"name": model_name, "model_id": model_id},
-            subject=f"Model {model_name} training succeeded.",
-        )
-        return new_scores
+            if evaluate_not_scoring_datasets:
+                jsonl_not_scoring_datasets = self.get_not_scoring_datasets(tasks.id)
+                not_scoring_datasets = self.downloads_not_scoring_datasets(
+                    jsonl_not_scoring_datasets,
+                    self.s3_bucket,
+                    tasks.task_code,
+                    model_s3_zip,
+                )
+                for not_scoring_dataset in not_scoring_datasets:
+                    self.logger.info("Evaluate non-scoring datasets")
+                    send_not_scoring_dataset = []
+                    send_not_scoring_dataset.append(not_scoring_dataset)
+                    new_score = self.save_predictions_dataset(
+                        send_not_scoring_dataset,
+                        tasks,
+                        ip,
+                        model_name,
+                        folder_name,
+                        model_id,
+                        arn_service,
+                    )
+                    new_scores.append(new_score)
+            self.builder.delete_repository(repo_name)
+            self.logger.info("Create light model")
+            self.model_repository.update_model_status(model_id)
+            self.logger.info("Clean folder and service")
+            self.clean_folder_and_service(folder_name, arn_service)
+            user_email = self.user_repository.get_user_email(user_id)[0]
+            self.email_helper.send(
+                contact=user_email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_train_successful.txt",
+                msg_dict={"name": model_name, "model_id": model_id},
+                subject=f"Model {model_name} training succeeded.",
+            )
+            return new_scores
+        except Exception as e:
+            self.logger.error(f"Error: {e}")
+            user_email = self.user_repository.get_user_email(user_id)[0]
+            self.email_helper.send(
+                contact=user_email,
+                cc_contact="dynabench-site@mlcommons.org",
+                template_name="model_eval_failed.txt",
+                msg_dict={"name": model_name, "model_id": model_id},
+                subject=f"Model {model_name} evaluation failed.",
+            )
 
     def clean_folder_and_service(self, folder_name: str, arn_service: str):
         print("arn_service", arn_service)

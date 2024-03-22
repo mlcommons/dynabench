@@ -67,3 +67,10 @@ class ContextRepository(AbstractRepository):
 
     def get_validation_failed(self, real_round_id: int, tags=None):
         return None
+
+    def get_context_by_real_round_id(self, real_round_id: int):
+        return (
+            self.session.query(self.model.context_json)
+            .filter(self.model.r_realid == real_round_id)
+            .all()
+        )

@@ -12,6 +12,7 @@ const MultiSliderSelection: FC<AnnotationFactoryType & AnnotationUserInput> = ({
   instruction,
   metadata,
   options_slider,
+  show_na_checkbox,
 }) => {
   const { updateModelInputs } = useContext(CreateInterfaceContext);
 
@@ -28,6 +29,7 @@ const MultiSliderSelection: FC<AnnotationFactoryType & AnnotationUserInput> = ({
             optionsSlider={options_slider}
             field_name_for_the_model={field_name_for_the_model}
             metadata={metadata}
+            show_na_checkbox={show_na_checkbox}
             onInputChange={updateModelInputs}
           />
         </AnnotationInstruction>

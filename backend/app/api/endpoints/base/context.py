@@ -11,6 +11,7 @@ from sse_starlette.sse import EventSourceResponse
 
 from app.domain.schemas.base.context import (
     GetContextRequest,
+    GetFilterContext,
     GetGenerativeContextRequest,
 )
 from app.domain.services.base.context import ContextService
@@ -68,3 +69,9 @@ async def stream_images(model_info: GetGenerativeContextRequest):
             await asyncio.sleep(1)
 
     return EventSourceResponse(event_generator())
+
+
+@router.post("/get_filter_context")
+def get_filter_context(model: GetFilterContext):
+    context = ContextService().get_filter_context(model.real_round_id, model.filters)
+    return context

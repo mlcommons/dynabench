@@ -82,6 +82,7 @@ class Leaderboard extends React.Component {
   }
 
   componentDidMount() {
+    console.log("Leaderboard component did mount");
     this.getCurrentTaskData();
   }
 
