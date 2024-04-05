@@ -26,6 +26,7 @@
     "select-multiple-images": "SelectMultipleImages",
     "multi-slider-selection": "MultiSliderSelection",
     "select-option-with-slider": "SelectOptionWithSliderSelection",
+    "basic-input-with-slider": "BasicInputWithSliderSelection",
     "basic-input-select-option-with-instructions": "BasicInputSelectOptionWithInstructions"
   }
 }

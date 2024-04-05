@@ -44,6 +44,7 @@ const CreateInterface = () => {
   // Parse the query parameters
   const queryParams = new URLSearchParams(location.search);
   const assignmentId = queryParams.get("assignmentId");
+  const treatmentId = queryParams.get("treatmentId");
 
   const checkIfUserCanCreateSample = async () => {
     if (response.ok) {
@@ -105,14 +106,26 @@ const CreateInterface = () => {
     }
   };
 
-  const isLogin = async (assignmentId: string | null, taskCode: string) => {
+  const isLogin = async (
+    assignmentId: string | null,
+    taskCode: string,
+    treatmentId: string | null,
+  ) => {
     if (!user.id) {
-      await checkUserIsLoggedIn(history, `/`, assignmentId, taskCode);
+      console.log("treatmentIdCreate", treatmentId);
+
+      await checkUserIsLoggedIn(
+        history,
+        `/`,
+        assignmentId,
+        taskCode,
+        treatmentId,
+      );
     }
   };
 
   useEffect(() => {
-    isLogin(assignmentId, taskCode);
+    isLogin(assignmentId, taskCode, treatmentId);
   }, [user]);
 
   useEffect(() => {

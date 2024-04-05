@@ -73,7 +73,7 @@ const Chatbot: FC<ChatbotProps> = ({
             text: "Please try again",
             icon: "error",
           }).then(() => {
-            window.location.reload();
+            // window.location.reload();
           });
         }
         setNewResponses(

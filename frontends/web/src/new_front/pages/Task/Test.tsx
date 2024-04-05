@@ -1,4 +1,4 @@
-import SelectOptionWithSlider from "new_front/components/Inputs/SelectOptionWithSlider";
+import BasicInputWithSlider from "new_front/components/Inputs/BasicInputWithSlider";
 import React from "react";
 
 const Test = () => {
@@ -23,12 +23,13 @@ const Test = () => {
 
   return (
     <>
-      <SelectOptionWithSlider
+      <BasicInputWithSlider
         options={options}
         instructions={instructions}
         optionsSlider={["0", "100"]}
         field_name_for_the_model={field_name_for_the_model}
         onInputChange={(data: any, metadata?: boolean) => console.log(data)}
+        instructions_slider="Select a value"
       />
     </>
   );

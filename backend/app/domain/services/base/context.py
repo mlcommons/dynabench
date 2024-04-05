@@ -244,3 +244,12 @@ class ContextService:
                 if context.get(key).lower() == value.lower():
                     filter_contexts.append(context)
         return random.choice(filter_contexts)
+
+    def get_contexts_from_s3(self, artifacts: dict):
+        artifacts = artifacts["artifacts"]
+        task_code = self.task_service.get_task_code_by_task_id(artifacts["task_id"])[0]
+        file_name = f"Top_{artifacts['country']}-{artifacts['language']}_Contexts.json"
+        key = f"{task_code}/{file_name}"
+        obj = self.s3.get_object(Bucket=self.dataperf_bucket, Key=key)
+        body = obj["Body"].read()
+        return json.loads(body)

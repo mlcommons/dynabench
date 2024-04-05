@@ -1,11 +1,11 @@
-import SelectOptionWithSlider from "new_front/components/Inputs/SelectOptionWithSlider";
+import BasicInputWithSlider from "new_front/components/Inputs/BasicInputWithSlider";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
 import React, { FC, useContext } from "react";
 
-const SelectOptionWithSliderSelection: FC<
+const BasicInputWithSliderSelection: FC<
   AnnotationFactoryType & AnnotationUserInput
 > = ({
   instructions,
@@ -24,7 +24,7 @@ const SelectOptionWithSliderSelection: FC<
           placement="left"
           tooltip={instruction || "Select one of the options below"}
         >
-          <SelectOptionWithSlider
+          <BasicInputWithSlider
             options={options}
             instructions={instructions}
             optionsSlider={options_slider}
@@ -39,4 +39,4 @@ const SelectOptionWithSliderSelection: FC<
   );
 };
 
-export default SelectOptionWithSliderSelection;
+export default BasicInputWithSliderSelection;

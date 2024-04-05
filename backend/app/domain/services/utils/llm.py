@@ -53,8 +53,11 @@ class LLMProvider(ABC):
 
 
 class OpenAIProvider(LLMProvider):
-    def __init__(self):
-        self.api_key = os.getenv("OPENAI")
+    def __init__(self, task_id: int = -1):
+        if task_id == 56:
+            self.api_key = os.getenv("OPENAI_HELPME")
+        else:
+            self.api_key = os.getenv("OPENAI")
         openai.api_key = self.api_key
 
     @async_timeout(30)
@@ -128,7 +131,7 @@ class OpenAIProvider(LLMProvider):
             return "None"
 
     def provider_name(self):
-        return "openai"
+        return "openaihm"
 
 
 class HuggingFaceProvider(LLMProvider):

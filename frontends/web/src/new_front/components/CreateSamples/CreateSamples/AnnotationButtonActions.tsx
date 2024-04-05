@@ -76,6 +76,8 @@ const AnnotationButtonActions: FC<Props> = ({
         model_evaluation_metric_info: modelEvaluationMetricInfo,
         model_metadata: metadataExample,
       };
+      console.log("finaModelInputs", finaModelInputs);
+      return null;
       if (partialSampleId === 0) {
         const modelOutput = await post(
           `/model/single_model_prediction_submit`,
@@ -137,6 +139,11 @@ const AnnotationButtonActions: FC<Props> = ({
       });
     }
   };
+
+  useEffect(() => {
+    console.log("modelInputs", modelInputs);
+    console.log("metadataExample", metadataExample);
+  }, [modelInputs, metadataExample]);
 
   return (
     <>

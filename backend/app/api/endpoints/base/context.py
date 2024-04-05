@@ -75,3 +75,8 @@ async def stream_images(model_info: GetGenerativeContextRequest):
 def get_filter_context(model: GetFilterContext):
     context = ContextService().get_filter_context(model.real_round_id, model.filters)
     return context
+
+
+@router.post("/get_contexts_from_s3")
+def get_contexts_from_s3(artifacts: dict):
+    return ContextService().get_contexts_from_s3(artifacts)

@@ -35,6 +35,9 @@ class TaskService:
         self.validation_repository = ValidationRepository()
         self.historical_task_repository = HistoricalDataRepository()
 
+    def get_task_code_by_task_id(self, task_id: int):
+        return self.task_repository.get_task_code_by_task_id(task_id)
+
     def update_last_activity_date(self, task_id: int):
         self.task_repository.update_last_activity_date(task_id)
 
