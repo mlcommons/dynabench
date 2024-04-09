@@ -248,8 +248,17 @@ class ContextService:
     def get_contexts_from_s3(self, artifacts: dict):
         artifacts = artifacts["artifacts"]
         task_code = self.task_service.get_task_code_by_task_id(artifacts["task_id"])[0]
-        file_name = f"Top_{artifacts['country']}-{artifacts['language']}_Contexts.json"
+        file_name = f"Top_{artifacts['country']}-{artifacts['language']}_Concepts.json"
         key = f"{task_code}/{file_name}"
         obj = self.s3.get_object(Bucket=self.dataperf_bucket, Key=key)
         body = obj["Body"].read()
         return json.loads(body)
+
+    def save_contexts_to_s3(self, file, task_id, language, country, description):
+        task_code = self.task_service.get_task_code_by_task_id(task_id)[0]
+        random_id = random.randint(0, 100000)
+        file_name = f"Top_{country}-{language}-{description}_{random_id}.jpeg"
+        key = f"{task_code}/images/{file_name}"
+        file.file.seek(0)
+        self.s3.put_object(Bucket=self.dataperf_bucket, Key=key, Body=file.file)
+        return key

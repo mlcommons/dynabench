@@ -110,8 +110,6 @@ const ChatWithInstructions: FC<
   };
 
   useEffect(() => {
-    console.log("treatmentId", treatmentId);
-
     if (treatmentId) {
       setTreatmentValue(getTreatmentValue(treatmentId as TreatmentId));
       if (getTreatmentValue(treatmentId as TreatmentId) !== "control") {

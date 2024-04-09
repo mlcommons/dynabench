@@ -8,12 +8,21 @@ import Select from "react-select";
 import useFetch from "use-http";
 import { PacmanLoader } from "react-spinners";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
+import axios from "axios";
 
 type ImageUploadProps = {
+  image: string;
+  setFile: (file: File) => void;
   setImage: (image: string) => void;
+  updateModelInputs: (input: object, metadata?: boolean) => void;
 };
 
-const ImageUpload = ({ setImage }: ImageUploadProps) => {
+const ImageUpload = ({
+  image,
+  setFile,
+  setImage,
+  updateModelInputs,
+}: ImageUploadProps) => {
   const [dragging, setDragging] = useState(false);
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
@@ -45,33 +54,56 @@ const ImageUpload = ({ setImage }: ImageUploadProps) => {
         setImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+      updateModelInputs({ image: file.name });
+      setFile(file);
     }
   };
 
   return (
-    <div
-      className={`flex justify-center items-center border-2 border-dashed rounded-lg p-4 ${
-        dragging ? "bg-gray-200" : ""
-      }`}
-      onDragEnter={handleDragEnter}
-      onDragOver={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <input
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleImageChange}
-      />
-      <div className="text-center">
-        <p className="mb-2">Drag & Drop or Click to Upload Image</p>
-        <button
-          className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
-          onClick={() => document.getElementById("fileInput")?.click()}
-        >
-          Select Image
-        </button>
+    <div>
+      <div className="flex items-center justify-center gap-8 pb-2">
+        <img
+          src={image}
+          alt="src"
+          className="rounded-lg max-w-[450px] max-h-[450px]"
+          onDrag={handleDragEnter}
+          onDragEnd={handleDragLeave}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragEnter}
+          onDrop={handleDrop}
+          onClick={() => {
+            const input = document.getElementById("fileInput");
+            if (input) {
+              input.click();
+            }
+          }}
+        />
+      </div>
+      <div
+        className={`flex justify-center items-center border-2 border-dashed rounded-lg p-4 ${
+          dragging ? "bg-gray-200" : ""
+        }`}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <input
+          id="fileInput"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageChange}
+        />
+        <div className="text-center">
+          <p className="mb-2">Drag & Drop or Click to Upload Image</p>
+          <button
+            className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
+            onClick={() => document.getElementById("fileInput")?.click()}
+          >
+            Select Image
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -92,6 +124,8 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   const [country, setCountry] = useState<string>("");
   const [languages, setLanguages] = useState<string[]>([]);
   const [language, setLanguage] = useState<string>("");
+  const [file, setFile] = useState<File>();
+  const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
   const { modelInputs, updateModelInputs } = useContext(CreateInterfaceContext);
 
   const handleGetLanguages = async (e: any) => {
@@ -105,7 +139,9 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
       },
       [] as string[],
     );
+    setLanguage("");
     setLanguages(extractedLanguages);
+    setFilterContext(null);
     updateModelInputs({
       origin_primary: e.value,
       origin_secondary: extractedLanguages[0],
@@ -131,6 +167,33 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
     }
   };
 
+  const handleSaveInput = async (e: any) => {
+    updateModelInputs({ description: e.target.value });
+    setDescription(e.target.value);
+  };
+
+  const handleSaveData = async () => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    axios
+      .post(`${BASE_URL_2}/context/save_contexts_to_s3`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        params: {
+          task_id: taskId,
+          language,
+          country,
+          description,
+        },
+      })
+      .then((res) => {
+        console.log(res);
+      });
+    setIsGenerativeContext(false);
+  };
+
   useEffect(() => {
     console.log("generative_context", generative_context);
     if (generative_context.artifacts) {
@@ -150,8 +213,8 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   }, [country, language]);
 
   useEffect(() => {
-    console.log("filterContext", filterContext);
-  }, [filterContext]);
+    console.log("file", file);
+  }, [file]);
 
   return (
     <>
@@ -161,7 +224,7 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
             Select the country and language
           </div>
         </div>
-        <div className="flex items-center justify-center gap-8 pb-6">
+        <div className="flex items-center justify-center gap-8 pb-12">
           <div className="mr-4">
             <p className="text-base">Country</p>
             <Select
@@ -189,26 +252,27 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
           <div className="grid grid-cols-3 gap-3 divide-x-2">
             <div className="col-span-1">
               <div className="flex flex-col items-center py-2 space-y-3 align-center">
-                <DoubleDropDown filterContext={filterContext} />
+                <DoubleDropDown
+                  filterContext={filterContext}
+                  updateModelInputs={updateModelInputs}
+                />
               </div>
             </div>
             <div className="col-span-2 px-4">
               <div className="flex flex-col items-center w-full col-span-2 py-2 space-y-3 align-center">
-                <img
-                  height={200}
-                  width={200}
-                  src={image}
-                  alt="src"
-                  className="rounded-lg cursor-pointer"
+                <ImageUpload
+                  image={image}
+                  setFile={setFile}
+                  setImage={setImage}
+                  updateModelInputs={updateModelInputs}
                 />
-                <ImageUpload setImage={setImage} />
                 <BasicInput
                   placeholder="Enter text here. Do not copy and paste"
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={handleSaveInput}
                 />
                 <GeneralButton
-                  onClick={() => console.log(description)}
-                  text="Send"
+                  onClick={handleSaveData}
+                  text="Save description"
                   className="px-4 mt-[2px] font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                 />
               </div>

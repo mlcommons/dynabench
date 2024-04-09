@@ -112,8 +112,6 @@ const CreateInterface = () => {
     treatmentId: string | null,
   ) => {
     if (!user.id) {
-      console.log("treatmentIdCreate", treatmentId);
-
       await checkUserIsLoggedIn(
         history,
         `/`,

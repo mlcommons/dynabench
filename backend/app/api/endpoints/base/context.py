@@ -5,7 +5,7 @@
 import asyncio
 import json
 
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 
@@ -30,19 +30,6 @@ async def get_context(model: GetContextRequest):
 async def get_context_configuration(task_id: int):
     context_config = ContextService().get_context_configuration(task_id=task_id)
     return context_config
-
-
-@router.websocket("/ws/get_generative_contexts")
-async def websocket_generative_context(websocket: WebSocket):
-    await websocket.accept()
-    model_info = await websocket.receive_json()
-    model_info = dict(model_info)
-    while True:
-        data = ContextService().get_generative_contexts(
-            model_info["type"], model_info["artifacts"]
-        )
-        await websocket.send_json(data)
-        await asyncio.sleep(1)
 
 
 @router.post("/get_generative_contexts")
@@ -80,3 +67,16 @@ def get_filter_context(model: GetFilterContext):
 @router.post("/get_contexts_from_s3")
 def get_contexts_from_s3(artifacts: dict):
     return ContextService().get_contexts_from_s3(artifacts)
+
+
+@router.post("/save_contexts_to_s3")
+def save_contexts_to_s3(
+    task_id: int,
+    language: str,
+    country: str,
+    description: str,
+    file: UploadFile = File(...),
+):
+    return ContextService().save_contexts_to_s3(
+        file, task_id, language, country, description
+    )

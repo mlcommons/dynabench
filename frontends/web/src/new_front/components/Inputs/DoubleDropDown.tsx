@@ -3,18 +3,24 @@ import Select from "react-select";
 
 type DoubleDropDownProps = {
   filterContext: any;
+  updateModelInputs: (input: object, metadata?: boolean) => void;
 };
 
-const DoubleDropDown = ({ filterContext }: DoubleDropDownProps) => {
+const DoubleDropDown = ({
+  filterContext,
+  updateModelInputs,
+}: DoubleDropDownProps) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedConcept, setSelectedConcept] = useState(null);
 
   const handleCategoryChange = (selectedOption: any) => {
     setSelectedCategory(selectedOption);
-    setSelectedConcept(null); // Reset selected concept when category changes
+    updateModelInputs({ category: selectedOption.value });
+    setSelectedConcept(null);
   };
 
   const handleConceptChange = (selectedOption: any) => {
+    updateModelInputs({ concept: selectedOption.value });
     setSelectedConcept(selectedOption);
   };
 
