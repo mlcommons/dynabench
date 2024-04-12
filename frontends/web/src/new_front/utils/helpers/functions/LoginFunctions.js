@@ -11,7 +11,7 @@ export const checkUserIsLoggedIn = async (
   url,
   assignmentId,
   taskCode,
-  treatmentId,
+  treatmentId
 ) => {
   const login = await isLogin();
   return sendUserToLogin(
@@ -20,7 +20,7 @@ export const checkUserIsLoggedIn = async (
     url,
     assignmentId,
     taskCode,
-    treatmentId,
+    treatmentId
   );
 };
 
@@ -42,13 +42,13 @@ const sendUserToLogin = (
   url,
   assignmentId,
   taskCode,
-  treatmentId,
+  treatmentId
 ) => {
   if (!login) {
     history.push(
       "/login?msg=" +
         encodeURIComponent(
-          "Please sign up or log in so that you can upload a model",
+          "Please sign up or log in so that you can upload a model"
         ) +
         "&src=" +
         encodeURIComponent(url) +
@@ -57,7 +57,7 @@ const sendUserToLogin = (
         "&taskCode=" +
         encodeURIComponent(taskCode) +
         "&treatmentId=" +
-        encodeURIComponent(treatmentId),
+        encodeURIComponent(treatmentId)
     );
   } else {
     return true;
