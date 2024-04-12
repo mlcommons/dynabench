@@ -129,9 +129,61 @@ class ContextService:
         return context_info
 
     def get_nibbler_contexts(
-        self, prompt: str, user_id: int, num_images: int, models: list, endpoint: str
+        self,
+        prompt: str,
+        user_id: int,
+        num_images: int,
+        models: list,
+        endpoint: str,
+        prompt_already_exists_for_user: bool,
+        prompt_with_more_than_one_hundred: bool,
     ) -> dict:
         images = []
+        if prompt_already_exists_for_user:
+            # Download the images from the s3 bucket
+            key = f"adversarial-nibbler/{prompt}/{user_id}"
+            objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
+            if "Contents" in objects:
+                for obj in objects["Contents"]:
+                    image_id = obj["Key"].split("/")[-1].split(".")[0]
+                    image = self.s3.get_object(
+                        Bucket=self.dataperf_bucket, Key=obj["Key"]
+                    )
+                    image_bytes = image["Body"].read()
+                    image = base64.b64encode(image_bytes).decode("utf-8")
+                    new_dict = {
+                        "image": image,
+                        "id": image_id,
+                    }
+                    images.append(new_dict)
+            return images
+        if prompt_with_more_than_one_hundred:
+            print("Prompt with less than 100 images")
+            key = f"adversarial-nibbler/{prompt}"
+            objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
+            users = []
+            if "Contents" in objects:
+                users = [obj["Key"] for obj in objects["Contents"]]
+                users = list({item.split("/")[2] for item in users})
+            print(f"Users are {users}")
+            random_user = random.choice(users)
+            print(f"Random user is {random_user}")
+            key = f"adversarial-nibbler/{prompt}/{random_user}"
+            objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
+            if "Contents" in objects:
+                for obj in objects["Contents"]:
+                    image_id = obj["Key"].split("/")[-1].split(".")[0]
+                    image = self.s3.get_object(
+                        Bucket=self.dataperf_bucket, Key=obj["Key"]
+                    )
+                    image_bytes = image["Body"].read()
+                    image = base64.b64encode(image_bytes).decode("utf-8")
+                    new_dict = {
+                        "image": image,
+                        "id": image_id,
+                    }
+                    images.append(new_dict)
+            return images
         start = time.time()
         multi_generator = ImageGenerator()
         generated_images = multi_generator.generate_all_images(
@@ -176,7 +228,9 @@ class ContextService:
                             "image": image,
                             "id": image_id,
                         }
-                        filename = f"adversarial-nibbler/{image_id}.jpeg"
+                        filename = (
+                            f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                        )
                         self.s3.put_object(
                             Body=base64.b64decode(image),
                             Bucket=self.dataperf_bucket,
@@ -226,6 +280,12 @@ class ContextService:
                 user_id=artifacts["user_id"],
                 models=artifacts["model"],
                 endpoint=artifacts["model"],
+                prompt_already_exists_for_user=artifacts[
+                    "prompt_already_exists_for_user"
+                ],
+                prompt_with_more_than_one_hundred=artifacts[
+                    "prompt_with_more_than_one_hundred"
+                ],
                 num_images=6,
             )
         elif type == "perdi":

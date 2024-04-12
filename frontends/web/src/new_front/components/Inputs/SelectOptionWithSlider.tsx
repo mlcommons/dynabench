@@ -36,7 +36,7 @@ const SelectOptionWithSlider: FC<SelectOptionWithSliderProps> = ({
       if (option && response.label === option) {
         return { label: response.label, value: value };
       }
-      return { label: response.label, value: 50 };
+      return { label: response.label, value: "" };
     });
 
     setResponses(updatedResponses);

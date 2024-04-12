@@ -9,6 +9,8 @@ import useFetch from "use-http";
 import { PacmanLoader } from "react-spinners";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import axios from "axios";
+import { Modal } from "react-bootstrap";
+import MDEditor from "@uiw/react-md-editor";
 
 type ImageUploadProps = {
   image: string;
@@ -119,6 +121,7 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
     "https://w7.pngwing.com/pngs/527/625/png-transparent-scalable-graphics-computer-icons-upload-uploading-cdr-angle-text-thumbnail.png",
   );
   const [description, setDescription] = useState("");
+  const [showExample, setShowExample] = useState(false);
   const { post, response, loading } = useFetch();
   const [countries, setCountries] = useState<string[]>([]);
   const [country, setCountry] = useState<string>("");
@@ -224,29 +227,64 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
             Select the country and language
           </div>
         </div>
-        <div className="flex items-center justify-center gap-8 pb-12">
-          <div className="mr-4">
-            <p className="text-base">Country</p>
-            <Select
-              options={countries.map((country) => ({
-                value: country,
-                label: country,
-              }))}
-              onChange={handleGetLanguages}
-              placeholder="Select a country"
-            />
+        <div className="flex items-center justify-between gap-8 pb-12">
+          <div className="flex gap-8">
+            <div className="mr-4">
+              <p className="text-base">Country</p>
+              <Select
+                options={countries.map((country) => ({
+                  value: country,
+                  label: country,
+                }))}
+                onChange={handleGetLanguages}
+                placeholder="Select a country"
+              />
+            </div>
+            <div>
+              <p className="text-base">Language</p>
+              <Select
+                options={languages.map((language) => ({
+                  value: language,
+                  label: language,
+                }))}
+                onChange={handleLanguageChange}
+                placeholder="Select a language"
+              />
+            </div>
           </div>
-          <div>
-            <p className="text-base">Language</p>
-            <Select
-              options={languages.map((language) => ({
-                value: language,
-                label: language,
-              }))}
-              onChange={handleLanguageChange}
-              placeholder="Select a language"
-            />
-          </div>
+          {filterContext && (
+            <div className="flex align-end">
+              <button
+                type="button"
+                className="mt-2 btn btn-outline-primary btn-sm btn-help-info"
+                onClick={() => {
+                  setShowExample(!showExample);
+                }}
+              >
+                <span className="text-base font-normal text-letter-color">
+                  Example
+                </span>
+              </button>
+              {showExample && (
+                <>
+                  <Modal
+                    show={showExample}
+                    onHide={() => {
+                      setShowExample(false);
+                    }}
+                    size="lg"
+                  >
+                    <Modal.Header closeButton>
+                      <Modal.Title>Example</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      <MDEditor.Markdown source={filterContext.example} />
+                    </Modal.Body>
+                  </Modal>
+                </>
+              )}
+            </div>
+          )}
         </div>
         {filterContext && (
           <div className="grid grid-cols-3 gap-3 divide-x-2">

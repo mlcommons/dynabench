@@ -13,6 +13,7 @@ import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
 import Swal from "sweetalert2";
+import MDEditor from "@uiw/react-md-editor";
 
 enum TreatmentId {
   Llama = "1",
@@ -30,6 +31,7 @@ const ChatWithInstructions: FC<
   realRoundId,
 }) => {
   const [signInConsent, setSignInConsent] = useState(false);
+  const [showExample, setShowExample] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
     user: [],
     bot: [],
@@ -44,6 +46,7 @@ const ChatWithInstructions: FC<
   const [readInstructions, setReadInstructions] = useState(false);
   const { updateModelInputs } = useContext(CreateInterfaceContext);
   const [treatmentValue, setTreatmentValue] = useState("");
+  const [example, setExample] = useState("");
   const { post, response } = useFetch();
   const { user } = useContext(UserContext);
   const location = useLocation();
@@ -111,6 +114,7 @@ const ChatWithInstructions: FC<
 
   useEffect(() => {
     if (treatmentId) {
+      updateModelInputs({ treatment_id: treatmentId });
       setTreatmentValue(getTreatmentValue(treatmentId as TreatmentId));
       if (getTreatmentValue(treatmentId as TreatmentId) !== "control") {
         const modelConfig =
@@ -118,11 +122,14 @@ const ChatWithInstructions: FC<
           generative_context.artifacts.providers[
             getTreatmentValue(treatmentId as TreatmentId)
           ][0];
-        console.log("modelConfig", modelConfig);
-
         setModelName({
           [getTreatmentValue(treatmentId as TreatmentId)]: modelConfig,
         });
+        // @ts-ignore
+        setExample(generative_context.artifacts.examples.model);
+      } else {
+        // @ts-ignore
+        setExample(generative_context.artifacts.examples.control);
       }
     }
   }, [treatmentId]);
@@ -139,6 +146,37 @@ const ChatWithInstructions: FC<
     <>
       {signInConsent ? (
         <>
+          <div className="flex items-end justify-end align-end">
+            <button
+              type="button"
+              className="my-2 btn btn-outline-primary btn-sm btn-help-info"
+              onClick={() => {
+                setShowExample(!showExample);
+              }}
+            >
+              <span className="text-base font-normal text-letter-color">
+                Example
+              </span>
+            </button>
+            {showExample && (
+              <>
+                <Modal
+                  show={showExample}
+                  onHide={() => {
+                    setShowExample(false);
+                  }}
+                  size="lg"
+                >
+                  <Modal.Header closeButton>
+                    <Modal.Title>Example</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    <MDEditor.Markdown source={example} />
+                  </Modal.Body>
+                </Modal>
+              </>
+            )}
+          </div>
           {!readInstructions ? (
             <div className="flex flex-col justify-center gap-8">
               <div
@@ -146,50 +184,61 @@ const ChatWithInstructions: FC<
                 className="p-4 bg-white border border-gray-200"
               >
                 <div className="">
-                  <h3 className="text-2xl font-bold">
-                    General Instructions for all participants
-                  </h3>
+                  <h3 className="text-2xl font-bold">General instructions</h3>
                   <p className="mb-3">
-                    In this study, you will be asked to complete two different
-                    scenarios which simulate healthcare scenarios that a person
-                    might encounter in everyday life...
+                    In this study, you will be asked to complete scenarios which
+                    simulate healthcare scenarios that a person might encounter
+                    in everyday life. In each case, you will be asked to make
+                    two decisions about how best to respond: 1) What should you
+                    do next? 2) What is the most likely cause of the problems
+                    being reported? The scenario (in the panel below) contains a
+                    description of specific case details, along with general
+                    life details and an abbreviated medical history. The
+                    information provided gives a complete picture of the
+                    relevant health details, but also includes additional
+                    information which may not be relevant. As with a real health
+                    decision, you will need to decide what information is most
+                    important. Once you have finished reading the instructions,
+                    click “I understand” to begin the experiment. You will
+                    continue to have access to the scenario information on the
+                    next page.
                   </p>
                   {treatmentValue !== "control" ? (
                     <>
-                      <h3 className="mb-3 text-xl font-bold ">
-                        Instructions for LLM treatments:
-                      </h3>
-                      <p className="">
+                      <p className="mb-2">
                         The health scenario for this task is presented in the
-                        right side panel. Please use the chatbot interface on
-                        the left side to help you in deciding what to do in this
-                        scenario...
+                        table below. On the next page, you will be asked to use
+                        a chatbot powered by a large language model to help you
+                        with this task. We are interested in understanding how
+                        you use the language model provided and how well it
+                        works for you. As such, it is essential that you only
+                        use your own words, and do not copy and paste from the
+                        scenario text, or from any other source.
                       </p>
                       <p className="mb-3">
-                        The questions you will be asked are: 1) “What should you
-                        do next?” with the options Treat at Home, Call your GP,
-                        Call 111, and Call 999; and 2) “What is the most likely
-                        cause of the problems being reported?” which is free
-                        response.
+                        To use the language model, simply type in the text box
+                        provided on the next page. The language model will then
+                        generate a response. You may interact with the model up
+                        to 10 times, and must interact at least once. When you
+                        are finished using the language model, press the
+                        “Finish” button to save the conversation and move on to
+                        the questions. Please be sure to select the key
+                        information from the scenario yourself rather than
+                        copying and pasting from the text provided.
                       </p>
                     </>
                   ) : (
                     <>
-                      <h3 className="mb-3 text-xl font-bold ">
-                        Instructions for control treatment:
-                      </h3>
                       <p className="">
                         The health scenario for this task is presented in the
-                        panel below. Please use any resource you would
-                        ordinarily use to decide what to do in a health
-                        scenario...
-                      </p>
-                      <p className="">
-                        The questions you will be asked are: 1) “What should you
-                        do next?” with the options Treat at Home, Call your GP,
-                        Call 111, and Call 999; and 2) “What is the most likely
-                        cause of the problems being reported?” which is free
-                        response.
+                        panel below. To assist in completing the scenarios,
+                        please use a search engine or any other methods you
+                        might ordinarily use at home. We are interested in
+                        understanding what tools you use and how well they work
+                        for you. This may be an online resource, a book, or
+                        anything else. Please be sure to select the key
+                        information from the scenario yourself rather than
+                        copying and pasting from the text provided.
                       </p>
                     </>
                   )}
@@ -262,7 +311,8 @@ const ChatWithInstructions: FC<
                     <p className="text-lg font-bold">
                       Now use the any methods you would ordinarily use at home
                       to determine the best response to the scenario. The
-                      scenario details are available for reference below.
+                      scenario details are available for reference on the right.
+                      Please describe the methods you use in the textbox below:
                     </p>
                     <textarea
                       className="w-full p-4 mt-4 border border-gray-200 h-96"
