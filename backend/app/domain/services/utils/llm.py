@@ -528,7 +528,7 @@ class HuggingFaceAPIProvider(LLMProvider):
     def __init__(self):
         self.api_key = os.getenv("HF_API")
         self.headers = {
-            "Authorization": os.getenv("HF"),
+            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
             "x-use-cache": "false",
         }
