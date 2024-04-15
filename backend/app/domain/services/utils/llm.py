@@ -241,11 +241,13 @@ class CohereProvider(LLMProvider):
         top_p = model[self.provider_name()]["top_p"]
         top_k = model[self.provider_name()]["top_k"]
         max_tokens = model[self.provider_name()]["max_tokens"]
-        model[self.provider_name()].setdefault('is_RAG',False)
+        model[self.provider_name()].setdefault("is_RAG", False)
         is_RAG = model[self.provider_name()]["is_RAG"]
         try:
             if is_conversational:
-                if is_RAG: # Conversational generation is required to use Command R RAG with web search
+                if (
+                    is_RAG
+                ):  # Conversational generation is required to use Command R RAG with web search
                     response = await self.cohere.chat(
                         message=prompt,
                         model=model_name,
@@ -254,7 +256,7 @@ class CohereProvider(LLMProvider):
                         p=top_p,
                         k=top_k,
                         max_tokens=max_tokens,
-                        connectors=[{'id':'web-search'}]
+                        connectors=[{"id": "web-search"}],
                     )
                 else:
                     response = await self.cohere.chat(
