@@ -111,7 +111,7 @@ const SelectBetweenImagesGenerative: FC<
           data: prompt.trim(),
         },
       );
-      if (!checkIfPromptExistsForUser) {
+      if (checkIfPromptExistsForUser) {
         Swal.fire({
           title: "Example already submitted",
           text: "You have already submitted an image from this prompt, so we are not generating new images. If you need to submit an additional image, please select from the following pre-populated images. Please reach out to <> if you have any issues.",
@@ -128,14 +128,13 @@ const SelectBetweenImagesGenerative: FC<
         promptWithMoreThanOneHundredSubmissions.some(
           (item: any) => item.data === prompt.trim(),
         );
-      if (!checkIfPromptIsInOccurrences) {
+      if (checkIfPromptIsInOccurrences) {
         Swal.fire({
           title: "Congrats! You have found a sample prompt!",
           text: "We've already found this issue so it won't contribute to your score. Now go and find a different prompt and get points!",
           icon: "success",
         });
       }
-      setShowLoader(false);
       const imagesHttp = await post("/context/get_generative_contexts", {
         type: generative_context.type,
         artifacts: {
@@ -148,7 +147,11 @@ const SelectBetweenImagesGenerative: FC<
         setShowImages(imagesHttp);
         setShowLoader(false);
       } else {
-        setShowLoader(true);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       }
 
       await saveHistoricalData(prompt, setPromptHistory);
@@ -348,7 +351,7 @@ const SelectBetweenImagesGenerative: FC<
       ) : (
         <div className="grid items-center justify-center grid-rows-2">
           <div className="mr-2 text-letter-color">
-            4 High-resolution images are currently being generated in batches
+            8 High-resolution images are currently being generated
             <br />
           </div>
           <PacmanLoader
