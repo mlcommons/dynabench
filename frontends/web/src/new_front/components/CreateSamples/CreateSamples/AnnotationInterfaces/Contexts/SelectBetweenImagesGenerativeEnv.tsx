@@ -135,7 +135,6 @@ const SelectBetweenImagesGenerative: FC<
           icon: "success",
         });
       }
-      setShowLoader(false);
       const imagesHttp = await post("/context/get_generative_contexts", {
         type: generative_context.type,
         artifacts: {
@@ -148,7 +147,11 @@ const SelectBetweenImagesGenerative: FC<
         setShowImages(imagesHttp);
         setShowLoader(false);
       } else {
-        setShowLoader(true);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
       }
 
       await saveHistoricalData(prompt, setPromptHistory);
