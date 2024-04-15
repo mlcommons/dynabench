@@ -5,11 +5,24 @@
 import asyncio
 from multiprocessing import Pool
 
-from app.domain.services.utils.image_generators import (  # SD2ImageProvider,
-    OpenAIImageProvider,
+from app.domain.services.utils.image_generators import ( Dalle2ImageProvider,
+    Dalle3ImageProvider,
     SDRunwayMLImageProvider,
+    SDRunwayMLImageProvider2,
+    SDRunwayMLImageProvider3,
     SDVariableAutoEncoder,
+    SDVariableAutoEncoder2,
+    SDVariableAutoEncoder3,
     SDXLImageProvider,
+    SDXLImageProvider2,
+    SDXLImageProvider3,
+    SDXLTurboImageProvider,
+    SDXLTurboImageProvider2,
+    SDXLTurboImageProvider3,
+    SDXLTurboImageProvider4,
+    SDXLTurboImageProvider5,
+    SDXLTurboImageProvider6,
+    HF_SDXL
 )
 from app.domain.services.utils.llm import (
     AlephAlphaProvider,
@@ -92,10 +105,23 @@ class ImageGenerator:
     def __init__(self):
         self.image_providers = [
             SDVariableAutoEncoder(),
-            OpenAIImageProvider(),
+            SDVariableAutoEncoder2(),
+            SDVariableAutoEncoder3(),
+            Dalle3ImageProvider(),
+            Dalle2ImageProvider(),
             SDRunwayMLImageProvider(),
-            # SD2ImageProvider(),
+            SDRunwayMLImageProvider2(),
+            SDRunwayMLImageProvider3(),
             SDXLImageProvider(),
+            SDXLImageProvider2(),
+            SDXLImageProvider3(),
+            SDXLTurboImageProvider(),
+            SDXLTurboImageProvider2(),
+            SDXLTurboImageProvider3(),
+            SDXLTurboImageProvider4(),
+            SDXLTurboImageProvider5(),
+            SDXLTurboImageProvider6(),
+            HF_SDXL()
         ]
 
     def generate_images_parallel(self, generator, prompt, num_images, models, endpoint):
