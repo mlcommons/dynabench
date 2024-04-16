@@ -252,7 +252,6 @@ class CohereProvider(LLMProvider):
                         p=top_p,
                         k=top_k,
                         max_tokens=max_tokens,
-                        connectors=[{"id": "web-search"}],
                         **model[self.provider_name()]['model_args']
                     )
             else:
