@@ -241,6 +241,7 @@ class CohereProvider(LLMProvider):
         top_p = model[self.provider_name()]["top_p"]
         top_k = model[self.provider_name()]["top_k"]
         max_tokens = model[self.provider_name()]["max_tokens"]
+        model[self.provider_name()].setdefault("model_args", {})
         try:
             if is_conversational:
                 response = await self.cohere.chat(
@@ -251,6 +252,7 @@ class CohereProvider(LLMProvider):
                     p=top_p,
                     k=top_k,
                     max_tokens=max_tokens,
+                    **model[self.provider_name()]["model_args"],
                 )
             else:
                 prompt = f"{head_template} {prompt} {foot_template}"
@@ -261,6 +263,7 @@ class CohereProvider(LLMProvider):
                     p=top_p,
                     k=top_k,
                     max_tokens=max_tokens,
+                    **model[self.provider_name()]["model_args"],
                 )
 
             return {
