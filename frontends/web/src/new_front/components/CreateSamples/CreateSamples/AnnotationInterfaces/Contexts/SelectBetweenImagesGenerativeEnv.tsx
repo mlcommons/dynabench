@@ -94,6 +94,42 @@ const SelectBetweenImagesGenerative: FC<
     }
   };
 
+  const runCheckers = async (prompt: string) => {
+    const checkIfPromptExistsForUser = await post(
+      "/historical_data/check_if_historical_data_exists",
+      {
+        task_id: taskId,
+        user_id: user.id,
+        data: prompt.trim(),
+      },
+    );
+    if (checkIfPromptExistsForUser) {
+      Swal.fire({
+        title: "Example already submitted",
+        text: "You have already submitted an image from this prompt, so we are not generating new images. If you need to submit an additional image, please select from the following pre-populated images. Please reach out to <> if you have any issues.",
+        icon: "info",
+      });
+    }
+    const promptWithMoreThanOneHundredSubmissions = await post(
+      "/historical_data/get_occurrences_with_more_than_one_hundred",
+      {
+        task_id: taskId,
+      },
+    );
+    const checkIfPromptIsInOccurrences =
+      promptWithMoreThanOneHundredSubmissions.some(
+        (item: any) => item.data === prompt.trim(),
+      );
+    if (checkIfPromptIsInOccurrences) {
+      Swal.fire({
+        title: "Congrats! You have found a sample prompt!",
+        text: "We've already found this issue so it won't contribute to your score. Now go and find a different prompt and get points!",
+        icon: "success",
+      });
+    }
+    return { checkIfPromptExistsForUser, checkIfPromptIsInOccurrences };
+  };
+
   const generateImages = async () => {
     if (
       neccessaryFields.every(
@@ -103,38 +139,8 @@ const SelectBetweenImagesGenerative: FC<
       )
     ) {
       setShowLoader(true);
-      const checkIfPromptExistsForUser = await post(
-        "/historical_data/check_if_historical_data_exists",
-        {
-          task_id: taskId,
-          user_id: user.id,
-          data: prompt.trim(),
-        },
-      );
-      if (checkIfPromptExistsForUser) {
-        Swal.fire({
-          title: "Example already submitted",
-          text: "You have already submitted an image from this prompt, so we are not generating new images. If you need to submit an additional image, please select from the following pre-populated images. Please reach out to <> if you have any issues.",
-          icon: "info",
-        });
-      }
-      const promptWithMoreThanOneHundredSubmissions = await post(
-        "/historical_data/get_occurrences_with_more_than_one_hundred",
-        {
-          task_id: taskId,
-        },
-      );
-      const checkIfPromptIsInOccurrences =
-        promptWithMoreThanOneHundredSubmissions.some(
-          (item: any) => item.data === prompt.trim(),
-        );
-      if (checkIfPromptIsInOccurrences) {
-        Swal.fire({
-          title: "Congrats! You have found a sample prompt!",
-          text: "We've already found this issue so it won't contribute to your score. Now go and find a different prompt and get points!",
-          icon: "success",
-        });
-      }
+      const { checkIfPromptExistsForUser, checkIfPromptIsInOccurrences } =
+        await runCheckers(prompt);
       const imagesHttp = await post("/context/get_generative_contexts", {
         type: generative_context.type,
         artifacts: {
@@ -185,6 +191,8 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const handlePromptHistory = async (prompt: string) => {
+    setShowLoader(true);
+    setShowImages([]);
     setArtifactsInput({
       ...artifactsInput,
       prompt: prompt,
@@ -194,10 +202,29 @@ const SelectBetweenImagesGenerative: FC<
     updateModelInputs({
       [field_names_for_the_model.original_prompt ?? "original_prompt"]: prompt,
     });
-    await post("/context/get_generative_contexts", {
+
+    const { checkIfPromptExistsForUser, checkIfPromptIsInOccurrences } =
+      await runCheckers(prompt);
+    const imagesHttp = await post("/context/get_generative_contexts", {
       type: generative_context.type,
-      artifacts: artifactsInput,
+      artifacts: {
+        ...artifactsInput,
+        prompt: prompt,
+        user_id: user.id,
+        prompt_already_exists_for_user: checkIfPromptExistsForUser,
+        prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
+      },
     });
+    if (response.ok) {
+      setShowImages(imagesHttp);
+      setShowLoader(false);
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });
+    }
   };
 
   const handleSelectImage = async (image: string) => {
