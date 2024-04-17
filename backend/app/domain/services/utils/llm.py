@@ -11,10 +11,10 @@ import cohere
 import google.generativeai as palm
 import openai
 import replicate
-import requests
 from aiohttp import ClientSession
 from aleph_alpha_client import AsyncClient, CompletionRequest, Prompt
 from anthropic import AsyncAnthropic
+from openai import OpenAI
 
 from app.domain.services.base.task import TaskService
 
@@ -43,7 +43,9 @@ class LLMProvider(ABC):
         pass
 
     @abstractmethod
-    def conversational_generation(self, prompt: str, model: dict, history: dict) -> str:
+    def conversational_generation(
+        self, prompt: str, model: dict, history: dict, provider: str
+    ) -> str:
         pass
 
     @property
@@ -62,16 +64,20 @@ class OpenAIProvider(LLMProvider):
 
     @async_timeout(30)
     async def generate_text(
-        self, prompt: str, model: dict, is_conversational: bool = False
+        self,
+        prompt: str,
+        model: dict,
+        provider,
+        is_conversational: bool = False,
     ) -> str:
-        model_name = model[self.provider_name()]["model_name"]
-        frequency_penalty = model[self.provider_name()]["frequency_penalty"]
-        presence_penalty = model[self.provider_name()]["presence_penalty"]
-        temperature = model[self.provider_name()]["temperature"]
-        top_p = model[self.provider_name()]["top_p"]
-        max_tokens = model[self.provider_name()]["max_tokens"]
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        model_name = model[provider]["model_name"]
+        frequency_penalty = model[provider]["frequency_penalty"]
+        presence_penalty = model[provider]["presence_penalty"]
+        temperature = model[provider]["temperature"]
+        top_p = model[provider]["top_p"]
+        max_tokens = model[provider]["max_tokens"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
         if is_conversational:
             messages = prompt
         else:
@@ -82,7 +88,8 @@ class OpenAIProvider(LLMProvider):
                 }
             ]
         try:
-            response = await openai.ChatCompletion.acreate(
+            client = OpenAI(api_key=self.api_key)
+            response = client.chat.completions.create(
                 model=model_name,
                 messages=messages,
                 frequency_penalty=frequency_penalty,
@@ -94,8 +101,8 @@ class OpenAIProvider(LLMProvider):
             )
 
             return {
-                "text": response["choices"][0]["message"]["content"],
-                "provider_name": self.provider_name(),
+                "text": response.choices[0].message.content,
+                "provider_name": provider,
                 "model_name": model_name,
                 "artifacts": model,
             }
@@ -104,10 +111,10 @@ class OpenAIProvider(LLMProvider):
             return None
 
     async def conversational_generation(
-        self, prompt: str, model: dict, history: dict
+        self, prompt: str, model: dict, history: dict, provider: str
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
         formatted_conversation.append({"role": "system", "content": head_template})
 
@@ -121,7 +128,7 @@ class OpenAIProvider(LLMProvider):
             {"role": "user", "content": f"{prompt} {foot_template}"}
         )
         result = await self.generate_text(
-            formatted_conversation, model, is_conversational=True
+            formatted_conversation, model, provider, is_conversational=True
         )
 
         try:
@@ -141,14 +148,16 @@ class HuggingFaceProvider(LLMProvider):
     @async_timeout(30)
     def generate_text(self, prompt: str, model: dict) -> str:
         return "I am HF"
-        endpoint = model[self.provider_name()]["endpoint"]
-        payload = {"inputs": prompt, "max_new_tokens": 100}
-        response = requests.post(endpoint, json=payload, headers=self.headers)
-        if response.status_code == 200:
-            sample = response.json()[0]["generated_text"]
-            return sample
+        # endpoint = model[provider]["endpoint"]
+        # payload = {"inputs": prompt, "max_new_tokens": 100}
+        # response = requests.post(endpoint, json=payload, headers=self.headers)
+        # if response.status_code == 200:
+        #     sample = response.json()[0]["generated_text"]
+        #     return sample
 
-    def conversational_generation(self, prompt: str, model: dict) -> str:
+    def conversational_generation(
+        self, prompt: str, model: dict, history: dict, provider: str
+    ) -> str:
         return
 
     def provider_name(self):
@@ -162,24 +171,24 @@ class AnthropicProvider(LLMProvider):
 
     @async_timeout(30)
     async def generate_text(
-        self, prompt: str, model: dict, is_conversational: bool = False
+        self, prompt: str, model: dict, provider, is_conversational: bool = False
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
         if is_conversational:
             final_prompt = prompt
         else:
             final_prompt = (
                 f"\n\nHuman: {head_template} {prompt} {foot_template} \n\nAssistant:"
             )
-        max_tokens = model[self.provider_name()]["max_tokens"]
-        temperature = model[self.provider_name()]["temperature"]
-        top_p = model[self.provider_name()]["top_p"]
-        top_k = model[self.provider_name()]["top_k"]
+        max_tokens = model[provider]["max_tokens"]
+        temperature = model[provider]["temperature"]
+        top_p = model[provider]["top_p"]
+        top_k = model[provider]["top_k"]
 
         try:
             completion = await self.anthropic.completions.create(
-                model=model[self.provider_name()]["model_name"],
+                model=model[provider]["model_name"],
                 max_tokens_to_sample=max_tokens,
                 prompt=final_prompt,
                 temperature=temperature,
@@ -189,8 +198,8 @@ class AnthropicProvider(LLMProvider):
 
             return {
                 "text": completion.completion,
-                "provider_name": self.provider_name(),
-                "model_name": model[self.provider_name()]["model_name"],
+                "provider_name": provider,
+                "model_name": model[provider]["model_name"],
                 "artifacts": model,
             }
         except Exception as e:
@@ -198,10 +207,10 @@ class AnthropicProvider(LLMProvider):
             return None
 
     async def conversational_generation(
-        self, prompt: str, model: dict, history: dict
+        self, prompt: str, model: dict, history: dict, provider: str
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
         formatted_conversation.append(f"Human: {head_template}")
         for user_entry, bot_entry in zip(history["user"], history["bot"]):
@@ -216,7 +225,7 @@ class AnthropicProvider(LLMProvider):
         formatted_conversation = "\n\n".join(formatted_conversation)
 
         conversation = await self.generate_text(
-            formatted_conversation, model, is_conversational=True
+            formatted_conversation, model, provider, is_conversational=True
         )
         try:
             return conversation["text"]
@@ -229,22 +238,30 @@ class AnthropicProvider(LLMProvider):
 
 
 class CohereProvider(LLMProvider):
-    def __init__(self):
-        self.api_key = os.getenv("COHERE")
+    def __init__(self, task_id: int = -1):
+        if task_id == 56:
+            self.api_key = os.getenv("COHERE_HELPME")
+        else:
+            self.api_key = os.getenv("COHERE")
         self.cohere = cohere.AsyncClient(self.api_key, timeout=30)
 
     @async_timeout(30)
     async def generate_text(
-        self, prompt: str, model: dict, is_conversational: bool = False, chat_history=[]
+        self,
+        prompt: str,
+        model: dict,
+        provider,
+        is_conversational: bool = False,
+        chat_history=[],
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
-        model_name = model[self.provider_name()]["model_name"]
-        temperature = model[self.provider_name()]["temperature"]
-        top_p = model[self.provider_name()]["top_p"]
-        top_k = model[self.provider_name()]["top_k"]
-        max_tokens = model[self.provider_name()]["max_tokens"]
-        model[self.provider_name()].setdefault("model_args", {})
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
+        model_name = model[provider]["model_name"]
+        temperature = model[provider]["temperature"]
+        top_p = model[provider]["top_p"]
+        top_k = model[provider]["top_k"]
+        max_tokens = model[provider]["max_tokens"]
+        model[provider].setdefault("model_args", {})
         try:
             if is_conversational:
                 response = await self.cohere.chat(
@@ -255,7 +272,7 @@ class CohereProvider(LLMProvider):
                     p=top_p,
                     k=top_k,
                     max_tokens=max_tokens,
-                    **model[self.provider_name()]["model_args"],
+                    **model[provider]["model_args"],
                 )
             else:
                 prompt = f"{head_template} {prompt} {foot_template}"
@@ -266,12 +283,12 @@ class CohereProvider(LLMProvider):
                     p=top_p,
                     k=top_k,
                     max_tokens=max_tokens,
-                    **model[self.provider_name()]["model_args"],
+                    **model[provider]["model_args"],
                 )
 
             return {
                 "text": response.text,
-                "provider_name": self.provider_name(),
+                "provider_name": provider,
                 "model_name": model_name,
                 "artifacts": model,
             }
@@ -280,10 +297,10 @@ class CohereProvider(LLMProvider):
             return None
 
     async def conversational_generation(
-        self, prompt: str, model: dict, history: dict
+        self, prompt: str, model: dict, history: dict, provider: str
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
         formatted_conversation.append({"user_name": "User", "text": head_template})
         for user_entry, bot_entry in zip(history["user"], history["bot"]):
@@ -294,7 +311,11 @@ class CohereProvider(LLMProvider):
 
         prompt = f"{prompt} {foot_template}"
         result = await self.generate_text(
-            prompt, model, is_conversational=True, chat_history=formatted_conversation
+            prompt,
+            model,
+            provider,
+            is_conversational=True,
+            chat_history=formatted_conversation,
         )
         try:
             return result["text"]
@@ -312,21 +333,21 @@ class AlephAlphaProvider(LLMProvider):
 
     @async_timeout(30)
     async def generate_text(
-        self, prompt: str, model: dict, is_conversational: bool = False
+        self, prompt: str, model: dict, provider, is_conversational: bool = False
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        # foot_template = model[self.provider_name()]["templates"]["footer"]
+        head_template = model[provider]["templates"]["header"]
+        # foot_template = model[provider]["templates"]["footer"]
         params = {
             "prompt": Prompt.from_text(prompt),
-            "maximum_tokens": model[self.provider_name()]["max_tokens"],
-            "temperature": model[self.provider_name()]["temperature"],
-            "top_p": model[self.provider_name()]["top_p"],
-            "top_k": model[self.provider_name()]["top_k"],
-            "frequency_penalty": model[self.provider_name()]["frequency_penalty"],
-            "presence_penalty": model[self.provider_name()]["presence_penalty"],
+            "maximum_tokens": model[provider]["max_tokens"],
+            "temperature": model[provider]["temperature"],
+            "top_p": model[provider]["top_p"],
+            "top_k": model[provider]["top_k"],
+            "frequency_penalty": model[provider]["frequency_penalty"],
+            "presence_penalty": model[provider]["presence_penalty"],
         }
         request = CompletionRequest(**params)
-        model_name = model[self.provider_name()]["model_name"]
+        model_name = model[provider]["model_name"]
 
         try:
             if is_conversational:
@@ -348,7 +369,7 @@ class AlephAlphaProvider(LLMProvider):
 
             return {
                 "text": completion,
-                "provider_name": self.provider_name(),
+                "provider_name": provider,
                 "model_name": model_name,
                 "artifacts": model,
             }
@@ -357,10 +378,10 @@ class AlephAlphaProvider(LLMProvider):
             return None
 
     async def conversational_generation(
-        self, prompt: str, model: dict, history: dict
+        self, prompt: str, model: dict, history: dict, provider: str
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        # foot_template = model[self.provider_name()]["templates"]["footer"]
+        head_template = model[provider]["templates"]["header"]
+        # foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
         formatted_conversation.append(
             f"### Instruction:\n{head_template} \n\n### Input:"
@@ -376,7 +397,7 @@ class AlephAlphaProvider(LLMProvider):
 
         formatted_conversation = "\n".join(formatted_conversation)
         result = await self.generate_text(
-            formatted_conversation, model, is_conversational=True
+            formatted_conversation, model, provider, is_conversational=True
         )
         try:
             return result["text"]
@@ -395,14 +416,14 @@ class GoogleProvider(LLMProvider):
 
     @async_timeout(30)
     async def generate_text(
-        self, prompt: str, model: dict, is_conversational: bool = False
+        self, prompt: str, model: dict, provider, is_conversational: bool = False
     ) -> str:
-        model_name = model[self.provider_name()]["model_name"]
-        temperature = model[self.provider_name()]["temperature"]
-        top_p = model[self.provider_name()]["top_p"]
-        top_k = model[self.provider_name()]["top_k"]
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        model_name = model[provider]["model_name"]
+        temperature = model[provider]["temperature"]
+        top_p = model[provider]["top_p"]
+        top_k = model[provider]["top_k"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
 
         if is_conversational:
             messages = prompt
@@ -418,7 +439,7 @@ class GoogleProvider(LLMProvider):
             )
             return {
                 "text": response.last,
-                "provider_name": self.provider_name(),
+                "provider_name": provider,
                 "model_name": model_name,
                 "artifacts": model,
             }
@@ -427,10 +448,10 @@ class GoogleProvider(LLMProvider):
             return None
 
     async def conversational_generation(
-        self, prompt: str, model: dict, history: dict
+        self, prompt: str, model: dict, history: dict, provider: str
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
         formatted_conversation.append(f"Human: {head_template}")
         for user_entry, bot_entry in zip(history["user"], history["bot"]):
@@ -444,7 +465,7 @@ class GoogleProvider(LLMProvider):
 
         formatted_conversation = "\n\n".join(formatted_conversation)
         result = await self.generate_text(
-            formatted_conversation, model, is_conversational=True
+            formatted_conversation, model, provider, is_conversational=True
         )
 
         try:
@@ -465,17 +486,17 @@ class ReplicateProvider(LLMProvider):
 
     @async_timeout(30)
     def generate_text(
-        self, prompt: str, model: dict, is_conversational: bool = False
+        self, prompt: str, model: dict, provider, is_conversational: bool = False
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
-        model_name = model[self.provider_name()]["model_name"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
+        model_name = model[provider]["model_name"]
         input = {
-            "max_new_tokens": model[self.provider_name()]["max_tokens"],
-            "min_new_tokens": model[self.provider_name()]["min_tokens"],
-            "temperature": model[self.provider_name()]["temperature"],
-            "top_p": model[self.provider_name()]["top_p"],
-            "top_k": model[self.provider_name()]["top_k"],
+            "max_new_tokens": model[provider]["max_tokens"],
+            "min_new_tokens": model[provider]["min_tokens"],
+            "temperature": model[provider]["temperature"],
+            "top_p": model[provider]["top_p"],
+            "top_k": model[provider]["top_k"],
         }
 
         if is_conversational:
@@ -490,7 +511,7 @@ class ReplicateProvider(LLMProvider):
                 final_string += items
             return {
                 "text": final_string,
-                "provider_name": self.provider_name(),
+                "provider_name": provider,
                 "model_name": model_name,
                 "artifacts": model,
             }
@@ -498,9 +519,11 @@ class ReplicateProvider(LLMProvider):
             print(e)
             return None
 
-    def conversational_generation(self, prompt: str, model: dict, history: dict) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+    def conversational_generation(
+        self, prompt: str, model: dict, history: dict, provider: str
+    ) -> str:
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
         formatted_conversation.append(f"Human: {head_template}")
         for user_entry, bot_entry in zip(history["user"], history["bot"]):
@@ -514,7 +537,7 @@ class ReplicateProvider(LLMProvider):
 
         formatted_conversation = "\n\n".join(formatted_conversation)
         result = self.generate_text(
-            formatted_conversation, model, is_conversational=True
+            formatted_conversation, model, provider, is_conversational=True
         )
 
         try:
@@ -538,19 +561,19 @@ class HuggingFaceAPIProvider(LLMProvider):
 
     @async_timeout(30)
     async def generate_text(
-        self, prompt: str, model: dict, is_conversational=False
+        self, prompt: str, model: dict, provider, is_conversational=False
     ) -> str:
-        is_llama = model[self.provider_name()]["is_llama"]
-        is_falcon = model[self.provider_name()]["is_falcon"]
-        is_pythia = model[self.provider_name()]["is_pythia"]
-        is_zephyr = model[self.provider_name()]["is_zephyr"]
-        is_guanaco = model[self.provider_name()]["is_guanaco"]
-        is_vicuna = model[self.provider_name()]["is_vicuna"]
+        is_llama = model[provider]["is_llama"]
+        is_falcon = model[provider]["is_falcon"]
+        is_pythia = model[provider]["is_pythia"]
+        is_zephyr = model[provider]["is_zephyr"]
+        is_guanaco = model[provider]["is_guanaco"]
+        is_vicuna = model[provider]["is_vicuna"]
         base = "https://api-inference.huggingface.co/models/"
-        model_name = model[self.provider_name()]["model_name"]
+        model_name = model[provider]["model_name"]
         endpoint = base + model_name
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
         if is_conversational:
             prompt = prompt
         else:
@@ -573,11 +596,11 @@ class HuggingFaceAPIProvider(LLMProvider):
             else:
                 prompt = prompt
 
-        max_new_tokens = model[self.provider_name()]["max_tokens"]
-        min_new_tokens = model[self.provider_name()]["min_tokens"]
-        temperature = model[self.provider_name()]["temperature"]
-        top_p = model[self.provider_name()]["top_p"]
-        top_k = model[self.provider_name()]["top_k"]
+        max_new_tokens = model[provider]["max_tokens"]
+        min_new_tokens = model[provider]["min_tokens"]
+        temperature = model[provider]["temperature"]
+        top_p = model[provider]["top_p"]
+        top_k = model[provider]["top_k"]
         payload = {
             "inputs": prompt,
             "parameters": {
@@ -595,34 +618,39 @@ class HuggingFaceAPIProvider(LLMProvider):
         # async with httpx.AsyncClient() as client:
         #     response = await client.post(endpoint, data=data, headers=self.headers)
         #     answer = response.json()
-        async with ClientSession() as session:
-            async with session.post(
-                endpoint, data=data, headers=self.headers
-            ) as response:
-                answer = await response.json()
 
-        if response.status == 200:
-            final_string = answer[0]["generated_text"]
-            return {
-                "text": final_string,
-                "provider_name": self.provider_name(),
-                "model_name": model_name,
-                "artifacts": model,
-            }
-        else:
-            return None
+        intents = 0
+        while intents < 3:
+            async with ClientSession() as session:
+                async with session.post(
+                    endpoint, data=data, headers=self.headers
+                ) as response:
+                    answer = await response.json()
+            if response.status == 200:
+                final_string = answer[0]["generated_text"]
+                return {
+                    "text": final_string,
+                    "provider_name": provider,
+                    "model_name": model_name,
+                    "artifacts": model,
+                }
+            else:
+                await asyncio.sleep(5)
+                intents += 1
+                continue
+        return None
 
     async def conversational_generation(
-        self, prompt: str, model: dict, history: dict
+        self, prompt: str, model: dict, history: dict, provider: str
     ) -> str:
-        head_template = model[self.provider_name()]["templates"]["header"]
-        foot_template = model[self.provider_name()]["templates"]["footer"]
-        is_llama = model[self.provider_name()]["is_llama"]
-        is_falcon = model[self.provider_name()]["is_falcon"]
-        is_pythia = model[self.provider_name()]["is_pythia"]
-        is_vicuna = model[self.provider_name()]["is_vicuna"]
-        is_zephyr = model[self.provider_name()]["is_zephyr"]
-        is_guanaco = model[self.provider_name()]["is_guanaco"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
+        is_llama = model[provider]["is_llama"]
+        is_falcon = model[provider]["is_falcon"]
+        is_pythia = model[provider]["is_pythia"]
+        is_vicuna = model[provider]["is_vicuna"]
+        is_zephyr = model[provider]["is_zephyr"]
+        is_guanaco = model[provider]["is_guanaco"]
 
         formatted_conversation = []
         if is_llama:
@@ -696,7 +724,7 @@ class HuggingFaceAPIProvider(LLMProvider):
             formatted_conversation = "\n".join(formatted_conversation)
 
         response = await self.generate_text(
-            formatted_conversation, model, is_conversational=True
+            formatted_conversation, model, provider, is_conversational=True
         )
         try:
             return response["text"]

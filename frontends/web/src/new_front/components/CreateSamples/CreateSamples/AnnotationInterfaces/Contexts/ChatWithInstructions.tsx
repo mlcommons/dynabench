@@ -19,6 +19,7 @@ enum TreatmentId {
   Llama = "1",
   GPT = "2",
   Control = "3",
+  Cohere = "4",
 }
 
 const ChatWithInstructions: FC<
@@ -62,6 +63,9 @@ const ChatWithInstructions: FC<
       case TreatmentId.GPT:
         setProvider("openaihm");
         return "openaihm";
+      case TreatmentId.Cohere:
+        setProvider("coherehm");
+        return "coherehm";
       case TreatmentId.Control:
         return "control";
       default:
