@@ -108,7 +108,11 @@ const SelectBetweenImagesGenerative: FC<
         url: "/context/stream",
         body: {
           type: generative_context.type,
-          artifacts: artifactsInput,
+          artifacts: {
+            ...artifactsInput,
+            prompt_already_exists_for_user: false,
+            prompt_with_more_than_one_hundred: false,
+          },
         },
         setSaveData: setShowImages,
         setExternalLoading: setShowLoader,
@@ -139,6 +143,8 @@ const SelectBetweenImagesGenerative: FC<
       ...artifactsInput,
       prompt: event.target.value,
       user_id: user.id,
+      prompt_already_exists_for_user: false,
+      prompt_with_more_than_one_hundred: false,
     });
     setPrompt(event.target.value);
     updateModelInputs({
@@ -152,6 +158,8 @@ const SelectBetweenImagesGenerative: FC<
       ...artifactsInput,
       prompt: prompt,
       user_id: user.id,
+      prompt_already_exists_for_user: false,
+      prompt_with_more_than_one_hundred: false,
     });
     setPrompt(prompt);
     updateModelInputs({
@@ -163,6 +171,8 @@ const SelectBetweenImagesGenerative: FC<
         type: generative_context.type,
         artifacts: {
           ...artifactsInput,
+          prompt_already_exists_for_user: false,
+          prompt_with_more_than_one_hundred: false,
           prompt: prompt,
           user_id: user.id,
         },

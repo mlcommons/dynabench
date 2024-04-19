@@ -140,6 +140,7 @@ class ContextService:
     ) -> dict:
         images = []
         if prompt_already_exists_for_user:
+            print("Prompt already exists for user")
             # Download the images from the s3 bucket
             key = f"adversarial-nibbler/{prompt}/{user_id}"
             objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
@@ -286,7 +287,7 @@ class ContextService:
                 prompt_with_more_than_one_hundred=artifacts[
                     "prompt_with_more_than_one_hundred"
                 ],
-                num_images=6,
+                num_images=artifacts.get("num_images", 12),
             )
         elif type == "perdi":
             return await self.get_perdi_contexts(

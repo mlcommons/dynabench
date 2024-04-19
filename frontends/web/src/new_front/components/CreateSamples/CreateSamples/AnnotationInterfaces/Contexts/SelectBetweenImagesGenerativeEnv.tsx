@@ -106,7 +106,7 @@ const SelectBetweenImagesGenerative: FC<
     if (checkIfPromptExistsForUser) {
       Swal.fire({
         title: "Example already submitted",
-        text: "You have already submitted an image from this prompt, so we are not generating new images. If you need to submit an additional image, please select from the following pre-populated images. Please reach out to <> if you have any issues.",
+        text: "You have already submitted an image from this prompt, so we are not generating new images. If you need to submit an additional image, please select from the following pre-populated images. Please reach out to dataperf-adversarial-nibbler@googlegroups.com if you have any issues.",
         icon: "info",
       });
     }

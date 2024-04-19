@@ -3,9 +3,12 @@
 # LICENSE file in the root directory of this source tree.
 
 import asyncio
+import random
 from multiprocessing import Pool
 
-from app.domain.services.utils.image_generators import ( Dalle2ImageProvider,
+from app.domain.services.utils.image_generators import (
+    HF_SDXL,
+    Dalle2ImageProvider,
     Dalle3ImageProvider,
     SDRunwayMLImageProvider,
     SDRunwayMLImageProvider2,
@@ -22,7 +25,6 @@ from app.domain.services.utils.image_generators import ( Dalle2ImageProvider,
     SDXLTurboImageProvider4,
     SDXLTurboImageProvider5,
     SDXLTurboImageProvider6,
-    HF_SDXL
 )
 from app.domain.services.utils.llm import (
     AlephAlphaProvider,
@@ -121,7 +123,7 @@ class ImageGenerator:
             SDXLTurboImageProvider4(),
             SDXLTurboImageProvider5(),
             SDXLTurboImageProvider6(),
-            HF_SDXL()
+            HF_SDXL(),
         ]
 
     def generate_images_parallel(self, generator, prompt, num_images, models, endpoint):
@@ -130,13 +132,14 @@ class ImageGenerator:
     def generate_all_images(
         self, prompt: str, num_images: int, models: list, endpoint: str
     ) -> list:
-        with Pool(len(self.image_providers)) as _:
+        generators = random.sample(self.image_providers, num_images)
+        with Pool(len(generators)) as _:
             with Pool() as pool:
                 results = pool.starmap(
                     self.generate_images_parallel,
                     [
                         (generator, prompt, num_images, models, endpoint)
-                        for generator in self.image_providers
+                        for generator in generators
                     ],
                 )
             pool.close()
