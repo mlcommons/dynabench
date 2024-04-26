@@ -481,8 +481,11 @@ class HistoricalData(Base):
     history = Column(Text)
     created_at = Column(DateTime, server_default=func.now(), default=func.now())
 
+
 class Jobs(Base):
     __tablename__ = "jobs"
     id = Column(Integer, primary_key=True)
     status = Column(String(255), nullable=False)
     job_metadata = Column(Text)
+    prompt = Column(Text)
+    user_id = Column(Integer)

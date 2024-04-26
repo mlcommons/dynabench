@@ -3,8 +3,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import base64
-import hashlib
-import io
 import json
 import os
 import random
@@ -12,14 +10,11 @@ import time
 
 import boto3
 import yaml
-import celery
 from fastapi import HTTPException
-from PIL import Image
-import logging
+from worker.tasks import generate_images
 
-from worker.tasks import generate_nibbler_images_celery, add
+from app.domain.services.base.jobs import JobService
 from app.domain.services.base.task import TaskService
-from app.domain.services.utils.constant import black_image, forbidden_image
 from app.domain.services.utils.llm import (
     AlephAlphaProvider,
     AnthropicProvider,
@@ -30,14 +25,10 @@ from app.domain.services.utils.llm import (
     OpenAIProvider,
     ReplicateProvider,
 )
-from app.domain.services.utils.multi_generator import ImageGenerator, LLMGenerator
+from app.domain.services.utils.multi_generator import LLMGenerator
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
-from app.domain.services.base.jobs import JobService
 
-
-logging.basicConfig(filename='adversarial_nibbler.log', level=logging.CRITICAL,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ContextService:
     def __init__(self):
@@ -147,7 +138,6 @@ class ContextService:
         prompt_with_more_than_one_hundred: bool,
     ) -> dict:
         images = []
-        self.jobs_service.create_registry({"prompt": prompt, "user_id": user_id})
         if prompt_already_exists_for_user:
             print("Prompt already exists for user")
             # Download the images from the s3 bucket
@@ -194,18 +184,17 @@ class ContextService:
                     }
                     images.append(new_dict)
             return images
-        
-        images = celery.group(*[generate_nibbler_images_celery.s(prompt, num_images, models, endpoint, user_id) for _ in range(6)])
-        res = images()
-        # Should this happen asynchronously?
-        all_responses = res.get()
-        for response in all_responses:
-            info_to_log = {"message": response['message'], "time": response['time'],
-                           "model": response['generator'], "task_id": response['queue_task_id'],
-                            "user_id": response['user_id']}
-            logging.critical(info_to_log)
-        self.jobs_service.remove_registry({"prompt": prompt, "user_id": user_id})
-                
+        self.jobs_service.create_registry({"prompt": prompt, "user_id": user_id})
+        generate_images.delay(prompt, num_images, models, endpoint, user_id)
+        queue_position = self.jobs_service.determine_queue_position(
+            {"prompt": prompt, "user_id": user_id}
+        )
+        return {
+            "message": "Images are being generated",
+            "queue_position": queue_position["queue_position"],
+            "all_positions": queue_position["all_positions"],
+        }
+
     async def get_perdi_contexts(
         self, prompt: str, number_of_samples: int, models: dict
     ) -> list:
@@ -240,9 +229,14 @@ class ContextService:
 
     async def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
-            exists = self.jobs_service.metadata_exists({"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]})
+            exists = self.jobs_service.metadata_exists(
+                {"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]}
+            )
             if exists:
-                return "POSITION IN THE QUEUE IS GIVEN PROMPT AND UID" 
+                queue_data = self.jobs_service.determine_queue_position(
+                    {"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]}
+                )
+                return queue_data
             return await self.get_nibbler_contexts(
                 prompt=artifacts["prompt"],
                 user_id=artifacts["user_id"],
