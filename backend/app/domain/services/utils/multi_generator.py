@@ -6,8 +6,8 @@ import asyncio
 import random
 from multiprocessing import Pool
 
-from app.domain.services.utils.image_generators import (
-    HF_SDXL,
+import random
+from app.domain.services.utils.image_generators import ( 
     Dalle2ImageProvider,
     Dalle3ImageProvider,
     SDRunwayMLImageProvider,
@@ -25,6 +25,7 @@ from app.domain.services.utils.image_generators import (
     SDXLTurboImageProvider4,
     SDXLTurboImageProvider5,
     SDXLTurboImageProvider6,
+    HF_SDXL
 )
 from app.domain.services.utils.llm import (
     AlephAlphaProvider,
@@ -123,7 +124,7 @@ class ImageGenerator:
             SDXLTurboImageProvider4(),
             SDXLTurboImageProvider5(),
             SDXLTurboImageProvider6(),
-            HF_SDXL(),
+            HF_SDXL()
         ]
 
     def generate_images_parallel(self, generator, prompt, num_images, models, endpoint):
@@ -145,3 +146,7 @@ class ImageGenerator:
             pool.close()
             pool.join()
         return results
+    
+    def generate_one_image(self,  prompt, num_images, models, endpoint, user_id):
+        model = random.sample(self.image_providers, 1)[0]
+        return model.generate_images(prompt, num_images, models, endpoint, user_id)

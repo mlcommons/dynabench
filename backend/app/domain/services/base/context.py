@@ -12,9 +12,12 @@ import time
 
 import boto3
 import yaml
+import celery
 from fastapi import HTTPException
 from PIL import Image
+import logging
 
+from worker.tasks import generate_nibbler_images_celery, add
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.constant import black_image, forbidden_image
 from app.domain.services.utils.llm import (
@@ -30,10 +33,15 @@ from app.domain.services.utils.llm import (
 from app.domain.services.utils.multi_generator import ImageGenerator, LLMGenerator
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
+from app.domain.services.base.jobs import JobService
 
+
+logging.basicConfig(filename='adversarial_nibbler.log', level=logging.CRITICAL,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ContextService:
     def __init__(self):
+        self.jobs_service = JobService()
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
         self.task_service = TaskService()
@@ -128,7 +136,7 @@ class ContextService:
         }
         return context_info
 
-    def get_nibbler_contexts(
+    async def get_nibbler_contexts(
         self,
         prompt: str,
         user_id: int,
@@ -139,6 +147,7 @@ class ContextService:
         prompt_with_more_than_one_hundred: bool,
     ) -> dict:
         images = []
+        self.jobs_service.create_registry({"prompt": prompt, "user_id": user_id})
         if prompt_already_exists_for_user:
             print("Prompt already exists for user")
             # Download the images from the s3 bucket
@@ -185,63 +194,18 @@ class ContextService:
                     }
                     images.append(new_dict)
             return images
-        start = time.time()
-        multi_generator = ImageGenerator()
-        generated_images = multi_generator.generate_all_images(
-            prompt, num_images, models, endpoint
-        )
-        images = []
-        for generator_dict in generated_images:
-            if generator_dict:
-                for image in generator_dict.get("images", []):
-                    image_id = (
-                        generator_dict["generator"]
-                        + "_"
-                        + prompt
-                        + "_"
-                        + str(user_id)
-                        + "_"
-                        + hashlib.md5(image.encode()).hexdigest()
-                    )
-                    print(image_id)
-                    image_bytes = io.BytesIO(base64.b64decode(image))
-                    img = Image.open(image_bytes)
-                    img = img.convert("L")
-                    average_intensity = img.getdata()
-                    average_intensity = sum(average_intensity) / len(average_intensity)
-                    if average_intensity < 10:
-                        print("Image too dark, skipping")
-                        new_dict = {
-                            "image": forbidden_image,
-                            "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
-                        }
-                        images.append(new_dict)
-
-                    elif black_image in image:
-                        new_dict = {
-                            "image": forbidden_image,
-                            "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
-                        }
-                        images.append(new_dict)
-
-                    else:
-                        new_dict = {
-                            "image": image,
-                            "id": image_id,
-                        }
-                        filename = (
-                            f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
-                        )
-                        self.s3.put_object(
-                            Body=base64.b64decode(image),
-                            Bucket=self.dataperf_bucket,
-                            Key=filename,
-                        )
-                        images.append(new_dict)
-        random.shuffle(images)
-        print(f"Time to generate images: {time.time() - start}")
-        return images
-
+        
+        images = celery.group(*[generate_nibbler_images_celery.s(prompt, num_images, models, endpoint, user_id) for _ in range(6)])
+        res = images()
+        # Should this happen asynchronously?
+        all_responses = res.get()
+        for response in all_responses:
+            info_to_log = {"message": response['message'], "time": response['time'],
+                           "model": response['generator'], "task_id": response['queue_task_id'],
+                            "user_id": response['user_id']}
+            logging.critical(info_to_log)
+        self.jobs_service.remove_registry({"prompt": prompt, "user_id": user_id})
+                
     async def get_perdi_contexts(
         self, prompt: str, number_of_samples: int, models: dict
     ) -> list:
@@ -276,7 +240,10 @@ class ContextService:
 
     async def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
-            return self.get_nibbler_contexts(
+            exists = self.jobs_service.metadata_exists({"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]})
+            if exists:
+                return "POSITION IN THE QUEUE IS GIVEN PROMPT AND UID" 
+            return await self.get_nibbler_contexts(
                 prompt=artifacts["prompt"],
                 user_id=artifacts["user_id"],
                 models=artifacts["model"],

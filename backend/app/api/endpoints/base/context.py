@@ -16,9 +16,7 @@ from app.domain.schemas.base.context import (
 )
 from app.domain.services.base.context import ContextService
 
-
 router = APIRouter()
-
 
 @router.post("/get_context", response_model={})
 async def get_context(model: GetContextRequest):
@@ -33,7 +31,8 @@ async def get_context_configuration(task_id: int):
 
 
 @router.post("/get_generative_contexts")
-async def get_generative_contexts(model: GetGenerativeContextRequest):
+async def get_generative_contexts(model: dict):
+    model = GetGenerativeContextRequest(**model)
     image_list = await ContextService().get_generative_contexts(
         model.type, model.artifacts
     )

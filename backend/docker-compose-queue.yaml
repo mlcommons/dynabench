@@ -1,0 +1,37 @@
+version: "3.9"
+   
+services:
+  worker:
+    image: worker
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+    entrypoint: 
+      /bin/bash "worker/celery_entrypoint.sh"
+    environment:
+      CELERY_CONCURRENCY_LIMIT: 1
+      HOSTNAME: 0.0.0.0
+      CELERY_BROKER_URL: redis://redis:6379/0
+  redis:
+    image: redis:7.2
+    expose:
+      - '6379'
+    ports:
+      - '6379:6379'
+    # volumes:
+    #   - .:/app
+  dashboard:
+    image: mher/flower:0.9.7
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - FLOWER_PORT=8888
+    ports:
+      - 5555:8888
+    depends_on:
+      - redis
+      - worker
