@@ -28,6 +28,8 @@ const SelectBetweenImagesGenerative: FC<
   setPartialSampleId,
 }) => {
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
+  const [showQueue, setShowQueue] = useState<boolean>(false);
+  const [positionQueue, setPositionQueue] = useState<any>({});
   const [firstMessageReceived, setFirstMessageReceived] = useState(false);
   const [allowsGeneration, setAllowsGeneration] = useState(true);
   const [showLoader, setShowLoader] = useState(false);
@@ -141,26 +143,56 @@ const SelectBetweenImagesGenerative: FC<
       setShowLoader(true);
       const { checkIfPromptExistsForUser, checkIfPromptIsInOccurrences } =
         await runCheckers(prompt);
-      const imagesHttp = await post("/context/get_generative_contexts", {
-        type: generative_context.type,
-        artifacts: {
-          ...artifactsInput,
-          prompt_already_exists_for_user: checkIfPromptExistsForUser,
-          prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
-        },
-      });
-      if (response.ok) {
-        setShowImages(imagesHttp);
-        setShowLoader(false);
-      } else {
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_HOST_2}/context/get_generative_contexts`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: generative_context.type,
+              artifacts: {
+                ...artifactsInput,
+                task_id: taskId,
+                prompt_already_exists_for_user: checkIfPromptExistsForUser,
+                prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
+              },
+            }),
+          },
+        );
+
+        const imagesHttp = await response.json();
+        if (imagesHttp) {
+          if (Array.isArray(imagesHttp)) {
+            setShowImages(imagesHttp);
+            setShowLoader(false);
+            setShowQueue(false);
+            console.log("imagesHttp", imagesHttp);
+          } else {
+            setShowQueue(true);
+            setPositionQueue(imagesHttp);
+            await saveHistoricalData(prompt, setPromptHistory);
+            setTimeout(generateImages, 25000);
+          }
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong!",
+          });
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: "Something went wrong!",
         });
+        window.location.reload();
       }
-
-      await saveHistoricalData(prompt, setPromptHistory);
       await post(
         "/rounduserexample/increment_counter_examples_submitted_today",
         {
@@ -211,6 +243,7 @@ const SelectBetweenImagesGenerative: FC<
         ...artifactsInput,
         prompt: prompt,
         user_id: user.id,
+        task_id: taskId,
         prompt_already_exists_for_user: checkIfPromptExistsForUser,
         prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
       },
@@ -376,18 +409,47 @@ const SelectBetweenImagesGenerative: FC<
           )}
         </div>
       ) : (
-        <div className="grid items-center justify-center grid-rows-2">
-          <div className="mr-2 text-letter-color">
-            8 High-resolution images are currently being generated
-            <br />
-          </div>
-          <PacmanLoader
-            color="#ccebd4"
-            loading={showLoader}
-            size={50}
-            className="flex align-center"
-          />
-        </div>
+        <>
+          {showQueue ? (
+            <div className="grid items-center justify-center grid-rows-1">
+              <div className="px-8 py-8 ">
+                <h4 className="pb-4 text-3xl font-bold text-gray-700">
+                  Queue Position
+                </h4>
+                <p className="text-lg text-gray-700">
+                  You are currently number {positionQueue.queue_position} in the
+                  queue.
+                </p>
+                <p className="text-lg text-gray-700">
+                  There are {positionQueue.all_positions - 1} users ahead of
+                  you.
+                </p>
+                <p className="text-lg text-gray-700">
+                  Please wait a few moments for your images to be generated.
+                </p>
+                <PacmanLoader
+                  color="#ccebd4"
+                  loading={showLoader}
+                  size={50}
+                  className="flex pt-2 align-center"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid items-center justify-center grid-rows-2">
+              <div className="mr-2 text-letter-color">
+                8 High-resolution images are currently being generated
+                <br />
+              </div>
+              <PacmanLoader
+                color="#ccebd4"
+                loading={showLoader}
+                size={50}
+                className="flex align-center"
+              />
+            </div>
+          )}
+        </>
       )}
     </>
   );

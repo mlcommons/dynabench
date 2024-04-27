@@ -13,6 +13,7 @@ import yaml
 from fastapi import HTTPException
 from worker.tasks import generate_images
 
+from app.domain.services.base.historical_data import HistoricalDataService
 from app.domain.services.base.jobs import JobService
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.llm import (
@@ -35,6 +36,7 @@ class ContextService:
         self.jobs_service = JobService()
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
+        self.historical_data_service = HistoricalDataService()
         self.task_service = TaskService()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -136,8 +138,15 @@ class ContextService:
         endpoint: str,
         prompt_already_exists_for_user: bool,
         prompt_with_more_than_one_hundred: bool,
+        task_id: int,
     ) -> dict:
         images = []
+        prompt_already_exists_for_user = (
+            self.historical_data_service.check_if_historical_data_exists(
+                task_id, user_id, prompt
+            )
+        )
+        print("Prompt already exists for user", prompt_already_exists_for_user)
         if prompt_already_exists_for_user:
             print("Prompt already exists for user")
             # Download the images from the s3 bucket
@@ -184,6 +193,7 @@ class ContextService:
                     }
                     images.append(new_dict)
             return images
+        print("generating new images")
         self.jobs_service.create_registry({"prompt": prompt, "user_id": user_id})
         generate_images.delay(prompt, num_images, models, endpoint, user_id)
         queue_position = self.jobs_service.determine_queue_position(
@@ -232,10 +242,12 @@ class ContextService:
             exists = self.jobs_service.metadata_exists(
                 {"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]}
             )
+            print("Exists is", exists)
             if exists:
                 queue_data = self.jobs_service.determine_queue_position(
                     {"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]}
                 )
+                print("Queue data is", queue_data)
                 return queue_data
             return await self.get_nibbler_contexts(
                 prompt=artifacts["prompt"],
@@ -249,6 +261,7 @@ class ContextService:
                     "prompt_with_more_than_one_hundred"
                 ],
                 num_images=artifacts.get("num_images", 12),
+                task_id=artifacts.get("task_id", 59),
             )
         elif type == "perdi":
             return await self.get_perdi_contexts(
