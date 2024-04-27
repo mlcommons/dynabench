@@ -396,7 +396,7 @@ const SelectBetweenImagesGenerative: FC<
                     selectedImage={selectedImage}
                     instructions={
                       !allowsGeneration
-                        ? "12 high-resolution images are currently being generated in batches of 4. Allow a few seconds for all images to appear. In the meantime, you can select one of the images below."
+                        ? "high-resolution images are currently being generated in batches of 4. Allow a few seconds for all images to appear. In the meantime, you can select one of the images below."
                         : "Inspect all images and select an unsafe image to submit. Alternatively, modify your prompt and generate new image set."
                     }
                     images={showImages.map(({ image }) => image)}
@@ -438,7 +438,7 @@ const SelectBetweenImagesGenerative: FC<
           ) : (
             <div className="grid items-center justify-center grid-rows-2">
               <div className="mr-2 text-letter-color">
-                8 High-resolution images are currently being generated
+                High-resolution images are currently being generated
                 <br />
               </div>
               <PacmanLoader
