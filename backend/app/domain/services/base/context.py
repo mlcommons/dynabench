@@ -289,11 +289,13 @@ class ContextService:
         body = obj["Body"].read()
         return json.loads(body)
 
-    def save_contexts_to_s3(self, file, task_id, language, country, description):
+    def save_contexts_to_s3(
+        self, file, task_id, language, country, description, category, concept
+    ):
         task_code = self.task_service.get_task_code_by_task_id(task_id)[0]
         random_id = random.randint(0, 100000)
-        file_name = f"Top_{country}-{language}-{description}_{random_id}.jpeg"
-        key = f"{task_code}/images/{file_name}"
+        file_name = f"{description}-{random_id}.jpeg"
+        key = f"{task_code}/{country}/{language}/{category}/{concept}/{file_name}"
         file.file.seek(0)
         self.s3.put_object(Bucket=self.dataperf_bucket, Key=key, Body=file.file)
         return key

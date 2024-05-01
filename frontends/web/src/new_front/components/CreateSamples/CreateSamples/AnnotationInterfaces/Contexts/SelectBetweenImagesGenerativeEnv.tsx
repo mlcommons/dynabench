@@ -296,10 +296,10 @@ const SelectBetweenImagesGenerative: FC<
   const cleanHistory = () => {
     Swal.fire({
       title: "Are you sure?",
-      text: "You will not be able to recover this history!",
+      text: "You will be permanently deleting your submitted prompts.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Yes, delete forever",
       cancelButtonText: "No, keep it",
     }).then(async (result) => {
       if (result.isConfirmed) {
@@ -310,7 +310,7 @@ const SelectBetweenImagesGenerative: FC<
         setPromptHistory([]);
         Swal.fire("Deleted!", "Your history has been deleted.", "success");
       } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire("Cancelled", "Your history is safe :)", "error");
+        Swal.fire("Cancelled", "Your previous prompts are saved", "error");
       }
     });
   };
@@ -417,12 +417,9 @@ const SelectBetweenImagesGenerative: FC<
                   Queue Position
                 </h4>
                 <p className="text-lg text-gray-700">
-                  You are currently number {positionQueue.queue_position} in the
-                  queue.
-                </p>
-                <p className="text-lg text-gray-700">
-                  There are {positionQueue.all_positions - 1} users ahead of
-                  you.
+                  Your images should take between{" "}
+                  {positionQueue.queue_position * 30} and{" "}
+                  {positionQueue.queue_position * 30 + 30} seconds to generate!
                 </p>
                 <p className="text-lg text-gray-700">
                   Please wait a few moments for your images to be generated.

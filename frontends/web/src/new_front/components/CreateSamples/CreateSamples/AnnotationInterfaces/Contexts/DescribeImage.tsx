@@ -121,12 +121,26 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
     "https://w7.pngwing.com/pngs/527/625/png-transparent-scalable-graphics-computer-icons-upload-uploading-cdr-angle-text-thumbnail.png",
   );
   const [description, setDescription] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(
+    localStorage.getItem("selectedCategory")
+      ? JSON.parse(localStorage.getItem("selectedCategory") || "")
+      : null,
+  );
+  const [selectedConcept, setSelectedConcept] = useState(
+    localStorage.getItem("selectedConcept")
+      ? JSON.parse(localStorage.getItem("selectedConcept") || "")
+      : null,
+  );
   const [showExample, setShowExample] = useState(false);
   const { post, response, loading } = useFetch();
   const [countries, setCountries] = useState<string[]>([]);
-  const [country, setCountry] = useState<string>("");
+  const [country, setCountry] = useState<string>(
+    localStorage.getItem("country") || "",
+  );
   const [languages, setLanguages] = useState<string[]>([]);
-  const [language, setLanguage] = useState<string>("");
+  const [language, setLanguage] = useState<string>(
+    localStorage.getItem("language") || "",
+  );
   const [file, setFile] = useState<File>();
   const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
   const { modelInputs, updateModelInputs } = useContext(CreateInterfaceContext);
@@ -175,8 +189,21 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
     setDescription(e.target.value);
   };
 
+  useEffect(() => {
+    console.log("selectedConcept", selectedConcept.value);
+  }, [selectedCategory, selectedConcept]);
+
   const handleSaveData = async () => {
-    if (!file) return;
+    if (description.length < 20) {
+      alert("Please enter a description with at least 20 characters.");
+      return;
+    }
+    if (!file || !description || !selectedCategory || !selectedConcept) {
+      alert(
+        "Please choose an image, describe it, and pick a category and concept.",
+      );
+      return;
+    }
     const formData = new FormData();
     formData.append("file", file);
     axios
@@ -189,6 +216,8 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
           language,
           country,
           description,
+          concept: selectedConcept.value,
+          category: selectedCategory.value,
         },
       })
       .then((res) => {
@@ -216,8 +245,31 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   }, [country, language]);
 
   useEffect(() => {
-    console.log("file", file);
-  }, [file]);
+    localStorage.setItem("language", language);
+    localStorage.setItem("country", country);
+  }, [language, country]);
+
+  useEffect(() => {
+    if (localStorage.getItem("language") && localStorage.getItem("country")) {
+      updateModelInputs({
+        origin_primary: localStorage.getItem("country"),
+        origin_secondary: localStorage.getItem("language"),
+      });
+    }
+    if (localStorage.getItem("selectedCategory")) {
+      updateModelInputs({ category: selectedCategory.value });
+    }
+    if (localStorage.getItem("selectedConcept")) {
+      updateModelInputs({ concept: selectedConcept.value });
+    }
+  }, [localStorage]);
+
+  useEffect(() => {
+    // If language and country are already selected then fetch the context
+    if (localStorage.getItem("language") && localStorage.getItem("country")) {
+      handleGetCategories();
+    }
+  }, [localStorage.getItem("language")]);
 
   return (
     <>
@@ -238,6 +290,12 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                 }))}
                 onChange={handleGetLanguages}
                 placeholder="Select a country"
+                defaultValue={
+                  localStorage.getItem("country") && {
+                    value: localStorage.getItem("country"),
+                    label: localStorage.getItem("country"),
+                  }
+                }
               />
             </div>
             <div>
@@ -249,6 +307,12 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                 }))}
                 onChange={handleLanguageChange}
                 placeholder="Select a language"
+                defaultValue={
+                  localStorage.getItem("language") && {
+                    value: localStorage.getItem("language"),
+                    label: localStorage.getItem("language"),
+                  }
+                }
               />
             </div>
           </div>
@@ -293,6 +357,10 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                 <DoubleDropDown
                   filterContext={filterContext}
                   updateModelInputs={updateModelInputs}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  selectedConcept={selectedConcept}
+                  setSelectedConcept={setSelectedConcept}
                 />
               </div>
             </div>
@@ -304,9 +372,11 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                   setImage={setImage}
                   updateModelInputs={updateModelInputs}
                 />
-                <BasicInput
+                <input
                   placeholder="Enter text here. Do not copy and paste"
                   onChange={handleSaveInput}
+                  className="w-full h-12 p-4 bg-gray-100 border-gray-300 rounded-lg border-1"
+                  minLength={20}
                 />
                 <GeneralButton
                   onClick={handleSaveData}

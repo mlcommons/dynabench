@@ -16,7 +16,9 @@ from app.domain.schemas.base.context import (
 )
 from app.domain.services.base.context import ContextService
 
+
 router = APIRouter()
+
 
 @router.post("/get_context", response_model={})
 async def get_context(model: GetContextRequest):
@@ -74,9 +76,11 @@ def save_contexts_to_s3(
     task_id: int,
     language: str,
     country: str,
+    category: str,
+    concept: str,
     description: str,
     file: UploadFile = File(...),
 ):
     return ContextService().save_contexts_to_s3(
-        file, task_id, language, country, description
+        file, task_id, language, country, description, category, concept
     )
