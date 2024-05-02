@@ -54,7 +54,7 @@ const DoubleDropDown = ({
   return (
     <>
       {filterContext && (
-        <div className="flex flex-col gap-8 px-4">
+        <div className="flex flex-row gap-8 px-4">
           <div className="mr-4">
             <p className="text-base">Category</p>
             <Select

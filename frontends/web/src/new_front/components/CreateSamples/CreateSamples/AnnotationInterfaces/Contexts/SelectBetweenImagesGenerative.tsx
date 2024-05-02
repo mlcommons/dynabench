@@ -422,6 +422,10 @@ const SelectBetweenImagesGenerative: FC<
                   {positionQueue.queue_position * 30 + 30} seconds to generate!
                 </p>
                 <p className="text-lg text-gray-700">
+                  You are currently position {positionQueue.queue_position} in
+                  the queue.
+                </p>
+                <p className="text-lg text-gray-700">
                   Please wait a few moments for your images to be generated.
                 </p>
                 <PacmanLoader

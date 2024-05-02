@@ -189,10 +189,6 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
     setDescription(e.target.value);
   };
 
-  useEffect(() => {
-    console.log("selectedConcept", selectedConcept.value);
-  }, [selectedCategory, selectedConcept]);
-
   const handleSaveData = async () => {
     if (description.length < 20) {
       alert("Please enter a description with at least 20 characters.");
@@ -280,55 +276,8 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
           </div>
         </div>
         <div className="flex items-center justify-between gap-8 pb-12">
-          <div className="flex gap-8">
-            <div className="mr-4">
-              <p className="text-base">Country</p>
-              <Select
-                options={countries.map((country) => ({
-                  value: country,
-                  label: country,
-                }))}
-                onChange={handleGetLanguages}
-                placeholder="Select a country"
-                defaultValue={
-                  localStorage.getItem("country") && {
-                    value: localStorage.getItem("country"),
-                    label: localStorage.getItem("country"),
-                  }
-                }
-              />
-            </div>
-            <div>
-              <p className="text-base">Language</p>
-              <Select
-                options={languages.map((language) => ({
-                  value: language,
-                  label: language,
-                }))}
-                onChange={handleLanguageChange}
-                placeholder="Select a language"
-                defaultValue={
-                  localStorage.getItem("language") && {
-                    value: localStorage.getItem("language"),
-                    label: localStorage.getItem("language"),
-                  }
-                }
-              />
-            </div>
-          </div>
           {filterContext && (
             <div className="flex align-end">
-              <button
-                type="button"
-                className="mt-2 btn btn-outline-primary btn-sm btn-help-info"
-                onClick={() => {
-                  setShowExample(!showExample);
-                }}
-              >
-                <span className="text-base font-normal text-letter-color">
-                  Example
-                </span>
-              </button>
               {showExample && (
                 <>
                   <Modal
@@ -350,20 +299,80 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
             </div>
           )}
         </div>
-        {filterContext && (
-          <div className="grid grid-cols-3 gap-3 divide-x-2">
-            <div className="col-span-1">
-              <div className="flex flex-col items-center py-2 space-y-3 align-center">
-                <DoubleDropDown
-                  filterContext={filterContext}
-                  updateModelInputs={updateModelInputs}
-                  selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
-                  selectedConcept={selectedConcept}
-                  setSelectedConcept={setSelectedConcept}
-                />
+        <div className="grid grid-cols-3 gap-3 divide-x-2">
+          <div className="col-span-1">
+            <div className="flex flex-col items-center pt-2 pb-16 space-y-5 align-center">
+              <div className="flex gap-8">
+                <div className="mr-4">
+                  <p className="text-base">Country</p>
+                  <Select
+                    options={countries.map((country) => ({
+                      value: country,
+                      label: country,
+                    }))}
+                    onChange={handleGetLanguages}
+                    placeholder="Select a country"
+                    defaultValue={
+                      localStorage.getItem("country") && {
+                        value: localStorage.getItem("country"),
+                        label: localStorage.getItem("country"),
+                      }
+                    }
+                  />
+                </div>
+                <div>
+                  <p className="text-base">Language</p>
+                  <Select
+                    options={languages.map((language) => ({
+                      value: language,
+                      label: language,
+                    }))}
+                    onChange={handleLanguageChange}
+                    placeholder="Select a language"
+                    defaultValue={
+                      localStorage.getItem("language") && {
+                        value: localStorage.getItem("language"),
+                        label: localStorage.getItem("language"),
+                      }
+                    }
+                  />
+                </div>
               </div>
             </div>
+            {filterContext && (
+              <>
+                <div className="flex flex-col items-center py-2 space-y-3 align-center">
+                  <DoubleDropDown
+                    filterContext={filterContext}
+                    updateModelInputs={updateModelInputs}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    selectedConcept={selectedConcept}
+                    setSelectedConcept={setSelectedConcept}
+                  />
+                </div>
+                <div className="flex flex-row items-center justify-between py-8 mx-8 space-y-3 align-center">
+                  <button
+                    type="button"
+                    className="mt-2 btn btn-outline-primary btn-sm btn-help-info"
+                    onClick={() => {
+                      setShowExample(!showExample);
+                    }}
+                  >
+                    <span className="text-base font-normal text-letter-color">
+                      Example
+                    </span>
+                  </button>
+                  <GeneralButton
+                    onClick={handleSaveData}
+                    text="Save description"
+                    className="px-4 mt-[2px] font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          {filterContext && (
             <div className="col-span-2 px-4">
               <div className="flex flex-col items-center w-full col-span-2 py-2 space-y-3 align-center">
                 <ImageUpload
@@ -378,15 +387,10 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                   className="w-full h-12 p-4 bg-gray-100 border-gray-300 rounded-lg border-1"
                   minLength={20}
                 />
-                <GeneralButton
-                  onClick={handleSaveData}
-                  text="Save description"
-                  className="px-4 mt-[2px] font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
-                />
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       {loading && (
         <div className="grid items-center justify-center grid-rows-2">
