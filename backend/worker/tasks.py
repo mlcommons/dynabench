@@ -39,7 +39,9 @@ def generate_nibbler_images_celery(
 
 
 @app.task(name="generate_images", queue="nibbler", max_retries=0)
-def generate_images(prompt, num_images, models, endpoint, user_id):
+def generate_images(
+    prompt, num_images, models, endpoint, user_id, num_of_current_images
+):
     try:
         job_service = JobService()
         images = celery.group(
@@ -54,7 +56,7 @@ def generate_images(prompt, num_images, models, endpoint, user_id):
         res = images.apply_async()
         print(res)
         all_responses = res.get(disable_sync_subtasks=False)
-        if len(all_responses) > 4:
+        if (len(all_responses) + num_of_current_images) >= 5:
             job_service.remove_registry({"prompt": prompt, "user_id": user_id})
 
         for response in all_responses:

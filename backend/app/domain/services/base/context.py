@@ -146,6 +146,7 @@ class ContextService:
                 task_id, user_id, prompt
             )
         )
+        num_of_current_images = 0
         print("Prompt already exists for user", prompt_already_exists_for_user)
         if prompt_already_exists_for_user:
             print("Prompt already exists for user")
@@ -166,7 +167,10 @@ class ContextService:
                             "id": image_id,
                         }
                         images.append(new_dict)
-                return images
+                    return images
+                else:
+                    num_of_current_images = len(objects["Contents"])
+
         if prompt_with_more_than_one_hundred:
             print("Prompt with less than 100 images")
             key = f"adversarial-nibbler/{prompt}"
@@ -196,7 +200,9 @@ class ContextService:
             return images
         print("generating new images")
         self.jobs_service.create_registry({"prompt": prompt, "user_id": user_id})
-        generate_images.delay(prompt, num_images, models, endpoint, user_id)
+        generate_images.delay(
+            prompt, num_images, models, endpoint, user_id, num_of_current_images
+        )
         queue_position = self.jobs_service.determine_queue_position(
             {"prompt": prompt, "user_id": user_id}
         )
