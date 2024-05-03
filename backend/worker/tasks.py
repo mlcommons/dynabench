@@ -13,7 +13,7 @@ from app.domain.services.utils.multi_generator import ImageGenerator
 
 
 logging.basicConfig(
-    filename="adversarial_nibbler.log",
+    filename="worker/adversarial_nibbler.log",
     level=logging.CRITICAL,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
