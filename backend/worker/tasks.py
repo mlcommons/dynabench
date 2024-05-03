@@ -47,7 +47,7 @@ def generate_images(prompt, num_images, models, endpoint, user_id):
                 generate_nibbler_images_celery.s(
                     prompt, num_images, models, endpoint, user_id
                 )
-                for _ in range(6)
+                for _ in range(10)
             ]
         )
 
