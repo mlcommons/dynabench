@@ -153,19 +153,20 @@ class ContextService:
             key = f"adversarial-nibbler/{prompt}/{user_id}"
             objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
             if "Contents" in objects:
-                for obj in objects["Contents"]:
-                    image_id = obj["Key"].split("/")[-1].split(".")[0]
-                    image = self.s3.get_object(
-                        Bucket=self.dataperf_bucket, Key=obj["Key"]
-                    )
-                    image_bytes = image["Body"].read()
-                    image = base64.b64encode(image_bytes).decode("utf-8")
-                    new_dict = {
-                        "image": image,
-                        "id": image_id,
-                    }
-                    images.append(new_dict)
-            return images
+                if len(objects["Contents"]) > 4:
+                    for obj in objects["Contents"]:
+                        image_id = obj["Key"].split("/")[-1].split(".")[0]
+                        image = self.s3.get_object(
+                            Bucket=self.dataperf_bucket, Key=obj["Key"]
+                        )
+                        image_bytes = image["Body"].read()
+                        image = base64.b64encode(image_bytes).decode("utf-8")
+                        new_dict = {
+                            "image": image,
+                            "id": image_id,
+                        }
+                        images.append(new_dict)
+                return images
         if prompt_with_more_than_one_hundred:
             print("Prompt with less than 100 images")
             key = f"adversarial-nibbler/{prompt}"
