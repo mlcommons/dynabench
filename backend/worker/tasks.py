@@ -54,7 +54,8 @@ def generate_images(prompt, num_images, models, endpoint, user_id):
         res = images.apply_async()
         print(res)
         all_responses = res.get(disable_sync_subtasks=False)
-        job_service.remove_registry({"prompt": prompt, "user_id": user_id})
+        if len(all_responses) > 4:
+            job_service.remove_registry({"prompt": prompt, "user_id": user_id})
 
         for response in all_responses:
             info_to_log = {
