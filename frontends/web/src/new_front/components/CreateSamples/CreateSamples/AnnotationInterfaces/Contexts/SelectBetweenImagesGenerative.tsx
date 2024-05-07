@@ -224,7 +224,6 @@ const SelectBetweenImagesGenerative: FC<
 
   const handlePromptHistory = async (prompt: string) => {
     setShowLoader(true);
-    setShowImages([]);
     setArtifactsInput({
       ...artifactsInput,
       prompt: prompt,
@@ -249,6 +248,7 @@ const SelectBetweenImagesGenerative: FC<
       },
     });
     if (response.ok) {
+      setShowImages([]);
       setShowImages(imagesHttp);
       setShowLoader(false);
     } else {
@@ -380,9 +380,7 @@ const SelectBetweenImagesGenerative: FC<
               </AnnotationInstruction>
             </div>
           </div>
-          {showImages.length === 0 ? (
-            <></>
-          ) : (
+          {showImages.length > 0 && (
             <>
               <div>
                 <AnnotationInstruction
