@@ -33,6 +33,7 @@ const ChatWithInstructions: FC<
 }) => {
   const [signInConsent, setSignInConsent] = useState(false);
   const [showExample, setShowExample] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
     user: [],
     bot: [],
@@ -69,7 +70,8 @@ const ChatWithInstructions: FC<
       case TreatmentId.Control:
         return "control";
       default:
-        throw new Error("Invalid treatment ID");
+        setProvider("openaihm");
+        return "openaihm";
     }
   }
 
@@ -150,7 +152,34 @@ const ChatWithInstructions: FC<
     <>
       {signInConsent ? (
         <>
-          <div className="flex items-end justify-end align-end">
+          <div className="flex items-end justify-between align-end">
+            <button
+              type="button"
+              className="my-2 btn btn-outline-primary btn-sm btn-help-info"
+              onClick={() => {
+                setShowInstructions(!showInstructions);
+              }}
+            >
+              <span className="text-base font-normal text-letter-color">
+                Instructions
+              </span>
+            </button>
+            {showInstructions && (
+              <Modal
+                show={showInstructions}
+                onHide={() => {
+                  setShowInstructions(false);
+                }}
+                size="lg"
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Instructions</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <MDEditor.Markdown source={context.instructions} />
+                </Modal.Body>
+              </Modal>
+            )}
             <button
               type="button"
               className="my-2 btn btn-outline-primary btn-sm btn-help-info"
@@ -188,24 +217,54 @@ const ChatWithInstructions: FC<
                 className="p-4 bg-white border border-gray-200"
               >
                 <div className="">
-                  <h3 className="text-2xl font-bold">General instructions</h3>
+                  <h3 className="text-2xl font-bold">What do I need to do?</h3>
                   <p className="mb-3">
-                    In this study, you will be asked to complete scenarios which
-                    simulate healthcare scenarios that a person might encounter
-                    in everyday life. In each case, you will be asked to make
-                    two decisions about how best to respond: 1) What should you
-                    do next? 2) What is the most likely cause of the problems
-                    being reported? The scenario (in the panel below) contains a
-                    description of specific case details, along with general
-                    life details and an abbreviated medical history. The
+                    In this study, you will be asked to complete{" "}
+                    <strong>two scenarios</strong> which simulate healthcare
+                    decisions that a person might encounter in everyday life.{" "}
+                    <strong>
+                      In each scenario, you will be asked to make two decisions
+                    </strong>{" "}
+                    about how best to respond:
+                    <br />
+                    <br />
+                    1) What should you do next? (e.g. call 111 or 999)
+                    <br />
+                    <br />
+                    2) What is the most likely cause of the symptoms being
+                    reported?
+                    <br />
+                    <br />
+                    The scenario (available below and on the next page)
+                    describes the specific details of the case, followed by
+                    general life details and an abbreviated medical history. The
                     information provided gives a complete picture of the
                     relevant health details, but also includes additional
                     information which may not be relevant. As with a real health
                     decision, you will need to decide what information is most
-                    important. Once you have finished reading the instructions,
-                    click “I understand” to begin the experiment. You will
-                    continue to have access to the scenario information on the
-                    next page.
+                    important.
+                    <br />
+                    <br />
+                    c. For the language model treatments, there is additional
+                    text which appears. I would like to change that to the
+                    below: We are interested in understanding how you use the
+                    language model provided and how well it works for you.
+                    Therefore, it is essential that you{" "}
+                    <strong>only use your own words,</strong> and do not copy
+                    and paste from the scenario text, or from any
+                    <br />
+                    <br />
+                    d. In all treatments, there is a final paragraph at the end
+                    which I would like to change to these two lines (with
+                    newlines):
+                    <br />
+                    <br />
+                    After completing the first scenario, you will return to this
+                    page for a different second scenario.
+                    <br />
+                    <br />
+                    Once you have finished reading the instructions, click “I
+                    understand” to begin the experiment.
                   </p>
                   {treatmentValue !== "control" ? (
                     <>
@@ -254,30 +313,24 @@ const ChatWithInstructions: FC<
                   className="p-4 bg-white border border-gray-200"
                 >
                   <h1 className="mb-4 text-2xl font-bold">
-                    Brief Introduction to Large Language Models
+                    How does the interface work?
                   </h1>
                   <p className="mb-4">
-                    In this study, participants will interact with a large
-                    language model to reach a decision about a healthcare
-                    scenario.
-                  </p>
-                  <p className="mb-4">
-                    Large language models (LLMs) are a recent technology in the
-                    field of artificial intelligence which can generate text.
-                    They often take the form of a chatbot, which holds
-                    “conversations” with users by responding to written prompts.
-                    The most famous example is ChatGPT.
-                  </p>
-                  <p className="mb-4">
-                    The LLM used in this experiment also uses a chat interface.
-                    You can type in sentences, such as questions about the
-                    scenario, and the LLM will generate new text in response.
-                    Your previous statements will be included as context, so
-                    that each response reflects the whole conversation up to
-                    that point.
+                    On the next page, we want you to interact with a large
+                    language model to help you make a medical decision. The LLM
+                    used in this experiment uses a chat interface. You can type
+                    in sentences, such as questions about the scenario, and the
+                    LLM will generate new text in response. After you have read
+                    the response, click “Save” and then you will be able to ask
+                    another question. You may interact with the model up to 10
+                    times, and must interact at least once. When you are
+                    finished using the language model, press the “Finish” button
+                    to save the whole conversation and move on to the scenario
+                    questions.
                   </p>
                 </div>
               )}
+              <h3 className="text-2xl font-bold">Scenario</h3>
               <div className="px-4 py-2 border border-gray-200 ">
                 <BasicInstructions instructions={context} />
               </div>

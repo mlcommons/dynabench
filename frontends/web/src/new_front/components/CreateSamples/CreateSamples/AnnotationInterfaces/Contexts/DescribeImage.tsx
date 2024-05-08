@@ -63,11 +63,11 @@ const ImageUpload = ({
 
   return (
     <div>
-      <div className="flex items-center justify-center gap-8 pb-2">
+      <div className="flex items-center justify-center object-cover gap-8 pb-2">
         <img
           src={image}
           alt="src"
-          className="rounded-lg max-w-[450px] max-h-[450px]"
+          className="rounded-lg"
           onDrag={handleDragEnter}
           onDragEnd={handleDragLeave}
           onDragLeave={handleDragLeave}
@@ -275,7 +275,7 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
             Select the country and language
           </div>
         </div>
-        <div className="flex items-center justify-between gap-8 pb-12">
+        <div className="flex items-center justify-between gap-8 md:pb-12">
           {filterContext && (
             <div className="flex align-end">
               {showExample && (
@@ -299,9 +299,9 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
             </div>
           )}
         </div>
-        <div className="grid grid-cols-3 gap-3 divide-x-2">
+        <div className="grid grid-cols-1 gap-3 divide-x-2 md:grid-cols-3">
           <div className="col-span-1">
-            <div className="flex flex-col items-center pt-2 pb-16 space-y-5 align-center">
+            <div className="flex flex-col items-center pt-2 pb-4 space-y-5 md:pb-16 align-center">
               <div className="flex gap-8">
                 <div className="mr-4">
                   <p className="text-base">Country</p>
@@ -365,7 +365,7 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                   </button>
                   <GeneralButton
                     onClick={handleSaveData}
-                    text="Save description"
+                    text="Submit"
                     className="px-4 mt-[2px] font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                   />
                 </div>
