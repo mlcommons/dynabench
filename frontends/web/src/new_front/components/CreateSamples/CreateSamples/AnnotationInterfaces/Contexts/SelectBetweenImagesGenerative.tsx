@@ -236,27 +236,58 @@ const SelectBetweenImagesGenerative: FC<
 
     const { checkIfPromptExistsForUser, checkIfPromptIsInOccurrences } =
       await runCheckers(prompt);
-    const imagesHttp = await post("/context/get_generative_contexts", {
-      type: generative_context.type,
-      artifacts: {
-        ...artifactsInput,
-        prompt: prompt,
-        user_id: user.id,
-        task_id: taskId,
-        prompt_already_exists_for_user: checkIfPromptExistsForUser,
-        prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
-      },
-    });
-    if (response.ok) {
-      setShowImages([]);
-      setShowImages(imagesHttp);
-      setShowLoader(false);
-    } else {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_HOST_2}/context/get_generative_contexts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: generative_context.type,
+            artifacts: {
+              ...artifactsInput,
+              prompt: prompt,
+              user_id: user.id,
+              task_id: taskId,
+              prompt_already_exists_for_user: checkIfPromptExistsForUser,
+              prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
+            },
+          }),
+        },
+      );
+
+      const imagesHttp = await response.json();
+      if (imagesHttp) {
+        if (Array.isArray(imagesHttp)) {
+          setShowImages(imagesHttp);
+          setShowLoader(false);
+          setShowQueue(false);
+          console.log("imagesHttp", imagesHttp);
+        } else {
+          setShowImages([]);
+          setShowQueue(true);
+          setPositionQueue(imagesHttp);
+          await saveHistoricalData(prompt, setPromptHistory);
+          setTimeout(generateImages, 25000);
+        }
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
       Swal.fire({
         icon: "error",
         title: "Oops...",
         text: "Something went wrong!",
       });
+      window.location.reload();
     }
   };
 

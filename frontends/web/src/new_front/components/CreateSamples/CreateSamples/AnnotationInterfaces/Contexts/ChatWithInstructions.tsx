@@ -137,6 +137,9 @@ const ChatWithInstructions: FC<
         // @ts-ignore
         setExample(generative_context.artifacts.examples.control);
       }
+    } else {
+      setTreatmentValue("openaihm");
+      setModelName({ openaihm: "gpt-3.5-turbo" });
     }
   }, [treatmentId]);
 

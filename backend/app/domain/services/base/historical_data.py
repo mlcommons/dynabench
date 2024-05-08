@@ -21,6 +21,8 @@ class HistoricalDataService:
             return self.historical_data_repository.save_historical_data(
                 task_id, user_id, data
             )
+        else:
+            return self.get_historical_data_by_task_and_user(task_id, user_id)
 
     def check_if_historical_data_exists(self, task_id: int, user_id: int, data: str):
         check_if_exist = (
