@@ -369,7 +369,7 @@ const SelectBetweenImagesGenerative: FC<
             >
               <Dropdown
                 options={promptHistory.map((item) => item.history)}
-                placeholder="Find your previous prompts here           "
+                placeholder="Click this dropdown to see submitted prompts"
                 onChange={handlePromptHistory}
                 disabled={!allowsGeneration}
               />

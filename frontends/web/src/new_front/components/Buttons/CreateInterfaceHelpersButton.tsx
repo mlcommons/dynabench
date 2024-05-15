@@ -1,4 +1,5 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useContext } from "react";
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { Modal } from "react-bootstrap";
 import MDEditor from "@uiw/react-md-editor";
 import ShowInstructionsButton from "new_front/components/Buttons/ShowInstructionsButton";
@@ -6,14 +7,13 @@ import ShowInstructionsButton from "new_front/components/Buttons/ShowInstruction
 type CreateInterfaceHelpersButtonProps = {
   generalInstructions: string;
   creationExample?: string;
-  amountExamplesCreatedToday?: number;
 };
 
 const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
   generalInstructions,
   creationExample,
-  amountExamplesCreatedToday,
 }) => {
+  const { amountExamplesCreatedToday } = useContext(CreateInterfaceContext);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showCreationExample, setShowCreationExample] = useState(false);
 
