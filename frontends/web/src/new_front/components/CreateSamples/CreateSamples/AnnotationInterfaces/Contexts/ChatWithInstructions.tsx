@@ -53,7 +53,7 @@ const ChatWithInstructions: FC<
   const { user } = useContext(UserContext);
   const location = useLocation();
   const queryParams = queryString.parse(location.search);
-  let treatmentId = queryParams.treatmentId;
+  let treatmentId = queryParams.treatmentId ? queryParams.treatmentId : "2";
   let prolificId = queryParams.assignmentId;
 
   function getTreatmentValue(treatmentId: TreatmentId): string {
