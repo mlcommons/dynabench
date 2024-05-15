@@ -1,4 +1,4 @@
-import React, { FC, useState, useContext } from "react";
+import React, { FC, useState, useContext, useEffect } from "react";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { Modal } from "react-bootstrap";
 import MDEditor from "@uiw/react-md-editor";
@@ -7,15 +7,24 @@ import ShowInstructionsButton from "new_front/components/Buttons/ShowInstruction
 type CreateInterfaceHelpersButtonProps = {
   generalInstructions: string;
   creationExample?: string;
+  realRoundId: number;
+  userId: number;
 };
 
 const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
   generalInstructions,
   creationExample,
+  realRoundId,
+  userId,
 }) => {
-  const { amountExamplesCreatedToday } = useContext(CreateInterfaceContext);
+  const { amountExamplesCreatedToday, updateAmountExamplesCreatedToday } =
+    useContext(CreateInterfaceContext);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showCreationExample, setShowCreationExample] = useState(false);
+
+  useEffect(() => {
+    updateAmountExamplesCreatedToday(realRoundId, userId);
+  }, [realRoundId, userId]);
 
   return (
     <div className="flex items-center justify-between gap-2">

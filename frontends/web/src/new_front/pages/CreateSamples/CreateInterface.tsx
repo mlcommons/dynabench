@@ -99,10 +99,6 @@ const CreateInterface = () => {
     }
   };
 
-  const loadAmountExamples = async () => {
-    updateAmountExamplesCreatedToday(taskContextInfo?.real_round_id!, user.id!);
-  };
-
   const isLogin = async (
     assignmentId: string | null,
     taskCode: string,
@@ -132,10 +128,12 @@ const CreateInterface = () => {
 
   useEffect(() => {
     if (taskContextInfo?.real_round_id) {
-      loadAmountExamples();
+      updateAmountExamplesCreatedToday(
+        taskContextInfo?.real_round_id,
+        user.id!,
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskContextInfo?.real_round_id]);
+  }, [taskContextInfo, user]);
 
   useEffect(() => {
     if (taskContextInfo?.real_round_id) {
@@ -169,6 +167,8 @@ const CreateInterface = () => {
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
                     creationExample={taskInfo?.creation_example_md!}
+                    realRoundId={taskContextInfo?.real_round_id!}
+                    userId={user.id!}
                   />
                 </div>
               </div>
