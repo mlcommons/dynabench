@@ -18,7 +18,10 @@ import { useHistory, useParams } from "react-router-dom";
 import UserContext from "containers/UserContext";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
-import { CreateInterfaceProvider } from "new_front/context/CreateInterface/Context";
+import {
+  CreateInterfaceContext,
+  CreateInterfaceProvider,
+} from "new_front/context/CreateInterface/Context";
 import Swal from "sweetalert2";
 import { useLocation } from "react-router-dom";
 
@@ -38,6 +41,9 @@ const CreateInterface = () => {
   const { get, post, response, loading } = useFetch();
   let { taskCode } = useParams<{ taskCode: string }>();
   const { user } = useContext(UserContext);
+  const { updateAmountExamplesCreatedToday } = useContext(
+    CreateInterfaceContext,
+  );
   const history = useHistory();
   const location = useLocation();
 
@@ -94,16 +100,7 @@ const CreateInterface = () => {
   };
 
   const loadAmountExamples = async () => {
-    const amountExamples = await post(
-      `/rounduserexample/number_of_examples_created`,
-      {
-        round_id: taskContextInfo?.real_round_id,
-        user_id: user.id!,
-      },
-    );
-    if (response.ok) {
-      setAmountExamples(amountExamples);
-    }
+    updateAmountExamplesCreatedToday(taskContextInfo?.real_round_id!, user.id!);
   };
 
   const isLogin = async (
@@ -172,7 +169,6 @@ const CreateInterface = () => {
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
                     creationExample={taskInfo?.creation_example_md!}
-                    amountExamplesCreatedToday={Number(amountExamples)}
                   />
                 </div>
               </div>

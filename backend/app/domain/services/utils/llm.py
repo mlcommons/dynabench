@@ -272,6 +272,7 @@ class CohereProvider(LLMProvider):
                     p=top_p,
                     k=top_k,
                     max_tokens=max_tokens,
+                    prompt_truncation="AUTO",
                     **model[provider]["model_args"],
                 )
             else:
@@ -283,6 +284,7 @@ class CohereProvider(LLMProvider):
                     p=top_p,
                     k=top_k,
                     max_tokens=max_tokens,
+                    prompt_truncation="AUTO",
                     **model[provider]["model_args"],
                 )
 

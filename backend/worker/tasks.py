@@ -39,28 +39,35 @@ def generate_nibbler_images_celery(
 
 
 @app.task(name="generate_images", queue="nibbler", max_retries=0)
-def generate_images(prompt, num_images, models, endpoint, user_id):
-    job_service = JobService()
-    images = celery.group(
-        *[
-            generate_nibbler_images_celery.s(
-                prompt, num_images, models, endpoint, user_id
-            )
-            for _ in range(6)
-        ]
-    )
+def generate_images(
+    prompt, num_images, models, endpoint, user_id, num_of_current_images
+):
+    try:
+        job_service = JobService()
+        images = celery.group(
+            *[
+                generate_nibbler_images_celery.s(
+                    prompt, num_images, models, endpoint, user_id
+                )
+                for _ in range(10)
+            ]
+        )
 
-    res = images.apply_async()
-    print(res)
-    all_responses = res.get(disable_sync_subtasks=False)
-    job_service.remove_registry({"prompt": prompt, "user_id": user_id})
+        res = images.apply_async()
+        print(res)
+        all_responses = res.get(disable_sync_subtasks=False)
+        if (len(all_responses) + num_of_current_images) >= 5:
+            job_service.remove_registry({"prompt": prompt, "user_id": user_id})
 
-    for response in all_responses:
-        info_to_log = {
-            "message": response["message"],
-            "time": response["time"],
-            "model": response["generator"],
-            "task_id": response["queue_task_id"],
-            "user_id": response["user_id"],
-        }
-        logging.critical(info_to_log)
+        for response in all_responses:
+            info_to_log = {
+                "message": response["message"],
+                "time": response["time"],
+                "model": response["generator"],
+                "task_id": response["queue_task_id"],
+                "user_id": response["user_id"],
+            }
+            logging.critical(info_to_log)
+    except Exception as e:
+        print(e)
+        job_service.remove_registry({"prompt": prompt, "user_id": user_id})

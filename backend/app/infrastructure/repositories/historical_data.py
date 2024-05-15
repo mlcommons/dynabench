@@ -45,7 +45,7 @@ class HistoricalDataRepository(AbstractRepository):
             )
             .filter(HistoricalData.task_id == task_id)
             .group_by(HistoricalData.history, HistoricalData.task_id)
-            .having(func.count(HistoricalData.history) > 100)
+            .having(func.count(HistoricalData.history) > 10)
             .all()
         )
 

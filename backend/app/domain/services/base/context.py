@@ -13,6 +13,7 @@ import yaml
 from fastapi import HTTPException
 from worker.tasks import generate_images
 
+from app.domain.services.base.historical_data import HistoricalDataService
 from app.domain.services.base.jobs import JobService
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.llm import (
@@ -35,6 +36,7 @@ class ContextService:
         self.jobs_service = JobService()
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
+        self.historical_data_service = HistoricalDataService()
         self.task_service = TaskService()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -136,27 +138,39 @@ class ContextService:
         endpoint: str,
         prompt_already_exists_for_user: bool,
         prompt_with_more_than_one_hundred: bool,
+        task_id: int,
     ) -> dict:
         images = []
+        prompt_already_exists_for_user = (
+            self.historical_data_service.check_if_historical_data_exists(
+                task_id, user_id, prompt
+            )
+        )
+        num_of_current_images = 0
+        print("Prompt already exists for user", prompt_already_exists_for_user)
         if prompt_already_exists_for_user:
             print("Prompt already exists for user")
             # Download the images from the s3 bucket
             key = f"adversarial-nibbler/{prompt}/{user_id}"
             objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
             if "Contents" in objects:
-                for obj in objects["Contents"]:
-                    image_id = obj["Key"].split("/")[-1].split(".")[0]
-                    image = self.s3.get_object(
-                        Bucket=self.dataperf_bucket, Key=obj["Key"]
-                    )
-                    image_bytes = image["Body"].read()
-                    image = base64.b64encode(image_bytes).decode("utf-8")
-                    new_dict = {
-                        "image": image,
-                        "id": image_id,
-                    }
-                    images.append(new_dict)
-            return images
+                if len(objects["Contents"]) > 4:
+                    for obj in objects["Contents"]:
+                        image_id = obj["Key"].split("/")[-1].split(".")[0]
+                        image = self.s3.get_object(
+                            Bucket=self.dataperf_bucket, Key=obj["Key"]
+                        )
+                        image_bytes = image["Body"].read()
+                        image = base64.b64encode(image_bytes).decode("utf-8")
+                        new_dict = {
+                            "image": image,
+                            "id": image_id,
+                        }
+                        images.append(new_dict)
+                    return images
+                else:
+                    num_of_current_images = len(objects["Contents"])
+
         if prompt_with_more_than_one_hundred:
             print("Prompt with less than 100 images")
             key = f"adversarial-nibbler/{prompt}"
@@ -184,8 +198,11 @@ class ContextService:
                     }
                     images.append(new_dict)
             return images
+        print("generating new images")
         self.jobs_service.create_registry({"prompt": prompt, "user_id": user_id})
-        generate_images.delay(prompt, num_images, models, endpoint, user_id)
+        generate_images.delay(
+            prompt, num_images, models, endpoint, user_id, num_of_current_images
+        )
         queue_position = self.jobs_service.determine_queue_position(
             {"prompt": prompt, "user_id": user_id}
         )
@@ -232,10 +249,12 @@ class ContextService:
             exists = self.jobs_service.metadata_exists(
                 {"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]}
             )
+            print("Exists is", exists)
             if exists:
                 queue_data = self.jobs_service.determine_queue_position(
                     {"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]}
                 )
+                print("Queue data is", queue_data)
                 return queue_data
             return await self.get_nibbler_contexts(
                 prompt=artifacts["prompt"],
@@ -249,6 +268,7 @@ class ContextService:
                     "prompt_with_more_than_one_hundred"
                 ],
                 num_images=artifacts.get("num_images", 12),
+                task_id=artifacts.get("task_id", 59),
             )
         elif type == "perdi":
             return await self.get_perdi_contexts(
@@ -276,11 +296,13 @@ class ContextService:
         body = obj["Body"].read()
         return json.loads(body)
 
-    def save_contexts_to_s3(self, file, task_id, language, country, description):
+    def save_contexts_to_s3(
+        self, file, task_id, language, country, description, category, concept
+    ):
         task_code = self.task_service.get_task_code_by_task_id(task_id)[0]
         random_id = random.randint(0, 100000)
-        file_name = f"Top_{country}-{language}-{description}_{random_id}.jpeg"
-        key = f"{task_code}/images/{file_name}"
+        file_name = f"{description}-{random_id}.jpeg"
+        key = f"{task_code}/{country}/{language}/{category}/{concept}/{file_name}"
         file.file.seek(0)
         self.s3.put_object(Bucket=self.dataperf_bucket, Key=key, Body=file.file)
         return key
