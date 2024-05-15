@@ -2,6 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import datetime
+import json
 import logging
 import time
 
@@ -13,7 +15,7 @@ from app.domain.services.utils.multi_generator import ImageGenerator
 
 
 logging.basicConfig(
-    filename="worker/adversarial_nibbler.log",
+    filename="adversarial_nibbler.log",
     level=logging.CRITICAL,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
@@ -62,12 +64,15 @@ def generate_images(
         for response in all_responses:
             info_to_log = {
                 "message": response["message"],
-                "time": response["time"],
+                "generation_time": response["time"],
                 "model": response["generator"],
                 "task_id": response["queue_task_id"],
                 "user_id": response["user_id"],
+                "prompt": prompt,
+                "timestamp": datetime.datetime.now(),
             }
-            logging.critical(info_to_log)
+            print("info_to_log")
+            logging.critical(json.dumps(info_to_log))
     except Exception as e:
         print(e)
         job_service.remove_registry({"prompt": prompt, "user_id": user_id})

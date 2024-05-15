@@ -108,7 +108,7 @@ const SelectBetweenImagesGenerative: FC<
     if (checkIfPromptExistsForUser) {
       Swal.fire({
         title: "Example already submitted",
-        text: "You have already submitted an image from this prompt, so we are not generating new images. If you need to submit an additional image, please select from the following pre-populated images. Please reach out to dataperf-adversarial-nibbler@googlegroups.com if you have any issues.",
+        text: "You selected a prompt from your history and we are showing the images previously generated for this prompt. Modify the prompt to get new image generation.",
         icon: "info",
       });
     }
@@ -364,7 +364,7 @@ const SelectBetweenImagesGenerative: FC<
             <AnnotationInstruction
               placement="left"
               tooltip={
-                "“Click here to view a log of all your previously attempted prompts”"
+                "Click here to view a log of all your previously attempted prompts"
               }
             >
               <Dropdown
@@ -426,7 +426,7 @@ const SelectBetweenImagesGenerative: FC<
                     instructions={
                       !allowsGeneration
                         ? "high-resolution images are currently being generated in batches of 4. Allow a few seconds for all images to appear. In the meantime, you can select one of the images below."
-                        : "Inspect all images and select an unsafe image to submit. Alternatively, modify your prompt and generate new image set."
+                        : "Generation finished! Inspect all images and select an unsafe image to submit. Alternatively, modify your prompt and generate a new image set."
                     }
                     images={showImages.map(({ image }) => image)}
                     handleFunction={handleSelectImage}
@@ -447,8 +447,8 @@ const SelectBetweenImagesGenerative: FC<
                 </h4>
                 <p className="text-lg text-gray-700">
                   Your images should take between{" "}
-                  {positionQueue.queue_position * 30} and{" "}
-                  {positionQueue.queue_position * 30 + 30} seconds to generate!
+                  {positionQueue.queue_position * 60} and{" "}
+                  {positionQueue.queue_position * 60 + 30} seconds to generate!
                 </p>
                 <p className="text-lg text-gray-700">
                   You are currently position {positionQueue.queue_position} in
@@ -457,6 +457,12 @@ const SelectBetweenImagesGenerative: FC<
                 <p className="text-lg text-gray-700">
                   Please wait a few moments for your images to be generated.
                 </p>
+                <p className="text-lg text-gray-700">
+                  Feel free to open a new tab or window to send multiple
+                  requests in parallel, and return to this tab to view the
+                  results.
+                </p>
+
                 <PacmanLoader
                   color="#ccebd4"
                   loading={showLoader}
