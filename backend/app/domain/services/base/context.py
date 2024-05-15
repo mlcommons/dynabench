@@ -156,7 +156,7 @@ class ContextService:
             if "Contents" in objects:
                 if len(objects["Contents"]) > 4:
                     for obj in objects["Contents"]:
-                        image_id = obj["Key"].split("/")[-1].split(".")[0]
+                        image_id = obj["Key"].split("/")[-1].replace(".jpeg", "")
                         image = self.s3.get_object(
                             Bucket=self.dataperf_bucket, Key=obj["Key"]
                         )
@@ -186,7 +186,7 @@ class ContextService:
             objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
             if "Contents" in objects:
                 for obj in objects["Contents"]:
-                    image_id = obj["Key"].split("/")[-1].split(".")[0]
+                    image_id = obj["Key"].split("/")[-1].replace(".jpeg", "")
                     image = self.s3.get_object(
                         Bucket=self.dataperf_bucket, Key=obj["Key"]
                     )
