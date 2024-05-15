@@ -102,6 +102,7 @@ class Dalle2ImageProvider(ImageProvider):
             return {
                 "generator": self.provider_name(),
                 "message": message,
+                "prompt": prompt,
                 "id": image_id,
             }
 
@@ -166,6 +167,7 @@ class Dalle3ImageProvider(ImageProvider):
             return {
                 "generator": self.provider_name(),
                 "message": message,
+                "prompt": prompt,
                 "id": image_id,
             }
 
@@ -228,6 +230,7 @@ class SDXLImageProvider(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -280,6 +283,7 @@ class SDXLImageProvider2(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -331,6 +335,7 @@ class SDXLImageProvider3(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -382,6 +387,7 @@ class SDXLTurboImageProvider(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -433,6 +439,7 @@ class SDXLTurboImageProvider2(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -484,6 +491,7 @@ class SDXLTurboImageProvider3(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -535,6 +543,7 @@ class SDXLTurboImageProvider4(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -586,6 +595,7 @@ class SDXLTurboImageProvider5(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -637,6 +647,7 @@ class SDXLTurboImageProvider6(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -688,6 +699,7 @@ class SDRunwayMLImageProvider(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -739,6 +751,7 @@ class SDRunwayMLImageProvider2(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -790,6 +803,7 @@ class SDRunwayMLImageProvider3(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -841,6 +855,7 @@ class SDVariableAutoEncoder(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -892,6 +907,7 @@ class SDVariableAutoEncoder2(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -943,6 +959,7 @@ class SDVariableAutoEncoder3(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
 
@@ -994,6 +1011,7 @@ class HF_SDXL(ImageProvider):
                 return {
                     "generator": self.provider_name(),
                     "message": message,
+                    "prompt": prompt,
                     "id": image_id,
                 }
         except Exception as e:
