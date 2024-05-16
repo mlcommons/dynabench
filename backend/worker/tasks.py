@@ -8,17 +8,23 @@ import logging
 import time
 
 import celery
+from celery.signals import after_setup_logger
 from worker.config import app
 
 from app.domain.services.base.jobs import JobService
 from app.domain.services.utils.multi_generator import ImageGenerator
 
 
-logging.basicConfig(
-    filename="adversarial_nibbler.log",
-    level=logging.CRITICAL,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
+logger = logging.getLogger(__name__)
+
+
+@after_setup_logger.connect
+def setup_loggers(logger, *args, **kwargs):
+    formatter = logging.Formatter("%(message)s")
+    fh = logging.FileHandler("adversarial_nibbler.log")
+    fh.setFormatter(formatter)
+    fh.setLevel(logging.CRITICAL)
+    logger.addHandler(fh)
 
 
 @app.task(name="add", queue="test")
@@ -69,10 +75,10 @@ def generate_images(
                 "task_id": response["queue_task_id"],
                 "user_id": response["user_id"],
                 "prompt": prompt,
-                "timestamp": datetime.datetime.now(),
+                "timestamp": str(datetime.datetime.now()),
             }
-            print("info_to_log")
-            logging.critical(json.dumps(info_to_log))
+
+            logger.critical(json.dumps(info_to_log))
     except Exception as e:
         print(e)
         job_service.remove_registry({"prompt": prompt, "user_id": user_id})
