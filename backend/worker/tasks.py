@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 @after_setup_logger.connect
 def setup_loggers(logger, *args, **kwargs):
     formatter = logging.Formatter("%(message)s")
-    fh = logging.FileHandler("adversarial_nibbler.log")
+    fh = logging.FileHandler("worker/adversarial_nibbler.log")
     fh.setFormatter(formatter)
     fh.setLevel(logging.CRITICAL)
     logger.addHandler(fh)
