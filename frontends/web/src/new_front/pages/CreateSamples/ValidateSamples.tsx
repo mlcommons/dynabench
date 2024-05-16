@@ -121,6 +121,8 @@ const ValidateSamples: FC = () => {
               <div className="flex items-start justify-end pr-4 pt-14">
                 <CreateInterfaceHelpersButton
                   generalInstructions={generalInstructions}
+                  realRoundId={roundId}
+                  userId={user.id}
                 />
               </div>
             </div>

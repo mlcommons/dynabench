@@ -8,5 +8,6 @@ export type AnnotationUserInput = {
   options?: string[];
   field_name_for_the_model: string;
   options_slider?: any;
+  instructions_slider?: string;
   show_na_checkbox?: boolean;
 };

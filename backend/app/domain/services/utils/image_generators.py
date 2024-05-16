@@ -3,27 +3,59 @@
 # LICENSE file in the root directory of this source tree.
 
 import base64
+import hashlib
+import io
+import json
 import os
 from abc import ABC, abstractmethod
-from io import BytesIO
 
+import boto3
 import openai
 import requests
-from requests.adapters import HTTPAdapter
+from openai import OpenAI
+from PIL import Image
 
 from app.domain.services.base.task import TaskService
 from app.domain.services.utils.adapters import RequestSession
-from app.domain.services.utils.constant import forbidden_image
+from app.domain.services.utils.constant import black_image, forbidden_image
 
 
 class ImageProvider(ABC):
     def __init__(self):
         self.task_service = TaskService()
+        self.session = boto3.Session(
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.getenv("AWS_REGION"),
+        )
+        self.s3 = self.session.client("s3")
+        self.dataperf_bucket = os.getenv("AWS_S3_DATAPERF_BUCKET")
         pass
 
     @abstractmethod
     def generate_images(self, prompt: str, num_images: int) -> list:
         pass
+
+    def verify_image_darkness(self, image: str) -> bool:
+        image_bytes = io.BytesIO(base64.b64decode(image))
+        img = Image.open(image_bytes)
+        img = img.convert("L")
+        average_intensity = img.getdata()
+        average_intensity = sum(average_intensity) / len(average_intensity)
+        if average_intensity < 20 or black_image in image:
+            return True
+        return False
+
+    def get_image_id(self, prompt: str, user_id: int, image: str) -> str:
+        return (
+            self.provider_name()
+            + "_"
+            + prompt
+            + "_"
+            + str(user_id)
+            + "_"
+            + hashlib.md5(image.encode()).hexdigest()
+        )
 
     @property
     @abstractmethod
@@ -31,119 +63,757 @@ class ImageProvider(ABC):
         pass
 
 
-class OpenAIImageProvider(ImageProvider):
+class Dalle2ImageProvider(ImageProvider):
     def __init__(self):
+        super().__init__()
         self.api_key = os.getenv("OPENAI")
-        openai.api_key = self.api_key
 
     def generate_images(
-        self, prompt: str, num_images: int, models: list = [], endpoint: str = ""
+        self,
+        prompt: str,
+        num_images: int,
+        models: list = [],
+        endpoint: str = "",
+        user_id: int = 1912,
     ) -> list:
-        openai.api_key = self.api_key
+        client = OpenAI(api_key=self.api_key)
         try:
-            response = openai.Image.create(
-                prompt=prompt, n=1, size="256x256", response_format="b64_json"
+            response = client.images.generate(
+                model="dall-e-2",
+                prompt=prompt,
+                size="512x512",
+                n=num_images,
+                response_format="b64_json",
             )
-            image_response = [x["b64_json"] for x in response["data"]]
-            return {"generator": self.provider_name(), "images": image_response}
+            message = "Success"
+            image = response.data[0].b64_json
+            dark_image = self.verify_image_darkness(image)
+            if dark_image:
+                image = forbidden_image
+                message = "Image is too dark"
+
+            image_id = self.get_image_id(prompt, user_id, image)
+            filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+            self.s3.put_object(
+                Body=base64.b64decode(image),
+                Bucket=self.dataperf_bucket,
+                Key=filename,
+            )
+            return {
+                "generator": self.provider_name(),
+                "message": message,
+                "prompt": prompt,
+                "id": image_id,
+            }
+
+        except openai.BadRequestError as e:
+            json_error = json.loads(e.response.text)
+            error_code = json_error.get("error", {}).get("code", e.response.status_code)
+            image_id = self.get_image_id(prompt, user_id, forbidden_image)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "id": image_id,
+            }
 
         except Exception as e:
-            print(e, "This was the exception")
-            images = [forbidden_image]
-            return {"generator": self.provider_name(), "images": images}
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
 
     def provider_name(self):
-        return "openai"
+        return "dalle2"
 
 
-class DynabenchImageProvider(ImageProvider):
+class Dalle3ImageProvider(ImageProvider):
     def __init__(self):
-        pass
+        super().__init__()
+        self.api_key = os.getenv("OPENAI")
 
-    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
-        payload = {"prompt": prompt, "num_images": 1}
-        response = requests.post(f"{endpoint['dynabench']['endpoint']}", json=payload)
+    def generate_images(
+        self,
+        prompt: str,
+        num_images: int,
+        models: list = [],
+        endpoint: str = "",
+        user_id: int = 1912,
+    ) -> list:
+        client = OpenAI(api_key=self.api_key)
         try:
-            if response.status_code == 200:
-                return {"generator": self.provider_name(), "images": response.json()}
-        except:
-            return {"generator": self.provider_name(), "images": [forbidden_image]}
-
-    def provider_name(self):
-        return "dynabench"
-
-
-class SD2ImageProvider(ImageProvider):
-    def __init__(self):
-        self.api_key = os.getenv("HF")
-        self.session = RequestSession()
-
-    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
-        print("Trying model", endpoint["hf_inference_3"]["endpoint"])
-        payload = {"inputs": prompt, "steps": 30}
-        headers = {"Authorization": self.api_key}
-        try:
-            response = self.session.session.post(
-                f"{endpoint['hf_inference_3']['endpoint']}",
-                json=payload,
-                headers=headers,
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size="1024x1024",
+                n=1,
+                response_format="b64_json",
             )
-            if response.status_code == 200:
-                new_image = response.json()
-                return {"generator": self.provider_name(), "images": [new_image]}
-        except:
-            return {"generator": self.provider_name(), "images": [forbidden_image]}
+            message = "Success"
+            image = response.data[0].b64_json
+            dark_image = self.verify_image_darkness(image)
+            if dark_image:
+                image = forbidden_image
+                message = "Image is too dark"
+
+            image_id = self.get_image_id(prompt, user_id, image)
+            filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+            self.s3.put_object(
+                Body=base64.b64decode(image),
+                Bucket=self.dataperf_bucket,
+                Key=filename,
+            )
+            return {
+                "generator": self.provider_name(),
+                "message": message,
+                "prompt": prompt,
+                "id": image_id,
+            }
+
+        except openai.BadRequestError as e:
+            json_error = json.loads(e.response.text)
+            error_code = json_error.get("error", {}).get("code", e.response.status_code)
+            image_id = self.get_image_id(prompt, user_id, forbidden_image)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "id": image_id,
+            }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
 
     def provider_name(self):
-        return "sd2.1-base"
+        return "dalle3"
 
 
 class SDXLImageProvider(ImageProvider):
     def __init__(self):
+        super().__init__()
         self.api_key = os.getenv("HF")
         self.session = RequestSession()
 
-    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
-        print("Trying model", endpoint["hf_inference_4"]["endpoint"])
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sdxl1"]["endpoint"])
         payload = {"inputs": prompt, "steps": 30}
         headers = {"Authorization": self.api_key}
         try:
-            response = self.session.session.post(
-                f"{endpoint['hf_inference_4']['endpoint']}",
+            response = requests.post(
+                f"{endpoint['sdxl1']['endpoint']}",
                 json=payload,
                 headers=headers,
                 timeout=25,
             )
+            message = "Success"
             if response.status_code == 200:
-                new_image = response.json()[0]["image"]["images"][0]
-                return {"generator": self.provider_name(), "images": [new_image]}
-        except:
-            return {"generator": self.provider_name(), "images": [forbidden_image]}
+                image = response.json()[0]["image"]["images"][0]
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
 
     def provider_name(self):
         return "sdxl1.0"
 
 
-class SDRunwayMLImageProvider(ImageProvider):
+class SDXLImageProvider2(ImageProvider):
     def __init__(self):
+        super().__init__()
         self.api_key = os.getenv("HF")
         self.session = RequestSession()
 
-    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
-        print("Trying model", endpoint["hf_inference_2"]["endpoint"])
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sdxl2"]["endpoint"])
         payload = {"inputs": prompt, "steps": 30}
         headers = {"Authorization": self.api_key}
         try:
-            response = self.session.session.post(
-                f"{endpoint['hf_inference_2']['endpoint']}",
+            response = requests.post(
+                f"{endpoint['sdxl2']['endpoint']}",
                 json=payload,
                 headers=headers,
+                timeout=25,
             )
+            message = "Success"
             if response.status_code == 200:
-                new_image = response.json()
-                return {"generator": self.provider_name(), "images": [new_image]}
-        except:
-            return {"generator": self.provider_name(), "images": [forbidden_image]}
+                image = response.json()[0]["image"]["images"][0]
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "sdxl1.0"
+
+
+class SDXLImageProvider3(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sdxl3"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sdxl3']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "sdxl1.0"
+
+
+class SDXLTurboImageProvider(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sdxlturbo"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sdxlturbo']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "sdxl-turbo"
+
+
+class SDXLTurboImageProvider2(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sdxlturbo2"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sdxlturbo2']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "sdxl-turbo"
+
+
+class SDXLTurboImageProvider3(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sdxlturbo3"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sdxlturbo3']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "sdxl-turbo"
+
+
+class SDXLTurboImageProvider4(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sdxlturbo4"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sdxlturbo4']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "sdxl-turbo"
+
+
+class SDXLTurboImageProvider5(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sdxlturbo5"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sdxlturbo5']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "sdxl-turbo"
+
+
+class SDXLTurboImageProvider6(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sdxlturbo6"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sdxlturbo6']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "sdxl-turbo"
+
+
+class SDRunwayMLImageProvider(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sd15"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sd15']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "runwayml-sd1.5"
+
+
+class SDRunwayMLImageProvider2(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sd152"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sd152']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "runwayml-sd1.5"
+
+
+class SDRunwayMLImageProvider3(ImageProvider):
+    def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sd153"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sd153']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=25,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
 
     def provider_name(self):
         return "runwayml-sd1.5"
@@ -151,55 +821,167 @@ class SDRunwayMLImageProvider(ImageProvider):
 
 class SDVariableAutoEncoder(ImageProvider):
     def __init__(self):
+        super().__init__()
         self.api_key = os.getenv("HF")
         self.session = RequestSession()
 
-    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
-        print("Trying model", endpoint["hf_inference_1"]["endpoint"])
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sd21vae"]["endpoint"])
         payload = {"inputs": prompt, "steps": 30}
         headers = {"Authorization": self.api_key}
         try:
-            response = self.session.session.post(
-                f"{endpoint['hf_inference_1']['endpoint']}",
+            response = requests.post(
+                f"{endpoint['sd21vae']['endpoint']}",
                 json=payload,
                 headers=headers,
+                timeout=50,
             )
+            message = "Success"
             if response.status_code == 200:
-                new_image = response.json()[0]["image"]["images"][0]
-                return {"generator": self.provider_name(), "images": [new_image]}
-        except:
-            return {"generator": self.provider_name(), "images": [forbidden_image]}
+                image = response.json()[0]["image"]["images"][0]
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
 
     def provider_name(self):
         return "sd+vae_ft_mse"
 
 
-class HFInferenceEndpointImageProvider(ImageProvider):
+class SDVariableAutoEncoder2(ImageProvider):
     def __init__(self):
+        super().__init__()
         self.api_key = os.getenv("HF")
+        self.session = RequestSession()
 
-    def generate_images(self, prompt: str, num_images: int, model, endpoint) -> list:
-        print("Trying model", endpoint["hf_inference_1"]["endpoint"])
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sd21vae2"]["endpoint"])
         payload = {"inputs": prompt, "steps": 30}
         headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sd21vae2']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=50,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()[0]["image"]["images"][0]
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
 
-        response = requests.post(
-            f"{endpoint['hf_inference_1']['endpoint']}", json=payload, headers=headers
-        )
-        if response.status_code == 200:
-            new_image = response.json()[0]["image"]["images"][0]
-            return {"generator": self.provider_name(), "images": [new_image]}
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
 
     def provider_name(self):
         return "sd+vae_ft_mse"
 
 
-class HFImageProvider(ImageProvider):
+class SDVariableAutoEncoder3(ImageProvider):
     def __init__(self):
+        super().__init__()
+        self.api_key = os.getenv("HF")
+        self.session = RequestSession()
+
+    def generate_images(
+        self, prompt: str, num_images: int, model, endpoint, user_id
+    ) -> list:
+        print("Trying model", endpoint["sd21vae3"]["endpoint"])
+        payload = {"inputs": prompt, "steps": 30}
+        headers = {"Authorization": self.api_key}
+        try:
+            response = requests.post(
+                f"{endpoint['sd21vae3']['endpoint']}",
+                json=payload,
+                headers=headers,
+                timeout=50,
+            )
+            message = "Success"
+            if response.status_code == 200:
+                image = response.json()[0]["image"]["images"][0]
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
+                    "prompt": prompt,
+                    "id": image_id,
+                }
+
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
+
+    def provider_name(self):
+        return "sd+vae_ft_mse"
+
+
+class HF_SDXL(ImageProvider):
+    def __init__(self):
+        super().__init__()
         self.api_key = os.getenv("HF")
 
     def generate_images(
-        self, prompt: str, num_images: int, models: list, endpoint: str
+        self, prompt: str, num_images: int, models: list, endpoint: str, user_id: int
     ):
         payload = {"inputs": prompt}
         headers = {
@@ -208,115 +990,37 @@ class HFImageProvider(ImageProvider):
             "Pragma": "no-cache",
             "x-use-cache": "false",
         }
-        model = models["huggingface"]["models"][0]
-        endpoint = f"{endpoint['huggingface']['endpoint']}/{model}"
-        images = []
+        endpoint = endpoint["huggingface_sdxl"]["endpoint"]
         try:
             response = requests.post(endpoint, json=payload, headers=headers)
             print("Trying model", endpoint, "with status code", response.status_code)
+            message = "Success"
             if response.status_code == 200:
-                base64_image = base64.b64encode(response.content)
-                images.append(base64_image.decode("utf-8"))
-        except response.exceptions.Timeout:
-            print("Timeout error")
-        return {"generator": self.provider_name(), "images": images}
-
-    def provider_name(self):
-        return "hf"
-
-
-class StableDiffusionImageProvider(ImageProvider):
-    def __init__(self):
-        self.api_key = os.getenv("STABLE_DIFFUSION")
-
-    def generate_images(
-        self, prompt: str, num_images: int, models: list, endpoint: str
-    ) -> list:
-        for model in models["together"]["models"]:
-            print(f"Trying model {model}")
-            res = requests.post(
-                endpoint,
-                json={
-                    "model": model,
+                image = base64.b64encode(response.content).decode("utf-8")
+                dark_image = self.verify_image_darkness(image)
+                if dark_image:
+                    image = forbidden_image
+                    message = "Image is too dark"
+                image_id = self.get_image_id(prompt, user_id, image)
+                filename = f"adversarial-nibbler/{prompt}/{user_id}/{image_id}.jpeg"
+                self.s3.put_object(
+                    Body=base64.b64decode(image),
+                    Bucket=self.dataperf_bucket,
+                    Key=filename,
+                )
+                return {
+                    "generator": self.provider_name(),
+                    "message": message,
                     "prompt": prompt,
-                    "n": num_images,
-                    "steps": 20,
-                },
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "User-Agent": "",
-                },
-            )
-            try:
-                if res.status_code == 200:
-                    image_response = res.json().get("output").get("choices")
-                    image_response = [x["image_base64"] for x in image_response]
-                    print(f"Model {model} worked")
-                    return image_response
-            except requests.exceptions.Timeout:
-                continue
-            else:
-                continue
-
-        image_response = [forbidden_image] * int(num_images)
-        return image_response
+                    "id": image_id,
+                }
+        except Exception as e:
+            error_code = str(e)
+            return {
+                "generator": self.provider_name(),
+                "message": error_code,
+                "images": None,
+            }
 
     def provider_name(self):
-        return "stable_diffusion"
-
-
-class MidjourneyImageProvider(ImageProvider):
-    def __init__(self):
-        self.server_id = os.getenv("SERVER_ID")
-        self.channel_id = os.getenv("CHANNEL_ID")
-        self.dyna_bot = os.getenv("DYNA_BOT")
-
-    def generate_images(
-        self, prompt: str, num_images: int, models: list, endpoint: str
-    ) -> list:
-        payload = {
-            "type": 2,
-            "application_id": "1109849712405782700",
-            "guild_id": self.server_id,
-            "channel_id": self.channel_id,
-            "session_id": "2fb980f65e5c9a77c96ca01f2c242cf6",
-            "data": {
-                "version": "1077969938624553050",
-                "id": "938956540159881230",
-                "name": "imagine",
-                "type": 1,
-                "options": [{"type": 3, "name": "prompt", "value": prompt}],
-                "application_command": {
-                    "id": "938956540159881230",
-                    "application_id": "1109849712405782700",
-                    "version": "1077969938624553050",
-                    "default_permission": True,
-                    "default_member_permissions": None,
-                    "type": 1,
-                    "nsfw": False,
-                    "name": "imagine",
-                    "description": "Create images with Midjourney",
-                    "dm_permission": True,
-                    "options": [
-                        {
-                            "type": 3,
-                            "name": "prompt",
-                            "description": "The prompt to imagine",
-                            "required": True,
-                        }
-                    ],
-                },
-                "attachments": [],
-            },
-        }
-
-        header = {"authorization": self.dyna_bot}
-        response = requests.post(
-            "https://discord.com/api/v9/interactions", json=payload, headers=header
-        )
-
-        print(response)
-        return
-
-    def provider_name(self):
-        return "midjourney"
+        return "sdxl1.0"

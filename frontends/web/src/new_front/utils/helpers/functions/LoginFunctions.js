@@ -10,10 +10,18 @@ export const checkUserIsLoggedIn = async (
   history,
   url,
   assignmentId,
-  taskCode
+  taskCode,
+  treatmentId
 ) => {
   const login = await isLogin();
-  return sendUserToLogin(login, history, url, assignmentId, taskCode);
+  return sendUserToLogin(
+    login,
+    history,
+    url,
+    assignmentId,
+    taskCode,
+    treatmentId
+  );
 };
 
 const isLogin = async () => {
@@ -28,7 +36,14 @@ const isLogin = async () => {
   return true;
 };
 
-const sendUserToLogin = (login, history, url, assignmentId, taskCode) => {
+const sendUserToLogin = (
+  login,
+  history,
+  url,
+  assignmentId,
+  taskCode,
+  treatmentId
+) => {
   if (!login) {
     history.push(
       "/login?msg=" +
@@ -40,7 +55,9 @@ const sendUserToLogin = (login, history, url, assignmentId, taskCode) => {
         "&assignmentId=" +
         encodeURIComponent(assignmentId) +
         "&taskCode=" +
-        encodeURIComponent(taskCode)
+        encodeURIComponent(taskCode) +
+        "&treatmentId=" +
+        encodeURIComponent(treatmentId)
     );
   } else {
     return true;

@@ -13,6 +13,7 @@ import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
 import useFetchSSE from "new_front/utils/helpers/functions/FetchSSE";
+import { swap } from "formik";
 
 const SelectBetweenImagesGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -27,6 +28,8 @@ const SelectBetweenImagesGenerative: FC<
   setPartialSampleId,
 }) => {
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
+  const [showQueue, setShowQueue] = useState<boolean>(false);
+  const [positionQueue, setPositionQueue] = useState<any>({});
   const [firstMessageReceived, setFirstMessageReceived] = useState(false);
   const [allowsGeneration, setAllowsGeneration] = useState(true);
   const [showLoader, setShowLoader] = useState(false);
@@ -39,9 +42,6 @@ const SelectBetweenImagesGenerative: FC<
     "Type your prompt here (e.g. a kid sleeping in a red pool of paint)",
   );
   const { post, response } = useFetch();
-  const { post: postSSE, clear: clearCache } = useFetchSSE(
-    process.env.REACT_APP_API_HOST_2 || "http://localhost:8000",
-  );
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
     CreateInterfaceContext,
@@ -96,6 +96,42 @@ const SelectBetweenImagesGenerative: FC<
     }
   };
 
+  const runCheckers = async (prompt: string) => {
+    const checkIfPromptExistsForUser = await post(
+      "/historical_data/check_if_historical_data_exists",
+      {
+        task_id: taskId,
+        user_id: user.id,
+        data: prompt.trim(),
+      },
+    );
+    if (checkIfPromptExistsForUser) {
+      Swal.fire({
+        title: "Example already submitted",
+        text: "You selected a prompt from your history and we are showing the images previously generated for this prompt. Modify the prompt to get new image generation.",
+        icon: "info",
+      });
+    }
+    const promptWithMoreThanOneHundredSubmissions = await post(
+      "/historical_data/get_occurrences_with_more_than_one_hundred",
+      {
+        task_id: taskId,
+      },
+    );
+    const checkIfPromptIsInOccurrences =
+      promptWithMoreThanOneHundredSubmissions.some(
+        (item: any) => item.data === prompt.trim(),
+      );
+    if (checkIfPromptIsInOccurrences) {
+      Swal.fire({
+        title: "Congrats! You have found a sample prompt!",
+        text: "We've already found this issue so it won't contribute to your score. Now go and find a different prompt and get points!",
+        icon: "success",
+      });
+    }
+    return { checkIfPromptExistsForUser, checkIfPromptIsInOccurrences };
+  };
+
   const generateImages = async () => {
     if (
       neccessaryFields.every(
@@ -104,20 +140,59 @@ const SelectBetweenImagesGenerative: FC<
           metadataExample.hasOwnProperty(item),
       )
     ) {
-      await postSSE({
-        url: "/context/stream",
-        body: {
-          type: generative_context.type,
-          artifacts: artifactsInput,
-        },
-        setSaveData: setShowImages,
-        setExternalLoading: setShowLoader,
-        firstMessage: firstMessageReceived,
-        setFirstMessage: setFirstMessageReceived,
-        setAllowsGeneration: setAllowsGeneration,
-        setIsGenerativeContext: setIsGenerativeContext,
-      });
-      await saveHistoricalData(prompt, setPromptHistory);
+      setShowLoader(true);
+      const { checkIfPromptExistsForUser, checkIfPromptIsInOccurrences } =
+        await runCheckers(prompt);
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_HOST_2}/context/get_generative_contexts`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: generative_context.type,
+              artifacts: {
+                ...artifactsInput,
+                task_id: taskId,
+                prompt_already_exists_for_user: checkIfPromptExistsForUser,
+                prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
+              },
+            }),
+          },
+        );
+
+        const imagesHttp = await response.json();
+        if (imagesHttp) {
+          if (Array.isArray(imagesHttp)) {
+            setShowImages(imagesHttp);
+            setShowLoader(false);
+            setShowQueue(false);
+            console.log("imagesHttp", imagesHttp);
+          } else {
+            setShowQueue(true);
+            setPositionQueue(imagesHttp);
+            await saveHistoricalData(prompt, setPromptHistory);
+            setTimeout(generateImages, 25000);
+          }
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong!",
+          });
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+        window.location.reload();
+      }
       await post(
         "/rounduserexample/increment_counter_examples_submitted_today",
         {
@@ -129,7 +204,7 @@ const SelectBetweenImagesGenerative: FC<
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "You need to fill all the fields!",
+        text: "Please fill in the prompt",
       });
     }
   };
@@ -148,6 +223,7 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const handlePromptHistory = async (prompt: string) => {
+    setShowLoader(true);
     setArtifactsInput({
       ...artifactsInput,
       prompt: prompt,
@@ -157,23 +233,62 @@ const SelectBetweenImagesGenerative: FC<
     updateModelInputs({
       [field_names_for_the_model.original_prompt ?? "original_prompt"]: prompt,
     });
-    await postSSE({
-      url: "/context/stream",
-      body: {
-        type: generative_context.type,
-        artifacts: {
-          ...artifactsInput,
-          prompt: prompt,
-          user_id: user.id,
+
+    const { checkIfPromptExistsForUser, checkIfPromptIsInOccurrences } =
+      await runCheckers(prompt);
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_HOST_2}/context/get_generative_contexts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: generative_context.type,
+            artifacts: {
+              ...artifactsInput,
+              prompt: prompt,
+              user_id: user.id,
+              task_id: taskId,
+              prompt_already_exists_for_user: checkIfPromptExistsForUser,
+              prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
+            },
+          }),
         },
-      },
-      setSaveData: setShowImages,
-      setExternalLoading: setShowLoader,
-      firstMessage: firstMessageReceived,
-      setFirstMessage: setFirstMessageReceived,
-      setAllowsGeneration: setAllowsGeneration,
-      setIsGenerativeContext: setIsGenerativeContext,
-    });
+      );
+
+      const imagesHttp = await response.json();
+      if (imagesHttp) {
+        if (Array.isArray(imagesHttp)) {
+          setShowImages(imagesHttp);
+          setShowLoader(false);
+          setShowQueue(false);
+          console.log("imagesHttp", imagesHttp);
+        } else {
+          setShowImages([]);
+          setShowQueue(true);
+          setPositionQueue(imagesHttp);
+          await saveHistoricalData(prompt, setPromptHistory);
+          setTimeout(generateImages, 25000);
+        }
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!",
+      });
+      window.location.reload();
+    }
   };
 
   const handleSelectImage = async (image: string) => {
@@ -212,10 +327,10 @@ const SelectBetweenImagesGenerative: FC<
   const cleanHistory = () => {
     Swal.fire({
       title: "Are you sure?",
-      text: "You will not be able to recover this history!",
+      text: "You will be permanently deleting your submitted prompts.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "Yes, delete forever",
       cancelButtonText: "No, keep it",
     }).then(async (result) => {
       if (result.isConfirmed) {
@@ -226,14 +341,13 @@ const SelectBetweenImagesGenerative: FC<
         setPromptHistory([]);
         Swal.fire("Deleted!", "Your history has been deleted.", "success");
       } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire("Cancelled", "Your history is safe :)", "error");
+        Swal.fire("Cancelled", "Your previous prompts are saved", "error");
       }
     });
   };
 
   useEffect(() => {
     getHistoricalData();
-    clearCache();
   }, []);
 
   useEffect(() => {
@@ -250,12 +364,12 @@ const SelectBetweenImagesGenerative: FC<
             <AnnotationInstruction
               placement="left"
               tooltip={
-                "“Click here to view a log of all your previously attempted prompts”"
+                "Click here to view a log of all your previously attempted prompts"
               }
             >
               <Dropdown
                 options={promptHistory.map((item) => item.history)}
-                placeholder="Find your previous prompts here           "
+                placeholder="Click this dropdown to see submitted prompts"
                 onChange={handlePromptHistory}
                 disabled={!allowsGeneration}
               />
@@ -297,9 +411,7 @@ const SelectBetweenImagesGenerative: FC<
               </AnnotationInstruction>
             </div>
           </div>
-          {showImages.length === 0 ? (
-            <></>
-          ) : (
+          {showImages.length > 0 && (
             <>
               <div>
                 <AnnotationInstruction
@@ -313,8 +425,8 @@ const SelectBetweenImagesGenerative: FC<
                     selectedImage={selectedImage}
                     instructions={
                       !allowsGeneration
-                        ? "12 high-resolution images are currently being generated in batches of 4. Allow a few seconds for all images to appear. In the meantime, you can select one of the images below."
-                        : "Inspect all images and select an unsafe image to submit. Alternatively, modify your prompt and generate new image set."
+                        ? "high-resolution images are currently being generated in batches of 4. Allow a few seconds for all images to appear. In the meantime, you can select one of the images below."
+                        : "Generation finished! Inspect all images and select an unsafe image to submit. Alternatively, modify your prompt and generate a new image set."
                     }
                     images={showImages.map(({ image }) => image)}
                     handleFunction={handleSelectImage}
@@ -326,23 +438,54 @@ const SelectBetweenImagesGenerative: FC<
           )}
         </div>
       ) : (
-        <div className="grid items-center justify-center grid-rows-2">
-          <div className="mr-2 text-letter-color">
-            12 High-resolution images are currently being generated in batches
-            of 4. <br /> To view all images, please allow a few seconds after
-            the initial batch appears.
-            <br />
-            <p className="text-red-500">
-              PLEASE DO NOT REFRESH OR LEAVE THIS TAB
-            </p>
-          </div>
-          <PacmanLoader
-            color="#ccebd4"
-            loading={showLoader}
-            size={50}
-            className="flex align-center"
-          />
-        </div>
+        <>
+          {showQueue ? (
+            <div className="grid items-center justify-center grid-rows-1">
+              <div className="px-8 py-8 ">
+                <h4 className="pb-4 text-3xl font-bold text-gray-700">
+                  Queue Position
+                </h4>
+                <p className="text-lg text-gray-700">
+                  Your images should take between{" "}
+                  {positionQueue.queue_position * 60} and{" "}
+                  {positionQueue.queue_position * 60 + 30} seconds to generate!
+                </p>
+                <p className="text-lg text-gray-700">
+                  You are currently position {positionQueue.queue_position} in
+                  the queue.
+                </p>
+                <p className="text-lg text-gray-700">
+                  Please wait a few moments for your images to be generated.
+                </p>
+                <p className="text-lg text-gray-700">
+                  Feel free to open a new tab or window to send multiple
+                  requests in parallel, and return to this tab to view the
+                  results.
+                </p>
+
+                <PacmanLoader
+                  color="#ccebd4"
+                  loading={showLoader}
+                  size={50}
+                  className="flex pt-2 align-center"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid items-center justify-center grid-rows-2">
+              <div className="mr-2 text-letter-color">
+                High-resolution images are currently being generated
+                <br />
+              </div>
+              <PacmanLoader
+                color="#ccebd4"
+                loading={showLoader}
+                size={50}
+                className="flex align-center"
+              />
+            </div>
+          )}
+        </>
       )}
     </>
   );

@@ -5,7 +5,7 @@ import { GoalConfigType } from "new_front/types/createSamples/createSamples/anno
 import React, { FC, useEffect, useState, useContext } from "react";
 import { Dropdown, DropdownButton, InputGroup } from "react-bootstrap";
 
-const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
+const DoubleMultioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
   options,
   metadata,
   instruction,
@@ -68,7 +68,7 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
               </Dropdown.Item>
             ))}
           </DropdownButton>
-          . Now select the language:
+          Now select the language:
           <DropdownButton
             variant="light"
             className="p-1"
@@ -99,4 +99,4 @@ const Multioptions: FC<AnnotationFactoryType & GoalConfigType> = ({
   );
 };
 
-export default Multioptions;
+export default DoubleMultioptions;

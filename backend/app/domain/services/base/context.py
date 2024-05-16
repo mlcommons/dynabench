@@ -3,8 +3,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import base64
-import hashlib
-import io
 import json
 import os
 import random
@@ -13,10 +11,11 @@ import time
 import boto3
 import yaml
 from fastapi import HTTPException
-from PIL import Image
+from worker.tasks import generate_images
 
+from app.domain.services.base.historical_data import HistoricalDataService
+from app.domain.services.base.jobs import JobService
 from app.domain.services.base.task import TaskService
-from app.domain.services.utils.constant import black_image, forbidden_image
 from app.domain.services.utils.llm import (
     AlephAlphaProvider,
     AnthropicProvider,
@@ -27,15 +26,17 @@ from app.domain.services.utils.llm import (
     OpenAIProvider,
     ReplicateProvider,
 )
-from app.domain.services.utils.multi_generator import ImageGenerator, LLMGenerator
+from app.domain.services.utils.multi_generator import LLMGenerator
 from app.infrastructure.repositories.context import ContextRepository
 from app.infrastructure.repositories.round import RoundRepository
 
 
 class ContextService:
     def __init__(self):
+        self.jobs_service = JobService()
         self.context_repository = ContextRepository()
         self.round_repository = RoundRepository()
+        self.historical_data_service = HistoricalDataService()
         self.task_service = TaskService()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -128,64 +129,88 @@ class ContextService:
         }
         return context_info
 
-    def get_nibbler_contexts(
-        self, prompt: str, user_id: int, num_images: int, models: list, endpoint: str
+    async def get_nibbler_contexts(
+        self,
+        prompt: str,
+        user_id: int,
+        num_images: int,
+        models: list,
+        endpoint: str,
+        prompt_already_exists_for_user: bool,
+        prompt_with_more_than_one_hundred: bool,
+        task_id: int,
     ) -> dict:
         images = []
-        start = time.time()
-        multi_generator = ImageGenerator()
-        generated_images = multi_generator.generate_all_images(
-            prompt, num_images, models, endpoint
+        prompt_already_exists_for_user = (
+            self.historical_data_service.check_if_historical_data_exists(
+                task_id, user_id, prompt
+            )
         )
-        images = []
-        for generator_dict in generated_images:
-            if generator_dict:
-                for image in generator_dict.get("images", []):
-                    image_id = (
-                        generator_dict["generator"]
-                        + "_"
-                        + prompt
-                        + "_"
-                        + str(user_id)
-                        + "_"
-                        + hashlib.md5(image.encode()).hexdigest()
-                    )
-                    print(image_id)
-                    image_bytes = io.BytesIO(base64.b64decode(image))
-                    img = Image.open(image_bytes)
-                    img = img.convert("L")
-                    average_intensity = img.getdata()
-                    average_intensity = sum(average_intensity) / len(average_intensity)
-                    if average_intensity < 10:
-                        print("Image too dark, skipping")
-                        new_dict = {
-                            "image": forbidden_image,
-                            "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
-                        }
-                        images.append(new_dict)
-
-                    elif black_image in image:
-                        new_dict = {
-                            "image": forbidden_image,
-                            "id": hashlib.md5(forbidden_image.encode()).hexdigest(),
-                        }
-                        images.append(new_dict)
-
-                    else:
+        num_of_current_images = 0
+        print("Prompt already exists for user", prompt_already_exists_for_user)
+        if prompt_already_exists_for_user:
+            print("Prompt already exists for user")
+            # Download the images from the s3 bucket
+            key = f"adversarial-nibbler/{prompt}/{user_id}"
+            objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
+            if "Contents" in objects:
+                if len(objects["Contents"]) > 4:
+                    for obj in objects["Contents"]:
+                        image_id = obj["Key"].split("/")[-1].replace(".jpeg", "")
+                        image = self.s3.get_object(
+                            Bucket=self.dataperf_bucket, Key=obj["Key"]
+                        )
+                        image_bytes = image["Body"].read()
+                        image = base64.b64encode(image_bytes).decode("utf-8")
                         new_dict = {
                             "image": image,
                             "id": image_id,
                         }
-                        filename = f"adversarial-nibbler/{image_id}.jpeg"
-                        self.s3.put_object(
-                            Body=base64.b64decode(image),
-                            Bucket=self.dataperf_bucket,
-                            Key=filename,
-                        )
                         images.append(new_dict)
-        random.shuffle(images)
-        print(f"Time to generate images: {time.time() - start}")
-        return images
+                    return images
+                else:
+                    num_of_current_images = len(objects["Contents"])
+
+        if prompt_with_more_than_one_hundred:
+            print("Prompt with less than 100 images")
+            key = f"adversarial-nibbler/{prompt}"
+            objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
+            users = []
+            if "Contents" in objects:
+                users = [obj["Key"] for obj in objects["Contents"]]
+                users = list({item.split("/")[2] for item in users})
+            print(f"Users are {users}")
+            random_user = random.choice(users)
+            print(f"Random user is {random_user}")
+            key = f"adversarial-nibbler/{prompt}/{random_user}"
+            objects = self.s3.list_objects_v2(Bucket=self.dataperf_bucket, Prefix=key)
+            if "Contents" in objects:
+                for obj in objects["Contents"]:
+                    image_id = obj["Key"].split("/")[-1].replace(".jpeg", "")
+                    image = self.s3.get_object(
+                        Bucket=self.dataperf_bucket, Key=obj["Key"]
+                    )
+                    image_bytes = image["Body"].read()
+                    image = base64.b64encode(image_bytes).decode("utf-8")
+                    new_dict = {
+                        "image": image,
+                        "id": image_id,
+                    }
+                    images.append(new_dict)
+            return images
+        print("generating new images")
+        self.jobs_service.create_registry({"prompt": prompt, "user_id": user_id})
+        generate_images.delay(
+            prompt, num_images, models, endpoint, user_id, num_of_current_images
+        )
+        queue_position = self.jobs_service.determine_queue_position(
+            {"prompt": prompt, "user_id": user_id}
+        )
+        return {
+            "message": "Images are being generated",
+            "queue_position": queue_position["queue_position"],
+            "all_positions": queue_position["all_positions"],
+        }
 
     async def get_perdi_contexts(
         self, prompt: str, number_of_samples: int, models: dict
@@ -221,12 +246,29 @@ class ContextService:
 
     async def get_generative_contexts(self, type: str, artifacts: dict) -> dict:
         if type == "nibbler":
-            return self.get_nibbler_contexts(
+            exists = self.jobs_service.metadata_exists(
+                {"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]}
+            )
+            print("Exists is", exists)
+            if exists:
+                queue_data = self.jobs_service.determine_queue_position(
+                    {"prompt": artifacts["prompt"], "user_id": artifacts["user_id"]}
+                )
+                print("Queue data is", queue_data)
+                return queue_data
+            return await self.get_nibbler_contexts(
                 prompt=artifacts["prompt"],
                 user_id=artifacts["user_id"],
                 models=artifacts["model"],
                 endpoint=artifacts["model"],
-                num_images=6,
+                prompt_already_exists_for_user=artifacts[
+                    "prompt_already_exists_for_user"
+                ],
+                prompt_with_more_than_one_hundred=artifacts[
+                    "prompt_with_more_than_one_hundred"
+                ],
+                num_images=artifacts.get("num_images", 12),
+                task_id=artifacts.get("task_id", 59),
             )
         elif type == "perdi":
             return await self.get_perdi_contexts(
@@ -244,3 +286,23 @@ class ContextService:
                 if context.get(key).lower() == value.lower():
                     filter_contexts.append(context)
         return random.choice(filter_contexts)
+
+    def get_contexts_from_s3(self, artifacts: dict):
+        artifacts = artifacts["artifacts"]
+        task_code = self.task_service.get_task_code_by_task_id(artifacts["task_id"])[0]
+        file_name = f"Top_{artifacts['country']}-{artifacts['language']}_Concepts.json"
+        key = f"{task_code}/{file_name}"
+        obj = self.s3.get_object(Bucket=self.dataperf_bucket, Key=key)
+        body = obj["Body"].read()
+        return json.loads(body)
+
+    def save_contexts_to_s3(
+        self, file, task_id, language, country, description, category, concept
+    ):
+        task_code = self.task_service.get_task_code_by_task_id(task_id)[0]
+        random_id = random.randint(0, 100000)
+        file_name = f"{description}-{random_id}.jpeg"
+        key = f"{task_code}/{country}/{language}/{category}/{concept}/{file_name}"
+        file.file.seek(0)
+        self.s3.put_object(Bucket=self.dataperf_bucket, Key=key, Body=file.file)
+        return key

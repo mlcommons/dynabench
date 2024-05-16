@@ -102,7 +102,7 @@ class RoundUserExampleInfoService:
         return number_of_examples_created[0]
 
     def redirect_to_third_party_provider(
-        self, task_id: int, user_id: int, round_id: int
+        self, task_id: int, user_id: int, round_id: int, url: str
     ):
         user_email = self.user_repository.get_user_email(user_id)[0]
         print(user_email.split("@")[1])
@@ -124,6 +124,8 @@ class RoundUserExampleInfoService:
             required_number_of_examples = task_configuration["external_validator"][
                 "required_number_of_examples"
             ]
-            redirect_url = task_configuration["external_validator"]["url"]
+            redirect_url = task_configuration.get("external_validator", {}).get("url")
             if number_of_examples_created == required_number_of_examples:
+                if url:
+                    return url
                 return redirect_url

@@ -26,6 +26,7 @@ const Chatbot: FC<ChatbotProps> = ({
   setIsGenerativeContext,
 }) => {
   const [prompt, setPrompt] = useState("");
+  const [showSendButton, setShowSendButton] = useState(true);
   const [numInteractions, setNumInteractions] = useState(0);
   const [isAskingQuestion, setIsAskingQuestion] = useState(true);
   const [newRespones, setNewResponses] = useState<any[]>([]);
@@ -73,7 +74,7 @@ const Chatbot: FC<ChatbotProps> = ({
             text: "Please try again",
             icon: "error",
           }).then(() => {
-            window.location.reload();
+            // window.location.reload();
           });
         }
         setNewResponses(
@@ -187,6 +188,7 @@ const Chatbot: FC<ChatbotProps> = ({
 
   const handleFinishInteraction = () => {
     showOriginalInteractions();
+    setShowSendButton(false);
     finishSection();
     setIsGenerativeContext(false);
     // setFinishConversation(true);
@@ -313,11 +315,13 @@ const Chatbot: FC<ChatbotProps> = ({
                     </>
                   ) : (
                     <div>
-                      <GeneralButton
-                        onClick={saveHistoryValidation}
-                        text="Save"
-                        className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
-                      />
+                      {showSendButton && (
+                        <GeneralButton
+                          onClick={saveHistoryValidation}
+                          text="Save"
+                          className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
+                        />
+                      )}
                     </div>
                   )}
                 </div>

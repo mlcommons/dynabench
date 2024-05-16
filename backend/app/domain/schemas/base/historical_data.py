@@ -10,6 +10,10 @@ class GetHistoricalDataRequest(BaseModel):
     user_id: int
 
 
+class GetHistoricalData(BaseModel):
+    task_id: int
+
+
 class GetSaveHistoricalDataRequest(BaseModel):
     task_id: int
     user_id: int
