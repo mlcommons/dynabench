@@ -54,7 +54,7 @@ const ChatWithInstructions: FC<
   const location = useLocation();
   const queryParams = queryString.parse(location.search);
   let treatmentId = queryParams.treatmentId ? queryParams.treatmentId : "2";
-  let prolificId = queryParams.assignmentId ? queryParams.assignmentId : Math.floor(100000 + Math.random() * 900000);
+  let prolificId = queryParams.assignmentId ? queryParams.assignmentId : Math.floor(100000 + Math.random() * 900000).toString();
 
   function getTreatmentValue(treatmentId: TreatmentId): string {
     switch (treatmentId) {
