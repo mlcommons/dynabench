@@ -2,10 +2,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import datetime
 import json
 import logging
 import time
+from datetime import datetime
 
 import celery
 from celery.signals import after_setup_logger
@@ -51,6 +51,7 @@ def generate_images(
     prompt, num_images, models, endpoint, user_id, num_of_current_images
 ):
     try:
+        request_start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         job_service = JobService()
         images = celery.group(
             *[
@@ -67,6 +68,8 @@ def generate_images(
         if (len(all_responses) + num_of_current_images) >= 5:
             job_service.remove_registry({"prompt": prompt, "user_id": user_id})
 
+        request_end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         for response in all_responses:
             info_to_log = {
                 "message": response["message"],
@@ -74,8 +77,10 @@ def generate_images(
                 "model": response["generator"],
                 "task_id": response["queue_task_id"],
                 "user_id": response["user_id"],
+                "image_id": response["id"],
                 "prompt": prompt,
-                "timestamp": str(datetime.datetime.now()),
+                "request_start_time": request_start_time,
+                "request_end_time": request_end_time,
             }
 
             logger.critical(json.dumps(info_to_log))
