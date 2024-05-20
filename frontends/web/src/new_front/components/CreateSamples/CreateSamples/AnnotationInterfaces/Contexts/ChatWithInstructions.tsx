@@ -54,7 +54,7 @@ const ChatWithInstructions: FC<
   const location = useLocation();
   const queryParams = queryString.parse(location.search);
   let treatmentId = queryParams.treatmentId ? queryParams.treatmentId : "2";
-  let prolificId = queryParams.assignmentId;
+  let prolificId = queryParams.assignmentId ? queryParams.assignmentId : Math.floor(100000 + Math.random() * 900000).toString();
 
   function getTreatmentValue(treatmentId: TreatmentId): string {
     switch (treatmentId) {
@@ -248,66 +248,38 @@ const ChatWithInstructions: FC<
                     important.
                     <br />
                     <br />
-                    c. For the language model treatments, there is additional
-                    text which appears. I would like to change that to the
-                    below: We are interested in understanding how you use the
-                    language model provided and how well it works for you.
-                    Therefore, it is essential that you{" "}
-                    <strong>only use your own words,</strong> and do not copy
-                    and paste from the scenario text, or from any
-                    <br />
-                    <br />
-                    d. In all treatments, there is a final paragraph at the end
-                    which I would like to change to these two lines (with
-                    newlines):
-                    <br />
-                    <br />
-                    After completing the first scenario, you will return to this
+                  </p>
+                  {treatmentValue !== "control" ? (
+                    <>
+                      <p className="mb-2">
+                      We are interested in understanding how you use the
+                      language model provided and how well it works for you.
+                      Therefore, it is essential that you{" "}
+                      <strong>only use your own words,</strong> and do not copy
+                      and paste from the scenario text, or from any other source.
+                    </>
+                  ) : (
+                    <>
+                      <p className="">
+                      To assist in completing the scenarios,
+                      please use a search engine or any other methods you
+                      might ordinarily use at home. We are interested in
+                      understanding what tools you use and how well they work
+                      for you. This may be an online resource, a book, or
+                      anything else. It is essential that you{" "}
+                      <strong>only use your own words,</strong> and do not copy
+                      and paste from the scenario text, or from any other source.
+                      </p>
+                    </>
+                  )}
+                  <p className="mb-3">
+                  After completing the first scenario, you will return to this
                     page for a different second scenario.
                     <br />
                     <br />
                     Once you have finished reading the instructions, click “I
                     understand” to begin the experiment.
                   </p>
-                  {treatmentValue !== "control" ? (
-                    <>
-                      <p className="mb-2">
-                        The health scenario for this task is presented in the
-                        table below. On the next page, you will be asked to use
-                        a chatbot powered by a large language model to help you
-                        with this task. We are interested in understanding how
-                        you use the language model provided and how well it
-                        works for you. As such, it is essential that you only
-                        use your own words, and do not copy and paste from the
-                        scenario text, or from any other source.
-                      </p>
-                      <p className="mb-3">
-                        To use the language model, simply type in the text box
-                        provided on the next page. The language model will then
-                        generate a response. You may interact with the model up
-                        to 10 times, and must interact at least once. When you
-                        are finished using the language model, press the
-                        “Finish” button to save the conversation and move on to
-                        the questions. Please be sure to select the key
-                        information from the scenario yourself rather than
-                        copying and pasting from the text provided.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="">
-                        The health scenario for this task is presented in the
-                        panel below. To assist in completing the scenarios,
-                        please use a search engine or any other methods you
-                        might ordinarily use at home. We are interested in
-                        understanding what tools you use and how well they work
-                        for you. This may be an online resource, a book, or
-                        anything else. Please be sure to select the key
-                        information from the scenario yourself rather than
-                        copying and pasting from the text provided.
-                      </p>
-                    </>
-                  )}
                 </div>
               </div>
               {treatmentValue !== "control" && (
@@ -333,8 +305,8 @@ const ChatWithInstructions: FC<
                   </p>
                 </div>
               )}
-              <h3 className="text-2xl font-bold">Scenario</h3>
               <div className="px-4 py-2 border border-gray-200 ">
+                <h3 className="text-2xl font-bold">Scenario</h3>  
                 <BasicInstructions instructions={context} />
               </div>
               <div className="flex items-end justify-end gap-4">
