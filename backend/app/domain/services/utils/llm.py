@@ -173,7 +173,7 @@ class AnthropicProvider(LLMProvider):
 
     @async_timeout(30)
     async def generate_text(
-        self, prompt: str, model: dict, provider = None, is_conversational: bool = False
+        self, prompt: str, model: dict, provider=None, is_conversational: bool = False
     ) -> str:
         provider = provider if type(provider) == str else self.provider_name()
         head_template = model[provider]["templates"]["header"]
@@ -254,7 +254,7 @@ class CohereProvider(LLMProvider):
         self,
         prompt: str,
         model: dict,
-        provider = None,
+        provider=None,
         is_conversational: bool = False,
         chat_history=[],
     ) -> str:
