@@ -548,7 +548,7 @@ class TaskOwnerPage extends React.Component {
               ))}
             </Nav>
           </Col>
-          <Col className="col-span-10">
+          <Col className="md:col-span-10">
             {this.props.location.hash === "#settings" && this.state.task ? (
               <Settings
                 task={this.state.task}
