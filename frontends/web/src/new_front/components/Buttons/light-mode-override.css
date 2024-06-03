@@ -1,0 +1,5 @@
+
+.wmde-markdown, .wmde-markdown-color {
+    background-color: #ffffff !important; /* Light background for inline code */
+    color: #212529 !important;            /* Dark text for inline code */
+}

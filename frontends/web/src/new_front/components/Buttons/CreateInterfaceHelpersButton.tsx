@@ -3,6 +3,7 @@ import { CreateInterfaceContext } from "new_front/context/CreateInterface/Contex
 import { Modal } from "react-bootstrap";
 import MDEditor from "@uiw/react-md-editor";
 import ShowInstructionsButton from "new_front/components/Buttons/ShowInstructionsButton";
+import "./light-mode-override.css";
 
 type CreateInterfaceHelpersButtonProps = {
   generalInstructions: string;
@@ -88,10 +89,10 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
                 }}
                 size="lg"
               >
-                <Modal.Header closeButton>
+                <Modal.Header closeButton className="px-4">
                   <Modal.Title>Example</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body className="px-4">
                   <MDEditor.Markdown source={creationExample} />
                 </Modal.Body>
               </Modal>
