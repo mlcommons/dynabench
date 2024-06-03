@@ -530,7 +530,7 @@ class TaskOwnerPage extends React.Component {
     return (
       <Container fluid>
         <Row>
-          <Col lg={2} className="p-0 border col-span-2">
+          <Col lg={2} className="p-0 border col-span-2 min-h-screen">
             <Nav className="flex-lg-column sidebar-wrapper sticky-top">
               {navOptions.map((navOption) => (
                 <Nav.Item key={navOption.href}>
