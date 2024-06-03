@@ -83,10 +83,10 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
   return (
     <>
       {!loading ? (
-        <div className="col-span-1 py-4 ">
-          <div className="grid items-center justify-center grid-cols-6">
-            <div className="flex justify-end col-span-3 ">
-              <div className="col-span-1 pl-2 pr-3" id="submit">
+        <div className="md:col-span-2 xs:col-span-12 xs:w-screen py-4 ">
+          <div className="grid items-center justify-center lg:grid-cols-6 md:grid-cols-8 xs:grid-cols-4">
+            <div className="flex xs:flex-wrap md:flex-nowrapjustify-end lg:col-span-4 md:col-span-5 xs:col-span-12 ">
+              <div className="col-span-1 xs:pb-2 pl-2 pr-3" id="submit">
                 <Button
                   className="border-0 font-weight-bold light-gray-bg task-action-btn"
                   onClick={() => downloadExamples()}
@@ -95,7 +95,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
                 </Button>
               </div>
               {s3Bucket && (
-                <div className="col-span-1 pl-2 pr-3" id="submit">
+                <div className="col-span-1 xs:pb-2 pl-2 pr-3" id="submit">
                   <Button
                     className="border-0 font-weight-bold light-gray-bg task-action-btn"
                     onClick={() => downloadAdditionalData()}
@@ -104,7 +104,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
                   </Button>
                 </div>
               )}
-              <div className="col-span-1 pl-2 pr-3" id="submit">
+              <div className="col-span-1 xs:pb-2 pl-2 pr-3" id="submit">
                 <Button
                   className="border-0 font-weight-bold light-gray-bg task-action-btn"
                   onClick={() => downloadModelResults()}
@@ -113,7 +113,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
                 </Button>
               </div>
               {taskId === 45 && (
-                <div className="col-span-1 pl-2 pr-3" id="submit">
+                <div className="col-span-1 xs:pb-2 pl-2 pr-3" id="submit">
                   <Button
                     className="border-0 font-weight-bold light-gray-bg task-action-btn"
                     onClick={() => downloadUsersInfo()}
