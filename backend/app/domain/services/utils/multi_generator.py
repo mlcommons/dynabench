@@ -3,13 +3,28 @@
 # LICENSE file in the root directory of this source tree.
 
 import asyncio
+import random
 from multiprocessing import Pool
 
-from app.domain.services.utils.image_generators import (  # SD2ImageProvider,
-    OpenAIImageProvider,
+from app.domain.services.utils.image_generators import (
+    HF_SDXL,
+    Dalle2ImageProvider,
+    Dalle3ImageProvider,
     SDRunwayMLImageProvider,
+    SDRunwayMLImageProvider2,
+    SDRunwayMLImageProvider3,
     SDVariableAutoEncoder,
+    SDVariableAutoEncoder2,
+    SDVariableAutoEncoder3,
     SDXLImageProvider,
+    SDXLImageProvider2,
+    SDXLImageProvider3,
+    SDXLTurboImageProvider,
+    SDXLTurboImageProvider2,
+    SDXLTurboImageProvider3,
+    SDXLTurboImageProvider4,
+    SDXLTurboImageProvider5,
+    SDXLTurboImageProvider6,
 )
 from app.domain.services.utils.llm import (
     AlephAlphaProvider,
@@ -25,6 +40,7 @@ from app.domain.services.utils.llm import (
 
 class LLMGenerator:
     def __init__(self):
+        # Providers
         self.llm_providers = {
             "openai": OpenAIProvider(),
             "cohere": CohereProvider(),
@@ -92,10 +108,23 @@ class ImageGenerator:
     def __init__(self):
         self.image_providers = [
             SDVariableAutoEncoder(),
-            OpenAIImageProvider(),
+            SDVariableAutoEncoder2(),
+            SDVariableAutoEncoder3(),
+            Dalle3ImageProvider(),
+            Dalle2ImageProvider(),
             SDRunwayMLImageProvider(),
-            # SD2ImageProvider(),
+            SDRunwayMLImageProvider2(),
+            SDRunwayMLImageProvider3(),
             SDXLImageProvider(),
+            SDXLImageProvider2(),
+            SDXLImageProvider3(),
+            SDXLTurboImageProvider(),
+            SDXLTurboImageProvider2(),
+            SDXLTurboImageProvider3(),
+            SDXLTurboImageProvider4(),
+            SDXLTurboImageProvider5(),
+            SDXLTurboImageProvider6(),
+            HF_SDXL(),
         ]
 
     def generate_images_parallel(self, generator, prompt, num_images, models, endpoint):
@@ -104,15 +133,20 @@ class ImageGenerator:
     def generate_all_images(
         self, prompt: str, num_images: int, models: list, endpoint: str
     ) -> list:
-        with Pool(len(self.image_providers)) as _:
+        generators = random.sample(self.image_providers, num_images)
+        with Pool(len(generators)) as _:
             with Pool() as pool:
                 results = pool.starmap(
                     self.generate_images_parallel,
                     [
                         (generator, prompt, num_images, models, endpoint)
-                        for generator in self.image_providers
+                        for generator in generators
                     ],
                 )
             pool.close()
             pool.join()
         return results
+
+    def generate_one_image(self, prompt, num_images, models, endpoint, user_id):
+        model = random.sample(self.image_providers, 1)[0]
+        return model.generate_images(prompt, num_images, models, endpoint, user_id)

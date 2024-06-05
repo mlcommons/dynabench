@@ -46,7 +46,8 @@ const AnnotationButtonActions: FC<Props> = ({
   setIsGenerativeContext,
 }) => {
   const [sandboxMode, setSandboxMode] = useState<boolean>(false);
-  let { modelInputs, metadataExample } = useContext(CreateInterfaceContext);
+  let { modelInputs, metadataExample, updateAmountExamplesCreatedToday } =
+    useContext(CreateInterfaceContext);
 
   const { post, loading, response } = useFetch();
 
@@ -88,6 +89,7 @@ const AnnotationButtonActions: FC<Props> = ({
             text: "Your example has been saved",
             confirmButtonColor: "#2088ef",
           });
+          updateAmountExamplesCreatedToday(realRoundId, userId);
           setModelOutput(modelOutput);
           if (modelOutput.input === "") {
             window.location.reload();
@@ -113,6 +115,7 @@ const AnnotationButtonActions: FC<Props> = ({
             text: "Your example has been saved",
             confirmButtonColor: "#2088ef",
           });
+          updateAmountExamplesCreatedToday(realRoundId, userId);
           setIsGenerativeContext(true);
           setModelOutput(modelOutput);
           modelInputs = {};
@@ -137,6 +140,11 @@ const AnnotationButtonActions: FC<Props> = ({
       });
     }
   };
+
+  useEffect(() => {
+    console.log("modelInputs", modelInputs);
+    console.log("metadataExample", metadataExample);
+  }, [modelInputs, metadataExample]);
 
   return (
     <>

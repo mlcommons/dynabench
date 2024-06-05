@@ -239,7 +239,7 @@ class ExampleService:
                 context_id,
                 user_id,
                 False,
-                None,
+                example_info["select_image"].split("_")[0],
                 json.dumps(example_info),
                 json.dumps({}),
                 json.dumps({}),

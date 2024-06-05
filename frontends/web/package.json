@@ -29,6 +29,7 @@
         "moment": "^2.24.0",
         "prop-types": "^15.7.2",
         "qs": "^6.9.3",
+        "query-string": "^9.0.0",
         "react": "^18.2.0",
         "react-audio-player": "^0.17.0",
         "react-bootstrap": "^1.2.2",

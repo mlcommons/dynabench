@@ -2,6 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from sqlalchemy.sql import func
+
 from app.infrastructure.models.models import HistoricalData
 from app.infrastructure.repositories.abstract import AbstractRepository
 
@@ -35,6 +37,17 @@ class HistoricalDataRepository(AbstractRepository):
         ).filter(HistoricalData.user_id == user_id).delete()
         self.session.flush()
         self.session.commit()
+
+    def get_occurrences_with_more_than_one_hundred(self, task_id: int):
+        return (
+            self.session.query(
+                HistoricalData.history,
+            )
+            .filter(HistoricalData.task_id == task_id)
+            .group_by(HistoricalData.history, HistoricalData.task_id)
+            .having(func.count(HistoricalData.history) > 10)
+            .all()
+        )
 
     def check_if_historical_data_exists(self, task_id: int, user_id: int, data: str):
         return (

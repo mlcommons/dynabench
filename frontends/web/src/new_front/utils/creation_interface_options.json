@@ -1,31 +1,33 @@
 {
-  "goal": {
-    "plain-text": "PlainText",
-    "multioptions": "Multioptions",
-    "radio-button-options": "RadioButtonOptions",
-    "double-multioptions": "DoubleMultioptions"
-  },
-  "context": {
-    "plain-text": "PlainText",
-    "selectable-text": "SelectableText",
-    "zoom_image": "ZoomImage",
-    "audio": "Audio",
-    "modify-original-text": "ModifyOriginalText",
-    "select-multiple-images-generative": "SelectBetweenImagesGenerative",
-    "evaluate-texts-generative": "EvaluateTextsGenerative",
-    "chat-with-instructions": "ChatWithInstructions",
-    "describe-image": "DescribeImage"
-  },
-  "user_input": {
-    "input-with-instructions": "InputWithInstructions",
-    "text": "Text",
-    "audio": "Audio",
-    "multioptions": "Multioptions",
-    "multioptions-with-instructions": "MultioptionsWithInstructions",
-    "radio-button-options": "RadioButtonOptions",
-    "select-multiple-images": "SelectMultipleImages",
-    "multi-slider-selection": "MultiSliderSelection",
-    "select-option-with-slider": "SelectOptionWithSliderSelection",
-    "basic-input-select-option-with-instructions": "BasicInputSelectOptionWithInstructions"
-  }
+    "goal": {
+        "plain-text": "PlainText",
+        "multioptions": "Multioptions",
+        "radio-button-options": "RadioButtonOptions",
+        "double-multioptions": "DoubleMultioptions"
+    },
+    "context": {
+        "plain-text": "PlainText",
+        "selectable-text": "SelectableText",
+        "zoom_image": "ZoomImage",
+        "audio": "Audio",
+        "modify-original-text": "ModifyOriginalText",
+        "select-multiple-images-generative": "SelectBetweenImagesGenerative",
+        "select-multiple-images-generative-dev": "SelectBetweenImagesGenerativeEnv",
+        "evaluate-texts-generative": "EvaluateTextsGenerative",
+        "chat-with-instructions": "ChatWithInstructions",
+        "describe-image": "DescribeImage"
+    },
+    "user_input": {
+        "input-with-instructions": "InputWithInstructions",
+        "text": "Text",
+        "audio": "Audio",
+        "multioptions": "Multioptions",
+        "multioptions-with-instructions": "MultioptionsWithInstructions",
+        "radio-button-options": "RadioButtonOptions",
+        "select-multiple-images": "SelectMultipleImages",
+        "multi-slider-selection": "MultiSliderSelection",
+        "select-option-with-slider": "SelectOptionWithSliderSelection",
+        "basic-input-with-slider": "BasicInputWithSliderSelection",
+        "basic-input-select-option-with-instructions": "BasicInputSelectOptionWithInstructions"
+    }
 }

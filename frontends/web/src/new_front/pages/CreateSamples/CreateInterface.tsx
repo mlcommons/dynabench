@@ -18,7 +18,10 @@ import { useHistory, useParams } from "react-router-dom";
 import UserContext from "containers/UserContext";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
-import { CreateInterfaceProvider } from "new_front/context/CreateInterface/Context";
+import {
+  CreateInterfaceContext,
+  CreateInterfaceProvider,
+} from "new_front/context/CreateInterface/Context";
 import Swal from "sweetalert2";
 import { useLocation } from "react-router-dom";
 
@@ -38,12 +41,16 @@ const CreateInterface = () => {
   const { get, post, response, loading } = useFetch();
   let { taskCode } = useParams<{ taskCode: string }>();
   const { user } = useContext(UserContext);
+  const { updateAmountExamplesCreatedToday } = useContext(
+    CreateInterfaceContext,
+  );
   const history = useHistory();
   const location = useLocation();
 
   // Parse the query parameters
   const queryParams = new URLSearchParams(location.search);
   const assignmentId = queryParams.get("assignmentId");
+  const treatmentId = queryParams.get("treatmentId");
 
   const checkIfUserCanCreateSample = async () => {
     if (response.ok) {
@@ -92,27 +99,24 @@ const CreateInterface = () => {
     }
   };
 
-  const loadAmountExamples = async () => {
-    const amountExamples = await post(
-      `/rounduserexample/number_of_examples_created`,
-      {
-        round_id: taskContextInfo?.real_round_id,
-        user_id: user.id!,
-      },
-    );
-    if (response.ok) {
-      setAmountExamples(amountExamples);
-    }
-  };
-
-  const isLogin = async (assignmentId: string | null, taskCode: string) => {
+  const isLogin = async (
+    assignmentId: string | null,
+    taskCode: string,
+    treatmentId: string | null,
+  ) => {
     if (!user.id) {
-      await checkUserIsLoggedIn(history, `/`, assignmentId, taskCode);
+      await checkUserIsLoggedIn(
+        history,
+        `/`,
+        assignmentId,
+        taskCode,
+        treatmentId,
+      );
     }
   };
 
   useEffect(() => {
-    isLogin(assignmentId, taskCode);
+    isLogin(assignmentId, taskCode, treatmentId);
   }, [user]);
 
   useEffect(() => {
@@ -124,10 +128,12 @@ const CreateInterface = () => {
 
   useEffect(() => {
     if (taskContextInfo?.real_round_id) {
-      loadAmountExamples();
+      updateAmountExamplesCreatedToday(
+        taskContextInfo?.real_round_id,
+        user.id!,
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskContextInfo?.real_round_id]);
+  }, [taskContextInfo, user]);
 
   useEffect(() => {
     if (taskContextInfo?.real_round_id) {
@@ -161,7 +167,8 @@ const CreateInterface = () => {
                   <CreateInterfaceHelpersButton
                     generalInstructions={taskInfo?.instructions_md!}
                     creationExample={taskInfo?.creation_example_md!}
-                    amountExamplesCreatedToday={Number(amountExamples)}
+                    realRoundId={taskContextInfo?.real_round_id!}
+                    userId={user.id!}
                   />
                 </div>
               </div>

@@ -71,6 +71,8 @@ class ModelService:
             "google": GoogleProvider(),
             "replicate": ReplicateProvider(),
             "huggingface_api": HuggingFaceAPIProvider(),
+            "openaihm": OpenAIProvider(task_id=56),
+            "coherehm": CohereProvider(task_id=56),
         }
 
     def get_model_in_the_loop(self, task_id: str) -> str:
@@ -414,6 +416,7 @@ class ModelService:
         prompt: str,
         num_answers: int,
     ):
+        print("Selected model was", model_name)
         print("Selected model was", model_name[provider]["model_name"])
         responses = []
         llm = self.providers[provider]
@@ -421,7 +424,7 @@ class ModelService:
             response = {
                 "id": i,
                 "text": await llm.conversational_generation(
-                    prompt, model_name, history
+                    prompt, model_name, history, provider
                 ),
             }
             responses.append(response)

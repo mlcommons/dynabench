@@ -7,6 +7,7 @@ from fastapi.exceptions import HTTPException
 
 from app.domain.schemas.base.historical_data import (
     DeleteHistoricalDataRequest,
+    GetHistoricalData,
     GetHistoricalDataRequest,
     GetSaveHistoricalDataRequest,
 )
@@ -34,6 +35,24 @@ async def save_historical_data(model: GetSaveHistoricalDataRequest):
         raise HTTPException(
             status_code=400, detail="Historical data already exists for this task"
         )
+
+
+@router.post("/get_occurrences_with_more_than_one_hundred")
+async def get_occurrences_with_more_than_one_hundred(model: GetHistoricalData):
+    history = HistoricalDataService().get_occurrences_with_more_than_one_hundred(
+        model.task_id
+    )
+    return history
+
+
+@router.post("/check_if_historical_data_exists")
+async def check_if_historical_data_exists(
+    model: GetSaveHistoricalDataRequest,
+):
+    history = HistoricalDataService().check_if_historical_data_exists(
+        model.task_id, model.user_id, model.data
+    )
+    return history
 
 
 @router.post("/delete_historical_data")

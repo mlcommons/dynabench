@@ -49,5 +49,5 @@ async def increment_counter_examples_submitted_today(
 @router.post("/redirect_to_third_party_provider", response_model={})
 async def redirect_to_third_party_provider(model: RedirectThirdPartyProvider):
     return RoundUserExampleInfoService().redirect_to_third_party_provider(
-        model.task_id, model.user_id, model.round_id
+        model.task_id, model.user_id, model.round_id, model.url
     )

@@ -8,6 +8,7 @@ type SelectOptionWithSliderProps = {
   optionsSlider: string[];
   field_name_for_the_model: string;
   metadata?: boolean;
+  instructions_slider: string;
   onInputChange: (data: any, metadata?: boolean) => void;
 };
 
@@ -17,12 +18,12 @@ const SelectOptionWithSlider: FC<SelectOptionWithSliderProps> = ({
   optionsSlider = ["0", "100"],
   field_name_for_the_model,
   metadata,
+  instructions_slider,
   onInputChange,
 }) => {
-  console.log("optionss", options);
-
   const [open, setOpen] = useState(false);
   const [optionSelected, setOptionSelected] = useState(false);
+  const [optionSelectedValue, setOptionSelectedValue] = useState("");
 
   const [responses, setResponses] = useState<any[]>(
     options.map((option) => {
@@ -30,15 +31,16 @@ const SelectOptionWithSlider: FC<SelectOptionWithSliderProps> = ({
     }),
   );
 
-  const handleChange = (option: string, value: string) => {
-    const updatedResponses = [...responses];
-    const responseIndex = updatedResponses.findIndex(
-      (response) => response.label === option,
-    );
-    if (responseIndex !== -1) {
-      updatedResponses[responseIndex].value = value;
-    }
+  const handleChange = (value: string, option: string) => {
+    const updatedResponses = responses.map((response) => {
+      if (option && response.label === option) {
+        return { label: response.label, value: value };
+      }
+      return { label: response.label, value: "" };
+    });
+
     setResponses(updatedResponses);
+
     onInputChange(
       {
         [field_name_for_the_model]: updatedResponses,
@@ -83,8 +85,9 @@ const SelectOptionWithSlider: FC<SelectOptionWithSliderProps> = ({
                         value={option}
                         className="mr-2"
                         onChange={() => {
+                          setOptionSelectedValue(option.label);
                           setOptionSelected(true);
-                          handleChange(option.label, "50");
+                          handleChange("50", option.label);
                         }}
                       />
                       {option.label}
@@ -97,6 +100,9 @@ const SelectOptionWithSlider: FC<SelectOptionWithSliderProps> = ({
           {optionSelected && (
             <div className="flex items-center justify-center px-20 pt-2">
               <div className="w-full">
+                <h3 className="my-3 text-base normal-case text-letter-color">
+                  {parse(instructions_slider)}
+                </h3>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-600">{optionsSlider[0]}</p>
                   <p className="text-sm text-gray-600">{optionsSlider[1]}</p>
@@ -105,9 +111,13 @@ const SelectOptionWithSlider: FC<SelectOptionWithSliderProps> = ({
                   type="range"
                   min={optionsSlider[0]}
                   max={optionsSlider[1]}
-                  value={responses[0].value}
+                  value={
+                    responses.find(
+                      (response) => response.label === optionSelectedValue,
+                    )?.value
+                  }
                   onChange={(e) => {
-                    handleChange(options[0].label, e.target.value);
+                    handleChange(e.target.value, optionSelectedValue);
                   }}
                   className="w-full"
                 />
