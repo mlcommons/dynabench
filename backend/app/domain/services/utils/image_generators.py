@@ -122,6 +122,7 @@ class Dalle2ImageProvider(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -187,6 +188,7 @@ class Dalle3ImageProvider(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -240,6 +242,7 @@ class SDXLImageProvider(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -293,6 +296,7 @@ class SDXLImageProvider2(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -345,6 +349,7 @@ class SDXLImageProvider3(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -397,6 +402,7 @@ class SDXLTurboImageProvider(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -449,6 +455,7 @@ class SDXLTurboImageProvider2(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -501,6 +508,7 @@ class SDXLTurboImageProvider3(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -553,6 +561,7 @@ class SDXLTurboImageProvider4(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -605,6 +614,7 @@ class SDXLTurboImageProvider5(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -657,6 +667,7 @@ class SDXLTurboImageProvider6(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -709,6 +720,7 @@ class SDRunwayMLImageProvider(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -761,6 +773,7 @@ class SDRunwayMLImageProvider2(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -813,6 +826,7 @@ class SDRunwayMLImageProvider3(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -865,6 +879,7 @@ class SDVariableAutoEncoder(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -917,6 +932,7 @@ class SDVariableAutoEncoder2(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -969,6 +985,7 @@ class SDVariableAutoEncoder3(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
@@ -1020,6 +1037,7 @@ class HF_SDXL(ImageProvider):
                 "generator": self.provider_name(),
                 "message": error_code,
                 "images": None,
+                "id": None,
             }
 
     def provider_name(self):
