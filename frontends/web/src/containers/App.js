@@ -66,7 +66,7 @@ import OthersTaskLanding from "new_front/pages/CommunitiesLandingPages/OthersTas
 import logoBlack from "new_front/assets/logo_black.png";
 import logoWhite from "new_front/assets/logo_mlcommos_white.png";
 import OverlayInstructionsProvider from "new_front/context/OverlayInstructions/Context";
-import { Provider } from  "react-redux";
+import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "state/store.tsx";
 
@@ -226,7 +226,9 @@ class App extends React.Component {
                                       <ul className="ul-nav">
                                         {this.state &&
                                           this.state.tasks
-                                            .filter((t) => t.challenge_type === 1)
+                                            .filter(
+                                              (t) => t.challenge_type === 1
+                                            )
                                             .map((task, index) => (
                                               <li
                                                 key={task.task_code}
@@ -242,13 +244,18 @@ class App extends React.Component {
                                       </ul>
                                     </li>
                                     <li id="dataperf" className="li-nav">
-                                      <a className="second-nav-a" href="/dataperf">
+                                      <a
+                                        className="second-nav-a"
+                                        href="/dataperf"
+                                      >
                                         Dataperf
                                       </a>
                                       <ul className="ul-nav">
                                         {this.state &&
                                           this.state.tasks
-                                            .filter((t) => t.challenge_type === 2)
+                                            .filter(
+                                              (t) => t.challenge_type === 2
+                                            )
                                             .map((task, index) => (
                                               <li
                                                 key={task.task_code}
@@ -264,13 +271,18 @@ class App extends React.Component {
                                       </ul>
                                     </li>
                                     <li id="babylm" className="li-nav">
-                                      <a className="second-nav-a" href="/babylm">
+                                      <a
+                                        className="second-nav-a"
+                                        href="/babylm"
+                                      >
                                         BabyLM
                                       </a>
                                       <ul className="ul-nav">
                                         {this.state &&
                                           this.state.tasks
-                                            .filter((t) => t.challenge_type === 3)
+                                            .filter(
+                                              (t) => t.challenge_type === 3
+                                            )
                                             .map((task, index) => (
                                               <li
                                                 key={task.task_code}
@@ -292,7 +304,9 @@ class App extends React.Component {
                                       <ul className="ul-nav">
                                         {this.state &&
                                           this.state.tasks
-                                            .filter((t) => t.challenge_type === 4)
+                                            .filter(
+                                              (t) => t.challenge_type === 4
+                                            )
                                             .map((task, index) => (
                                               <li
                                                 key={task.task_code}
@@ -307,7 +321,10 @@ class App extends React.Component {
                                             ))}
                                       </ul>
                                     </li>
-                                    <li id="machine_translation" className="li-nav">
+                                    <li
+                                      id="machine_translation"
+                                      className="li-nav"
+                                    >
                                       <a
                                         className="second-nav-a"
                                         href="/machine_translation"
@@ -317,7 +334,9 @@ class App extends React.Component {
                                       <ul className="ul-nav">
                                         {this.state &&
                                           this.state.tasks
-                                            .filter((t) => t.challenge_type === 7)
+                                            .filter(
+                                              (t) => t.challenge_type === 7
+                                            )
                                             .map((task, index) => (
                                               <li
                                                 key={task.task_code}
@@ -333,13 +352,18 @@ class App extends React.Component {
                                       </ul>
                                     </li>
                                     <li id="flores" className="li-nav">
-                                      <a className="second-nav-a" href="/flores">
+                                      <a
+                                        className="second-nav-a"
+                                        href="/flores"
+                                      >
                                         Flores
                                       </a>
                                       <ul className="ul-nav">
                                         {this.state &&
                                           this.state.tasks
-                                            .filter((t) => t.challenge_type === 5)
+                                            .filter(
+                                              (t) => t.challenge_type === 5
+                                            )
                                             .map((task, index) => (
                                               <li
                                                 key={task.task_code}
@@ -355,13 +379,18 @@ class App extends React.Component {
                                       </ul>
                                     </li>
                                     <li id="contributed" className="li-nav">
-                                      <a href="/others" className="second-nav-a">
+                                      <a
+                                        href="/others"
+                                        className="second-nav-a"
+                                      >
                                         Others
                                       </a>
                                       <ul className="ul-nav">
                                         {this.state &&
                                           this.state.tasks
-                                            .filter((t) => t.challenge_type === 6)
+                                            .filter(
+                                              (t) => t.challenge_type === 6
+                                            )
                                             .map((task, index) => (
                                               <li
                                                 className="li-nav"
@@ -390,7 +419,9 @@ class App extends React.Component {
                                       className="no-chevron"
                                       title={
                                         <Avatar
-                                          avatar_url={this.state.user.avatar_url}
+                                          avatar_url={
+                                            this.state.user.avatar_url
+                                          }
                                           username={this.state.user.username}
                                           isThumbnail={true}
                                           theme="light"
@@ -410,7 +441,8 @@ class App extends React.Component {
                                         {this.state.user &&
                                         this.state.user.unseen_notifications
                                           ? "(" +
-                                            this.state.user?.unseen_notifications +
+                                            this.state.user
+                                              ?.unseen_notifications +
                                             ")"
                                           : ""}
                                       </NavDropdown.Item>
@@ -455,7 +487,10 @@ class App extends React.Component {
                             <Route path="/about" component={About} />
                             <Route path="/contact" component={ContactPage} />
                             <Route path="/termsofuse" component={TermsPage} />
-                            <Route path="/datapolicy" component={DataPolicyPage} />
+                            <Route
+                              path="/datapolicy"
+                              component={DataPolicyPage}
+                            />
                             <Route
                               path="/tasks/top/:taskCode"
                               component={TaskModelLeaderboardPage}
@@ -528,7 +563,10 @@ class App extends React.Component {
                               path="/tasks/:taskCode/:forkOrSnapshotName"
                               component={ForkAndSnapshotRouter}
                             />
-                            <Route path="/tasks/:taskCode" component={TaskPage} />
+                            <Route
+                              path="/tasks/:taskCode"
+                              component={TaskPage}
+                            />
                             <Route path="/test" component={Test} />
                             <Route
                               path="/flores/top5/:taskShortName"
@@ -538,7 +576,10 @@ class App extends React.Component {
                               path="/flores/:taskShortName?"
                               component={FloresTaskPage}
                             />
-                            <Route path="/dataperf" component={DataperfLanding} />
+                            <Route
+                              path="/dataperf"
+                              component={DataperfLanding}
+                            />
                             <Route path="/dadc" component={DADCLanding} />
                             <Route path="/babylm" component={BabyLMLanding} />
                             <Route
