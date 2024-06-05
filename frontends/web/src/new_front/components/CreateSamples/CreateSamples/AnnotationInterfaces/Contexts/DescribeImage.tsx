@@ -143,7 +143,7 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   );
   const [file, setFile] = useState<File>();
   const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
-  const { modelInputs, updateModelInputs } = useContext(CreateInterfaceContext);
+  const { modelInputs, updateModelInputs, removeItem } = useContext(CreateInterfaceContext);
 
   const handleGetLanguages = async (e: any) => {
     if (!e.value) return;
@@ -243,6 +243,12 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   useEffect(() => {
     localStorage.setItem("language", language);
     localStorage.setItem("country", country);
+    localStorage.removeItem("selectedCategory");
+    localStorage.removeItem("selectedConcept");
+    removeItem("category");
+    removeItem("concept");
+    setSelectedCategory(null);
+    setSelectedConcept(null);
   }, [language, country]);
 
   useEffect(() => {

@@ -12,8 +12,6 @@ import { getIdFromImageString } from "new_front/utils/helpers/functions/DataMani
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
-import useFetchSSE from "new_front/utils/helpers/functions/FetchSSE";
-import { swap } from "formik";
 
 const SelectBetweenImagesGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -30,7 +28,7 @@ const SelectBetweenImagesGenerative: FC<
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
   const [showQueue, setShowQueue] = useState<boolean>(false);
   const [positionQueue, setPositionQueue] = useState<any>({});
-  const [firstMessageReceived, setFirstMessageReceived] = useState(false);
+  const [firstMessageReceived, setFirstMessageReceived] = useState<boolean>(false);
   const [allowsGeneration, setAllowsGeneration] = useState(true);
   const [showLoader, setShowLoader] = useState(false);
   const [showImages, setShowImages] = useState<any[]>([]);
@@ -96,6 +94,14 @@ const SelectBetweenImagesGenerative: FC<
     }
   };
 
+  const handlePopUp = () => {
+    Swal.fire({
+      title: "Example already submitted",
+      text: "You selected a prompt from your history and we are showing the images previously generated for this prompt. Modify the prompt to get new image generation.",
+      icon: "info",
+    });
+  }
+
   const runCheckers = async (prompt: string) => {
     const checkIfPromptExistsForUser = await post(
       "/historical_data/check_if_historical_data_exists",
@@ -106,11 +112,7 @@ const SelectBetweenImagesGenerative: FC<
       },
     );
     if (checkIfPromptExistsForUser) {
-      Swal.fire({
-        title: "Example already submitted",
-        text: "You selected a prompt from your history and we are showing the images previously generated for this prompt. Modify the prompt to get new image generation.",
-        icon: "info",
-      });
+      setFirstMessageReceived(true);
     }
     const promptWithMoreThanOneHundredSubmissions = await post(
       "/historical_data/get_occurrences_with_more_than_one_hundred",
@@ -118,6 +120,7 @@ const SelectBetweenImagesGenerative: FC<
         task_id: taskId,
       },
     );
+
     const checkIfPromptIsInOccurrences =
       promptWithMoreThanOneHundredSubmissions.some(
         (item: any) => item.data === prompt.trim(),
@@ -355,6 +358,10 @@ const SelectBetweenImagesGenerative: FC<
       CreatePartialSample();
     }
   }, [selectedImage]);
+
+  useEffect(() => {
+    firstMessageReceived && handlePopUp();
+  }, [firstMessageReceived])
 
   return (
     <>
