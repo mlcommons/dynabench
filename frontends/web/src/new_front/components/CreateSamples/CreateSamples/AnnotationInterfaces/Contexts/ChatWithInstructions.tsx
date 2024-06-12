@@ -273,6 +273,7 @@ const ChatWithInstructions: FC<
                     </>
                   )}
                   <p className="mb-3">
+                    <br />
                   After completing the first scenario, you will return to this
                     page for a different second scenario.
                     <br />
@@ -340,12 +341,21 @@ const ChatWithInstructions: FC<
                   />
                 ) : (
                   <>
-                    <p className="text-lg font-bold">
-                      Now use the any methods you would ordinarily use at home
-                      to determine the best response to the scenario. The
-                      scenario details are available for reference on the right.
-                      Please describe the methods you use in the textbox below:
-                    </p>
+                    <div>
+                    <p className="text-lg font-bold">The scenario details are available on the right. You need
+                       to find answers to two questions:</p>
+                    <ol>
+                    <li>     1) What should you do next?</li>
+                    <li>     2) What is the most likely cause of the problems being reported?</li>
+                    </ol>
+                    Use the any methods you ordinarily use at home (e.g. online search, reference book)
+                      to determine the best response to the scenario. 
+                    <br />
+                    <p style="color:MediumSeaGreen;">
+                      Keep track of the methods you are using in the textbox below. 
+                      Once you click “Submit” the scenario questions will appear.
+                    </span>
+                    </p></div>
                     <textarea
                       className="w-full p-4 mt-4 border border-gray-200 h-96"
                       placeholder="Type your response here..."
