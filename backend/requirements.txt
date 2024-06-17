@@ -40,3 +40,5 @@ pytz==2021.3
 celery==5.4.0
 redis==5.0.3
 msgpack-python
+paramiko==3.4.0
+scp==0.15.0

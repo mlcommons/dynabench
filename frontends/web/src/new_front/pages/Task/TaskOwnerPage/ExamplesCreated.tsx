@@ -46,7 +46,8 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
     }
   };
 
-  const downloadUsersInfo = async () => {
+  const downloadUsersInfo = async (e: any) => {
+    e.preventDefault();
     await get(`/user/download_users_info`);
     if (response.ok) {
       response.blob().then((blob) => {
@@ -80,13 +81,44 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
     }
   };
 
+  const downloadLogs = async (e: any) => {
+    e.preventDefault();
+    await get(`/task/download_logs/${task45.taskId}/${task45.localDir}`);
+    if (response.ok) {
+      response.blob().then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${taskId}_logs.log`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      });
+    }
+  };
+
+  const task45 = {
+    taskId: 45,
+    buttons: [
+      {
+        name: "Download users info",
+        action: downloadUsersInfo,
+      },
+      {
+        name: "Download logs",
+        action: downloadLogs,
+      },
+    ],
+    localDir: "nibbler",
+  };
+
   return (
     <>
       {!loading ? (
         <div className="md:col-span-2 col-span-1 py-4">
-          <div className="flex flex-wrap md:flex-none grid items-center justify-center lg:grid-cols-7 md:grid-cols-4 grid-cols-4">
+          <div className="flex flex-wrap md:flex-none grid items-center lg:grid-cols-7 md:grid-cols-4 grid-cols-4">
             <div
-              className="col-span-2 sm:col-span-1 pb-2 sm:pb-0 pl-2 pr-3 min-w-40"
+              className="col-span-2 sm:col-span-1 pb-2 sm:pb-0 pl-2 md:mx-auto md:pl-0 md:pr-0 pr-3 min-w-40"
               id="submit"
             >
               <Button
@@ -98,7 +130,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
             </div>
             {s3Bucket && (
               <div
-                className="col-span-2 sm:col-span-1 pb-2 sm:pb-0 pl-2 pr-3 min-w-40"
+                className="col-span-2 sm:col-span-1 pb-2 sm:pb-0 pl-2 md:mx-auto md:pl-0 md:pr-0 pr-3 min-w-40"
                 id="submit"
               >
                 <Button
@@ -110,7 +142,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
               </div>
             )}
             <div
-              className="col-span-2 sm:col-span-1 pb-2 sm:pb-0 pl-2 pr-3 min-w-40"
+              className="col-span-2 sm:col-span-1 pb-2 sm:pb-0 pl-2 md:mx-auto md:pl-0 md:pr-0 pr-3 min-w-40"
               id="submit"
             >
               <Button
@@ -120,19 +152,22 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
                 Download model results
               </Button>
             </div>
-            {taskId === 45 && (
-              <div
-                className="col-span-2 sm:col-span-1 pb-2 sm:pb-0 pl-2 pr-3 min-w-40"
-                id="submit"
-              >
-                <Button
-                  className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                  onClick={() => downloadUsersInfo()}
+            {taskId === 45 &&
+              task45.taskId &&
+              task45.buttons.map((btn, index) => (
+                <div
+                  key={index}
+                  className={`col-span-2 sm:col-span-1 pl-2 md:mx-auto pb-2 sm:pb-0 md:pl-0 md:pr-0 pr-3 min-w-40`}
+                  id="submit"
                 >
-                  Download users info
-                </Button>
-              </div>
-            )}
+                  <Button
+                    className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                    onClick={(e) => btn.action(e)}
+                  >
+                    {btn.name}
+                  </Button>
+                </div>
+              ))}
           </div>
         </div>
       ) : (

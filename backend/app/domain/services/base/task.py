@@ -2,6 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import os
 from ast import literal_eval
 
 import yaml
@@ -13,6 +14,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.instance_property imp
 from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import (
     meta_metrics_dict,
 )
+from app.domain.services.utils.secure_copy_protocol import SecureCopyProtocol
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.example import ExampleRepository
 from app.infrastructure.repositories.historical_data import HistoricalDataRepository
@@ -34,6 +36,8 @@ class TaskService:
         self.user_repository = UserRepository()
         self.validation_repository = ValidationRepository()
         self.historical_task_repository = HistoricalDataRepository()
+        self.server_ssh = os.getenv("SERVER_SSH")
+        self.build_eval_server_pem = os.getenv("BUILD_EVAL_SERVER_PEM")
 
     def get_task_code_by_task_id(self, task_id: int):
         return self.task_repository.get_task_code_by_task_id(task_id)
@@ -283,3 +287,13 @@ class TaskService:
             )
         )
         return amount_of_models_uploaded_in_hr_diff < dynalab_threshold
+
+    def download_logs(self, task_id: str, local_dir: str):
+        remote_file = os.getenv(f"REMOTE_FILE_TASK_{task_id}")
+        os.makedirs(local_dir, exist_ok=True)
+        local_file_path = os.path.join(local_dir, os.path.basename(remote_file))
+        with open(local_file_path, "w"):
+            pass
+        protocol = SecureCopyProtocol(self.server_ssh, self.build_eval_server_pem)
+        file_log = protocol.copy_pipeline(remote_file, local_file_path)
+        return file_log

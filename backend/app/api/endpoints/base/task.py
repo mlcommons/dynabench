@@ -1,7 +1,10 @@
 # Copyright (c) MLCommons and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
+import os
+
 from fastapi import APIRouter
+from fastapi.responses import FileResponse
 
 from app.domain.schemas.base.task import (
     CheckSignConsentRequest,
@@ -113,3 +116,13 @@ async def update_config_yaml(model: UpdateYamlConfiguration):
 @router.get("/allow_update_dynalab_submissions/{task_id}/{user_id}", response_model={})
 async def allow_update_dynalab_submissions(task_id: int, user_id: int):
     return TaskService().allow_update_dynalab_submissions(task_id, user_id)
+
+
+@router.get("/download_logs/{task_id}/{local_dir}", response_model={})
+async def download_logs(task_id: int, local_dir: str):
+    log_file = TaskService().download_logs(task_id, local_dir)
+    return FileResponse(
+        log_file,
+        media_type="application/octet-stream",
+        filename=os.path.basename(log_file),
+    )
