@@ -78,8 +78,8 @@ const SubmitInterface = (props) => {
         props.history.push(
           "/login?&src=" +
             encodeURIComponent(
-              `/tasks/${params.taskId}/submit_${state.submission_type}`,
-            ),
+              `/tasks/${params.taskId}/submit_${state.submission_type}`
+            )
         );
       }
 
@@ -146,7 +146,7 @@ const SubmitInterface = (props) => {
 
   const handleSubmit = async (
     values,
-    { setFieldValue, setSubmitting, resetForm, setFieldError },
+    { setFieldValue, setSubmitting, resetForm, setFieldError }
   ) => {
     const files = {};
     for (const dataset of state.datasets) {
@@ -158,7 +158,7 @@ const SubmitInterface = (props) => {
         const result = await context.api.uploadPredictions(
           state.task.id,
           values.modelName,
-          files,
+          files
         );
         values.modelName = "";
         for (const [fname, _] of Object.entries(files)) {
@@ -171,7 +171,7 @@ const SubmitInterface = (props) => {
         console.log(error);
         setFieldError(
           "accept",
-          "Predictions could not be added (" + error.error + ")",
+          "Predictions could not be added (" + error.error + ")"
         );
         setSubmitting(false);
       }
@@ -180,8 +180,8 @@ const SubmitInterface = (props) => {
         props.history.push(
           "/login?&src=" +
             encodeURIComponent(
-              `/tasks/${props.match.params.taskId}/submit_${state.submission_type}`,
-            ),
+              `/tasks/${props.match.params.taskId}/submit_${state.submission_type}`
+            )
         );
       } else {
         context.api.uploadTrainFiles(state.task.id, values.modelName, files);
@@ -193,7 +193,7 @@ const SubmitInterface = (props) => {
         setSubmitting(false);
         setFieldError(
           "accept",
-          "Thank you. You will soon receive an email about the status of your submission.",
+          "Thank you. You will soon receive an email about the status of your submission."
         );
       }
     }
@@ -290,7 +290,7 @@ const SubmitInterface = (props) => {
                                 ...prevState,
                                 showModals: state.showModals.map(
                                   (obj, obj_index) =>
-                                    index === obj_index ? !obj : obj,
+                                    index === obj_index ? !obj : obj
                                 ),
                               }))
                             }
@@ -325,7 +325,7 @@ const SubmitInterface = (props) => {
                                     ...prevState,
                                     showModals: state.showModals.map(
                                       (obj, obj_index) =>
-                                        index === obj_index ? !obj : obj,
+                                        index === obj_index ? !obj : obj
                                     ),
                                   }))
                                 }
