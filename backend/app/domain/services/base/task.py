@@ -3,10 +3,8 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
-import time
 from ast import literal_eval
 
-import boto3
 import yaml
 from fastapi import HTTPException
 
@@ -288,53 +286,8 @@ class TaskService:
         )
         return amount_of_models_uploaded_in_hr_diff < dynalab_threshold
 
-    def download_logs(self, task_id: str, local_dir: str):
-        aws_region = os.environ["AWS_REGION"]
-        aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
-        aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
-        s3_client = boto3.client(
-            "s3",
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            region_name=aws_region,
-        )
-
-        s3_bucket_name = os.getenv("S3_BUCKET_NAME")
-        remote_log_Path = os.getenv(f"REMOTE_LOG_PATH_{task_id}")
-        s3_key = os.getenv(f"S3_KEY_{task_id}")
-        print("s3 setup")
-        if not self.__upload_log_to_s3(
-            remote_log_Path, s3_bucket_name, s3_key, aws_region
-        ):
-            raise HTTPException(
-                status_code=500, detail="Failed to upload log file to S3"
-            )
-
-        try:
-            s3_client.download_file(s3_bucket_name, s3_key, local_dir)
-            if not os.path.exists(local_dir):
-                raise HTTPException(status_code=404, detail="File not found")
-
-            # Return the file as a response
-            return local_dir
-
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-
-    def __upload_log_to_s3(self, remote_log_path, s3_bucket_name, s3_key, aws_region):
-        instance_id = os.getenv("INSTANCE_ID")
-        ssm_client = boto3.client("ssm", region_name=aws_region)
-        command = f"aws s3 cp {remote_log_path} s3://{s3_bucket_name}/{s3_key}"
-        response = ssm_client.send_command(
-            InstanceIds=[instance_id],
-            DocumentName="AWS-RunShellScript",
-            Parameters={"commands": [command]},
-        )
-        command_id = response["Command"]["CommandId"]
-        # Wait for the command for a few second before checking status
-        time.sleep(10)
-        output = ssm_client.get_command_invocation(
-            CommandId=command_id,
-            InstanceId=instance_id,
-        )
-        return output["Status"] == "Success"
+    def download_logs(self, task_id: str):
+        filename = os.getenv(f"REMOTE_LOG_PATH_{task_id}")
+        if not os.path.exists(filename):
+            raise HTTPException(status_code=404, detail="File not found")
+        return filename
