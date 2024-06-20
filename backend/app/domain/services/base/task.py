@@ -3,9 +3,12 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
+import time
 from ast import literal_eval
 
+import boto3
 import yaml
+from fastapi import HTTPException
 
 from app.domain.services.base.score import ScoreService
 from app.domain.services.builder_and_evaluation.eval_utils.instance_property import (
@@ -14,7 +17,6 @@ from app.domain.services.builder_and_evaluation.eval_utils.instance_property imp
 from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import (
     meta_metrics_dict,
 )
-from app.domain.services.utils.secure_copy_protocol import SecureCopyProtocol
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.example import ExampleRepository
 from app.infrastructure.repositories.historical_data import HistoricalDataRepository
@@ -36,8 +38,6 @@ class TaskService:
         self.user_repository = UserRepository()
         self.validation_repository = ValidationRepository()
         self.historical_task_repository = HistoricalDataRepository()
-        self.server_ssh = os.getenv("SERVER_SSH")
-        self.build_eval_server_pem = os.getenv("BUILD_EVAL_SERVER_PEM")
 
     def get_task_code_by_task_id(self, task_id: int):
         return self.task_repository.get_task_code_by_task_id(task_id)
@@ -289,11 +289,52 @@ class TaskService:
         return amount_of_models_uploaded_in_hr_diff < dynalab_threshold
 
     def download_logs(self, task_id: str, local_dir: str):
-        remote_file = os.getenv(f"REMOTE_FILE_TASK_{task_id}")
-        os.makedirs(local_dir, exist_ok=True)
-        local_file_path = os.path.join(local_dir, os.path.basename(remote_file))
-        with open(local_file_path, "w"):
-            pass
-        protocol = SecureCopyProtocol(self.server_ssh, self.build_eval_server_pem)
-        file_log = protocol.copy_pipeline(remote_file, local_file_path)
-        return file_log
+        aws_region = os.environ["AWS_REGION"]
+        aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
+        aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=aws_region,
+        )
+
+        s3_bucket_name = os.getenv("S3_BUCKET_NAME")
+        remote_log_Path = os.getenv(f"REMOTE_LOG_PATH_{task_id}")
+        s3_key = os.getenv(f"S3_KEY_{task_id}")
+        print("s3 setup")
+        if not self.__upload_log_to_s3(
+            remote_log_Path, s3_bucket_name, s3_key, aws_region
+        ):
+            raise HTTPException(
+                status_code=500, detail="Failed to upload log file to S3"
+            )
+
+        try:
+            s3_client.download_file(s3_bucket_name, s3_key, local_dir)
+            if not os.path.exists(local_dir):
+                raise HTTPException(status_code=404, detail="File not found")
+
+            # Return the file as a response
+            return local_dir
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    def __upload_log_to_s3(self, remote_log_path, s3_bucket_name, s3_key, aws_region):
+        instance_id = os.getenv("INSTANCE_ID")
+        ssm_client = boto3.client("ssm", region_name=aws_region)
+        command = f"aws s3 cp {remote_log_path} s3://{s3_bucket_name}/{s3_key}"
+        response = ssm_client.send_command(
+            InstanceIds=[instance_id],
+            DocumentName="AWS-RunShellScript",
+            Parameters={"commands": [command]},
+        )
+        command_id = response["Command"]["CommandId"]
+        # Wait for the command for a few second before checking status
+        time.sleep(10)
+        output = ssm_client.get_command_invocation(
+            CommandId=command_id,
+            InstanceId=instance_id,
+        )
+        return output["Status"] == "Success"
