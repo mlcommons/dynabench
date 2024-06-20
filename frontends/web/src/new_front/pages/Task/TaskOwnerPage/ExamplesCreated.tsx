@@ -83,7 +83,7 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
 
   const downloadLogs = async (e: any) => {
     e.preventDefault();
-    await get(`/task/download_logs/${task45.taskId}/${task45.localDir}`);
+    await get(`/task/download_logs/${task45.taskId}`);
     if (response.ok) {
       response.blob().then((blob) => {
         const url = window.URL.createObjectURL(new Blob([blob]));
@@ -109,7 +109,6 @@ const ExamplesCreated: FC<ExamplesCreatedProps> = ({ taskId, s3Bucket }) => {
         action: downloadLogs,
       },
     ],
-    localDir: "nibbler",
   };
 
   return (
