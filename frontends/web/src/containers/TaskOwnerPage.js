@@ -530,7 +530,7 @@ class TaskOwnerPage extends React.Component {
     return (
       <Container fluid>
         <Row>
-          <Col lg={2} className="p-0 border">
+          <Col lg={2} className="p-0 border col-span-2 min-h-screen">
             <Nav className="flex-lg-column sidebar-wrapper sticky-top">
               {navOptions.map((navOption) => (
                 <Nav.Item key={navOption.href}>
@@ -548,7 +548,7 @@ class TaskOwnerPage extends React.Component {
               ))}
             </Nav>
           </Col>
-          <Col>
+          <Col className="md:col-span-10">
             {this.props.location.hash === "#settings" && this.state.task ? (
               <Settings
                 task={this.state.task}

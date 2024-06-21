@@ -54,7 +54,9 @@ const ChatWithInstructions: FC<
   const location = useLocation();
   const queryParams = queryString.parse(location.search);
   let treatmentId = queryParams.treatmentId ? queryParams.treatmentId : "2";
-  let prolificId = queryParams.assignmentId ? queryParams.assignmentId : Math.floor(100000 + Math.random() * 900000).toString();
+  let prolificId = queryParams.assignmentId
+    ? queryParams.assignmentId
+    : Math.floor(100000 + Math.random() * 900000).toString();
 
   function getTreatmentValue(treatmentId: TreatmentId): string {
     switch (treatmentId) {
@@ -256,25 +258,27 @@ const ChatWithInstructions: FC<
                       language model provided and how well it works for you.
                       Therefore, it is essential that you{" "}
                       <strong>only use your own words,</strong> and do not copy
-                      and paste from the scenario text, or from any other source.
-                    </>
+                      and paste from the scenario text, or from any other
+                      source.
+                    </p>
                   ) : (
                     <>
                       <p className="">
-                      To assist in completing the scenarios,
-                      please use a search engine or any other methods you
-                      might ordinarily use at home. We are interested in
-                      understanding what tools you use and how well they work
-                      for you. This may be an online resource, a book, or
-                      anything else. It is essential that you{" "}
-                      <strong>only use your own words,</strong> and do not copy
-                      and paste from the scenario text, or from any other source.
+                        To assist in completing the scenarios, please use a
+                        search engine or any other methods you might ordinarily
+                        use at home. We are interested in understanding what
+                        tools you use and how well they work for you. This may
+                        be an online resource, a book, or anything else. It is
+                        essential that you{" "}
+                        <strong>only use your own words,</strong> and do not
+                        copy and paste from the scenario text, or from any other
+                        source.
                       </p>
                     </>
                   )}
                   <p className="mb-3">
                     <br />
-                  After completing the first scenario, you will return to this
+                    After completing the first scenario, you will return to this
                     page for a different second scenario.
                     <br />
                     <br />
@@ -307,7 +311,7 @@ const ChatWithInstructions: FC<
                 </div>
               )}
               <div className="px-4 py-2 border border-gray-200 ">
-                <h3 className="text-2xl font-bold">Scenario</h3>  
+                <h3 className="text-2xl font-bold">Scenario</h3>
                 <BasicInstructions instructions={context} />
               </div>
               <div className="flex items-end justify-end gap-4">

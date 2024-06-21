@@ -1,12 +1,23 @@
 import React, { createContext, useState, FC } from "react";
+import { set } from "react-ga";
 import useFetch from "use-http";
 
-export const CreateInterfaceContext = createContext({
+interface CreateInterfaceContextType {
+  modelInputs: Record<string, any>;
+  metadataExample: Record<string, any>;
+  updateModelInputs: (input: object, metadata?: boolean) => void;
+  amountExamplesCreatedToday: number;
+  updateAmountExamplesCreatedToday: (realRoundId: number, userId: number) => void;
+  removeItem: (key: string) => void;
+}
+
+export const CreateInterfaceContext = createContext<CreateInterfaceContextType>({
   modelInputs: {},
   metadataExample: {},
-  updateModelInputs: (input: object, metadata?: boolean) => {},
+  updateModelInputs: () => {},
   amountExamplesCreatedToday: 0,
-  updateAmountExamplesCreatedToday: (realRoundId: number, userId: number) => {},
+  updateAmountExamplesCreatedToday: () => {},
+  removeItem: () => {},
 });
 
 type CreateInterfaceProviderProps = {
@@ -16,7 +27,7 @@ type CreateInterfaceProviderProps = {
 export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
   children,
 }) => {
-  const [modelInputs, setModelInputs] = useState({});
+  const [modelInputs, setModelInputs] = useState<Record<string, any>>({});
   const [metadataExample, setMetadataExample] = useState({});
   const [amountExamplesCreatedToday, setAmountExamplesCreatedToday] =
     useState(0);
@@ -50,6 +61,13 @@ export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
     }
   };
 
+  const removeItem = (key: string) => {
+    setModelInputs((prevModelInputs) => {
+      const {[key]: _, ...newObject} = prevModelInputs
+      return newObject;
+    });
+  }
+
   return (
     <CreateInterfaceContext.Provider
       value={{
@@ -58,6 +76,7 @@ export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
         updateModelInputs,
         amountExamplesCreatedToday,
         updateAmountExamplesCreatedToday,
+        removeItem,
       }}
     >
       {children}
