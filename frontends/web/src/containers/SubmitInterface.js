@@ -86,7 +86,7 @@ const SubmitInterface = (props) => {
       }
 
       setState((prevState) => ({ ...prevState, taskId: params.taskId }));
-      !sendCallDataSets && params.taskId && handleGetTask(params.taskId);
+      !setSendCallDatasets && params.taskId && handleGetTask(params.taskId);
     };
 
     fetchData();
@@ -99,7 +99,7 @@ const SubmitInterface = (props) => {
   ]);
 
   const handleGetTask = async (taskId) => {
-    setSendCallDataSets(true);
+    setSendCallDatasets(true);
     try {
       const taskResult = await context.api.getTask(taskId);
       setState((prevState) => ({ ...prevState, task: taskResult }));
@@ -110,7 +110,7 @@ const SubmitInterface = (props) => {
         showModals: datasets.map(() => false),
       }));
     } catch (error) {
-      setSendCallDataSets(false);
+      setSendCallDatasets(false);
       console.warn(error);
     }
   };
