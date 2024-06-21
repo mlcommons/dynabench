@@ -64,7 +64,7 @@ const SubmitInterface = (props) => {
   const { get, response } = useFetch();
   const context = useContext(UserContext);
   const [sendCallSubmited, setSendCallSubmited] = useState(false);
-  const [sendCallDataSets, setSendCallDataSets] = useState(false);
+  const [sendCallDatasets, setSendCallDatasets] = useState(false);
   const [state, setState] = useState({
     submission_type: props.submission_type,
     taskId: null,
