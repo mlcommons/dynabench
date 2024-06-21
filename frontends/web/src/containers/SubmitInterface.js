@@ -112,6 +112,7 @@ const SubmitInterface = (props) => {
   };
 
   const allowSubmitDynalab = async (task_id, user_id) => {
+    console.log("task_id", task_id);
     if (!task_id) {
       return false;
     }
