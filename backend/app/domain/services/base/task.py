@@ -2,9 +2,11 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import os
 from ast import literal_eval
 
 import yaml
+from fastapi import HTTPException
 
 from app.domain.services.base.score import ScoreService
 from app.domain.services.builder_and_evaluation.eval_utils.instance_property import (
@@ -283,3 +285,9 @@ class TaskService:
             )
         )
         return amount_of_models_uploaded_in_hr_diff < dynalab_threshold
+
+    def download_logs(self, task_id: str):
+        filename = os.getenv(f"REMOTE_LOG_PATH_{task_id}")
+        if not os.path.exists(filename):
+            raise HTTPException(status_code=404, detail="File not found")
+        return filename
