@@ -108,7 +108,7 @@ const SubmitInterface = (props) => {
         ...prevState,
         datasets: datasets,
         showModals: datasets.map(() => false),
-        }));
+      }));
     } catch (error) {
       setSendCallDataSets(false);
       console.warn(error);
@@ -120,7 +120,9 @@ const SubmitInterface = (props) => {
     if (!task_id) {
       return false;
     }
-    const answer = await get(`/task/allow_update_dynalab_submissions/${task_id}/${user_id}`);
+    const answer = await get(
+      `/task/allow_update_dynalab_submissions/${task_id}/${user_id}`
+    );
     if (answer) {
       return true;
     }
