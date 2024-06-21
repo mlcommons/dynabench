@@ -37,7 +37,7 @@ const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
         {multiplyResultsByHundred ? (
           <>
             {data.averaged_scores.map((score: any, index: number) => (
-              <td className="text-right " key={index}>
+              <td className="text-right" key={index}>
                 {(parseFloat(score) * 100).toFixed(2)}
               </td>
             ))}
