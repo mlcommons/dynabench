@@ -84,18 +84,7 @@ const SubmitInterface = (props) => {
       }
 
       setState((prevState) => ({ ...prevState, taskId: params.taskId }));
-      try {
-        const taskResult = await context.api.getTask(state.taskId);
-        setState((prevState) => ({ ...prevState, task: taskResult }));
-        const datasets = await context.api.getDatasets(taskResult.id);
-        setState((prevState) => ({
-          ...prevState,
-          datasets: datasets,
-          showModals: datasets.map(() => false),
-        }));
-      } catch (error) {
-        console.log(error);
-      }
+      params.taskId && handleGetTask(params.taskId);
     };
 
     fetchData();
@@ -106,6 +95,21 @@ const SubmitInterface = (props) => {
     state.submission_type,
     state.taskId,
   ]);
+
+  const handleGetTask = async (taskId) => {
+    try {
+      const taskResult = await context.api.getTask(taskId);
+      setState((prevState) => ({ ...prevState, task: taskResult }));
+      const datasets = await context.api.getDatasets(taskResult.id);
+      setState((prevState) => ({
+        ...prevState,
+        datasets: datasets,
+        showModals: datasets.map(() => false),
+      }));
+    } catch (error) {
+      console.warn(error);
+    }
+  };
 
   const allowSubmitDynalab = async (task_id, user_id) => {
     console.log("task_id", task_id);
@@ -119,11 +123,11 @@ const SubmitInterface = (props) => {
     return false;
   };
 
-  const handleIsAllowedToSubmit = () => {
+  const handleIsAllowedToSubmit = async () => {
     const user = context.api.getCredentials();
 
-    const allowUpload = allowSubmitDynalab(state.task.id, user.id);
-    if (allowUpload) {
+    const allowUpload = await allowSubmitDynalab(state.task.id, user.id);
+    if (!allowUpload) {
       Swal.fire({
         title: "Error!",
         text: "You have reached the maximum number of submissions for this task.",
@@ -138,7 +142,7 @@ const SubmitInterface = (props) => {
   };
 
   useEffect(() => {
-    handleIsAllowedToSubmit(state.task);
+    state?.task?.id && handleIsAllowedToSubmit();
   }, [state.task]);
 
   const handleSubmit = async (
