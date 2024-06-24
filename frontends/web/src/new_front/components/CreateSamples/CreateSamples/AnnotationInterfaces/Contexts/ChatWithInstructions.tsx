@@ -1,19 +1,21 @@
 import React, { FC, useContext, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import MDEditor from "@uiw/react-md-editor";
+import Modal from "react-bootstrap/Modal";
+import queryString from "query-string";
+import useFetch from "use-http";
+import Swal from "sweetalert2";
+
+import UserContext from "containers/UserContext";
+
 import SignContractHelpMe from "new_front/components/Modals/SignContractHelpMe";
 import Chatbot from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/Chatbot";
-import useFetch from "use-http";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
-import UserContext from "containers/UserContext";
-import Modal from "react-bootstrap/Modal";
 import { ChatHistoryType } from "new_front/types/createSamples/createSamples/utils";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import BasicInstructions from "new_front/components/Inputs/BasicInstructions";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
-import { useLocation } from "react-router-dom";
-import queryString from "query-string";
-import Swal from "sweetalert2";
-import MDEditor from "@uiw/react-md-editor";
 
 enum TreatmentId {
   Llama = "1",
@@ -31,7 +33,8 @@ const ChatWithInstructions: FC<
   context,
   realRoundId,
 }) => {
-  const [signInConsent, setSignInConsent] = useState(false);
+  const [signInConsent, setSignInConsent] = useState(true);
+  const [callLoading, setCallLoading] = useState(true);
   const [showExample, setShowExample] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
@@ -83,6 +86,7 @@ const ChatWithInstructions: FC<
       task_id: taskId,
     });
     if (response.ok) {
+      setCallLoading(false);
       setSignInConsent(signConsent);
     }
   };
@@ -155,242 +159,258 @@ const ChatWithInstructions: FC<
 
   return (
     <>
-      {signInConsent ? (
+      {callLoading ? (
+        <>Loading...</>
+      ) : (
         <>
-          <div className="flex items-end justify-between align-end">
-            <button
-              type="button"
-              className="my-2 btn btn-outline-primary btn-sm btn-help-info"
-              onClick={() => {
-                setShowInstructions(!showInstructions);
-              }}
-            >
-              <span className="text-base font-normal text-letter-color">
-                Instructions
-              </span>
-            </button>
-            {showInstructions && (
-              <Modal
-                show={showInstructions}
-                onHide={() => {
-                  setShowInstructions(false);
-                }}
-                size="lg"
-              >
-                <Modal.Header closeButton>
-                  <Modal.Title>Instructions</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  <MDEditor.Markdown source={context.instructions} />
-                </Modal.Body>
-              </Modal>
-            )}
-            <button
-              type="button"
-              className="my-2 btn btn-outline-primary btn-sm btn-help-info"
-              onClick={() => {
-                setShowExample(!showExample);
-              }}
-            >
-              <span className="text-base font-normal text-letter-color">
-                Example
-              </span>
-            </button>
-            {showExample && (
-              <>
-                <Modal
-                  show={showExample}
-                  onHide={() => {
-                    setShowExample(false);
+          {signInConsent ? (
+            <>
+              <div className="flex items-end justify-between align-end">
+                <button
+                  type="button"
+                  className="my-2 btn btn-outline-primary btn-sm btn-help-info"
+                  onClick={() => {
+                    setShowInstructions(!showInstructions);
                   }}
-                  size="lg"
                 >
-                  <Modal.Header closeButton>
-                    <Modal.Title>Example</Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    <MDEditor.Markdown source={example} />
-                  </Modal.Body>
-                </Modal>
-              </>
-            )}
-          </div>
-          {!readInstructions ? (
-            <div className="flex flex-col justify-center gap-8">
-              <div
-                id="general-instructions"
-                className="p-4 bg-white border border-gray-200"
-              >
-                <div className="">
-                  <h3 className="text-2xl font-bold">What do I need to do?</h3>
-                  <p className="mb-3">
-                    In this study, you will be asked to complete{" "}
-                    <strong>two scenarios</strong> which simulate healthcare
-                    decisions that a person might encounter in everyday life.{" "}
-                    <strong>
-                      In each scenario, you will be asked to make two decisions
-                    </strong>{" "}
-                    about how best to respond:
-                    <br />
-                    <br />
-                    1) What should you do next? (e.g. call 111 or 999)
-                    <br />
-                    <br />
-                    2) What is the most likely cause of the symptoms being
-                    reported?
-                    <br />
-                    <br />
-                    The scenario (available below and on the next page)
-                    describes the specific details of the case, followed by
-                    general life details and an abbreviated medical history. The
-                    information provided gives a complete picture of the
-                    relevant health details, but also includes additional
-                    information which may not be relevant. As with a real health
-                    decision, you will need to decide what information is most
-                    important.
-                    <br />
-                    <br />
-                  </p>
-                  {treatmentValue !== "control" ? (
-                    <p className="mb-2">
-                      We are interested in understanding how you use the
-                      language model provided and how well it works for you.
-                      Therefore, it is essential that you{" "}
-                      <strong>only use your own words,</strong> and do not copy
-                      and paste from the scenario text, or from any other
-                      source.
-                    </p>
-                  ) : (
-                    <>
-                      <p className="">
-                        To assist in completing the scenarios, please use a
-                        search engine or any other methods you might ordinarily
-                        use at home. We are interested in understanding what
-                        tools you use and how well they work for you. This may
-                        be an online resource, a book, or anything else. It is
-                        essential that you{" "}
-                        <strong>only use your own words,</strong> and do not
-                        copy and paste from the scenario text, or from any other
-                        source.
-                      </p>
-                    </>
-                  )}
-                  <p className="mb-3">
-                    After completing the first scenario, you will return to this
-                    page for a different second scenario.
-                    <br />
-                    <br />
-                    Once you have finished reading the instructions, click “I
-                    understand” to begin the experiment.
-                  </p>
-                </div>
-              </div>
-              {treatmentValue !== "control" && (
-                <div
-                  id="brief-instructions"
-                  className="p-4 bg-white border border-gray-200"
+                  <span className="text-base font-normal text-letter-color">
+                    Instructions
+                  </span>
+                </button>
+                {showInstructions && (
+                  <Modal
+                    show={showInstructions}
+                    onHide={() => {
+                      setShowInstructions(false);
+                    }}
+                    size="lg"
+                  >
+                    <Modal.Header closeButton>
+                      <Modal.Title>Instructions</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      <MDEditor.Markdown source={context.instructions} />
+                    </Modal.Body>
+                  </Modal>
+                )}
+                <button
+                  type="button"
+                  className="my-2 btn btn-outline-primary btn-sm btn-help-info"
+                  onClick={() => {
+                    setShowExample(!showExample);
+                  }}
                 >
-                  <h1 className="mb-4 text-2xl font-bold">
-                    How does the interface work?
-                  </h1>
-                  <p className="mb-4">
-                    On the next page, we want you to interact with a large
-                    language model to help you make a medical decision. The LLM
-                    used in this experiment uses a chat interface. You can type
-                    in sentences, such as questions about the scenario, and the
-                    LLM will generate new text in response. After you have read
-                    the response, click “Save” and then you will be able to ask
-                    another question. You may interact with the model up to 10
-                    times, and must interact at least once. When you are
-                    finished using the language model, press the “Finish” button
-                    to save the whole conversation and move on to the scenario
-                    questions.
-                  </p>
-                </div>
-              )}
-              <div className="px-4 py-2 border border-gray-200 ">
-                <h3 className="text-2xl font-bold">Scenario</h3>
-                <BasicInstructions instructions={context} />
-              </div>
-              <div className="flex items-end justify-end gap-4">
-                <GeneralButton
-                  text="I understand"
-                  onClick={() => setReadInstructions(true)}
-                  className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-3 divide-x-2">
-              <div className="col-span-2">
-                {treatmentValue !== "control" ? (
-                  <Chatbot
-                    instructions={artifactsInput.general_instruction_chatbot}
-                    chatHistory={chatHistory}
-                    username={user.username}
-                    modelName={modelName}
-                    provider={provider}
-                    numOfSamplesChatbot={artifactsInput.num_of_samples_chatbot}
-                    numInteractionsChatbot={
-                      artifactsInput.num_interactions_chatbot
-                    }
-                    finishConversation={finishConversation}
-                    setChatHistory={setChatHistory}
-                    showOriginalInteractions={() => {}}
-                    setFinishConversation={setFinishConversation}
-                    updateModelInputs={updateModelInputs}
-                    setIsGenerativeContext={setIsGenerativeContext}
-                  />
-                ) : (
+                  <span className="text-base font-normal text-letter-color">
+                    Example
+                  </span>
+                </button>
+                {showExample && (
                   <>
-                    <p className="text-lg font-bold">
-                      Now use the any methods you would ordinarily use at home
-                      to determine the best response to the scenario. The
-                      scenario details are available for reference on the right.
-                      Please describe the methods you use in the textbox below:
-                    </p>
-                    <textarea
-                      className="w-full p-4 mt-4 border border-gray-200 h-96"
-                      placeholder="Type your response here..."
-                      onPaste={(e: any) => {
-                        e.preventDefault();
-                        return false;
+                    <Modal
+                      show={showExample}
+                      onHide={() => {
+                        setShowExample(false);
                       }}
-                      onCopy={(e: any) => {
-                        e.preventDefault();
-                        return false;
-                      }}
-                      onChange={(e) => setControlText(e.target.value)}
-                    />
-                    {controlText.length > 0 && (
-                      <div className="flex justify-end">
-                        <GeneralButton
-                          className="px-4 mt-4 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn"
-                          text="Submit"
-                          onClick={() => {
-                            updateModelInputs({
-                              controlText: controlText,
-                            });
-                            setIsGenerativeContext(false);
-                          }}
-                        />
-                      </div>
-                    )}
+                      size="lg"
+                    >
+                      <Modal.Header closeButton>
+                        <Modal.Title>Example</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        <MDEditor.Markdown source={example} />
+                      </Modal.Body>
+                    </Modal>
                   </>
                 )}
               </div>
-              <div className="col-span-1">
-                <div className="px-4 overflow-y-auto max-h-96">
-                  <BasicInstructions instructions={context} />
+              {!readInstructions ? (
+                <div className="flex flex-col justify-center gap-8">
+                  <div
+                    id="general-instructions"
+                    className="p-4 bg-white border border-gray-200"
+                  >
+                    <div className="">
+                      <h3 className="text-2xl font-bold">
+                        What do I need to do?
+                      </h3>
+                      <p className="mb-3">
+                        In this study, you will be asked to complete{" "}
+                        <strong>two scenarios</strong> which simulate healthcare
+                        decisions that a person might encounter in everyday
+                        life.{" "}
+                        <strong>
+                          In each scenario, you will be asked to make two
+                          decisions
+                        </strong>{" "}
+                        about how best to respond:
+                        <br />
+                        <br />
+                        1) What should you do next? (e.g. call 111 or 999)
+                        <br />
+                        <br />
+                        2) What is the most likely cause of the symptoms being
+                        reported?
+                        <br />
+                        <br />
+                        The scenario (available below and on the next page)
+                        describes the specific details of the case, followed by
+                        general life details and an abbreviated medical history.
+                        The information provided gives a complete picture of the
+                        relevant health details, but also includes additional
+                        information which may not be relevant. As with a real
+                        health decision, you will need to decide what
+                        information is most important.
+                        <br />
+                        <br />
+                      </p>
+                      {treatmentValue !== "control" ? (
+                        <p className="mb-2">
+                          We are interested in understanding how you use the
+                          language model provided and how well it works for you.
+                          Therefore, it is essential that you{" "}
+                          <strong>only use your own words,</strong> and do not
+                          copy and paste from the scenario text, or from any
+                          other source.
+                        </p>
+                      ) : (
+                        <>
+                          <p className="">
+                            To assist in completing the scenarios, please use a
+                            search engine or any other methods you might
+                            ordinarily use at home. We are interested in
+                            understanding what tools you use and how well they
+                            work for you. This may be an online resource, a
+                            book, or anything else. It is essential that you{" "}
+                            <strong>only use your own words,</strong> and do not
+                            copy and paste from the scenario text, or from any
+                            other source.
+                          </p>
+                        </>
+                      )}
+                      <p className="mb-3">
+                        After completing the first scenario, you will return to
+                        this page for a different second scenario.
+                        <br />
+                        <br />
+                        Once you have finished reading the instructions, click
+                        “I understand” to begin the experiment.
+                      </p>
+                    </div>
+                  </div>
+                  {treatmentValue !== "control" && (
+                    <div
+                      id="brief-instructions"
+                      className="p-4 bg-white border border-gray-200"
+                    >
+                      <h1 className="mb-4 text-2xl font-bold">
+                        How does the interface work?
+                      </h1>
+                      <p className="mb-4">
+                        On the next page, we want you to interact with a large
+                        language model to help you make a medical decision. The
+                        LLM used in this experiment uses a chat interface. You
+                        can type in sentences, such as questions about the
+                        scenario, and the LLM will generate new text in
+                        response. After you have read the response, click “Save”
+                        and then you will be able to ask another question. You
+                        may interact with the model up to 10 times, and must
+                        interact at least once. When you are finished using the
+                        language model, press the “Finish” button to save the
+                        whole conversation and move on to the scenario
+                        questions.
+                      </p>
+                    </div>
+                  )}
+                  <div className="px-4 py-2 border border-gray-200 ">
+                    <h3 className="text-2xl font-bold">Scenario</h3>
+                    <BasicInstructions instructions={context} />
+                  </div>
+                  <div className="flex items-end justify-end gap-4">
+                    <GeneralButton
+                      text="I understand"
+                      onClick={() => setReadInstructions(true)}
+                      className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                    />
+                  </div>
                 </div>
-              </div>
-            </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3 divide-x-2">
+                  <div className="col-span-2">
+                    {treatmentValue !== "control" ? (
+                      <Chatbot
+                        instructions={
+                          artifactsInput.general_instruction_chatbot
+                        }
+                        chatHistory={chatHistory}
+                        username={user.username}
+                        modelName={modelName}
+                        provider={provider}
+                        numOfSamplesChatbot={
+                          artifactsInput.num_of_samples_chatbot
+                        }
+                        numInteractionsChatbot={
+                          artifactsInput.num_interactions_chatbot
+                        }
+                        finishConversation={finishConversation}
+                        setChatHistory={setChatHistory}
+                        showOriginalInteractions={() => {}}
+                        setFinishConversation={setFinishConversation}
+                        updateModelInputs={updateModelInputs}
+                        setIsGenerativeContext={setIsGenerativeContext}
+                      />
+                    ) : (
+                      <>
+                        <p className="text-lg font-bold">
+                          Now use the any methods you would ordinarily use at
+                          home to determine the best response to the scenario.
+                          The scenario details are available for reference on
+                          the right. Please describe the methods you use in the
+                          textbox below:
+                        </p>
+                        <textarea
+                          className="w-full p-4 mt-4 border border-gray-200 h-96"
+                          placeholder="Type your response here..."
+                          onPaste={(e: any) => {
+                            e.preventDefault();
+                            return false;
+                          }}
+                          onCopy={(e: any) => {
+                            e.preventDefault();
+                            return false;
+                          }}
+                          onChange={(e) => setControlText(e.target.value)}
+                        />
+                        {controlText.length > 0 && (
+                          <div className="flex justify-end">
+                            <GeneralButton
+                              className="px-4 mt-4 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn"
+                              text="Submit"
+                              onClick={() => {
+                                updateModelInputs({
+                                  controlText: controlText,
+                                });
+                                setIsGenerativeContext(false);
+                              }}
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <div className="col-span-1">
+                    <div className="px-4 overflow-y-auto max-h-96">
+                      <BasicInstructions instructions={context} />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <Modal show={true} onHide={() => setSignInConsent} size="lg">
+              <SignContractHelpMe handleClose={handleSignInConsent} />
+            </Modal>
           )}
         </>
-      ) : (
-        <Modal show={true} onHide={() => setSignInConsent} size="lg">
-          <SignContractHelpMe handleClose={handleSignInConsent} />
-        </Modal>
       )}
     </>
   );
