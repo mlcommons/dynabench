@@ -121,7 +121,7 @@ const SubmitInterface = (props) => {
       return false;
     }
     const answer = await get(
-      `/task/allow_update_dynalab_submissions/${task_id}/${user_id}`
+      `/task/allow_update_dynalab_submissions/${task_id}/${user_id}`,
     );
     if (answer) {
       return true;
