@@ -44,7 +44,7 @@ const ChatWithInstructions: FC<
   const [modelName, setModelName] = useState({});
   const [provider, setProvider] = useState("");
   const [artifactsInput, setArtifactsInput] = useState<any>(
-    generative_context.artifacts,
+    generative_context.artifacts
   );
   const [controlText, setControlText] = useState("");
   const [finishConversation, setFinishConversation] = useState(false);
@@ -108,7 +108,7 @@ const ChatWithInstructions: FC<
         user_id: user.id,
         round_id: realRoundId,
         url: `https://oii.qualtrics.com/jfe/form/SV_3rt2Z0hbvyocuMu?prolific_id=${prolificId}`,
-      },
+      }
     );
     if (response.ok) {
       if (redirectUrl) {

@@ -56,6 +56,7 @@ class LLMProvider(ABC):
 
 class OpenAIProvider(LLMProvider):
     def __init__(self, task_id: int = -1):
+        self.task_id = task_id
         if task_id == 56:
             self.api_key = os.getenv("OPENAI_HELPME")
         else:
@@ -140,7 +141,7 @@ class OpenAIProvider(LLMProvider):
             return "None"
 
     def provider_name(self):
-        return "openai"
+        return "openaihm" if self.task_id == 56 else "openai"
 
 
 class HuggingFaceProvider(LLMProvider):
@@ -243,6 +244,7 @@ class AnthropicProvider(LLMProvider):
 
 class CohereProvider(LLMProvider):
     def __init__(self, task_id: int = -1):
+        self.task_id = task_id
         if task_id == 56:
             self.api_key = os.getenv("COHERE_HELPME")
         else:
@@ -332,7 +334,7 @@ class CohereProvider(LLMProvider):
             return "None"
 
     def provider_name(self):
-        return "cohere"
+        return "coherehm" if self.task_id == 56 else "cohere"
 
 
 class AlephAlphaProvider(LLMProvider):

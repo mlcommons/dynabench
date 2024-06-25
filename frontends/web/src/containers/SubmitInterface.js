@@ -63,6 +63,8 @@ const FileUpload = ({ values, filename, setFieldValue, disabled }) => {
 const SubmitInterface = (props) => {
   const { get, response } = useFetch();
   const context = useContext(UserContext);
+  const [sendCallSubmited, setSendCallSubmited] = useState(false);
+  const [sendCallDatasets, setSendCallDatasets] = useState(false);
   const [state, setState] = useState({
     submission_type: props.submission_type,
     taskId: null,
@@ -84,7 +86,7 @@ const SubmitInterface = (props) => {
       }
 
       setState((prevState) => ({ ...prevState, taskId: params.taskId }));
-      params.taskId && handleGetTask(params.taskId);
+      !setSendCallDatasets && params.taskId && handleGetTask(params.taskId);
     };
 
     fetchData();
@@ -97,6 +99,7 @@ const SubmitInterface = (props) => {
   ]);
 
   const handleGetTask = async (taskId) => {
+    setSendCallDatasets(true);
     try {
       const taskResult = await context.api.getTask(taskId);
       setState((prevState) => ({ ...prevState, task: taskResult }));
@@ -107,6 +110,7 @@ const SubmitInterface = (props) => {
         showModals: datasets.map(() => false),
       }));
     } catch (error) {
+      setSendCallDatasets(false);
       console.warn(error);
     }
   };
@@ -116,14 +120,17 @@ const SubmitInterface = (props) => {
     if (!task_id) {
       return false;
     }
-    await get(`/task/allow_update_dynalab_submissions/${task_id}/${user_id}`);
-    if (response.ok) {
+    const answer = await get(
+      `/task/allow_update_dynalab_submissions/${task_id}/${user_id}`
+    );
+    if (answer) {
       return true;
     }
     return false;
   };
 
   const handleIsAllowedToSubmit = async () => {
+    setSendCallSubmited(true);
     const user = context.api.getCredentials();
 
     const allowUpload = await allowSubmitDynalab(state.task.id, user.id);
@@ -142,7 +149,7 @@ const SubmitInterface = (props) => {
   };
 
   useEffect(() => {
-    state?.task?.id && handleIsAllowedToSubmit();
+    !sendCallSubmited && state?.task?.id && handleIsAllowedToSubmit();
   }, [state.task]);
 
   const handleSubmit = async (
