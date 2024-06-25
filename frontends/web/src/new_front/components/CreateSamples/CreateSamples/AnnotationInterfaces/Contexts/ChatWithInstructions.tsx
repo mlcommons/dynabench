@@ -228,16 +228,16 @@ const ChatWithInstructions: FC<
                     <strong>two scenarios</strong> which simulate healthcare
                     decisions that a person might encounter in everyday life.{" "}
                     <strong>
-                      In each scenario, you will be asked to make two decisions
+                      In each scenario, you will be asked two questions
                     </strong>{" "}
                     about how best to respond:
                     <br />
                     <br />
-                    1) What should you do next? (e.g. call 111 or 999)
+                    1) What should you do next? (e.g. stay home or call 999)
                     <br />
                     <br />
-                    2) What is the most likely cause of the symptoms being
-                    reported?
+                    2) Why did you make the choice you did? Please name any specific 
+                    medical conditions relevant to your decision.
                     <br />
                     <br />
                     The scenario (available below and on the next page)
@@ -261,6 +261,7 @@ const ChatWithInstructions: FC<
                       and paste from the scenario text, or from any other
                       source.
                     </p>
+                    </>
                   ) : (
                     <>
                       <p className="">
@@ -346,19 +347,18 @@ const ChatWithInstructions: FC<
                 ) : (
                   <>
                     <div>
-                    <p className="text-lg font-bold">The scenario details are available on the right. You need
-                       to find answers to two questions:</p>
+                    <p className="text-lg font-bold">The scenario details are available on the right. You
+                    will need to answer two questions:</p>
                     <ol>
                     <li>     1) What should you do next?</li>
-                    <li>     2) What is the most likely cause of the problems being reported?</li>
+                    <li>     2) Why did you make the choice you did? </li>
                     </ol>
                     Use the any methods you ordinarily use at home (e.g. online search, reference book)
                       to determine the best response to the scenario. 
                     <br />
-                    <p style="color:MediumSeaGreen;">
+                    <p style={{color:"MediumSeaGreen"}}>
                       Keep track of the methods you are using in the textbox below. 
                       Once you click “Submit” the scenario questions will appear.
-                    </span>
                     </p></div>
                     <textarea
                       className="w-full p-4 mt-4 border border-gray-200 h-96"
