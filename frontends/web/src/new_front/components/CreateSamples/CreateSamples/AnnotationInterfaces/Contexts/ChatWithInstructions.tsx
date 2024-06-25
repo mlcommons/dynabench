@@ -228,16 +228,16 @@ const ChatWithInstructions: FC<
                     <strong>two scenarios</strong> which simulate healthcare
                     decisions that a person might encounter in everyday life.{" "}
                     <strong>
-                      In each scenario, you will be asked to make two decisions
+                      In each scenario, you will be asked two questions
                     </strong>{" "}
                     about how best to respond:
                     <br />
                     <br />
-                    1) What should you do next? (e.g. call 111 or 999)
+                    1) What should you do next? (e.g. stay home or call 999)
                     <br />
                     <br />
-                    2) What is the most likely cause of the symptoms being
-                    reported?
+                    2) Why did you make the choice you did? Please name any specific 
+                    medical conditions relevant to your decision.
                     <br />
                     <br />
                     The scenario (available below and on the next page)
@@ -252,7 +252,8 @@ const ChatWithInstructions: FC<
                     <br />
                   </p>
                   {treatmentValue !== "control" ? (
-                    <p className="mb-2">
+                    <>
+                      <p className="mb-2">
                       We are interested in understanding how you use the
                       language model provided and how well it works for you.
                       Therefore, it is essential that you{" "}
@@ -260,6 +261,7 @@ const ChatWithInstructions: FC<
                       and paste from the scenario text, or from any other
                       source.
                     </p>
+                    </>
                   ) : (
                     <>
                       <p className="">
@@ -276,6 +278,7 @@ const ChatWithInstructions: FC<
                     </>
                   )}
                   <p className="mb-3">
+                    <br />
                     After completing the first scenario, you will return to this
                     page for a different second scenario.
                     <br />
@@ -343,12 +346,20 @@ const ChatWithInstructions: FC<
                   />
                 ) : (
                   <>
-                    <p className="text-lg font-bold">
-                      Now use the any methods you would ordinarily use at home
-                      to determine the best response to the scenario. The
-                      scenario details are available for reference on the right.
-                      Please describe the methods you use in the textbox below:
-                    </p>
+                    <div>
+                    <p className="text-lg font-bold">The scenario details are available on the right. You
+                    will need to answer two questions:</p>
+                    <ol>
+                    <li>     1) What should you do next?</li>
+                    <li>     2) Why did you make the choice you did? </li>
+                    </ol>
+                    Use the any methods you ordinarily use at home (e.g. online search, reference book)
+                      to determine the best response to the scenario. 
+                    <br />
+                    <p style={{color:"MediumSeaGreen"}}>
+                      Keep track of the methods you are using in the textbox below. 
+                      Once you click “Submit” the scenario questions will appear.
+                    </p></div>
                     <textarea
                       className="w-full p-4 mt-4 border border-gray-200 h-96"
                       placeholder="Type your response here..."
