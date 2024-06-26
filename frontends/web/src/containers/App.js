@@ -127,7 +127,10 @@ class App extends React.Component {
             this.setState({ user: result });
           },
           (error) => {
-            console.log(error);
+            console.warn(error);
+            if (error.status === 401) {
+              this.api.logout();
+            }
           }
         );
       });
@@ -137,7 +140,7 @@ class App extends React.Component {
         this.setState({ tasks: result });
       },
       (error) => {
-        console.log(error);
+        console.warn(error);
       }
     );
   }
