@@ -365,7 +365,7 @@ table.inspectModel thead td {
 
 @supports (scrollbar-width: auto) {
     .hide-scroll-bar {
-      scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+        scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
     }
 }
 
