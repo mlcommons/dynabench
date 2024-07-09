@@ -128,7 +128,7 @@ class App extends React.Component {
           },
           (error) => {
             console.warn(error);
-            if (error.status === 401) {
+            if (error.status_code === 401) {
               this.api.logout();
             }
           }
