@@ -173,95 +173,6 @@ const ChatWithInstructions: FC<
                     setShowInstructions(!showInstructions);
                   }}
                 >
-<<<<<<< HEAD
-                  <Modal.Header closeButton>
-                    <Modal.Title>Example</Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    <MDEditor.Markdown source={example} />
-                  </Modal.Body>
-                </Modal>
-              </>
-            )}
-          </div>
-          {!readInstructions ? (
-            <div className="flex flex-col justify-center gap-8">
-              <div
-                id="general-instructions"
-                className="p-4 bg-white border border-gray-200"
-              >
-                <div className="">
-                  <h3 className="text-2xl font-bold">What do I need to do?</h3>
-                  <p className="mb-3">
-                    In this study, you will be asked to complete{" "}
-                    <strong>two scenarios</strong> which simulate healthcare
-                    decisions that a person might encounter in everyday life.{" "}
-                    <strong>
-                      In each scenario, you will be asked two questions
-                    </strong>{" "}
-                    about how best to respond:
-                    <br />
-                    <br />
-                    1) What should you do next? (e.g. stay home or call 999)
-                    <br />
-                    <br />
-                    2) Why did you make the choice you did? Please name any specific 
-                    medical conditions relevant to your decision.
-                    <br />
-                    <br />
-                    The scenario (available below and on the next page)
-                    describes the specific details of the case, followed by
-                    general life details and an abbreviated medical history. The
-                    information provided gives a complete picture of the
-                    relevant health details, but also includes additional
-                    information which may not be relevant. As with a real health
-                    decision, you will need to decide what information is most
-                    important.
-                    <br />
-                    <br />
-                  </p>
-                  {treatmentValue !== "control" ? (
-                    <>
-                      <p className="mb-2">
-                      We are interested in understanding how you use the
-                      language model provided and how well it works for you.
-                      Therefore, it is essential that you{" "}
-                      <strong>only use your own words,</strong> and do not copy
-                      and paste from the scenario text, or from any other
-                      source.
-                    </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="">
-                        To assist in completing the scenarios, please use a
-                        search engine or any other methods you might ordinarily
-                        use at home. We are interested in understanding what
-                        tools you use and how well they work for you. This may
-                        be an online resource, a book, or anything else. It is
-                        essential that you{" "}
-                        <strong>only use your own words,</strong> and do not
-                        copy and paste from the scenario text, or from any other
-                        source.
-                      </p>
-                    </>
-                  )}
-                  <p className="mb-3">
-                    <br />
-                    After completing the first scenario, you will return to this
-                    page for a different second scenario.
-                    <br />
-                    <br />
-                    Once you have finished reading the instructions, click “I
-                    understand” to begin the experiment.
-                  </p>
-                </div>
-              </div>
-              {treatmentValue !== "control" && (
-                <div
-                  id="brief-instructions"
-                  className="p-4 bg-white border border-gray-200"
-=======
                   <span className="text-base font-normal text-letter-color">
                     Instructions
                   </span>
@@ -288,7 +199,6 @@ const ChatWithInstructions: FC<
                   onClick={() => {
                     setShowExample(!showExample);
                   }}
->>>>>>> 02fbe2f01bb2cd30d0cbe2834ee7aed87bd5de41
                 >
                   <span className="text-base font-normal text-letter-color">
                     Example
@@ -296,33 +206,10 @@ const ChatWithInstructions: FC<
                 </button>
                 {showExample && (
                   <>
-<<<<<<< HEAD
-                    <div>
-                    <p className="text-lg font-bold">The scenario details are available on the right. You
-                    will need to answer two questions:</p>
-                    <ol>
-                    <li>     1) What should you do next?</li>
-                    <li>     2) Why did you make the choice you did? </li>
-                    </ol>
-                    Use the any methods you ordinarily use at home (e.g. online search, reference book)
-                      to determine the best response to the scenario. 
-                    <br />
-                    <p style={{color:"MediumSeaGreen"}}>
-                      Keep track of the methods you are using in the textbox below. 
-                      Once you click “Submit” the scenario questions will appear.
-                    </p></div>
-                    <textarea
-                      className="w-full p-4 mt-4 border border-gray-200 h-96"
-                      placeholder="Type your response here..."
-                      onPaste={(e: any) => {
-                        e.preventDefault();
-                        return false;
-=======
                     <Modal
                       show={showExample}
                       onHide={() => {
                         setShowExample(false);
->>>>>>> 02fbe2f01bb2cd30d0cbe2834ee7aed87bd5de41
                       }}
                       size="lg"
                     >
@@ -373,17 +260,17 @@ const ChatWithInstructions: FC<
                         health decision, you will need to decide what
                         information is most important.
                         <br />
-                        <br />
                       </p>
                       {treatmentValue !== "control" ? (
                         <>
                           <p className="mb-2">
-                            We are interested in understanding how you use the
-                            language model provided and how well it works for
-                            you. Therefore, it is essential that you{" "}
-                            <strong>only use your own words,</strong> and do not
-                            copy and paste from the scenario text, or from any
-                            other source.
+                            To assist in completing the scenarios, please use the 
+                            language model provided. We are interested in 
+                            understanding how you use the language model provided 
+                            and how well it works for you. Therefore, it is 
+                            essential that you{" "}<strong>only use your own  
+                            words,</strong> and do not copy and paste from the 
+                            scenario text, or from any other source.
                           </p>
                         </>
                       ) : (
