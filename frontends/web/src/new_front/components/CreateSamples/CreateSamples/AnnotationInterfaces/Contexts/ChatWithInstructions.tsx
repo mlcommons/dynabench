@@ -260,17 +260,17 @@ const ChatWithInstructions: FC<
                         health decision, you will need to decide what
                         information is most important.
                         <br />
-                        <br />
                       </p>
                       {treatmentValue !== "control" ? (
                         <>
                           <p className="mb-2">
-                            We are interested in understanding how you use the
-                            language model provided and how well it works for
-                            you. Therefore, it is essential that you{" "}
-                            <strong>only use your own words,</strong> and do not
-                            copy and paste from the scenario text, or from any
-                            other source.
+                            To assist in completing the scenarios, please use the 
+                            language model provided. We are interested in 
+                            understanding how you use the language model provided 
+                            and how well it works for you. Therefore, it is 
+                            essential that you{" "}<strong>only use your own  
+                            words,</strong> and do not copy and paste from the 
+                            scenario text, or from any other source.
                           </p>
                         </>
                       ) : (
