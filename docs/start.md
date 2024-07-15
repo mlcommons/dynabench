@@ -1,96 +1,62 @@
-# Development
+## Dynabench Components Overview
 
-Please read our [contributing guidelines](https://github.com/mlcommons/dynabench/blob/main/CONTRIBUTING.md) to understand how to setup your development environment including `pre-commit` hooks.
+Dynabench currently consists of three main components:
 
-## Clone the repository
+### Old Backend
 
-After forking [facebookresearch/dynabench](https://github.com/mlcommons/dynabench) to your own GitHub account, clone the forked repo using:
+This backend is located in the `API` folder. Currently, the main functionality is the login system. To run this backend, follow these steps:
 
-```
-git clone git@github.com:{your_github_username}/dynabench.git
-cd dynabench
-```
+1. Create a virtual environment (conda or venv can be used) (`python3 -m venv env`).
+2. Activate the environment (`source env/bin/activate`).
+3. Install the libraries from the `requirements` folder (`python3 -m pip install -r requirements.txt`).
+4. Run the command: `python3 server.py dev`.
 
-## Backend
+**Note:** Remember to set the environment variables.
 
-The backend is written in Python and requires a locally installed MySQL database.
+### New Backend
 
-### Prerequisites
+The new backend is located in the `backend` folder. This is the core of the application, following a hexagonal architecture. It is composed of three main folders inside the `app`:
 
-We recommend using Conda to create an environment for the backend and easily managing the dependencies. The following will install all of the dependencies required by the backend server:
+- **API:** Endpoints reside in this folder. No business logic should be implemented in these endpoints.
+- **Domain:** This folder contains all the logic of the functions, both programming and business.
+- **Infrastructure:** Here, calls to the database are made using SQLAlchemy.
 
-```
-conda create -n dev python=3.7
-conda activate dev
-pip install -r requirements.txt
-```
+To install the new backend, follow the same steps as for the API, with the last command being:
 
-Next, follow these [instructions to install MySQL](database.md).
+`python3 -m uvicorn app.main:app --reload`
 
-### Configuration
+### Frontend
 
-Set up your SSL certificates, e.g.:
+The main frontend is located in the `frontends/web` folder. Inside this folder, you will find a folder called `src/new_front`. About 99% of new changes should be made inside this folder.
 
-```
-mkdir ~/.ssl
-cd ~/.ssl
-openssl req -newkey rsa:2048 -x509 -new -nodes -keyout local-cert.key -out local-cert.crt -subj /CN=test1 -sha256 -days 365 -addext "extendedKeyUsage = serverAuth"
-cat local-cert.key local-cert.crt > local-cert.pem
-chmod 600 *
-ln -s local-cert.key dynabench.org-key.pem
-ln -s local-cert.crt dynabench.org.crt
-```
+To install the frontend, follow these steps:
 
-### Setting up the API server
+1. Ensure that Node.js and npm are installed.
+2. Run `npm i` (you may need to run it with the `--legacy-peer-deps` flag).
+3. Run `npm run start`.
 
-Run the installation script to create your configuration files and ensure all outstanding database migrations are marked as completed:
+Remember to configure the environment variables.
 
-```
-cd api
-python install.py
-```
+## DB
 
-The script will ask you a list of questions to fill in the config file (in `api/common/config.py`). The answers will look like as follows:
-```
-Please enter your db_name: dynabench
-Please enter your db_user: dynabench
-Please enter your db_password: {use the password you set in MySQL install instructions}
-Please enter your ssl_cert_file_path: {home directory path}/.ssl/dynabench.org.crt
-Please enter your ssl_org_pem_file_path: {home directory path}/.ssl/dynabench.org-key.pem
-```
+To migrate the database you can use the following link that comes with some artifacts:
 
-### Running the API server
+https://models-dynalab.s3.eu-west-3.amazonaws.com/sql/db.sql
 
-Run the server:
+## Types of Challenges in Dynabench
 
-```
-cd api
-python server.py dev
-```
+Dynabench currently features three different types of challenges:
 
-Your API backend should now be running at https://localhost:8081. If you just generated a local and unverified certificate, you may need to tell your browser it's okay to proceed.
+### Creation of Examples
 
-## Frontend
+Challenges falling under this category include PRISM, Wonders, Help-me, and Nibbler. To host the various interface types from the frontend, we utilize the strategy design pattern. Modifying components not adjustable from the YAML file requires specific actions:
 
-To install and run the frontend, we recommend using [nvm](https://github.com/creationix/nvm) (see [here](https://github.com/nvm-sh/nvm#installing-and-updating) for installation instructions) to manage and install node versions.
+1. **Identify the YAML File:** Begin by accessing the YAML of the respective task.
 
-```
-cd frontends/web/
-nvm install node
-nvm install-latest-npm
-npm install
-echo 'REACT_APP_API_HOST = "https://localhost:8081"' >> .env
-npm start
-```
+2. **Check Context Type:** Determine the type of context.
 
-If you get a warning about SSL certificates, edit the corresponding paths in `package.json`. Your frontend should now be running at https://localhost:3000.
+3. **Locate Equivalence in Interface Options:** Navigate to `frontends/web/src/new_front/utils/creation_interface_options.json` and find the equivalence of the component used.
 
-## Docker Compose
-Alternatively, you can run the following two commands to setup both backend and frontend locally:
+4. **Identify Component in Codebase:** Proceed to `frontends/web/src/new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts` and identify the component.
 
-```
-docker-compose build --no-cache
-docker-compose up
-```
-
-Backend will be running on localhost:8081 and Frontend will be running on localhost:3000.
+This process ensures efficient modification of components within the Dynabench platform.
