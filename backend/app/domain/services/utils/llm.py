@@ -56,6 +56,7 @@ class LLMProvider(ABC):
 
 class OpenAIProvider(LLMProvider):
     def __init__(self, task_id: int = -1):
+        self.task_id = task_id
         if task_id == 56:
             self.api_key = os.getenv("OPENAI_HELPME")
         else:
@@ -70,7 +71,7 @@ class OpenAIProvider(LLMProvider):
         provider,
         is_conversational: bool = False,
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         model_name = model[provider]["model_name"]
         frequency_penalty = model[provider]["frequency_penalty"]
         presence_penalty = model[provider]["presence_penalty"]
@@ -114,7 +115,7 @@ class OpenAIProvider(LLMProvider):
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict, provider=None
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
@@ -140,7 +141,7 @@ class OpenAIProvider(LLMProvider):
             return "None"
 
     def provider_name(self):
-        return "openaihm"
+        return "openaihm" if self.task_id == 56 else "openai"
 
 
 class HuggingFaceProvider(LLMProvider):
@@ -175,7 +176,7 @@ class AnthropicProvider(LLMProvider):
     async def generate_text(
         self, prompt: str, model: dict, provider=None, is_conversational: bool = False
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         foot_template = model[provider]["templates"]["footer"]
         if is_conversational:
@@ -212,7 +213,7 @@ class AnthropicProvider(LLMProvider):
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict, provider: str = None
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
@@ -243,6 +244,7 @@ class AnthropicProvider(LLMProvider):
 
 class CohereProvider(LLMProvider):
     def __init__(self, task_id: int = -1):
+        self.task_id = task_id
         if task_id == 56:
             self.api_key = os.getenv("COHERE_HELPME")
         else:
@@ -258,7 +260,7 @@ class CohereProvider(LLMProvider):
         is_conversational: bool = False,
         chat_history=[],
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         foot_template = model[provider]["templates"]["footer"]
         model_name = model[provider]["model_name"]
@@ -306,7 +308,7 @@ class CohereProvider(LLMProvider):
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict, provider: str = None
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
@@ -332,7 +334,7 @@ class CohereProvider(LLMProvider):
             return "None"
 
     def provider_name(self):
-        return "cohere"
+        return "coherehm" if self.task_id == 56 else "cohere"
 
 
 class AlephAlphaProvider(LLMProvider):
@@ -343,7 +345,7 @@ class AlephAlphaProvider(LLMProvider):
     async def generate_text(
         self, prompt: str, model: dict, provider=None, is_conversational: bool = False
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         # foot_template = model[provider]["templates"]["footer"]
         params = {
@@ -389,7 +391,7 @@ class AlephAlphaProvider(LLMProvider):
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict, provider: str = None
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         # foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
@@ -428,7 +430,7 @@ class GoogleProvider(LLMProvider):
     async def generate_text(
         self, prompt: str, model: dict, provider=None, is_conversational: bool = False
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         model_name = model[provider]["model_name"]
         temperature = model[provider]["temperature"]
         top_p = model[provider]["top_p"]
@@ -461,7 +463,7 @@ class GoogleProvider(LLMProvider):
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict, provider: str = None
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
@@ -500,7 +502,7 @@ class ReplicateProvider(LLMProvider):
     def generate_text(
         self, prompt: str, model: dict, provider=None, is_conversational: bool = False
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         foot_template = model[provider]["templates"]["footer"]
         model_name = model[provider]["model_name"]
@@ -576,7 +578,7 @@ class HuggingFaceAPIProvider(LLMProvider):
     async def generate_text(
         self, prompt: str, model: dict, provider=None, is_conversational=False
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         is_llama = model[provider]["is_llama"]
         is_falcon = model[provider]["is_falcon"]
         is_pythia = model[provider]["is_pythia"]
@@ -657,7 +659,7 @@ class HuggingFaceAPIProvider(LLMProvider):
     async def conversational_generation(
         self, prompt: str, model: dict, history: dict, provider: str = None
     ) -> str:
-        provider = provider if type(provider) == str else self.provider_name()
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
         head_template = model[provider]["templates"]["header"]
         foot_template = model[provider]["templates"]["footer"]
         is_llama = model[provider]["is_llama"]

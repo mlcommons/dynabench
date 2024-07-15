@@ -54,15 +54,16 @@ const DropDownStats = ({
       <div
         className={`${
           open ? "block" : "hidden"
-        } absolute right-0 mt-2 w-full rounded-md shadow-lg  ring-1 ring-black ring-opacity-5 `}
+        } absolute z-10 h-44 md:h-24 right-0 mt-2 w-full rounded-md shadow-lg  ring-1 ring-black ring-opacity-5 overflow-auto hide-scroll-bar bg-slate-50 md:bg-transparent`}
         role="menu"
         aria-orientation="vertical"
         aria-labelledby="menu-button"
+        tabIndex={-1}
       >
         {options?.map((option, key) => (
           <p
             key={key}
-            className="block w-full px-4 py-2 text-xl text-left text-white pointer"
+            className="block w-full px-4 py-2 text-xl text-left text-gray md:text-white pointer"
             role="menuitem"
             onClick={() => {
               onChange!(option);

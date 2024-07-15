@@ -63,6 +63,8 @@ const FileUpload = ({ values, filename, setFieldValue, disabled }) => {
 const SubmitInterface = (props) => {
   const { get, response } = useFetch();
   const context = useContext(UserContext);
+  const [sendCallSubmited, setSendCallSubmited] = useState(false);
+  const [sendCallDatasets, setSendCallDatasets] = useState(false);
   const [state, setState] = useState({
     submission_type: props.submission_type,
     taskId: null,
@@ -84,18 +86,7 @@ const SubmitInterface = (props) => {
       }
 
       setState((prevState) => ({ ...prevState, taskId: params.taskId }));
-      try {
-        const taskResult = await context.api.getTask(state.taskId);
-        setState((prevState) => ({ ...prevState, task: taskResult }));
-        const datasets = await context.api.getDatasets(taskResult.id);
-        setState((prevState) => ({
-          ...prevState,
-          datasets: datasets,
-          showModals: datasets.map(() => false),
-        }));
-      } catch (error) {
-        console.log(error);
-      }
+      !setSendCallDatasets && params.taskId && handleGetTask(params.taskId);
     };
 
     fetchData();
@@ -107,23 +98,43 @@ const SubmitInterface = (props) => {
     state.taskId,
   ]);
 
+  const handleGetTask = async (taskId) => {
+    setSendCallDatasets(true);
+    try {
+      const taskResult = await context.api.getTask(taskId);
+      setState((prevState) => ({ ...prevState, task: taskResult }));
+      const datasets = await context.api.getDatasets(taskResult.id);
+      setState((prevState) => ({
+        ...prevState,
+        datasets: datasets,
+        showModals: datasets.map(() => false),
+      }));
+    } catch (error) {
+      setSendCallDatasets(false);
+      console.warn(error);
+    }
+  };
+
   const allowSubmitDynalab = async (task_id, user_id) => {
     console.log("task_id", task_id);
     if (!task_id) {
       return false;
     }
-    await get(`/task/allow_update_dynalab_submissions/${task_id}/${user_id}`);
-    if (response.ok) {
+    const answer = await get(
+      `/task/allow_update_dynalab_submissions/${task_id}/${user_id}`
+    );
+    if (answer) {
       return true;
     }
     return false;
   };
 
-  const handleIsAllowedToSubmit = () => {
+  const handleIsAllowedToSubmit = async () => {
+    setSendCallSubmited(true);
     const user = context.api.getCredentials();
 
-    const allowUpload = allowSubmitDynalab(state.task.id, user.id);
-    if (allowUpload) {
+    const allowUpload = await allowSubmitDynalab(state.task.id, user.id);
+    if (!allowUpload) {
       Swal.fire({
         title: "Error!",
         text: "You have reached the maximum number of submissions for this task.",
@@ -138,7 +149,7 @@ const SubmitInterface = (props) => {
   };
 
   useEffect(() => {
-    handleIsAllowedToSubmit(state.task);
+    !sendCallSubmited && state?.task?.id && handleIsAllowedToSubmit();
   }, [state.task]);
 
   const handleSubmit = async (
