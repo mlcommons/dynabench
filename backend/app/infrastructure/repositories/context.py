@@ -75,9 +75,9 @@ class ContextRepository(AbstractRepository):
             .all()
         )
 
-    def get_context_by_key_value_in_contextjson(self, search_txt: str):
+    def get_context_by_key_value_in_contextjson(self, search_name: str, search_value: str):
         return (
             self.session.query(self.model)
-            .filter(self.model.context_json.like(search_txt))
+            .filter(func.json_extract(self.model.context_json, search_name).like(search_value))
             .all()
         )
