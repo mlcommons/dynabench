@@ -308,8 +308,8 @@ class ContextService:
         return key
 
     def get_random_context_from_key_value(self, key_name: str, key_value: str) -> dict:
-        search_key = f'$.{key_name}'
-        search_value = f'%{key_value}%'
+        search_key = f"$.{key_name}"
+        search_value = f"%{key_value}%"
         contexts = self.context_repository.get_context_by_key_value_in_contextjson(
             search_key, search_value
         )
