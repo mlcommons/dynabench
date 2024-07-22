@@ -84,3 +84,8 @@ def save_contexts_to_s3(
     return ContextService().save_contexts_to_s3(
         file, task_id, language, country, description, category, concept
     )
+
+
+@router.post("/get_random_context_from_key_value")
+def get_random_context_from_key_value(key_name: str, key_value: str):
+    return ContextService().get_random_context_from_key_value(key_name, key_value)
