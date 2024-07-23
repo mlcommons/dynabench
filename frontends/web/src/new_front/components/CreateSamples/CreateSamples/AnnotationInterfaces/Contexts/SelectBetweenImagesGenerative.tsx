@@ -28,21 +28,22 @@ const SelectBetweenImagesGenerative: FC<
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
   const [showQueue, setShowQueue] = useState<boolean>(false);
   const [positionQueue, setPositionQueue] = useState<any>({});
-  const [firstMessageReceived, setFirstMessageReceived] = useState<boolean>(false);
+  const [firstMessageReceived, setFirstMessageReceived] =
+    useState<boolean>(false);
   const [allowsGeneration, setAllowsGeneration] = useState(true);
   const [showLoader, setShowLoader] = useState(false);
   const [showImages, setShowImages] = useState<any[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [artifactsInput, setArtifactsInput] = useState<any>(
-    generative_context.artifacts,
+    generative_context.artifacts
   );
   const [prompt, setPrompt] = useState(
-    "Type your prompt here (e.g. a kid sleeping in a red pool of paint)",
+    "Type your prompt here (e.g. a kid sleeping in a red pool of paint)"
   );
   const { post, response } = useFetch();
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
-    CreateInterfaceContext,
+    CreateInterfaceContext
   );
   const neccessaryFields = ["original_prompt"];
   const [selectedImage, setSelectedImage] = useState<string>("");
@@ -53,7 +54,7 @@ const SelectBetweenImagesGenerative: FC<
       {
         task_id: taskId,
         user_id: user.id,
-      },
+      }
     );
     if (response.ok) {
       setPromptHistory(history);
@@ -82,7 +83,7 @@ const SelectBetweenImagesGenerative: FC<
 
   const saveHistoricalData = async (
     text: string,
-    setPromptHistory: (value: any[]) => void,
+    setPromptHistory: (value: any[]) => void
   ) => {
     const history = await post("/historical_data/save_historical_data", {
       task_id: taskId,
@@ -96,11 +97,11 @@ const SelectBetweenImagesGenerative: FC<
 
   const handlePopUp = () => {
     Swal.fire({
-      title: "Example already submitted",
-      text: "You selected a prompt from your history and we are showing the images previously generated for this prompt. Modify the prompt to get new image generation.",
+      title: "Prompt already in history of prompts",
+      text: "For prompts in your prompt history we are showing the images previously generated for this prompt. If you would like to see new images modify the prompt",
       icon: "info",
     });
-  }
+  };
 
   const runCheckers = async (prompt: string) => {
     const checkIfPromptExistsForUser = await post(
@@ -109,7 +110,7 @@ const SelectBetweenImagesGenerative: FC<
         task_id: taskId,
         user_id: user.id,
         data: prompt.trim(),
-      },
+      }
     );
     if (checkIfPromptExistsForUser) {
       setFirstMessageReceived(true);
@@ -118,12 +119,12 @@ const SelectBetweenImagesGenerative: FC<
       "/historical_data/get_occurrences_with_more_than_one_hundred",
       {
         task_id: taskId,
-      },
+      }
     );
 
     const checkIfPromptIsInOccurrences =
       promptWithMoreThanOneHundredSubmissions.some(
-        (item: any) => item.data === prompt.trim(),
+        (item: any) => item.data === prompt.trim()
       );
     if (checkIfPromptIsInOccurrences) {
       Swal.fire({
@@ -140,7 +141,7 @@ const SelectBetweenImagesGenerative: FC<
       neccessaryFields.every(
         (item) =>
           modelInputs.hasOwnProperty(item) ||
-          metadataExample.hasOwnProperty(item),
+          metadataExample.hasOwnProperty(item)
       )
     ) {
       setShowLoader(true);
@@ -163,7 +164,7 @@ const SelectBetweenImagesGenerative: FC<
                 prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
               },
             }),
-          },
+          }
         );
 
         const imagesHttp = await response.json();
@@ -201,7 +202,7 @@ const SelectBetweenImagesGenerative: FC<
         {
           round_id: realRoundId,
           user_id: user.id,
-        },
+        }
       );
     } else {
       Swal.fire({
@@ -258,7 +259,7 @@ const SelectBetweenImagesGenerative: FC<
               prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
             },
           }),
-        },
+        }
       );
 
       const imagesHttp = await response.json();
@@ -313,7 +314,7 @@ const SelectBetweenImagesGenerative: FC<
           user_id: user.id,
           round_id: realRoundId,
           task_id: taskId,
-        },
+        }
       );
       if (response.ok) {
         setPartialSampleId(partialSampleId.id);
@@ -361,7 +362,7 @@ const SelectBetweenImagesGenerative: FC<
 
   useEffect(() => {
     firstMessageReceived && handlePopUp();
-  }, [firstMessageReceived])
+  }, [firstMessageReceived]);
 
   return (
     <>
