@@ -47,14 +47,18 @@ const SelectMultipleTextMultipleTags: FC<
     const tempTags: any[] = [];
     const colors: string[] = [];
     const tempTagColors: any = {};
-    tags?.forEach((tag: string) => {
+    tags?.forEach((tag: any) => {
       let color = generateLightRandomColor();
       while (colors.includes(color)) {
         color = generateLightRandomColor();
       }
       colors.push(color);
-      tempTags.push({ value: tag, color: color });
-      tempTagColors[tag] = color;
+      tempTags.push({
+        value: tag?.display_label,
+        color: color,
+        back_label: tag?.back_label,
+      });
+      tempTagColors[tag.back_label] = color;
     });
     setLocalTags(tempTags);
     setTagColors(tempTagColors);
@@ -66,7 +70,9 @@ const SelectMultipleTextMultipleTags: FC<
   useEffect(() => {
     if (preferedTag) {
       setTagSelection(localTags.find((tag: any) => tag.value === preferedTag));
-      handleSubmit(localTags.find((tag: any) => tag.value === preferedTag));
+      handleSubmit(
+        localTags.find((tag: any) => tag.value === preferedTag)?.back_label
+      );
       submitButton && (submitButton.hidden = false);
     }
   }, [preferedTag]);
@@ -78,24 +84,20 @@ const SelectMultipleTextMultipleTags: FC<
       ((submitButton as any).disabled = false);
   }, [text]);
 
+  useEffect(() => {}, [localTags]);
+
   const handleSubmit = async (value: string | null) => {
-    console.log("in handle submit");
-    !value && (value = tagSelection.value);
+    !value && (value = tagSelection.back_label);
     submitButton && (submitButton.hidden = false);
-    /* const payload = {
-      key_name: field_names_for_the_model?.tag_name_search,
-      key_value: value,
-    }; */
     const bringContext = await post(
-      `/context/get_random_context_from_key_value`,
+      "/context/get_random_context_from_key_value/",
       {
         key_name: field_names_for_the_model?.tag_name_search,
-        key_value: "ace-Arab",
+        key_value: value,
       }
     );
-    console.log(bringContext);
     if (response.ok) {
-      setText(bringContext.text);
+      setText(bringContext.content);
     }
   };
 
@@ -105,9 +107,9 @@ const SelectMultipleTextMultipleTags: FC<
       {
         start: 0,
         end: tokens?.length,
-        tag: tagSelection,
+        tag: tagSelection.back_label,
         tokens: tokens,
-        color: tagColors[tagSelection],
+        color: tagColors[tagSelection.back_label],
       },
     ]);
   };
@@ -141,7 +143,7 @@ const SelectMultipleTextMultipleTags: FC<
               <DropdownSearch
                 options={localTags}
                 value={
-                  tagSelection ||
+                  tagSelection?.value ||
                   `Select a ${
                     field_names_for_the_model?.tag_name_for_display || "tag"
                   }`
@@ -152,6 +154,7 @@ const SelectMultipleTextMultipleTags: FC<
                 <Button
                   className="border-0 font-weight-bold light-gray-bg task-action-btn"
                   onClick={() => handleSubmit(null)}
+                  disabled={!tagSelection}
                 >
                   Select
                 </Button>
@@ -172,8 +175,8 @@ const SelectMultipleTextMultipleTags: FC<
               onChange={(value) => handleChange(value)}
               getSpan={(span) => ({
                 ...span,
-                tag: tagSelection,
-                color: tagColors[tagSelection],
+                tag: tagSelection.back_label,
+                color: tagColors[tagSelection.back_label],
               })}
               renderMark={(props) => (
                 <mark
@@ -224,7 +227,12 @@ const SelectMultipleTextMultipleTags: FC<
             <div className="col-span-5">
               <DropdownSearch
                 options={localTags}
-                value={tagSelection || "Select a tag"}
+                value={
+                  tagSelection?.value ||
+                  `Select a ${
+                    field_names_for_the_model?.tag_name_for_display || "tag"
+                  }`
+                }
                 onChange={setTagSelection}
               />
             </div>

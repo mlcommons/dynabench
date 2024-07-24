@@ -16,14 +16,14 @@ const DropdownSearch: FC<DropdownSearchProps> = ({
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredOptions = options.filter((option) =>
-    option.value.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOptions = options.filter(
+    (option) => option.value?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleOnClick = (option: any) => {
     setOpen(false);
     setSearchTerm("");
-    onChange(option.value);
+    onChange(option);
   };
 
   return (

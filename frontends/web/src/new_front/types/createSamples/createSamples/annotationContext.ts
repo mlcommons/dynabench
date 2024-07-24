@@ -5,7 +5,7 @@ export type ContextConfigType = {
   metadata?: any;
   field_names_for_the_model: any;
   generative_context: GenerativeContext;
-  tags?: string[];
+  tags?: object[];
 };
 
 export type GenerativeContext = {
