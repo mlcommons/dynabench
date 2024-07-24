@@ -380,6 +380,7 @@ const SelectBetweenImagesGenerative: FC<
                 placeholder="Click this dropdown to see submitted prompts"
                 onChange={handlePromptHistory}
                 disabled={!allowsGeneration}
+                allowSearch={instruction.dropdown_search || false}
               />
             </AnnotationInstruction>
             <AnnotationInstruction
