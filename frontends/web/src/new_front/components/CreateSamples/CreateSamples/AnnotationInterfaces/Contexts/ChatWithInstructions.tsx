@@ -244,7 +244,7 @@ const ChatWithInstructions: FC<
                         about how best to respond:
                         <br />
                         <br />
-                        1) What should you do next? (e.g. stay home or call 999)
+                        1) What healthcare service do you need? (e.g. A&E or routine GP follow-up)
                         <br />
                         <br />
                         2) Why did you make the choice you did? Please name any
@@ -324,7 +324,7 @@ const ChatWithInstructions: FC<
                     </div>
                   )}
                   <div className="px-4 py-2 border border-gray-200 ">
-                    <h3 className="text-2xl font-bold">Scenario</h3>
+                    <h3 className="text-2xl font-bold"><u>Scenario</u></h3>
                     <BasicInstructions instructions={context} />
                   </div>
                   <div className="flex items-end justify-end gap-4">
@@ -368,7 +368,7 @@ const ChatWithInstructions: FC<
                             will need to answer two questions:
                           </p>
                           <ol>
-                            <li> 1) What should you do next?</li>
+                            <li> 1) What healthcare service do you need?</li>
                             <li> 2) Why did you make the choice you did? </li>
                           </ol>
                           Use the any methods you ordinarily use at home (e.g.
