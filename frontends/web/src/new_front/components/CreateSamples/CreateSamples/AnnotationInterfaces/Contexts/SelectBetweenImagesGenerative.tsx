@@ -28,7 +28,8 @@ const SelectBetweenImagesGenerative: FC<
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
   const [showQueue, setShowQueue] = useState<boolean>(false);
   const [positionQueue, setPositionQueue] = useState<any>({});
-  const [firstMessageReceived, setFirstMessageReceived] = useState<boolean>(false);
+  const [firstMessageReceived, setFirstMessageReceived] =
+    useState<boolean>(false);
   const [allowsGeneration, setAllowsGeneration] = useState(true);
   const [showLoader, setShowLoader] = useState(false);
   const [showImages, setShowImages] = useState<any[]>([]);
@@ -100,7 +101,7 @@ const SelectBetweenImagesGenerative: FC<
       text: "You selected a prompt from your history and we are showing the images previously generated for this prompt. Modify the prompt to get new image generation.",
       icon: "info",
     });
-  }
+  };
 
   const runCheckers = async (prompt: string) => {
     const checkIfPromptExistsForUser = await post(
@@ -361,7 +362,7 @@ const SelectBetweenImagesGenerative: FC<
 
   useEffect(() => {
     firstMessageReceived && handlePopUp();
-  }, [firstMessageReceived])
+  }, [firstMessageReceived]);
 
   return (
     <>
@@ -379,6 +380,7 @@ const SelectBetweenImagesGenerative: FC<
                 placeholder="Click this dropdown to see submitted prompts"
                 onChange={handlePromptHistory}
                 disabled={!allowsGeneration}
+                allowSearch={instruction.dropdown_search || false}
               />
             </AnnotationInstruction>
             <AnnotationInstruction
