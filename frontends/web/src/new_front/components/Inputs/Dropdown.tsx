@@ -1,11 +1,11 @@
-import React, { FC, useState } from "react";
-import { DropdownButton, Dropdown as BootsDropdown } from "react-bootstrap";
+import React, { FC, useState, useEffect } from "react";
 
 type DropdownProps = {
   options: any[];
   placeholder: string;
   onChange: (prompt: any) => void;
   disabled?: boolean;
+  allowSearch?: boolean;
 };
 
 const Dropdown: FC<DropdownProps> = ({
@@ -13,8 +13,18 @@ const Dropdown: FC<DropdownProps> = ({
   placeholder,
   onChange,
   disabled = false,
+  allowSearch = false,
 }) => {
   const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredOptions = options.filter((option) =>
+    option.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  useEffect(() => {
+    open && setSearchTerm("");
+  }, [open]);
 
   return (
     <div className="w-full pb-6 text-right ">
@@ -54,7 +64,16 @@ const Dropdown: FC<DropdownProps> = ({
         aria-labelledby="menu-button"
       >
         <div className="py-1" role="none">
-          {options.map((option, key) => (
+          {allowSearch && (
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          )}
+          {filteredOptions.map((option, key) => (
             <button
               key={key}
               type="button"
