@@ -11,5 +11,5 @@ export type ContextConfigType = {
 export type GenerativeContext = {
   is_generative: boolean;
   type: string;
-  artifacts: object;
+  artifacts: any;
 };

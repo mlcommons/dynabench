@@ -3,9 +3,9 @@ import { Button } from "react-bootstrap";
 import { TokenAnnotator } from "react-text-annotate";
 import useFetch from "use-http";
 import { PacmanLoader } from "react-spinners";
+import Swal from "sweetalert2";
 
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
-import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
@@ -17,37 +17,56 @@ type MultipleTagsTypes = {
   preselectedTag?: string;
 };
 
+type Dictionary = { [key: string]: any };
+
+const cleanUpSelection = (
+  selection: Array<Dictionary>,
+  keyToRemove: string,
+) => {
+  const result: Array<Record<string, any>> = [];
+
+  selection.forEach((dictionary) => {
+    const newDictionary: Dictionary = {};
+
+    for (const key in dictionary) {
+      if (dictionary.hasOwnProperty(key) && key !== keyToRemove) {
+        newDictionary[key] = dictionary[key];
+      }
+    }
+
+    result.push(newDictionary);
+  });
+
+  return result;
+};
+
 const SelectMultipleTextMultipleTags: FC<
   ContextAnnotationFactoryType & ContextConfigType & MultipleTagsTypes
-> = ({ field_names_for_the_model, context, instruction, metadata, tags }) => {
+> = ({
+  field_names_for_the_model,
+  instruction,
+  userId,
+  taskId,
+  generative_context,
+}) => {
   const { post, loading, response } = useFetch();
 
-  const { updateModelInputs } = useContext(CreateInterfaceContext);
   const [selectionInfo, setSelectionInfo] = useState<any>([]);
   const [localTags, setLocalTags] = useState<any>([]);
   const [tagSelection, setTagSelection] = useState<any>(null);
   const [tagColors, setTagColors] = useState<any>(undefined);
   const [preferedTag, setPreferedTag] = useState<any>(null);
-  const [text, setText] = useState<string | undefined>(context);
+  const [text, setText] = useState<string | undefined>(undefined);
+  const [contextId, setContextId] = useState<number | null>(null);
+  const [realRoundId, setRealRoundId] = useState<number | null>(null);
 
   const submitButton: HTMLElement | null = document.getElementById("submit");
 
   useEffect(() => {
-    updateModelInputs(
-      {
-        [field_names_for_the_model.context]: context.context,
-      },
-      metadata.context
-    );
-
-    if (submitButton) {
-      submitButton.hidden = true;
-      (submitButton as any).disabled = true;
-    }
     const tempTags: any[] = [];
     const colors: string[] = [];
     const tempTagColors: any = {};
-    tags?.forEach((tag: any) => {
+    generative_context?.artifacts?.tags?.forEach((tag: any) => {
       let color = generateLightRandomColor();
       while (colors.includes(color)) {
         color = generateLightRandomColor();
@@ -71,20 +90,10 @@ const SelectMultipleTextMultipleTags: FC<
     if (preferedTag) {
       setTagSelection(localTags.find((tag: any) => tag.value === preferedTag));
       handleSubmit(
-        localTags.find((tag: any) => tag.value === preferedTag)?.back_label
+        localTags.find((tag: any) => tag.value === preferedTag)?.back_label,
       );
-      submitButton && (submitButton.hidden = false);
     }
   }, [preferedTag]);
-
-  useEffect(() => {
-    text &&
-      text.length > 0 &&
-      submitButton &&
-      ((submitButton as any).disabled = false);
-  }, [text]);
-
-  useEffect(() => {}, [localTags]);
 
   const handleSubmit = async (value: string | null) => {
     !value && (value = tagSelection.back_label);
@@ -94,10 +103,22 @@ const SelectMultipleTextMultipleTags: FC<
       {
         key_name: field_names_for_the_model?.tag_name_search,
         key_value: value,
-      }
+      },
     );
     if (response.ok) {
-      setText(bringContext.content);
+      !bringContext &&
+        Swal.fire({
+          title: instruction?.context_alert_title,
+          text: instruction?.context_alert_text,
+          icon: "warning",
+          confirmButtonText: "Ok",
+        }).then(() => {
+          handleSubmit(field_names_for_the_model?.default_tag);
+        });
+      console.log("bringContext", bringContext);
+      setText(bringContext?.content);
+      setContextId(bringContext?.id);
+      setRealRoundId(bringContext?.round_id);
     }
   };
 
@@ -114,25 +135,38 @@ const SelectMultipleTextMultipleTags: FC<
     ]);
   };
 
+  const handleSubmitExample = async () => {
+    const newSelectionInfo = cleanUpSelection(selectionInfo, "color");
+    const response = await post("/example/create_example/", {
+      context_id: contextId,
+      user_id: userId,
+      input_json: { labels: newSelectionInfo },
+      text: text,
+      task_id: taskId,
+      round_id: realRoundId,
+      increment_context: true,
+    });
+    if (response.ok) {
+      Swal.fire({
+        title: "Success",
+        text: "The data has been saved",
+        icon: "success",
+        confirmButtonText: "Ok",
+      }).then(() => {
+        handleSubmit(null);
+      });
+    }
+  };
+
   const handleChange = (value: any) => {
     setSelectionInfo(value);
-    console.log("selection", value);
-    /* updateModelInputs(
-      {
-        [field_names_for_the_model.answer ?? "selectable_text"]: context.context
-          .split(" ")
-          .slice(value[0].start, value[0].end)
-          .join(" "),
-      },
-      metadata.answer
-    ); */
   };
 
   return (
     <AnnotationInstruction
       placement="top"
       tooltip={
-        instruction?.context ||
+        instruction?.preselection_tag ||
         "Select the tag and the text according to the tag"
       }
     >
@@ -140,13 +174,16 @@ const SelectMultipleTextMultipleTags: FC<
         <>
           {!loading ? (
             <div className="mt-8">
+              {instruction?.preselection && (
+                <div className="pb-4 text-l font-bold">
+                  {instruction?.preselection}
+                </div>
+              )}
               <DropdownSearch
                 options={localTags}
                 value={
                   tagSelection?.value ||
-                  `Select a ${
-                    field_names_for_the_model?.tag_name_for_display || "tag"
-                  }`
+                  `Select a ${instruction?.tag_name || "tag"}`
                 }
                 onChange={setTagSelection}
               />
@@ -161,14 +198,32 @@ const SelectMultipleTextMultipleTags: FC<
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-32">
+            <div className="grid items-center justify-center h-32 grid-rows-2">
+              <div className="mr-2 text-letter-color mb-5">
+                Data is being prepared, please wait...
+              </div>
               <PacmanLoader color="#ccebd4" loading={loading} size={50} />
             </div>
           )}
         </>
       ) : (
         <>
-          <div className="p-2 rounded mt-2">
+          <div className="p-2 rounded">
+            <div className="grid grid-cols-6">
+              {instruction?.selection_note && (
+                <div className="pb-4 text-l font-bold col-span-8">
+                  {instruction?.selection_note}
+                </div>
+              )}
+              <div className="mx-auto mb-4 col-start-10">
+                <Button
+                  className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                  onClick={() => handleSelectAll()}
+                >
+                  Select all text area
+                </Button>
+              </div>
+            </div>
             <TokenAnnotator
               tokens={text.split(" ")}
               value={selectionInfo}
@@ -223,8 +278,8 @@ const SelectMultipleTextMultipleTags: FC<
               )}
             />
           </div>
-          <div className="mt-8 grid grid-cols-6 gap-4">
-            <div className="col-span-5">
+          <div className="mt-8 gap-4">
+            <div>
               <DropdownSearch
                 options={localTags}
                 value={
@@ -236,12 +291,15 @@ const SelectMultipleTextMultipleTags: FC<
                 onChange={setTagSelection}
               />
             </div>
-            <div className="mx-auto mt-2">
+          </div>
+          <div className="mt-8 pag-4">
+            <div className="mx-auto mb-4 col-start-10">
               <Button
                 className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                onClick={() => handleSelectAll()}
+                onClick={() => handleSubmitExample()}
+                disabled={!selectionInfo.length}
               >
-                Select all text area
+                Submit
               </Button>
             </div>
           </div>
