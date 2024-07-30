@@ -2,6 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import json
+
 from fastapi import APIRouter, Response
 
 from app.domain.schemas.base.example import (
@@ -69,15 +71,32 @@ def partial_creation_generative_example(
 def create_example(
     model: CreateExampleRequest,
 ):
-    return ExampleService().create_example(
-        model.context_id,
-        model.user_id,
-        model.model_wrong,
-        model.model_endpoint_name,
-        model.input_json,
-        model.output_json,
-        model.metadata,
-        model.tag,
+    return (
+        ExampleService().create_example_and_increment_counters(
+            model.context_id,
+            model.user_id,
+            model.model_wrong,
+            model.model_endpoint_name,
+            json.dumps(model.input_json),
+            json.dumps(model.output_json),
+            json.dumps(model.metadata),
+            model.tag,
+            model.round_id,
+            model.task_id,
+            text=model.text,
+        )
+        if model.increment_context
+        else ExampleService().create_example(
+            model.context_id,
+            model.user_id,
+            model.model_wrong,
+            model.model_endpoint_name,
+            model.input_json,
+            model.output_json,
+            model.metadata,
+            model.tag,
+            model.text,
+        )
     )
 
 

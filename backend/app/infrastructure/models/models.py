@@ -439,6 +439,7 @@ class Example(Base):
     cid = Column(ForeignKey("contexts.id"), nullable=False, index=True)
     uid = Column(ForeignKey("users.id"), index=True)
     tag = Column(Text)
+    text = Column(Text)
     input_json = Column(Text)
     output_json = Column(Text)
     metadata_json = Column(Text)
