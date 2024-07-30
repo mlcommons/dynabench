@@ -198,6 +198,7 @@ const CreateInterface = () => {
                     hidden={hidden}
                     setPartialSampleId={setPartialSampleId}
                     setIsGenerativeContext={setIsGenerativeContext}
+                    userId={user.id!}
                   />
                 )}
               </div>
