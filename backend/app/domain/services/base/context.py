@@ -314,5 +314,13 @@ class ContextService:
         )
         if not contexts:
             return None
-        contexts = [json.loads(context.context_json) for context in contexts]
+        contexts = [
+            {
+                "id": context.id,
+                "round_id": context.r_realid,
+                **json.loads(context.context_json),
+            }
+            for context in contexts
+        ]
+
         return random.choice(contexts)
