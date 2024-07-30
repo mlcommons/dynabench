@@ -27,6 +27,7 @@ class ExampleRepository(AbstractRepository):
         output_json: Json,
         metadata: Json,
         tag: str,
+        text: str,
     ) -> dict:
         return self.add(
             {
@@ -42,6 +43,7 @@ class ExampleRepository(AbstractRepository):
                 "split": "undecided",
                 "flagged": 0,
                 "total_verified": 0,
+                "text": text,
             }
         )
 
