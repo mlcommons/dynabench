@@ -166,7 +166,7 @@ const SelectMultipleTextMultipleTags: FC<
     <AnnotationInstruction
       placement="top"
       tooltip={
-        instruction?.preselection_tag ||
+        instruction?.tooltip ||
         "Select the tag and the text according to the tag"
       }
     >
