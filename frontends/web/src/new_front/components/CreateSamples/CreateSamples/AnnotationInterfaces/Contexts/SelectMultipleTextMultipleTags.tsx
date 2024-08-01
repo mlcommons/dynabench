@@ -1,9 +1,9 @@
-import React, { FC, useEffect, useState, useContext } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { TokenAnnotator } from "react-text-annotate";
-import useFetch from "use-http";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
+import useFetch from "use-http";
 
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
@@ -59,6 +59,7 @@ const SelectMultipleTextMultipleTags: FC<
   const [text, setText] = useState<string | undefined>(undefined);
   const [contextId, setContextId] = useState<number | null>(null);
   const [realRoundId, setRealRoundId] = useState<number | null>(null);
+  const [loading2, setLoading2] = useState<boolean>(false);
 
   const submitButton: HTMLElement | null = document.getElementById("submit");
 
@@ -95,31 +96,47 @@ const SelectMultipleTextMultipleTags: FC<
     }
   }, [preferedTag]);
 
-  const handleSubmit = async (value: string | null) => {
+  useEffect(() => {
+    text?.length && setLoading2(false);
+  }, [text]);
+
+  const handleSubmit = (value: string | null) => {
     !value && (value = tagSelection.back_label);
     submitButton && (submitButton.hidden = false);
-    const bringContext = await post(
-      "/context/get_random_context_from_key_value/",
+    setLoading2(true);
+    setSelectionInfo([]);
+    fetch(
+      `${process.env.REACT_APP_API_HOST_2}/context/get_random_context_from_key_value/`,
       {
-        key_name: field_names_for_the_model?.tag_name_search,
-        key_value: value,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          key_name: field_names_for_the_model?.tag_name_search,
+          key_value: value,
+        }),
       },
-    );
-    if (response.ok) {
-      !bringContext &&
-        Swal.fire({
-          title: instruction?.context_alert_title,
-          text: instruction?.context_alert_text,
-          icon: "warning",
-          confirmButtonText: "Ok",
-        }).then(() => {
-          handleSubmit(field_names_for_the_model?.default_tag);
-        });
-      console.log("bringContext", bringContext);
-      setText(bringContext?.content);
-      setContextId(bringContext?.id);
-      setRealRoundId(bringContext?.round_id);
-    }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        !data &&
+          Swal.fire({
+            title: instruction?.context_alert_title,
+            text: instruction?.context_alert_text,
+            icon: "warning",
+            confirmButtonText: "Ok",
+          }).then(() => {
+            handleSubmit(field_names_for_the_model?.default_tag);
+          });
+        console.log("bringContext", data);
+        setText(data?.content);
+        setContextId(data?.id);
+        setRealRoundId(data?.round_id);
+      })
+      .catch((error) => {
+        console.warn("error", error);
+      });
   };
 
   const handleSelectAll = async () => {
@@ -137,11 +154,13 @@ const SelectMultipleTextMultipleTags: FC<
 
   const handleSubmitExample = async () => {
     const newSelectionInfo = cleanUpSelection(selectionInfo, "color");
-    const response = await post("/example/create_example/", {
+    const sendText = text;
+    setText(undefined);
+    await post("/example/create_example/", {
       context_id: contextId,
       user_id: userId,
       input_json: { labels: newSelectionInfo },
-      text: text,
+      text: sendText,
       task_id: taskId,
       round_id: realRoundId,
       increment_context: true,
@@ -172,7 +191,7 @@ const SelectMultipleTextMultipleTags: FC<
     >
       {!text ? (
         <>
-          {!loading ? (
+          {!loading && !loading2 ? (
             <div className="mt-8">
               {instruction?.preselection && (
                 <div className="pb-4 text-l font-bold">
@@ -202,7 +221,11 @@ const SelectMultipleTextMultipleTags: FC<
               <div className="mr-2 text-letter-color mb-5">
                 Data is being prepared, please wait...
               </div>
-              <PacmanLoader color="#ccebd4" loading={loading} size={50} />
+              <PacmanLoader
+                color="#ccebd4"
+                loading={loading || loading2}
+                size={50}
+              />
             </div>
           )}
         </>
@@ -222,6 +245,20 @@ const SelectMultipleTextMultipleTags: FC<
                 >
                   Select all text area
                 </Button>
+              </div>
+            </div>
+            <div className="my-8 gap-4 grid grid-cols-3">
+              <div className="col-span-2">
+                <DropdownSearch
+                  options={localTags}
+                  value={
+                    tagSelection?.value ||
+                    `Select a ${
+                      field_names_for_the_model?.tag_name_for_display || "tag"
+                    }`
+                  }
+                  onChange={setTagSelection}
+                />
               </div>
             </div>
             <TokenAnnotator
@@ -277,30 +314,27 @@ const SelectMultipleTextMultipleTags: FC<
                 </mark>
               )}
             />
-          </div>
-          <div className="mt-8 gap-4">
-            <div>
-              <DropdownSearch
-                options={localTags}
-                value={
-                  tagSelection?.value ||
-                  `Select a ${
-                    field_names_for_the_model?.tag_name_for_display || "tag"
-                  }`
-                }
-                onChange={setTagSelection}
-              />
-            </div>
-          </div>
-          <div className="mt-8 pag-4">
-            <div className="mx-auto mb-4 col-start-10">
-              <Button
-                className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                onClick={() => handleSubmitExample()}
-                disabled={!selectionInfo.length}
-              >
-                Submit
-              </Button>
+            <div className="mt-8 gap-4 grid grid-cols-6 ">
+              <div className="mb-4">
+                <Button
+                  className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                  onClick={() => handleSubmitExample()}
+                  disabled={!selectionInfo.length || loading}
+                >
+                  {loading ? "Loading..." : "Submit"}
+                </Button>
+              </div>
+              <div className="pl-2 col-span-2 col-start-8" id="switchContext">
+                <Button
+                  className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                  onClick={() => {
+                    setText(undefined);
+                    handleSubmit(null);
+                  }}
+                >
+                  Skip and load a new text
+                </Button>
+              </div>
             </div>
           </div>
         </>
