@@ -40,7 +40,9 @@ const DropdownSearch: FC<DropdownSearchProps> = ({
           <div className="flex justify-between w-full">
             <span className="pt-1">{value}</span>
             <svg
-              className="flex mt-1 -mr-1 text-gray-800 h-7 w-7 "
+              className={`flex mt-1 -mr-1 text-gray-800 h-7 w-7 ${
+                open && "transform rotate-180"
+              }`}
               viewBox="0 0 20 20"
               fill="currentColor"
               aria-hidden="true"
