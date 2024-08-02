@@ -1,30 +1,30 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState } from "react";
 
-type DropdownProps = {
+type DropdownSearchProps = {
   options: any[];
-  placeholder: string;
+  value: string;
   onChange: (prompt: any) => void;
   disabled?: boolean;
-  allowSearch?: boolean;
 };
 
-const Dropdown: FC<DropdownProps> = ({
+const DropdownSearch: FC<DropdownSearchProps> = ({
   options,
-  placeholder,
+  value,
   onChange,
   disabled = false,
-  allowSearch = false,
 }) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredOptions = options.filter(
+    (option) => option.value?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  useEffect(() => {
-    open && setSearchTerm("");
-  }, [open]);
+  const handleOnClick = (option: any) => {
+    setOpen(false);
+    setSearchTerm("");
+    onChange(option);
+  };
 
   return (
     <div className="w-full pb-6 text-right ">
@@ -38,9 +38,11 @@ const Dropdown: FC<DropdownProps> = ({
           onClick={() => setOpen(!open)}
         >
           <div className="flex justify-between w-full">
-            <span className="pt-1">{placeholder}</span>
+            <span className="pt-1">{value}</span>
             <svg
-              className="flex mt-1 -mr-1 text-gray-800 h-7 w-7 "
+              className={`flex mt-1 -mr-1 text-gray-800 h-7 w-7 ${
+                open && "transform rotate-180"
+              }`}
               viewBox="0 0 20 20"
               fill="currentColor"
               aria-hidden="true"
@@ -64,28 +66,23 @@ const Dropdown: FC<DropdownProps> = ({
         aria-labelledby="menu-button"
       >
         <div className="py-1" role="none">
-          {allowSearch && (
-            <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          )}
+          <input
+            type="text"
+            className="w-full p-2 border border-gray-300 rounded"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           {filteredOptions.map((option, key) => (
             <button
               key={key}
               type="button"
               className="block w-full px-4 py-2 text-left text-gray-700 border-solid rounded-sm focus:outline-none hover:bg-gray-100 hover:text-gray-900"
               role="menuitem"
-              onClick={() => {
-                setOpen(false);
-                onChange(option);
-              }}
+              onClick={() => handleOnClick(option)}
               disabled={disabled}
             >
-              {option}
+              {option.value}
             </button>
           ))}
         </div>
@@ -94,4 +91,4 @@ const Dropdown: FC<DropdownProps> = ({
   );
 };
 
-export default Dropdown;
+export default DropdownSearch;

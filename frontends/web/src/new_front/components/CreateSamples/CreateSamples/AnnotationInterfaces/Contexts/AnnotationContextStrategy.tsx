@@ -34,6 +34,7 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
   hidden,
   setIsGenerativeContext,
   setPartialSampleId,
+  userId,
 }) => {
   const [goalRender, setGoalRender] =
     useState<ReactElement<ContextConfigType & ContextAnnotationFactoryType>>();
@@ -51,6 +52,7 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
             hidden,
             setIsGenerativeContext,
             setPartialSampleId,
+            userId,
             ...config,
           }}
         />,
