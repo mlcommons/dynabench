@@ -6,7 +6,7 @@ export type InfoContextTask = {
 };
 
 export type ConfigurationTask = {
-  goal: object;
+  goal: object | null;
   context: object;
   user_input: object[];
   required_fields: string[];

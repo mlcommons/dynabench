@@ -8,6 +8,7 @@
     "context": {
         "plain-text": "PlainText",
         "selectable-text": "SelectableText",
+        "select-multiple-text-multiple-tags": "SelectMultipleTextMultipleTags",
         "zoom_image": "ZoomImage",
         "audio": "Audio",
         "modify-original-text": "ModifyOriginalText",

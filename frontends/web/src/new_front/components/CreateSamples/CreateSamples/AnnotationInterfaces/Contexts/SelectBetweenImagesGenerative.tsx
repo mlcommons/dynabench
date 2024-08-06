@@ -28,7 +28,8 @@ const SelectBetweenImagesGenerative: FC<
   const [promptHistory, setPromptHistory] = useState<any[]>([]);
   const [showQueue, setShowQueue] = useState<boolean>(false);
   const [positionQueue, setPositionQueue] = useState<any>({});
-  const [firstMessageReceived, setFirstMessageReceived] = useState<boolean>(false);
+  const [firstMessageReceived, setFirstMessageReceived] =
+    useState<boolean>(false);
   const [allowsGeneration, setAllowsGeneration] = useState(true);
   const [showLoader, setShowLoader] = useState(false);
   const [showImages, setShowImages] = useState<any[]>([]);
@@ -96,11 +97,11 @@ const SelectBetweenImagesGenerative: FC<
 
   const handlePopUp = () => {
     Swal.fire({
-      title: "Example already submitted",
-      text: "You selected a prompt from your history and we are showing the images previously generated for this prompt. Modify the prompt to get new image generation.",
+      title: "Prompt already in history of prompts",
+      text: "For prompts in your prompt history we are showing the images previously generated for this prompt. If you would like to see new images modify the prompt",
       icon: "info",
     });
-  }
+  };
 
   const runCheckers = async (prompt: string) => {
     const checkIfPromptExistsForUser = await post(
@@ -114,16 +115,25 @@ const SelectBetweenImagesGenerative: FC<
     if (checkIfPromptExistsForUser) {
       setFirstMessageReceived(true);
     }
-    const promptWithMoreThanOneHundredSubmissions = await post(
-      "/historical_data/get_occurrences_with_more_than_one_hundred",
+    const responseHistory = await fetch(
+      `${process.env.REACT_APP_API_HOST_2}/historical_data/get_occurrences_with_more_than_one_hundred`,
       {
-        task_id: taskId,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          task_id: taskId,
+        }),
       },
     );
 
+    const promptWithMoreThanOneHundredSubmissions =
+      await responseHistory.json();
+
     const checkIfPromptIsInOccurrences =
       promptWithMoreThanOneHundredSubmissions.some(
-        (item: any) => item.data === prompt.trim(),
+        (item: any) => item === prompt.trim(),
       );
     if (checkIfPromptIsInOccurrences) {
       Swal.fire({
@@ -361,7 +371,7 @@ const SelectBetweenImagesGenerative: FC<
 
   useEffect(() => {
     firstMessageReceived && handlePopUp();
-  }, [firstMessageReceived])
+  }, [firstMessageReceived]);
 
   return (
     <>
@@ -379,6 +389,7 @@ const SelectBetweenImagesGenerative: FC<
                 placeholder="Click this dropdown to see submitted prompts"
                 onChange={handlePromptHistory}
                 disabled={!allowsGeneration}
+                allowSearch={instruction.dropdown_search || false}
               />
             </AnnotationInstruction>
             <AnnotationInstruction
