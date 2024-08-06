@@ -330,7 +330,9 @@ const ChatWithInstructions: FC<
                   <div className="flex items-end justify-end gap-4">
                     <GeneralButton
                       text="I understand"
-                      onClick={() => setReadInstructions(true)}
+                      onClick={() => {setReadInstructions(true);
+                        setIsGenerativeContext(false);}
+                      }
                       className="border-0 font-weight-bold light-gray-bg task-action-btn"
                     />
                   </div>
@@ -365,7 +367,7 @@ const ChatWithInstructions: FC<
                         <div>
                           <p className="text-lg font-bold">
                             The scenario details are available on the right. You
-                            will need to answer two questions:
+                            need to answer two questions:
                           </p>
                           <ol>
                             <li> 1) What healthcare service do you need?</li>
@@ -377,8 +379,8 @@ const ChatWithInstructions: FC<
                           <br />
                           <p style={{ color: "MediumSeaGreen" }}>
                             Keep track of the methods you are using in the
-                            textbox below. Once you click “Submit” the scenario
-                            questions will appear.
+                            textbox below, then answer the questions at the 
+                            bottom of the page.
                           </p>
                         </div>
                         <textarea
