@@ -262,7 +262,7 @@ const SelectMultipleTextMultipleTags: FC<
               </div>
             </div>
             <TokenAnnotator
-              tokens={text.split(" ")}
+              tokens={text.split(/\s/g)}
               value={selectionInfo}
               onChange={(value) => handleChange(value)}
               getSpan={(span) => ({
