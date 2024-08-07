@@ -35,15 +35,15 @@ const SelectBetweenImagesGenerative: FC<
   const [showImages, setShowImages] = useState<any[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [artifactsInput, setArtifactsInput] = useState<any>(
-    generative_context.artifacts
+    generative_context.artifacts,
   );
   const [prompt, setPrompt] = useState(
-    "Type your prompt here (e.g. a kid sleeping in a red pool of paint)"
+    "Type your prompt here (e.g. a kid sleeping in a red pool of paint)",
   );
   const { post, response } = useFetch();
   const { user } = useContext(UserContext);
   const { modelInputs, metadataExample, updateModelInputs } = useContext(
-    CreateInterfaceContext
+    CreateInterfaceContext,
   );
   const neccessaryFields = ["original_prompt"];
   const [selectedImage, setSelectedImage] = useState<string>("");
@@ -54,7 +54,7 @@ const SelectBetweenImagesGenerative: FC<
       {
         task_id: taskId,
         user_id: user.id,
-      }
+      },
     );
     if (response.ok) {
       setPromptHistory(history);
@@ -83,7 +83,7 @@ const SelectBetweenImagesGenerative: FC<
 
   const saveHistoricalData = async (
     text: string,
-    setPromptHistory: (value: any[]) => void
+    setPromptHistory: (value: any[]) => void,
   ) => {
     const history = await post("/historical_data/save_historical_data", {
       task_id: taskId,
@@ -110,21 +110,30 @@ const SelectBetweenImagesGenerative: FC<
         task_id: taskId,
         user_id: user.id,
         data: prompt.trim(),
-      }
+      },
     );
     if (checkIfPromptExistsForUser) {
       setFirstMessageReceived(true);
     }
-    const promptWithMoreThanOneHundredSubmissions = await post(
-      "/historical_data/get_occurrences_with_more_than_one_hundred",
+    const responseHistory = await fetch(
+      `${process.env.REACT_APP_API_HOST_2}/historical_data/get_occurrences_with_more_than_one_hundred`,
       {
-        task_id: taskId,
-      }
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          task_id: taskId,
+        }),
+      },
     );
+
+    const promptWithMoreThanOneHundredSubmissions =
+      await responseHistory.json();
 
     const checkIfPromptIsInOccurrences =
       promptWithMoreThanOneHundredSubmissions.some(
-        (item: any) => item.data === prompt.trim()
+        (item: any) => item === prompt.trim(),
       );
     if (checkIfPromptIsInOccurrences) {
       Swal.fire({
@@ -141,7 +150,7 @@ const SelectBetweenImagesGenerative: FC<
       neccessaryFields.every(
         (item) =>
           modelInputs.hasOwnProperty(item) ||
-          metadataExample.hasOwnProperty(item)
+          metadataExample.hasOwnProperty(item),
       )
     ) {
       setShowLoader(true);
@@ -164,7 +173,7 @@ const SelectBetweenImagesGenerative: FC<
                 prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
               },
             }),
-          }
+          },
         );
 
         const imagesHttp = await response.json();
@@ -202,7 +211,7 @@ const SelectBetweenImagesGenerative: FC<
         {
           round_id: realRoundId,
           user_id: user.id,
-        }
+        },
       );
     } else {
       Swal.fire({
@@ -259,7 +268,7 @@ const SelectBetweenImagesGenerative: FC<
               prompt_with_more_than_one_hundred: checkIfPromptIsInOccurrences,
             },
           }),
-        }
+        },
       );
 
       const imagesHttp = await response.json();
@@ -314,7 +323,7 @@ const SelectBetweenImagesGenerative: FC<
           user_id: user.id,
           round_id: realRoundId,
           task_id: taskId,
-        }
+        },
       );
       if (response.ok) {
         setPartialSampleId(partialSampleId.id);
