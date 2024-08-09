@@ -226,6 +226,7 @@ class ExampleService:
         context_info = {
             "validation_user_input": config_yaml.get("validation_user_input"),
             "validation_context": config_yaml.get("validation_context"),
+            "validation_options": config_yaml.get("validation_options"),
         }
         return context_info
 
