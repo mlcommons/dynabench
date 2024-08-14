@@ -106,7 +106,7 @@ const SelectMultipleTextMultipleTags: FC<
     setLoading2(true);
     setSelectionInfo([]);
     fetch(
-      `${process.env.REACT_APP_API_HOST_2}/context/get_random_context_from_key_value/`,
+      `${process.env.REACT_APP_API_HOST_2}/context/get_random_context_from_key_value`,
       {
         method: "POST",
         headers: {
@@ -156,7 +156,7 @@ const SelectMultipleTextMultipleTags: FC<
     const newSelectionInfo = cleanUpSelection(selectionInfo, "color");
     const sendText = text;
     setText(undefined);
-    await post("/example/create_example/", {
+    await post("/example/create_example", {
       context_id: contextId,
       user_id: userId,
       input_json: { labels: newSelectionInfo },
@@ -262,7 +262,7 @@ const SelectMultipleTextMultipleTags: FC<
               </div>
             </div>
             <TokenAnnotator
-              tokens={text.split(" ")}
+              tokens={text.split(/\s/g)}
               value={selectionInfo}
               onChange={(value) => handleChange(value)}
               getSpan={(span) => ({
