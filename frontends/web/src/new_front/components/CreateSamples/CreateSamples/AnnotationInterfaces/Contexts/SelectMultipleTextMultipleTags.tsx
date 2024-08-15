@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import { TokenAnnotator, TextAnnotator } from "react-text-annotate";
+import { TextAnnotator } from "react-text-annotate";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
@@ -10,6 +10,7 @@ import { ContextAnnotationFactoryType } from "new_front/types/createSamples/crea
 
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import DropdownSearch from "new_front/components/Inputs/DropdownSearch";
+import MultiSelect from "new_front/components/Lists/MultiSelect";
 
 import generateLightRandomColor from "new_front/utils/helpers/functions/GenerateRandomLightColor";
 
@@ -21,7 +22,7 @@ type Dictionary = { [key: string]: any };
 
 const cleanUpSelection = (
   selection: Array<Dictionary>,
-  keyToRemove: string,
+  keyToRemove: string
 ) => {
   const result: Array<Record<string, any>> = [];
 
@@ -60,6 +61,7 @@ const SelectMultipleTextMultipleTags: FC<
   const [contextId, setContextId] = useState<number | null>(null);
   const [realRoundId, setRealRoundId] = useState<number | null>(null);
   const [loading2, setLoading2] = useState<boolean>(false);
+  const [extraLabel, setExtraLabel] = useState<any>({});
 
   const submitButton: HTMLElement | null = document.getElementById("submit");
 
@@ -91,7 +93,7 @@ const SelectMultipleTextMultipleTags: FC<
     if (preferedTag) {
       setTagSelection(localTags.find((tag: any) => tag.value === preferedTag));
       handleSubmit(
-        localTags.find((tag: any) => tag.value === preferedTag)?.back_label,
+        localTags.find((tag: any) => tag.value === preferedTag)?.back_label
       );
     }
   }, [preferedTag]);
@@ -116,7 +118,7 @@ const SelectMultipleTextMultipleTags: FC<
           key_name: field_names_for_the_model?.tag_name_search,
           key_value: value,
         }),
-      },
+      }
     )
       .then((response) => response.json())
       .then((data) => {
@@ -159,7 +161,7 @@ const SelectMultipleTextMultipleTags: FC<
     await post("/example/create_example/", {
       context_id: contextId,
       user_id: userId,
-      input_json: { labels: newSelectionInfo },
+      input_json: { labels: newSelectionInfo, ...extraLabel },
       text: sendText,
       task_id: taskId,
       round_id: realRoundId,
@@ -177,6 +179,10 @@ const SelectMultipleTextMultipleTags: FC<
     }
   };
 
+  const handlemultipleSel = (data: any) => {
+    setExtraLabel(data);
+  };
+
   const handleChange = (value: any) => {
     const valueLength: number = value?.length;
     const regex = /\S/g;
@@ -186,11 +192,11 @@ const SelectMultipleTextMultipleTags: FC<
     }
     const start: number = Math.min(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     const end: number = Math.max(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     valueLength > 0 && console.log("last value", value[valueLength - 1].start);
     if (
@@ -205,7 +211,7 @@ const SelectMultipleTextMultipleTags: FC<
     const already = selectionInfo.find(
       (val: any) =>
         (val.start <= start && val.end >= start) ||
-        (val.start <= end && val.end >= start),
+        (val.start <= end && val.end >= start)
     );
     value[valueLength - 1].start = start;
     value[valueLength - 1].end = end;
@@ -303,6 +309,22 @@ const SelectMultipleTextMultipleTags: FC<
                   tag: tagSelection.back_label,
                   color: tagColors[tagSelection.back_label],
                 })}
+              />
+            </div>
+            <div>
+              <MultiSelect
+                options={
+                  generative_context?.artifacts?.additional_label?.options
+                }
+                instructions={
+                  generative_context?.artifacts?.additional_label
+                    ?.instructions || "Choose any that apply"
+                }
+                field_name_for_the_model={
+                  generative_context?.artifacts?.additional_label
+                    ?.extra_label || "content"
+                }
+                onInputChange={handlemultipleSel}
               />
             </div>
             <div className="mt-8 gap-4 grid grid-cols-6 ">
