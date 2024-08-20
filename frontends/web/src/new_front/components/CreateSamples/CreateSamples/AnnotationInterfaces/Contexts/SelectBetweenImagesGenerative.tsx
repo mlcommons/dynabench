@@ -146,6 +146,7 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const generateImages = async () => {
+    setFirstMessageReceived(false);
     if (
       neccessaryFields.every(
         (item) =>
@@ -187,7 +188,7 @@ const SelectBetweenImagesGenerative: FC<
             setShowQueue(true);
             setPositionQueue(imagesHttp);
             await saveHistoricalData(prompt, setPromptHistory);
-            setTimeout(generateImages, 25000);
+            setTimeout(generateImages, 15000);
           }
         } else {
           Swal.fire({
@@ -236,6 +237,7 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const handlePromptHistory = async (prompt: string) => {
+    setFirstMessageReceived(false);
     setShowLoader(true);
     setArtifactsInput({
       ...artifactsInput,
@@ -283,7 +285,7 @@ const SelectBetweenImagesGenerative: FC<
           setShowQueue(true);
           setPositionQueue(imagesHttp);
           await saveHistoricalData(prompt, setPromptHistory);
-          setTimeout(generateImages, 25000);
+          setTimeout(generateImages, 15000);
         }
       } else {
         Swal.fire({
