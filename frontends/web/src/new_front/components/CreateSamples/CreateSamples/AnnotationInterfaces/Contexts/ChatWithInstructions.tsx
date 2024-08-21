@@ -331,8 +331,7 @@ const ChatWithInstructions: FC<
                   <div className="flex items-end justify-end gap-4">
                     <GeneralButton
                       text="I understand"
-                      onClick={() => setReadInstructions(true)
-                      }
+                      onClick={() => setReadInstructions(true)}
                       className="border-0 font-weight-bold light-gray-bg task-action-btn"
                     />
                   </div>
