@@ -20,6 +20,7 @@ export type ConfigurationTask = {
 export type ValidationConfigurationTask = {
   validation_user_input: object[];
   validation_context: object[];
+  validation_options?: string[];
 };
 
 type ModelOutput = {
