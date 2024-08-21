@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import { TokenAnnotator } from "react-text-annotate";
+import { TextAnnotator } from "react-text-annotate";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
@@ -10,6 +10,7 @@ import { ContextAnnotationFactoryType } from "new_front/types/createSamples/crea
 
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import DropdownSearch from "new_front/components/Inputs/DropdownSearch";
+import MultiSelect from "new_front/components/Lists/MultiSelect";
 
 import generateLightRandomColor from "new_front/utils/helpers/functions/GenerateRandomLightColor";
 
@@ -60,6 +61,7 @@ const SelectMultipleTextMultipleTags: FC<
   const [contextId, setContextId] = useState<number | null>(null);
   const [realRoundId, setRealRoundId] = useState<number | null>(null);
   const [loading2, setLoading2] = useState<boolean>(false);
+  const [extraLabel, setExtraLabel] = useState<any>({});
 
   const submitButton: HTMLElement | null = document.getElementById("submit");
 
@@ -140,13 +142,13 @@ const SelectMultipleTextMultipleTags: FC<
   };
 
   const handleSelectAll = async () => {
-    const tokens = text?.split(" ");
+    const tokens = text?.split("");
     setSelectionInfo([
       {
         start: 0,
         end: tokens?.length,
         tag: tagSelection.back_label,
-        tokens: tokens,
+        text: text,
         color: tagColors[tagSelection.back_label],
       },
     ]);
@@ -159,7 +161,7 @@ const SelectMultipleTextMultipleTags: FC<
     await post("/example/create_example", {
       context_id: contextId,
       user_id: userId,
-      input_json: { labels: newSelectionInfo },
+      input_json: { labels: newSelectionInfo, ...extraLabel },
       text: sendText,
       task_id: taskId,
       round_id: realRoundId,
@@ -177,8 +179,43 @@ const SelectMultipleTextMultipleTags: FC<
     }
   };
 
+  const handlemultipleSel = (data: any) => {
+    setExtraLabel(data);
+  };
+
   const handleChange = (value: any) => {
-    setSelectionInfo(value);
+    const valueLength: number = value?.length;
+    const regex = /\S/g;
+    if (valueLength < selectionInfo.length) {
+      setSelectionInfo(value);
+      return;
+    }
+    const start: number = Math.min(
+      value[valueLength - 1].start,
+      value[valueLength - 1].end,
+    );
+    const end: number = Math.max(
+      value[valueLength - 1].start,
+      value[valueLength - 1].end,
+    );
+    valueLength > 0 && console.log("last value", value[valueLength - 1].start);
+    if (
+      valueLength > 0 &&
+      (isNaN(value[valueLength - 1].end) ||
+        value[valueLength - 1].text === "" ||
+        isNaN(value[valueLength - 1].start) ||
+        !value[valueLength - 1].text.match(regex))
+    ) {
+      return;
+    }
+    const already = selectionInfo.find(
+      (val: any) =>
+        (val.start <= start && val.end >= start) ||
+        (val.start <= end && val.end >= start),
+    );
+    value[valueLength - 1].start = start;
+    value[valueLength - 1].end = end;
+    !already && setSelectionInfo(value);
   };
 
   return (
@@ -261,59 +298,35 @@ const SelectMultipleTextMultipleTags: FC<
                 />
               </div>
             </div>
-            <TokenAnnotator
-              tokens={text.split(/\s/g)}
-              value={selectionInfo}
-              onChange={(value) => handleChange(value)}
-              getSpan={(span) => ({
-                ...span,
-                tag: tagSelection.back_label,
-                color: tagColors[tagSelection.back_label],
-              })}
-              renderMark={(props) => (
-                <mark
-                  key={props.key}
-                  onClick={() =>
-                    props.onClick({
-                      start: props.start,
-                      end: props.end,
-                      tag: props.tag,
-                      color: props.color,
-                      content: props.content,
-                    })
-                  }
-                  style={{
-                    padding: ".2em .3em",
-                    margin: "0 .25em",
-                    lineHeight: "1",
-                    display: "inline-block",
-                    borderRadius: ".25em",
-                    background: tagColors[props.tag],
-                  }}
-                >
-                  {props.content}{" "}
-                  <span
-                    style={{
-                      boxSizing: "border-box",
-                      content: "attr(data-entity)",
-                      fontSize: ".55em",
-                      lineHeight: "1",
-                      padding: ".35em .35em",
-                      borderRadius: ".35em",
-                      textTransform: "uppercase",
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      margin: "0 0 .15rem .5rem",
-                      background: "#fff",
-                      fontWeight: "700",
-                    }}
-                  >
-                    {" "}
-                    {props.tag}
-                  </span>
-                </mark>
-              )}
-            />
+            <div>
+              <TextAnnotator
+                style={{ whiteSpace: "pre-line" }}
+                content={text}
+                value={selectionInfo}
+                onChange={(value) => handleChange(value)}
+                getSpan={(span) => ({
+                  ...span,
+                  tag: tagSelection.back_label,
+                  color: tagColors[tagSelection.back_label],
+                })}
+              />
+            </div>
+            <div>
+              <MultiSelect
+                options={
+                  generative_context?.artifacts?.additional_label?.options
+                }
+                instructions={
+                  generative_context?.artifacts?.additional_label
+                    ?.instructions || "Choose any that apply"
+                }
+                field_name_for_the_model={
+                  generative_context?.artifacts?.additional_label
+                    ?.extra_label || "content"
+                }
+                onInputChange={handlemultipleSel}
+              />
+            </div>
             <div className="mt-8 gap-4 grid grid-cols-6 ">
               <div className="mb-4">
                 <Button
