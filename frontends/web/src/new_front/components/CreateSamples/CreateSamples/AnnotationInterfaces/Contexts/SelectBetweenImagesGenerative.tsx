@@ -97,8 +97,8 @@ const SelectBetweenImagesGenerative: FC<
 
   const handlePopUp = () => {
     Swal.fire({
-      title: "Prompt already in history of prompts",
-      text: "For prompts in your prompt history we are showing the images previously generated for this prompt. If you would like to see new images modify the prompt",
+      title: "This prompt is already in your history!",
+      text: "We will show the same images previously generated for it. Modify the prompt to see different images.",
       icon: "info",
     });
   };
@@ -137,8 +137,8 @@ const SelectBetweenImagesGenerative: FC<
       );
     if (checkIfPromptIsInOccurrences) {
       Swal.fire({
-        title: "Congrats! You have found a sample prompt!",
-        text: "We've already found this issue so it won't contribute to your score. Now go and find a different prompt and get points!",
+        title: "This prompt has already been submitted by other users",
+        text: "It won’t contribute to your score. Modify the prompt or think of a different one.",
         icon: "success",
       });
     }
@@ -146,6 +146,7 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const generateImages = async () => {
+    setFirstMessageReceived(false);
     if (
       neccessaryFields.every(
         (item) =>
@@ -187,7 +188,7 @@ const SelectBetweenImagesGenerative: FC<
             setShowQueue(true);
             setPositionQueue(imagesHttp);
             await saveHistoricalData(prompt, setPromptHistory);
-            setTimeout(generateImages, 25000);
+            setTimeout(generateImages, 10000);
           }
         } else {
           Swal.fire({
@@ -236,6 +237,7 @@ const SelectBetweenImagesGenerative: FC<
   };
 
   const handlePromptHistory = async (prompt: string) => {
+    setFirstMessageReceived(false);
     setShowLoader(true);
     setArtifactsInput({
       ...artifactsInput,
@@ -283,7 +285,7 @@ const SelectBetweenImagesGenerative: FC<
           setShowQueue(true);
           setPositionQueue(imagesHttp);
           await saveHistoricalData(prompt, setPromptHistory);
-          setTimeout(generateImages, 25000);
+          setTimeout(generateImages, 10000);
         }
       } else {
         Swal.fire({
