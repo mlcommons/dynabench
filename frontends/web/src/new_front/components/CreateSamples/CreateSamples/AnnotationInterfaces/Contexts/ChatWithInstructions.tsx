@@ -114,7 +114,7 @@ const ChatWithInstructions: FC<
       if (redirectUrl) {
         Swal.fire({
           title: "You have reached the necessary examples",
-          text: "You will be redirected to the third party provider",
+          text: "You will be redirected to the post-survey.",
           icon: "success",
           confirmButtonText: "Ok",
         }).then(() => {
@@ -247,8 +247,8 @@ const ChatWithInstructions: FC<
                         1) What healthcare service do you need? (e.g. A&E or routine GP follow-up)
                         <br />
                         <br />
-                        2) Why did you make the choice you did? Please name any
-                        specific medical conditions relevant to your decision.
+                        2) Why did you make the choice you did? Please name all of the
+                        specific medical conditions you consider relevant to your decision. (e.g. suspected broken bone)
                         <br />
                         <br />
                         The scenario (available below and on the next page)
@@ -270,7 +270,8 @@ const ChatWithInstructions: FC<
                             and how well it works for you. Therefore, it is 
                             essential that you{" "}<strong>only use your own  
                             words,</strong> and do not copy and paste from the 
-                            scenario text, or from any other source.
+                            scenario text, or from any other source. Please do not 
+                            use additional external sources.
                           </p>
                         </>
                       ) : (
@@ -330,8 +331,7 @@ const ChatWithInstructions: FC<
                   <div className="flex items-end justify-end gap-4">
                     <GeneralButton
                       text="I understand"
-                      onClick={() => {setReadInstructions(true);
-                        setIsGenerativeContext(false);}
+                      onClick={() => {setReadInstructions(true)}
                       }
                       className="border-0 font-weight-bold light-gray-bg task-action-btn"
                     />
@@ -367,7 +367,7 @@ const ChatWithInstructions: FC<
                         <div>
                           <p className="text-lg font-bold">
                             The scenario details are available on the right. You
-                            need to answer two questions:
+                            will need to answer two questions:
                           </p>
                           <ol>
                             <li> 1) What healthcare service do you need?</li>
@@ -379,8 +379,9 @@ const ChatWithInstructions: FC<
                           <br />
                           <p style={{ color: "MediumSeaGreen" }}>
                             Keep track of the methods you are using in the
-                            textbox below, then answer the questions at the 
-                            bottom of the page.
+                            textbox below. The questions will appear at the 
+                            bottom of the page after you have finished putting 
+                            in your approach.
                           </p>
                         </div>
                         <textarea
