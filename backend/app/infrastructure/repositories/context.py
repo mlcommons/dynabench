@@ -74,3 +74,10 @@ class ContextRepository(AbstractRepository):
             .filter(self.model.r_realid == real_round_id)
             .all()
         )
+
+    def get_context_by_key_value_in_contextjson(self, search_txt: str):
+        return (
+            self.session.query(self.model)
+            .filter(self.model.context_json.like(search_txt))
+            .all()
+        )

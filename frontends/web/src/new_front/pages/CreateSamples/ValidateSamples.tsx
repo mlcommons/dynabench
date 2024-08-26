@@ -141,7 +141,13 @@ const ValidateSamples: FC = () => {
             )}
             <RadioButton
               instructions="Actions"
-              options={["👍 Correct", "👎 Incorrect", "🚩 Flag"]}
+              options={
+                validationConfigInfo.validation_options || [
+                  "👍 Correct",
+                  "👎 Incorrect",
+                  "🚩 Flag",
+                ]
+              }
               field_name_for_the_model="label"
               onInputChange={(input) => {
                 setLabel(input.label);

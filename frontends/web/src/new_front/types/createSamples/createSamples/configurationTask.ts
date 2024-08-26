@@ -6,7 +6,7 @@ export type InfoContextTask = {
 };
 
 export type ConfigurationTask = {
-  goal: object;
+  goal: object | null;
   context: object;
   user_input: object[];
   required_fields: string[];
@@ -20,6 +20,7 @@ export type ConfigurationTask = {
 export type ValidationConfigurationTask = {
   validation_user_input: object[];
   validation_context: object[];
+  validation_options?: string[];
 };
 
 type ModelOutput = {
