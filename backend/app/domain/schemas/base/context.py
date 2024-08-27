@@ -21,3 +21,8 @@ class GetGenerativeContextRequest(BaseModel):
 class GetFilterContext(BaseModel):
     real_round_id: int
     filters: dict
+
+
+class GetRandomContext(BaseModel):
+    key_name: str
+    key_value: str

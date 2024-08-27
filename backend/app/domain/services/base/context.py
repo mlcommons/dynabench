@@ -306,3 +306,21 @@ class ContextService:
         file.file.seek(0)
         self.s3.put_object(Bucket=self.dataperf_bucket, Key=key, Body=file.file)
         return key
+
+    def get_random_context_from_key_value(self, key_name: str, key_value: dict) -> dict:
+        search_txt = f'%{key_name}":"{key_value}%'
+        contexts = self.context_repository.get_context_by_key_value_in_contextjson(
+            search_txt
+        )
+        if not contexts:
+            return None
+        contexts = [
+            {
+                "id": context.id,
+                "round_id": context.r_realid,
+                **json.loads(context.context_json),
+            }
+            for context in contexts
+        ]
+
+        return random.choice(contexts)

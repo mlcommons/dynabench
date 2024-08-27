@@ -35,6 +35,10 @@ class CreateExampleRequest(BaseModel):
     output_json: Optional[dict] = None
     metadata: Optional[dict] = None
     tag: Optional[str] = "generative"
+    increment_context: Optional[bool] = False
+    text: Optional[str] = None
+    task_id: Optional[int] = None
+    round_id: Optional[int] = None
 
 
 class PartialCreationExampleRequest(BaseModel):

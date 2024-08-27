@@ -10,4 +10,5 @@ export type ContextAnnotationFactoryType = AnnotationFactoryType & {
   contextId: number;
   taskId?: number;
   realRoundId: number;
+  userId?: number;
 };

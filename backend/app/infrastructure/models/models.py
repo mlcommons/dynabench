@@ -439,6 +439,7 @@ class Example(Base):
     cid = Column(ForeignKey("contexts.id"), nullable=False, index=True)
     uid = Column(ForeignKey("users.id"), index=True)
     tag = Column(Text)
+    text = Column(Text)
     input_json = Column(Text)
     output_json = Column(Text)
     metadata_json = Column(Text)
@@ -465,7 +466,9 @@ class Validation(Base):
     id = Column(Integer, primary_key=True)
     uid = Column(ForeignKey("users.id"), index=True)
     eid = Column(ForeignKey("examples.id"), nullable=False, index=True)
-    label = Column(Enum("flagged", "correct", "incorrect", "placeholder"))
+    label = Column(
+        Enum("flagged", "correct", "incorrect", "placeholder", "safe", "unsafe")
+    )
     mode = Column(Enum("user", "owner"))
     metadata_json = Column(Text)
 

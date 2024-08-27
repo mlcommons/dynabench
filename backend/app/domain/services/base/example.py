@@ -54,6 +54,7 @@ class ExampleService:
         output_json: Json,
         metadata: Json,
         tag: str,
+        text: str = None,
     ) -> dict:
         return self.example_repository.create_example(
             context_id,
@@ -64,6 +65,7 @@ class ExampleService:
             output_json,
             metadata,
             tag,
+            text,
         )
 
     def increment_counter_examples_submitted(
@@ -112,6 +114,7 @@ class ExampleService:
         amount_necessary_examples: int = -1,
         url_external_provider: str = None,
         provider_artifacts: dict = None,
+        text: str = None,
     ) -> dict:
         new_sample_info = self.create_example(
             context_id,
@@ -122,6 +125,7 @@ class ExampleService:
             output_json,
             metadata,
             tag,
+            text,
         )
         self.increment_counter_examples_submitted(
             round_id, user_id, context_id, task_id, model_wrong
@@ -222,6 +226,7 @@ class ExampleService:
         context_info = {
             "validation_user_input": config_yaml.get("validation_user_input"),
             "validation_context": config_yaml.get("validation_context"),
+            "validation_options": config_yaml.get("validation_options"),
         }
         return context_info
 

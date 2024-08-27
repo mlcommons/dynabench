@@ -150,7 +150,7 @@ const CreateInterface = () => {
         </div>
       ) : (
         <CreateInterfaceProvider>
-          <div className="container">
+          <div className="container mb-5">
             <div id="title">
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                 <div className="md:col-span-2">
@@ -198,6 +198,7 @@ const CreateInterface = () => {
                     hidden={hidden}
                     setPartialSampleId={setPartialSampleId}
                     setIsGenerativeContext={setIsGenerativeContext}
+                    userId={user.id!}
                   />
                 )}
               </div>

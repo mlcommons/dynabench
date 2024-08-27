@@ -5,10 +5,11 @@ export type ContextConfigType = {
   metadata?: any;
   field_names_for_the_model: any;
   generative_context: GenerativeContext;
+  tags?: object[];
 };
 
 export type GenerativeContext = {
   is_generative: boolean;
   type: string;
-  artifacts: object;
+  artifacts: any;
 };
