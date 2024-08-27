@@ -11,7 +11,7 @@ This backend is located in the `API` folder. Currently, the main functionality i
 3. Install the libraries from the `requirements` folder (`python3 -m pip install -r requirements.txt`).
 4. Run the command: `python3 server.py dev`.
 
-**Note:** Remember to set the environment variables.
+**Note:** Remember to set the environment variables to run the backend, there is a an example of this file is called .env.example inside the `API` folder.
 
 ### New Backend
 
@@ -25,6 +25,8 @@ To install the new backend, follow the same steps as for the API, with the last 
 
 `python3 -m uvicorn app.main:app --reload`
 
+**Note:** Remember to set the environment variables to run the backend, there is a an example of this file is called .env.example inside the `backend` folder.
+
 ### Frontend
 
 The main frontend is located in the `frontends/web` folder. Inside this folder, you will find a folder called `src/new_front`. About 99% of new changes should be made inside this folder.
@@ -35,7 +37,7 @@ To install the frontend, follow these steps:
 2. Run `npm i` (you may need to run it with the `--legacy-peer-deps` flag).
 3. Run `npm run start`.
 
-Remember to configure the environment variables.
+**Note:** Remember to configure the environment variables, there is a an example of this file is called .env.example inside the `frontends/web` folder.
 
 ## DB
 
