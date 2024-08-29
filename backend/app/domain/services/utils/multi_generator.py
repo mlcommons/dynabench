@@ -108,7 +108,6 @@ class ImageGenerator:
             SDRunwayMLImageProvider(model_instance="sd15"),
             SDRunwayMLImageProvider(model_instance="sd152"),
             SDRunwayMLImageProvider(model_instance="sd153"),
-            SDXLImageProvider(model_instance="sdxl1"),
             SDXLImageProvider(model_instance="sdxl2"),
             SDXLImageProvider(model_instance="sdxl3"),
             SDXLTurboImageProvider(model_instance="sdxlturbo"),

@@ -221,7 +221,7 @@ class SDXLImageProvider(ImageProvider):
             )
             message = "Success"
             if response.status_code == 200:
-                image = response.json()[0]["image"]["images"][0]
+                image = response.json()
                 dark_image = self.verify_image_darkness(image)
                 if dark_image:
                     image = forbidden_image
