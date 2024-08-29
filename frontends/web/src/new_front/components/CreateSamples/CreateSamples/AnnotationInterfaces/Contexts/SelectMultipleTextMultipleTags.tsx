@@ -284,7 +284,7 @@ const SelectMultipleTextMultipleTags: FC<
                 </Button>
               </div>
             </div>
-            <div className="my-8 gap-4 grid grid-cols-3">
+            <div className="my-3 gap-4 grid grid-cols-3 sticky top-4">
               <div className="col-span-2">
                 <DropdownSearch
                   options={localTags}
@@ -311,7 +311,7 @@ const SelectMultipleTextMultipleTags: FC<
                 })}
               />
             </div>
-            <div>
+            <div className="mt-3">
               <MultiSelect
                 options={
                   generative_context?.artifacts?.additional_label?.options
