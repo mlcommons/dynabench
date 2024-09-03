@@ -205,6 +205,7 @@ class SDXLImageProvider(ImageProvider):
         self.api_key = os.getenv("HF")
         self.session = RequestSession()
         self.model_instance = model_instance
+        self.timeout = 62
 
     def generate_images(
         self, prompt: str, num_images: int, model, endpoint, user_id

@@ -65,6 +65,21 @@ def generate_images(
         res = images.apply_async()
         print(res)
         all_responses = res.get(disable_sync_subtasks=False)
+        successes = len(
+            [response for response in all_responses if response["message"] == "Success"]
+        )
+        if (successes + num_of_current_images) < 5:
+            more_images = celery.group(
+                *[
+                    generate_nibbler_images_celery.s(
+                        prompt, num_images, models, endpoint, user_id
+                    )
+                    for _ in range(5 - successes + num_of_current_images)
+                ]
+            )
+            res = more_images.apply_async()
+            additional_responses = res.get(disable_sync_subtasks=False)
+            all_responses.extend(additional_responses)
         if (len(all_responses) + num_of_current_images) >= 5:
             job_service.remove_registry({"prompt": prompt, "user_id": user_id})
 
@@ -85,5 +100,6 @@ def generate_images(
 
             logger.critical(json.dumps(info_to_log))
     except Exception as e:
-        print(e)
+        error = e
+        print("Error: ", error)
         job_service.remove_registry({"prompt": prompt, "user_id": user_id})
