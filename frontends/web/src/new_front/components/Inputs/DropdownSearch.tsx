@@ -73,18 +73,20 @@ const DropdownSearch: FC<DropdownSearchProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          {filteredOptions.map((option, key) => (
-            <button
-              key={key}
-              type="button"
-              className="block w-full px-4 py-2 text-left text-gray-700 border-solid rounded-sm focus:outline-none hover:bg-gray-100 hover:text-gray-900"
-              role="menuitem"
-              onClick={() => handleOnClick(option)}
-              disabled={disabled}
-            >
-              {option.value}
-            </button>
-          ))}
+          <div className="max-h-96 overflow-y-auto mt-2">
+            {filteredOptions.map((option, key) => (
+              <button
+                key={key}
+                type="button"
+                className="block w-full px-4 py-2 text-left text-gray-700 border-solid rounded-sm focus:outline-none hover:bg-gray-100 hover:text-gray-900"
+                role="menuitem"
+                onClick={() => handleOnClick(option)}
+                disabled={disabled}
+              >
+                {option.value}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
