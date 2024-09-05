@@ -86,7 +86,7 @@ const SubmitInterface = (props) => {
       }
 
       setState((prevState) => ({ ...prevState, taskId: params.taskId }));
-      !setSendCallDatasets && params.taskId && handleGetTask(params.taskId);
+      !sendCallDatasets && params.taskId && handleGetTask(params.taskId);
     };
 
     fetchData();
