@@ -18,6 +18,8 @@ class Email:
 
         self.login = os.getenv("MAIL_LOGIN")
         self.pwd = os.getenv("MAIL_PASSWORD")
+        self.host = os.getenv("SMTP_HOST")
+        self.port = os.getenv("SMTP_PORT")
 
         self.local_dir = pathlib.Path(__file__).parent
 
@@ -35,7 +37,6 @@ class Email:
         return Template(template_file_content)
 
     def send(self, contact, cc_contact=None, template_name="", msg_dict={}, subject=""):
-
         try:
             msg = MIMEMultipart()
             message_template = self._read_template(template_name)
@@ -47,7 +48,7 @@ class Email:
             msg.set_charset("utf-8")
             msg["Subject"] = subject
             msg.attach(MIMEText(message, "plain"))
-            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server = smtplib.SMTP(self.host, self.port)
             server.ehlo()
             server.starttls()
             server.login(self.login, self.pwd)

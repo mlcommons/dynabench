@@ -19,6 +19,9 @@ class EmailHelper:
     def __init__(self):
         self.login = os.getenv("MAIL_LOGIN")
         self.pwd = os.getenv("MAIL_PASSWORD")
+        self.port = os.getenv("SMTP_PORT")
+        self.host = os.getenv("SMTP_HOST")
+
         self.local_dir = pathlib.Path(__file__).parent
 
     def _read_template(self, filename):
@@ -53,7 +56,7 @@ class EmailHelper:
             msg.set_charset("utf-8")
             msg["Subject"] = subject
             msg.attach(MIMEText(message, "plain"))
-            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server = smtplib.SMTP(self.host, self.port)
             server.ehlo()
             server.starttls()
             server.login(self.login, self.pwd)
