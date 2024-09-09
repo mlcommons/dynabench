@@ -74,6 +74,7 @@ class ModelService:
             "openaihm": OpenAIProvider(task_id=56),
             "coherehm": CohereProvider(task_id=56),
         }
+        self.email_sender = os.getenv("MAIL_LOGIN")
 
     def get_model_in_the_loop(self, task_id: str) -> str:
         model_in_the_loop_info = self.model_repository.get_model_in_the_loop(task_id)
@@ -135,7 +136,7 @@ class ModelService:
             )
             self.email_helper.send(
                 contact=user_email,
-                cc_contact="dynabench-site@mlcommons.org",
+                cc_contact=self.email_sender,
                 template_name="model_upload_successful.txt",
                 msg_dict={"name": model_name},
                 subject=f"Model {model_name} upload succeeded.",
@@ -163,7 +164,7 @@ class ModelService:
             )
             self.email_helper.send(
                 contact=user_email,
-                cc_contact="dynabench-site@mlcommons.org",
+                cc_contact=self.email_sender,
                 template_name="model_upload_successful.txt",
                 msg_dict={"name": model_name},
                 subject=f"Model {model_name} upload succeeded.",
@@ -371,7 +372,7 @@ class ModelService:
         )
         self.email_helper.send(
             contact=user_email,
-            cc_contact="dynabench-site@mlcommons.org",
+            cc_contact=self.email_sender,
             template_name="model_upload_successful.txt",
             msg_dict={"name": model_name},
             subject=f"Model {model_name} upload succeeded.",
@@ -390,7 +391,7 @@ class ModelService:
         if evaluate_model.status_code == 200:
             self.email_helper.send(
                 contact=user_email,
-                cc_contact="dynabench-site@mlcommons.org",
+                cc_contact=self.email_sender,
                 template_name="model_evaluation_sucessful.txt",
                 msg_dict={"name": model_name, "model_id": model["id"]},
                 subject=f"Model {model_name} evaluation succeeded.",
@@ -398,7 +399,7 @@ class ModelService:
         else:
             self.email_helper.send(
                 contact=user_email,
-                cc_contact="dynabench-site@mlcommons.org",
+                cc_contact=self.email_sender,
                 template_name="model_evaluation_failed.txt",
                 msg_dict={"name": model_name},
                 subject=f"Model {model_name} evaluation failed.",
