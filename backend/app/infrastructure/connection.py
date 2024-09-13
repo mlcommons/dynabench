@@ -8,9 +8,12 @@
 
 import os
 
+import uuid
 from dotenv import load_dotenv
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker
+
+from app.infrastructure.utils.singleton import Singleton
 
 
 load_dotenv()
@@ -28,7 +31,7 @@ CONNECTION_URI = (
 
 class Connection:
     def __init__(self) -> None:
-        self.engine = create_engine(CONNECTION_URI, echo=False)
+        self.engine = create_engine(CONNECTION_URI, echo=False, pool_pre_ping=True)
         self.Session = sessionmaker(bind=self.engine, expire_on_commit=False)
         self.session = self.Session()
         self.metadata = MetaData()
