@@ -12,3 +12,5 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 *.ipynb
+*.log
+celerybeat-schedule
