@@ -8,12 +8,9 @@
 
 import os
 
-import uuid
 from dotenv import load_dotenv
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker
-
-from app.infrastructure.utils.singleton import Singleton
 
 
 load_dotenv()
