@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ChevronExpandButton from "new_front/components/Buttons/ChevronExpandButton";
 
@@ -16,8 +16,18 @@ const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
   multiplyResultsByHundred = false,
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const [secondExpanded, setSecondExpanded] = useState(false);
+  const [secondExpanded, setSecondExpanded] = useState();
   const totalRows = expanded ? data.datasets.length + 1 : 1;
+
+  useEffect(() => {
+    setSecondExpanded(
+      data?.datasets?.reduce((acc: any, dataset: any) => {
+        acc[dataset.name] = false;
+        return acc;
+      }, {})
+    );
+  }, []);
+
   return (
     <>
       <tr key={data.model_id} onClick={() => setExpanded(!expanded)}>
@@ -80,7 +90,7 @@ const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
 
 type TaskModelLeaderboardRowFirstLevelProps = {
   dataset: any;
-  secondExpanded: boolean;
+  secondExpanded: any;
   setSecondExpanded: any;
   multiplyResultsByHundred?: boolean;
 };
@@ -95,12 +105,20 @@ const TaskModelLeaderboardRowFirstLevel: FC<
 }) => {
   return (
     <>
-      <tr key={dataset.name} onClick={() => setSecondExpanded(!secondExpanded)}>
-        <td>
+      <tr
+        key={dataset.name}
+        onClick={() =>
+          setSecondExpanded((prevState: any) => ({
+            ...prevState,
+            [dataset.name]: !secondExpanded[dataset.name],
+          }))
+        }
+      >
+        <td className="pl-3">
           {dataset.name}
           {dataset.downstream_info && (
             <div style={{ float: "right" }}>
-              <ChevronExpandButton expanded={secondExpanded} />
+              <ChevronExpandButton expanded={secondExpanded[dataset.name]} />
             </div>
           )}
         </td>
@@ -128,7 +146,7 @@ const TaskModelLeaderboardRowFirstLevel: FC<
           </>
         )}
       </tr>
-      {secondExpanded &&
+      {secondExpanded[dataset.name] &&
         dataset.downstream_info &&
         dataset.downstream_info.map((downstream: any, i: number) => (
           <TaskModelLeaderboardRowSecondLevel
@@ -152,7 +170,7 @@ const TaskModelLeaderboardRowSecondLevel: FC<
   return (
     <>
       <tr key={downstream.name}>
-        <td>{downstream.sub_task}</td>
+        <td className="pl-5">{downstream.sub_task} </td>
 
         <td
           className="text-right"
