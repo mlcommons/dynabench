@@ -81,3 +81,7 @@ class ContextRepository(AbstractRepository):
             .filter(self.model.context_json.like(search_txt))
             .all()
         )
+
+    def upload_contexts(self, context: dict):
+        self.session.add(self.model(**context))
+        self.session.commit()

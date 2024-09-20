@@ -92,3 +92,11 @@ def get_random_context_from_key_value(model: GetRandomContext):
     return ContextService().get_random_context_from_key_value(
         model.key_name, model.key_value
     )
+
+
+@router.post("/upload_new_contexts")
+def upload_new_contexts(
+    task_id: int,
+    file: UploadFile = File(...),
+):
+    return ContextService().upload_new_contexts(task_id, file)

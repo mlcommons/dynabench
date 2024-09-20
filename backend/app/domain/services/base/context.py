@@ -324,3 +324,23 @@ class ContextService:
         ]
 
         return random.choice(contexts)
+
+    def upload_new_contexts(self, task_id, file):
+        task_round = self.task_service.get_task_info_by_task_id(task_id).cur_round
+        real_round_id = self.round_repository.get_round_info_by_round_and_task(
+            task_id, task_round
+        ).id
+        file.file.seek(0)
+        if file.filename.endswith(".jsonl"):
+            file_type = "jsonl"
+        elif file.filename.endswith(".csv"):
+            file_type = "csv"
+        else:
+            raise HTTPException(500, "File type not supported")
+
+        if file_type == "jsonl":
+            for line in file.file:
+                base_format = {}
+                base_format["r_realid"] = real_round_id
+                base_format["context_json"] = line
+                self.context_repository.upload_contexts(base_format)
