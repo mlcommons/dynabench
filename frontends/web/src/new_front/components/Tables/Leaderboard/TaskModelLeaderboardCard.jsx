@@ -15,14 +15,17 @@ import {
   Modal,
   Popover,
 } from "react-bootstrap";
+import useFetch from "use-http";
+import { ScaleLoader } from "react-spinners";
+
 import UserContext from "containers/UserContext";
+
 import TaskModelLeaderboardTable from "new_front/components/Tables/Leaderboard/TaskModelLeaderboardTable";
 import { SortDirection } from "components/TaskLeaderboard/SortContainer";
 import {
   ForkModal,
   SnapshotModal,
 } from "components/TaskLeaderboard/ForkAndSnapshotModalWrapper";
-import useFetch from "use-http";
 
 const TaskModelLeaderboardCard = ({
   title,
@@ -417,24 +420,37 @@ const TaskModelLeaderboardCard = ({
           )}
         </div>
       </Card.Header>
-      <Card.Body className="p-0 leaderboard-container">
-        {!loading && data.length !== 0 && (
-          <TaskModelLeaderboardTable
-            data={data}
-            enableWeights={enableWeights}
-            metrics={metrics}
-            setMetricWeight={setMetricWeight}
-            enableDatasetWeights={enableDatasetWeights}
-            datasetWeights={datasetWeights}
-            setDatasetWeight={setDatasetWeight}
-            sort={sort}
-            toggleSort={toggleSort}
-            modelColumnTitle={modelColumnTitle}
-            showUserNames={task.show_username_leaderboard}
-            multiplyResultsByHundred={multiplyResultsByHundred}
-          />
-        )}
-      </Card.Body>
+      {loading ? (
+        <div className="grid justify-items-center">
+          <div>
+            <ScaleLoader
+              color="#ccebd4"
+              loading={loading}
+              size={50}
+              className="align-center"
+            />
+          </div>
+        </div>
+      ) : (
+        <Card.Body className="p-0 leaderboard-container">
+          {!loading && data.length !== 0 && (
+            <TaskModelLeaderboardTable
+              data={data}
+              enableWeights={enableWeights}
+              metrics={metrics}
+              setMetricWeight={setMetricWeight}
+              enableDatasetWeights={enableDatasetWeights}
+              datasetWeights={datasetWeights}
+              setDatasetWeight={setDatasetWeight}
+              sort={sort}
+              toggleSort={toggleSort}
+              modelColumnTitle={modelColumnTitle}
+              showUserNames={task.show_username_leaderboard}
+              multiplyResultsByHundred={multiplyResultsByHundred}
+            />
+          )}
+        </Card.Body>
+      )}
       <Card.Footer className="text-center">
         <Pagination className="float-right mb-0" size="sm">
           {disablePagination ? (
