@@ -27,6 +27,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
     get_f1,
     get_f1_meta,
     get_fairness_meta,
+    get_kullback_leibler_divergence_meta,
     get_macro_f1,
     get_macro_f1_meta,
     get_matthews_correlation,
@@ -95,4 +96,5 @@ meta_metrics_dict = {
     "dataperf_fraction_of_fixes": get_dataperf_fraction_of_fixes_meta,
     "dataperf_balanced_accuracy": get_dataperf_balanced_accuracy_meta,
     "chrf": get_chrf_meta,
+    "kullback_leibler_divergence": get_kullback_leibler_divergence_meta,
 }

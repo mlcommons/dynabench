@@ -166,6 +166,15 @@ def get_chrf_meta(task=None):
     }
 
 
+def get_kullback_leibler_divergence_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Kullback-Leibler Divergence",
+        "utility_direction": -1,
+        "offset": 0,
+    }
+
+
 def get_chrf_pp(predictions: list, targets: list):
     """Chrf++ metric.
 
