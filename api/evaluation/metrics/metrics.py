@@ -136,6 +136,15 @@ def get_chrf_meta(task=None):
     }
 
 
+def get_kullback_leibler_divergence_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Kullback-Leibler Divergence",
+        "utility_direction": -1,
+        "offset": 0,
+    }
+
+
 def get_dataperf_fraction_of_fixes(required_fixes, total_fixes):
     fraction_of_fixes = required_fixes / total_fixes
     return fraction_of_fixes
@@ -288,6 +297,15 @@ def get_bleu(predictions: list, targets: list):
 def get_chrf(predictions: list, targets: list):
     chrf = sacrebleu.corpus_chrf(predictions, [targets])
     return chrf.score
+
+
+def get_kullback_leibler_divergence(y_true, y_pred, epsilon=0.00001):
+    y = np.clip(y_true, epsilon, 1 - epsilon)
+    x = np.clip(y_pred, epsilon, 1 - epsilon)
+
+    kl = np.sum(y * np.log(y / x), axis=1)
+
+    return np.mean(kl)
 
 
 def get_bleu_meta(task=None):
