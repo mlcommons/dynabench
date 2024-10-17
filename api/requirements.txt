@@ -3,7 +3,7 @@ aiohttp
 bottle
 cheroot
 PyJWT>=2.0.0
-numpy
+numpy==2.0
 pymysql
 sagemaker
 six
