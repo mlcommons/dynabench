@@ -25,43 +25,47 @@ class RoundUserExampleInfoRepository(AbstractRepository):
         )
 
     def create_user_and_round_example_info(self, round_id: int, user_id: int) -> None:
-        self.session.add(
-            self.model(
-                r_realid=round_id,
-                uid=user_id,
-                examples_submitted=0,
-                total_fooled=0,
-                total_verified_not_correct_fooled=0,
+        with self.session as session:
+            session.add(
+                self.model(
+                    r_realid=round_id,
+                    uid=user_id,
+                    examples_submitted=0,
+                    total_fooled=0,
+                    total_verified_not_correct_fooled=0,
+                )
             )
-        )
-        self.session.flush()
-        self.session.commit()
+            session.flush()
+            session.commit()
 
     def increment_counter_examples_submitted(self, round_id: int, user_id: int):
-        self.session.query(self.model).filter(
-            (self.model.r_realid == round_id) & (self.model.uid == user_id)
-        ).update({self.model.examples_submitted: self.model.examples_submitted + 1})
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(
+                (self.model.r_realid == round_id) & (self.model.uid == user_id)
+            ).update({self.model.examples_submitted: self.model.examples_submitted + 1})
+            session.flush()
+            session.commit()
 
     def increment_counter_examples_fooled(self, round_id: int, user_id: int):
-        self.session.query(self.model).filter(
-            (self.model.r_realid == round_id) & (self.model.uid == user_id)
-        ).update({self.model.total_fooled: self.model.total_fooled + 1})
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(
+                (self.model.r_realid == round_id) & (self.model.uid == user_id)
+            ).update({self.model.total_fooled: self.model.total_fooled + 1})
+            session.flush()
+            session.commit()
 
     def increment_examples_submitted_today(self, round_id: int, user_id: int):
-        self.session.query(self.model).filter(
-            (self.model.r_realid == round_id) & (self.model.uid == user_id)
-        ).update(
-            {
-                self.model.amount_examples_on_a_day: self.model.amount_examples_on_a_day
-                + 1
-            }
-        )
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(
+                (self.model.r_realid == round_id) & (self.model.uid == user_id)
+            ).update(
+                {
+                    self.model.amount_examples_on_a_day: self.model.amount_examples_on_a_day
+                    + 1
+                }
+            )
+            session.flush()
+            session.commit()
 
     def amounts_examples_created_today(self, round_id: int, user_id: int):
         return (
@@ -85,28 +89,30 @@ class RoundUserExampleInfoRepository(AbstractRepository):
         )
 
     def update_last_used_and_counter(self, round_id: int, user_id: int):
-        self.session.query(self.model).filter(
-            (self.model.r_realid == round_id) & (self.model.uid == user_id)
-        ).update(
-            {
-                self.model.last_used: datetime.date.today(),
-                self.model.amount_examples_on_a_day: 0,
-            }
-        )
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(
+                (self.model.r_realid == round_id) & (self.model.uid == user_id)
+            ).update(
+                {
+                    self.model.last_used: datetime.date.today(),
+                    self.model.amount_examples_on_a_day: 0,
+                }
+            )
+            session.flush()
+            session.commit()
 
     def create_first_entry_for_day(self, round_id: int, user_id: int):
-        self.session.query(self.model).filter(
-            (self.model.r_realid == round_id) & (self.model.uid == user_id)
-        ).update(
-            {
-                self.model.amount_examples_on_a_day: 1,
-                self.model.last_used: datetime.date.today(),
-            }
-        )
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(
+                (self.model.r_realid == round_id) & (self.model.uid == user_id)
+            ).update(
+                {
+                    self.model.amount_examples_on_a_day: 1,
+                    self.model.last_used: datetime.date.today(),
+                }
+            )
+            session.flush()
+            session.commit()
 
     def get_counter_examples_submitted(self, round_id: int, user_id: int):
         return (
@@ -116,11 +122,12 @@ class RoundUserExampleInfoRepository(AbstractRepository):
         )
 
     def reset_counter_examples_submitted(self, round_id: int, user_id: int):
-        self.session.query(self.model).filter(
-            (self.model.r_realid == round_id) & (self.model.uid == user_id)
-        ).update({self.model.amount_examples_on_a_day: 0})
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(
+                (self.model.r_realid == round_id) & (self.model.uid == user_id)
+            ).update({self.model.amount_examples_on_a_day: 0})
+            session.flush()
+            session.commit()
 
     def number_of_examples_created(self, round_id: int, user_id: int):
         return (

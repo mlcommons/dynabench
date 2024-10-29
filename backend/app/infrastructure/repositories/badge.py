@@ -16,6 +16,7 @@ class BadgeRepository(AbstractRepository):
 
     def add_badge(self, user_id: int, name: str) -> None:
         model = self.model(uid=user_id, name=name)
-        self.session.add(model)
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.add(model)
+            session.flush()
+            session.commit()

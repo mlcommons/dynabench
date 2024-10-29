@@ -25,8 +25,10 @@ class JobRepository(AbstractRepository):
 
     def create_registry(self, model: dict):
         job = {"prompt": model["prompt"], "user_id": model["user_id"]}
-        self.session.add(self.model(**job))
-        self.session.commit()
+        new_instance = self.model(**job)
+        with self.session as session:
+            session.add(new_instance)
+            session.commit()
 
     def determine_queue_position(self, model: dict):
         my_position = (
@@ -45,8 +47,9 @@ class JobRepository(AbstractRepository):
         return {"queue_position": queue_position, "all_positions": all_positions}
 
     def remove_registry(self, model: dict):
-        self.session.query(self.model).filter(
-            self.model.prompt == model["prompt"]
-        ).filter(self.model.user_id == model["user_id"]).delete()
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(
+                self.model.prompt == model["prompt"]
+            ).filter(self.model.user_id == model["user_id"]).delete()
+            session.flush()
+            session.commit()

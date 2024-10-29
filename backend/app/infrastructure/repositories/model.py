@@ -40,19 +40,21 @@ class ModelRepository(AbstractRepository):
         return models_in_the_loop
 
     def update_light_model(self, id: int, light_model: str) -> None:
-        instance = self.session.query(self.model).filter(self.model.id == id).first()
-        light_model = f"{light_model}/model/single_evaluation"
-        instance.light_model = light_model
-        instance.is_in_the_loop = 0
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            instance = session.query(self.model).filter(self.model.id == id).first()
+            light_model = f"{light_model}/model/single_evaluation"
+            instance.light_model = light_model
+            instance.is_in_the_loop = 0
+            session.flush()
+            session.commit()
 
     def update_model_status(self, id: int) -> None:
-        instance = self.session.query(self.model).filter(self.model.id == id).first()
-        instance.deployment_status = "deployed"
-        instance.is_published = 0
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            instance = session.query(self.model).filter(self.model.id == id).first()
+            instance.deployment_status = "deployed"
+            instance.is_published = 0
+            session.flush()
+            session.commit()
 
     def get_lambda_models(self) -> list:
         models = (
@@ -89,10 +91,11 @@ class ModelRepository(AbstractRepository):
             deployment_status=deployment_status,
             secret=secret,
         )
-        self.session.add(model)
-        self.session.flush()
-        self.session.commit()
-        return model.__dict__
+        with self.session as session:
+            session.add(model)
+            session.flush()
+            session.commit()
+            return model.__dict__
 
     def get_active_models_by_task_id(self, task_id: int) -> list:
         models = (
@@ -128,18 +131,19 @@ class ModelRepository(AbstractRepository):
         )
 
     def update_published_status(self, model_id: int):
-        instance = (
-            self.session.query(self.model).filter(self.model.id == model_id).first()
-        )
-        instance.is_published = (
-            0
-            if instance.is_published == 1
-            else 1
-            if instance.is_published == 0
-            else instance.is_published
-        )
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            instance = (
+                session.query(self.model).filter(self.model.id == model_id).first()
+            )
+            instance.is_published = (
+                0
+                if instance.is_published == 1
+                else 1
+                if instance.is_published == 0
+                else instance.is_published
+            )
+            session.flush()
+            session.commit()
 
     def get_models_by_user_id(self, user_id: int) -> list:
         return (
@@ -173,10 +177,11 @@ class ModelRepository(AbstractRepository):
         return self.session.query(self.model).filter(self.model.uid == user_id).count()
 
     def delete_model(self, model_id: int):
-        self.session.query(Score).filter(Score.mid == model_id).delete()
-        self.session.query(self.model).filter(self.model.id == model_id).delete()
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(Score).filter(Score.mid == model_id).delete()
+            session.query(self.model).filter(self.model.id == model_id).delete()
+            session.flush()
+            session.commit()
 
     def get_all_model_info_by_id(self, model_id: int):
         valid_datasets = (
@@ -229,23 +234,24 @@ class ModelRepository(AbstractRepository):
         license: str,
         source_url: str,
     ):
-        (
-            self.session.query(self.model)
-            .filter(self.model.id == model_id)
-            .update(
-                {
-                    "name": name,
-                    "desc": desc,
-                    "longdesc": longdesc,
-                    "params": params,
-                    "languages": languages,
-                    "license": license,
-                    "source_url": source_url,
-                }
+        with self.session as session:
+            (
+                session.query(self.model)
+                .filter(self.model.id == model_id)
+                .update(
+                    {
+                        "name": name,
+                        "desc": desc,
+                        "longdesc": longdesc,
+                        "params": params,
+                        "languages": languages,
+                        "license": license,
+                        "source_url": source_url,
+                    }
+                )
             )
-        )
-        self.session.flush()
-        return self.session.commit()
+            session.flush()
+            return session.commit()
 
     def download_model_results(self, task_id: int):
         m = aliased(Model)

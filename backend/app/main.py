@@ -73,22 +73,3 @@ app.include_router(
     historical_data.router, prefix="/historical_data", tags=["historical_data"]
 )
 app.include_router(round.router, prefix="/round", tags=["round"])
-
-
-class RefreshSessionMiddleware:
-    """
-    Refreshes SQLAlchemy session on each call.
-    There may be issues since close_session is blocking and it is ran in an async function.
-    Possibly blocking the main asyncio loop.
-    Keep in mind that middlewares run on the main asyncio thread.
-    """
-
-    def __init__(self, app):
-        self.app = app
-
-    async def __call__(self, scope, receive, send):
-        await self.app(scope, receive, send)
-        Connection().close_session()
-
-
-app.add_middleware(RefreshSessionMiddleware)

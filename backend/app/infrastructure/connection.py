@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.infrastructure.utils.singleton import Singleton
+
 
 load_dotenv()
 
@@ -26,11 +28,11 @@ CONNECTION_URI = (
 )
 
 
-class Connection:
+class Connection(metaclass=Singleton):
     def __init__(self) -> None:
-        self.engine = create_engine(CONNECTION_URI, echo=False, pool_pre_ping=True)
-        self.Session = sessionmaker(bind=self.engine, expire_on_commit=False)
-        self.session = self.Session()
+        self.engine = create_engine(
+            CONNECTION_URI, echo=False, pool_pre_ping=True, pool_size=2, pool_recycle=60
+        )
         self.metadata = MetaData()
 
     def refresh_session(self):
@@ -38,3 +40,7 @@ class Connection:
 
     def close_session(self):
         self.session.close()
+
+    @property
+    def session(self):
+        return sessionmaker(bind=self.engine, expire_on_commit=True)()

@@ -16,10 +16,11 @@ class ContextRepository(AbstractRepository):
         super().__init__(Context)
 
     def increment_counter_total_samples_and_update_date(self, context_id: int) -> None:
-        self.session.query(self.model).filter(self.model.id == context_id).update(
-            {self.model.total_used: self.model.total_used + 1}
-        )
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == context_id).update(
+                {self.model.total_used: self.model.total_used + 1}
+            )
+            session.commit()
 
     def get_real_round_id(self, context_id: int) -> int:
         instance = (
@@ -83,5 +84,6 @@ class ContextRepository(AbstractRepository):
         )
 
     def upload_contexts(self, context: dict):
-        self.session.add(self.model(**context))
-        self.session.commit()
+        with self.session as session:
+            session.add(self.model(**context))
+            session.commit()

@@ -25,16 +25,18 @@ class UserRepository(AbstractRepository):
         return self.add({"email": email, "password": password, "username": username})
 
     def increment_examples_fooled(self, user_id: int):
-        self.session.query(self.model).filter(self.model.id == user_id).update(
-            {self.model.total_fooled: self.model.total_fooled + 1}
-        )
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {self.model.total_fooled: self.model.total_fooled + 1}
+            )
+            session.commit()
 
     def increment_model_submitted_count(self, user_id: int):
-        self.session.query(self.model).filter(self.model.id == user_id).update(
-            {self.model.models_submitted: self.model.models_submitted + 1}
-        )
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {self.model.models_submitted: self.model.models_submitted + 1}
+            )
+            session.commit()
 
     def get_user_email(self, user_id: int) -> str:
         return (
@@ -59,40 +61,45 @@ class UserRepository(AbstractRepository):
         ) is not None
 
     def increment_examples_verified(self, user_id: int):
-        self.session.query(self.model).filter(self.model.id == user_id).update(
-            {self.model.examples_verified: self.model.examples_verified + 1}
-        )
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {self.model.examples_verified: self.model.examples_verified + 1}
+            )
+            session.commit()
 
     def increment_examples_verified_correct(self, user_id: int):
-        self.session.query(self.model).filter(self.model.id == user_id).update(
-            {
-                self.model.examples_verified_correct: self.model.examples_verified_correct
-                + 1
-            }
-        )
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {
+                    self.model.examples_verified_correct: self.model.examples_verified_correct
+                    + 1
+                }
+            )
+            session.commit()
 
     def increment_examples_verified_correct_fooled(self, user_id: int):
-        self.session.query(self.model).filter(self.model.id == user_id).update(
-            {self.model.total_verified_fooled: self.model.total_verified_fooled + 1}
-        )
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {self.model.total_verified_fooled: self.model.total_verified_fooled + 1}
+            )
+            session.commit()
 
     def increment_examples_verified_incorrect_fooled(self, user_id: int):
-        self.session.query(self.model).filter(self.model.id == user_id).update(
-            {
-                self.model.total_verified_not_correct_fooled: self.model.total_verified_not_correct_fooled
-                + 1
-            }
-        )
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {
+                    self.model.total_verified_not_correct_fooled: self.model.total_verified_not_correct_fooled
+                    + 1
+                }
+            )
+            session.commit()
 
     def increment_examples_created(self, user_id: int):
-        self.session.query(self.model).filter(self.model.id == user_id).update(
-            {self.model.examples_submitted: self.model.examples_submitted + 1}
-        )
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {self.model.examples_submitted: self.model.examples_submitted + 1}
+            )
+            session.commit()
 
     def get_badges_by_user_id(self, user_id: int) -> dict:
         return self.session.query(Badge).filter(Badge.uid == user_id).all()

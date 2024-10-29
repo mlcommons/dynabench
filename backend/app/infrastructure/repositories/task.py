@@ -44,9 +44,10 @@ class TaskRepository(AbstractRepository):
         return instance
 
     def update_last_activity_date(self, task_id: int):
-        self.session.query(self.model).filter(self.model.id == task_id).update({})
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == task_id).update({})
+            session.flush()
+            session.commit()
 
     def get_active_tasks_with_round_info(self):
         return (
@@ -113,11 +114,12 @@ class TaskRepository(AbstractRepository):
         )
 
     def update_task_instructions(self, task_id: int, instructions: dict):
-        self.session.query(self.model).filter_by(id=task_id).update(
-            {"general_instructions": instructions}
-        )
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter_by(id=task_id).update(
+                {"general_instructions": instructions}
+            )
+            session.flush()
+            session.commit()
 
     def get_challenges_types(self):
         return self.session.query(ChallengesTypes).all()
@@ -144,11 +146,12 @@ class TaskRepository(AbstractRepository):
         )
 
     def update_config_yaml(self, task_id: int, config_yaml: dict):
-        self.session.query(self.model).filter_by(id=task_id).update(
-            {"config_yaml": config_yaml}
-        )
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(self.model).filter_by(id=task_id).update(
+                {"config_yaml": config_yaml}
+            )
+            session.flush()
+            session.commit()
 
     def get_s3_bucket_by_task_id(self, task_id: int):
         return (
