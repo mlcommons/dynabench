@@ -40,9 +40,9 @@ class ModelRepository(AbstractRepository):
         return models_in_the_loop
 
     def update_light_model(self, id: int, light_model: str) -> None:
+        light_model = f"{light_model}/model/single_evaluation"
         with self.session as session:
             instance = session.query(self.model).filter(self.model.id == id).first()
-            light_model = f"{light_model}/model/single_evaluation"
             instance.light_model = light_model
             instance.is_in_the_loop = 0
             session.flush()
