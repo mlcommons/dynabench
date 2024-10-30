@@ -84,6 +84,7 @@ class ContextRepository(AbstractRepository):
         )
 
     def upload_contexts(self, context: dict):
+        model = self.model(**context)
         with self.session as session:
-            session.add(self.model(**context))
+            session.add(model)
             session.commit()
