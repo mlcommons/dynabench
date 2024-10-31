@@ -104,9 +104,10 @@ class DatasetRepository(AbstractRepository):
         dataset = Dataset(
             tid=task_id, name=dataset_name, access_type=access_type, rid=0
         )
-        self.session.add(dataset)
-        self.session.commit()
-        return dataset
+        with self.session as session:
+            session.add(dataset)
+            session.commit()
+            return dataset
 
     def get_downstream_datasets(self, task_id: int) -> dict:
         downstream_datasets = (

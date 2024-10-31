@@ -83,9 +83,10 @@ class ScoreRepository(AbstractRepository):
             IS NOT NULL AND mid = :model_id
         """
         )
-        self.session.execute(sql, {"model_id": model_id})
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.execute(sql, {"model_id": model_id})
+            session.flush()
+            session.commit()
 
     def fix_f1_score(self, model_id: int):
         sql = text(
@@ -101,6 +102,7 @@ class ScoreRepository(AbstractRepository):
             IS NOT NULL AND mid = :model_id
         """
         )
-        self.session.execute(sql, {"model_id": model_id})
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.execute(sql, {"model_id": model_id})
+            session.flush()
+            session.commit()

@@ -24,10 +24,12 @@ class AbstractRepository:
 
     def add(self, instance_dict: dict):
         new_instance = self.model(**instance_dict)
-        self.session.add(new_instance)
-        self.session.commit()
-        new_instance = self.instance_converter.instance_to_dict(new_instance)
-        return new_instance
+        with self.session as session:
+            session.add(new_instance)
+            session.commit()
+            session.refresh(new_instance)
+            new_instance = self.instance_converter.instance_to_dict(new_instance)
+            return new_instance
 
     def get_by_id(self, id: int) -> dict:
         instance = self.session.query(self.model).get(id)

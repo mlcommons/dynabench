@@ -26,17 +26,19 @@ class HistoricalDataRepository(AbstractRepository):
             user_id=user_id,
             history=data,
         )
-        self.session.add(model)
-        self.session.flush()
-        self.session.commit()
-        return self.get_historical_data_by_task_and_user(task_id, user_id)
+        with self.session as session:
+            session.add(model)
+            session.flush()
+            session.commit()
+            return self.get_historical_data_by_task_and_user(task_id, user_id)
 
     def delete_historical_data(self, task_id: int, user_id: int):
-        self.session.query(HistoricalData).filter(
-            HistoricalData.task_id == task_id
-        ).filter(HistoricalData.user_id == user_id).delete()
-        self.session.flush()
-        self.session.commit()
+        with self.session as session:
+            session.query(HistoricalData).filter(
+                HistoricalData.task_id == task_id
+            ).filter(HistoricalData.user_id == user_id).delete()
+            session.flush()
+            session.commit()
 
     def get_occurrences_with_more_than_one_hundred(self, task_id: int):
         return (
