@@ -64,12 +64,7 @@ class ContextService:
     def get_real_round_id(self, context_id: int) -> int:
         return self.context_repository.get_real_round_id(context_id)
 
-    def get_context(
-        self,
-        task_id: int,
-        method: str,
-        tags=None,
-    ):
+    def get_context(self, task_id: int, method: str, tags=None, need_context=False):
         """Get a context for annotation
 
         Args:
@@ -78,8 +73,11 @@ class ContextService:
             2. 'least_fooled': selects contexts that least fool the model
             3. 'least_used': selects contexts that have been annotated the least
             Defaults to 'least_used'.
+
+            need_context (str, optional): Whether to return the context or not.
+            Defaults to False.
         Raises:
-            HTTPException: There are no contexts available
+            HTTPException: There are no contexts available when needed
         Returns:
             list: A list of context objects, each of which has different attributes.
         """
@@ -97,6 +95,13 @@ class ContextService:
             task_id, round_id
         ).id
 
+        if not need_context:
+            return {
+                "current_context": None,
+                "context_id": None,
+                "real_round_id": real_round_id,
+                "tags": tags,
+            }
         if method == "uniform":
             context = self.context_repository.get_random(real_round_id, tags)
         elif method == "least_used":
@@ -106,6 +111,7 @@ class ContextService:
         if not context:
             raise HTTPException(500, f"No contexts available ({real_round_id})")
 
+        print(f"context id {context.id}")
         return {
             "current_context": json.loads(context.context_json),
             "context_id": context.id,
@@ -307,23 +313,22 @@ class ContextService:
         self.s3.put_object(Bucket=self.dataperf_bucket, Key=key, Body=file.file)
         return key
 
-    def get_random_context_from_key_value(self, key_name: str, key_value: dict) -> dict:
+    def get_random_context_from_key_value(
+        self, key_name: str, key_value: dict, r_realid: int
+    ) -> dict:
         search_txt = f'%{key_name}":"{key_value}%'
-        contexts = self.context_repository.get_context_by_key_value_in_contextjson(
-            search_txt
+        context = self.context_repository.get_context_by_key_value_in_contextjson(
+            search_txt, r_realid
         )
-        if not contexts:
+        if not context:
             return None
-        contexts = [
-            {
-                "id": context.id,
-                "round_id": context.r_realid,
-                **json.loads(context.context_json),
-            }
-            for context in contexts
-        ]
+        context = {
+            "id": context.id,
+            "round_id": r_realid,
+            **json.loads(context.context_json),
+        }
 
-        return random.choice(contexts)
+        return context
 
     def upload_new_contexts(self, task_id, file):
         task_round = self.task_service.get_task_info_by_task_id(task_id).cur_round

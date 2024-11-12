@@ -11,6 +11,7 @@ class GetContextRequest(BaseModel):
     task_id: int
     method: str = "least_used"
     tags: Optional[str] = None
+    need_context: Optional[bool] = False
 
 
 class GetGenerativeContextRequest(BaseModel):
@@ -26,3 +27,4 @@ class GetFilterContext(BaseModel):
 class GetRandomContext(BaseModel):
     key_name: str
     key_value: str
+    real_round_id: int
