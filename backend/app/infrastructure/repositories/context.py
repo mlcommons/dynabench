@@ -76,12 +76,17 @@ class ContextRepository(AbstractRepository):
             .all()
         )
 
-    def get_context_by_key_value_in_contextjson(self, search_txt: str):
-        return (
+    def get_context_by_key_value_in_contextjson(self, search_txt: str, r_realid: int):
+        instance = (
             self.session.query(self.model)
-            .filter(self.model.context_json.like(search_txt))
-            .all()
+            .filter(
+                self.model.r_realid == r_realid,
+                self.model.context_json.like(search_txt),
+            )
+            .order_by(func.rand())
+            .first()
         )
+        return instance
 
     def upload_contexts(self, context: dict):
         model = self.model(**context)

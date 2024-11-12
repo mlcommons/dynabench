@@ -22,7 +22,7 @@ type Dictionary = { [key: string]: any };
 
 const cleanUpSelection = (
   selection: Array<Dictionary>,
-  keyToRemove: string,
+  keyToRemove: string
 ) => {
   const result: Array<Record<string, any>> = [];
 
@@ -49,6 +49,7 @@ const SelectMultipleTextMultipleTags: FC<
   userId,
   taskId,
   generative_context,
+  realRoundId,
 }) => {
   const { post, loading, response } = useFetch();
 
@@ -59,7 +60,6 @@ const SelectMultipleTextMultipleTags: FC<
   const [preferedTag, setPreferedTag] = useState<any>(null);
   const [text, setText] = useState<string | undefined>(undefined);
   const [contextId, setContextId] = useState<number | null>(null);
-  const [realRoundId, setRealRoundId] = useState<number | null>(null);
   const [loading2, setLoading2] = useState<boolean>(false);
   const [extraLabel, setExtraLabel] = useState<any>({});
 
@@ -93,7 +93,7 @@ const SelectMultipleTextMultipleTags: FC<
     if (preferedTag) {
       setTagSelection(localTags.find((tag: any) => tag.value === preferedTag));
       handleSubmit(
-        localTags.find((tag: any) => tag.value === preferedTag)?.back_label,
+        localTags.find((tag: any) => tag.value === preferedTag)?.back_label
       );
     }
   }, [preferedTag]);
@@ -117,8 +117,9 @@ const SelectMultipleTextMultipleTags: FC<
         body: JSON.stringify({
           key_name: field_names_for_the_model?.tag_name_search,
           key_value: value,
+          real_round_id: realRoundId,
         }),
-      },
+      }
     )
       .then((response) => response.json())
       .then((data) => {
@@ -134,7 +135,6 @@ const SelectMultipleTextMultipleTags: FC<
         console.log("bringContext", data);
         setText(data?.content);
         setContextId(data?.id);
-        setRealRoundId(data?.round_id);
       })
       .catch((error) => {
         console.warn("error", error);
@@ -192,11 +192,11 @@ const SelectMultipleTextMultipleTags: FC<
     }
     const start: number = Math.min(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     const end: number = Math.max(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     valueLength > 0 && console.log("last value", value[valueLength - 1].start);
     if (
@@ -211,7 +211,7 @@ const SelectMultipleTextMultipleTags: FC<
     const already = selectionInfo.find(
       (val: any) =>
         (val.start <= start && val.end >= start) ||
-        (val.start <= end && val.end >= start),
+        (val.start <= end && val.end >= start)
     );
     value[valueLength - 1].start = start;
     value[valueLength - 1].end = end;

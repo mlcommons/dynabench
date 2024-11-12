@@ -76,19 +76,14 @@ const CreateInterface = () => {
 
   const loadTaskContextData = async () => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
-    const [taskContextInfo, taskConfiguration, modelInTheLoop, taskInfo] =
-      await Promise.all([
-        post(`/context/get_context`, {
-          task_id: taskId,
-        }),
-        get(`/context/get_context_configuration?task_id=${taskId}`),
-        post(`/model/get_model_in_the_loop`, {
-          task_id: taskId,
-        }),
-        get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
-      ]);
+    const [taskConfiguration, modelInTheLoop, taskInfo] = await Promise.all([
+      get(`/context/get_context_configuration?task_id=${taskId}`),
+      post(`/model/get_model_in_the_loop`, {
+        task_id: taskId,
+      }),
+      get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
+    ]);
     if (response.ok) {
-      setTaskContextInfo(taskContextInfo);
       setTaskConfiguration(taskConfiguration);
       setModelInTheLoop(modelInTheLoop);
       setTaskInfo(taskInfo);
@@ -97,6 +92,23 @@ const CreateInterface = () => {
         taskConfiguration.context.generative_context?.is_generative,
       );
     }
+  };
+
+  const loadTaskContext = async () => {
+    console.log("in new method");
+    const configContext = taskConfiguration?.context as any;
+    let needContext;
+    if ("context_for_start" in configContext) {
+      needContext = configContext.context_for_start ? true : false;
+    } else {
+      needContext = true;
+    }
+    await post(`/context/get_context`, {
+      task_id: taskId,
+      need_context: needContext,
+    }).then((response) => {
+      setTaskContextInfo(response);
+    });
   };
 
   const isLogin = async (
@@ -118,6 +130,10 @@ const CreateInterface = () => {
   useEffect(() => {
     isLogin(assignmentId, taskCode, treatmentId);
   }, [user]);
+
+  useEffect(() => {
+    taskConfiguration && taskId && loadTaskContext();
+  }, [taskConfiguration, taskId]);
 
   useEffect(() => {
     if (user.id) {
@@ -188,7 +204,7 @@ const CreateInterface = () => {
                     CONTEXT:
                   </h6>
                 )}
-                {taskConfiguration?.context && (
+                {taskConfiguration?.context && taskContextInfo && (
                   <AnnotationContextStrategy
                     config={taskConfiguration?.context as any}
                     context={taskContextInfo?.current_context}

@@ -23,7 +23,9 @@ router = APIRouter()
 
 @router.post("/get_context", response_model={})
 async def get_context(model: GetContextRequest):
-    context = ContextService().get_context(model.task_id, model.method, model.tags)
+    context = ContextService().get_context(
+        model.task_id, model.method, model.tags, model.need_context
+    )
     return context
 
 
@@ -90,7 +92,7 @@ def save_contexts_to_s3(
 @router.post("/get_random_context_from_key_value")
 def get_random_context_from_key_value(model: GetRandomContext):
     return ContextService().get_random_context_from_key_value(
-        model.key_name, model.key_value
+        model.key_name, model.key_value, model.real_round_id
     )
 
 
