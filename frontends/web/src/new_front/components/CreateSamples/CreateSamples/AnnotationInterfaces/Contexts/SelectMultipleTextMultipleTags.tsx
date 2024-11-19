@@ -138,6 +138,15 @@ const SelectMultipleTextMultipleTags: FC<
       })
       .catch((error) => {
         console.warn("error", error);
+        setLoading2(false);
+        Swal.fire({
+          title: instruction?.context_alert_title,
+          text: instruction?.context_alert_text,
+          icon: "warning",
+          confirmButtonText: "Ok",
+        }).then(() => {
+          handleSubmit(field_names_for_the_model?.default_tag);
+        });
       });
   };
 
