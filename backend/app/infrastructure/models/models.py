@@ -8,6 +8,7 @@
 
 # coding: utf-8
 from sqlalchemy import (
+    JSON,
     TIMESTAMP,
     BigInteger,
     Column,
@@ -383,7 +384,7 @@ class Context(Base):
 
     id = Column(Integer, primary_key=True)
     r_realid = Column(ForeignKey("rounds.id"), nullable=False, index=True)
-    context_json = Column(Text)
+    context_json = Column(JSON)
     tag = Column(Text)
     metadata_json = Column(Text)
     total_used = Column(Integer)

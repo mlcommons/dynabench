@@ -113,7 +113,7 @@ class ContextService:
 
         print(f"context id {context.id}")
         return {
-            "current_context": json.loads(context.context_json),
+            "current_context": context.context_json,
             "context_id": context.id,
             "real_round_id": context.r_realid,
             "tags": tags,
@@ -316,16 +316,16 @@ class ContextService:
     def get_random_context_from_key_value(
         self, key_name: str, key_value: dict, r_realid: int
     ) -> dict:
-        search_txt = f'%{key_name}":"{key_value}%'
         context = self.context_repository.get_context_by_key_value_in_contextjson(
-            search_txt, r_realid
+            key_name, key_value, r_realid
         )
+        print("context", context)
         if not context:
             return None
         context = {
             "id": context.id,
             "round_id": r_realid,
-            **json.loads(context.context_json),
+            **context.context_json,
         }
 
         return context
