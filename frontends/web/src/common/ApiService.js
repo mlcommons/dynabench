@@ -891,7 +891,9 @@ export default class ApiService {
   isTokenExpired(token) {
     try {
       const decoded = decode(token);
-      if (decoded.exp < Date.now() / 1048576) {
+      //The exp field is in seconds, so we multiply by 1000 to get milliseconds
+      //equal to the date object got by Date.now().
+      if (decoded.exp * 1000 < Date.now()) {
         // Checking if token is expired. N
         return true;
       } else return false;
@@ -916,9 +918,14 @@ export default class ApiService {
   }
 
   logout() {
-    this.fetch(`${this.domain}/authenticate/logout`, {
-      method: "POST",
-    });
+    try {
+      this.fetch(`${this.domain}/authenticate/logout`, {
+        method: "POST",
+      });
+    } catch (e) {
+      console.log("Could not logout");
+      console.warn(e);
+    }
     localStorage.removeItem("id_token");
   }
 

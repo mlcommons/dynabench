@@ -13,7 +13,7 @@ import qs from "qs";
 import React from "react";
 import { Container, Nav, Navbar, NavDropdown, Row } from "react-bootstrap";
 import ReactGA from "react-ga";
-import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Link, Route, Switch, Redirect } from "react-router-dom";
 import { Provider as FetchProvider } from "use-http";
 import { OverlayProvider } from "new_front/components/OverlayInstructions/Provider";
 import { ParallaxProvider } from "react-scroll-parallax";
@@ -129,7 +129,9 @@ class App extends React.Component {
           (error) => {
             console.warn(error);
             if (error.status_code === 401) {
-              this.api.logout();
+              console.log("Logging out due to 401");
+              <Redirect push to="/logout" />;
+              //In Case Redirect doesn't work window.location.href = "/logout";
             }
           }
         );
@@ -146,6 +148,14 @@ class App extends React.Component {
   }
   componentDidMount() {
     this.refreshData();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const userCredentials = this.api.getCredentials();
+    if (!this.api.loggedIn() && userCredentials.id) {
+      console.log("Redirecting to logout");
+      return <Redirect push to="/logout" />;
+    }
   }
 
   render() {
@@ -617,7 +627,12 @@ class App extends React.Component {
 class Logout extends React.Component {
   static contextType = UserContext;
   componentDidMount() {
-    this.context.api.logout();
+    try {
+      console.log("logout");
+      this.context.api.logout();
+    } catch (e) {
+      console.warn(e);
+    }
     this.context.updateState({ user: {} });
     this.props.history.push("/");
   }
