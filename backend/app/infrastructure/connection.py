@@ -31,7 +31,7 @@ CONNECTION_URI = (
 class Connection(metaclass=Singleton):
     def __init__(self) -> None:
         self.engine = create_engine(
-            CONNECTION_URI, echo=False, pool_pre_ping=True, pool_size=2, pool_recycle=60
+            CONNECTION_URI, echo=False, pool_pre_ping=True, pool_size=6, pool_recycle=60
         )
         self.metadata = MetaData()
 
