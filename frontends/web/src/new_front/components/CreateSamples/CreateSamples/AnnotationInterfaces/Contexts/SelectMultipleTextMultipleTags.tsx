@@ -207,7 +207,6 @@ const SelectMultipleTextMultipleTags: FC<
       value[valueLength - 1].start,
       value[valueLength - 1].end
     );
-    valueLength > 0 && console.log("last value", value[valueLength - 1].start);
     if (
       valueLength > 0 &&
       (isNaN(value[valueLength - 1].end) ||
