@@ -14,6 +14,30 @@ import MultiSelect from "new_front/components/Lists/MultiSelect";
 
 import generateLightRandomColor from "new_front/utils/helpers/functions/GenerateRandomLightColor";
 
+const RTLtexts = [
+  "ara",
+  "ary",
+  "arz",
+  "ars",
+  "arb",
+  "aeb",
+  "aii",
+  "aze",
+  "azj",
+  "azb",
+  "div",
+  "heb",
+  "hbo",
+  "ckb",
+  "kur",
+  "kmr",
+  "sdh",
+  "nqo",
+  "fas",
+  "syc",
+  "urd",
+];
+
 type MultipleTagsTypes = {
   preselectedTag?: string;
 };
@@ -62,6 +86,7 @@ const SelectMultipleTextMultipleTags: FC<
   const [contextId, setContextId] = useState<number | null>(null);
   const [loading2, setLoading2] = useState<boolean>(false);
   const [extraLabel, setExtraLabel] = useState<any>({});
+  const [rtl, setRTL] = useState<boolean>(false);
 
   const submitButton: HTMLElement | null = document.getElementById("submit");
 
@@ -107,6 +132,7 @@ const SelectMultipleTextMultipleTags: FC<
     submitButton && (submitButton.hidden = false);
     setLoading2(true);
     setSelectionInfo([]);
+    setRTL(RTLtexts.includes(value as string));
     fetch(
       `${process.env.REACT_APP_API_HOST_2}/context/get_random_context_from_key_value`,
       {
@@ -306,7 +332,7 @@ const SelectMultipleTextMultipleTags: FC<
                 />
               </div>
             </div>
-            <div>
+            <div dir="auto" className={`unicode-text ${rtl ? "rtl" : "ltf"}`}>
               <TextAnnotator
                 style={{ whiteSpace: "pre-line" }}
                 content={text}
