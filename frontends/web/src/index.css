@@ -127,3 +127,12 @@ h2.active {
 .btn-link:hover {
     color: #344854;
 }
+
+.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+.ltr {
+    direction: ltr;
+}
