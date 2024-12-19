@@ -29,7 +29,7 @@ class TaskRepository(AbstractRepository):
             .filter(self.model.task_code == task_code)
             .first()
         )
-    
+
     def get_s3_bucket_by_task_id(self, task_id: int):
         return (
             self.session.query(self.model.s3_bucket)

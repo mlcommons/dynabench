@@ -4,14 +4,14 @@
 
 import json
 import os
+import re
 import secrets
 import time
-import re
 
 import boto3
 import requests
 import yaml
-from fastapi import HTTPException, UploadFile, BackgroundTasks
+from fastapi import BackgroundTasks, HTTPException, UploadFile
 from pydantic import Json
 
 from app.domain.helpers.email import EmailHelper
@@ -174,7 +174,7 @@ class ModelService:
 
     def single_model_prediction(self, model_url: str, model_input: dict):
         return requests.post(model_url, json=model_input).json()
-    
+
     def upload_model_to_s3(
         self,
         model_name: str,
@@ -187,13 +187,15 @@ class ModelService:
         task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
         task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
         user_email = self.user_repository.get_user_email(user_id)[0]
-        
-        file_name = file_name.lower()
-        file_name = file_name.replace('/', ':')
-        file_name = re.sub(r'\s+', '_', file_name)
-        clean_file_name = re.sub(r'_+', '_', file_name)
 
-        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{clean_file_name}"
+        file_name = file_name.lower()
+        file_name = file_name.replace("/", ":")
+        file_name = re.sub(r"\s+", "_", file_name)
+        clean_file_name = re.sub(r"_+", "_", file_name)
+
+        model_path = (
+            f"{task_code}/submited_models/{task_id}-{user_id}-{clean_file_name}"
+        )
         try:
             self.s3.put_object(
                 Body=file_to_upload.file,

@@ -101,7 +101,7 @@ def heavy_evaluation(
         model.task_code,
         model.file_to_upload,
         background_tasks,
-    )  
+    )
 
 
 @router.get("/initiate_lambda_models")
