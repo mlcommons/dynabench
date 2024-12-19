@@ -64,6 +64,7 @@ class EmailHelper:
             server.close()
             return f"e-mail sended to {contact}"
 
-        except Exception:
+        except Exception as e:
             print("Error sending e-mail")
+            print(e)
             return False

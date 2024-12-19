@@ -51,15 +51,18 @@ const SubmitModel = () => {
       formData.append("user_id", user.id);
       formData.append("task_code", taskCode);
       formData.append("file_to_upload", modelData.file);
-      sendModelData(formData).then(() => {
-        setLoading({ loading: true, text: "Done" });
-        Swal.fire({
-          title: "Good job!",
-          text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
-          icon: "success",
-          confirmButtonColor: "#007bff",
-        });
-      });
+
+      sendModelData(formData, configYaml.evaluation?.type === "heavy").then(
+        () => {
+          setLoading({ loading: true, text: "Done" });
+          Swal.fire({
+            title: "Good job!",
+            text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
+            icon: "success",
+            confirmButtonColor: "#007bff",
+          });
+        }
+      );
     } else {
       setLoadingFile(true);
       alert("Please upload a model");
@@ -70,12 +73,12 @@ const SubmitModel = () => {
   const getTaskData = async () => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
     const taskData = await get(
-      `/task/get_task_with_round_info_by_task_id/${taskId}`,
+      `/task/get_task_with_round_info_by_task_id/${taskId}`
     );
     const dynalabModel = await get(`/model/get_dynalab_model/${taskCode}`);
     if (response.ok) {
       setConfigYaml(
-        JSON.parse(JSON.stringify(yaml.load(taskData.config_yaml))),
+        JSON.parse(JSON.stringify(yaml.load(taskData.config_yaml)))
       );
       setDynalabModel(dynalabModel);
     }

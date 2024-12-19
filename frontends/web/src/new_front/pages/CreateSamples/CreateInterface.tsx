@@ -42,7 +42,7 @@ const CreateInterface = () => {
   let { taskCode } = useParams<{ taskCode: string }>();
   const { user } = useContext(UserContext);
   const { updateAmountExamplesCreatedToday } = useContext(
-    CreateInterfaceContext,
+    CreateInterfaceContext
   );
   const history = useHistory();
   const location = useLocation();
@@ -59,7 +59,7 @@ const CreateInterface = () => {
         {
           round_id: taskContextInfo?.real_round_id,
           user_id: user.id!,
-        },
+        }
       );
       if (!stillAllowedToSubmit) {
         Swal.fire({
@@ -89,13 +89,12 @@ const CreateInterface = () => {
       setTaskInfo(taskInfo);
       setTaskId(taskId);
       setIsGenerativeContext(
-        taskConfiguration.context.generative_context?.is_generative,
+        taskConfiguration.context.generative_context?.is_generative
       );
     }
   };
 
   const loadTaskContext = async () => {
-    console.log("in new method");
     const configContext = taskConfiguration?.context as any;
     let needContext;
     if ("context_for_start" in configContext) {
@@ -114,7 +113,7 @@ const CreateInterface = () => {
   const isLogin = async (
     assignmentId: string | null,
     taskCode: string,
-    treatmentId: string | null,
+    treatmentId: string | null
   ) => {
     if (!user.id) {
       await checkUserIsLoggedIn(
@@ -122,7 +121,7 @@ const CreateInterface = () => {
         `/`,
         assignmentId,
         taskCode,
-        treatmentId,
+        treatmentId
       );
     }
   };
@@ -146,7 +145,7 @@ const CreateInterface = () => {
     if (taskContextInfo?.real_round_id) {
       updateAmountExamplesCreatedToday(
         taskContextInfo?.real_round_id,
-        user.id!,
+        user.id!
       );
     }
   }, [taskContextInfo, user]);
@@ -250,7 +249,7 @@ const CreateInterface = () => {
                     isGenerativeContext={isGenerativeContext}
                     userId={user.id!}
                     accept_sandbox_creation={Boolean(
-                      taskInfo.accept_sandbox_creation,
+                      taskInfo.accept_sandbox_creation
                     )}
                     setModelOutput={setModelOutput}
                     setIsGenerativeContext={setIsGenerativeContext}
