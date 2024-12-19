@@ -5,11 +5,16 @@ import Swal from "sweetalert2";
 const useUploadFile = () => {
   const [progress, setProgress] = useState(0);
 
-  const sendModelData = (formData: FormData) => {
+  const sendModelData = (formData: FormData, heavy: boolean = false) => {
+    const url = `${process.env.REACT_APP_API_HOST_2}${
+      heavy
+        ? "/model/heavy_evaluation"
+        : "/model/upload_model_to_s3_and_evaluate"
+    }`;
     return axios
       .request({
         method: "post",
-        url: `${process.env.REACT_APP_API_HOST_2}/model/upload_model_to_s3_and_evaluate`,
+        url: url,
         data: formData,
         onUploadProgress: (p) => {
           setProgress(p.loaded / p.total);

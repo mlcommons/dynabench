@@ -6,11 +6,12 @@ import json
 import os
 import secrets
 import time
+import re
 
 import boto3
 import requests
 import yaml
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException, UploadFile, BackgroundTasks
 from pydantic import Json
 
 from app.domain.helpers.email import EmailHelper
@@ -173,6 +174,46 @@ class ModelService:
 
     def single_model_prediction(self, model_url: str, model_input: dict):
         return requests.post(model_url, json=model_input).json()
+    
+    def upload_model_to_s3(
+        self,
+        model_name: str,
+        file_name: str,
+        user_id: str,
+        task_code: str,
+        file_to_upload: UploadFile,
+        background_tasks: BackgroundTasks,
+    ):
+        task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
+        task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        
+        file_name = file_name.lower()
+        file_name = file_name.replace('/', ':')
+        file_name = re.sub(r'\s+', '_', file_name)
+        clean_file_name = re.sub(r'_+', '_', file_name)
+
+        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{clean_file_name}"
+        try:
+            self.s3.put_object(
+                Body=file_to_upload.file,
+                Bucket=task_s3_bucket,
+                Key=model_path,
+                ContentType=file_to_upload.content_type,
+            )
+            self.user_repository.increment_model_submitted_count(user_id)
+            background_tasks.add_task(
+                self.email_helper.send,
+                contact=user_email,
+                cc_contact=self.email_sender,
+                template_name="model_upload_successful.txt",
+                msg_dict={"name": model_name},
+                subject=f"Model {model_name} upload succeeded.",
+            )
+            return "Model upload successfully"
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return "Model upload failed"
 
     def single_model_prediction_submit(
         self,
