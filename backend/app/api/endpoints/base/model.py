@@ -87,6 +87,27 @@ async def upload_model_to_s3_and_evaluate(
     return "The model will be evaluated in the background"
 
 
+@router.post("/heavy_evaluation")
+def heavy_evaluation(
+    background_tasks: BackgroundTasks,
+    model: UploadModelToS3AndEvaluateRequest = Depends(
+        UploadModelToS3AndEvaluateRequest
+    ),
+):
+    return ModelService().upload_model_to_s3(
+        model.model_name,
+        model.description,
+        model.num_paramaters,
+        model.languages,
+        model.license,
+        model.file_name,
+        model.user_id,
+        model.task_code,
+        model.file_to_upload,
+        background_tasks,
+    )
+
+
 @router.get("/initiate_lambda_models")
 def initiate_lambda_models() -> None:
     return ModelService().initiate_lambda_models()

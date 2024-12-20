@@ -4,13 +4,14 @@
 
 import json
 import os
+import re
 import secrets
 import time
 
 import boto3
 import requests
 import yaml
-from fastapi import HTTPException, UploadFile
+from fastapi import BackgroundTasks, HTTPException, UploadFile
 from pydantic import Json
 
 from app.domain.helpers.email import EmailHelper
@@ -173,6 +174,68 @@ class ModelService:
 
     def single_model_prediction(self, model_url: str, model_input: dict):
         return requests.post(model_url, json=model_input).json()
+
+    def upload_model_to_s3(
+        self,
+        model_name: str,
+        description: str,
+        num_paramaters: str,
+        languages: str,
+        license: str,
+        file_name: str,
+        user_id: str,
+        task_code: str,
+        file_to_upload: UploadFile,
+        background_tasks: BackgroundTasks,
+    ):
+        task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
+        task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+        user_email = self.user_repository.get_user_email(user_id)[0]
+
+        file_name = file_name.lower()
+        file_name = file_name.replace("/", ":")
+        file_name = re.sub(r"\s+", "_", file_name)
+        clean_file_name = re.sub(r"_+", "_", file_name)
+
+        model_name_clean = model_name.lower()
+        model_name_clean = model_name_clean.replace("/", ":")
+        model_name_clean = re.sub(r"\s+", "_", model_name_clean)
+        model_name_clean = re.sub(r"_+", "_", model_name_clean)
+
+        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+        try:
+            self.s3.put_object(
+                Body=file_to_upload.file,
+                Bucket=task_s3_bucket,
+                Key=model_path,
+                ContentType=file_to_upload.content_type,
+            )
+            self.user_repository.increment_model_submitted_count(user_id)
+            self.model_repository.create_new_model(
+                task_id=task_id,
+                user_id=user_id,
+                model_name=model_name,
+                shortname=model_name,
+                longdesc=description,
+                desc=description,
+                languages=languages,
+                license=license,
+                params=num_paramaters,
+                deployment_status="uploaded",
+                secret=secrets.token_hex(),
+            )
+            background_tasks.add_task(
+                self.email_helper.send,
+                contact=user_email,
+                cc_contact=self.email_sender,
+                template_name="model_upload_successful.txt",
+                msg_dict={"name": model_name},
+                subject=f"Model {model_name} upload succeeded.",
+            )
+            return "Model upload successfully"
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return "Model upload failed"
 
     def single_model_prediction_submit(
         self,
