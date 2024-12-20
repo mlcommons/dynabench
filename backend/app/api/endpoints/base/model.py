@@ -96,6 +96,10 @@ def heavy_evaluation(
 ):
     return ModelService().upload_model_to_s3(
         model.model_name,
+        model.description,
+        model.num_paramaters,
+        model.languages,
+        model.license,
         model.file_name,
         model.user_id,
         model.task_code,

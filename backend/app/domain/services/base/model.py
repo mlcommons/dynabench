@@ -178,6 +178,10 @@ class ModelService:
     def upload_model_to_s3(
         self,
         model_name: str,
+        description: str,
+        num_paramaters: str,
+        languages: str,
+        license: str,
         file_name: str,
         user_id: str,
         task_code: str,
@@ -193,9 +197,12 @@ class ModelService:
         file_name = re.sub(r"\s+", "_", file_name)
         clean_file_name = re.sub(r"_+", "_", file_name)
 
-        model_path = (
-            f"{task_code}/submited_models/{task_id}-{user_id}-{clean_file_name}"
-        )
+        model_name_clean = model_name.lower()
+        model_name_clean = model_name_clean.replace("/", ":")
+        model_name_clean = re.sub(r"\s+", "_", model_name_clean)
+        model_name_clean = re.sub(r"_+", "_", model_name_clean)
+
+        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
         try:
             self.s3.put_object(
                 Body=file_to_upload.file,
@@ -204,6 +211,19 @@ class ModelService:
                 ContentType=file_to_upload.content_type,
             )
             self.user_repository.increment_model_submitted_count(user_id)
+            self.model_repository.create_new_model(
+                task_id=task_id,
+                user_id=user_id,
+                model_name=model_name,
+                shortname=model_name,
+                longdesc=description,
+                desc=description,
+                languages=languages,
+                license=license,
+                params=num_paramaters,
+                deployment_status="uploaded",
+                secret=secrets.token_hex(),
+            )
             background_tasks.add_task(
                 self.email_helper.send,
                 contact=user_email,
