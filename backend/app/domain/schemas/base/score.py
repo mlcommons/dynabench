@@ -22,7 +22,7 @@ class CsvResponseModel(BaseModel):
     rounds: Union[List[int], None]
 
 
-class ScoresHeavyEvaluationRequest(BaseModel):
+class HeavyEvaluationScoresRequest(BaseModel):
     model_id: int
     message: str
     scores: Optional[dict]

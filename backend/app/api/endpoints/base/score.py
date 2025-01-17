@@ -8,7 +8,7 @@ from app.domain.schemas.base.score import (
     CsvResponseModel,
     GetCsvScore,
     GetLeaderboardMetadata,
-    ScoresHeavyEvaluationRequest,
+    HeavyEvaluationScoresRequest,
 )
 from app.domain.services.base.score import ScoreService
 
@@ -32,7 +32,7 @@ async def read_leaderboard_metadata(model: GetLeaderboardMetadata):
 
 
 @router.post("/scores_heavy_evaluation")
-def scores_heavy_evaluation(model: ScoresHeavyEvaluationRequest):
+def heavy_evaluation_scores(model: HeavyEvaluationScoresRequest):
     return ScoreService().add_scores_and_update_model(
         model.model_id, model.scores, model.status, model.message
     )
