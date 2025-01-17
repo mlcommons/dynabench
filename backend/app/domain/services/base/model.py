@@ -11,7 +11,7 @@ import time
 import boto3
 import requests
 import yaml
-from fastapi import BackgroundTasks, HTTPException, UploadFile
+from fastapi import HTTPException, UploadFile
 from pydantic import Json
 
 from app.domain.helpers.email import EmailHelper
@@ -175,7 +175,7 @@ class ModelService:
     def single_model_prediction(self, model_url: str, model_input: dict):
         return requests.post(model_url, json=model_input).json()
 
-    def upload_model_to_s3(
+    def upload_and_create_model(
         self,
         model_name: str,
         description: str,
@@ -186,7 +186,6 @@ class ModelService:
         user_id: str,
         task_code: str,
         file_to_upload: UploadFile,
-        background_tasks: BackgroundTasks,
     ):
         task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
         task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
@@ -203,6 +202,8 @@ class ModelService:
         model_name_clean = re.sub(r"_+", "_", model_name_clean)
 
         model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+        uri_logging = f"s3://{task_s3_bucket}/{task_code}/inference_logs/"
+        uri_model = f"s3://{task_s3_bucket}/{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
         try:
             self.s3.put_object(
                 Body=file_to_upload.file,
@@ -211,7 +212,7 @@ class ModelService:
                 ContentType=file_to_upload.content_type,
             )
             self.user_repository.increment_model_submitted_count(user_id)
-            self.model_repository.create_new_model(
+            model = self.model_repository.create_new_model(
                 task_id=task_id,
                 user_id=user_id,
                 model_name=model_name,
@@ -224,18 +225,45 @@ class ModelService:
                 deployment_status="uploaded",
                 secret=secrets.token_hex(),
             )
-            background_tasks.add_task(
-                self.email_helper.send,
+            return {
+                "model_path": uri_model,
+                "save_s3_path": uri_logging,
+                "model_id": model["id"],
+                "model_name": model_name,
+                "user_email": user_email,
+            }
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return "Model upload failed"
+
+    def run_heavy_evaluation(
+        self,
+        model_path: str,
+        model_id: int,
+        save_s3_path: str,
+        user_email: str,
+        model_name: str,
+    ):
+        try:
+            # url = ""
+            # requests.post(
+            #     url,
+            #     json={
+            #         "model_path": model_path,
+            #         "model_id": model_id,
+            #         "save_s3_path": save_s3_path,
+            #         "endpoint_url": "https://backend.dynabench.org/score/scores_heavy_evaluation",
+            #     },
+            # )
+            self.email_helper.send(
                 contact=user_email,
                 cc_contact=self.email_sender,
                 template_name="model_upload_successful.txt",
                 msg_dict={"name": model_name},
                 subject=f"Model {model_name} upload succeeded.",
             )
-            return "Model upload successfully"
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
-            return "Model upload failed"
 
     def single_model_prediction_submit(
         self,

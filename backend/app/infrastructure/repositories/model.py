@@ -6,6 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
 
@@ -95,7 +96,11 @@ class ModelRepository(AbstractRepository):
             session.add(model)
             session.flush()
             session.commit()
-            return model.__dict__
+            model_data = {
+                c.key: getattr(model, c.key) for c in inspect(model).mapper.column_attrs
+            }
+
+            return model_data
 
     def get_active_models_by_task_id(self, task_id: int) -> list:
         models = (

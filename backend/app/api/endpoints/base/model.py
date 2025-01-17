@@ -94,7 +94,7 @@ def heavy_evaluation(
         UploadModelToS3AndEvaluateRequest
     ),
 ):
-    return ModelService().upload_model_to_s3(
+    data = ModelService().upload_and_create_model(
         model.model_name,
         model.description,
         model.num_paramaters,
@@ -104,8 +104,16 @@ def heavy_evaluation(
         model.user_id,
         model.task_code,
         model.file_to_upload,
-        background_tasks,
     )
+    background_tasks.add_task(
+        ModelService().run_heavy_evaluation,
+        data["model_path"],
+        data["model_id"],
+        data["save_s3_path"],
+        data["user_email"],
+        data["model_name"],
+    )
+    return "The model will be evaluated in the background"
 
 
 @router.get("/initiate_lambda_models")
