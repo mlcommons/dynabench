@@ -188,6 +188,8 @@ class ModelService:
         file_to_upload: UploadFile,
     ):
         task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
+        yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
+        yaml_file = yaml.safe_load(yaml_file)
         task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
         user_email = self.user_repository.get_user_email(user_id)[0]
 
@@ -204,6 +206,8 @@ class ModelService:
         model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
         uri_logging = f"s3://{task_s3_bucket}/{task_code}/inference_logs/"
         uri_model = f"s3://{task_s3_bucket}/{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+        inference_url = yaml_file["evaluation"]["inference_url"]
+
         try:
             self.s3.put_object(
                 Body=file_to_upload.file,
@@ -231,30 +235,34 @@ class ModelService:
                 "model_id": model["id"],
                 "model_name": model_name,
                 "user_email": user_email,
+                "inference_url": inference_url,
             }
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             return "Model upload failed"
 
     def run_heavy_evaluation(
+        self, model_path: str, model_id: int, save_s3_path: str, inference_url: str
+    ):
+        try:
+            requests.post(
+                inference_url,
+                json={
+                    "model_path": model_path,
+                    "model_id": model_id,
+                    "save_s3_path": save_s3_path,
+                    "endpoint_url": "https://backend.dynabench.org/score/scores_heavy_evaluation",
+                },
+            )
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
+    def send_uploaded_model_email(
         self,
-        model_path: str,
-        model_id: int,
-        save_s3_path: str,
         user_email: str,
         model_name: str,
     ):
         try:
-            # url = ""
-            # requests.post(
-            #     url,
-            #     json={
-            #         "model_path": model_path,
-            #         "model_id": model_id,
-            #         "save_s3_path": save_s3_path,
-            #         "endpoint_url": "https://backend.dynabench.org/score/scores_heavy_evaluation",
-            #     },
-            # )
             self.email_helper.send(
                 contact=user_email,
                 cc_contact=self.email_sender,

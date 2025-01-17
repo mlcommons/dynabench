@@ -362,27 +362,41 @@ class ScoreService:
         csv_file = pd.read_csv(final_file)
         return csv_file.to_dict(orient="records")
 
-    def add_scores_and_update_model(self, model_id: int, scores: dict):
+    def add_scores_and_update_model(
+        self, model_id: int, scores: dict, status: int, message: str
+    ):
         try:
             model = self.model_repository.get_model_info_by_id(model_id)
             user = self.user_repository.get_user_info_by_id(model.uid)
-            datasets = self.dataset_repository.get_order_datasets_by_task_id(
-                model.task_id
-            )
-            datasets = [dataset.__dict__ for dataset in datasets]
-            metadata_json = dict(scores)
-            scores["metadata_json"] = metadata_json
-            scores["mid"] = model_id
-            scores["did"] = datasets[0]["id"]
-            self.score_repository.add(scores)
-            self.model_repository.update_model_status(model_id)
-            self.email_helper.send(
-                contact=user["email"],
-                cc_contact=self.email_sender,
-                template_name="model_evaluation_sucessful.txt",
-                msg_dict={"name": model["name"], "model_id": model["id"]},
-                subject=f"Model {model['name']} evaluation succeeded.",
-            )
+            if status != 200:
+                self.email_helper.send(
+                    contact=user["email"],
+                    cc_contact=self.email_sender,
+                    template_name="model_evaluation_failed.txt",
+                    msg_dict={"name": model["name"]},
+                    subject=f"Model {model['name']} evaluation failed.",
+                )
+                print("error running inference")
+                print(message)
+                return {"response": "Error running instance"}
+            else:
+                datasets = self.dataset_repository.get_order_datasets_by_task_id(
+                    model.task_id
+                )
+                datasets = [dataset.__dict__ for dataset in datasets]
+                metadata_json = dict(scores)
+                scores["metadata_json"] = metadata_json
+                scores["mid"] = model_id
+                scores["did"] = datasets[0]["id"]
+                self.score_repository.add(scores)
+                self.model_repository.update_model_status(model_id)
+                self.email_helper.send(
+                    contact=user["email"],
+                    cc_contact=self.email_sender,
+                    template_name="model_evaluation_sucessful.txt",
+                    msg_dict={"name": model["name"], "model_id": model["id"]},
+                    subject=f"Model {model['name']} evaluation succeeded.",
+                )
+                return {"response": "Scores added successfully"}
         except Exception as e:
             return {"error": str(e)}
-        return {"response": "Scores added successfully"}

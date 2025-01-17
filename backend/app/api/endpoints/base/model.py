@@ -110,6 +110,10 @@ def heavy_evaluation(
         data["model_path"],
         data["model_id"],
         data["save_s3_path"],
+        data["inference_url"],
+    )
+    background_tasks.add_task(
+        ModelService().send_upload_email,
         data["user_email"],
         data["model_name"],
     )

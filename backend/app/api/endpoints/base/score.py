@@ -33,4 +33,6 @@ async def read_leaderboard_metadata(model: GetLeaderboardMetadata):
 
 @router.post("/scores_heavy_evaluation")
 def scores_heavy_evaluation(model: ScoresHeavyEvaluationRequest):
-    return ScoreService().add_scores_and_update_model(model.model_id, model.scores)
+    return ScoreService().add_scores_and_update_model(
+        model.model_id, model.scores, model.status, model.message
+    )
