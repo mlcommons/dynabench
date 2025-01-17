@@ -251,7 +251,7 @@ class ModelService:
                     "model_path": model_path,
                     "model_id": model_id,
                     "save_s3_path": save_s3_path,
-                    "endpoint_url": "https://backend.dynabench.org/score/scores_heavy_evaluation",
+                    "endpoint_url": "https://backend.dynabench.org/score/heavy_evaluation_scores",
                 },
             )
         except Exception as e:
