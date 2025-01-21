@@ -8,6 +8,7 @@ from app.domain.schemas.base.score import (
     CsvResponseModel,
     GetCsvScore,
     GetLeaderboardMetadata,
+    HeavyEvaluationScoresRequest,
 )
 from app.domain.services.base.score import ScoreService
 
@@ -28,3 +29,10 @@ async def read_users_score_csv(model: GetCsvScore):
 @router.post("/read_leaderboard_metadata/", response_model={})
 async def read_leaderboard_metadata(model: GetLeaderboardMetadata):
     return ScoreService().read_leaderboard_metadata(model.task_id, model.round_id)
+
+
+@router.post("/heavy_evaluation_scores")
+def heavy_evaluation_scores(model: HeavyEvaluationScoresRequest):
+    return ScoreService().add_scores_and_update_model(
+        model.model_id, model.scores, model.status, model.message
+    )

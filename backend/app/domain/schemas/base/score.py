@@ -20,3 +20,10 @@ class GetLeaderboardMetadata(BaseModel):
 class CsvResponseModel(BaseModel):
     data: Union[str, List]
     rounds: Union[List[int], None]
+
+
+class HeavyEvaluationScoresRequest(BaseModel):
+    model_id: int
+    message: str
+    scores: Optional[dict]
+    status: Optional[int]
