@@ -229,6 +229,7 @@ class ModelService:
                 deployment_status="uploaded",
                 secret=secrets.token_hex(),
             )
+            print("The model has been uploaded and created in the DB")
             return {
                 "model_path": uri_model,
                 "save_s3_path": uri_logging,
@@ -245,7 +246,8 @@ class ModelService:
         self, model_path: str, model_id: int, save_s3_path: str, inference_url: str
     ):
         try:
-            requests.post(
+            print("background task before request to Runpod")
+            r = requests.post(
                 inference_url,
                 json={
                     "model_path": model_path,
@@ -254,8 +256,9 @@ class ModelService:
                     "endpoint_url": "https://backend.dynabench.org/score/heavy_evaluation_scores",
                 },
             )
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
+            r.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            print(f"An unexpected error occurred while running heavy evaluation: {e}")
 
     def send_uploaded_model_email(
         self,
@@ -270,6 +273,7 @@ class ModelService:
                 msg_dict={"name": model_name},
                 subject=f"Model {model_name} upload succeeded.",
             )
+            print("sent uploaded email")
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
