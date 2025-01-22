@@ -366,7 +366,7 @@ class ScoreService:
         self, model_id: int, scores: dict, status_code: int, message: str
     ):
         try:
-            model = self.model_repository.get_model_infco_by_id(model_id)
+            model = self.model_repository.get_model_info_by_id(model_id)
             user = self.user_repository.get_info_by_user_id(model["uid"])
             if status_code != 200:
                 self.email_helper.send(
