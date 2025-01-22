@@ -145,6 +145,60 @@ def get_kullback_leibler_divergence_meta(task=None):
     }
 
 
+def get_standard_accuracy_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Accuracy",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
+def get_CER_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "CER",
+        "utility_direction": -1,
+        "offset": 0,
+    }
+
+
+def get_STD_CER_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "STD CER",
+        "utility_direction": -1,
+        "offset": 0,
+    }
+
+
+def get_CER_15_WORSE_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "CER_15_WORSE",
+        "utility_direction": -1,
+        "offset": 0,
+    }
+
+
+def get_dialect_Accuracy_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Dialect Accuracy",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
+def get_dialect_CER_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "Dialect CER",
+        "utility_direction": -1,
+        "offset": 0,
+    }
+
+
 def get_dataperf_fraction_of_fixes(required_fixes, total_fixes):
     fraction_of_fixes = required_fixes / total_fixes
     return fraction_of_fixes
