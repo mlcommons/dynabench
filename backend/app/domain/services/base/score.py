@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 from app.domain.helpers.email import EmailHelper
+from app.domain.services.base.dataset import DatasetService
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.round import RoundRepository
@@ -23,6 +24,7 @@ class ScoreService:
         self.score_repository = ScoreRepository()
         self.task_repository = TaskRepository()
         self.dataset_repository = DatasetRepository()
+        self.dataset_service = DatasetService()
         self.round_repository = RoundRepository()
         self.model_repository = ModelRepository()
         self.user_repository = UserRepository()
