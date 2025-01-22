@@ -55,4 +55,10 @@ metrics_meta_dict = {
     "dataperf_balanced_accuracy": metrics.get_dataperf_balanced_accuracy_meta,
     "chrf": metrics.get_chrf_meta,
     "kullback_leibler_divergence": metrics.get_kullback_leibler_divergence_meta,
+    "Standard_Accuracy": metrics.get_standard_accuracy_meta,
+    "Standard_CER": metrics.get_CER_meta,
+    "Standard_STD_CER": metrics.get_STD_CER_meta,
+    "Standard_CER_15_WORSE": metrics.get_CER_15_WORSE_meta,
+    "Dialect_Accuracy": metrics.get_dialect_Accuracy_meta,
+    "Dialect_CER": metrics.get_dialect_CER_meta,
 }
