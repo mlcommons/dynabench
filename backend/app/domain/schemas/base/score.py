@@ -25,5 +25,5 @@ class CsvResponseModel(BaseModel):
 class HeavyEvaluationScoresRequest(BaseModel):
     model_id: int
     message: str
-    scores: Optional[dict]
-    status: Optional[int]
+    scores: dict
+    status_code: int

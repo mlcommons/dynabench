@@ -363,17 +363,17 @@ class ScoreService:
         return csv_file.to_dict(orient="records")
 
     def add_scores_and_update_model(
-        self, model_id: int, scores: dict, status: int, message: str
+        self, model_id: int, scores: dict, status_code: int, message: str
     ):
         try:
             model = self.model_repository.get_model_info_by_id(model_id)
-            user = self.user_repository.get_user_info_by_id(model.uid)
-            if status != 200:
+            user = self.user_repository.get_info_by_user_id(model.uid)
+            if status_code != 200:
                 self.email_helper.send(
                     contact=user["email"],
                     cc_contact=self.email_sender,
-                    template_name="model_evaluation_failed.txt",
-                    msg_dict={"name": model["name"]},
+                    template_name="model_inference_failed.txt",
+                    msg_dict={"name": model["name"], "message": message},
                     subject=f"Model {model['name']} evaluation failed.",
                 )
                 print("error running inference")
