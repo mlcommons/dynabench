@@ -1,0 +1,10 @@
+Hi there
+
+Your model $name has failed evaluating. Please check the following message and correct your model to try again. If you think this is a mistake, please contact
+the task organizer.
+
+$message.
+
+Thanks,
+
+The Dynabench Team
