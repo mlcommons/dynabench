@@ -11,7 +11,9 @@ import pandas as pd
 
 from app.domain.helpers.email import EmailHelper
 from app.domain.services.base.dataset import DatasetService
+from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
+from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.score import ScoreRepository
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.user import UserRepository
@@ -21,7 +23,9 @@ class ScoreService:
     def __init__(self):
         self.score_repository = ScoreRepository()
         self.task_repository = TaskRepository()
+        self.dataset_repository = DatasetRepository()
         self.dataset_service = DatasetService()
+        self.round_repository = RoundRepository()
         self.model_repository = ModelRepository()
         self.user_repository = UserRepository()
         self.session = boto3.Session(
@@ -30,6 +34,7 @@ class ScoreService:
             region_name=os.getenv("AWS_REGION"),
         )
         self.s3 = self.session.client("s3")
+        self.email_sender = os.getenv("MAIL_LOGIN")
         self.email_helper = EmailHelper()
 
     def get_scores_by_dataset_and_model_id(
@@ -363,35 +368,46 @@ class ScoreService:
         return csv_file.to_dict(orient="records")
 
     def add_scores_and_update_model(
-        self, model_id: int, scores: dict, status: int, message: str
+        self, model_id: int, scores: dict, status_code: int, message: str
     ):
         try:
             model = self.model_repository.get_model_info_by_id(model_id)
-            user = self.user_repository.get_user_info_by_id(model.uid)
-            if status != 200:
+            user = self.user_repository.get_info_by_user_id(model["uid"])
+
+            if status_code != 200:
                 self.email_helper.send(
-                    contact=user["email"],
+                    contact=user.email,
                     cc_contact=self.email_sender,
-                    template_name="model_evaluation_failed.txt",
-                    msg_dict={"name": model["name"]},
+                    template_name="model_inference_failed.txt",
+                    msg_dict={"name": model["name"], "message": message},
                     subject=f"Model {model['name']} evaluation failed.",
                 )
-                print("error running inference")
-                print(message)
                 return {"response": "Error running instance"}
             else:
                 datasets = self.dataset_repository.get_order_datasets_by_task_id(
-                    model.task_id
+                    model["tid"]
                 )
                 datasets = [dataset.__dict__ for dataset in datasets]
+                round_id = datasets[0]["rid"]
+                round_info = self.round_repository.get_round_info_by_round_and_task(
+                    model["tid"], round_id
+                )
                 metadata_json = dict(scores)
-                scores["metadata_json"] = metadata_json
-                scores["mid"] = model_id
-                scores["did"] = datasets[0]["id"]
-                self.score_repository.add(scores)
+
+                new_score = {
+                    "perf": metadata_json["Standard_CER_15_WORSE"],
+                    "pretty_perf": f"{100*metadata_json['Standard_CER_15_WORSE']:.2f}%",
+                    "mid": model_id,
+                    "r_realid": round_info.id,
+                    "did": datasets[0]["id"],
+                    "metadata_json": json.dumps(metadata_json),
+                }
+
+                self.score_repository.add(new_score)
+
                 self.model_repository.update_model_status(model_id)
                 self.email_helper.send(
-                    contact=user["email"],
+                    contact=user.email,
                     cc_contact=self.email_sender,
                     template_name="model_evaluation_sucessful.txt",
                     msg_dict={"name": model["name"], "model_id": model["id"]},

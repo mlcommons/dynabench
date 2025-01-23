@@ -207,6 +207,7 @@ class ModelService:
         uri_logging = f"s3://{task_s3_bucket}/{task_code}/inference_logs/"
         uri_model = f"s3://{task_s3_bucket}/{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
         inference_url = yaml_file["evaluation"]["inference_url"]
+        metadata_url = f"s3://{task_s3_bucket}/{task_code}/metadata/"
 
         try:
             self.s3.put_object(
@@ -237,28 +238,52 @@ class ModelService:
                 "model_name": model_name,
                 "user_email": user_email,
                 "inference_url": inference_url,
+                "metadata_url": metadata_url,
             }
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             return "Model upload failed"
 
     def run_heavy_evaluation(
-        self, model_path: str, model_id: int, save_s3_path: str, inference_url: str
+        self,
+        model_path: str,
+        model_id: int,
+        save_s3_path: str,
+        inference_url: str,
+        metadata_url: str,
     ):
+        api_key = os.getenv("RUNPOD")
+        params = {
+            "input": {
+                "model_path": model_path,
+                "model_id": model_id,
+                "save_s3_path": save_s3_path,
+                "endpoint_url": "https://backend.dynabench.org/score/heavy_evaluation_scores",
+                "metada_s3_path": metadata_url,
+            }
+        }
         try:
             print("background task before request to Runpod")
             r = requests.post(
                 inference_url,
-                json={
-                    "model_path": model_path,
-                    "model_id": model_id,
-                    "save_s3_path": save_s3_path,
-                    "endpoint_url": "https://backend.dynabench.org/score/heavy_evaluation_scores",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
                 },
+                json=params,
             )
             r.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            print(f"An unexpected error occurred while running heavy evaluation: {e}")
+
+            print("Runpod answer", r.json())
+        except requests.exceptions.HTTPError as e:
+            print(e)
+            raise HTTPException(
+                status_code=r.status_code, detail=f"RunPod API Error: {r.text}"
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"An unexpected error occurred: {str(e)}"
+            )
 
     def send_uploaded_model_email(
         self,
