@@ -406,6 +406,7 @@ class ScoreService:
                 self.score_repository.add(new_score)
 
                 self.model_repository.update_model_status(model_id)
+                self.model_repository.update_published_status(model_id)
                 self.email_helper.send(
                     contact=user.email,
                     cc_contact=self.email_sender,
