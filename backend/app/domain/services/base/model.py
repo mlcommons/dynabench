@@ -259,7 +259,7 @@ class ModelService:
                 "model_id": model_id,
                 "save_s3_path": save_s3_path,
                 "endpoint_url": "https://backend.dynabench.org/score/heavy_evaluation_scores",
-                "metada_s3_path": metadata_url,
+                "metadata_s3_path": metadata_url,
             }
         }
         try:
