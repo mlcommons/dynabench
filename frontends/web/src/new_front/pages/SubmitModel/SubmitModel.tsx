@@ -61,9 +61,8 @@ const SubmitModel = () => {
         configYaml.evaluation?.type === "heavy" &&
         modelData.file.size > THRESHOLD
       ) {
-        const partsCount = Math.ceil(
-          modelData.file.size / (1 * 1024 * 1024 * 100)
-        ); //100MB
+        const chunkSize = 1 * 1024 * 1024 * 10; // 10MB
+        const partsCount = Math.ceil(modelData.file.size / chunkSize); //10MB
         const data = {
           model_name: modelData.modelName,
           file_name: modelData.file.name,
@@ -72,7 +71,7 @@ const SubmitModel = () => {
           task_code: taskCode,
           parts_count: partsCount,
         };
-        getSignedURLS(formData, modelData.file, data).then(() => {
+        getSignedURLS(formData, modelData.file, data, chunkSize).then(() => {
           setLoading({ loading: true, text: "Done" });
           Swal.fire({
             title: "Good job!",

@@ -9,14 +9,15 @@ interface partObject {
 
 const useUploadHeavyFile = () => {
   const [bigProgress, setProgress] = useState(0);
-  const [signedUrls, setSignedUrls] = useState([]);
-  const [parts, setParts] = useState<partObject[]>([]);
-  const [uploadId, setUploadID] = useState("");
   const baseURL = process.env.REACT_APP_API_HOST_2;
 
-  const getSignedURLS = (formData: FormData, file: File, data: object) => {
+  const getSignedURLS = (
+    formData: FormData,
+    file: File,
+    data: object,
+    chunkSize: number,
+  ) => {
     const url = `${baseURL}/model/initiate-mutipart-upload`;
-    console.log("get signed URLS");
     return axios
       .request({
         method: "post",
@@ -25,14 +26,17 @@ const useUploadHeavyFile = () => {
       })
       .then((response) => {
         const { upload_id, urls } = response.data;
-        setSignedUrls(urls);
-        setUploadID(upload_id);
-        console.log(upload_id, urls);
-
-        return uploadFileChunks(formData, file, data, urls, upload_id);
+        return uploadFileChunks(
+          formData,
+          file,
+          data,
+          urls,
+          upload_id,
+          chunkSize,
+        );
       })
       .catch((e) => {
-        console.error(e);
+        console.error("Faile to get signed URLS", e);
         setProgress(0);
         Swal.fire({
           icon: "error",
@@ -48,9 +52,8 @@ const useUploadHeavyFile = () => {
     data: any,
     urls: [],
     uploadId: string,
+    chunkSize: number,
   ) => {
-    let totalUploaded = 0;
-    const chunkSize = 1 * 1024 * 1024 * 100; //100MB
     const localParts: partObject[] = [];
     const promises: Promise<void>[] = [];
     const abortParams = {
@@ -62,6 +65,7 @@ const useUploadHeavyFile = () => {
     };
     let uploadFailed = false;
 
+    const uploadProgresschunk = 1 / urls.length;
     for (let i = 0; i < urls.length; i++) {
       const start = i * chunkSize;
       const chunk = file?.slice(start, start + chunkSize);
@@ -73,20 +77,13 @@ const useUploadHeavyFile = () => {
           headers: {
             "Content-Type": file.type,
           },
-          onUploadProgress: (progressEvent) => {
-            const chunkProgress = progressEvent.loaded / progressEvent.total;
-            const chunkUploaded = progressEvent.loaded;
-
-            // Update total uploaded bytes
-            totalUploaded += chunkUploaded - chunkProgress * chunkSize;
-            setProgress(totalUploaded / file.size);
-          },
         })
         .then((response) => {
           localParts.push({
             ETag: response.headers.etag,
             PartNumber: i + 1,
           });
+          setProgress((prevState) => prevState + uploadProgresschunk);
         })
         .catch((err) => {
           console.error(`Failed to upload part ${i + 1}: ${err.message}`);
@@ -105,7 +102,6 @@ const useUploadHeavyFile = () => {
           abortUpload(abortParams);
           return;
         }
-        setParts(localParts);
         return completeUpload(formData, uploadId, localParts, abortParams);
       })
       .catch((err) => {
@@ -135,12 +131,12 @@ const useUploadHeavyFile = () => {
         url: url,
         data: params,
       })
-      .then((response) => {
-        setSignedUrls(response.data);
+      .then(() => {
         setProgress(1);
         return true;
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error("There was an error while completing upload", e);
         abortUpload(abortParams);
         setProgress(0);
         Swal.fire({
