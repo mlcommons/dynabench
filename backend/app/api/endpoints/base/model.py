@@ -5,7 +5,10 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, Response, UploadF
 from fastapi.responses import FileResponse
 
 from app.domain.schemas.base.model import (
+    AbortMultipartRequest,
     BatchCreateExampleRequest,
+    BatchURLsResponse,
+    CompleteBigModelUploadRequest,
     ConversationWithBufferMemoryRequest,
     DownloadAllExamplesRequest,
     ModelInTheLoopRequest,
@@ -13,6 +16,7 @@ from app.domain.schemas.base.model import (
     SingleModelEvaluationRequest,
     SingleModelEvaluationResponse,
     UpdateModelInfoRequest,
+    UploadBigModelRequest,
     UploadModelToS3AndEvaluateRequest,
 )
 from app.domain.services.base.model import ModelService
@@ -104,6 +108,68 @@ def heavy_evaluation(
         model.user_id,
         model.task_code,
         model.file_to_upload,
+    )
+    background_tasks.add_task(
+        ModelService().run_heavy_evaluation,
+        data["model_path"],
+        data["model_id"],
+        data["save_s3_path"],
+        data["inference_url"],
+        data["metadata_url"],
+    )
+    background_tasks.add_task(
+        ModelService().send_uploaded_model_email,
+        data["user_email"],
+        data["model_name"],
+    )
+    return "The model will be evaluated in the background"
+
+
+@router.post("/initiate-mutipart-upload", response_model=BatchURLsResponse)
+def initiate_multipart_upload(model: UploadBigModelRequest):
+    return ModelService().initiate_multipart_upload(
+        model.model_name,
+        model.file_name,
+        model.content_type,
+        model.user_id,
+        model.task_code,
+        model.parts_count,
+    )
+
+
+@router.post("/abort-mutipart-upload")
+def abort_multipart_upload(model: AbortMultipartRequest):
+    return ModelService().abort_multipart_upload(
+        model.upload_id,
+        model.task_code,
+        model.model_name,
+        model.user_id,
+        model.file_name,
+    )
+
+
+@router.post("/complete-multipart-upload")
+def complete_multipart_upload(
+    model: CompleteBigModelUploadRequest,
+    background_tasks: BackgroundTasks,
+):
+    ModelService().complete_multipart_upload(
+        model.upload_id,
+        model.parts,
+        model.user_id,
+        model.task_code,
+        model.model_name,
+        model.file_name,
+    )
+    data = ModelService().create_model(
+        model.model_name,
+        model.description,
+        model.num_paramaters,
+        model.languages,
+        model.license,
+        model.file_name,
+        model.user_id,
+        model.task_code,
     )
     background_tasks.add_task(
         ModelService().run_heavy_evaluation,
