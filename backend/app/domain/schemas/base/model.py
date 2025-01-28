@@ -1,7 +1,7 @@
 # Copyright (c) MLCommons and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from fastapi import File, UploadFile
 from pydantic import BaseModel
@@ -35,8 +35,7 @@ class ModelInTheLoopRequest(BaseModel):
     task_id: int
 
 
-@form_body
-class UploadModelToS3AndEvaluateRequest(BaseModel):
+class BaseforModelRequest(BaseModel):
     model_name: Optional[str]
     description: Optional[str]
     num_paramaters: Optional[float]
@@ -45,6 +44,10 @@ class UploadModelToS3AndEvaluateRequest(BaseModel):
     file_name: str
     user_id: int
     task_code: str
+
+
+@form_body
+class UploadModelToS3AndEvaluateRequest(BaseforModelRequest):
     file_to_upload: UploadFile = File(...)
 
 
@@ -86,3 +89,40 @@ class UpdateModelInfoRequest(BaseModel):
 
 class DownloadAllExamplesRequest(BaseModel):
     task_id: int
+
+
+class UploadBigModelRequest(BaseModel):
+    model_name: str
+    file_name: str
+    content_type: str
+    user_id: int
+    task_code: str
+    parts_count: int
+
+
+class PreSignedURL(BaseModel):
+    batch_numer: int
+    batch_presigned_url: str
+
+
+class BatchURLsResponse(BaseModel):
+    upload_id: str
+    urls: List
+
+
+class FilePart(BaseModel):
+    ETag: str
+    PartNumber: int
+
+
+class CompleteBigModelUploadRequest(BaseforModelRequest):
+    upload_id: str
+    parts: List[FilePart]
+
+
+class AbortMultipartRequest(BaseModel):
+    upload_id: str
+    task_code: str
+    model_name: str
+    user_id: int
+    file_name: str
