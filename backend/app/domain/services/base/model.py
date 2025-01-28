@@ -10,6 +10,7 @@ import time
 from typing import List
 
 import boto3
+import boto3.session
 import requests
 import yaml
 from fastapi import HTTPException, UploadFile
@@ -62,7 +63,9 @@ class ModelService:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
             region_name=os.getenv("AWS_REGION"),
         )
-        self.s3 = self.session.client("s3")
+        self.s3 = self.session.client(
+            "s3", config=boto3.session.Config(signature_version="s3v4")
+        )
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
         self.email_helper = EmailHelper()
         self.providers = {
@@ -655,40 +658,73 @@ class ModelService:
         model_name_clean = re.sub(r"_+", "_", model_name_clean)
 
         model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
-
-        response = self.s3.create_multipart_upload(
-            Bucket=task_s3_bucket, Key=model_path, ContentType=content_type
-        )
-        upload_id = response["UploadId"]
-
-        urls = []
-        for part_number in range(1, parts_count):
-            presigned_url = self.s3.generate_presigned_url(
-                "upload_part",
-                Params={
-                    "Bucket": task_s3_bucket,
-                    "Key": model_path,
-                    "UploadId": upload_id,
-                    "PartNumber": part_number,
-                },
-                ExpiresIn=3600,
+        try:
+            response = self.s3.create_multipart_upload(
+                Bucket=task_s3_bucket, Key=model_path, ContentType=content_type
             )
-        urls.append(presigned_url)
+            upload_id = response["UploadId"]
 
-        return
+            urls = []
+            for part_number in range(1, parts_count + 1):
+                presigned_url = self.s3.generate_presigned_url(
+                    "upload_part",
+                    Params={
+                        "Bucket": task_s3_bucket,
+                        "Key": model_path,
+                        "UploadId": upload_id,
+                        "PartNumber": part_number,
+                    },
+                    ExpiresIn=3600,
+                    HttpMethod="put",
+                )
+                urls.append(presigned_url)
+        except Exception as e:
+            print("There was an error while generating pre signed urls", e)
+
+        return {"upload_id": upload_id, "urls": urls}
 
     def complete_multipart_upload(
-        self, upload_id: int, parts: List, bucket_name: str, object_key: str
+        self,
+        upload_id: int,
+        parts: List,
+        user_id: str,
+        task_code: str,
+        model_name: str,
+        file_name: str,
     ):
+        task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
+        yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
+        yaml_file = yaml.safe_load(yaml_file)
+        task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+
+        file_name = file_name.lower()
+        file_name = file_name.replace("/", ":")
+        file_name = re.sub(r"\s+", "_", file_name)
+        clean_file_name = re.sub(r"_+", "_", file_name)
+
+        model_name_clean = model_name.lower()
+        model_name_clean = model_name_clean.replace("/", ":")
+        model_name_clean = re.sub(r"\s+", "_", model_name_clean)
+        model_name_clean = re.sub(r"_+", "_", model_name_clean)
+
+        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+
+        parts = sorted(parts, key=lambda x: x.PartNumber)
+        parts = [p.dict() for p in parts]
+
         try:
             self.s3.complete_multipart_upload(
-                Bucket=bucket_name,
-                Key=object_key,
+                Bucket=task_s3_bucket,
+                Key=model_path,
                 UploadId=upload_id,
                 MultipartUpload={"Parts": parts},
             )
-            return {"message": "Upload completed successfully"}
+            self.s3.head_object(
+                Bucket=task_s3_bucket,
+                Key=model_path,
+            )
         except Exception as e:
+            print("Failed to complete upload:", e)
             raise HTTPException(
                 status_code=500, detail=f"Failed to complete upload: {str(e)}"
             )
@@ -749,7 +785,45 @@ class ModelService:
                 "user_email": user_email,
                 "inference_url": inference_url,
                 "metadata_url": metadata_url,
+                "s3_bucket": task_s3_bucket,
             }
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             return "Model upload failed"
+
+    def abort_multipart_upload(
+        self,
+        upload_id: str,
+        task_code: str,
+        model_name: str,
+        user_id: int,
+        file_name: str,
+    ):
+        task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
+        yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
+        yaml_file = yaml.safe_load(yaml_file)
+        task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+
+        file_name = file_name.lower()
+        file_name = file_name.replace("/", ":")
+        file_name = re.sub(r"\s+", "_", file_name)
+        clean_file_name = re.sub(r"_+", "_", file_name)
+
+        model_name_clean = model_name.lower()
+        model_name_clean = model_name_clean.replace("/", ":")
+        model_name_clean = re.sub(r"\s+", "_", model_name_clean)
+        model_name_clean = re.sub(r"_+", "_", model_name_clean)
+
+        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+
+        try:
+            self.s3.abort_multipart_upload(
+                Bucket=task_s3_bucket,
+                Key=model_path,
+                UploadId=upload_id,
+            )
+            return {"message": "Multipart upload aborted successfully."}
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Failed to abort upload: {str(e)}"
+            )
