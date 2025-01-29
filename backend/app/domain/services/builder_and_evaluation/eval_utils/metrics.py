@@ -175,7 +175,7 @@ def get_kullback_leibler_divergence_meta(task=None):
     }
 
 
-def get_standard_accuracy_meta(task=None):
+def get_standard_LID_accuracy_meta(task=None):
     return {
         "unit": "%",
         "pretty_name": "Accuracy",
@@ -211,7 +211,7 @@ def get_CER_15_WORSE_meta(task=None):
     }
 
 
-def get_dialect_Accuracy_meta(task=None):
+def get_dialect_LID_Accuracy_meta(task=None):
     return {
         "unit": "%",
         "pretty_name": "Dialect Accuracy",
