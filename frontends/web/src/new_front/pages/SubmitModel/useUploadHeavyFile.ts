@@ -18,6 +18,7 @@ const useUploadHeavyFile = () => {
     chunkSize: number,
   ) => {
     const url = `${baseURL}/model/initiate-mutipart-upload`;
+    setProgress(0);
     return axios
       .request({
         method: "post",
