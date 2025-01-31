@@ -145,10 +145,10 @@ def get_kullback_leibler_divergence_meta(task=None):
     }
 
 
-def get_standard_accuracy_meta(task=None):
+def get_standard_LID_accuracy_meta(task=None):
     return {
         "unit": "%",
-        "pretty_name": "Accuracy",
+        "pretty_name": "Standard LID Accuracy",
         "utility_direction": 1,
         "offset": 0,
     }
@@ -181,10 +181,10 @@ def get_CER_15_WORSE_meta(task=None):
     }
 
 
-def get_dialect_Accuracy_meta(task=None):
+def get_dialect_LID_Accuracy_meta(task=None):
     return {
         "unit": "%",
-        "pretty_name": "Dialect Accuracy",
+        "pretty_name": "Dialect LID Accuracy",
         "utility_direction": 1,
         "offset": 0,
     }

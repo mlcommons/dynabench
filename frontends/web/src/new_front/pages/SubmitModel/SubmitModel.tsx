@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 import useUploadFile from "./useUploadFile";
+import useStartMultipart from "./useUploadHeavyFile";
 import CreateModel from "new_front/pages/SubmitModel/CreateModel";
 import { Button } from "react-bootstrap";
 import ProgressBar from "new_front/components/Buttons/ProgressBar";
@@ -19,6 +20,7 @@ const SubmitModel = () => {
   });
   const [loadingFile, setLoadingFile] = useState(false);
   const { progress, sendModelData } = useUploadFile();
+  const { bigProgress, getSignedURLS } = useStartMultipart();
   const [showHuggingFace, setShowHuggingFace] = useState(false);
   const [showDynalab, setShowDynalab] = useState(false);
   const [hfModel, setHfModel] = useState(false);
@@ -52,8 +54,24 @@ const SubmitModel = () => {
       formData.append("task_code", taskCode);
       formData.append("file_to_upload", modelData.file);
 
-      sendModelData(formData, configYaml.evaluation?.type === "heavy").then(
-        () => {
+      const THRESHOLD = 4 * 1024 * 1024 * 1024; //4GB
+
+      console.log("Model Size", modelData.file.size);
+      if (
+        configYaml.evaluation?.type === "heavy" &&
+        modelData.file.size > THRESHOLD
+      ) {
+        const chunkSize = 1 * 1024 * 1024 * 10; // 10MB
+        const partsCount = Math.ceil(modelData.file.size / chunkSize); //10MB
+        const data = {
+          model_name: modelData.modelName,
+          file_name: modelData.file.name,
+          content_type: modelData.file.type,
+          user_id: user.id,
+          task_code: taskCode,
+          parts_count: partsCount,
+        };
+        getSignedURLS(formData, modelData.file, data, chunkSize).then(() => {
           setLoading({ loading: true, text: "Done" });
           Swal.fire({
             title: "Good job!",
@@ -61,8 +79,20 @@ const SubmitModel = () => {
             icon: "success",
             confirmButtonColor: "#007bff",
           });
-        }
-      );
+        });
+      } else {
+        sendModelData(formData, configYaml.evaluation?.type === "heavy").then(
+          () => {
+            setLoading({ loading: true, text: "Done" });
+            Swal.fire({
+              title: "Good job!",
+              text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
+              icon: "success",
+              confirmButtonColor: "#007bff",
+            });
+          }
+        );
+      }
     } else {
       setLoadingFile(true);
       alert("Please upload a model");
@@ -183,12 +213,19 @@ const SubmitModel = () => {
                   <i className="fas fa-edit "></i> Upload model
                 </Button>
               )}
+              <span className="pb-4 text-red-400">
+                Please refrain from renaming the files and directories of the
+                downloadable zip base file
+              </span>
+              <span className="pb-4 text-gray-400">
+                This may affect our pipeline thus your scoring
+              </span>
             </div>
           </div>
         </div>
       ) : (
         <div className="flex items-center justify-center h-screen">
-          <ProgressBar progress={progress} text={loading.text} />
+          <ProgressBar progress={progress || bigProgress} text={loading.text} />
         </div>
       )}
     </>
