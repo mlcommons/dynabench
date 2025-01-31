@@ -296,6 +296,7 @@ class ModelService:
         model_name: str,
     ):
         try:
+            print("before email")
             self.email_helper.send(
                 contact=user_email,
                 cc_contact=self.email_sender,
