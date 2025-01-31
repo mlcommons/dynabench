@@ -257,17 +257,17 @@ class ModelService:
         inference_url: str,
         metadata_url: str,
     ):
-        api_key = os.getenv("RUNPOD")
-        params = {
-            "input": {
-                "model_path": model_path,
-                "model_id": model_id,
-                "save_s3_path": save_s3_path,
-                "endpoint_url": "https://backend.dynabench.org/score/heavy_evaluation_scores",
-                "metadata_s3_path": metadata_url,
-            }
-        }
         try:
+            api_key = os.getenv("RUNPOD")
+            params = {
+                "input": {
+                    "model_path": model_path,
+                    "model_id": model_id,
+                    "save_s3_path": save_s3_path,
+                    "endpoint_url": "https://backend.dynabench.org/score/heavy_evaluation_scores",
+                    "metadata_s3_path": metadata_url,
+                }
+            }
             print("background task before request to Runpod")
             r = requests.post(
                 inference_url,
@@ -282,13 +282,9 @@ class ModelService:
             print("Runpod answer", r.json())
         except requests.exceptions.HTTPError as e:
             print(e)
-            raise HTTPException(
-                status_code=r.status_code, detail=f"RunPod API Error: {r.text}"
-            )
+            print(f"RunPod API Error: {e} | Response: {r.text}")
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"An unexpected error occurred: {str(e)}"
-            )
+            print(f"Unexpected error in RunPod request: {str(e)}")
 
     def send_uploaded_model_email(
         self,
@@ -296,6 +292,7 @@ class ModelService:
         model_name: str,
     ):
         try:
+            print("before email")
             self.email_helper.send(
                 contact=user_email,
                 cc_contact=self.email_sender,
