@@ -292,7 +292,6 @@ class ModelService:
         model_name: str,
     ):
         try:
-            print("before email")
             self.email_helper.send(
                 contact=user_email,
                 cc_contact=self.email_sender,
@@ -300,7 +299,7 @@ class ModelService:
                 msg_dict={"name": model_name},
                 subject=f"Model {model_name} upload succeeded.",
             )
-            print("sent uploaded email")
+            print(f"sent uploaded email to {user_email} model {model_name}")
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
