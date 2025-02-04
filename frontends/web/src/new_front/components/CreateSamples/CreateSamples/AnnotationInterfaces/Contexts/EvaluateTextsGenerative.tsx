@@ -31,7 +31,7 @@ const EvaluateTextsGenerative: FC<
   const [signInConsent, setSignInConsent] = useState(true);
   const [showInput, setShowInput] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
-  const [showCategory, setShowCategory] = useState(true);
+  const [showCategory, setShowCategory] = useState(false);
   const [finishConversation, setFinishConversation] = useState(false);
   const [disabledInput, setDisabledInput] = useState(false);
   const [disableTypeOfConversation, setDisableTypeOfConversation] =
@@ -258,7 +258,6 @@ const EvaluateTextsGenerative: FC<
   useEffect(() => {
     checkIfUserReachedNecessaryExamples();
     if ("show_category" in artifactsInput) {
-      console.log("in show category");
       setShowCategory(artifactsInput?.show_category);
       let category = "Unguided";
       if ("default_category" in artifactsInput) {
@@ -272,6 +271,8 @@ const EvaluateTextsGenerative: FC<
       });
       setShowInput(true);
       setShowCategory(false);
+    } else {
+      setShowCategory(true);
     }
   }, []);
 
