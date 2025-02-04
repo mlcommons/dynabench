@@ -382,6 +382,9 @@ class ScoreService:
                     msg_dict={"name": model["name"], "message": message},
                     subject=f"Model {model['name']} evaluation failed.",
                 )
+                print(
+                    f"sent email error running instance to {user.email} model {model['name']} "
+                )
                 return {"response": "Error running instance"}
             else:
                 datasets = self.dataset_repository.get_order_datasets_by_task_id(
@@ -412,6 +415,9 @@ class ScoreService:
                     template_name="model_evaluation_sucessful.txt",
                     msg_dict={"name": model["name"], "model_id": model["id"]},
                     subject=f"Model {model['name']} evaluation succeeded.",
+                )
+                print(
+                    f"sent email evaluation sucessful to {user.email} model {model['name']} "
                 )
                 return {"response": "Scores added successfully"}
         except Exception as e:
