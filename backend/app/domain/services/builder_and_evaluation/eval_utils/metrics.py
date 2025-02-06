@@ -205,7 +205,7 @@ def get_STD_CER_meta(task=None):
 def get_CER_15_WORSE_meta(task=None):
     return {
         "unit": "%",
-        "pretty_name": "CER_15_WORSE",
+        "pretty_name": "CER_15_WORST",
         "utility_direction": -1,
         "offset": 0,
     }
