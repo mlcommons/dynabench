@@ -1,6 +1,5 @@
 import { useState } from "react";
 import axios from "axios";
-import Swal from "sweetalert2";
 
 interface partObject {
   ETag: string;
@@ -18,6 +17,7 @@ const useUploadHeavyFile = () => {
     chunkSize: number,
   ) => {
     const url = `${baseURL}/model/initiate-mutipart-upload`;
+    setProgress(0);
     return axios
       .request({
         method: "post",
@@ -38,11 +38,7 @@ const useUploadHeavyFile = () => {
       .catch((e) => {
         console.error("Faile to get signed URLS", e);
         setProgress(0);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong!",
-        });
+        return false;
       });
   };
 
@@ -67,6 +63,9 @@ const useUploadHeavyFile = () => {
 
     const uploadProgresschunk = 1 / urls.length;
     for (let i = 0; i < urls.length; i++) {
+      if (uploadFailed) {
+        break;
+      }
       const start = i * chunkSize;
       const chunk = file?.slice(start, start + chunkSize);
       const promise = axios
@@ -100,14 +99,14 @@ const useUploadHeavyFile = () => {
             "Aborting multipart upload due to part upload failure.",
           );
           abortUpload(abortParams);
-          return;
+          return false;
         }
         return completeUpload(formData, uploadId, localParts, abortParams);
       })
       .catch((err) => {
         console.error("An error occurred during the upload:", err);
+        return false;
       })
-      .then();
   };
 
   const completeUpload = (
@@ -138,24 +137,22 @@ const useUploadHeavyFile = () => {
       .catch((e) => {
         console.error("There was an error while completing upload", e);
         abortUpload(abortParams);
-        setProgress(0);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong!",
-        });
+        return false;
       });
   };
 
   const abortUpload = (params: any) => {
     const url = `${baseURL}/model/abort-mutipart-upload`;
+    setProgress(0);
     axios
       .post(url, params)
       .then(() => {
         console.log("Multipart upload aborted successfully.");
+        return false;
       })
       .catch((err) => {
         console.error("Failed to abort multipart upload:", err.message);
+        return false;
       });
   };
 

@@ -71,15 +71,25 @@ const SubmitModel = () => {
           task_code: taskCode,
           parts_count: partsCount,
         };
-        getSignedURLS(formData, modelData.file, data, chunkSize).then(() => {
-          setLoading({ loading: true, text: "Done" });
-          Swal.fire({
-            title: "Good job!",
-            text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
-            icon: "success",
-            confirmButtonColor: "#007bff",
-          });
-        });
+        getSignedURLS(formData, modelData.file, data, chunkSize).then(
+          (data) => {
+            setLoading({ loading: true, text: "Done" });
+            if (data) {
+              Swal.fire({
+                title: "Good job!",
+                text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
+                icon: "success",
+                confirmButtonColor: "#007bff",
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong!",
+              });
+            }
+          }
+        );
       } else {
         sendModelData(formData, configYaml.evaluation?.type === "heavy").then(
           () => {
@@ -213,6 +223,13 @@ const SubmitModel = () => {
                   <i className="fas fa-edit "></i> Upload model
                 </Button>
               )}
+              <span className="pb-4 text-red-400">
+                Please refrain from renaming the files and directories of the
+                downloadable zip base file
+              </span>
+              <span className="pb-4 text-gray-400">
+                This may affect our pipeline thus your scoring
+              </span>
             </div>
           </div>
         </div>

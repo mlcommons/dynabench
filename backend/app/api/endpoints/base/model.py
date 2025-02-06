@@ -98,7 +98,8 @@ def heavy_evaluation(
         UploadModelToS3AndEvaluateRequest
     ),
 ):
-    data = ModelService().upload_and_create_model(
+    model_service = ModelService()
+    data = model_service.upload_and_create_model(
         model.model_name,
         model.description,
         model.num_paramaters,
@@ -110,7 +111,7 @@ def heavy_evaluation(
         model.file_to_upload,
     )
     background_tasks.add_task(
-        ModelService().run_heavy_evaluation,
+        model_service.run_heavy_evaluation,
         data["model_path"],
         data["model_id"],
         data["save_s3_path"],
@@ -118,7 +119,7 @@ def heavy_evaluation(
         data["metadata_url"],
     )
     background_tasks.add_task(
-        ModelService().send_uploaded_model_email,
+        model_service.send_uploaded_model_email,
         data["user_email"],
         data["model_name"],
     )
@@ -153,7 +154,8 @@ def complete_multipart_upload(
     model: CompleteBigModelUploadRequest,
     background_tasks: BackgroundTasks,
 ):
-    ModelService().complete_multipart_upload(
+    model_service = ModelService()
+    model_service.complete_multipart_upload(
         model.upload_id,
         model.parts,
         model.user_id,
@@ -161,7 +163,7 @@ def complete_multipart_upload(
         model.model_name,
         model.file_name,
     )
-    data = ModelService().create_model(
+    data = model_service.create_model(
         model.model_name,
         model.description,
         model.num_paramaters,
@@ -172,7 +174,7 @@ def complete_multipart_upload(
         model.task_code,
     )
     background_tasks.add_task(
-        ModelService().run_heavy_evaluation,
+        model_service.run_heavy_evaluation,
         data["model_path"],
         data["model_id"],
         data["save_s3_path"],
@@ -180,7 +182,7 @@ def complete_multipart_upload(
         data["metadata_url"],
     )
     background_tasks.add_task(
-        ModelService().send_uploaded_model_email,
+        model_service.send_uploaded_model_email,
         data["user_email"],
         data["model_name"],
     )
