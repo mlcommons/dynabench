@@ -71,15 +71,25 @@ const SubmitModel = () => {
           task_code: taskCode,
           parts_count: partsCount,
         };
-        getSignedURLS(formData, modelData.file, data, chunkSize).then(() => {
-          setLoading({ loading: true, text: "Done" });
-          Swal.fire({
-            title: "Good job!",
-            text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
-            icon: "success",
-            confirmButtonColor: "#007bff",
-          });
-        });
+        getSignedURLS(formData, modelData.file, data, chunkSize).then(
+          (data) => {
+            setLoading({ loading: true, text: "Done" });
+            if (data) {
+              Swal.fire({
+                title: "Good job!",
+                text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
+                icon: "success",
+                confirmButtonColor: "#007bff",
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong!",
+              });
+            }
+          }
+        );
       } else {
         sendModelData(formData, configYaml.evaluation?.type === "heavy").then(
           () => {

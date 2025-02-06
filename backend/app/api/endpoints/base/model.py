@@ -154,7 +154,7 @@ def complete_multipart_upload(
     model: CompleteBigModelUploadRequest,
     background_tasks: BackgroundTasks,
 ):
-    model_service = ModelService
+    model_service = ModelService()
     model_service.complete_multipart_upload(
         model.upload_id,
         model.parts,
