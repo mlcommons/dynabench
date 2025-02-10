@@ -51,7 +51,7 @@ const useUploadHeavyFile = () => {
     chunkSize: number,
   ) => {
     const localParts: partObject[] = [];
-    const promises: Promise<void>[] = [];
+    const BATCH_SIZE = 100;
     const abortParams = {
       upload_id: uploadId,
       model_name: formData.get("model_name"),
@@ -60,53 +60,60 @@ const useUploadHeavyFile = () => {
       task_code: formData.get("task_code"),
     };
     let uploadFailed = false;
-
     const uploadProgresschunk = 1 / urls.length;
-    for (let i = 0; i < urls.length; i++) {
-      if (uploadFailed) {
-        break;
-      }
-      const start = i * chunkSize;
-      const chunk = file?.slice(start, start + chunkSize);
-      const promise = axios
-        .request({
-          method: "put",
-          url: urls[i],
-          data: chunk,
-          headers: {
-            "Content-Type": file.type,
-          },
-        })
-        .then((response) => {
-          localParts.push({
-            ETag: response.headers.etag,
-            PartNumber: i + 1,
-          });
-          setProgress((prevState) => prevState + uploadProgresschunk);
-        })
-        .catch((err) => {
-          console.error(`Failed to upload part ${i + 1}: ${err.message}`);
-          uploadFailed = true;
-        });
 
-      promises.push(promise);
-    }
-
-    return Promise.all(promises)
-      .then(() => {
+    function processBatch(batchIndex: number): Promise<boolean> {
+      if (batchIndex >= urls.length || uploadFailed) {
         if (uploadFailed) {
           console.error(
             "Aborting multipart upload due to part upload failure.",
           );
-          abortUpload(abortParams);
-          return false;
+          return abortUpload(abortParams).then(() => false);
         }
-        return completeUpload(formData, uploadId, localParts, abortParams);
-      })
-      .catch((err) => {
-        console.error("An error occurred during the upload:", err);
-        return false;
-      })
+        return completeUpload(formData, uploadId, localParts, abortParams).then(
+          () => true,
+        );
+      }
+
+      const batch = urls.slice(batchIndex, batchIndex + BATCH_SIZE);
+      const promises = [];
+
+      for (let i = 0; i < batch.length; i++) {
+        const globalIndex = batchIndex + i;
+        const start = globalIndex * chunkSize;
+        const chunk = file?.slice(start, start + chunkSize);
+        const promise = axios
+          .request({
+            method: "put",
+            url: urls[globalIndex],
+            data: chunk,
+            headers: {
+              "Content-Type": file.type,
+            },
+          })
+          .then((response) => {
+            localParts.push({
+              ETag: response.headers.etag,
+              PartNumber: globalIndex + 1,
+            });
+            setProgress((prevState) => prevState + uploadProgresschunk);
+            return false;
+          })
+          .catch((err) => {
+            console.error(`Failed to upload part ${i + 1}: ${err.message}`);
+            uploadFailed = true;
+            return false;
+          });
+
+        promises.push(promise);
+      }
+
+      return Promise.all(promises).then(() =>
+        processBatch(batchIndex + BATCH_SIZE),
+      );
+    }
+
+    return processBatch(0);
   };
 
   const completeUpload = (
@@ -141,19 +148,22 @@ const useUploadHeavyFile = () => {
       });
   };
 
-  const abortUpload = (params: any) => {
+  const abortUpload = (params: any): Promise<void> => {
     const url = `${baseURL}/model/abort-mutipart-upload`;
     setProgress(0);
-    axios
-      .post(url, params)
+    return axios
+      .request({
+        method: "post",
+        url: url,
+        data: params,
+      })
       .then(() => {
         console.log("Multipart upload aborted successfully.");
-        return false;
       })
       .catch((err) => {
         console.error("Failed to abort multipart upload:", err.message);
-        return false;
-      });
+      })
+      .then(() => Promise.resolve());
   };
 
   return { bigProgress, getSignedURLS };

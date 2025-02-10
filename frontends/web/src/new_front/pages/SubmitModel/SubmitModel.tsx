@@ -61,7 +61,7 @@ const SubmitModel = () => {
         configYaml.evaluation?.type === "heavy" &&
         modelData.file.size > THRESHOLD
       ) {
-        const chunkSize = 1 * 1024 * 1024 * 10; // 10MB
+        const chunkSize = 1 * 1024 * 1024 * 100; // 100MB
         const partsCount = Math.ceil(modelData.file.size / chunkSize); //10MB
         const data = {
           model_name: modelData.modelName,
@@ -72,9 +72,10 @@ const SubmitModel = () => {
           parts_count: partsCount,
         };
         getSignedURLS(formData, modelData.file, data, chunkSize).then(
-          (data) => {
+          (succeed) => {
             setLoading({ loading: true, text: "Done" });
-            if (data) {
+            console.log("fin", succeed);
+            if (succeed) {
               Swal.fire({
                 title: "Good job!",
                 text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
