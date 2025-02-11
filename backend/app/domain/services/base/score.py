@@ -8,9 +8,13 @@ import os
 import boto3
 import numpy as np
 import pandas as pd
+import yaml
 
 from app.domain.helpers.email import EmailHelper
 from app.domain.services.base.dataset import DatasetService
+from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import (
+    meta_metrics_dict,
+)
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.model import ModelRepository
 from app.infrastructure.repositories.round import RoundRepository
@@ -307,11 +311,30 @@ class ScoreService:
         return converted_data
 
     def get_maximun_principal_score_by_task(self, task_id: int) -> float:
+        yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
+        yaml_file = yaml.safe_load(yaml_file)
+        perf_metric = yaml_file.get("perf_metric", {})
+        if isinstance(perf_metric, list):
+            evaluation = yaml_file.get("evaluation", None)
+            main_metric = evaluation.get("main_perf_metric", None)
+        else:
+            main_metric = perf_metric.get("type", None)
+        if main_metric:
+            metadata = meta_metrics_dict.get(main_metric)
+            metadata = metadata(None)
+            direction = metadata.get("utility_direction", None)
+        else:
+            direction = 1
         scoring_datasets = self.dataset_service.get_scoring_datasets_by_task_id(task_id)
         scoring_datasets = [dataset["id"] for dataset in scoring_datasets]
-        scores = self.score_repository.get_maximun_principal_score_by_task(
-            task_id, scoring_datasets
-        )
+        if direction == -1:
+            scores = self.score_repository.get_minimum_main_score_by_task(
+                task_id, scoring_datasets
+            )
+        else:
+            scores = self.score_repository.get_maximun_principal_score_by_task(
+                task_id, scoring_datasets
+            )
         if scores:
             return scores
         else:
