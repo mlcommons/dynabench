@@ -54,6 +54,18 @@ class ScoreRepository(AbstractRepository):
             .first()
         )
 
+    def get_minimum_main_score_by_task(self, task_id: int, datasets: list):
+        return (
+            self.session.query(Model.name, func.avg(Score.perf).label("perf"))
+            .filter(Score.did.in_(datasets))
+            .filter(Score.mid == Model.id)
+            .filter(Model.tid == task_id)
+            .filter(Model.is_published)
+            .group_by(Model.id)
+            .order_by(func.avg(Score.perf).asc())
+            .first()
+        )
+
     def get_downstream_scores(self, dataset_id: int, model_id: int):
         return (
             self.session.query(Score)

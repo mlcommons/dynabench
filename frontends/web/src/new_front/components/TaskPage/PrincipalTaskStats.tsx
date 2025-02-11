@@ -65,7 +65,7 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
               {maxScore!.toFixed(2)}
             </h6>
             <p className="text-sm font-medium tracking-widest text-white uppercase ">
-              Max score
+              Top score
             </p>
           </div>
         )}
