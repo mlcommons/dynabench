@@ -1,0 +1,9 @@
+runpod
+boto3
+datasets
+torch
+torchaudio
+jiwer
+git+https://github.com/espnet/espnet.git@dac4a60a1b52bada7fa277c61ebe4e252f0c2260#egg=espnet
+espnet-model-zoo
+s3prl
