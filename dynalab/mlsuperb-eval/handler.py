@@ -341,7 +341,7 @@ def evaluate_results(results):
                     if lang_cer < 0:
                         continue
                     lang_cers.append(lang_cer)
-                    lang_acc_hyps.append(utterance["predicted_lang"])
+                    lang_acc_hyps.append(utterance["predicted_lang"].strip("[]"))
                     lang_acc_refs.append(utterance["lang"])
             if lang_cers:
                 all_standard_cers.append(sum(lang_cers) / len(lang_cers))
@@ -356,7 +356,7 @@ def evaluate_results(results):
         )
         standard_cer = round(sum(all_standard_cers) / len(all_standard_cers) * 100, 1)
         cer_std = round(statistics.stdev(all_standard_cers) * 100, 1)
-        worst = round(sum(all_standard_cers[:15]) / 15, 1)
+        worst = round((sum(all_standard_cers[:15]) / 15) * 100, 1)
 
         # Calculate CER metrics for dialect set
         all_dialect_cers = []
@@ -378,7 +378,7 @@ def evaluate_results(results):
                     if lang_cer < 0:
                         continue
                     lang_cers.append(lang_cer)
-                    lang_acc_hyps.append(utterance["predicted_lang"])
+                    lang_acc_hyps.append(utterance["predicted_lang"].strip("[]"))
                     lang_acc_refs.append(utterance["lang"])
             if lang_cers:
                 all_dialect_cers.append(sum(lang_cers) / len(lang_cers))
@@ -389,7 +389,7 @@ def evaluate_results(results):
         lid_dialect_accuracy = round(
             sum(all_dialect_lang_acc) / len(all_dialect_lang_acc) * 100, 1
         )
-        dialect_cer = round(sum(all_dialect_cers) / len(all_dialect_cers), 1)
+        dialect_cer = round(sum(all_dialect_cers) / len(all_dialect_cers) * 100, 1)
 
         evaluation_results = {
             "Standard_LangID_Accuracy": lid_accuracy,
