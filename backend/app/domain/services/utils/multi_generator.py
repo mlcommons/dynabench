@@ -23,6 +23,7 @@ from app.domain.services.utils.llm import (
     HuggingFaceAPIProvider,
     HuggingFaceProvider,
     OpenAIProvider,
+    OpenRouterProvider,
     ReplicateProvider,
 )
 
@@ -39,6 +40,7 @@ class LLMGenerator:
             "google": GoogleProvider(),
             "replicate": ReplicateProvider(),
             "huggingface_api": HuggingFaceAPIProvider(),
+            "openrouter": OpenRouterProvider(),
         }
 
     async def generate_one_text(
