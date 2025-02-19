@@ -39,6 +39,7 @@ from app.domain.services.utils.llm import (
     HuggingFaceAPIProvider,
     HuggingFaceProvider,
     OpenAIProvider,
+    OpenRouterProvider,
     ReplicateProvider,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
@@ -77,6 +78,7 @@ class ModelService:
             "google": GoogleProvider(),
             "replicate": ReplicateProvider(),
             "huggingface_api": HuggingFaceAPIProvider(),
+            "openrouter": OpenRouterProvider(),
             "openaihm": OpenAIProvider(task_id=56),
             "coherehm": CohereProvider(task_id=56),
         }
@@ -208,9 +210,12 @@ class ModelService:
         model_name_clean = re.sub(r"\s+", "_", model_name_clean)
         model_name_clean = re.sub(r"_+", "_", model_name_clean)
 
-        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
-        uri_logging = f"s3://{task_s3_bucket}/{task_code}/inference_logs/"
-        uri_model = f"s3://{task_s3_bucket}/{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+        model_path = f"""{task_code}/submited_models/
+                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
+        uri_logging = f"""s3://{task_s3_bucket}/{task_code}/inference_logs/
+                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
+        uri_model = f"""s3://{task_s3_bucket}/{task_code}/submited_models/
+                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
         inference_url = yaml_file["evaluation"]["inference_url"]
         metadata_url = f"s3://{task_s3_bucket}/{task_code}/metadata/"
 
@@ -264,7 +269,8 @@ class ModelService:
                     "model_path": model_path,
                     "model_id": model_id,
                     "save_s3_path": save_s3_path,
-                    "endpoint_url": "https://backend.dynabench.org/score/heavy_evaluation_scores",
+                    "endpoint_url": """https://backend.dynabench.org/
+                                       score/heavy_evaluation_scores""",
                     "metadata_s3_path": metadata_url,
                 }
             }
@@ -653,7 +659,8 @@ class ModelService:
         model_name_clean = re.sub(r"\s+", "_", model_name_clean)
         model_name_clean = re.sub(r"_+", "_", model_name_clean)
 
-        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+        model_path = f"""{task_code}/submited_models/
+                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
         try:
             response = self.s3.create_multipart_upload(
                 Bucket=task_s3_bucket, Key=model_path, ContentType=content_type
@@ -703,7 +710,8 @@ class ModelService:
         model_name_clean = re.sub(r"\s+", "_", model_name_clean)
         model_name_clean = re.sub(r"_+", "_", model_name_clean)
 
-        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+        model_path = f"""{task_code}/submited_models/
+                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
 
         parts = sorted(parts, key=lambda x: x.PartNumber)
         parts = [p.dict() for p in parts]
@@ -753,9 +761,10 @@ class ModelService:
         model_name_clean = re.sub(r"_+", "_", model_name_clean)
 
         uri_logging = f"s3://{task_s3_bucket}/{task_code}/inference_logs/"
-        uri_model = f"s3://{task_s3_bucket}/{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+        uri_model = f"""s3://{task_s3_bucket}/{task_code}/submited_models/
+                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
         inference_url = yaml_file["evaluation"]["inference_url"]
-        metadata_url = f"s3://{task_s3_bucket}/{task_code}/metadata/"
+        metadata_url = f"""s3://{task_s3_bucket}/{task_code}/metadata/"""
 
         try:
             self.user_repository.increment_model_submitted_count(user_id)
@@ -810,7 +819,8 @@ class ModelService:
         model_name_clean = re.sub(r"\s+", "_", model_name_clean)
         model_name_clean = re.sub(r"_+", "_", model_name_clean)
 
-        model_path = f"{task_code}/submited_models/{task_id}-{user_id}-{model_name}-{clean_file_name}"
+        model_path = f"""{task_code}/submited_models/
+                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
 
         try:
             self.s3.abort_multipart_upload(

@@ -751,3 +751,105 @@ class HuggingFaceAPIProvider(LLMProvider):
 
     def provider_name(self):
         return "huggingface_api"
+
+
+class OpenRouterProvider(LLMProvider):
+    def __init__(self, task_id: int = -1):
+        self.api_key = os.getenv("OPENROUTER")
+        self.headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        self.completion_url = "https://openrouter.ai/api/v1/chat/completions"
+
+    @async_timeout(30)
+    async def generate_text(
+        self,
+        prompt: str,
+        model: dict,
+        provider,
+        is_conversational: bool = False,
+    ) -> str:
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
+        model_name = model[provider]["model_name"]
+        temperature = model[provider]["temperature"]
+        top_p = model[provider]["top_p"]
+        max_tokens = model[provider]["max_tokens"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
+        if is_conversational:
+            messages = prompt
+        else:
+            messages = [
+                {
+                    "role": "user",
+                    "content": f"{head_template} {prompt} {foot_template}",
+                }
+            ]
+        try:
+            async with ClientSession() as session:
+                async with session.post(
+                    self.completion_url,
+                    headers=self.headers,
+                    json={
+                        "model": model_name,
+                        "messages": messages,
+                        "temperature": temperature,
+                        "top_p": top_p,
+                        "max_tokens": max_tokens,
+                    },
+                ) as response:
+                    response_data = await response.json()
+
+            return {
+                "text": response_data["choices"][0]["message"]["content"],
+                "provider_name": provider,
+                "model_name": model_name,
+                "artifacts": model,
+            }
+        except Exception as e:
+            print(e)
+            return None
+
+    async def conversational_generation(
+        self, prompt: str, model: dict, history: dict, provider=None
+    ) -> str:
+        provider = provider if isinstance(type(provider), str) else self.provider_name()
+        is_llama = model[provider]["is_llama"]
+        head_template = model[provider]["templates"]["header"]
+        foot_template = model[provider]["templates"]["footer"]
+        formatted_conversation = []
+        if is_llama:
+            formatted_conversation.append(f"<s>[INST] {head_template} [/INST]")
+            for user_entry, bot_entry in zip(history["user"], history["bot"]):
+                user_text = user_entry["text"]
+                bot_text = bot_entry["text"]
+                formatted_conversation.append(f"[INST] {user_text} [/INST]")
+                formatted_conversation.append(f"{bot_text} </s>")
+            formatted_conversation.append(f"[INST] {prompt} {foot_template} [/INST]")
+            formatted_conversation = "\n".join(formatted_conversation)
+        else:
+            formatted_conversation = []
+            formatted_conversation.append({"role": "system", "content": head_template})
+
+        for user_entry, bot_entry in zip(history["user"], history["bot"]):
+            user_text = user_entry["text"]
+            bot_text = bot_entry["text"]
+            formatted_conversation.append({"role": "user", "content": user_text})
+            formatted_conversation.append({"role": "assistant", "content": bot_text})
+
+        formatted_conversation.append(
+            {"role": "user", "content": f"{prompt} {foot_template}"}
+        )
+        result = await self.generate_text(
+            formatted_conversation, model, provider, is_conversational=True
+        )
+
+        try:
+            return result["text"]
+        except Exception as e:
+            print(e)
+            return "None"
+
+    def provider_name(self):
+        return "openrouter"
