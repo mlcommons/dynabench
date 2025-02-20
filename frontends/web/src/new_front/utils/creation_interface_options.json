@@ -16,6 +16,7 @@
         "select-multiple-images-generative-dev": "SelectBetweenImagesGenerativeEnv",
         "evaluate-texts-generative": "EvaluateTextsGenerative",
         "chat-with-instructions": "ChatWithInstructions",
+        "chat-random-with-instructions": "ChatRandomWithInstructions",
         "describe-image": "DescribeImage"
     },
     "user_input": {
@@ -25,8 +26,10 @@
         "multioptions": "Multioptions",
         "multioptions-with-instructions": "MultioptionsWithInstructions",
         "radio-button-options": "RadioButtonOptions",
+        "horizontal-radio-button-options": "HorizontalRadioButtonOptions",
         "select-multiple-images": "SelectMultipleImages",
         "multi-slider-selection": "MultiSliderSelection",
+        "simple-slider": "SimpleSlider",
         "select-option-with-slider": "SelectOptionWithSliderSelection",
         "basic-input-with-slider": "BasicInputWithSliderSelection",
         "basic-input-select-option-with-instructions": "BasicInputSelectOptionWithInstructions"
