@@ -2,9 +2,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import json
 import os
+import random
 from ast import literal_eval
 
+import boto3
 import yaml
 from fastapi import HTTPException
 
@@ -36,6 +39,12 @@ class TaskService:
         self.user_repository = UserRepository()
         self.validation_repository = ValidationRepository()
         self.historical_task_repository = HistoricalDataRepository()
+        self.session = boto3.Session(
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.getenv("AWS_REGION"),
+        )
+        self.s3 = self.session.client("s3")
 
     def get_task_code_by_task_id(self, task_id: int):
         return self.task_repository.get_task_code_by_task_id(task_id)
@@ -291,3 +300,35 @@ class TaskService:
         if not os.path.exists(filename):
             raise HTTPException(status_code=404, detail="File not found")
         return filename
+
+    def get_config_file_by_task_id(self, task_id: int):
+        return self.task_repository.get_config_file_by_task_id(task_id)
+
+    def get_random_provider_and_model_info(self, task_id: int):
+        yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
+        yaml_file = yaml.safe_load(yaml_file)
+        providers = yaml_file["context"]["generative_context"]["artifacts"].get(
+            "providers", None
+        )
+        if providers is None:
+            return {"model": "", "provider": None}
+        provider = random.choice(list(providers))
+        model = random.choice(providers[provider])
+        return {"model": model, "provider": provider}
+
+    def get_task_consent(self, task_id: int):
+        yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
+        yaml_file = yaml.safe_load(yaml_file)
+        consent_URI = yaml_file["context"]["generative_context"]["artifacts"].get(
+            "consent_uri", None
+        )
+        if consent_URI is None:
+            return {"consent_terms": None, "agree_text": None, "disagree_text": None}
+
+        s3_bucket = consent_URI.split("/")[2]
+        key = "/".join(consent_URI.split("/")[3:])
+        consent_file = self.s3.get_object(Bucket=s3_bucket, Key=key)
+
+        consent_file = json.loads(consent_file["Body"].read())
+
+        return consent_file

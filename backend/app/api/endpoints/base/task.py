@@ -126,3 +126,13 @@ async def download_logs(task_id: int):
         media_type="application/octet-stream",
         filename=os.path.basename(log_file),
     )
+
+
+@router.get("/get_random_provider_and_model_info", response_model={})
+def get_random_provider_and_model_info(task_id: int):
+    return TaskService().get_random_provider_and_model_info(task_id)
+
+
+@router.get("/get_task_consent", response_model={})
+def get_task_consent(task_id: int):
+    return TaskService().get_task_consent(task_id)
