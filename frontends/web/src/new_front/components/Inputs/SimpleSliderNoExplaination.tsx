@@ -2,7 +2,7 @@ import React, { FC, useState } from "react";
 import { Collapse } from "react-bootstrap";
 import parse from "html-react-parser";
 
-type SimplesSliderNoExplnationProps = {
+type SimpleSliderNoExplainationProps = {
   instructions: string;
   optionsSlider: string[];
   field_name_for_the_model: string;
@@ -11,7 +11,7 @@ type SimplesSliderNoExplnationProps = {
   onInputChange: (data: any, metadata?: boolean) => void;
 };
 
-const SimplesSliderNoExplnation: FC<SimplesSliderNoExplnationProps> = ({
+const SimpleSliderNoExplaination: FC<SimpleSliderNoExplainationProps> = ({
   instructions,
   optionsSlider = ["0", "100"],
   field_name_for_the_model,
@@ -74,4 +74,4 @@ const SimplesSliderNoExplnation: FC<SimplesSliderNoExplnationProps> = ({
     </div>
   );
 };
-export default SimplesSliderNoExplnation;
+export default SimpleSliderNoExplaination;

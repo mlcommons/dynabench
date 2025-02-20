@@ -1,4 +1,4 @@
-import SimplesSliderNoExplnation from "new_front/components/Inputs/SimplesSliderNoExplnation";
+import SimpleSliderNoExplaination from "new_front/components/Inputs/SimpleSliderNoExplaination";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { AnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
@@ -19,7 +19,7 @@ const SimpleSlider: FC<AnnotationFactoryType & AnnotationUserInput> = ({
     <>
       {instructions && options_slider && (
         <AnnotationInstruction placement="left" tooltip={instruction || "Rate"}>
-          <SimplesSliderNoExplnation
+          <SimpleSliderNoExplaination
             optionsSlider={options_slider}
             instructions_slider={instructions_slider || "Select a value"}
             instructions={instructions}
