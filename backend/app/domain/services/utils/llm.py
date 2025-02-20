@@ -762,7 +762,7 @@ class OpenRouterProvider(LLMProvider):
         }
         self.completion_url = "https://openrouter.ai/api/v1/chat/completions"
 
-    @async_timeout(30)
+    @async_timeout(90)
     async def generate_text(
         self,
         prompt: str,
@@ -800,6 +800,7 @@ class OpenRouterProvider(LLMProvider):
                     },
                 ) as response:
                     response_data = await response.json()
+                    print("Response data: ", response_data)
 
             return {
                 "text": response_data["choices"][0]["message"]["content"],
@@ -816,6 +817,7 @@ class OpenRouterProvider(LLMProvider):
     ) -> str:
         provider = provider if isinstance(type(provider), str) else self.provider_name()
         is_llama = model[provider]["is_llama"]
+        is_llama = False
         head_template = model[provider]["templates"]["header"]
         foot_template = model[provider]["templates"]["footer"]
         formatted_conversation = []
