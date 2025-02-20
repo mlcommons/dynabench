@@ -1,5 +1,5 @@
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
-import BasicInput from "new_front/components/Inputs/BasicInput";
+import BasicInputSeveralRows from "new_front/components/Inputs/BasicInputSeveralRows";
 import EvaluateText from "new_front/components/Inputs/EvaluateText";
 import React, { FC, useEffect, useState } from "react";
 import { PacmanLoader } from "react-spinners";
@@ -64,7 +64,7 @@ const Chatbot: FC<ChatbotProps> = ({
           provider: provider,
           prompt: prompt,
           num_answers: numOfSamplesChatbot,
-        },
+        }
       );
       if (response.ok) {
         const noAnswers = await checkNotAnswers(generatedTexts);
@@ -81,7 +81,7 @@ const Chatbot: FC<ChatbotProps> = ({
           generatedTexts.map((text: any) => ({
             ...text,
             score: 50,
-          })) as any,
+          })) as any
         );
         setIsAskingQuestion(false);
       }
@@ -97,10 +97,10 @@ const Chatbot: FC<ChatbotProps> = ({
   const checkNotAnswers = async (generatedTexts: any) => {
     // check if in some of the texts the provider name is None, in that case return True
     const notAnswers = generatedTexts.every(
-      (text: any) => text.text === "None",
+      (text: any) => text.text === "None"
     );
     const allTheAnswersAreEmpty = generatedTexts.every(
-      (text: any) => text.text === "\n",
+      (text: any) => text.text === "\n"
     );
     return notAnswers || allTheAnswersAreEmpty;
   };
@@ -133,11 +133,11 @@ const Chatbot: FC<ChatbotProps> = ({
               : 1,
           text: newRespones.reduce(
             (max: { score: number }, answer: { score: number }) =>
-              answer.score > max.score ? answer : max,
+              answer.score > max.score ? answer : max
           ).text,
           score: newRespones.reduce(
             (max: { score: number }, answer: { score: number }) =>
-              answer.score > max.score ? answer : max,
+              answer.score > max.score ? answer : max
           ).score,
         },
       ],
@@ -166,7 +166,7 @@ const Chatbot: FC<ChatbotProps> = ({
 
   const saveHistoryValidation = () => {
     const isTied = newRespones.every(
-      (text) => text.score === newRespones[0].score && newRespones.length > 1,
+      (text) => text.score === newRespones[0].score && newRespones.length > 1
     );
     if (isTied) {
       Swal.fire({
@@ -270,7 +270,7 @@ const Chatbot: FC<ChatbotProps> = ({
                 <div className="flex items-end">
                   <div className="flex flex-col items-start order-2 w-full max-w-lg pt-2 mx-2 space-y-2">
                     {isAskingQuestion && (
-                      <BasicInput
+                      <BasicInputSeveralRows
                         placeholder="Enter text here. Do not copy and paste"
                         onChange={(e) => setPrompt(e.target.value)}
                         onEnter={askQuestion}
