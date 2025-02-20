@@ -762,7 +762,7 @@ class OpenRouterProvider(LLMProvider):
         }
         self.completion_url = "https://openrouter.ai/api/v1/chat/completions"
 
-    @async_timeout(30)
+    @async_timeout(90)
     async def generate_text(
         self,
         prompt: str,
