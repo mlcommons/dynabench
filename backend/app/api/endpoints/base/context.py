@@ -102,3 +102,8 @@ def upload_new_contexts(
     file: UploadFile = File(...),
 ):
     return ContextService().upload_new_contexts(task_id, file)
+
+
+@router.get("/get_distinct_context")
+def get_distinct_context(user_id: int, round_id: int):
+    return ContextService().get_distinct_context(user_id, round_id)

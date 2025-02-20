@@ -349,3 +349,10 @@ class ContextService:
                 base_format["r_realid"] = real_round_id
                 base_format["context_json"] = line
                 self.context_repository.upload_contexts(base_format)
+
+    def get_distinct_context(self, user_id: int, round_id: int):
+        context = self.context_repository.get_distinct_context(round_id, user_id)
+        if not context:
+            return {"context": None}
+
+        return {"context": context}
