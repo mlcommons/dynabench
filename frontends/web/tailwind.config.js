@@ -37,5 +37,5 @@ module.exports = {
     // ...
     require("@tailwindcss/line-clamp"),
   ],
-  safelist: ["list-decimal", "pl-5", "mb-3"],
+  safelist: ["list-decimal", "pl-5", "mb-3, text-red-700"],
 };
