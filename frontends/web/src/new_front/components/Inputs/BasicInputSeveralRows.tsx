@@ -20,14 +20,13 @@ const BasicInputSeveralRows: FC<BasicInputSeveralRowsProps> = ({
   onEnter,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const [rows, setRows] = useState(1);
 
   const adjustHeight = () => {
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "auto"; // Reset height to recalculate
       const scrollHeight = textAreaRef.current.scrollHeight;
-      const lineHeight = 15; // Approximate line height
-      const maxHeight = 5 * lineHeight;
+      const lineHeight = 20; // Approximate line height
+      const maxHeight = 10 * lineHeight;
 
       if (scrollHeight > maxHeight) {
         textAreaRef.current.style.height = `${maxHeight}px`; // Limit height
@@ -66,7 +65,7 @@ const BasicInputSeveralRows: FC<BasicInputSeveralRowsProps> = ({
         style={{
           resize: "none",
           overflowY: "hidden",
-          minHeight: "15px",
+          minHeight: "10px",
         }}
       />
     </Collapse>

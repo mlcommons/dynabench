@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState } from "react";
 import { Collapse } from "react-bootstrap";
 import parse from "html-react-parser";
 
@@ -27,6 +27,7 @@ const HorizontalRadioButton: FC<HorizontalRadioButtonProps> = ({
   );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedOption(event.target.value);
     if (field_name_for_the_model && onInputChange) {
       onInputChange(
         {
@@ -43,7 +44,7 @@ const HorizontalRadioButton: FC<HorizontalRadioButtonProps> = ({
         className="flex items-center h-16 px-1 space-x-10 transition cursor-pointer hover:bg-[#eef2ff]"
         onClick={() => setOpen(!open)}
       >
-        <h3 className="mb-1 text-base font-semibold normal-case text-letter-color">
+        <h3 className="mb-1 text-base normal-case text-letter-color">
           {open ? (
             <i className="pl-2 pr-3 fas fa-minus" />
           ) : (
@@ -60,19 +61,17 @@ const HorizontalRadioButton: FC<HorizontalRadioButtonProps> = ({
                 className="px-3 flex flex-col items-center w-full sm:w-auto"
                 key={index}
               >
-                <label
-                  className="text-base font-medium text-letter-color"
-                  defaultValue={selectedOption}
-                >
+                <label className="text-base font-medium text-letter-color">
                   {parse(option)}
                 </label>
                 <input
                   type="radio"
-                  value={option}
-                  name="radio"
+                  value={selectedOption}
+                  name={field_name_for_the_model}
                   className="w-4 h-5 bg-gray-100 border-gray-300 rounded text-third-color focus:ring-third-color"
                   onChange={handleChange}
                   disabled={disabled}
+                  id={field_name_for_the_model}
                 />
               </li>
             ))}
