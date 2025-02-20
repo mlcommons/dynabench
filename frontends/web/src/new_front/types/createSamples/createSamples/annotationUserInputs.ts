@@ -10,4 +10,5 @@ export type AnnotationUserInput = {
   options_slider?: any;
   instructions_slider?: string;
   show_na_checkbox?: boolean;
+  initiate_open?: boolean;
 };
