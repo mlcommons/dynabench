@@ -6,6 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 from sqlalchemy import case, func
+from sqlalchemy.sql import and_
 
 from app.infrastructure.models.models import Context, Example
 from app.infrastructure.repositories.abstract import AbstractRepository
@@ -95,3 +96,16 @@ class ContextRepository(AbstractRepository):
         with self.session as session:
             session.add(model)
             session.commit()
+
+    def get_distinct_context(self, round_id: int, user_id: int):
+        return (
+            self.session.query(self.model)
+            .join(
+                Example,
+                and_(Example.cid == self.model.id, Example.uid == user_id),
+                isouter=True,
+            )
+            .filter(self.model.r_realid == round_id)
+            .order_by(func.rand())
+            .first()
+        )
