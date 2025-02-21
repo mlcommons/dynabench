@@ -106,6 +106,7 @@ class ContextRepository(AbstractRepository):
                 isouter=True,
             )
             .filter(self.model.r_realid == round_id)
+            .filter(Example.id.is_(None))
             .order_by(func.rand())
             .first()
         )

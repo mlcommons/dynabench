@@ -11,4 +11,5 @@ export type ContextAnnotationFactoryType = AnnotationFactoryType & {
   taskId?: number;
   realRoundId: number;
   userId?: number;
+  setContextInfo?: (taskContextInfo: any) => void;
 };

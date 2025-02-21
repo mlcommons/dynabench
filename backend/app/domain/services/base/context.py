@@ -353,6 +353,6 @@ class ContextService:
     def get_distinct_context(self, user_id: int, round_id: int):
         context = self.context_repository.get_distinct_context(round_id, user_id)
         if not context:
-            return {"context": None}
+            return None
 
-        return {"context": context}
+        return context
