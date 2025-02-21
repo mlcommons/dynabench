@@ -214,6 +214,11 @@ const CreateInterface = () => {
                     setPartialSampleId={setPartialSampleId}
                     setIsGenerativeContext={setIsGenerativeContext}
                     userId={user.id!}
+                    setContextInfo={
+                      (taskConfiguration?.context as any)?.context_for_start
+                        ? undefined
+                        : setTaskContextInfo
+                    }
                   />
                 )}
               </div>

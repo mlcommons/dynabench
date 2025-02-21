@@ -13,6 +13,7 @@ const HorizontalRadioButtonOptions: FC<
   instruction,
   field_name_for_the_model,
   initiate_open,
+  metadata,
 }) => {
   const { updateModelInputs } = useContext(CreateInterfaceContext);
 
@@ -30,6 +31,7 @@ const HorizontalRadioButtonOptions: FC<
               field_name_for_the_model={field_name_for_the_model}
               onInputChange={updateModelInputs}
               InitialOpen={initiate_open}
+              metadata={metadata}
             />
           </AnnotationInstruction>
         </>

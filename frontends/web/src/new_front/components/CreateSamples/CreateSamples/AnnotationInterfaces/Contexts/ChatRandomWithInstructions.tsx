@@ -1,6 +1,5 @@
 import React, { FC, useContext, useEffect, useState, useCallback } from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import MDEditor from "@uiw/react-md-editor";
 import Modal from "react-bootstrap/Modal";
 import queryString from "query-string";
 import useFetch from "use-http";
@@ -26,19 +25,18 @@ const ChatWithInstructions: FC<
   setIsGenerativeContext,
   context,
   realRoundId,
+  setContextInfo,
 }) => {
   const artifactsInput = generative_context.artifacts;
   const [signInConsent, setSignInConsent] = useState(true);
   const [callLoading, setCallLoading] = useState(true);
-  const [showExample, setShowExample] = useState(false);
-  const [showInstructions, setShowInstructions] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
     user: [],
     bot: [],
   });
   const [modelName, setModelName] = useState({});
   const [provider, setProvider] = useState("");
-  const [newContext, setNewContext] = useState<any>();
+  const [localContext, setLocalContext] = useState(null);
   const [agreeText, setAgreeText] = useState(null);
   const [consentTerms, setConsentTerms] = useState(null);
   const [finishConversation, setFinishConversation] = useState(false);
@@ -46,13 +44,10 @@ const ChatWithInstructions: FC<
     artifactsInput?.jump_instructions ? true : false
   );
   const { updateModelInputs } = useContext(CreateInterfaceContext);
-  const [example, setExample] = useState("");
   const { get, post, response, loading } = useFetch();
   const { user } = useContext(UserContext);
   const location = useLocation();
   const history = useHistory();
-
-  const queryParams = queryString.parse(location.search);
 
   const bringConsentTerms = useCallback(async () => {
     await get(`/task/get_task_consent?task_id=${taskId}`);
@@ -93,23 +88,40 @@ const ChatWithInstructions: FC<
         get(`/task/get_random_provider_and_model_info?task_id=${taskId}`),
       ]);
       if (response.ok) {
-        if (!contextResponse.context || !modelResponse.provider) {
+        if (!contextResponse || !modelResponse.provider) {
           Swal.fire({
-            title: !contextResponse.context
+            title: !contextResponse
               ? "No more tasks"
               : "No models or providers",
-            text: !contextResponse.context
+            text: !contextResponse
               ? "You have no more task to complete in this round"
               : "There are no models or providers available for this task",
-            icon: !contextResponse.context ? "success" : "error",
+            icon: !contextResponse ? "success" : "error",
             confirmButtonText: "Ok",
           }).then(() => {
-            history.goBack();
+            //got to task page
+            if (location.pathname.includes("tasks")) {
+              const newPath = location.pathname
+                .split("/")
+                .slice(0, -1)
+                .join("/");
+              history.push(newPath);
+            } else {
+              history.goBack();
+            }
           });
+        } else {
+          setModelName({ [modelResponse.provider]: modelResponse.model });
+          setProvider(modelResponse.provider);
+          setLocalContext(contextResponse.context_json);
+          const newContext = {
+            context_id: contextResponse.id,
+            current_context: contextResponse.context_json,
+            real_round_id: realRoundId,
+            tag: contextResponse.tag,
+          };
+          setContextInfo?.(newContext);
         }
-        setNewContext(contextResponse.context);
-        setModelName({ [modelResponse.provider]: modelResponse.model });
-        setProvider(modelResponse.provider);
       }
     } catch (error) {
       console.log("error", error);
@@ -136,64 +148,6 @@ const ChatWithInstructions: FC<
         <>
           {signInConsent ? (
             <>
-              <div className="flex items-end justify-between align-end">
-                <button
-                  type="button"
-                  className="my-2 btn btn-outline-primary btn-sm btn-help-info"
-                  onClick={() => {
-                    setShowInstructions(!showInstructions);
-                  }}
-                >
-                  <span className="text-base font-normal text-letter-color">
-                    Instructions
-                  </span>
-                </button>
-                {showInstructions && (
-                  <Modal
-                    show={showInstructions}
-                    onHide={() => {
-                      setShowInstructions(false);
-                    }}
-                    size="lg"
-                  >
-                    <Modal.Header closeButton>
-                      <Modal.Title>Instructions</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                      <MDEditor.Markdown source={context.instructions} />
-                    </Modal.Body>
-                  </Modal>
-                )}
-                <button
-                  type="button"
-                  className="my-2 btn btn-outline-primary btn-sm btn-help-info"
-                  onClick={() => {
-                    setShowExample(!showExample);
-                  }}
-                >
-                  <span className="text-base font-normal text-letter-color">
-                    Example
-                  </span>
-                </button>
-                {showExample && (
-                  <>
-                    <Modal
-                      show={showExample}
-                      onHide={() => {
-                        setShowExample(false);
-                      }}
-                      size="lg"
-                    >
-                      <Modal.Header closeButton>
-                        <Modal.Title>Example</Modal.Title>
-                      </Modal.Header>
-                      <Modal.Body>
-                        <MDEditor.Markdown source={example} />
-                      </Modal.Body>
-                    </Modal>
-                  </>
-                )}
-              </div>
               {
                 //if jump_instructions is true and exist in
                 //generative context under artifacts, then
@@ -262,9 +216,7 @@ const ChatWithInstructions: FC<
                   </div>
                   <div className="col-span-1">
                     <div className="px-4 overflow-y-auto max-h-96">
-                      <BasicInstructions
-                        instructions={newContext?.context_json}
-                      />
+                      <BasicInstructions instructions={localContext} />
                     </div>
                   </div>
                 </div>

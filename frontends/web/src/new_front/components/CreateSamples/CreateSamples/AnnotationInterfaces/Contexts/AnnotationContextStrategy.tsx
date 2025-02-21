@@ -17,7 +17,7 @@ import { BarLoader } from "react-spinners";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 
 const Import = (
-  module: string,
+  module: string
 ): LazyExoticComponent<ComponentType<AnnotationFactoryType>> =>
   React.lazy(() => import(`./${module}`).catch(() => import(`./GoalFallback`)));
 
@@ -35,6 +35,7 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
   setIsGenerativeContext,
   setPartialSampleId,
   userId,
+  setContextInfo = () => {},
 }) => {
   const [goalRender, setGoalRender] =
     useState<ReactElement<ContextConfigType & ContextAnnotationFactoryType>>();
@@ -53,9 +54,10 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
             setIsGenerativeContext,
             setPartialSampleId,
             userId,
+            setContextInfo,
             ...config,
           }}
-        />,
+        />
       );
     };
     getView();

@@ -2,31 +2,32 @@ import React, { FC, useState } from "react";
 import { Collapse } from "react-bootstrap";
 import parse from "html-react-parser";
 
-type SimpleSliderNoExplainationProps = {
+type SimpleSliderNoExplanationProps = {
   instructions: string;
   optionsSlider: string[];
   field_name_for_the_model: string;
   metadata?: boolean;
   instructions_slider: string;
   onInputChange: (data: any, metadata?: boolean) => void;
+  initialOpen?: boolean;
 };
 
-const SimpleSliderNoExplaination: FC<SimpleSliderNoExplainationProps> = ({
+const SimpleSliderNoExplanation: FC<SimpleSliderNoExplanationProps> = ({
   instructions,
   optionsSlider = ["0", "100"],
   field_name_for_the_model,
   metadata,
   instructions_slider,
   onInputChange,
+  initialOpen = true,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   const [selectedValue, setelectedValue] = useState("");
 
   const handleChange = (value: string) => {
     const updatedResponses = { instructions: value };
 
     setelectedValue(value);
-
     onInputChange(
       {
         [field_name_for_the_model]: updatedResponses,
@@ -74,4 +75,4 @@ const SimpleSliderNoExplaination: FC<SimpleSliderNoExplainationProps> = ({
     </div>
   );
 };
-export default SimpleSliderNoExplaination;
+export default SimpleSliderNoExplanation;
