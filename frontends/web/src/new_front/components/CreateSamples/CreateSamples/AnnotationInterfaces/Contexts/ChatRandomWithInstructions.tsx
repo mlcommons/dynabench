@@ -69,7 +69,7 @@ const ChatWithInstructions: FC<
       task_id: taskId,
     });
     if (response.ok) {
-      signConsent && setCallLoading(false);
+      setCallLoading(false);
       setSignInConsent(signConsent);
       !signConsent && bringConsentTerms();
     }
@@ -82,29 +82,6 @@ const ChatWithInstructions: FC<
     });
     setSignInConsent(true);
     window.location.reload();
-  };
-
-  const checkIfUserReachedNecessaryExamples = async () => {
-    const redirectUrl = await post(
-      "/rounduserexample/redirect_to_third_party_provider",
-      {
-        task_id: taskId,
-        user_id: user.id,
-        round_id: realRoundId,
-      }
-    );
-    if (response.ok) {
-      if (redirectUrl) {
-        Swal.fire({
-          title: "You have reached the necessary examples",
-          text: "You will be redirected to the post-survey.",
-          icon: "success",
-          confirmButtonText: "Ok",
-        }).then(() => {
-          window.location.href = redirectUrl;
-        });
-      }
-    }
   };
 
   const bringDistinctContextAndModelInfo = async () => {
@@ -148,7 +125,6 @@ const ChatWithInstructions: FC<
   }, [signInConsent]);
 
   useEffect(() => {
-    checkIfUserReachedNecessaryExamples();
     bringDistinctContextAndModelInfo();
   }, []);
 
@@ -297,7 +273,7 @@ const ChatWithInstructions: FC<
           ) : (
             <>
               {consentTerms && agreeText && (
-                <Modal show={true} onHide={() => setSignInConsent} size="lg">
+                <Modal show={true} size="lg">
                   <SignConsent
                     handleClose={handleSignInConsent}
                     consentTerms={consentTerms}
