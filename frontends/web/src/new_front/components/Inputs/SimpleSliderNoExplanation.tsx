@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { Collapse } from "react-bootstrap";
 import parse from "html-react-parser";
 
@@ -23,8 +23,12 @@ const SimpleSliderNoExplanation: FC<SimpleSliderNoExplanationProps> = ({
 }) => {
   const [open, setOpen] = useState(initialOpen);
   const [selectedValue, setelectedValue] = useState("");
+  const [showTooltip, setShowTooltip] = useState(false);
+  const minValue = Number(optionsSlider[0]);
+  const maxValue = Number(optionsSlider[1]);
 
   const handleChange = (value: string) => {
+    setShowTooltip(true);
     const updatedResponses = { instructions: value };
 
     setelectedValue(value);
@@ -35,6 +39,20 @@ const SimpleSliderNoExplanation: FC<SimpleSliderNoExplanationProps> = ({
       metadata
     );
   };
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout | undefined;
+
+    if (showTooltip) {
+      timeout = setTimeout(() => {
+        setShowTooltip(false);
+      }, 1500);
+    }
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [showTooltip]);
 
   return (
     <div className="py-2 ">
@@ -53,7 +71,7 @@ const SimpleSliderNoExplanation: FC<SimpleSliderNoExplanationProps> = ({
       </div>
       <Collapse in={open}>
         <div className="flex items-center justify-center px-20 pt-2">
-          <div className="w-full">
+          <div className="w-full relative">
             <h3 className="my-3 text-base normal-case text-letter-color">
               {parse(instructions_slider)}
             </h3>
@@ -61,6 +79,22 @@ const SimpleSliderNoExplanation: FC<SimpleSliderNoExplanationProps> = ({
               <p className="text-sm text-gray-600">{optionsSlider[0]}</p>
               <p className="text-sm text-gray-600">{optionsSlider[1]}</p>
             </div>
+            {showTooltip && (
+              <div
+                className={`absolute bottom-0 transform -translate-x-1/2 -translate-y-6 bg-gray-800 text-white text-sm px-2 py-1 rounded-md transition-opacity duration-1000 ${
+                  showTooltip ? "opacity-0" : "opacity-100"
+                }"`}
+                style={{
+                  left: `${
+                    ((Number(selectedValue) - minValue) /
+                      (maxValue - minValue)) *
+                    100
+                  }%`,
+                }}
+              >
+                {selectedValue}
+              </div>
+            )}
             <input
               type="range"
               min={optionsSlider[0]}
