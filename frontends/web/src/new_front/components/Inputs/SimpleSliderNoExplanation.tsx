@@ -29,12 +29,11 @@ const SimpleSliderNoExplanation: FC<SimpleSliderNoExplanationProps> = ({
 
   const handleChange = (value: string) => {
     setShowTooltip(true);
-    const updatedResponses = { instructions: value };
 
     setelectedValue(value);
     onInputChange(
       {
-        [field_name_for_the_model]: updatedResponses,
+        [field_name_for_the_model]: value,
       },
       metadata
     );
