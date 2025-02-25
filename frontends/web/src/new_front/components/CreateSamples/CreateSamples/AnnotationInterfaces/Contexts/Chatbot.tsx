@@ -198,7 +198,7 @@ const Chatbot: FC<ChatbotProps> = ({
     <>
       {!loading ? (
         <>
-          {!finishConversation && (
+          {
             <>
               <h3 className="pt-1 pb-6 pl-6 text-lg font-bold text-letter-color">
                 {parse(instructions)}
@@ -327,7 +327,7 @@ const Chatbot: FC<ChatbotProps> = ({
                 </div>
               </div>
             </>
-          )}
+          }
         </>
       ) : (
         <div className="grid items-center justify-center grid-rows-2">
