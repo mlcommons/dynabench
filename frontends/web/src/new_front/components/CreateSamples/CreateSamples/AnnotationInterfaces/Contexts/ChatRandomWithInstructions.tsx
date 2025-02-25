@@ -17,7 +17,13 @@ import { CreateInterfaceContext } from "new_front/context/CreateInterface/Contex
 import BasicInstructions from "new_front/components/Inputs/BasicInstructions";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
 
-const ChatWithInstructions: FC<
+interface ModelNameMap {
+  [key: string]: {
+    model_name: string;
+  };
+}
+
+const ChatRandomWithInstructions: FC<
   ContextAnnotationFactoryType & ContextConfigType
 > = ({
   taskId,
@@ -34,7 +40,7 @@ const ChatWithInstructions: FC<
     user: [],
     bot: [],
   });
-  const [modelName, setModelName] = useState({});
+  const [modelName, setModelName] = useState<ModelNameMap>({});
   const [provider, setProvider] = useState("");
   const [localContext, setLocalContext] = useState(null);
   const [agreeText, setAgreeText] = useState(null);
@@ -43,7 +49,7 @@ const ChatWithInstructions: FC<
   const [readInstructions, setReadInstructions] = useState(
     artifactsInput?.jump_instructions ? true : false
   );
-  const { updateModelInputs } = useContext(CreateInterfaceContext);
+  const { updateModelInputs, modelInputs } = useContext(CreateInterfaceContext);
   const { get, post, response, loading } = useFetch();
   const { user } = useContext(UserContext);
   const location = useLocation();
@@ -139,6 +145,24 @@ const ChatWithInstructions: FC<
   useEffect(() => {
     bringDistinctContextAndModelInfo();
   }, []);
+
+  useEffect(() => {
+    finishConversation &&
+      !("model_info" in modelInputs) &&
+      updateModelInputs({
+        ...modelInputs,
+        model_info: {
+          provider: provider,
+          model_name: modelName[provider]["model_name"],
+        },
+      });
+  }, [finishConversation]);
+
+  useEffect(() => {
+    if ("chat_history" in modelInputs) {
+      setFinishConversation(true);
+    }
+  }, [modelInputs]);
 
   return (
     <>
@@ -241,4 +265,4 @@ const ChatWithInstructions: FC<
   );
 };
 
-export default ChatWithInstructions;
+export default ChatRandomWithInstructions;
