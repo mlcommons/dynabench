@@ -2,7 +2,7 @@ import React, { FC, useState, useEffect } from "react";
 
 type DropdownProps = {
   options: any[];
-  placeholder: string;
+  placeholder: string | undefined;
   onChange: (prompt: any) => void;
   disabled?: boolean;
   allowSearch?: boolean;
@@ -19,7 +19,7 @@ const Dropdown: FC<DropdownProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(searchTerm.toLowerCase()),
+    option.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -69,8 +69,7 @@ const Dropdown: FC<DropdownProps> = ({
               type="text"
               className="w-full p-2 border border-gray-300 rounded"
               placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={placeholder}
             />
           )}
           {filteredOptions.map((option, key) => (
