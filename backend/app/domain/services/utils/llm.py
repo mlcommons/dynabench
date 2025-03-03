@@ -13,6 +13,7 @@ import openai
 import replicate
 from aiohttp import ClientSession
 from aleph_alpha_client import AsyncClient, CompletionRequest, Prompt
+from anthropic import AsyncAnthropic
 from openai import OpenAI
 
 from app.domain.services.base.task import TaskService
@@ -173,6 +174,7 @@ class AnthropicProvider(LLMProvider):
             self.api_key = os.getenv("ANTHROPIC_YOUTH")
         else:
             self.api_key = os.getenv("ANTHROPIC")
+        self.anthropic = AsyncAnthropic(api_key=self.api_key, timeout=30)
 
     @async_timeout(30)
     async def generate_text(
@@ -241,7 +243,7 @@ class AnthropicProvider(LLMProvider):
             return "None"
 
     def provider_name(self):
-        return "anthropic"
+        return "anthropic_youth" if self.task_id == 67 else "anthropic"
 
 
 class CohereProvider(LLMProvider):
