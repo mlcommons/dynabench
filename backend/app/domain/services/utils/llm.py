@@ -13,7 +13,6 @@ import openai
 import replicate
 from aiohttp import ClientSession
 from aleph_alpha_client import AsyncClient, CompletionRequest, Prompt
-from anthropic import AsyncAnthropic
 from openai import OpenAI
 
 from app.domain.services.base.task import TaskService
@@ -168,9 +167,12 @@ class HuggingFaceProvider(LLMProvider):
 
 
 class AnthropicProvider(LLMProvider):
-    def __init__(self):
-        self.api_key = os.getenv("ANTHROPIC")
-        self.anthropic = AsyncAnthropic(api_key=self.api_key, timeout=30)
+    def __init__(self, task_id: int = -1):
+        self.task_id = task_id
+        if task_id == 67:
+            self.api_key = os.getenv("ANTHROPIC_YOUTH")
+        else:
+            self.api_key = os.getenv("ANTHROPIC")
 
     @async_timeout(30)
     async def generate_text(
