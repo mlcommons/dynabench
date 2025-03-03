@@ -54,12 +54,12 @@ const HorizontalRadioButton: FC<HorizontalRadioButtonProps> = ({
         </h3>
       </div>
       <Collapse in={open} className="margin">
-        <div className="justify-center flex w-full">
+        <div className="justify-center flex w-full mt-2">
           <ul className="w-fit grid grid-cols-2 sm:flex sm:flex-wrap gap-4 text-sm font-medium text-letter-color">
             {options.map((option, index) => (
               <li
                 className="px-3 flex flex-col items-center w-full sm:w-auto"
-                key={index}
+                key={`HRB-${index}`}
               >
                 <label className="text-base font-medium text-letter-color">
                   {parse(option)}

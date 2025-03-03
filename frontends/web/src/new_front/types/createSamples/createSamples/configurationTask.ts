@@ -15,6 +15,7 @@ export type ConfigurationTask = {
   model_output: ModelOutput;
   model_evaluation_metric: ModelEvaluationMetric;
   creation_samples_title?: string;
+  user_input_group_by?: number;
 };
 
 export type ValidationConfigurationTask = {

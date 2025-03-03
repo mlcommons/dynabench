@@ -228,6 +228,10 @@ const CreateInterface = () => {
                     config={taskConfiguration?.user_input as any}
                     isGenerativeContext={isGenerativeContext}
                     hidden={hidden}
+                    groupby={
+                      (taskConfiguration as any)?.context?.metadata
+                        ?.user_input_group_by || 0
+                    }
                   />
                 )}
               </div>
