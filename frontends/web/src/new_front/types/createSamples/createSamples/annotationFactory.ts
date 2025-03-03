@@ -1,6 +1,7 @@
 export type AnnotationFactoryType = {
   instruction?: any;
   hidden?: boolean;
+  groupby?: number;
 };
 
 export type ContextAnnotationFactoryType = AnnotationFactoryType & {
