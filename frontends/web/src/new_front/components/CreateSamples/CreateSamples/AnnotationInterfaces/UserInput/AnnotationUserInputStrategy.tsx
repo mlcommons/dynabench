@@ -20,11 +20,13 @@ const Import = (
 type Props = {
   config: AnnotationUserInput[];
   isGenerativeContext: boolean;
+  groupby?: number;
 };
 
 const AnnotationUserInputStrategy: FC<Props & AnnotationFactoryType> = ({
   config,
   isGenerativeContext,
+  groupby = 0,
 }) => {
   const [userInputRenders, setUserInputRenders] = useState<
     ReactElement<AnnotationUserInput & AnnotationFactoryType>[]
@@ -32,13 +34,21 @@ const AnnotationUserInputStrategy: FC<Props & AnnotationFactoryType> = ({
 
   useEffect(() => {
     const getView = () => {
-      config.map((option, index) => {
+      const newRenders: ReactElement<
+        AnnotationUserInput & AnnotationFactoryType
+      >[] = [];
+      config.forEach((option, index) => {
         const View = Import(ModulesRegistry.user_input[option.type]);
-        setUserInputRenders((prev) => [
-          ...prev,
-          <View {...{ ...option }} key={index} />,
-        ]);
+        newRenders.push(<View {...{ ...option }} key={`AUIS${index}`} />);
+
+        if ((index + 1) % groupby === 0 && groupby !== 0) {
+          newRenders.push(
+            <hr className="divider mx-5 my-3" key={`AUIS${index}divider`} />
+          );
+        }
       });
+
+      setUserInputRenders(newRenders);
     };
     getView();
   }, []);
