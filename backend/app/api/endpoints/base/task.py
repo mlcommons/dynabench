@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from app.domain.schemas.base.task import (
     CheckSignConsentRequest,
     GetDynaboardInfoByTaskIdRequest,
+    PreliminarQuestionsRequest,
     SignInConsentRequest,
     UpdateTaskInstructions,
     UpdateYamlConfiguration,
@@ -103,9 +104,21 @@ async def sign_in_consent(model: SignInConsentRequest):
     return TaskService().sign_in_consent(model.task_id, model.user_id)
 
 
+@router.post("/save_preliminar_questions", response_model={})
+async def save_preliminar_questions(model: PreliminarQuestionsRequest):
+    return TaskService().save_preliminar_questions(
+        model.task_id, model.user_id, model.preliminar_questions
+    )
+
+
 @router.post("/check_signed_consent", response_model={})
 async def check_signed_consent(model: CheckSignConsentRequest):
     return TaskService().check_signed_consent(model.task_id, model.user_id)
+
+
+@router.post("/check_preliminar_questions_done", response_model={})
+async def check_preliminar_questions_done(model: CheckSignConsentRequest):
+    return TaskService().check_preliminar_questions_done(model.task_id, model.user_id)
 
 
 @router.post("/update_config_yaml", response_model={})
