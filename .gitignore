@@ -14,3 +14,11 @@ node_modules/
 *.ipynb
 *.log
 celerybeat-schedule
+dataperf/nasa_food_for_thought/Dockerfile
+dataperf/nasa_food_for_thought/Dockerfile.aws.lambda
+dataperf/nasa_food_for_thought/app/__init__.py
+dataperf/nasa_food_for_thought/app/app.py
+dataperf/nasa_food_for_thought/app/api/endpoints/model.py
+dataperf/nasa_food_for_thought/app/domain/helpers.py
+dataperf/nasa_food_for_thought/app/domain/model.py
+dataperf/nasa_food_for_thought/app/models/Prediction.py
