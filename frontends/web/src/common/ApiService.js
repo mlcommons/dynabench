@@ -727,11 +727,14 @@ export default class ApiService {
     });
   }
 
-  uploadTrainFiles(tid, modelName, files) {
+  uploadTrainFiles(tid, modelName, files, source_url = null) {
     const token = this.getToken();
     const formData = new FormData();
     for (const [name, file] of Object.entries(files)) {
       formData.append(name, file);
+    }
+    if (source_url) {
+      formData.append("source_url", source_url);
     }
     return this.fetch(
       `${this.domain}/models/upload_train_files/${tid}/${modelName}`,
