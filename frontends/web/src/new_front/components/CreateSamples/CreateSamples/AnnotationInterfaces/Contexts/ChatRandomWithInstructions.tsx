@@ -1,7 +1,6 @@
 import React, { FC, useContext, useEffect, useState, useCallback } from "react";
 import { useLocation, useHistory } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
-import queryString from "query-string";
 import useFetch from "use-http";
 import Swal from "sweetalert2";
 import parse from "html-react-parser";
@@ -9,6 +8,7 @@ import parse from "html-react-parser";
 import UserContext from "containers/UserContext";
 
 import SignConsent from "new_front/components/Modals/SignConsent";
+import PreliminarQuestions from "new_front/components/Modals/PreliminarQuestions";
 import Chatbot from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/Chatbot";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
@@ -34,7 +34,8 @@ const ChatRandomWithInstructions: FC<
   setContextInfo,
 }) => {
   const artifactsInput = generative_context.artifacts;
-  const [signInConsent, setSignInConsent] = useState(true);
+  const [signInConsent, setSignInConsent] = useState(false);
+  const [donePreliminarQuestions, setDonePreliminarQuestions] = useState(true);
   const [callLoading, setCallLoading] = useState(true);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
     user: [],
@@ -45,11 +46,14 @@ const ChatRandomWithInstructions: FC<
   const [localContext, setLocalContext] = useState(null);
   const [agreeText, setAgreeText] = useState(null);
   const [consentTerms, setConsentTerms] = useState(null);
+  const [preliminarQuestions, setPreliminarQuestions] = useState(null);
   const [finishConversation, setFinishConversation] = useState(false);
   const [readInstructions, setReadInstructions] = useState(
     artifactsInput?.jump_instructions ? true : false
   );
-  const { updateModelInputs, modelInputs } = useContext(CreateInterfaceContext);
+  const { updateModelInputs, modelInputs, cleanModelInputs } = useContext(
+    CreateInterfaceContext
+  );
   const { get, post, response, loading } = useFetch();
   const { user } = useContext(UserContext);
   const location = useLocation();
@@ -76,13 +80,56 @@ const ChatRandomWithInstructions: FC<
     }
   }, [user.id, taskId, bringConsentTerms, post]);
 
+  const checkifUserHasDonePreliminarQuestions = useCallback(async () => {
+    const donePreliminar = await post("/task/check_preliminar_questions_done", {
+      user_id: user.id,
+      task_id: taskId,
+    });
+    if (response.ok) {
+      setCallLoading(false);
+      setDonePreliminarQuestions(donePreliminar);
+      !donePreliminar &&
+        setPreliminarQuestions(artifactsInput.preliminar_questions);
+    }
+  }, [user.id, taskId, post]);
+
   const handleSignInConsent = async () => {
     await post("/task/sign_in_consent", {
       user_id: user.id,
       task_id: taskId,
     });
-    setSignInConsent(true);
-    window.location.reload();
+    if (response.ok) {
+      setSignInConsent(true);
+    } else {
+      Swal.fire({
+        title: "Error",
+        text: "There was an error signing the consent, try again or contact support",
+        icon: "error",
+        confirmButtonText: "Ok",
+      }).then(() => {});
+    }
+  };
+
+  const handlePreliminarQuestionsSubmit = async () => {
+    const data = { ...modelInputs };
+    await post("/task/save_preliminar_questions", {
+      user_id: user.id,
+      task_id: taskId,
+      preliminar_questions: { preliminar_questions: data },
+    });
+    if (response.ok) {
+      cleanModelInputs();
+      setDonePreliminarQuestions(true);
+    } else {
+      Swal.fire({
+        title: "Error",
+        text: "There was an error saving the preliminar questions, try again or contact support",
+        icon: "error",
+        confirmButtonText: "Ok",
+      }).then(() => {
+        window.location.reload();
+      });
+    }
   };
 
   const bringDistinctContextAndModelInfo = async () => {
@@ -135,15 +182,15 @@ const ChatRandomWithInstructions: FC<
   };
 
   useEffect(() => {
+    bringDistinctContextAndModelInfo();
+    if ("preliminar_questions" in artifactsInput) {
+      checkifUserHasDonePreliminarQuestions();
+    }
     if (!("need_consent" in artifactsInput) || artifactsInput.need_consent) {
       checkIfUserIsSignedInConsent();
     } else {
       setCallLoading(false);
     }
-  }, [signInConsent]);
-
-  useEffect(() => {
-    bringDistinctContextAndModelInfo();
   }, []);
 
   useEffect(() => {
@@ -170,7 +217,7 @@ const ChatRandomWithInstructions: FC<
         <>Loading...</>
       ) : (
         <>
-          {signInConsent ? (
+          {signInConsent && donePreliminarQuestions ? (
             <>
               {
                 //if jump_instructions is true and exist in
@@ -236,6 +283,7 @@ const ChatRandomWithInstructions: FC<
                       setFinishConversation={setFinishConversation}
                       updateModelInputs={updateModelInputs}
                       setIsGenerativeContext={setIsGenerativeContext}
+                      allowPaste={artifactsInput?.allow_paste}
                     />
                   </div>
                   <div className="col-span-1">
@@ -248,7 +296,7 @@ const ChatRandomWithInstructions: FC<
             </>
           ) : (
             <>
-              {consentTerms && agreeText && (
+              {consentTerms && agreeText && !signInConsent && (
                 <Modal show={true} size="lg">
                   <SignConsent
                     handleClose={handleSignInConsent}
@@ -257,6 +305,18 @@ const ChatRandomWithInstructions: FC<
                   />
                 </Modal>
               )}
+              {signInConsent &&
+                preliminarQuestions &&
+                !donePreliminarQuestions && (
+                  <Modal show={true} size="lg">
+                    <PreliminarQuestions
+                      config={preliminarQuestions}
+                      isGenerativeContext={false}
+                      title={artifactsInput?.preliminar_questions_title}
+                      handleClose={handlePreliminarQuestionsSubmit}
+                    />
+                  </Modal>
+                )}
             </>
           )}
         </>

@@ -13,6 +13,7 @@ export type ChatbotProps = {
   numInteractionsChatbot: number;
   finishConversation: boolean;
   optionsSlider?: string[];
+  allowPaste?: boolean;
   setChatHistory: (chatHistory: ChatHistoryType) => void;
   showOriginalInteractions: () => void;
   setFinishConversation: (finishConversation: boolean) => void;
