@@ -215,6 +215,10 @@ def do_upload_via_train_files(credentials, tid, model_name):
     }
 
     endpoint_name = f"ts{int(time.time())}-{model_name}"
+    metadata = task_config.get("metadata", {})
+    proof = metadata.get("upload_proof", False)
+    source_url = bottle.request.forms.get("source_url", None)
+
     model = m.create(
         task_id=tid,
         user_id=user_id,
@@ -226,6 +230,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
         endpoint_name=endpoint_name,
         deployment_status=DeploymentStatusEnum.predictions_upload,
         secret=secrets.token_hex(),
+        source_url=source_url if proof else None,
     )
     for dataset in datasets:
         if (
