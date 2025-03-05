@@ -9,6 +9,7 @@ type DropDownWithInstructionsProps = {
   field_name_for_the_model?: string;
   metadata?: boolean;
   onInputChange?: (data: any, metadata?: boolean) => void;
+  initialOpen?: boolean;
 };
 
 const DropDownWithInstructions: FC<DropDownWithInstructionsProps> = ({
@@ -17,8 +18,9 @@ const DropDownWithInstructions: FC<DropDownWithInstructionsProps> = ({
   field_name_for_the_model,
   metadata,
   onInputChange,
+  initialOpen = true,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
   const [selectedOption, setSelectedOption] = useState<string | undefined>(
     undefined
   );

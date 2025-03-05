@@ -1,7 +1,7 @@
 # Copyright (c) MLCommons and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-from typing import List
+from typing import Dict, List
 
 from pydantic import BaseModel
 
@@ -33,6 +33,12 @@ class GetDynaboardInfoByTaskIdRequest(BaseModel):
 class SignInConsentRequest(BaseModel):
     task_id: int
     user_id: int
+
+
+class PreliminaryQuestionsRequest(BaseModel):
+    task_id: int
+    user_id: int
+    preliminary_questions: Dict
 
 
 class CheckSignConsentRequest(BaseModel):

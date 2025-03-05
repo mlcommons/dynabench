@@ -275,9 +275,23 @@ class TaskService:
             return True
         return False
 
+    def check_preliminary_questions_done(self, task_id: int, user_id: int):
+        if self.historical_task_repository.check_preliminary_questions_done(
+            task_id, user_id
+        ):
+            return True
+        return False
+
     def sign_in_consent(self, task_id: int, user_id: int):
         return self.historical_task_repository.save_historical_data(
             task_id, user_id, "consent"
+        )
+
+    def save_preliminary_questions(
+        self, task_id: int, user_id: int, preliminary_questions: dict
+    ):
+        return self.historical_task_repository.save_historical_data(
+            task_id, user_id, json.dumps(preliminary_questions)
         )
 
     def update_config_yaml(self, task_id: int, config_yaml: str):
