@@ -35,10 +35,10 @@ class SignInConsentRequest(BaseModel):
     user_id: int
 
 
-class PreliminarQuestionsRequest(BaseModel):
+class PreliminaryQuestionsRequest(BaseModel):
     task_id: int
     user_id: int
-    preliminar_questions: Dict
+    preliminary_questions: Dict
 
 
 class CheckSignConsentRequest(BaseModel):

@@ -8,7 +8,7 @@ import parse from "html-react-parser";
 import UserContext from "containers/UserContext";
 
 import SignConsent from "new_front/components/Modals/SignConsent";
-import PreliminarQuestions from "new_front/components/Modals/PreliminarQuestions";
+import PreliminaryQuestions from "new_front/components/Modals/PreliminaryQuestions";
 import Chatbot from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/Chatbot";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
@@ -16,6 +16,7 @@ import { ChatHistoryType } from "new_front/types/createSamples/createSamples/uti
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import BasicInstructions from "new_front/components/Inputs/BasicInstructions";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
+import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
 
 interface ModelNameMap {
   [key: string]: {
@@ -35,7 +36,8 @@ const ChatRandomWithInstructions: FC<
 }) => {
   const artifactsInput = generative_context.artifacts;
   const [signInConsent, setSignInConsent] = useState(false);
-  const [donePreliminarQuestions, setDonePreliminarQuestions] = useState(true);
+  const [donePreliminaryQuestions, setDonePreliminaryQuestions] =
+    useState(true);
   const [callLoading, setCallLoading] = useState(true);
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
     user: [],
@@ -46,7 +48,9 @@ const ChatRandomWithInstructions: FC<
   const [localContext, setLocalContext] = useState(null);
   const [agreeText, setAgreeText] = useState(null);
   const [consentTerms, setConsentTerms] = useState(null);
-  const [preliminarQuestions, setPreliminarQuestions] = useState(null);
+  const [preliminaryQuestions, setPreliminaryQuestions] = useState<
+    AnnotationUserInput[]
+  >([]);
   const [finishConversation, setFinishConversation] = useState(false);
   const [readInstructions, setReadInstructions] = useState(
     artifactsInput?.jump_instructions ? true : false
@@ -80,16 +84,19 @@ const ChatRandomWithInstructions: FC<
     }
   }, [user.id, taskId, bringConsentTerms, post]);
 
-  const checkifUserHasDonePreliminarQuestions = useCallback(async () => {
-    const donePreliminar = await post("/task/check_preliminar_questions_done", {
-      user_id: user.id,
-      task_id: taskId,
-    });
+  const checkifUserHasDonePreliminaryQuestions = useCallback(async () => {
+    const donePreliminary = await post(
+      "/task/check_preliminary_questions_done",
+      {
+        user_id: user.id,
+        task_id: taskId,
+      }
+    );
     if (response.ok) {
       setCallLoading(false);
-      setDonePreliminarQuestions(donePreliminar);
-      !donePreliminar &&
-        setPreliminarQuestions(artifactsInput.preliminar_questions);
+      setDonePreliminaryQuestions(donePreliminary);
+      !donePreliminary &&
+        setPreliminaryQuestions(artifactsInput.preliminary_questions);
     }
   }, [user.id, taskId, post]);
 
@@ -110,20 +117,41 @@ const ChatRandomWithInstructions: FC<
     }
   };
 
-  const handlePreliminarQuestionsSubmit = async () => {
+  const handlePreliminaryQuestionsSubmit = async () => {
+    const requiredFields = preliminaryQuestions.map(
+      (question) => question?.field_name_for_the_model
+    );
+
+    const allAnswered = requiredFields.every(
+      (field) =>
+        field in modelInputs &&
+        modelInputs[field] !== null &&
+        modelInputs[field] !== "" &&
+        modelInputs[field] !== undefined
+    );
+    if (!allAnswered) {
+      Swal.fire({
+        title: "Incomplete Questions",
+        text: "Please answer everything before submitting.",
+        icon: "warning",
+        confirmButtonText: "Ok",
+      });
+      return;
+    }
+
     const data = { ...modelInputs };
-    await post("/task/save_preliminar_questions", {
+    await post("/task/save_preliminary_questions", {
       user_id: user.id,
       task_id: taskId,
-      preliminar_questions: { preliminar_questions: data },
+      preliminary_questions: { preliminary_questions: data },
     });
     if (response.ok) {
       cleanModelInputs();
-      setDonePreliminarQuestions(true);
+      setDonePreliminaryQuestions(true);
     } else {
       Swal.fire({
         title: "Error",
-        text: "There was an error saving the preliminar questions, try again or contact support",
+        text: "There was an error saving the preliminary questions, try again or contact support",
         icon: "error",
         confirmButtonText: "Ok",
       }).then(() => {
@@ -183,8 +211,8 @@ const ChatRandomWithInstructions: FC<
 
   useEffect(() => {
     bringDistinctContextAndModelInfo();
-    if ("preliminar_questions" in artifactsInput) {
-      checkifUserHasDonePreliminarQuestions();
+    if ("preliminary_questions" in artifactsInput) {
+      checkifUserHasDonePreliminaryQuestions();
     }
     if (!("need_consent" in artifactsInput) || artifactsInput.need_consent) {
       checkIfUserIsSignedInConsent();
@@ -217,7 +245,7 @@ const ChatRandomWithInstructions: FC<
         <>Loading...</>
       ) : (
         <>
-          {signInConsent && donePreliminarQuestions ? (
+          {signInConsent && donePreliminaryQuestions ? (
             <>
               {
                 //if jump_instructions is true and exist in
@@ -306,14 +334,14 @@ const ChatRandomWithInstructions: FC<
                 </Modal>
               )}
               {signInConsent &&
-                preliminarQuestions &&
-                !donePreliminarQuestions && (
+                preliminaryQuestions &&
+                !donePreliminaryQuestions && (
                   <Modal show={true} size="lg">
-                    <PreliminarQuestions
-                      config={preliminarQuestions}
+                    <PreliminaryQuestions
+                      config={preliminaryQuestions}
                       isGenerativeContext={false}
-                      title={artifactsInput?.preliminar_questions_title}
-                      handleClose={handlePreliminarQuestionsSubmit}
+                      title={artifactsInput?.preliminary_questions_title}
+                      handleClose={handlePreliminaryQuestionsSubmit}
                     />
                   </Modal>
                 )}

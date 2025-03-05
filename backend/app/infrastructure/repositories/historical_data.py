@@ -69,11 +69,11 @@ class HistoricalDataRepository(AbstractRepository):
             .first()
         )
 
-    def check_preliminar_questions_done(self, task_id: int, user_id: int):
+    def check_preliminary_questions_done(self, task_id: int, user_id: int):
         return (
             self.session.query(HistoricalData)
             .filter(HistoricalData.task_id == task_id)
             .filter(HistoricalData.user_id == user_id)
-            .filter(HistoricalData.history.like('%"preliminar_questions"%'))
+            .filter(HistoricalData.history.like('%"preliminary_questions"%'))
             .first()
         )

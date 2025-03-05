@@ -5,14 +5,14 @@ import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import AnnotationUserInputStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/UserInput/AnnotationUserInputStrategy";
 import { AnnotationUserInput } from "new_front/types/createSamples/createSamples/annotationUserInputs";
 
-type PreliminarQuestionsProps = {
+type PreliminaryQuestionsProps = {
   handleClose: () => void;
   config: AnnotationUserInput[];
   isGenerativeContext: boolean;
   title?: string;
 };
 
-const PreliminarQuestions: FC<PreliminarQuestionsProps> = ({
+const PreliminaryQuestions: FC<PreliminaryQuestionsProps> = ({
   handleClose,
   config,
   isGenerativeContext,
@@ -46,4 +46,4 @@ const PreliminarQuestions: FC<PreliminarQuestionsProps> = ({
   );
 };
 
-export default PreliminarQuestions;
+export default PreliminaryQuestions;
