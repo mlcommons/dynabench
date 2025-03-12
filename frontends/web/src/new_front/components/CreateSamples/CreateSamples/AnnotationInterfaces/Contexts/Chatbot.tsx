@@ -24,6 +24,7 @@ const Chatbot: FC<ChatbotProps> = ({
   setFinishConversation,
   updateModelInputs,
   setIsGenerativeContext,
+  allowPaste,
 }) => {
   const [prompt, setPrompt] = useState("");
   const [showSendButton, setShowSendButton] = useState(true);
@@ -274,6 +275,7 @@ const Chatbot: FC<ChatbotProps> = ({
                         placeholder="Enter text here. Do not copy and paste"
                         onChange={(e) => setPrompt(e.target.value)}
                         onEnter={askQuestion}
+                        allowPaste={allowPaste}
                       />
                     )}
                   </div>
