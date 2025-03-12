@@ -41,7 +41,7 @@ class LLMGenerator:
             "replicate": ReplicateProvider(),
             "huggingface_api": HuggingFaceAPIProvider(),
             "openrouter": OpenRouterProvider(),
-            "anthropic_youth": AnthropicProvider(task_id=67),
+            "openrouter_youth": OpenRouterProvider(task_id=67),
         }
 
     async def generate_one_text(

@@ -759,7 +759,11 @@ class HuggingFaceAPIProvider(LLMProvider):
 
 class OpenRouterProvider(LLMProvider):
     def __init__(self, task_id: int = -1):
-        self.api_key = os.getenv("OPENROUTER")
+        self.task_id = task_id
+        if task_id == 67:
+            self.api_key = os.getenv("OPENROUTER_YOUTH")
+        else:
+            self.api_key = os.getenv("OPENROUTER")
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
@@ -804,7 +808,6 @@ class OpenRouterProvider(LLMProvider):
                     },
                 ) as response:
                     response_data = await response.json()
-
             return {
                 "text": response_data["choices"][0]["message"]["content"],
                 "provider_name": provider,
@@ -856,4 +859,6 @@ class OpenRouterProvider(LLMProvider):
             return "None"
 
     def provider_name(self):
+        if self.task_id == 67:
+            return "openrouter_youth"
         return "openrouter"
