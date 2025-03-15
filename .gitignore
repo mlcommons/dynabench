@@ -14,3 +14,4 @@ node_modules/
 *.ipynb
 *.log
 celerybeat-schedule
+*.h5

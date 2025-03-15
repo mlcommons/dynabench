@@ -13,6 +13,7 @@ import openai
 import replicate
 from aiohttp import ClientSession
 from aleph_alpha_client import AsyncClient, CompletionRequest, Prompt
+from anthropic import AsyncAnthropic
 from openai import OpenAI
 
 from app.domain.services.base.task import TaskService
@@ -173,6 +174,7 @@ class AnthropicProvider(LLMProvider):
             self.api_key = os.getenv("ANTHROPIC_YOUTH")
         else:
             self.api_key = os.getenv("ANTHROPIC")
+        self.anthropic = AsyncAnthropic(api_key=self.api_key)
 
     @async_timeout(30)
     async def generate_text(
@@ -193,9 +195,9 @@ class AnthropicProvider(LLMProvider):
         top_k = model[provider]["top_k"]
 
         try:
-            completion = await self.anthropic.completions.create(
+            completion = await self.anthropic.messages.create(
                 model=model[provider]["model_name"],
-                max_tokens_to_sample=max_tokens,
+                max_tokens=max_tokens,
                 prompt=final_prompt,
                 temperature=temperature,
                 top_p=top_p,
@@ -241,7 +243,7 @@ class AnthropicProvider(LLMProvider):
             return "None"
 
     def provider_name(self):
-        return "anthropic"
+        return "anthropic_youth" if self.task_id == 67 else "anthropic"
 
 
 class CohereProvider(LLMProvider):
@@ -757,7 +759,11 @@ class HuggingFaceAPIProvider(LLMProvider):
 
 class OpenRouterProvider(LLMProvider):
     def __init__(self, task_id: int = -1):
-        self.api_key = os.getenv("OPENROUTER")
+        self.task_id = task_id
+        if task_id == 67:
+            self.api_key = os.getenv("OPENROUTER_YOUTH")
+        else:
+            self.api_key = os.getenv("OPENROUTER")
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
@@ -802,7 +808,6 @@ class OpenRouterProvider(LLMProvider):
                     },
                 ) as response:
                     response_data = await response.json()
-
             return {
                 "text": response_data["choices"][0]["message"]["content"],
                 "provider_name": provider,
@@ -854,4 +859,6 @@ class OpenRouterProvider(LLMProvider):
             return "None"
 
     def provider_name(self):
+        if self.task_id == 67:
+            return "openrouter_youth"
         return "openrouter"

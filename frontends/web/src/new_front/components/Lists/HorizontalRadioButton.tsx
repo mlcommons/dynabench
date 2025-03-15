@@ -23,7 +23,7 @@ const HorizontalRadioButton: FC<HorizontalRadioButtonProps> = ({
 }) => {
   const [open, setOpen] = useState(InitialOpen);
   const [selectedOption, setSelectedOption] = useState<string>(
-    options[0] || ""
+    options[0] || "",
   );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +33,7 @@ const HorizontalRadioButton: FC<HorizontalRadioButtonProps> = ({
         {
           [field_name_for_the_model]: event.target.value,
         },
-        metadata || false
+        metadata || false,
       );
     }
   };
@@ -66,12 +66,13 @@ const HorizontalRadioButton: FC<HorizontalRadioButtonProps> = ({
                 </label>
                 <input
                   type="radio"
-                  value={selectedOption}
+                  value={option}
                   name={field_name_for_the_model}
+                  checked={selectedOption === option}
                   className="w-4 h-5 bg-gray-100 border-gray-300 rounded text-third-color focus:ring-third-color"
                   onChange={handleChange}
                   disabled={disabled}
-                  id={field_name_for_the_model}
+                  id={`${field_name_for_the_model}-${index}`}
                 />
               </li>
             ))}
