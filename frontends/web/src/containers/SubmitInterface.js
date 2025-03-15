@@ -22,6 +22,7 @@ import Markdown from "react-markdown";
 import DragAndDrop from "../components/DragAndDrop/DragAndDrop";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
+import yaml from "js-yaml";
 
 const FileUpload = ({ values, filename, setFieldValue, disabled }) => {
   return values[filename] ? (
@@ -72,6 +73,7 @@ const SubmitInterface = (props) => {
     datasets: [],
     showModals: [],
   });
+  const [configYaml, setConfigYaml] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,6 +105,12 @@ const SubmitInterface = (props) => {
     try {
       const taskResult = await context.api.getTask(taskId);
       setState((prevState) => ({ ...prevState, task: taskResult }));
+      try {
+        const jsObject = yaml.load(taskResult.config_yaml);
+        setConfigYaml(jsObject);
+      } catch (error) {
+        console.error("Error parsing config yaml", error);
+      }
       const datasets = await context.api.getDatasets(taskResult.id);
       setState((prevState) => ({
         ...prevState,
@@ -192,7 +200,12 @@ const SubmitInterface = (props) => {
             )
         );
       } else {
-        context.api.uploadTrainFiles(state.task.id, values.modelName, files);
+        context.api.uploadTrainFiles(
+          state.task.id,
+          values.modelName,
+          files,
+          values.sourceURL
+        );
         values.modelName = "";
         for (const [fname, _] of Object.entries(files)) {
           values[fname] = null;
@@ -357,6 +370,24 @@ const SubmitInterface = (props) => {
                           </Form.Group>
                         </div>
                       ))}
+                      {configYaml?.metadata?.upload_proof && (
+                        <Form.Group
+                          as={Row}
+                          className="py-3 my-0 border-top"
+                          controlId="sourceURL"
+                        >
+                          <Form.Label className="text-base" column>
+                            Source Code URL
+                          </Form.Label>
+                          <Col sm={8}>
+                            <Form.Control
+                              disabled={isSubmitting}
+                              value={values.sourceURL}
+                              onChange={handleChange}
+                            />
+                          </Col>
+                        </Form.Group>
+                      )}
                       <Form.Group as={Row} className="py-3 my-0">
                         <Col sm="8">
                           <small className="form-text text-muted">

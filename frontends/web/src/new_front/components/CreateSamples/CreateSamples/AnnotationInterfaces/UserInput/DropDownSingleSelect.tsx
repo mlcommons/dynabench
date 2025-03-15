@@ -11,6 +11,7 @@ const DropDownSingleSelect: FC<AnnotationFactoryType & AnnotationUserInput> = ({
   field_name_for_the_model,
   instruction,
   metadata,
+  initiate_open,
 }) => {
   const { updateModelInputs } = useContext(CreateInterfaceContext);
 
@@ -27,6 +28,7 @@ const DropDownSingleSelect: FC<AnnotationFactoryType & AnnotationUserInput> = ({
             field_name_for_the_model={field_name_for_the_model}
             metadata={metadata}
             onInputChange={updateModelInputs}
+            initialOpen={initiate_open}
           />
         </AnnotationInstruction>
       )}

@@ -6,6 +6,7 @@ type BasicInputSeveralRowsProps = {
   open?: boolean;
   disabled?: boolean;
   required?: boolean;
+  allowPaste?: boolean;
 
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onEnter?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
@@ -16,6 +17,7 @@ const BasicInputSeveralRows: FC<BasicInputSeveralRowsProps> = ({
   open = true,
   disabled = false,
   required = true,
+  allowPaste = true,
   onChange,
   onEnter,
 }) => {
@@ -58,6 +60,11 @@ const BasicInputSeveralRows: FC<BasicInputSeveralRowsProps> = ({
         onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
           if (e.key === "Enter") {
             onEnter && onEnter(e);
+          }
+        }}
+        onPaste={(e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+          if (!allowPaste) {
+            e.preventDefault();
           }
         }}
         disabled={disabled}

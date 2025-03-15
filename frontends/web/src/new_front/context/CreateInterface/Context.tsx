@@ -6,19 +6,26 @@ interface CreateInterfaceContextType {
   modelInputs: Record<string, any>;
   metadataExample: Record<string, any>;
   updateModelInputs: (input: object, metadata?: boolean) => void;
+  cleanModelInputs: () => void;
   amountExamplesCreatedToday: number;
-  updateAmountExamplesCreatedToday: (realRoundId: number, userId: number) => void;
+  updateAmountExamplesCreatedToday: (
+    realRoundId: number,
+    userId: number
+  ) => void;
   removeItem: (key: string) => void;
 }
 
-export const CreateInterfaceContext = createContext<CreateInterfaceContextType>({
-  modelInputs: {},
-  metadataExample: {},
-  updateModelInputs: () => {},
-  amountExamplesCreatedToday: 0,
-  updateAmountExamplesCreatedToday: () => {},
-  removeItem: () => {},
-});
+export const CreateInterfaceContext = createContext<CreateInterfaceContextType>(
+  {
+    modelInputs: {},
+    metadataExample: {},
+    updateModelInputs: () => {},
+    cleanModelInputs: () => {},
+    amountExamplesCreatedToday: 0,
+    updateAmountExamplesCreatedToday: () => {},
+    removeItem: () => {},
+  }
+);
 
 type CreateInterfaceProviderProps = {
   children: React.ReactNode;
@@ -45,16 +52,20 @@ export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
     }
   };
 
+  const cleanModelInputs = () => {
+    setModelInputs({});
+  };
+
   const updateAmountExamplesCreatedToday = async (
     realRoundId: number,
-    userId: number,
+    userId: number
   ) => {
     const amountExamples = await post(
       `/rounduserexample/number_of_examples_created`,
       {
         round_id: realRoundId,
         user_id: userId,
-      },
+      }
     );
     if (response.ok) {
       setAmountExamplesCreatedToday(amountExamples);
@@ -63,10 +74,10 @@ export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
 
   const removeItem = (key: string) => {
     setModelInputs((prevModelInputs) => {
-      const {[key]: _, ...newObject} = prevModelInputs
+      const { [key]: _, ...newObject } = prevModelInputs;
       return newObject;
     });
-  }
+  };
 
   return (
     <CreateInterfaceContext.Provider
@@ -74,6 +85,7 @@ export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
         modelInputs,
         metadataExample,
         updateModelInputs,
+        cleanModelInputs,
         amountExamplesCreatedToday,
         updateAmountExamplesCreatedToday,
         removeItem,
