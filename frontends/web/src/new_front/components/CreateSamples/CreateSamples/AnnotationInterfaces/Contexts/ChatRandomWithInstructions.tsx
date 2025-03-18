@@ -53,10 +53,10 @@ const ChatRandomWithInstructions: FC<
   >([]);
   const [finishConversation, setFinishConversation] = useState(false);
   const [readInstructions, setReadInstructions] = useState(
-    artifactsInput?.jump_instructions ? true : false
+    artifactsInput?.jump_instructions ? true : false,
   );
   const { updateModelInputs, modelInputs, cleanModelInputs } = useContext(
-    CreateInterfaceContext
+    CreateInterfaceContext,
   );
   const { get, post, response, loading } = useFetch();
   const { user } = useContext(UserContext);
@@ -90,7 +90,7 @@ const ChatRandomWithInstructions: FC<
       {
         user_id: user.id,
         task_id: taskId,
-      }
+      },
     );
     if (response.ok) {
       setCallLoading(false);
@@ -119,7 +119,7 @@ const ChatRandomWithInstructions: FC<
 
   const handlePreliminaryQuestionsSubmit = async () => {
     const requiredFields = preliminaryQuestions.map(
-      (question) => question?.field_name_for_the_model
+      (question) => question?.field_name_for_the_model,
     );
 
     const allAnswered = requiredFields.every(
@@ -127,7 +127,7 @@ const ChatRandomWithInstructions: FC<
         field in modelInputs &&
         modelInputs[field] !== null &&
         modelInputs[field] !== "" &&
-        modelInputs[field] !== undefined
+        modelInputs[field] !== undefined,
     );
     if (!allAnswered) {
       Swal.fire({
@@ -164,9 +164,11 @@ const ChatRandomWithInstructions: FC<
     try {
       const [contextResponse, modelResponse] = await Promise.all([
         get(
-          `/context/get_distinct_context?user_id=${user.id}&round_id=${realRoundId}`
+          `/context/get_distinct_context?user_id=${user.id}&round_id=${realRoundId}`,
         ),
-        get(`/task/get_random_provider_and_model_info?task_id=${taskId}`),
+        get(
+          `/task/get_random_provider_and_model_info?task_id=${taskId}&user_id=${user.id}`,
+        ),
       ]);
       if (response.ok) {
         if (!contextResponse || !modelResponse.provider) {
@@ -265,7 +267,7 @@ const ChatRandomWithInstructions: FC<
                       </h3>
                       <br />
                       {parse(
-                        generative_context.artifacts.first_explainatory_block
+                        generative_context.artifacts.first_explainatory_block,
                       )}
                     </div>
                   </div>

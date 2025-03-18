@@ -142,8 +142,8 @@ async def download_logs(task_id: int):
 
 
 @router.get("/get_random_provider_and_model_info", response_model={})
-def get_random_provider_and_model_info(task_id: int):
-    return TaskService().get_random_provider_and_model_info(task_id)
+def get_random_provider_and_model_info(task_id: int, user_id: int):
+    return TaskService().get_random_provider_and_model_info(task_id, user_id)
 
 
 @router.get("/get_task_consent", response_model={})

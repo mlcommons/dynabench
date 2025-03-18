@@ -189,3 +189,37 @@ class ExampleRepository(AbstractRepository):
             .filter(Example.uid == user_id)
             .scalar()
         )
+
+    def get_used_models_by_user_id_and_task_id(self, user_id: int, task_id: int):
+        # Get the latest round (max rid) for the given task
+        latest_round = (
+            self.session.query(Round)
+            .filter(Round.tid == task_id)
+            .order_by(Round.rid.desc())
+            .first()
+        )
+
+        if not latest_round:
+            return []
+
+        # Get all context IDs associated with this round
+        context_ids = (
+            self.session.query(Context.id)
+            .filter(Context.r_realid == latest_round.id)
+            .all()
+        )
+
+        if not context_ids:
+            return []
+
+        # Extract IDs from the result tuples
+        context_id_list = [cid[0] for cid in context_ids]
+
+        # Get all examples with matching contexts
+        return (
+            self.session.query(Example.model_endpoint_name)
+            .filter(Example.uid == user_id if user_id else True)
+            .filter(Example.cid.in_(context_id_list))
+            .distinct()
+            .all()
+        )
