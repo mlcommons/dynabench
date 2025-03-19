@@ -105,7 +105,6 @@ class RoundUserExampleInfoService:
         self, task_id: int, user_id: int, round_id: int, url: str
     ):
         user_email = self.user_repository.get_user_email(user_id)[0]
-        print(user_email.split("@")[1])
         if user_email.split("@")[1] == "amazonturk.com":
             number_of_examples_created = (
                 self.rounds_user_example_info_repository.number_of_examples_created(

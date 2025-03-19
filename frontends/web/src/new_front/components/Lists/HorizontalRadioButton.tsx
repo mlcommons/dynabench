@@ -22,8 +22,8 @@ const HorizontalRadioButton: FC<HorizontalRadioButtonProps> = ({
   onInputChange,
 }) => {
   const [open, setOpen] = useState(InitialOpen);
-  const [selectedOption, setSelectedOption] = useState<string>(
-    options[0] || "",
+  const [selectedOption, setSelectedOption] = useState<string | undefined>(
+    undefined,
   );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -63,6 +63,30 @@ const ChatRandomWithInstructions: FC<
   const location = useLocation();
   const history = useHistory();
 
+  const checkIfUserReachedNecessaryExamples = async () => {
+    const redirectUrl = await post(
+      "/rounduserexample/redirect_to_third_party_provider",
+      {
+        task_id: taskId,
+        user_id: user.id,
+        round_id: realRoundId,
+        url: artifactsInput?.redirect_url || null,
+      },
+    );
+    if (response.ok) {
+      if (redirectUrl) {
+        Swal.fire({
+          title: "You have reached the necessary examples",
+          text: "You will be redirected to the post-survey.",
+          icon: "success",
+          confirmButtonText: "Ok",
+        }).then(() => {
+          window.location.href = redirectUrl;
+        });
+      }
+    }
+  };
+
   const bringConsentTerms = useCallback(async () => {
     await get(`/task/get_task_consent?task_id=${taskId}`);
     if (response.ok) {
@@ -213,6 +237,7 @@ const ChatRandomWithInstructions: FC<
 
   useEffect(() => {
     bringDistinctContextAndModelInfo();
+    checkIfUserReachedNecessaryExamples();
     if ("preliminary_questions" in artifactsInput) {
       checkifUserHasDonePreliminaryQuestions();
     }
