@@ -77,14 +77,16 @@ const ChatRandomWithInstructions: FC<
       if (redirectUrl) {
         Swal.fire({
           title: "You have reached the necessary examples",
-          text: "You will be redirected to the post-survey.",
+          text: "You will be redirected back to Prolific.",
           icon: "success",
           confirmButtonText: "Ok",
         }).then(() => {
           window.location.href = redirectUrl;
         });
+        return true;
       }
     }
+    return false;
   };
 
   const bringConsentTerms = useCallback(async () => {
@@ -236,16 +238,30 @@ const ChatRandomWithInstructions: FC<
   };
 
   useEffect(() => {
-    bringDistinctContextAndModelInfo();
-    checkIfUserReachedNecessaryExamples();
-    if ("preliminary_questions" in artifactsInput) {
-      checkifUserHasDonePreliminaryQuestions();
-    }
-    if (!("need_consent" in artifactsInput) || artifactsInput.need_consent) {
-      checkIfUserIsSignedInConsent();
-    } else {
-      setCallLoading(false);
-    }
+    const initializeComponent = async () => {
+      // First check if user should be redirected to third party
+      const shouldRedirect = await checkIfUserReachedNecessaryExamples();
+
+      // Only proceed with other initializations if no redirect is needed
+      if (!shouldRedirect) {
+        bringDistinctContextAndModelInfo();
+
+        if ("preliminary_questions" in artifactsInput) {
+          checkifUserHasDonePreliminaryQuestions();
+        }
+
+        if (
+          !("need_consent" in artifactsInput) ||
+          artifactsInput.need_consent
+        ) {
+          checkIfUserIsSignedInConsent();
+        } else {
+          setCallLoading(false);
+        }
+      }
+    };
+
+    initializeComponent();
   }, []);
 
   useEffect(() => {
