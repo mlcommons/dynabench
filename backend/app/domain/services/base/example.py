@@ -24,6 +24,7 @@ from app.domain.services.base.task import TaskService
 from app.domain.services.base.user import UserService
 from app.domain.services.base.validation import ValidationService
 from app.infrastructure.repositories.example import ExampleRepository
+from app.infrastructure.repositories.historical_data import HistoricalDataRepository
 from app.infrastructure.repositories.task import TaskRepository
 
 
@@ -34,6 +35,7 @@ class ExampleService:
         self.task_service = TaskService()
         self.task_repository = TaskRepository()
         self.round_service = RoundService()
+        self.historical_data_repository = HistoricalDataRepository()
         self.round_user_example_info = RoundUserExampleInfoService()
         self.user_service = UserService()
         self.validation_service = ValidationService()
@@ -280,6 +282,14 @@ class ExampleService:
             example_info["user_name"] = self.user_service.get_user_name_by_id(
                 example_info["uid"]
             )[0]
+            historical_data = (
+                self.historical_data_repository.get_historical_data_by_task_and_user(
+                    task_id, example_info["uid"]
+                )
+            )
+            for data_tuple in historical_data:
+                if data_tuple[0] != "consent":
+                    example_necessary_info["demographic_data"] = data_tuple[0]
             example_necessary_info["example_info"] = example_info
             example_necessary_info["context_info"] = example[1].__dict__
             example_necessary_info["round_info"] = example[2]
