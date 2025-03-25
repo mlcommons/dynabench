@@ -53,15 +53,41 @@ const ChatRandomWithInstructions: FC<
   >([]);
   const [finishConversation, setFinishConversation] = useState(false);
   const [readInstructions, setReadInstructions] = useState(
-    artifactsInput?.jump_instructions ? true : false
+    artifactsInput?.jump_instructions ? true : false,
   );
   const { updateModelInputs, modelInputs, cleanModelInputs } = useContext(
-    CreateInterfaceContext
+    CreateInterfaceContext,
   );
   const { get, post, response, loading } = useFetch();
   const { user } = useContext(UserContext);
   const location = useLocation();
   const history = useHistory();
+
+  const checkIfUserReachedNecessaryExamples = async () => {
+    const redirectUrl = await post(
+      "/rounduserexample/redirect_to_third_party_provider",
+      {
+        task_id: taskId,
+        user_id: user.id,
+        round_id: realRoundId,
+        url: artifactsInput?.redirect_url || null,
+      },
+    );
+    if (response.ok) {
+      if (redirectUrl) {
+        Swal.fire({
+          title: "You have reached the necessary examples",
+          text: "You will be redirected back to Prolific.",
+          icon: "success",
+          confirmButtonText: "Ok",
+        }).then(() => {
+          window.location.href = redirectUrl;
+        });
+        return true;
+      }
+    }
+    return false;
+  };
 
   const bringConsentTerms = useCallback(async () => {
     await get(`/task/get_task_consent?task_id=${taskId}`);
@@ -90,7 +116,7 @@ const ChatRandomWithInstructions: FC<
       {
         user_id: user.id,
         task_id: taskId,
-      }
+      },
     );
     if (response.ok) {
       setCallLoading(false);
@@ -119,7 +145,7 @@ const ChatRandomWithInstructions: FC<
 
   const handlePreliminaryQuestionsSubmit = async () => {
     const requiredFields = preliminaryQuestions.map(
-      (question) => question?.field_name_for_the_model
+      (question) => question?.field_name_for_the_model,
     );
 
     const allAnswered = requiredFields.every(
@@ -127,7 +153,7 @@ const ChatRandomWithInstructions: FC<
         field in modelInputs &&
         modelInputs[field] !== null &&
         modelInputs[field] !== "" &&
-        modelInputs[field] !== undefined
+        modelInputs[field] !== undefined,
     );
     if (!allAnswered) {
       Swal.fire({
@@ -164,9 +190,11 @@ const ChatRandomWithInstructions: FC<
     try {
       const [contextResponse, modelResponse] = await Promise.all([
         get(
-          `/context/get_distinct_context?user_id=${user.id}&round_id=${realRoundId}`
+          `/context/get_distinct_context?user_id=${user.id}&round_id=${realRoundId}`,
         ),
-        get(`/task/get_random_provider_and_model_info?task_id=${taskId}`),
+        get(
+          `/task/get_random_provider_and_model_info?task_id=${taskId}&user_id=${user.id}`,
+        ),
       ]);
       if (response.ok) {
         if (!contextResponse || !modelResponse.provider) {
@@ -210,15 +238,30 @@ const ChatRandomWithInstructions: FC<
   };
 
   useEffect(() => {
-    bringDistinctContextAndModelInfo();
-    if ("preliminary_questions" in artifactsInput) {
-      checkifUserHasDonePreliminaryQuestions();
-    }
-    if (!("need_consent" in artifactsInput) || artifactsInput.need_consent) {
-      checkIfUserIsSignedInConsent();
-    } else {
-      setCallLoading(false);
-    }
+    const initializeComponent = async () => {
+      // First check if user should be redirected to third party
+      const shouldRedirect = await checkIfUserReachedNecessaryExamples();
+
+      // Only proceed with other initializations if no redirect is needed
+      if (!shouldRedirect) {
+        bringDistinctContextAndModelInfo();
+
+        if ("preliminary_questions" in artifactsInput) {
+          checkifUserHasDonePreliminaryQuestions();
+        }
+
+        if (
+          !("need_consent" in artifactsInput) ||
+          artifactsInput.need_consent
+        ) {
+          checkIfUserIsSignedInConsent();
+        } else {
+          setCallLoading(false);
+        }
+      }
+    };
+
+    initializeComponent();
   }, []);
 
   useEffect(() => {
@@ -265,7 +308,7 @@ const ChatRandomWithInstructions: FC<
                       </h3>
                       <br />
                       {parse(
-                        generative_context.artifacts.first_explainatory_block
+                        generative_context.artifacts.first_explainatory_block,
                       )}
                     </div>
                   </div>

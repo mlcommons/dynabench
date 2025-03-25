@@ -318,16 +318,35 @@ class TaskService:
     def get_config_file_by_task_id(self, task_id: int):
         return self.task_repository.get_config_file_by_task_id(task_id)
 
-    def get_random_provider_and_model_info(self, task_id: int):
+    def get_random_provider_and_model_info(self, task_id: int, user_id: int):
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         yaml_file = yaml.safe_load(yaml_file)
         providers = yaml_file["context"]["generative_context"]["artifacts"].get(
             "providers", None
         )
+        provider = random.choice(list(providers))
         if providers is None:
             return {"model": "", "provider": None}
-        provider = random.choice(list(providers))
-        model = random.choice(providers[provider])
+
+        is_unique = yaml_file["context"]["generative_context"].get("is_unique", False)
+        if is_unique:
+            model_names = [
+                model[0]
+                for model in self.example_repository.get_used_models_by_user_id_and_task_id(
+                    user_id, task_id
+                )
+            ]
+            model_names = list(set(model_names))
+            available_models = [
+                model_config
+                for model_config in providers[provider]
+                if model_config["model_name"] not in model_names
+            ]
+            if len(available_models) == 0:
+                return {"model": "", "provider": None}
+            model = random.choice(available_models)
+        else:
+            model = random.choice(providers[provider])
         return {"model": model, "provider": provider}
 
     def get_task_consent(self, task_id: int):

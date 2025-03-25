@@ -366,6 +366,8 @@ class ModelService:
             external_validator_url = None
             external_validator_artifacts = None
         if not sandbox_mode:
+            if model_url == "":
+                model_url = model_input.get("model_info", {}).get("model_name", None)
             self.example_service.create_example_and_increment_counters(
                 context_id,
                 user_id,
@@ -553,8 +555,6 @@ class ModelService:
         prompt: str,
         num_answers: int,
     ):
-        print("Selected model was", model_name)
-        print("Selected model was", model_name[provider]["model_name"])
         responses = []
         llm = self.providers[provider]
         for i in range(num_answers):

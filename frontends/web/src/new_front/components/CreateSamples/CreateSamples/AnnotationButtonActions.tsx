@@ -69,7 +69,7 @@ const AnnotationButtonActions: FC<Props> = ({
         sandbox_mode: sandboxMode,
         user_id: userId,
         context_id: contextId,
-        tag: tags,
+        tag: tags || "",
         round_id: realRoundId,
         task_id: taskID,
         model_url: modelInTheLoop,
