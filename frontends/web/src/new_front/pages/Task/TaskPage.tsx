@@ -128,7 +128,7 @@ const TaskPage = () => {
                     {(task.show_user_leaderboard !== 0 ||
                       task.show_leaderboard !== 0) && (
                       <TabOption
-                        optionTab={task.id in [45, 60] ? 2 : 1}
+                        optionTab={[45, 60].includes(task.id) ? 2 : 1}
                         tabName="Leaderboard"
                         openTab={openTab}
                         setOpenTab={setOpenTab}
@@ -136,7 +136,7 @@ const TaskPage = () => {
                     )}
                     {Object.entries(taskInstructions).length !== 0 && (
                       <TabOption
-                        optionTab={task.id in [45, 60] ? 1 : 2}
+                        optionTab={[45, 60].includes(task.id) ? 1 : 2}
                         tabName="Overview"
                         openTab={openTab}
                         setOpenTab={setOpenTab}
@@ -174,7 +174,7 @@ const TaskPage = () => {
               <div className="flex-auto">
                 <div className="tab-content tab-space">
                   {/* Remove after Nibbler finish */}
-                  {task.id !== 45 ? (
+                  {![45, 60].includes(task.id) ? (
                     <div className={openTab === 1 ? "block  px-4" : "hidden"}>
                       {task.show_user_leaderboard !== 0 ||
                       task.show_leaderboard !== 0 ? (
@@ -225,7 +225,7 @@ const TaskPage = () => {
                   )}
 
                   {/* Remove after Nibbler finish */}
-                  {task.id !== 45 ? (
+                  {![45, 60].includes(task.id) ? (
                     <>
                       {Object.entries(taskInstructions).length !== 0 && (
                         <div
