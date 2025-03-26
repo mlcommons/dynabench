@@ -128,7 +128,7 @@ const TaskPage = () => {
                     {(task.show_user_leaderboard !== 0 ||
                       task.show_leaderboard !== 0) && (
                       <TabOption
-                        optionTab={task.id === 45 ? 2 : 1}
+                        optionTab={task.id in [45, 60] ? 2 : 1}
                         tabName="Leaderboard"
                         openTab={openTab}
                         setOpenTab={setOpenTab}
@@ -136,7 +136,7 @@ const TaskPage = () => {
                     )}
                     {Object.entries(taskInstructions).length !== 0 && (
                       <TabOption
-                        optionTab={task.id === 45 ? 1 : 2}
+                        optionTab={task.id in [45, 60] ? 1 : 2}
                         tabName="Overview"
                         openTab={openTab}
                         setOpenTab={setOpenTab}
