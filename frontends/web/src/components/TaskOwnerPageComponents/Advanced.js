@@ -14,7 +14,7 @@ import React, { useState } from "react";
 import { Container, Row, Form, Col, Card, Button } from "react-bootstrap";
 import { Formik } from "formik";
 import useFetch from "use-http";
-import yaml from "js-yaml";
+const yaml = require("js-yaml");
 
 const Advanced = (props) => {
   const { post, response } = useFetch();
