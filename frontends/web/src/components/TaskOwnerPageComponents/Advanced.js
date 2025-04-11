@@ -14,14 +14,14 @@ import React, { useState } from "react";
 import { Container, Row, Form, Col, Card, Button } from "react-bootstrap";
 import { Formik } from "formik";
 import useFetch from "use-http";
-import yaml from "js-yaml";
+import yaml from 'js-yaml';
 
 const Advanced = (props) => {
   const { post, response } = useFetch();
-  const [error, setError] = useState();
+  const [ error, setError ] = useState();
 
   const saveYamlConfig = async (values) => {
-    const validation = validateYamlConfig(values.config_yaml);
+    const validation =  validateYamlConfig(values.config_yaml);
     if (validation.valid) {
       await post("task/update_config_yaml", {
         task_id: props.task.id,
@@ -40,19 +40,19 @@ const Advanced = (props) => {
     if (!text) {
       errors.error_message = "Required";
       errors.valid = false;
-    } else {
+    }  else {
       try {
         yaml.load(text);
         errors.error_message = "";
         errors.valid = true;
       } catch (e) {
-        errors.valid = false;
+        errors.valid = false
         errors.error_message = e.message;
       }
     }
     setError(errors);
     return errors;
-  };
+  }
 
   return (
     <Container className="pb-5 mb-5">
@@ -115,9 +115,7 @@ const Advanced = (props) => {
                             isInvalid={error && !error?.valid}
                           />
                           <Form.Control.Feedback type="invalid">
-                            <pre
-                              style={{ color: "red", whiteSpace: "pre-wrap" }}
-                            >
+                            <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
                               {error?.error_message}
                             </pre>
                           </Form.Control.Feedback>
