@@ -46,7 +46,7 @@ type Dictionary = { [key: string]: any };
 
 const cleanUpSelection = (
   selection: Array<Dictionary>,
-  keyToRemove: string
+  keyToRemove: string,
 ) => {
   const result: Array<Record<string, any>> = [];
 
@@ -118,7 +118,7 @@ const SelectMultipleTextMultipleTags: FC<
     if (preferedTag) {
       setTagSelection(localTags.find((tag: any) => tag.value === preferedTag));
       handleSubmit(
-        localTags.find((tag: any) => tag.value === preferedTag)?.back_label
+        localTags.find((tag: any) => tag.value === preferedTag)?.back_label,
       );
     }
   }, [preferedTag]);
@@ -144,8 +144,10 @@ const SelectMultipleTextMultipleTags: FC<
           key_name: field_names_for_the_model?.tag_name_search,
           key_value: value,
           real_round_id: realRoundId,
+          distinctive: generative_context?.distinctive,
+          user_id: userId,
         }),
-      }
+      },
     )
       .then((response) => response.json())
       .then((data) => {
@@ -227,11 +229,11 @@ const SelectMultipleTextMultipleTags: FC<
     }
     const start: number = Math.min(
       value[valueLength - 1].start,
-      value[valueLength - 1].end
+      value[valueLength - 1].end,
     );
     const end: number = Math.max(
       value[valueLength - 1].start,
-      value[valueLength - 1].end
+      value[valueLength - 1].end,
     );
     if (
       valueLength > 0 &&
@@ -245,7 +247,7 @@ const SelectMultipleTextMultipleTags: FC<
     const already = selectionInfo.find(
       (val: any) =>
         (val.start <= start && val.end >= start) ||
-        (val.start <= end && val.end >= start)
+        (val.start <= end && val.end >= start),
     );
     value[valueLength - 1].start = start;
     value[valueLength - 1].end = end;
