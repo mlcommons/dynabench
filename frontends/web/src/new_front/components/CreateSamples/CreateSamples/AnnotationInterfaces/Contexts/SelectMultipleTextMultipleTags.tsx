@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
+import { useLocation, useHistory } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import { TextAnnotator } from "react-text-annotate";
 import { PacmanLoader } from "react-spinners";
@@ -87,6 +88,8 @@ const SelectMultipleTextMultipleTags: FC<
   const [loading2, setLoading2] = useState<boolean>(false);
   const [extraLabel, setExtraLabel] = useState<any>({});
   const [rtl, setRTL] = useState<boolean>(false);
+  const location = useLocation();
+  const history = useHistory();
 
   const submitButton: HTMLElement | null = document.getElementById("submit");
 
@@ -158,7 +161,24 @@ const SelectMultipleTextMultipleTags: FC<
             icon: "warning",
             confirmButtonText: "Ok",
           }).then(() => {
-            handleSubmit(field_names_for_the_model?.default_tag);
+            if (value !== field_names_for_the_model?.default_tag) {
+              const predefault = localTags.filter(
+                (option: any) =>
+                  option.back_label === field_names_for_the_model?.default_tag,
+              );
+              setTagSelection(predefault[0]);
+              handleSubmit(field_names_for_the_model?.default_tag);
+            } else {
+              if (location.pathname.includes("tasks")) {
+                const newPath = location.pathname
+                  .split("/")
+                  .slice(0, -1)
+                  .join("/");
+                history.push(newPath);
+              } else {
+                history.goBack();
+              }
+            }
           });
         console.log("bringContext", data);
         setText(data?.content);
@@ -173,7 +193,24 @@ const SelectMultipleTextMultipleTags: FC<
           icon: "warning",
           confirmButtonText: "Ok",
         }).then(() => {
-          handleSubmit(field_names_for_the_model?.default_tag);
+          if (value !== field_names_for_the_model?.default_tag) {
+            const predefault = localTags.filter(
+              (option: any) =>
+                option.back_label === field_names_for_the_model?.default_tag,
+            );
+            setTagSelection(predefault[0]);
+            handleSubmit(field_names_for_the_model?.default_tag);
+          } else {
+            if (location.pathname.includes("tasks")) {
+              const newPath = location.pathname
+                .split("/")
+                .slice(0, -1)
+                .join("/");
+              history.push(newPath);
+            } else {
+              history.goBack();
+            }
+          }
         });
       });
   };
