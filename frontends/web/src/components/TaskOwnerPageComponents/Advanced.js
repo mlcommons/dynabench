@@ -10,22 +10,48 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { Container, Row, Form, Col, Card, Button } from "react-bootstrap";
 import { Formik } from "formik";
 import useFetch from "use-http";
+const yaml = require("js-yaml");
 
 const Advanced = (props) => {
   const { post, response } = useFetch();
+  const [error, setError] = useState();
 
   const saveYamlConfig = async (values) => {
-    await post("task/update_config_yaml", {
-      task_id: props.task.id,
-      config_yaml: values.config_yaml,
-    });
-    if (response.ok) {
-      window.location.reload();
+    const validation = validateYamlConfig(values.config_yaml);
+    if (validation.valid) {
+      await post("task/update_config_yaml", {
+        task_id: props.task.id,
+        config_yaml: values.config_yaml,
+      });
+      if (response.ok) {
+        window.location.reload();
+      }
+    } else {
+      console.error("Invalid YAML config", validation.error_message);
     }
+  };
+
+  const validateYamlConfig = (text) => {
+    const errors = {};
+    if (!text) {
+      errors.error_message = "Required";
+      errors.valid = false;
+    } else {
+      try {
+        yaml.load(text);
+        errors.error_message = "";
+        errors.valid = true;
+      } catch (e) {
+        errors.valid = false;
+        errors.error_message = e.message;
+      }
+    }
+    setError(errors);
+    return errors;
   };
 
   return (
@@ -53,7 +79,7 @@ const Advanced = (props) => {
                 dirty,
               }) => (
                 <>
-                  <form className="px-4" onSubmit={handleSubmit}>
+                  <form noValidate className="px-4" onSubmit={handleSubmit}>
                     <Container>
                       <Form.Group
                         as={Row}
@@ -86,7 +112,15 @@ const Advanced = (props) => {
                             onChange={handleChange}
                             spellCheck={false}
                             style={{ fontSize: 12, fontFamily: "Courier New" }}
+                            isInvalid={error && !error?.valid}
                           />
+                          <Form.Control.Feedback type="invalid">
+                            <pre
+                              style={{ color: "red", whiteSpace: "pre-wrap" }}
+                            >
+                              {error?.error_message}
+                            </pre>
+                          </Form.Control.Feedback>
                         </Col>
                         <Form.Text id="paramsHelpBlock" muted>
                           DynaTask configuration strings are YAML objects that
