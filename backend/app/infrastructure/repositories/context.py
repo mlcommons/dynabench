@@ -91,6 +91,26 @@ class ContextRepository(AbstractRepository):
         )
         return instance
 
+    def get_distinctive_context_by_key_value(
+        self, key_name: str, key_value: str, r_realid: int, user_id
+    ):
+        instance = (
+            self.session.query(self.model)
+            .join(
+                Example,
+                and_(Example.cid == self.model.id, Example.uid == user_id),
+                isouter=True,
+            )
+            .filter(
+                self.model.r_realid == r_realid,
+                self.model.context_json[key_name] == key_value,
+            )
+            .filter(Example.id.is_(None))
+            .order_by(func.rand())
+            .first()
+        )
+        return instance
+
     def upload_contexts(self, context: dict):
         model = self.model(**context)
         with self.session as session:

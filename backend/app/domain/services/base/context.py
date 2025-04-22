@@ -314,11 +314,21 @@ class ContextService:
         return key
 
     def get_random_context_from_key_value(
-        self, key_name: str, key_value: dict, r_realid: int
+        self,
+        key_name: str,
+        key_value: dict,
+        r_realid: int,
+        distinctive: bool = False,
+        user_id: int = None,
     ) -> dict:
-        context = self.context_repository.get_context_by_key_value_in_contextjson(
-            key_name, key_value, r_realid
-        )
+        if distinctive:
+            context = self.context_repository.get_distinctive_context_by_key_value(
+                key_name, key_value, r_realid, user_id
+            )
+        else:
+            context = self.context_repository.get_context_by_key_value_in_contextjson(
+                key_name, key_value, r_realid
+            )
         print("context", context)
         if not context:
             return None

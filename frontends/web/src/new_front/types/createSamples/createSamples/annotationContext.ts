@@ -12,4 +12,5 @@ export type GenerativeContext = {
   is_generative: boolean;
   type: string;
   artifacts: any;
+  distinctive?: boolean;
 };

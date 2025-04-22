@@ -92,7 +92,11 @@ def save_contexts_to_s3(
 @router.post("/get_random_context_from_key_value")
 def get_random_context_from_key_value(model: GetRandomContext):
     return ContextService().get_random_context_from_key_value(
-        model.key_name, model.key_value, model.real_round_id
+        model.key_name,
+        model.key_value,
+        model.real_round_id,
+        model.distinctive,
+        model.user_id,
     )
 
 

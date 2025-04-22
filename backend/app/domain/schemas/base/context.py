@@ -28,3 +28,5 @@ class GetRandomContext(BaseModel):
     key_name: str
     key_value: str
     real_round_id: int
+    distinctive: Optional[bool] = False
+    user_id: Optional[int]
