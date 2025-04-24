@@ -34,7 +34,7 @@ const SubmitModel = () => {
 
   const isLogin = async (taskCode: string) => {
     if (!user.id) {
-      await checkUserIsLoggedIn(history, `/`, null, taskCode);
+      await checkUserIsLoggedIn(history, `/uploadModel`, null, taskCode);
     }
   };
   const handleSubmitModel = (modelData: any) => {
@@ -89,7 +89,7 @@ const SubmitModel = () => {
                 text: "Something went wrong!",
               });
             }
-          }
+          },
         );
       } else {
         sendModelData(formData, configYaml.evaluation?.type === "heavy").then(
@@ -101,7 +101,7 @@ const SubmitModel = () => {
               icon: "success",
               confirmButtonColor: "#007bff",
             });
-          }
+          },
         );
       }
     } else {
@@ -114,12 +114,12 @@ const SubmitModel = () => {
   const getTaskData = async () => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
     const taskData = await get(
-      `/task/get_task_with_round_info_by_task_id/${taskId}`
+      `/task/get_task_with_round_info_by_task_id/${taskId}`,
     );
     const dynalabModel = await get(`/model/get_dynalab_model/${taskCode}`);
     if (response.ok) {
       setConfigYaml(
-        JSON.parse(JSON.stringify(yaml.load(taskData.config_yaml)))
+        JSON.parse(JSON.stringify(yaml.load(taskData.config_yaml))),
       );
       setDynalabModel(dynalabModel);
     }

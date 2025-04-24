@@ -25,6 +25,8 @@ const LoginPage: FC = () => {
     queryParams.get("treatmentId") === "null"
       ? null
       : queryParams.get("treatmentId");
+  const srcURL =
+    queryParams.get("src") === "null" ? null : queryParams.get("src");
 
   const handleAmazonTurk = (assignmentId: string) => {
     setEmail(`${assignmentId}@amazonturk.com`);
@@ -47,7 +49,11 @@ const LoginPage: FC = () => {
         updateState({
           user: response.data.user,
         });
-        if (taskCode) {
+        if (taskCode && srcURL) {
+          history.push(
+            `/tasks/${taskCode}${srcURL}?assignmentId=${assignmentId}&treatmentId=${treatmentId}`,
+          );
+        } else if (taskCode) {
           history.push(
             `/tasks/${taskCode}/create?assignmentId=${assignmentId}&treatmentId=${treatmentId}`,
           );
