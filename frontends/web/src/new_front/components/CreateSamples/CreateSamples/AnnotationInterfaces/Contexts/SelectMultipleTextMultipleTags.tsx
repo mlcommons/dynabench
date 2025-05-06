@@ -348,7 +348,7 @@ const SelectMultipleTextMultipleTags: FC<
                   {instruction?.selection_note}
                 </div>
               )}
-              <div className="mx-auto mb-4 col-start-10">
+              <div className="mx-auto mb-4 pl-4 md:pl-0 col-start-10">
                 <Button
                   className="border-0 font-weight-bold light-gray-bg task-action-btn"
                   onClick={() => handleSelectAll()}
