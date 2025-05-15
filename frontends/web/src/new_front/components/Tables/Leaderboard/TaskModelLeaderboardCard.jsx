@@ -5,7 +5,14 @@
  */
 
 import React from "react";
-import { useEffect, useState, useContext } from "react";
+import {
+  useEffect,
+  useState,
+  useContext,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   Card,
   Pagination,
@@ -41,6 +48,8 @@ const TaskModelLeaderboardCard = ({
   getInitialWeights,
 }) => {
   const taskId = task.id;
+  const lastCallArgs = useRef(null);
+  const initialWeights = useRef(null);
   const [data, setData] = useState([]);
   const [enableHelp, setEnableHelp] = useState(false);
   const [enableWeights, setEnableWeights] = useState(false);
@@ -67,7 +76,7 @@ const TaskModelLeaderboardCard = ({
     setPage(0);
   }, [taskId]);
 
-  const setMetricWeight = (metricID, newWeight) => {
+  const setMetricWeight = useCallback((metricID, newWeight) => {
     setMetrics((state) => {
       const list = state.map((item, j) => {
         if (item.id === metricID) {
@@ -78,9 +87,9 @@ const TaskModelLeaderboardCard = ({
       });
       return list;
     });
-  };
+  }, []);
 
-  const setDatasetWeight = (datasetID, newWeight) => {
+  const setDatasetWeight = useCallback((datasetID, newWeight) => {
     setDatasetWeights((state) => {
       const list = state.map((item, j) => {
         if (item.id === datasetID) {
@@ -91,65 +100,134 @@ const TaskModelLeaderboardCard = ({
       });
       return list;
     });
-  };
+  }, []);
 
-  const toggleSort = (field) => {
-    if (disableToggleSort) {
+  const toggleSort = useCallback(
+    (field) => {
+      if (disableToggleSort) {
+        return;
+      }
+
+      setSort((currentSort) => {
+        const currentDirection = currentSort.direction;
+        const newDirection =
+          field !== sort.field
+            ? SortDirection.DESC
+            : SortDirection.getOppositeDirection(currentDirection);
+
+        return {
+          field: field,
+          direction: newDirection,
+        };
+      });
+    },
+    [disableToggleSort],
+  );
+
+  useEffect(() => {
+    setIsLoading(true);
+    const currentArgs = JSON.stringify({
+      task,
+      context,
+      sort,
+      page,
+    });
+
+    if (initialWeights.current === currentArgs) {
+      return;
+    }
+    initialWeights.current = currentArgs;
+    try {
+      getInitialWeights(task, context.api, (result) => {
+        if (
+          result.orderedMetricWeights?.length &&
+          result.orderedDatasetWeights?.length
+        ) {
+          setMetrics(result.orderedMetricWeights);
+          setDatasetWeights(result.orderedDatasetWeights);
+          setDescription(result.description);
+        } else {
+          console.error("Invalid initial weights format:", result);
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching initial weights:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [context.api, task, getInitialWeights]);
+
+  const weightCalculations = useMemo(() => {
+    if (!datasetWeights?.length || !metrics?.length) {
+      return null;
+    }
+    const datasetWeightsList = datasetWeights.map(
+      (obj) =>
+        obj.weight / datasetWeights.reduce((sum, item) => sum + item.weight, 0),
+    );
+
+    const metricWeightsList = metrics.map(
+      (obj) => obj.weight / metrics.reduce((sum, item) => sum + item.weight, 0),
+    );
+
+    return {
+      datasetWeightsList,
+      metricWeightsList,
+      metricsIDs: metrics.map((metric) => metric.id),
+    };
+  }, [datasetWeights, metrics]);
+
+  const handleScoreData = useCallback(
+    async (datasetWeightsList, metricWeightsList, metricIds) => {
+      setIsLoading(true);
+      try {
+        const scoreData = await post("/task/get_dynaboard_info_by_task_id/", {
+          task_id: taskId,
+          ordered_metric_weights: metricWeightsList,
+          ordered_scoring_dataset_weights: datasetWeightsList,
+          sort_by: sort?.field,
+          sort_direction: sort?.direction,
+          offset: page * pageLimit,
+          limit: pageLimit,
+          metrics: metricIds,
+        });
+        if (response.ok) {
+          setData(scoreData.data);
+          setTotal(scoreData.count);
+        }
+      } catch (error) {
+        console.error("Error fetching score data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [taskId, post, sort?.field, sort?.direction, page, pageLimit, response],
+  );
+
+  useEffect(() => {
+    if (!weightCalculations) {
+      console.log("Waiting for weight calculations...");
+      return;
+    }
+    const { datasetWeightsList, metricWeightsList, metricsIDs } =
+      weightCalculations;
+
+    const currentArgs = JSON.stringify({
+      datasetWeightsList,
+      metricWeightsList,
+      metricsIDs,
+      sort,
+      page,
+    });
+
+    if (lastCallArgs.current === currentArgs) {
       return;
     }
 
-    const currentDirection = sort.direction;
+    lastCallArgs.current = currentArgs;
 
-    const newDirection =
-      field !== sort.field
-        ? SortDirection.DESC
-        : SortDirection.getOppositeDirection(currentDirection);
-
-    setSort({
-      field: field,
-      direction: newDirection,
-    });
-  };
-
-  useEffect(() => {
-    getInitialWeights(task, context.api, (result) => {
-      setMetrics(result.orderedMetricWeights);
-      setDatasetWeights(result.orderedDatasetWeights);
-      setDescription(result.description);
-    });
-  }, [context.api, task, getInitialWeights]);
-
-  const handleScoreData = async () => {
-    if (datasetWeights && metrics) {
-      const datasetWeightsList = datasetWeights.map(
-        (obj) =>
-          obj.weight /
-          datasetWeights.reduce((sum, item) => sum + item.weight, 0)
-      );
-      const metricWeightsList = metrics.map(
-        (obj) =>
-          obj.weight / metrics.reduce((sum, item) => sum + item.weight, 0)
-      );
-      const scoreData = await post("/task/get_dynaboard_info_by_task_id/", {
-        task_id: taskId,
-        ordered_metric_weights: metricWeightsList,
-        ordered_scoring_dataset_weights: datasetWeightsList,
-        sort_by: sort.field,
-        sort_direction: sort.direction,
-        offset: page * pageLimit,
-        limit: pageLimit,
-        metrics: metrics.map((metric) => metric.id),
-      });
-      if (response.ok) {
-        setData(scoreData.data);
-        setTotal(scoreData.count);
-      }
-    }
-  };
-
-  useEffect(() => {
-    handleScoreData();
-  }, [metrics, datasetWeights, sort]);
+    handleScoreData(datasetWeightsList, metricWeightsList, metricsIDs);
+  }, [weightCalculations, handleScoreData]);
 
   const isEndOfPage = (page + 1) * pageLimit >= total;
 
@@ -319,9 +397,9 @@ const TaskModelLeaderboardCard = ({
                       history.push(
                         "/login?msg=" +
                           encodeURIComponent(
-                            "You need to login to create a leaderboard snapshot."
+                            "You need to login to create a leaderboard snapshot.",
                           ) +
-                          `&src=/tasks/${taskCode}`
+                          `&src=/tasks/${taskCode}`,
                       );
                     }
                   }}
@@ -348,9 +426,9 @@ const TaskModelLeaderboardCard = ({
                       history.push(
                         "/login?msg=" +
                           encodeURIComponent(
-                            "You need to login to fork a leaderboard."
+                            "You need to login to fork a leaderboard.",
                           ) +
-                          `&src=/tasks/${taskCode}`
+                          `&src=/tasks/${taskCode}`,
                       );
                     }
                   }}
