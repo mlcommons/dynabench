@@ -82,6 +82,7 @@ class ModelService:
             "openaihm": OpenAIProvider(task_id=56),
             "coherehm": CohereProvider(task_id=56),
             "anthropic_youth": AnthropicProvider(task_id=67),
+            "openrouter_youth": OpenRouterProvider(task_id=67),
         }
         self.email_sender = os.getenv("MAIL_LOGIN")
 
