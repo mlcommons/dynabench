@@ -206,7 +206,7 @@ const TaskModelLeaderboardCard = ({
 
   useEffect(() => {
     if (!weightCalculations) {
-      console.log("Waiting for weight calculations...");
+      //Weight calculations are not ready yet
       return;
     }
     const { datasetWeightsList, metricWeightsList, metricsIDs } =
