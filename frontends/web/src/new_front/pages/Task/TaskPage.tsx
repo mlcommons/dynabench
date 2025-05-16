@@ -13,7 +13,7 @@ import TabOption from "new_front/components/Buttons/TabOption";
 import TaskActionButtons from "new_front/components/Buttons/TaskActionButtons_new";
 import TaskHelpersButton from "new_front/components/Buttons/TaskHelpersButton";
 import { TaskInfoType } from "new_front/types/task/taskInfo";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
 import useFetch from "use-http";
@@ -36,32 +36,51 @@ const TaskPage = () => {
   const userContext = useContext(UserContext);
   const { user } = userContext;
 
-  const getTask = async (taskCode: string) => {
-    const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
-    const [taskData, maxScore, amountOfModels, adminOrOwner, taskInstructions] =
-      await Promise.all([
-        await get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
-        await get(`/score/get_maximun_principal_score_by_task/${taskId}`),
-        await get(`/model/get_amount_of_models_by_task/${taskId}`),
-        await post("/auth/is_admin_or_owner", {
-          task_id: taskId,
-          user_id: user.id,
-        }),
-        await get(`/task/get_task_instructions/${taskId}`),
-      ]);
-    if (response.ok) {
-      setTask(taskData);
-      setMaxScore(maxScore.perf);
-      setAmountOfModels(amountOfModels);
-      setAdminOrOwner(adminOrOwner);
-      setTaskInstructions(taskInstructions);
-      setLoading(false);
-    }
-  };
+  const getTask = useCallback(
+    async (taskCode: string) => {
+      const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
+      const [taskData, maxScore, amountOfModels, taskInstructions] =
+        await Promise.all([
+          await get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
+          await get(`/score/get_maximun_principal_score_by_task/${taskId}`),
+          await get(`/model/get_amount_of_models_by_task/${taskId}`),
+          await get(`/task/get_task_instructions/${taskId}`),
+        ]);
+      if (response.ok) {
+        setTask(taskData);
+        setMaxScore(maxScore.perf);
+        setAmountOfModels(amountOfModels);
+        setTaskInstructions(taskInstructions);
+        setLoading(false);
+      }
+    },
+    [taskCode],
+  );
+
+  const checkAdminOrOwner = useCallback(
+    async (user_id: number) => {
+      if (user?.id && task?.id) {
+        const adminOrOwner = await post("/auth/is_admin_or_owner", {
+          task_id: task?.id,
+          user_id: user_id,
+        });
+        if (response.ok) {
+          setAdminOrOwner(adminOrOwner);
+        }
+      } else {
+        setAdminOrOwner(false);
+      }
+    },
+    [user?.id, task],
+  );
+
+  useEffect(() => {
+    user?.id && task && checkAdminOrOwner(user?.id);
+  }, [user, task]);
 
   useEffect(() => {
     getTask(taskCode);
-  }, [user]);
+  }, [taskCode]);
 
   useEffect(() => {
     if (

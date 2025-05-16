@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, memo } from "react";
 import { Link } from "react-router-dom";
 import ChevronExpandButton from "new_front/components/Buttons/ChevronExpandButton";
 
@@ -9,84 +9,99 @@ type TaskModelLeaderboardRowProps = {
   multiplyResultsByHundred?: boolean;
 };
 
-const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = ({
-  data,
-  showDynascore,
-  showUserNames,
-  multiplyResultsByHundred = false,
-}) => {
-  const [expanded, setExpanded] = useState(false);
-  const [secondExpanded, setSecondExpanded] = useState();
-  const totalRows = expanded ? data.datasets.length + 1 : 1;
-
-  useEffect(() => {
-    setSecondExpanded(
-      data?.datasets?.reduce((acc: any, dataset: any) => {
-        acc[dataset.name] = false;
-        return acc;
-      }, {})
-    );
-  }, []);
-
+const areRowPropsEqual = (
+  prevProps: TaskModelLeaderboardRowProps,
+  nextProps: TaskModelLeaderboardRowProps,
+) => {
   return (
-    <>
-      <tr key={data.model_id} onClick={() => setExpanded(!expanded)}>
-        <td>
-          <Link to={`/models/${data.model_id}`} className="btn-link">
-            {data.model_name}
-          </Link>
-          {showUserNames && (
-            <Link to={`/users/${data.uid}#profile`} className="btn-link">
-              ({data.username})
-            </Link>
-          )}
-          <div style={{ float: "right" }}>
-            <ChevronExpandButton expanded={expanded} />
-          </div>
-        </td>
-        {multiplyResultsByHundred ? (
-          <>
-            {data.averaged_scores.map((score: any, index: number) => (
-              <td className="text-right" key={index}>
-                {(parseFloat(score) * 100).toFixed(2)}
-              </td>
-            ))}
-          </>
-        ) : (
-          <>
-            {data.averaged_scores.map((score: any, index: number) => (
-              <td className="text-right" key={index}>
-                {parseFloat(score).toFixed(2)}
-              </td>
-            ))}
-          </>
-        )}
-
-        {showDynascore && (
-          <td className="pr-4 text-right align-middle " rowSpan={totalRows}>
-            <span>
-              {expanded ? (
-                <h1>{parseFloat(data.dynascore).toFixed(2)}</h1>
-              ) : (
-                parseFloat(data.dynascore).toFixed(2)
-              )}
-            </span>
-          </td>
-        )}
-      </tr>
-      {expanded &&
-        data.datasets.map((dataset: any, i: number) => (
-          <TaskModelLeaderboardRowFirstLevel
-            key={i}
-            dataset={dataset}
-            secondExpanded={secondExpanded}
-            setSecondExpanded={setSecondExpanded}
-            multiplyResultsByHundred={multiplyResultsByHundred}
-          />
-        ))}
-    </>
+    prevProps.showDynascore === nextProps.showDynascore &&
+    prevProps.showUserNames === nextProps.showUserNames &&
+    prevProps.multiplyResultsByHundred === nextProps.multiplyResultsByHundred &&
+    JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data)
   );
 };
+
+const TaskModelLeaderboardRow: FC<TaskModelLeaderboardRowProps> = memo(
+  ({
+    data,
+    showDynascore,
+    showUserNames,
+    multiplyResultsByHundred = false,
+  }) => {
+    const [expanded, setExpanded] = useState(false);
+    const [secondExpanded, setSecondExpanded] = useState();
+    const totalRows = expanded ? data.datasets.length + 1 : 1;
+
+    useEffect(() => {
+      setSecondExpanded(
+        data?.datasets?.reduce((acc: any, dataset: any) => {
+          acc[dataset.name] = false;
+          return acc;
+        }, {}),
+      );
+    }, []);
+
+    return (
+      <>
+        <tr key={data.model_id} onClick={() => setExpanded(!expanded)}>
+          <td>
+            <Link to={`/models/${data.model_id}`} className="btn-link">
+              {data.model_name}
+            </Link>
+            {showUserNames && (
+              <Link to={`/users/${data.uid}#profile`} className="btn-link">
+                ({data.username})
+              </Link>
+            )}
+            <div style={{ float: "right" }}>
+              <ChevronExpandButton expanded={expanded} />
+            </div>
+          </td>
+          {multiplyResultsByHundred ? (
+            <>
+              {data.averaged_scores.map((score: any, index: number) => (
+                <td className="text-right" key={index}>
+                  {(parseFloat(score) * 100).toFixed(2)}
+                </td>
+              ))}
+            </>
+          ) : (
+            <>
+              {data.averaged_scores.map((score: any, index: number) => (
+                <td className="text-right" key={index}>
+                  {parseFloat(score).toFixed(2)}
+                </td>
+              ))}
+            </>
+          )}
+
+          {showDynascore && (
+            <td className="pr-4 text-right align-middle " rowSpan={totalRows}>
+              <span>
+                {expanded ? (
+                  <h1>{parseFloat(data.dynascore).toFixed(2)}</h1>
+                ) : (
+                  parseFloat(data.dynascore).toFixed(2)
+                )}
+              </span>
+            </td>
+          )}
+        </tr>
+        {expanded &&
+          data.datasets.map((dataset: any, i: number) => (
+            <TaskModelLeaderboardRowFirstLevel
+              key={i}
+              dataset={dataset}
+              secondExpanded={secondExpanded}
+              setSecondExpanded={setSecondExpanded}
+              multiplyResultsByHundred={multiplyResultsByHundred}
+            />
+          ))}
+      </>
+    );
+  },
+  areRowPropsEqual,
+);
 
 type TaskModelLeaderboardRowFirstLevelProps = {
   dataset: any;
