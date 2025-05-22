@@ -47,7 +47,7 @@ type Dictionary = { [key: string]: any };
 
 const cleanUpSelection = (
   selection: Array<Dictionary>,
-  keyToRemove: string,
+  keyToRemove: string
 ) => {
   const result: Array<Record<string, any>> = [];
 
@@ -121,7 +121,7 @@ const SelectMultipleTextMultipleTags: FC<
     if (preferedTag) {
       setTagSelection(localTags.find((tag: any) => tag.value === preferedTag));
       handleSubmit(
-        localTags.find((tag: any) => tag.value === preferedTag)?.back_label,
+        localTags.find((tag: any) => tag.value === preferedTag)?.back_label
       );
     }
   }, [preferedTag]);
@@ -150,7 +150,7 @@ const SelectMultipleTextMultipleTags: FC<
           distinctive: generative_context?.distinctive,
           user_id: userId,
         }),
-      },
+      }
     )
       .then((response) => response.json())
       .then((data) => {
@@ -164,7 +164,7 @@ const SelectMultipleTextMultipleTags: FC<
             if (value !== field_names_for_the_model?.default_tag) {
               const predefault = localTags.filter(
                 (option: any) =>
-                  option.back_label === field_names_for_the_model?.default_tag,
+                  option.back_label === field_names_for_the_model?.default_tag
               );
               setTagSelection(predefault[0]);
               handleSubmit(field_names_for_the_model?.default_tag);
@@ -196,7 +196,7 @@ const SelectMultipleTextMultipleTags: FC<
           if (value !== field_names_for_the_model?.default_tag) {
             const predefault = localTags.filter(
               (option: any) =>
-                option.back_label === field_names_for_the_model?.default_tag,
+                option.back_label === field_names_for_the_model?.default_tag
             );
             setTagSelection(predefault[0]);
             handleSubmit(field_names_for_the_model?.default_tag);
@@ -246,7 +246,8 @@ const SelectMultipleTextMultipleTags: FC<
         title: "Success",
         text: "The data has been saved",
         icon: "success",
-        confirmButtonText: "Ok",
+        showConfirmButton: false,
+        timer: 2000,
       }).then(() => {
         handleSubmit(null);
       });
@@ -266,11 +267,11 @@ const SelectMultipleTextMultipleTags: FC<
     }
     const start: number = Math.min(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     const end: number = Math.max(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     if (
       valueLength > 0 &&
@@ -284,7 +285,7 @@ const SelectMultipleTextMultipleTags: FC<
     const already = selectionInfo.find(
       (val: any) =>
         (val.start <= start && val.end >= start) ||
-        (val.start <= end && val.end >= start),
+        (val.start <= end && val.end >= start)
     );
     value[valueLength - 1].start = start;
     value[valueLength - 1].end = end;
@@ -329,7 +330,9 @@ const SelectMultipleTextMultipleTags: FC<
           ) : (
             <div className="grid items-center justify-center h-32 grid-rows-2">
               <div className="mr-2 text-letter-color mb-5">
-                Data is being prepared, please wait...
+                {loading2
+                  ? "Data is being prepared, please wait..."
+                  : "Saving data..."}
               </div>
               <PacmanLoader
                 color="#ccebd4"
