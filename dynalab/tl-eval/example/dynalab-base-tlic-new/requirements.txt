@@ -1,0 +1,13 @@
+fastapi
+mangum
+pydantic
+python-dotenv
+typing-extensions
+uvicorn
+jwt
+numpy
+tensorflow>=2.8.0
+matplotlib
+scikit-learn
+requests
+pillow
