@@ -40,6 +40,9 @@ import initializeData from "./InitializeAnnotationData.js";
 import ResponseInfo from "./ResponseInfo.js";
 import BatchCreateSamples from "../../components/Forms/BatchCreateSamples";
 import { getModelInTheLoop } from "../../services/ModelServices";
+import { parsePropsFromModelInput } from "../../utils/miscellaneous";
+import { translateYamlConfig } from "../../utils/yamlTranslation";
+import i18n from "../../i18n";
 const yaml = require("js-yaml");
 
 function deepCopyJSON(obj) {
@@ -63,6 +66,7 @@ class CreateInterface extends React.Component {
       mapKeyToExampleId: {},
       submitWithoutFullExample: false,
       taskConfig: null,
+      originalTaskConfig: null,
       data: {},
       loading: true,
       modelInTheLoop: null,
@@ -77,6 +81,9 @@ class CreateInterface extends React.Component {
     this.chatContainerRef = React.createRef();
     this.bottomAnchorRef = React.createRef();
     this.inputRef = React.createRef();
+
+    // Bind the language change handler
+    this.handleLanguageChange = this.handleLanguageChange.bind(this);
   }
 
   getInputData() {
@@ -92,7 +99,7 @@ class CreateInterface extends React.Component {
       data: Object.assign(
         {},
         initializeData(this.state.taskConfig.input),
-        JSON.parse(this.state.context.context_json)
+        JSON.parse(this.state.context.context_json),
       ),
     });
   }
@@ -106,7 +113,7 @@ class CreateInterface extends React.Component {
             this.state.task.id,
             this.state.task.cur_round,
             [],
-            this.state.task.context
+            this.state.task.context,
           )
           .then(
             (result) => {
@@ -132,7 +139,7 @@ class CreateInterface extends React.Component {
                   .filter((item) => item.name === obj.name);
                 if (expandedObj.length > 0) {
                   expandedOutput.push(
-                    JSON.parse(JSON.stringify(expandedObj[0]))
+                    JSON.parse(JSON.stringify(expandedObj[0])),
                   );
                 } else {
                   expandedOutput.push(obj);
@@ -149,18 +156,22 @@ class CreateInterface extends React.Component {
                 ? taskConfig.metadata.validate
                 : [];
 
+              // Apply translations to the YAML configuration
+              const translatedTaskConfig = translateYamlConfig(taskConfig);
+
               getModelInTheLoop(this.state.task.id)
                 .then((res) => {
                   this.setState({ modelInTheLoop: res.data.light_model });
                 })
                 .then(() => {
                   this.setState({
-                    taskConfig: taskConfig,
+                    originalTaskConfig: taskConfig, // Store the original untranslated config
+                    taskConfig: translatedTaskConfig,
                     randomTargetModel: randomTargetModel,
                     data: Object.assign(
                       {},
-                      initializeData(taskConfig.input),
-                      JSON.parse(result.context_json)
+                      initializeData(translatedTaskConfig.input),
+                      JSON.parse(result.context_json),
                     ),
                     context: result,
                     content: [],
@@ -176,9 +187,9 @@ class CreateInterface extends React.Component {
                 loading: false,
               });
               console.log(error);
-            }
+            },
           );
-      }
+      },
     );
   }
 
@@ -229,7 +240,7 @@ class CreateInterface extends React.Component {
     output = null,
     endpoint = null,
     metadata = {},
-    callback = () => this.smoothlyAnimateToBottom()
+    callback = () => this.smoothlyAnimateToBottom(),
   ) {
     this.setState(
       {
@@ -255,7 +266,7 @@ class CreateInterface extends React.Component {
               submitDisabled: false,
               refreshDisabled: false,
             },
-            callback
+            callback,
           );
           return;
         }
@@ -273,7 +284,7 @@ class CreateInterface extends React.Component {
             metadata,
             modelWrong,
             null,
-            endpoint
+            endpoint,
           )
           .then(
             (storeExampleResult) => {
@@ -288,7 +299,7 @@ class CreateInterface extends React.Component {
                     [key]: storeExampleResult.id,
                   },
                 },
-                callback
+                callback,
               );
 
               if (!!storeExampleResult.badges) {
@@ -306,9 +317,9 @@ class CreateInterface extends React.Component {
                 submitDisabled: false,
                 refreshDisabled: false,
               });
-            }
+            },
           );
-      }
+      },
     );
   }
 
@@ -375,7 +386,7 @@ class CreateInterface extends React.Component {
                           : modelResponseResult["signature"], // TODO: pre-dynatask models use signed, post-dynatask models use signature. Make this cleaner somehow?
                         modelWrongResult.model_wrong,
                         output,
-                        url
+                        url,
                       ),
                     (error) => {
                       console.log(error);
@@ -384,7 +395,7 @@ class CreateInterface extends React.Component {
                         refreshDisabled: false,
                         fetchPredictionError: true,
                       });
-                    }
+                    },
                   )
                   .then(() => this.smoothlyAnimateToBottom());
               }
@@ -395,17 +406,17 @@ class CreateInterface extends React.Component {
                 this.props.history.push(
                   "/login?msg=" +
                     encodeURIComponent(
-                      "You need to login to use this feature."
+                      "You need to login to use this feature.",
                     ) +
                     "&src=" +
-                    encodeURIComponent(`/tasks/${this.state.taskCode}/create`)
+                    encodeURIComponent(`/tasks/${this.state.taskCode}/create`),
                 );
               }
               this.setState({
                 submitDisabled: false,
                 refreshDisabled: false,
               });
-            }
+            },
           );
         });
     });
@@ -417,10 +428,10 @@ class CreateInterface extends React.Component {
         this.props.history.push(
           "/login?msg=" +
             encodeURIComponent(
-              "Please sign up or log in so that you can get credit for your generated examples."
+              "Please sign up or log in so that you can get credit for your generated examples.",
             ) +
             "&src=" +
-            encodeURIComponent(`/tasks/${this.state.taskCode}/create`)
+            encodeURIComponent(`/tasks/${this.state.taskCode}/create`),
         );
       } else {
         this.getNewContext();
@@ -434,6 +445,10 @@ class CreateInterface extends React.Component {
     this.setState({
       selectedModel: propState?.detail,
     });
+
+    // Listen for language changes
+    i18n.on("languageChanged", this.handleLanguageChange);
+
     const {
       match: { params },
     } = this.props;
@@ -455,7 +470,7 @@ class CreateInterface extends React.Component {
         },
         (error) => {
           console.log(error);
-        }
+        },
       );
     }
 
@@ -470,12 +485,12 @@ class CreateInterface extends React.Component {
                 this.props.history.replace({
                   pathname: this.props.location.pathname.replace(
                     `/tasks/${params.taskCode}`,
-                    `/tasks/${this.state.taskCode}`
+                    `/tasks/${this.state.taskCode}`,
                   ),
                   search: this.props.location.search,
                 });
               }
-            }
+            },
           );
         },
         (error) => {
@@ -483,13 +498,27 @@ class CreateInterface extends React.Component {
           if (error.status_code === 404 || error.status_code === 405) {
             this.props.history.push("/");
           }
-        }
+        },
       );
     });
   }
 
+  handleLanguageChange = (lng) => {
+    // Force re-translation of the YAML config from the original untranslated version
+    if (this.state.originalTaskConfig) {
+      const translatedTaskConfig = translateYamlConfig(
+        this.state.originalTaskConfig,
+      );
+      this.setState({ taskConfig: translatedTaskConfig });
+    }
+  };
+
+  componentWillUnmount() {
+    // Clean up language change listener
+    i18n.off("languageChanged", this.handleLanguageChange);
+  }
+
   render() {
-    console.log(this.state);
     const responseContent = this.state.content
       .map((item, index) => (
         <ResponseInfo
@@ -524,7 +553,7 @@ class CreateInterface extends React.Component {
     const goalMessageInterface = this.state.taskConfig?.input
       .filter(
         (taskConfigObj) =>
-          taskConfigObj.type === "multiclass" && taskConfigObj.as_goal_message
+          taskConfigObj.type === "multiclass" && taskConfigObj.as_goal_message,
       )
       .map((taskConfigObj) => (
         <div key={taskConfigObj.name} className="mt-1 mb-1">
@@ -550,10 +579,10 @@ class CreateInterface extends React.Component {
     // to remove the context string from view and put the context_string_selection
     // in its place
     const contextStringSelectionGroup = this.state.taskConfig?.input.filter(
-      (taskConfigObj) => taskConfigObj.type === "context_string_selection"
+      (taskConfigObj) => taskConfigObj.type === "context_string_selection",
     );
     const selectableContexts = contextStringSelectionGroup?.map(
-      (taskConfigObj) => taskConfigObj.reference_name
+      (taskConfigObj) => taskConfigObj.reference_name,
     );
     const tooTallForResponseInfoPlaceholder = this.state.taskConfig?.context
       .concat(this.state.taskConfig?.input)
@@ -562,7 +591,7 @@ class CreateInterface extends React.Component {
     const contextInterface = this.state.taskConfig?.context
       .concat(contextStringSelectionGroup)
       .filter(
-        (taskConfigObj) => !selectableContexts.includes(taskConfigObj.name)
+        (taskConfigObj) => !selectableContexts.includes(taskConfigObj.name),
       )
       .map((taskConfigObj) => (
         <div key={taskConfigObj.name} className="mt-1 mb-1">
@@ -592,7 +621,7 @@ class CreateInterface extends React.Component {
           taskConfigObj.type !== "context_string_selection" &&
           !(
             taskConfigObj.type === "multiclass" && taskConfigObj.as_goal_message
-          )
+          ),
       )
       .map((taskConfigObj) => (
         <div key={taskConfigObj.name} className="mt-1 mb-1">
@@ -790,7 +819,7 @@ class CreateInterface extends React.Component {
                         <InputGroup className="d-flex justify-content-end">
                           <Annotation
                             placement="top"
-                            tooltip="When you’re done, you can submit the example and we’ll find out what the model thinks!"
+                            tooltip="When you're done, you can submit the example and we'll find out what the model thinks!"
                           >
                             <Button
                               type="submit"
@@ -835,7 +864,7 @@ class CreateInterface extends React.Component {
                               >
                                 <Annotation
                                   placement="left"
-                                  tooltip="Don’t like this context? Try another one."
+                                  tooltip="Don't like this context? Try another one."
                                 >
                                   <Button
                                     className="border-0 font-weight-bold light-gray-bg task-action-btn"
@@ -849,7 +878,7 @@ class CreateInterface extends React.Component {
                             )}
                           <Annotation
                             placement="top"
-                            tooltip="When you’re done, you can submit the example and we’ll find out what the model thinks!"
+                            tooltip="When you're done, you can submit the example and we'll find out what the model thinks!"
                           >
                             <Button
                               type="submit"

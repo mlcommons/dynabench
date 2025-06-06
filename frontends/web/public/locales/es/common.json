@@ -1,0 +1,138 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "tasks": "Tareas",
+    "models": "Modelos",
+    "communities": "Comunidades",
+    "about": "Acerca de",
+    "contact": "Contacto",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar sesión",
+    "account": "Perfil",
+    "notifications": "Notificaciones"
+  },
+  "buttons": {
+    "submit": "Enviar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "send": "Enviar",
+    "finish": "Finalizar",
+    "continue": "Continuar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "close": "Cerrar",
+    "ok": "OK",
+    "yes": "Sí",
+    "no": "No",
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "create": "Crear",
+    "learnMore": "Conoce más"
+  },
+  "labels": {
+    "name": "Nombre",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "username": "Nombre de Usuario",
+    "description": "Descripción",
+    "title": "Título",
+    "language": "Idioma",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "results": "Resultados",
+    "confirmPassword": "Confirmar Contraseña",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "date": "Fecha",
+    "status": "Estado",
+    "type": "Tipo",
+    "category": "Categoría",
+    "tags": "Etiquetas",
+    "author": "Autor",
+    "created": "Creado",
+    "updated": "Actualizado",
+    "score": "Puntuación",
+    "rank": "Clasificación"
+  },
+  "messages": {
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "saved": "Guardado",
+    "error": "Ocurrió un error",
+    "success": "Éxito",
+    "noResults": "No se encontraron resultados",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar este elemento?",
+    "welcome": "Bienvenido a Dynabench",
+    "noData": "No hay datos disponibles"
+  },
+  "footer": {
+    "copyright": "© 2023 Dynabench. Todos los derechos reservados.",
+    "contact": "Contacto",
+    "terms": "Términos de Servicio",
+    "dataPolicy": "Política de Datos",
+    "privacy": "Política de Privacidad"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Desafiando los Límites de la Evaluación de IA",
+      "description": "Colabora con entusiastas y expertos en IA para abordar desafíos vitales de IA. Dynabench te permite crear y unirte a desafíos de IA, mejorando habilidades y avanzando la IA juntos.",
+      "challengesButton": "Desafíos",
+      "createChallengeButton": "Crea tu propio desafío"
+    },
+    "stats": {
+      "challenges": "Desafíos",
+      "participants": "Participantes",
+      "models": "Modelos",
+      "communities": "Comunidades"
+    },
+    "sections": {
+      "usedBy": "Utilizado Por",
+      "communities": "Comunidades",
+      "whatCanYouDo": "¿Qué puedes hacer con Dynabench?"
+    },
+    "features": {
+      "outsmartModels": {
+        "title": "Supera a modelos avanzados de IA:",
+        "description": "Compite contra los mejores enfrentándote a modelos como BERT, GPT, DALLE, YOLO, y más, y ve si puedes superarlos en un desafío o conjunto de datos específico."
+      },
+      "createChallenges": {
+        "title": "Crea desafíos de vanguardia",
+        "description": "Empuja los límites de la IA creando tus propios desafíos que aborden problemas críticos como seguridad, robustez, equidad, IA adversarial y centricidad de datos. Sé creativo y diseña desafíos que realmente pongan a prueba los límites de la IA."
+      },
+      "shareModels": {
+        "title": "Comparte tus propios modelos de IA (Dynalab)",
+        "description": "Envía tus propios modelos de IA a varios desafíos y conjuntos de datos, y obtén reconocimiento por tus enfoques innovadores en áreas como visión computacional, procesamiento de lenguaje natural, reconocimiento de voz, selección de conjuntos centrales y más."
+      },
+      "collaborate": {
+        "title": "Colabora con pares y expertos",
+        "description": "Dynabench ofrece una oportunidad única para conectarte con otras personas afines y expertos en la comunidad de IA. Estarás a la vanguardia de los últimos avances en investigación de IA. Mantén tus habilidades afiladas y mantente a la vanguardia involucrándote en la comunidad de Dynabench."
+      }
+    },
+    "communities": {
+      "dynamicalAdversarial": {
+        "title": "Adversarial Dinámico",
+        "description": "La idea básica es que recolectamos datos humanos dinámicamente con modelos en el bucle. Los humanos pueden ser encargados de encontrar ejemplos adversariales que engañen a los modelos de vanguardia actuales, por ejemplo, o los modelos pueden ser cooperativos y ayudar a los humanos a encontrar ejemplos interesantes. Esto ofrece dos beneficios: nos permite medir qué tan buenos son realmente nuestros métodos SOTA actuales; y produce datos que pueden usarse para entrenar modelos SOTA aún más fuertes."
+      },
+      "dataperf": {
+        "title": "Dataperf",
+        "description": "Un conjunto de benchmarks que evalúan la calidad de los datos de entrenamiento y prueba, y los algoritmos para construir u optimizar dichos conjuntos de datos, como la selección de conjuntos centrales o la depuración de errores de etiquetado, a través de una gama de tareas comunes de ML como la clasificación de imágenes. Planeamos aprovechar los benchmarks de DataPerf a través de desafíos y tablas de clasificación."
+      },
+      "babylm": {
+        "title": "BabyLM",
+        "description": "Esta tarea compartida desafía a los miembros de la comunidad a entrenar un modelo de lenguaje desde cero con la misma cantidad de datos lingüísticos disponibles para un niño. Las presentaciones deben implementarse en la biblioteca Transformers de Huggingface y se evaluarán en una tubería compartida. Esta tarea compartida está co-patrocinada por CMCL y CoNLL."
+      },
+      "llm": {
+        "title": "Modelo de Lenguaje Grande",
+        "description": "La comunidad de LLM en nuestra plataforma se dedica a crear desafíos avanzados para evaluar Modelos de Lenguaje Grande (LLMs) en varias tareas, asegurando que su rendimiento y capacidades sean evaluados exhaustivamente. Proporcionamos un espacio colaborativo para investigadores, desarrolladores y entusiastas para explorar y medir la efectividad de los LLMs en áreas específicas como la creación de sesgos, experiencia en dominios, y más."
+      },
+      "others": {
+        "title": "Otros",
+        "description": "Los datos de múltiples modalidades, como imágenes, texto y audio, se encuentran frecuentemente en aplicaciones del mundo real. Si tienes un desafío que no encaja dentro de nuestras comunidades existentes, tú"
+      }
+    }
+  }
+}

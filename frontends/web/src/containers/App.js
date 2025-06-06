@@ -67,6 +67,10 @@ import logoBlack from "new_front/assets/logo_black.png";
 import logoWhite from "new_front/assets/logo_mlcommos_white.png";
 import OverlayInstructionsProvider from "new_front/context/OverlayInstructions/Context";
 
+// i18n imports
+import { withTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher/LanguageSwitcher";
+
 const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
 
 class RouterMonitor extends React.Component {
@@ -93,7 +97,7 @@ class RouterMonitor extends React.Component {
       ) {
         this.props.history.push(
           "/login?msg=" +
-            encodeURIComponent("You need to be logged in to access this beta.")
+            encodeURIComponent("You need to be logged in to access this beta."),
         );
       }
     }
@@ -133,7 +137,7 @@ class App extends React.Component {
               <Redirect push to="/logout" />;
               //In Case Redirect doesn't work window.location.href = "/logout";
             }
-          }
+          },
         );
       });
     }
@@ -143,7 +147,7 @@ class App extends React.Component {
       },
       (error) => {
         console.warn(error);
-      }
+      },
     );
   }
   componentDidMount() {
@@ -159,6 +163,7 @@ class App extends React.Component {
   }
 
   render() {
+    const { t } = this.props; // Get translation function from HOC
     //href={`/tasks/${taskCode}`}
     var query = qs.parse(window.location.search, {
       ignoreQueryPrefix: true,
@@ -219,11 +224,11 @@ class App extends React.Component {
                           <Nav className="mr-auto">
                             <Nav.Item>
                               <Nav.Link as={Link} to="/about">
-                                About
+                                {t("navigation.about")}
                               </Nav.Link>
                             </Nav.Item>
                             <NavDropdown
-                              title="Communities"
+                              title={t("navigation.communities")}
                               id="basic-nav-dropdown"
                             >
                               <ul className="cl-menu ul-nav">
@@ -389,6 +394,7 @@ class App extends React.Component {
                             </NavDropdown>
                           </Nav>
                           <Nav className="justify-content-end">
+                            <LanguageSwitcher />
                             {this.state.user.id ? (
                               <>
                                 <SearchBar />
@@ -407,14 +413,14 @@ class App extends React.Component {
                                   id="collasible-nav-dropdown"
                                 >
                                   <NavDropdown.Item as={Link} to="/account">
-                                    Profile
+                                    {t("navigation.account")}
                                   </NavDropdown.Item>
                                   <NavDropdown.Divider />
                                   <NavDropdown.Item
                                     as={Link}
                                     to="/account#notifications"
                                   >
-                                    Notifications{" "}
+                                    {t("navigation.notifications")}{" "}
                                     {this.state.user &&
                                     this.state.user.unseen_notifications
                                       ? "(" +
@@ -425,7 +431,7 @@ class App extends React.Component {
 
                                   <NavDropdown.Divider />
                                   <NavDropdown.Item as={Link} to="/logout">
-                                    Logout
+                                    {t("navigation.logout")}
                                   </NavDropdown.Item>
                                 </NavDropdown>
                               </>
@@ -440,7 +446,7 @@ class App extends React.Component {
                                     to="/login"
                                     className="signup-nav-link login-fix-space"
                                   >
-                                    Login
+                                    {t("navigation.login")}
                                   </Nav.Link>
                                 </Nav.Item>
                                 <Nav.Item>
@@ -449,7 +455,7 @@ class App extends React.Component {
                                     to="/register"
                                     className="signup-nav-link"
                                   >
-                                    Sign up
+                                    {t("navigation.register")}
                                   </Nav.Link>
                                 </Nav.Item>
                               </>
@@ -593,21 +599,21 @@ class App extends React.Component {
                         <Container fluid>
                           <Row>
                             <div className="footer-nav-link">
-                              Copyright © 2023 MLCommons, Inc.
+                              {t("footer.copyright")}
                             </div>
                             <div className="footer-nav-link">
                               <Link to="/contact" className="text-reset">
-                                Contact
+                                {t("footer.contact")}
                               </Link>
                             </div>
                             <div className="footer-nav-link">
                               <Link to="/termsofuse" className="text-reset">
-                                Terms of Use
+                                {t("footer.terms")}
                               </Link>
                             </div>
                             <div className="footer-nav-link">
                               <Link to="/datapolicy" className="text-reset">
-                                Data Policy
+                                {t("footer.dataPolicy")}
                               </Link>
                             </div>
                           </Row>
@@ -641,4 +647,4 @@ class Logout extends React.Component {
   }
 }
 
-export default App;
+export default withTranslation()(App);

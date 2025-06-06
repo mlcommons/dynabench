@@ -5,6 +5,7 @@ import { TextAnnotator } from "react-text-annotate";
 import { PacmanLoader } from "react-spinners";
 import Swal from "sweetalert2";
 import useFetch from "use-http";
+import { useTranslation } from "react-i18next";
 
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
@@ -47,7 +48,7 @@ type Dictionary = { [key: string]: any };
 
 const cleanUpSelection = (
   selection: Array<Dictionary>,
-  keyToRemove: string
+  keyToRemove: string,
 ) => {
   const result: Array<Record<string, any>> = [];
 
@@ -90,6 +91,18 @@ const SelectMultipleTextMultipleTags: FC<
   const [rtl, setRTL] = useState<boolean>(false);
   const location = useLocation();
   const history = useHistory();
+  const { t } = useTranslation();
+
+  // Temporary debug log to see what instruction values we're receiving
+  useEffect(() => {
+    console.log(
+      "SelectMultipleTextMultipleTags received instruction:",
+      instruction,
+    );
+    if (instruction?.preselection) {
+      console.log("instruction.preselection:", instruction.preselection);
+    }
+  }, [instruction]);
 
   const submitButton: HTMLElement | null = document.getElementById("submit");
 
@@ -121,7 +134,7 @@ const SelectMultipleTextMultipleTags: FC<
     if (preferedTag) {
       setTagSelection(localTags.find((tag: any) => tag.value === preferedTag));
       handleSubmit(
-        localTags.find((tag: any) => tag.value === preferedTag)?.back_label
+        localTags.find((tag: any) => tag.value === preferedTag)?.back_label,
       );
     }
   }, [preferedTag]);
@@ -150,7 +163,7 @@ const SelectMultipleTextMultipleTags: FC<
           distinctive: generative_context?.distinctive,
           user_id: userId,
         }),
-      }
+      },
     )
       .then((response) => response.json())
       .then((data) => {
@@ -164,7 +177,7 @@ const SelectMultipleTextMultipleTags: FC<
             if (value !== field_names_for_the_model?.default_tag) {
               const predefault = localTags.filter(
                 (option: any) =>
-                  option.back_label === field_names_for_the_model?.default_tag
+                  option.back_label === field_names_for_the_model?.default_tag,
               );
               setTagSelection(predefault[0]);
               handleSubmit(field_names_for_the_model?.default_tag);
@@ -196,7 +209,7 @@ const SelectMultipleTextMultipleTags: FC<
           if (value !== field_names_for_the_model?.default_tag) {
             const predefault = localTags.filter(
               (option: any) =>
-                option.back_label === field_names_for_the_model?.default_tag
+                option.back_label === field_names_for_the_model?.default_tag,
             );
             setTagSelection(predefault[0]);
             handleSubmit(field_names_for_the_model?.default_tag);
@@ -243,8 +256,8 @@ const SelectMultipleTextMultipleTags: FC<
     });
     if (response.ok) {
       Swal.fire({
-        title: "Success",
-        text: "The data has been saved",
+        title: t("interface:success"),
+        text: t("interface:data_has_been_saved"),
         icon: "success",
         showConfirmButton: false,
         timer: 2000,
@@ -267,11 +280,11 @@ const SelectMultipleTextMultipleTags: FC<
     }
     const start: number = Math.min(
       value[valueLength - 1].start,
-      value[valueLength - 1].end
+      value[valueLength - 1].end,
     );
     const end: number = Math.max(
       value[valueLength - 1].start,
-      value[valueLength - 1].end
+      value[valueLength - 1].end,
     );
     if (
       valueLength > 0 &&
@@ -285,20 +298,39 @@ const SelectMultipleTextMultipleTags: FC<
     const already = selectionInfo.find(
       (val: any) =>
         (val.start <= start && val.end >= start) ||
-        (val.start <= end && val.end >= start)
+        (val.start <= end && val.end >= start),
     );
     value[valueLength - 1].start = start;
     value[valueLength - 1].end = end;
     !already && setSelectionInfo(value);
   };
 
+  // Helper function to translate dynamic tag name values
+  const translateTagName = (tagName: string | undefined) => {
+    if (!tagName) return t("interface:tag");
+
+    // Try to get translation from yamlContent namespace first
+    const yamlTranslated = t(`yamlContent:tag_name.${tagName.toLowerCase()}`, {
+      defaultValue: null,
+    });
+    if (
+      yamlTranslated &&
+      yamlTranslated !== `yamlContent:tag_name.${tagName.toLowerCase()}`
+    ) {
+      return yamlTranslated;
+    }
+
+    // Fallback to interface namespace
+    const interfaceTranslated = t(`interface:${tagName.toLowerCase()}`, {
+      defaultValue: tagName,
+    });
+    return interfaceTranslated;
+  };
+
   return (
     <AnnotationInstruction
       placement="top"
-      tooltip={
-        instruction?.tooltip ||
-        "Select the tag and the text according to the tag"
-      }
+      tooltip={instruction?.tooltip || t("interface:select_tag_and_text")}
     >
       {!text ? (
         <>
@@ -313,7 +345,9 @@ const SelectMultipleTextMultipleTags: FC<
                 options={localTags}
                 value={
                   tagSelection?.value ||
-                  `Select a ${instruction?.tag_name || "tag"}`
+                  `${t("interface:select_a")} ${translateTagName(
+                    instruction?.tag_name,
+                  )}`
                 }
                 onChange={setTagSelection}
               />
@@ -323,7 +357,7 @@ const SelectMultipleTextMultipleTags: FC<
                   onClick={() => handleSubmit(null)}
                   disabled={!tagSelection}
                 >
-                  Select
+                  {t("interface:select")}
                 </Button>
               </div>
             </div>
@@ -331,8 +365,8 @@ const SelectMultipleTextMultipleTags: FC<
             <div className="grid items-center justify-center h-32 grid-rows-2">
               <div className="mr-2 text-letter-color mb-5">
                 {loading2
-                  ? "Data is being prepared, please wait..."
-                  : "Saving data..."}
+                  ? t("interface:data_being_prepared")
+                  : t("interface:saving_data")}
               </div>
               <PacmanLoader
                 color="#ccebd4"
@@ -356,7 +390,7 @@ const SelectMultipleTextMultipleTags: FC<
                   className="border-0 font-weight-bold light-gray-bg task-action-btn"
                   onClick={() => handleSelectAll()}
                 >
-                  Select all text area
+                  {t("interface:select_all_text_area")}
                 </Button>
               </div>
             </div>
@@ -366,9 +400,9 @@ const SelectMultipleTextMultipleTags: FC<
                   options={localTags}
                   value={
                     tagSelection?.value ||
-                    `Select a ${
-                      field_names_for_the_model?.tag_name_for_display || "tag"
-                    }`
+                    `${t("interface:select_a")} ${translateTagName(
+                      field_names_for_the_model?.tag_name_display,
+                    )}`
                   }
                   onChange={setTagSelection}
                 />
@@ -394,7 +428,7 @@ const SelectMultipleTextMultipleTags: FC<
                 }
                 instructions={
                   generative_context?.artifacts?.additional_label
-                    ?.instructions || "Choose any that apply"
+                    ?.instructions || t("interface:choose_any_that_apply")
                 }
                 field_name_for_the_model={
                   generative_context?.artifacts?.additional_label
@@ -410,7 +444,7 @@ const SelectMultipleTextMultipleTags: FC<
                   onClick={() => handleSubmitExample()}
                   disabled={!selectionInfo.length || loading}
                 >
-                  {loading ? "Loading..." : "Submit"}
+                  {loading ? t("interface:loading") : t("interface:submit")}
                 </Button>
               </div>
               <div className="pl-2 col-span-2 col-start-8" id="switchContext">
@@ -421,7 +455,7 @@ const SelectMultipleTextMultipleTags: FC<
                     handleSubmit(null);
                   }}
                 >
-                  Skip and load a new text
+                  {t("interface:skip_and_load_new_text")}
                 </Button>
               </div>
             </div>

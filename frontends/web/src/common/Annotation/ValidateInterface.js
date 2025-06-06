@@ -23,6 +23,7 @@ import {
   Button,
   Spinner,
   InputGroup,
+  OverlayTrigger,
 } from "react-bootstrap";
 import UserContext from "../../containers/UserContext";
 import {
@@ -32,6 +33,7 @@ import {
 } from "../../containers/Overlay";
 import AnnotationComponent from "./AnnotationComponent.js";
 import initializeData from "./InitializeAnnotationData.js";
+import { translateYamlConfig } from "../../utils/yamlTranslation";
 const yaml = require("js-yaml");
 
 function deepCopyJSON(obj) {
@@ -73,10 +75,10 @@ class ValidateInterface extends React.Component {
       this.props.history.push(
         "/login?msg=" +
           encodeURIComponent(
-            "Please log in or sign up so that you can get credit for your generated examples."
+            "Please log in or sign up so that you can get credit for your generated examples.",
           ) +
           "&src=" +
-          encodeURIComponent(`/tasks/${params.taskCode}/validate`)
+          encodeURIComponent(`/tasks/${params.taskCode}/validate`),
       );
     }
 
@@ -113,12 +115,12 @@ class ValidateInterface extends React.Component {
                 this.props.history.replace({
                   pathname: this.props.location.pathname.replace(
                     `/tasks/${params.taskCode}`,
-                    `/tasks/${this.state.taskCode}`
+                    `/tasks/${this.state.taskCode}`,
                   ),
                   search: this.props.location.search,
                 });
               }
-            }
+            },
           );
         },
         (error) => {
@@ -126,7 +128,7 @@ class ValidateInterface extends React.Component {
           if (error.status_code === 404 || error.status_code === 405) {
             this.props.history.push("/");
           }
-        }
+        },
       );
     });
   }
@@ -142,7 +144,7 @@ class ValidateInterface extends React.Component {
           ? this.setRangesAndGetRandomFilteredExample()
           : this.context.api.getRandomExample(
               this.state.task.id,
-              this.state.task.selected_round
+              this.state.task.selected_round,
             )
         ).then(
           (result) => {
@@ -178,21 +180,24 @@ class ValidateInterface extends React.Component {
               ? taskConfig.metadata.validate
               : [];
 
+            // Apply translations to the YAML configuration
+            const translatedTaskConfig = translateYamlConfig(taskConfig);
+
             const context = JSON.parse(result.context.context_json);
             const input = JSON.parse(result.input_json);
             const createMetadata = JSON.parse(result.metadata_json);
             const validateMetadata = initializeData(
-              taskConfig.metadata.validate
+              translatedTaskConfig.metadata.validate,
             );
             this.setState({
               example: result,
-              taskConfig: taskConfig,
+              taskConfig: translatedTaskConfig,
               data: Object.assign(
                 {},
                 input,
                 createMetadata,
                 context,
-                validateMetadata
+                validateMetadata,
               ),
               loading: false,
             });
@@ -203,8 +208,8 @@ class ValidateInterface extends React.Component {
               loading: false,
               example: false,
             });
-          }
-        )
+          },
+        ),
     );
   }
 
@@ -223,7 +228,7 @@ class ValidateInterface extends React.Component {
         this.state.example.id,
         this.state.validatorAction,
         mode,
-        filteredValidatorMetadata
+        filteredValidatorMetadata,
       )
       .then(
         (result) => {
@@ -234,7 +239,7 @@ class ValidateInterface extends React.Component {
         },
         (error) => {
           console.log(error);
-        }
+        },
       );
   }
 
@@ -266,7 +271,7 @@ class ValidateInterface extends React.Component {
       minNumFlags,
       maxNumFlags,
       minNumDisagreements,
-      maxNumDisagreements
+      maxNumDisagreements,
     );
   }
 
@@ -303,12 +308,12 @@ class ValidateInterface extends React.Component {
           (taskConfigObj) =>
             taskConfigObj.model_wrong_condition === undefined ||
             taskConfigObj.model_wrong_condition ===
-              this.state.example.model_wrong
-        )
+              this.state.example.model_wrong,
+        ),
       )
       .filter(
         (taskConfigObj) =>
-          ![undefined, null].includes(this.state.data[taskConfigObj.name])
+          ![undefined, null].includes(this.state.data[taskConfigObj.name]),
       )
       .map((taskConfigObj) => (
         <div key={taskConfigObj.name} className="mb-3">
@@ -335,14 +340,15 @@ class ValidateInterface extends React.Component {
           type={taskConfigObj.type}
           configObj={taskConfigObj}
         />
-      )
+      ),
     );
 
     const validatorMetadataInterface = this.state.taskConfig?.metadata.validate
       ?.filter(
         (taskConfigObj) =>
           taskConfigObj.validated_label_condition === undefined ||
-          taskConfigObj.validated_label_condition === this.state.validatorAction
+          taskConfigObj.validated_label_condition ===
+            this.state.validatorAction,
       )
       .map((taskConfigObj) => (
         <div key={taskConfigObj.name} className="mt-1 mb-1">
@@ -401,7 +407,7 @@ class ValidateInterface extends React.Component {
                       onChange={() => {
                         this.setState(
                           { ownerMode: !this.state.ownerMode },
-                          this.componentDidMount()
+                          this.componentDidMount(),
                         );
                       }}
                     />
@@ -445,7 +451,7 @@ class ValidateInterface extends React.Component {
                             <Dropdown.Item
                               onClick={() =>
                                 this.updateOwnerValidationDisagreementFilter(
-                                  target
+                                  target,
                                 )
                               }
                               key={index}

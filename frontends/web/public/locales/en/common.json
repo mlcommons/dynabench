@@ -1,0 +1,128 @@
+{
+  "navigation": {
+    "home": "Home",
+    "tasks": "Tasks",
+    "models": "Models",
+    "communities": "Communities",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "account": "Profile",
+    "notifications": "Notifications"
+  },
+  "buttons": {
+    "submit": "Submit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "send": "Send",
+    "finish": "Finish",
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "login": "Login",
+    "signup": "Sign Up",
+    "create": "Create",
+    "learnMore": "Learn more"
+  },
+  "labels": {
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "username": "Username",
+    "description": "Description",
+    "title": "Title",
+    "language": "Language",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "results": "Results",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "error": "An error occurred",
+    "success": "Success",
+    "noResults": "No results found",
+    "confirmDelete": "Are you sure you want to delete this item?",
+    "welcome": "Welcome to Dynabench",
+    "noData": "No data available"
+  },
+  "footer": {
+    "copyright": "© 2023 Dynabench. All rights reserved.",
+    "contact": "Contact",
+    "terms": "Terms of Service",
+    "dataPolicy": "Data Policy",
+    "privacy": "Privacy Policy"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Challenging the Limits of Benchmarking AI",
+      "description": "Collaborate with AI enthusiasts and experts to tackle vital AI challenges. Dynabench lets you create and join AI challenges, enhancing skills and advancing AI together.",
+      "challengesButton": "Challenges",
+      "createChallengeButton": "Create your own challenge"
+    },
+    "stats": {
+      "challenges": "Challenges",
+      "participants": "Participants",
+      "models": "Models",
+      "communities": "Communities"
+    },
+    "sections": {
+      "usedBy": "Used By",
+      "communities": "Communities",
+      "whatCanYouDo": "What can you do with Dynabench?"
+    },
+    "features": {
+      "outsmartModels": {
+        "title": "Outsmart advanced AI models:",
+        "description": "Take on the best in the game by competing against models like BERT, GPT, DALLE, YOLO, and more, and see if you can outperform them in a specific challenge or dataset."
+      },
+      "createChallenges": {
+        "title": "Create cutting-edge challenges",
+        "description": "Push the boundaries of AI by creating your own challenges that address critical issues such as safety, robustness, fairness, adversarial AI, and data-centricity. Get creative and design challenges that truly test the limits of AI."
+      },
+      "shareModels": {
+        "title": "Share your own AI models (Dynalab)",
+        "description": "Submit your own AI models to various challenges and datasets, and get recognized for your innovative approaches in areas such as computer vision, natural language processing, speech recognition, coreset selection and more."
+      },
+      "collaborate": {
+        "title": "Collaborate with peers and experts",
+        "description": "Dynabench offers a unique opportunity to connect with other like-minded individuals and experts in the AI community. You'll be at the forefront of the latest advancements in AI research. Keep your skills sharp and stay ahead of the curve by getting involved in the Dynabench community."
+      }
+    },
+    "communities": {
+      "dynamicalAdversarial": {
+        "title": "Dynamical Adversarial",
+        "description": "The basic idea is that we collect human data dynamically with models in the loop. Humans can be tasked with finding adversarial examples that fool current state-of-the-art models, for example, or models can be cooperative and help humans find interesting examples. This offers two benefits: it allows us to gauge how good our current SOTA methods really are; and it yields data that may be used to further train even stronger SOTA models."
+      },
+      "dataperf": {
+        "title": "Dataperf",
+        "description": "A suite of benchmarks that evaluate the quality of training and test data, and the algorithms for constructing or optimizing such datasets, such as core set selection or labelling error debugging, across a range of common ML tasks such as image classification. We plan to leverage the DataPerf benchmarks through challenges and leaderboards."
+      },
+      "babylm": {
+        "title": "BabyLM",
+        "description": "This shared task challenges community members to train a language model from scratch on the same amount of linguistic data available to a child. Submissions should be implemented in Huggingface's Transformers library and will be evaluated on a shared pipeline. This shared task is co-sponsored by CMCL and CoNLL."
+      },
+      "llm": {
+        "title": "Large Language Model",
+        "description": "The LLM community on our platform is dedicated to creating advanced challenges to evaluate Language Models (LLMs) across various tasks, ensuring their performance and capabilities are thoroughly assessed. We provide a collaborative space for researchers, developers, and enthusiasts to explore and measure the effectiveness of LLMs in specific areas such as bias creation, domain expertise, and more."
+      },
+      "others": {
+        "title": "Others",
+        "description": "Data from multiple modalities, such as images, text, and audio, are frequently encountered in real-world applications. If you have a challenge that doesn't fit within our existing communities, you"
+      }
+    }
+  }
+}

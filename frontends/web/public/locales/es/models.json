@@ -1,0 +1,26 @@
+{
+  "title": "Modelos",
+  "description": "Descripción del modelo",
+  "performance": "Rendimiento",
+  "accuracy": "Precisión",
+  "score": "Puntuación",
+  "rank": "Clasificación",
+  "submitted": "Enviado",
+  "submittedBy": "Enviado por",
+  "submitModel": "Enviar modelo",
+  "modelName": "Nombre del modelo",
+  "modelDescription": "Descripción del modelo",
+  "uploadModel": "Subir modelo",
+  "modelFile": "Archivo del modelo",
+  "leaderboard": "Tabla de clasificación",
+  "results": "Resultados",
+  "details": "Detalles",
+  "download": "Descargar",
+  "evaluate": "Evaluar",
+  "status": {
+    "processing": "Procesando",
+    "completed": "Completado",
+    "failed": "Falló",
+    "pending": "Pendiente"
+  }
+}

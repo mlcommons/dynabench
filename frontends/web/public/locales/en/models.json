@@ -1,0 +1,26 @@
+{
+  "title": "Models",
+  "description": "Model Description",
+  "performance": "Performance",
+  "accuracy": "Accuracy",
+  "score": "Score",
+  "rank": "Rank",
+  "submitted": "Submitted",
+  "submittedBy": "Submitted by",
+  "submitModel": "Submit Model",
+  "modelName": "Model Name",
+  "modelDescription": "Model Description",
+  "uploadModel": "Upload Model",
+  "modelFile": "Model File",
+  "leaderboard": "Leaderboard",
+  "results": "Results",
+  "details": "Details",
+  "download": "Download",
+  "evaluate": "Evaluate",
+  "status": {
+    "processing": "Processing",
+    "completed": "Completed",
+    "failed": "Failed",
+    "pending": "Pending"
+  }
+}

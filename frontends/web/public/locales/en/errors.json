@@ -1,0 +1,32 @@
+{
+  "general": "An error occurred",
+  "network": "Network error",
+  "server": "Server error",
+  "notFound": "Not found",
+  "unauthorized": "Unauthorized",
+  "forbidden": "Access forbidden",
+  "timeout": "Request timeout",
+  "unknown": "Unknown error",
+  "login": {
+    "failed": "Login failed",
+    "invalidCredentials": "Invalid email or password",
+    "accountLocked": "Account is locked",
+    "emailNotVerified": "Email not verified"
+  },
+  "registration": {
+    "failed": "Registration failed",
+    "emailExists": "Email already exists",
+    "usernameExists": "Username already exists"
+  },
+  "upload": {
+    "failed": "Upload failed",
+    "invalidFile": "Invalid file",
+    "sizeTooLarge": "File size too large",
+    "formatNotSupported": "File format not supported"
+  },
+  "submission": {
+    "failed": "Submission failed",
+    "invalidData": "Invalid data provided",
+    "alreadyExists": "Submission already exists"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "create": {
+    "title": "Créer des Exemples",
+    "instruction": "Créer de nouveaux exemples pour cette tâche",
+    "submit": "Soumettre l'exemple",
+    "submitSuccess": "Exemple soumis avec succès!",
+    "submitError": "Erreur lors de la soumission de l'exemple",
+    "validate": "Valider les exemples",
+    "guidelines": "Directives",
+    "context": "Contexte",
+    "input": "Entrée",
+    "output": "Sortie",
+    "annotation": "Annotation",
+    "tooltipCreate": "Cliquez ici pour créer de nouveaux exemples",
+    "tooltipCreateDetail": "Créer de nouveaux exemples où le modèle échoue"
+  },
+  "validate": {
+    "title": "Valider des Exemples",
+    "instruction": "Aider à valider les exemples créés par d'autres utilisateurs",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "correctExample": "Exemple Correct",
+    "incorrectExample": "Exemple Incorrect",
+    "flagAsInappropriate": "Signaler comme Inapproprié",
+    "comments": "Commentaires",
+    "skipExample": "Passer l'Exemple",
+    "tooltipValidate": "Cliquez ici pour voir les exemples créés par d'autres et valider leur exactitude",
+    "tooltipValidateDetail": "Vérifier les exemples où le modèle a pu échouer"
+  },
+  "annotation": {
+    "selectText": "Sélectionnez le texte qui illustre le mieux le préjudice",
+    "whatDoINeedToDo": "Que dois-je faire ?",
+    "howDoesInterfaceWork": "Comment fonctionne l'interface ?",
+    "finishInteraction": "Terminer l'interaction",
+    "textsBeingGenerated": "Les textes sont en cours de génération, soyez patient avec les modèles",
+    "isModelCorrect": "Le modèle est-il correct ?",
+    "submit": "Soumettre",
+    "submitting": "Soumission...",
+    "submissionSuccess": "Annotation soumise avec succès!",
+    "submissionError": "Erreur lors de la soumission de l'annotation",
+    "exampleRetracted": "Exemple retiré - merci",
+    "exampleFlagged": "Exemple signalé - merci"
+  },
+  "interface": {
+    "information": "Information",
+    "send": "Envoyer",
+    "save": "Enregistrer",
+    "finish": "Terminer",
+    "continue": "Continuer",
+    "iUnderstand": "Je comprends"
+  },
+  "messages": {
+    "exampleSubmitted": "Exemple soumis avec succès",
+    "validationComplete": "Validation terminée",
+    "thankYouForExample": "Merci pour votre exemple",
+    "exampleRetracted": "Exemple retiré - merci",
+    "exampleFlagged": "Exemple signalé - merci"
+  },
+  "submitModels": {
+    "title": "Soumettre des Modèles",
+    "tooltip": "Cliquez ici pour télécharger vos modèles pour cette tâche"
+  },
+  "submitPredictions": {
+    "title": "Soumettre des Fichiers de Prédiction",
+    "tooltip": "Cliquez ici pour soumettre vos fichiers de prédiction générés par le modèle"
+  },
+  "submitFiles": {
+    "title": "Soumettre des Fichiers",
+    "tooltip": "Cliquez ici pour soumettre vos fichiers d'entraînement pour déclencher l'entraînement d'un modèle et l'évaluation sur nos jeux de données"
+  },
+  "mlcubeTutorial": {
+    "title": "Tutoriel MLCube",
+    "tooltip": "Cliquez ici pour accéder au tutoriel MLCube pour cette tâche"
+  },
+  "documentation": {
+    "title": "Documentation",
+    "tooltip": "Cliquez ici pour obtenir plus d'informations sur la tâche"
+  },
+  "Leaderboard": "Classement",
+  "Overview": "Aperçu",
+  "Documentation": "Documentation"
+}

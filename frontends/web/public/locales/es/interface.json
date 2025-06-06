@@ -1,0 +1,17 @@
+{
+  "examples_created": "ejemplos creados",
+  "select": "Seleccionar",
+  "select_a": "Seleccionar un",
+  "tag": "etiqueta",
+  "select_tag_and_text": "Seleccione la etiqueta y el texto según la etiqueta",
+  "data_being_prepared": "Los datos se están preparando, por favor espere...",
+  "saving_data": "Guardando datos...",
+  "select_all_text_area": "Seleccionar toda el área de texto",
+  "choose_any_that_apply": "Elija cualquiera que aplique",
+  "loading": "Cargando...",
+  "submit": "Enviar",
+  "skip_and_load_new_text": "Omitir y cargar un nuevo texto",
+  "success": "Éxito",
+  "data_has_been_saved": "Los datos han sido guardados",
+  "language": "Idioma"
+}
