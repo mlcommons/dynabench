@@ -260,7 +260,6 @@ const SelectMultipleTextMultipleTags: FC<
   };
 
   const closeSwal = () => {
-    console.log("closeSwal");
     Swal.close();
   };
 
