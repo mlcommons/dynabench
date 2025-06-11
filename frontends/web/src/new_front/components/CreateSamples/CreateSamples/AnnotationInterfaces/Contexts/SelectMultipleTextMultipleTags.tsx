@@ -246,12 +246,22 @@ const SelectMultipleTextMultipleTags: FC<
         title: "Success",
         text: "The data has been saved",
         icon: "success",
-        showConfirmButton: false,
-        timer: 2000,
+        timer: 1000,
+        willOpen: () => {
+          window.addEventListener("keydown", closeSwal);
+        },
+        willClose: () => {
+          window.removeEventListener("keydown", closeSwal);
+        },
       }).then(() => {
         handleSubmit(null);
       });
     }
+  };
+
+  const closeSwal = () => {
+    console.log("closeSwal");
+    Swal.close();
   };
 
   const handlemultipleSel = (data: any) => {
