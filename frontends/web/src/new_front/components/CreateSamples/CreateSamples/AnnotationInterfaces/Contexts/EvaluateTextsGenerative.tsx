@@ -1,21 +1,22 @@
+import React, { FC, useContext, useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import useFetch from "use-http";
+import Modal from "react-bootstrap/Modal";
+import parse from "html-react-parser";
+import { PacmanLoader } from "react-spinners";
+
 import UserContext from "containers/UserContext";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import Chatbot from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/Chatbot";
 import BasicInput from "new_front/components/Inputs/BasicInput";
 import EvaluateText from "new_front/components/Inputs/EvaluateText";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
+import AnnotationUserInputStrategy from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/UserInput/AnnotationUserInputStrategy";
+import SignContract from "new_front/components/Modals/SignContract";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { ChatHistoryType } from "new_front/types/createSamples/createSamples/utils";
-import React, { FC, useContext, useEffect, useState } from "react";
-import { PacmanLoader } from "react-spinners";
-import Swal from "sweetalert2";
-import useFetch from "use-http";
-import SignContract from "new_front/components/Modals/SignContract";
-import Modal from "react-bootstrap/Modal";
-import RadioButton from "new_front/components/Lists/RadioButton";
-import parse from "html-react-parser";
 
 const EvaluateTextsGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -58,17 +59,6 @@ const EvaluateTextsGenerative: FC<
     CreateInterfaceContext
   );
   const neccessaryFields = ["original_prompt", "category"];
-
-  const handleSaveCategory = async (category: string) => {
-    updateModelInputs({
-      category: category,
-    });
-    updateModelInputs({
-      initial_timestamp: Date.now(),
-    });
-    setShowInput(true);
-    setShowCategory(true);
-  };
 
   const checkIfUserIsSignedInConsent = async () => {
     const signConsent = await post("/task/check_signed_consent", {
@@ -291,6 +281,18 @@ const EvaluateTextsGenerative: FC<
     if (metadataExample) {
       console.log("metadataExample", metadataExample);
     }
+    if (
+      artifactsInput?.user_input &&
+      artifactsInput?.user_input?.field_name_for_the_model in modelInputs &&
+      !("initial_timestamp" in modelInputs) &&
+      !showInput
+    ) {
+      setShowCategory(true);
+      setShowInput(true);
+      updateModelInputs({
+        initial_timestamp: Date.now(),
+      });
+    }
   }, [modelInputs, texts, metadataExample]);
 
   useEffect(() => {
@@ -306,20 +308,10 @@ const EvaluateTextsGenerative: FC<
               <div>
                 {showCategory && (
                   <div>
-                    <AnnotationInstruction
-                      placement="left"
-                      tooltip={artifactsInput.user_input.instruction}
-                    >
-                      <RadioButton
-                        instructions={artifactsInput.user_input.instructions}
-                        options={artifactsInput.user_input.options}
-                        field_name_for_the_model={
-                          artifactsInput.user_input.field_name_for_the_model
-                        }
-                        onInputChange={handleSaveCategory}
-                        disabled={disableTypeOfConversation}
-                      />
-                    </AnnotationInstruction>
+                    <AnnotationUserInputStrategy
+                      config={[artifactsInput.user_input]}
+                      isGenerativeContext={false}
+                    />
                   </div>
                 )}
                 {showInput && (
