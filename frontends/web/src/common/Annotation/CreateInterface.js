@@ -99,7 +99,7 @@ class CreateInterface extends React.Component {
       data: Object.assign(
         {},
         initializeData(this.state.taskConfig.input),
-        JSON.parse(this.state.context.context_json),
+        JSON.parse(this.state.context.context_json)
       ),
     });
   }
@@ -113,7 +113,7 @@ class CreateInterface extends React.Component {
             this.state.task.id,
             this.state.task.cur_round,
             [],
-            this.state.task.context,
+            this.state.task.context
           )
           .then(
             (result) => {
@@ -139,7 +139,7 @@ class CreateInterface extends React.Component {
                   .filter((item) => item.name === obj.name);
                 if (expandedObj.length > 0) {
                   expandedOutput.push(
-                    JSON.parse(JSON.stringify(expandedObj[0])),
+                    JSON.parse(JSON.stringify(expandedObj[0]))
                   );
                 } else {
                   expandedOutput.push(obj);
@@ -171,7 +171,7 @@ class CreateInterface extends React.Component {
                     data: Object.assign(
                       {},
                       initializeData(translatedTaskConfig.input),
-                      JSON.parse(result.context_json),
+                      JSON.parse(result.context_json)
                     ),
                     context: result,
                     content: [],
@@ -187,9 +187,9 @@ class CreateInterface extends React.Component {
                 loading: false,
               });
               console.log(error);
-            },
+            }
           );
-      },
+      }
     );
   }
 
@@ -240,7 +240,7 @@ class CreateInterface extends React.Component {
     output = null,
     endpoint = null,
     metadata = {},
-    callback = () => this.smoothlyAnimateToBottom(),
+    callback = () => this.smoothlyAnimateToBottom()
   ) {
     this.setState(
       {
@@ -266,7 +266,7 @@ class CreateInterface extends React.Component {
               submitDisabled: false,
               refreshDisabled: false,
             },
-            callback,
+            callback
           );
           return;
         }
@@ -284,7 +284,7 @@ class CreateInterface extends React.Component {
             metadata,
             modelWrong,
             null,
-            endpoint,
+            endpoint
           )
           .then(
             (storeExampleResult) => {
@@ -299,7 +299,7 @@ class CreateInterface extends React.Component {
                     [key]: storeExampleResult.id,
                   },
                 },
-                callback,
+                callback
               );
 
               if (!!storeExampleResult.badges) {
@@ -317,9 +317,9 @@ class CreateInterface extends React.Component {
                 submitDisabled: false,
                 refreshDisabled: false,
               });
-            },
+            }
           );
-      },
+      }
     );
   }
 
@@ -386,7 +386,7 @@ class CreateInterface extends React.Component {
                           : modelResponseResult["signature"], // TODO: pre-dynatask models use signed, post-dynatask models use signature. Make this cleaner somehow?
                         modelWrongResult.model_wrong,
                         output,
-                        url,
+                        url
                       ),
                     (error) => {
                       console.log(error);
@@ -395,7 +395,7 @@ class CreateInterface extends React.Component {
                         refreshDisabled: false,
                         fetchPredictionError: true,
                       });
-                    },
+                    }
                   )
                   .then(() => this.smoothlyAnimateToBottom());
               }
@@ -406,17 +406,17 @@ class CreateInterface extends React.Component {
                 this.props.history.push(
                   "/login?msg=" +
                     encodeURIComponent(
-                      "You need to login to use this feature.",
+                      "You need to login to use this feature."
                     ) +
                     "&src=" +
-                    encodeURIComponent(`/tasks/${this.state.taskCode}/create`),
+                    encodeURIComponent(`/tasks/${this.state.taskCode}/create`)
                 );
               }
               this.setState({
                 submitDisabled: false,
                 refreshDisabled: false,
               });
-            },
+            }
           );
         });
     });
@@ -428,10 +428,10 @@ class CreateInterface extends React.Component {
         this.props.history.push(
           "/login?msg=" +
             encodeURIComponent(
-              "Please sign up or log in so that you can get credit for your generated examples.",
+              "Please sign up or log in so that you can get credit for your generated examples."
             ) +
             "&src=" +
-            encodeURIComponent(`/tasks/${this.state.taskCode}/create`),
+            encodeURIComponent(`/tasks/${this.state.taskCode}/create`)
         );
       } else {
         this.getNewContext();
@@ -470,7 +470,7 @@ class CreateInterface extends React.Component {
         },
         (error) => {
           console.log(error);
-        },
+        }
       );
     }
 
@@ -485,12 +485,12 @@ class CreateInterface extends React.Component {
                 this.props.history.replace({
                   pathname: this.props.location.pathname.replace(
                     `/tasks/${params.taskCode}`,
-                    `/tasks/${this.state.taskCode}`,
+                    `/tasks/${this.state.taskCode}`
                   ),
                   search: this.props.location.search,
                 });
               }
-            },
+            }
           );
         },
         (error) => {
@@ -498,7 +498,7 @@ class CreateInterface extends React.Component {
           if (error.status_code === 404 || error.status_code === 405) {
             this.props.history.push("/");
           }
-        },
+        }
       );
     });
   }
@@ -507,7 +507,7 @@ class CreateInterface extends React.Component {
     // Force re-translation of the YAML config from the original untranslated version
     if (this.state.originalTaskConfig) {
       const translatedTaskConfig = translateYamlConfig(
-        this.state.originalTaskConfig,
+        this.state.originalTaskConfig
       );
       this.setState({ taskConfig: translatedTaskConfig });
     }
@@ -553,7 +553,7 @@ class CreateInterface extends React.Component {
     const goalMessageInterface = this.state.taskConfig?.input
       .filter(
         (taskConfigObj) =>
-          taskConfigObj.type === "multiclass" && taskConfigObj.as_goal_message,
+          taskConfigObj.type === "multiclass" && taskConfigObj.as_goal_message
       )
       .map((taskConfigObj) => (
         <div key={taskConfigObj.name} className="mt-1 mb-1">
@@ -579,10 +579,10 @@ class CreateInterface extends React.Component {
     // to remove the context string from view and put the context_string_selection
     // in its place
     const contextStringSelectionGroup = this.state.taskConfig?.input.filter(
-      (taskConfigObj) => taskConfigObj.type === "context_string_selection",
+      (taskConfigObj) => taskConfigObj.type === "context_string_selection"
     );
     const selectableContexts = contextStringSelectionGroup?.map(
-      (taskConfigObj) => taskConfigObj.reference_name,
+      (taskConfigObj) => taskConfigObj.reference_name
     );
     const tooTallForResponseInfoPlaceholder = this.state.taskConfig?.context
       .concat(this.state.taskConfig?.input)
@@ -591,7 +591,7 @@ class CreateInterface extends React.Component {
     const contextInterface = this.state.taskConfig?.context
       .concat(contextStringSelectionGroup)
       .filter(
-        (taskConfigObj) => !selectableContexts.includes(taskConfigObj.name),
+        (taskConfigObj) => !selectableContexts.includes(taskConfigObj.name)
       )
       .map((taskConfigObj) => (
         <div key={taskConfigObj.name} className="mt-1 mb-1">
@@ -621,7 +621,7 @@ class CreateInterface extends React.Component {
           taskConfigObj.type !== "context_string_selection" &&
           !(
             taskConfigObj.type === "multiclass" && taskConfigObj.as_goal_message
-          ),
+          )
       )
       .map((taskConfigObj) => (
         <div key={taskConfigObj.name} className="mt-1 mb-1">
