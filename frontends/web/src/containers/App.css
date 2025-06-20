@@ -157,6 +157,12 @@
     padding: 0;
 }
 
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: #ccebd4;
+    color: white;
+}
+
 .navbar-dark .dropdown-item:focus,
 .navbar-dark .dropdown-item:hover,
 .sidebar-wrapper .nav-link:focus,
@@ -164,12 +170,6 @@
 .sidebar-wrapper .nav-link.active {
     background-color: rgba(18, 131, 216, 0.1);
     color: #344854;
-}
-
-.dropdown-item.active,
-.dropdown-item:active {
-    background-color: #ccebd4;
-    color: white;
 }
 
 .navbar-dark .navbar-nav .nav-link:focus {

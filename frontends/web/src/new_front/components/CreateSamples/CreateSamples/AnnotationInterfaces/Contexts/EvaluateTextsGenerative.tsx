@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import useFetch from "use-http";
 import Modal from "react-bootstrap/Modal";
 import parse from "html-react-parser";
+import { useTranslation } from "react-i18next";
 import { PacmanLoader } from "react-spinners";
 
 import UserContext from "containers/UserContext";
