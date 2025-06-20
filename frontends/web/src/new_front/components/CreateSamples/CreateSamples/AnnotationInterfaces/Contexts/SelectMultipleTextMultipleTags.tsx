@@ -260,12 +260,21 @@ const SelectMultipleTextMultipleTags: FC<
         title: t("interface:success"),
         text: t("interface:data_has_been_saved"),
         icon: "success",
-        showConfirmButton: false,
-        timer: 2000,
+        timer: 1000,
+        willOpen: () => {
+          window.addEventListener("keydown", closeSwal);
+        },
+        willClose: () => {
+          window.removeEventListener("keydown", closeSwal);
+        },
       }).then(() => {
         handleSubmit(null);
       });
     }
+  };
+
+  const closeSwal = () => {
+    Swal.close();
   };
 
   const handlemultipleSel = (data: any) => {
@@ -395,30 +404,34 @@ const SelectMultipleTextMultipleTags: FC<
             </div>
             <div className="my-3 gap-4 grid grid-cols-3 sticky top-4">
               <div className="col-span-2">
-                <DropdownSearch
-                  options={localTags}
-                  value={
-                    tagSelection?.value ||
-                    `${t("interface:select_a")} ${translateTagName(
-                      field_names_for_the_model?.tag_name_display,
-                    )}`
-                  }
-                  onChange={setTagSelection}
-                />
+                <span translate="no">
+                  <DropdownSearch
+                    options={localTags}
+                    value={
+                      tagSelection?.value ||
+                      `Select a ${
+                        field_names_for_the_model?.tag_name_for_display || "tag"
+                      }`
+                    }
+                    onChange={setTagSelection}
+                  />
+                </span>
               </div>
             </div>
             <div dir="auto" className={`unicode-text ${rtl ? "rtl" : "ltf"}`}>
-              <TextAnnotator
-                style={{ whiteSpace: "pre-line" }}
-                content={text}
-                value={selectionInfo}
-                onChange={(value) => handleChange(value)}
-                getSpan={(span) => ({
-                  ...span,
-                  tag: tagSelection.back_label,
-                  color: tagColors[tagSelection.back_label],
-                })}
-              />
+              <span translate="no">
+                <TextAnnotator
+                  style={{ whiteSpace: "pre-line" }}
+                  content={text}
+                  value={selectionInfo}
+                  onChange={(value) => handleChange(value)}
+                  getSpan={(span) => ({
+                    ...span,
+                    tag: tagSelection.back_label,
+                    color: tagColors[tagSelection.back_label],
+                  })}
+                />
+              </span>
             </div>
             <div className="mt-3">
               <MultiSelect
