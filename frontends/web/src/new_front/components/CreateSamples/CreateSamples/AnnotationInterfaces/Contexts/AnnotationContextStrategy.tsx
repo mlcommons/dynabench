@@ -61,7 +61,7 @@ const AnnotationContextStrategy: FC<Props & ContextAnnotationFactoryType> = ({
       );
     };
     getView();
-  }, [hidden]);
+  }, [hidden, config]);
 
   return (
     <Suspense fallback={<BarLoader color="#ccebd4" />}>{goalRender}</Suspense>

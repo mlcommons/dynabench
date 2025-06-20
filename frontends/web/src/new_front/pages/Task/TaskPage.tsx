@@ -16,6 +16,7 @@ import { TaskInfoType } from "new_front/types/task/taskInfo";
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { PacmanLoader } from "react-spinners";
+import { useTranslation } from "react-i18next";
 import useFetch from "use-http";
 import Leaderboard from "new_front/pages/Task/LeaderBoard";
 import OverviewTask from "../../components/TaskPage/OverviewTask";
@@ -24,6 +25,7 @@ import UserContext from "containers/UserContext";
 import MultipleLeaderboard from "new_front/components/Tables/Leaderboard/MultipleLeaderboard";
 
 const TaskPage = () => {
+  const { t } = useTranslation();
   const [task, setTask] = useState<TaskInfoType>();
   const [amountOfModels, setAmountOfModels] = useState<number>(0);
   const [maxScore, setMaxScore] = useState<number>(0);
@@ -148,7 +150,7 @@ const TaskPage = () => {
                       task.show_leaderboard !== 0) && (
                       <TabOption
                         optionTab={[45, 60].includes(task.id) ? 2 : 1}
-                        tabName="Leaderboard"
+                        tabName={t("tasks:Leaderboard")}
                         openTab={openTab}
                         setOpenTab={setOpenTab}
                       />
@@ -156,7 +158,7 @@ const TaskPage = () => {
                     {Object.entries(taskInstructions).length !== 0 && (
                       <TabOption
                         optionTab={[45, 60].includes(task.id) ? 1 : 2}
-                        tabName="Overview"
+                        tabName={t("tasks:Overview")}
                         openTab={openTab}
                         setOpenTab={setOpenTab}
                       />
@@ -164,7 +166,7 @@ const TaskPage = () => {
                     {task.documentation_url && (
                       <TabOption
                         optionTab={3}
-                        tabName="Documentation"
+                        tabName={t("tasks:Documentation")}
                         openTab={openTab}
                         documentationUrl={task.documentation_url}
                       />

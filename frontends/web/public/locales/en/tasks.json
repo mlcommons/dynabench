@@ -1,0 +1,78 @@
+{
+  "create": {
+    "title": "Create Examples",
+    "instruction": "Create new examples for this task",
+    "submit": "Submit Example",
+    "validate": "Validate Examples",
+    "guidelines": "Guidelines",
+    "context": "Context",
+    "input": "Input",
+    "output": "Output",
+    "annotation": "Annotation",
+    "tooltipCreate": "Click here to create new examples",
+    "tooltipCreateDetail": "Create new examples where the model fails"
+  },
+  "validate": {
+    "title": "Validate Examples",
+    "instruction": "Help validate examples created by other users",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "flagAsInappropriate": "Flag as Inappropriate",
+    "comments": "Comments",
+    "skipExample": "Skip Example",
+    "tooltipValidate": "Click here to see examples created by others, and validate their correctness",
+    "tooltipValidateDetail": "Verify examples where the model may have failed"
+  },
+  "annotation": {
+    "selectText": "Select the text that best exemplifies the harm",
+    "whatDoINeedToDo": "What do I need to do?",
+    "howDoesInterfaceWork": "How does the interface work?",
+    "finishInteraction": "Finish Interaction",
+    "textsBeingGenerated": "Texts are being generated, bear with the models",
+    "isModelCorrect": "Is the model correct?"
+  },
+  "interface": {
+    "information": "Information",
+    "send": "Send",
+    "save": "Save",
+    "finish": "Finish",
+    "continue": "Continue",
+    "iUnderstand": "I understand"
+  },
+  "messages": {
+    "exampleSubmitted": "Example submitted successfully",
+    "validationComplete": "Validation completed",
+    "thankYouForExample": "Thank you for your example",
+    "exampleRetracted": "Example retracted - thanks",
+    "exampleFlagged": "Example flagged - thanks"
+  },
+  "submitModels": {
+    "title": "Submit Models",
+    "tooltip": "Click here to upload your models for this task"
+  },
+  "submitPredictions": {
+    "title": "Submit Prediction Files",
+    "tooltip": "Click here to submit your model-generated prediction files"
+  },
+  "submitFiles": {
+    "title": "Submit Files",
+    "tooltip": "Click here to submit your train files to trigger the training of a model and evaluation on our datasets"
+  },
+  "mlcubeTutorial": {
+    "title": "MLCube Tutorial",
+    "tooltip": "Click here to access the MLCube tutorial for this task"
+  },
+  "documentation": {
+    "title": "Documentation",
+    "tooltip": "Click here to get more information about the task"
+  },
+  "Leaderboard": "Leaderboard",
+  "Overview": "Overview",
+  "Documentation": "Documentation",
+  "information": {
+    "rounds": "Rounds",
+    "examples": "Examples",
+    "topScore": "Top Score",
+    "submissions": "Submissions"
+  }
+}

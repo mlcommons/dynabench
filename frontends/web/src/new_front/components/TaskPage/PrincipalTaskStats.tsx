@@ -1,7 +1,8 @@
 import React, { FC, useEffect, useState } from "react";
-import DropDownStats from "new_front/components/Inputs/DropDownStats";
-
 import useFetch from "use-http";
+import { useTranslation } from "react-i18next";
+
+import DropDownStats from "new_front/components/Inputs/DropDownStats";
 
 type PrincipalTaskStatsProps = {
   totalCollected?: any;
@@ -23,9 +24,11 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
 
   const { get, response } = useFetch();
 
+  const { t } = useTranslation();
+
   const getAmountOfExamplesPerRound = async () => {
     const amountOfExamples = await get(
-      `/round/get_examples_collected_per_round/${selectedRound}-${taskId}`,
+      `/round/get_examples_collected_per_round/${selectedRound}-${taskId}`
     );
     if (response.ok) {
       setTotalExamples(amountOfExamples);
@@ -44,7 +47,7 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
             <h6 className="text-3xl font-bold text-white">{selectedRound}</h6>
             <DropDownStats
               options={Array.from({ length: totalRounds }, (_, i) => i + 1)}
-              placeholder="Rounds"
+              placeholder={t("tasks:information.rounds")}
               onChange={setSelectedRound}
             />
           </div>
@@ -53,7 +56,7 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
           <div className="text-center ">
             <h6 className="text-3xl font-bold text-white">{totalExamples}</h6>
             <p className="text-sm font-medium tracking-widest text-white uppercase ">
-              Examples
+              {t("tasks:information.examples")}
             </p>
           </div>
         )}
@@ -65,7 +68,7 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
               {maxScore!.toFixed(2)}
             </h6>
             <p className="text-sm font-medium tracking-widest text-white uppercase ">
-              Top score
+              {t("tasks:information.topScore")}
             </p>
           </div>
         )}
@@ -73,7 +76,7 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
           <div className="text-center ">
             <h6 className="text-3xl font-bold text-white">{amountOfModels}</h6>
             <p className="text-sm font-medium tracking-widest text-white uppercase ">
-              Submissions
+              {t("tasks:information.submissions")}
             </p>
           </div>
         )}

@@ -1,0 +1,60 @@
+{
+  "placeholder": {
+    "enter_a_statement": "Enter a statement",
+    "enter_statement": "Enter statement",
+    "enter_an_statement": "Enter an statement",
+    "enter_response": "Enter response...",
+    "enter_context": "Enter context...",
+    "enter_source_language": "Enter source language...",
+    "enter_target_language": "Enter target language...",
+    "enter_source_text": "Enter source text...",
+    "enter_target_text": "Enter target text",
+    "explain_why_your_example_is_correct": "Explain why your example is correct...",
+    "explain_why_you_thought_the_model_would_make_a_mist": "Explain why you thought the model would make a mistake...",
+    "explain_why_you_think_the_model_made_a_mistake": "Explain why you think the model made a mistake...",
+    "enter_corrected_label": "Enter corrected label",
+    "explain_why_your_proposed_target_is_correct": "Explain why your proposed target is correct...",
+    "enter_the_reason_for_flagging": "Enter the reason for flagging...",
+    "explain_why_the_example_is_correct": "Explain why the example is correct...",
+    "enter_what_you_think_was_done_to_try_to_trick_the": "Enter what you think was done to try to trick the model...",
+    "select_a_language": "Select a language"
+  },
+  "display_name": {
+    "example_explanation": "example explanation",
+    "model_explanation": "model explanation"
+  },
+  "content_warning": {
+    "this_is_sensitive_content_if_you_do_not_want_to_s": "This is sensitive content! If you do not want to see any hateful examples, please switch to another task.",
+    "this_involves_sensitive_content_if_you_do_not_wan": "This involves sensitive content! If you do not want to see any hateful examples, please switch to another task."
+  },
+  "label": {
+    "negative": "negative",
+    "positive": "positive",
+    "neutral": "neutral",
+    "hateful": "hateful",
+    "not_hateful": "not-hateful",
+    "not_counterspeech": "not_counterspeech",
+    "counterspeech": "counterspeech",
+    "other": "other",
+    "counter_speech": "counter_speech",
+    "not_counter_speech": "not_counter_speech",
+    "entailed": "entailed"
+  },
+  "goal_message": {
+    "label_the_text_with_the_languages_you_think_it_is": "Label the text with the languages you think it is written in",
+    "label_the_text_with_the_languages_you_think_it_is_": "Label the text with the languages you think it is written in"
+  },
+  "general": {
+    "please_select_a_language_you_are_proficient_in": "Please select a language you are proficient in"
+  },
+  "creation_samples_title": {
+    "label_the_text_with_the_languages_you_think_it_is": "Label the text with the languages you think it is written in",
+    "label_the_text_with_the_languages_you_think_it_is_": "Label the text with the languages you think it is written in"
+  },
+  "preselection": {
+    "please_select_a_language_you_are_proficient_in": "Please select a language you are proficient in"
+  },
+  "tag_name": {
+    "language": "language"
+  }
+}

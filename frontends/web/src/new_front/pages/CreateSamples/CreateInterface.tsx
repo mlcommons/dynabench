@@ -24,12 +24,16 @@ import {
 } from "new_front/context/CreateInterface/Context";
 import Swal from "sweetalert2";
 import { useLocation } from "react-router-dom";
+import { translateYamlConfig } from "utils/yamlTranslation";
+import { useTranslation } from "react-i18next";
 
 const CreateInterface = () => {
   const [modelOutput, setModelOutput] = useState<ModelOutputType>();
   const [modelInTheLoop, setModelInTheLoop] = useState<string>("");
   const [partialSampleId, setPartialSampleId] = useState(0);
   const [taskConfiguration, setTaskConfiguration] =
+    useState<ConfigurationTask>();
+  const [originalTaskConfiguration, setOriginalTaskConfiguration] =
     useState<ConfigurationTask>();
   const [taskContextInfo, setTaskContextInfo] = useState<InfoContextTask>();
   const [taskInfo, setTaskInfo] = useState<TaskInfoType>();
@@ -46,6 +50,7 @@ const CreateInterface = () => {
   );
   const history = useHistory();
   const location = useLocation();
+  const { i18n } = useTranslation();
 
   // Parse the query parameters
   const queryParams = new URLSearchParams(location.search);
@@ -84,12 +89,19 @@ const CreateInterface = () => {
       get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
     ]);
     if (response.ok) {
-      setTaskConfiguration(taskConfiguration);
+      // Store the original untranslated configuration
+      setOriginalTaskConfiguration(taskConfiguration as ConfigurationTask);
+      // Apply translations and store the translated configuration
+      const translatedTaskConfiguration = translateYamlConfig(
+        taskConfiguration
+      ) as ConfigurationTask;
+      setTaskConfiguration(translatedTaskConfiguration);
       setModelInTheLoop(modelInTheLoop);
       setTaskInfo(taskInfo);
       setTaskId(taskId);
       setIsGenerativeContext(
-        taskConfiguration.context.generative_context?.is_generative
+        (translatedTaskConfiguration.context as any)?.generative_context
+          ?.is_generative || false
       );
     }
   };
@@ -156,6 +168,16 @@ const CreateInterface = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskContextInfo?.real_round_id]);
+
+  // Handle language changes - re-translate the configuration when language changes
+  useEffect(() => {
+    if (originalTaskConfiguration) {
+      const translatedTaskConfiguration = translateYamlConfig(
+        originalTaskConfiguration
+      ) as ConfigurationTask;
+      setTaskConfiguration(translatedTaskConfiguration);
+    }
+  }, [i18n.language, originalTaskConfiguration]);
 
   return (
     <>

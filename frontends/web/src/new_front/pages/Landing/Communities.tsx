@@ -6,8 +6,11 @@ import { ReactComponent as Other } from "new_front/assets/other.svg";
 import { ReactComponent as LLM } from "new_front/assets/llm.svg";
 import { ReactComponent as Baby } from "new_front/assets/baby.svg";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Communities = () => {
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="container mx-auto pt-4">
@@ -21,7 +24,7 @@ const Communities = () => {
             initial="initial"
             animate="animate"
           >
-            Communities
+            {t("common:homepage.sections.communities")}
           </motion.h2>
         </a>
 
@@ -32,24 +35,20 @@ const Communities = () => {
               href="/dadc"
             >
               <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
-                Dynamical Adversarial
+                {t("common:homepage.communities.dynamicalAdversarial.title")}
               </h3>
             </a>
             <p className="mb-8 text-lg text-gray-600">
-              The basic idea is that we collect human data dynamically with
-              models in the loop. Humans can be tasked with finding adversarial
-              examples that fool current state-of-the-art models, for example,
-              or models can be cooperative and help humans find interesting
-              examples. This offers two benefits: it allows us to gauge how good
-              our current SOTA methods really are; and it yields data that may
-              be used to further train even stronger SOTA models.
+              {t(
+                "common:homepage.communities.dynamicalAdversarial.description",
+              )}
             </p>
             <Button
               className="p-2 text-lg font-semibold border-0 rounded-full bg-primary-color"
               as={Link}
               to="/dadc"
             >
-              Learn more
+              {t("common:buttons.learnMore")}
             </Button>
           </div>
           <div className="w-full p-6 sm:w-1/2">
@@ -89,23 +88,18 @@ const Communities = () => {
                 href="/dataperf"
               >
                 <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
-                  Dataperf
+                  {t("common:homepage.communities.dataperf.title")}
                 </h3>
               </a>
               <p className="mb-8 text-lg text-gray-600">
-                A suite of benchmarks that evaluate the quality of training and
-                test data, and the algorithms for constructing or optimizing
-                such datasets, such as core set selection or labelling error
-                debugging, across a range of common ML tasks such as image
-                classification. We plan to leverage the DataPerf benchmarks
-                through challenges and leaderboards.
+                {t("common:homepage.communities.dataperf.description")}
               </p>
               <Button
                 className="p-2 text-lg font-semibold border-0 rounded-full bg-primary-color"
                 as={Link}
                 to="/dataperf"
               >
-                Learn more
+                {t("common:buttons.learnMore")}
               </Button>
             </div>
           </div>
@@ -118,22 +112,18 @@ const Communities = () => {
               href="/babylm"
             >
               <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
-                BabyLM
+                {t("common:homepage.communities.babylm.title")}
               </h3>
             </a>
             <p className="mb-8 text-lg text-gray-600">
-              This shared task challenges community members to train a language
-              model from scratch on the same amount of linguistic data available
-              to a child. Submissions should be implemented in Huggingface's
-              Transformers library and will be evaluated on a shared pipeline.
-              This shared task is co-sponsored by CMCL and CoNLL.
+              {t("common:homepage.communities.babylm.description")}
             </p>
             <Button
               className="p-2 text-lg font-semibold border-0 rounded-full bg-primary-color"
               as={Link}
               to="/babylm"
             >
-              Learn more
+              {t("common:buttons.learnMore")}
             </Button>
           </div>
           <div className="w-full p-6 sm:w-1/2">
@@ -162,24 +152,18 @@ const Communities = () => {
                 href="/llms"
               >
                 <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
-                  Large Language Model
+                  {t("common:homepage.communities.llm.title")}
                 </h3>
               </a>
               <p className="mb-8 text-lg text-gray-600">
-                The LLM community on our platform is dedicated to creating
-                advanced challenges to evaluate Language Models (LLMs) across
-                various tasks, ensuring their performance and capabilities are
-                thoroughly assessed. We provide a collaborative space for
-                researchers, developers, and enthusiasts to explore and measure
-                the effectiveness of LLMs in specific areas such as bias
-                creation, domain expertise, and more.
+                {t("common:homepage.communities.llm.description")}
               </p>
               <Button
                 className="p-2 text-lg font-semibold border-0 rounded-full bg-primary-color"
                 as={Link}
                 to="/dataperf"
               >
-                Learn more
+                {t("common:buttons.learnMore")}
               </Button>
             </div>
           </div>
@@ -191,21 +175,18 @@ const Communities = () => {
               href="/others_tasks"
             >
               <h3 className="mb-3 text-3xl font-bold leading-none text-letter-color">
-                Others
+                {t("common:homepage.communities.others.title")}
               </h3>
             </a>
             <p className="mb-8 text-lg text-gray-600">
-              Data from multiple modalities, such as images, text, and audio,
-              are frequently encountered in real-world applications. If you have
-              a challenge that doesn't fit within our existing communities, you
-              are welcome to propose a new community or submit your challenge.
+              {t("common:homepage.communities.others.description")}
             </p>
             <Button
               className="p-2 text-lg font-semibold border-0 rounded-full bg-primary-color"
               as={Link}
               to="/others_tasks"
             >
-              Learn more
+              {t("common:buttons.learnMore")}
             </Button>
           </div>
           <div className="w-full p-6 sm:w-1/2">

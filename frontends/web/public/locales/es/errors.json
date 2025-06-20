@@ -1,0 +1,32 @@
+{
+  "general": "Ocurrió un error",
+  "network": "Error de red",
+  "server": "Error del servidor",
+  "notFound": "No encontrado",
+  "unauthorized": "No autorizado",
+  "forbidden": "Acceso prohibido",
+  "timeout": "Tiempo de espera agotado",
+  "unknown": "Error desconocido",
+  "login": {
+    "failed": "Error al iniciar sesión",
+    "invalidCredentials": "Correo o contraseña inválidos",
+    "accountLocked": "La cuenta está bloqueada",
+    "emailNotVerified": "Correo no verificado"
+  },
+  "registration": {
+    "failed": "Error en el registro",
+    "emailExists": "El correo ya existe",
+    "usernameExists": "El nombre de usuario ya existe"
+  },
+  "upload": {
+    "failed": "Error en la subida",
+    "invalidFile": "Archivo inválido",
+    "sizeTooLarge": "El tamaño del archivo es demasiado grande",
+    "formatNotSupported": "Formato de archivo no soportado"
+  },
+  "submission": {
+    "failed": "Error en el envío",
+    "invalidData": "Datos inválidos proporcionados",
+    "alreadyExists": "El envío ya existe"
+  }
+}

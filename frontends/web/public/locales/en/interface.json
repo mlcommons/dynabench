@@ -1,0 +1,16 @@
+{
+  "examples_created": "examples created",
+  "select": "Select",
+  "select_a": "Select a",
+  "tag": "tag",
+  "select_tag_and_text": "Select the tag and the text according to the tag",
+  "data_being_prepared": "Data is being prepared, please wait...",
+  "saving_data": "Saving data...",
+  "select_all_text_area": "Select all text area",
+  "choose_any_that_apply": "Choose any that apply",
+  "loading": "Loading...",
+  "submit": "Submit",
+  "skip_and_load_new_text": "Skip and load a new text",
+  "success": "Success",
+  "data_has_been_saved": "The data has been saved"
+}

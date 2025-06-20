@@ -1,11 +1,14 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const Features = () => {
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="pb-32">
         <h2 className="w-full mb-20 text-5xl font-bold leading-tight text-center text-letter-color">
-          What can you do with Dynabench?
+          {t("common:homepage.sections.whatCanYouDo")}
         </h2>
         <div className="grid grid-cols-1 md:gap-16 md:grid-cols-2">
           <div className="flex mb-12">
@@ -45,12 +48,10 @@ const Features = () => {
             </div>
             <div className="ml-4 grow">
               <p className="mb-1 text-xl font-bold text-letter-color">
-                Outsmart advanced AI models:
+                {t("common:homepage.features.outsmartModels.title")}
               </p>
               <p className="text-lg text-letter-color">
-                Take on the best in the game by competing against models like
-                BERT, GPT, DALLE, YOLO, and more, and see if you can outperform
-                them in a specific challenge or dataset.
+                {t("common:homepage.features.outsmartModels.description")}
               </p>
             </div>
           </div>
@@ -72,13 +73,10 @@ const Features = () => {
             </div>
             <div className="ml-4 grow">
               <p className="mb-1 text-xl font-bold text-letter-color">
-                Create cutting-edge challenges
+                {t("common:homepage.features.createChallenges.title")}
               </p>
               <p className="text-lg text-letter-color">
-                Push the boundaries of AI by creating your own challenges that
-                address critical issues such as safety, robustness, fairness,
-                adversarial AI, and data-centricity. Get creative and design
-                challenges that truly test the limits of AI.
+                {t("common:homepage.features.createChallenges.description")}
               </p>
             </div>
           </div>
@@ -117,13 +115,10 @@ const Features = () => {
             </div>
             <div className="ml-4 grow">
               <p className="mb-1 text-xl font-bold text-letter-color">
-                Share your own AI models (Dynalab){" "}
+                {t("common:homepage.features.shareModels.title")}
               </p>
               <p className="text-lg text-letter-color">
-                Submit your own AI models to various challenges and datasets,
-                and get recognized for your innovative approaches in areas such
-                as computer vision, natural language processing, speech
-                recognition, coreset selection and more.
+                {t("common:homepage.features.shareModels.description")}
               </p>
             </div>
           </div>
@@ -145,14 +140,10 @@ const Features = () => {
             </div>
             <div className="ml-4 grow">
               <p className="mb-1 text-xl font-bold text-letter-color">
-                Collaborate with peers and experts
+                {t("common:homepage.features.collaborate.title")}
               </p>
               <p className="text-lg text-letter-color">
-                Dynabench offers a unique opportunity to connect with other
-                like-minded individuals and experts in the AI community. You'll
-                be at the forefront of the latest advancements in AI research.
-                Keep your skills sharp and stay ahead of the curve by getting
-                involved in the Dynabench community.
+                {t("common:homepage.features.collaborate.description")}
               </p>
             </div>
           </div>

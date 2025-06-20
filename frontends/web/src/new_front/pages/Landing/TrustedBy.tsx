@@ -5,12 +5,15 @@ import {
   companies,
 } from "new_front/utils/constants";
 import "react-multi-carousel/lib/styles.css";
+import { useTranslation } from "react-i18next";
 
 const TrustedBy = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="container pt-4">
       <h2 className="w-full my-2 text-5xl font-bold leading-tight text-center text-letter-color">
-        Used By
+        {t("common:homepage.sections.usedBy")}
       </h2>
       <div className="grid content-center grid-cols-1 pt-8 jitems-center">
         <Carousel

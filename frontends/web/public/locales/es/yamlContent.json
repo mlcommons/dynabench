@@ -1,0 +1,60 @@
+{
+  "placeholder": {
+    "enter_a_statement": "Ingrese una declaración",
+    "enter_statement": "Ingrese declaración",
+    "enter_an_statement": "Ingrese una declaración",
+    "enter_response": "Ingrese respuesta...",
+    "enter_context": "Ingrese contexto...",
+    "enter_source_language": "Ingrese idioma de origen...",
+    "enter_target_language": "Ingrese idioma de destino...",
+    "enter_source_text": "Ingrese texto de origen...",
+    "enter_target_text": "Ingrese texto de destino",
+    "explain_why_your_example_is_correct": "Explique por qué su ejemplo es correcto...",
+    "explain_why_you_thought_the_model_would_make_a_mist": "Explique por qué pensó que el modelo cometería un error...",
+    "explain_why_you_think_the_model_made_a_mistake": "Explique por qué cree que el modelo cometió un error...",
+    "enter_corrected_label": "Ingrese etiqueta corregida",
+    "explain_why_your_proposed_target_is_correct": "Explique por qué su objetivo propuesto es correcto...",
+    "enter_the_reason_for_flagging": "Ingrese la razón para marcar...",
+    "explain_why_the_example_is_correct": "Explique por qué el ejemplo es correcto...",
+    "enter_what_you_think_was_done_to_try_to_trick_the": "Ingrese lo que cree que se hizo para intentar engañar al modelo...",
+    "select_a_language": "Seleccione un idioma"
+  },
+  "display_name": {
+    "example_explanation": "explicación del ejemplo",
+    "model_explanation": "explicación del modelo"
+  },
+  "content_warning": {
+    "this_is_sensitive_content_if_you_do_not_want_to_s": "¡Este contenido es sensible! Si no desea ver ejemplos de odio, cambie a otra tarea.",
+    "this_involves_sensitive_content_if_you_do_not_wan": "¡Esto involucra contenido sensible! Si no desea ver ejemplos de odio, cambie a otra tarea."
+  },
+  "label": {
+    "negative": "negativo",
+    "positive": "positivo",
+    "neutral": "neutral",
+    "hateful": "odioso",
+    "not_hateful": "no-odioso",
+    "not_counterspeech": "no_contradiscurso",
+    "counterspeech": "contradiscurso",
+    "other": "otro",
+    "counter_speech": "contradiscurso",
+    "not_counter_speech": "no_contradiscurso",
+    "entailed": "implicado"
+  },
+  "goal_message": {
+    "label_the_text_with_the_languages_you_think_it_is": "Etiquete el texto con los idiomas en los que cree que está escrito",
+    "label_the_text_with_the_languages_you_think_it_is_": "Etiquete el texto con los idiomas en los que cree que está escrito"
+  },
+  "general": {
+    "please_select_a_language_you_are_proficient_in": "Por favor seleccione un idioma en el que sea competente"
+  },
+  "creation_samples_title": {
+    "label_the_text_with_the_languages_you_think_it_is": "Etiquete el texto con los idiomas en los que cree que está escrito",
+    "label_the_text_with_the_languages_you_think_it_is_": "Etiquete el texto con los idiomas en los que cree que está escrito"
+  },
+  "preselection": {
+    "please_select_a_language_you_are_proficient_in": "Por favor seleccione un idioma en el que sea competente"
+  },
+  "tag_name": {
+    "language": "idioma"
+  }
+}

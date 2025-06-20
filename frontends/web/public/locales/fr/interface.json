@@ -1,0 +1,16 @@
+{
+  "examples_created": "exemples créés",
+  "select": "Sélectionner",
+  "select_a": "Sélectionner un",
+  "tag": "étiquette",
+  "select_tag_and_text": "Sélectionnez l'étiquette et le texte selon l'étiquette",
+  "data_being_prepared": "Les données sont en cours de préparation, veuillez patienter...",
+  "saving_data": "Sauvegarde des données...",
+  "select_all_text_area": "Sélectionner toute la zone de texte",
+  "choose_any_that_apply": "Choisissez tout ce qui s'applique",
+  "loading": "Chargement...",
+  "submit": "Soumettre",
+  "skip_and_load_new_text": "Ignorer et charger un nouveau texte",
+  "success": "Succès",
+  "data_has_been_saved": "Les données ont été sauvegardées"
+}

@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import useFetch from "use-http";
 import Modal from "react-bootstrap/Modal";
 import parse from "html-react-parser";
+import { useTranslation } from "react-i18next";
 import { PacmanLoader } from "react-spinners";
 
 import UserContext from "containers/UserContext";
@@ -59,6 +60,7 @@ const EvaluateTextsGenerative: FC<
     CreateInterfaceContext
   );
   const neccessaryFields = ["original_prompt", "category"];
+  const { t } = useTranslation();
 
   const checkIfUserIsSignedInConsent = async () => {
     const signConsent = await post("/task/check_signed_consent", {
@@ -215,12 +217,12 @@ const EvaluateTextsGenerative: FC<
   const handleSelectedText = () => {
     if (isTied) {
       Swal.fire({
-        title: "There's a tie",
-        text: "Are you sure that you want to continue?",
+        title: t("common:messages.tie"),
+        text: t("common:messages.sureToContinue"),
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
+        confirmButtonText: t("common:buttons.yes"),
+        cancelButtonText: t("common:buttons.no"),
       }).then((result: any) => {
         if (result.isConfirmed) {
           handleSaveText();
@@ -331,7 +333,7 @@ const EvaluateTextsGenerative: FC<
                           placement="left"
                           tooltip={
                             instruction.prompt ||
-                            "Select the text that best exemplifies the harm"
+                            t("tasks:annotation.selectText")
                           }
                         >
                           <BasicInput
@@ -345,7 +347,7 @@ const EvaluateTextsGenerative: FC<
                     ) : (
                       <div className="grid items-center justify-center grid-rows-2">
                         <div className="mr-2 text-letter-color">
-                          Texts are being generated, bear with the models
+                          {t("common:messages.bearModels")}
                         </div>
                         <PacmanLoader
                           color="#ccebd4"
@@ -368,7 +370,7 @@ const EvaluateTextsGenerative: FC<
                           >
                             <GeneralButton
                               onClick={generateTexts}
-                              text="Send"
+                              text={t("common:buttons.send")}
                               className="border-0 font-weight-bold light-gray-bg task-action-btn"
                               disabled={disabledInput}
                             />
@@ -407,7 +409,7 @@ const EvaluateTextsGenerative: FC<
                     <div className="grid col-span-1 py-3 justify-items-end">
                       <GeneralButton
                         onClick={handleSelectedText}
-                        text="Send"
+                        text={t("common:buttons.send")}
                         className="border-0 font-weight-bold light-gray-bg task-action-btn"
                       />
                     </div>

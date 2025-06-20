@@ -1,0 +1,21 @@
+{
+  "required": "Este campo es obligatorio",
+  "invalid": "Este campo no es válido",
+  "tooShort": "Este campo es demasiado corto",
+  "tooLong": "Este campo es demasiado largo",
+  "mustMatch": "Los campos deben coincidir",
+  "invalidFormat": "Formato inválido",
+  "emailInvalid": "Por favor ingresa una dirección de correo válida",
+  "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+  "passwordsDoNotMatch": "Las contraseñas no coinciden",
+  "usernameRequired": "El nombre de usuario es obligatorio",
+  "nameRequired": "El nombre es obligatorio",
+  "descriptionRequired": "La descripción es obligatoria",
+  "fileRequired": "El archivo es obligatorio",
+  "invalidFileType": "Tipo de archivo inválido",
+  "fileTooLarge": "El archivo es demasiado grande",
+  "minLength": "La longitud mínima es {{count}} caracteres",
+  "maxLength": "La longitud máxima es {{count}} caracteres",
+  "minValue": "El valor mínimo es {{value}}",
+  "maxValue": "El valor máximo es {{value}}"
+}

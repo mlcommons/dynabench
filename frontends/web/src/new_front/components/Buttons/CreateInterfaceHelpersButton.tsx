@@ -3,6 +3,7 @@ import { CreateInterfaceContext } from "new_front/context/CreateInterface/Contex
 import { Modal } from "react-bootstrap";
 import MDEditor from "@uiw/react-md-editor";
 import ShowInstructionsButton from "new_front/components/Buttons/ShowInstructionsButton";
+import { useTranslation } from "react-i18next";
 import "./light-mode-override.css";
 
 type CreateInterfaceHelpersButtonProps = {
@@ -22,6 +23,7 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
     useContext(CreateInterfaceContext);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showCreationExample, setShowCreationExample] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     updateAmountExamplesCreatedToday(realRoundId, userId);
@@ -32,7 +34,7 @@ const CreateInterfaceHelpersButton: FC<CreateInterfaceHelpersButtonProps> = ({
       <div className="col-span-2 ">
         {amountExamplesCreatedToday !== null ? (
           <div className="text-xs text-gray-500">
-            {amountExamplesCreatedToday} examples created
+            {amountExamplesCreatedToday} {t("interface:examples_created")}
           </div>
         ) : null}
       </div>

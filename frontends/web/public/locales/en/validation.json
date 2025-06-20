@@ -1,0 +1,21 @@
+{
+  "required": "This field is required",
+  "invalid": "This field is invalid",
+  "tooShort": "This field is too short",
+  "tooLong": "This field is too long",
+  "mustMatch": "Fields must match",
+  "invalidFormat": "Invalid format",
+  "emailInvalid": "Please enter a valid email address",
+  "passwordTooShort": "Password must be at least 8 characters",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "usernameRequired": "Username is required",
+  "nameRequired": "Name is required",
+  "descriptionRequired": "Description is required",
+  "fileRequired": "File is required",
+  "invalidFileType": "Invalid file type",
+  "fileTooLarge": "File is too large",
+  "minLength": "Minimum length is {{count}} characters",
+  "maxLength": "Maximum length is {{count}} characters",
+  "minValue": "Minimum value is {{value}}",
+  "maxValue": "Maximum value is {{value}}"
+}

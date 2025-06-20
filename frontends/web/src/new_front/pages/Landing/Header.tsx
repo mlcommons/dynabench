@@ -6,8 +6,10 @@ import { Link } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
 import Modal from "react-bootstrap/Modal";
 import CreateProposalTask from "new_front/components/Modals/CreateProposalTask";
+import { useTranslation } from "react-i18next";
 
 const Header: FC = () => {
+  const { t } = useTranslation();
   const [showProposeTask, setShowProposeTask] = useState(false);
   const handleClose = () => setShowProposeTask(false);
   const handleShow = () => setShowProposeTask(true);
@@ -25,12 +27,10 @@ const Header: FC = () => {
           >
             <div className="flex items-center justify-center flex-column">
               <h2 className="font-sans text-4xl font-bold text-center lg:text-5xl text-letter-color">
-                Challenging the Limits of Benchmarking AI
+                {t("common:homepage.hero.title")}
               </h2>
               <p className="items-center mt-4 mb-8 text-xl font-medium text-center lg:text-2xl">
-                Collaborate with AI enthusiasts and experts to tackle vital AI
-                challenges. Dynabench lets you create and join AI challenges,
-                enhancing skills and advancing AI together.
+                {t("common:homepage.hero.description")}
               </p>
             </div>
             <div className="flex items-center justify-center">
@@ -40,14 +40,14 @@ const Header: FC = () => {
                   className="max-w-sm py-2 text-lg font-semibold border-0 px-7 lg:text-xl bg-primary-color"
                   to="/tasks"
                 >
-                  Challenges
+                  {t("common:homepage.hero.challengesButton")}
                 </Button>
                 <Button
                   as="div"
                   onClick={handleShow}
                   className="py-2 text-lg font-semibold border-0 px-7 lg:text-xl light-gray-bg"
                 >
-                  Create your own challenge
+                  {t("common:homepage.hero.createChallengeButton")}
                 </Button>
               </div>
             </div>
@@ -56,25 +56,33 @@ const Header: FC = () => {
                 <h2 className="mb-2 text-2xl font-bold lg:text-3xl display-5 text-letter-color">
                   20+
                 </h2>
-                <h5 className="mb-2 text-xl font-medium">Challenges</h5>
+                <h5 className="mb-2 text-xl font-medium">
+                  {t("common:homepage.stats.challenges")}
+                </h5>
               </div>
               <div className="mb-4 text-center lg:mb-12 md:mb-0">
                 <h2 className="mb-2 text-2xl font-bold lg:text-3xl display-5 text-letter-color">
                   40+
                 </h2>
-                <h5 className="mb-2 text-xl font-medium">Partipants</h5>
+                <h5 className="mb-2 text-xl font-medium">
+                  {t("common:homepage.stats.participants")}
+                </h5>
               </div>
               <div className="mb-4 text-center lg:mb-12 md:mb-0">
                 <h2 className="mb-2 text-2xl font-bold lg:text-3xl display-5 text-letter-color">
                   100+
                 </h2>
-                <h5 className="mb-2 text-xl font-medium">Models</h5>
+                <h5 className="mb-2 text-xl font-medium">
+                  {t("common:homepage.stats.models")}
+                </h5>
               </div>
               <div className="mb-4 text-center lg:mb-12 md:mb-0">
                 <h2 className="mb-2 text-2xl font-bold text-center lg:text-3xl display-5 text-letter-color">
                   6
                 </h2>
-                <h5 className="mb-2 text-xl font-medium">Communities</h5>
+                <h5 className="mb-2 text-xl font-medium">
+                  {t("common:homepage.stats.communities")}
+                </h5>
               </div>
             </div>
           </motion.div>

@@ -1,0 +1,26 @@
+{
+  "title": "Modèles",
+  "description": "Description du modèle",
+  "performance": "Performance",
+  "accuracy": "Précision",
+  "score": "Score",
+  "rank": "Rang",
+  "submitted": "Soumis",
+  "submittedBy": "Soumis par",
+  "submitModel": "Soumettre un modèle",
+  "modelName": "Nom du modèle",
+  "modelDescription": "Description du modèle",
+  "uploadModel": "Télécharger un modèle",
+  "modelFile": "Fichier du modèle",
+  "leaderboard": "Classement",
+  "results": "Résultats",
+  "details": "Détails",
+  "download": "Télécharger",
+  "evaluate": "Évaluer",
+  "status": {
+    "processing": "En cours de traitement",
+    "completed": "Terminé",
+    "failed": "Échec",
+    "pending": "En attente"
+  }
+}

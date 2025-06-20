@@ -1,0 +1,84 @@
+{
+  "create": {
+    "title": "Crear Ejemplos",
+    "instruction": "Crear nuevos ejemplos para esta tarea",
+    "submit": "Enviar ejemplo",
+    "validate": "Validar ejemplos",
+    "guidelines": "Directrices",
+    "context": "Contexto",
+    "input": "Entrada",
+    "output": "Salida",
+    "annotation": "Anotación",
+    "tooltipCreate": "Haz clic aquí para crear nuevos ejemplos",
+    "tooltipCreateDetail": "Crear nuevos ejemplos donde el modelo falla"
+  },
+  "validate": {
+    "title": "Validar Ejemplos",
+    "instruction": "Ayuda a validar ejemplos creados por otros usuarios",
+    "correct": "Correcto",
+    "incorrect": "Incorrecto",
+    "flagAsInappropriate": "Marcar como Inapropiado",
+    "comments": "Comentarios",
+    "skipExample": "Saltar Ejemplo",
+    "tooltipValidate": "Haz clic aquí para ver ejemplos creados por otros y validar su corrección",
+    "tooltipValidateDetail": "Verificar ejemplos donde el modelo pudo haber fallado"
+  },
+  "annotation": {
+    "selectText": "Selecciona el texto que mejor ejemplifique el daño",
+    "whatDoINeedToDo": "¿Qué necesito hacer?",
+    "howDoesInterfaceWork": "¿Cómo funciona la interfaz?",
+    "finishInteraction": "Terminar interacción",
+    "textsBeingGenerated": "Los textos se están generando, ten paciencia con los modelos",
+    "isModelCorrect": "¿Es correcto el modelo?",
+    "submit": "Enviar",
+    "submitting": "Enviando...",
+    "submissionSuccess": "¡Anotación enviada exitosamente!",
+    "submissionError": "Error al enviar la anotación",
+    "exampleRetracted": "Ejemplo retirado - gracias",
+    "exampleFlagged": "Ejemplo marcado - gracias"
+  },
+  "interface": {
+    "information": "Información",
+    "send": "Enviar",
+    "save": "Guardar",
+    "finish": "Terminar",
+    "continue": "Continuar",
+    "iUnderstand": "Entiendo"
+  },
+  "messages": {
+    "exampleSubmitted": "Ejemplo enviado exitosamente",
+    "validationComplete": "Validación completada",
+    "thankYouForExample": "Gracias por tu ejemplo",
+    "exampleRetracted": "Ejemplo retirado - gracias",
+    "exampleFlagged": "Ejemplo marcado - gracias"
+  },
+  "submitModels": {
+    "title": "Enviar Modelos",
+    "tooltip": "Haz clic aquí para subir tus modelos para esta tarea"
+  },
+  "submitPredictions": {
+    "title": "Enviar Archivos de Predicción",
+    "tooltip": "Haz clic aquí para enviar tus archivos de predicción generados por el modelo"
+  },
+  "submitFiles": {
+    "title": "Enviar Archivos",
+    "tooltip": "Haz clic aquí para enviar tus archivos de entrenamiento para activar el entrenamiento de un modelo y evaluación en nuestros conjuntos de datos"
+  },
+  "mlcubeTutorial": {
+    "title": "Tutorial MLCube",
+    "tooltip": "Haz clic aquí para acceder al tutorial MLCube para esta tarea"
+  },
+  "documentation": {
+    "title": "Documentación",
+    "tooltip": "Haz clic aquí para obtener más información sobre la tarea"
+  },
+  "Leaderboard": "Tabla de Posiciones",
+  "Overview": "Resumen",
+  "Documentation": "Documentación",
+  "information": {
+    "rounds": "Rondas",
+    "examples": "Muestras",
+    "topScore": "Máxima Puntuación",
+    "submissions": "Envíos"
+  }
+}

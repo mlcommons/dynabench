@@ -40,6 +40,9 @@ import initializeData from "./InitializeAnnotationData.js";
 import ResponseInfo from "./ResponseInfo.js";
 import BatchCreateSamples from "../../components/Forms/BatchCreateSamples";
 import { getModelInTheLoop } from "../../services/ModelServices";
+import { parsePropsFromModelInput } from "../../utils/miscellaneous";
+import { translateYamlConfig } from "../../utils/yamlTranslation";
+import i18n from "../../i18n";
 const yaml = require("js-yaml");
 
 function deepCopyJSON(obj) {
@@ -63,6 +66,7 @@ class CreateInterface extends React.Component {
       mapKeyToExampleId: {},
       submitWithoutFullExample: false,
       taskConfig: null,
+      originalTaskConfig: null,
       data: {},
       loading: true,
       modelInTheLoop: null,
@@ -77,6 +81,9 @@ class CreateInterface extends React.Component {
     this.chatContainerRef = React.createRef();
     this.bottomAnchorRef = React.createRef();
     this.inputRef = React.createRef();
+
+    // Bind the language change handler
+    this.handleLanguageChange = this.handleLanguageChange.bind(this);
   }
 
   getInputData() {
@@ -149,17 +156,21 @@ class CreateInterface extends React.Component {
                 ? taskConfig.metadata.validate
                 : [];
 
+              // Apply translations to the YAML configuration
+              const translatedTaskConfig = translateYamlConfig(taskConfig);
+
               getModelInTheLoop(this.state.task.id)
                 .then((res) => {
                   this.setState({ modelInTheLoop: res.data.light_model });
                 })
                 .then(() => {
                   this.setState({
-                    taskConfig: taskConfig,
+                    originalTaskConfig: taskConfig, // Store the original untranslated config
+                    taskConfig: translatedTaskConfig,
                     randomTargetModel: randomTargetModel,
                     data: Object.assign(
                       {},
-                      initializeData(taskConfig.input),
+                      initializeData(translatedTaskConfig.input),
                       JSON.parse(result.context_json)
                     ),
                     context: result,
@@ -434,6 +445,10 @@ class CreateInterface extends React.Component {
     this.setState({
       selectedModel: propState?.detail,
     });
+
+    // Listen for language changes
+    i18n.on("languageChanged", this.handleLanguageChange);
+
     const {
       match: { params },
     } = this.props;
@@ -488,8 +503,22 @@ class CreateInterface extends React.Component {
     });
   }
 
+  handleLanguageChange = (lng) => {
+    // Force re-translation of the YAML config from the original untranslated version
+    if (this.state.originalTaskConfig) {
+      const translatedTaskConfig = translateYamlConfig(
+        this.state.originalTaskConfig
+      );
+      this.setState({ taskConfig: translatedTaskConfig });
+    }
+  };
+
+  componentWillUnmount() {
+    // Clean up language change listener
+    i18n.off("languageChanged", this.handleLanguageChange);
+  }
+
   render() {
-    console.log(this.state);
     const responseContent = this.state.content
       .map((item, index) => (
         <ResponseInfo
@@ -790,7 +819,7 @@ class CreateInterface extends React.Component {
                         <InputGroup className="d-flex justify-content-end">
                           <Annotation
                             placement="top"
-                            tooltip="When you’re done, you can submit the example and we’ll find out what the model thinks!"
+                            tooltip="When you're done, you can submit the example and we'll find out what the model thinks!"
                           >
                             <Button
                               type="submit"
@@ -835,7 +864,7 @@ class CreateInterface extends React.Component {
                               >
                                 <Annotation
                                   placement="left"
-                                  tooltip="Don’t like this context? Try another one."
+                                  tooltip="Don't like this context? Try another one."
                                 >
                                   <Button
                                     className="border-0 font-weight-bold light-gray-bg task-action-btn"
@@ -849,7 +878,7 @@ class CreateInterface extends React.Component {
                             )}
                           <Annotation
                             placement="top"
-                            tooltip="When you’re done, you can submit the example and we’ll find out what the model thinks!"
+                            tooltip="When you're done, you can submit the example and we'll find out what the model thinks!"
                           >
                             <Button
                               type="submit"
