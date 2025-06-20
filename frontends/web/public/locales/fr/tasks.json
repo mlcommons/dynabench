@@ -78,5 +78,11 @@
   },
   "Leaderboard": "Classement",
   "Overview": "Aperçu",
-  "Documentation": "Documentation"
+  "Documentation": "Documentation",
+  "information": {
+    "rounds": "Séries",
+    "examples": "Exemples",
+    "topScore": "Meilleur Score",
+    "submissions": "Soumissions"
+  }
 }

@@ -24,7 +24,7 @@ import {
 } from "new_front/context/CreateInterface/Context";
 import Swal from "sweetalert2";
 import { useLocation } from "react-router-dom";
-import { translateYamlConfig } from "../../../utils/yamlTranslation";
+import { translateYamlConfig } from "utils/yamlTranslation";
 import { useTranslation } from "react-i18next";
 
 const CreateInterface = () => {
@@ -46,11 +46,11 @@ const CreateInterface = () => {
   let { taskCode } = useParams<{ taskCode: string }>();
   const { user } = useContext(UserContext);
   const { updateAmountExamplesCreatedToday } = useContext(
-    CreateInterfaceContext,
+    CreateInterfaceContext
   );
   const history = useHistory();
   const location = useLocation();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
 
   // Parse the query parameters
   const queryParams = new URLSearchParams(location.search);
@@ -64,7 +64,7 @@ const CreateInterface = () => {
         {
           round_id: taskContextInfo?.real_round_id,
           user_id: user.id!,
-        },
+        }
       );
       if (!stillAllowedToSubmit) {
         Swal.fire({
@@ -93,7 +93,7 @@ const CreateInterface = () => {
       setOriginalTaskConfiguration(taskConfiguration as ConfigurationTask);
       // Apply translations and store the translated configuration
       const translatedTaskConfiguration = translateYamlConfig(
-        taskConfiguration,
+        taskConfiguration
       ) as ConfigurationTask;
       setTaskConfiguration(translatedTaskConfiguration);
       setModelInTheLoop(modelInTheLoop);
@@ -101,7 +101,7 @@ const CreateInterface = () => {
       setTaskId(taskId);
       setIsGenerativeContext(
         (translatedTaskConfiguration.context as any)?.generative_context
-          ?.is_generative || false,
+          ?.is_generative || false
       );
     }
   };
@@ -125,7 +125,7 @@ const CreateInterface = () => {
   const isLogin = async (
     assignmentId: string | null,
     taskCode: string,
-    treatmentId: string | null,
+    treatmentId: string | null
   ) => {
     if (!user.id) {
       await checkUserIsLoggedIn(
@@ -133,7 +133,7 @@ const CreateInterface = () => {
         `/`,
         assignmentId,
         taskCode,
-        treatmentId,
+        treatmentId
       );
     }
   };
@@ -157,7 +157,7 @@ const CreateInterface = () => {
     if (taskContextInfo?.real_round_id) {
       updateAmountExamplesCreatedToday(
         taskContextInfo?.real_round_id,
-        user.id!,
+        user.id!
       );
     }
   }, [taskContextInfo, user]);
@@ -173,7 +173,7 @@ const CreateInterface = () => {
   useEffect(() => {
     if (originalTaskConfiguration) {
       const translatedTaskConfiguration = translateYamlConfig(
-        originalTaskConfiguration,
+        originalTaskConfiguration
       ) as ConfigurationTask;
       setTaskConfiguration(translatedTaskConfiguration);
     }
@@ -280,7 +280,7 @@ const CreateInterface = () => {
                     isGenerativeContext={isGenerativeContext}
                     userId={user.id!}
                     accept_sandbox_creation={Boolean(
-                      taskInfo.accept_sandbox_creation,
+                      taskInfo.accept_sandbox_creation
                     )}
                     setModelOutput={setModelOutput}
                     setIsGenerativeContext={setIsGenerativeContext}

@@ -213,8 +213,33 @@ export const useTranslatedYamlConfig = (yamlConfig) => {
   return translatedConfig || yamlConfig;
 };
 
+/**
+ * Hook to get translation text from YAML config
+ * @param {object} textObject - Object containing text to translate
+ * @param {string} fallbackLanguage - Fallback language if translation not found
+ * @returns {text} Translated YAML text or fallback
+ */
+export const getTranslationfromYamlFile = (
+  textObject,
+  fallbackLanguage = "en",
+) => {
+  if (
+    !textObject ||
+    typeof textObject !== "object" ||
+    Object.keys(textObject).length === 0
+  ) {
+    console.warn("Invalid text object provided for translation");
+    return "";
+  }
+
+  let currentLanguage = i18n.language;
+
+  return textObject[currentLanguage] || textObject[fallbackLanguage] || "";
+};
+
 export default {
   translateYamlConfig,
   extractTranslationKeys,
   useTranslatedYamlConfig,
+  getTranslationfromYamlFile,
 };

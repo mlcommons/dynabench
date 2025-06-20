@@ -25,18 +25,23 @@ const LanguageSwitcher = () => {
   };
 
   return (
-    <Dropdown>
+    <Dropdown className="my-auto mr-2">
       <Dropdown.Toggle
         variant="light"
         id="language-dropdown"
         className="d-flex align-items-center border-0"
-        style={{ background: "transparent" }}
+        style={{
+          background: "transparent",
+          boxShadow: "none",
+          outline: "none",
+        }}
       >
         <span className="me-2">{currentLanguage.flag}</span>
         <span className="d-none d-md-inline">{currentLanguage.name}</span>
+        &nbsp;
       </Dropdown.Toggle>
 
-      <Dropdown.Menu>
+      <Dropdown.Menu className="my-2 py-1">
         {languages.map((language) => (
           <Dropdown.Item
             key={language.code}

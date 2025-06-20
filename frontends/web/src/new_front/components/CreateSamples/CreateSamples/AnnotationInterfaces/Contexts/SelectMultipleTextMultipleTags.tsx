@@ -13,6 +13,7 @@ import { ContextAnnotationFactoryType } from "new_front/types/createSamples/crea
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import DropdownSearch from "new_front/components/Inputs/DropdownSearch";
 import MultiSelect from "new_front/components/Lists/MultiSelect";
+import { getTranslationfromYamlFile } from "utils/yamlTranslation";
 
 import generateLightRandomColor from "new_front/utils/helpers/functions/GenerateRandomLightColor";
 
@@ -345,9 +346,7 @@ const SelectMultipleTextMultipleTags: FC<
                 options={localTags}
                 value={
                   tagSelection?.value ||
-                  `${t("interface:select_a")} ${translateTagName(
-                    instruction?.tag_name,
-                  )}`
+                  `${t("interface:select_a")} ${instruction?.tag_name}`
                 }
                 onChange={setTagSelection}
               />
@@ -382,7 +381,7 @@ const SelectMultipleTextMultipleTags: FC<
             <div className="grid grid-cols-6">
               {instruction?.selection_note && (
                 <div className="pb-4 text-l font-bold col-span-8">
-                  {instruction?.selection_note}
+                  {getTranslationfromYamlFile(instruction?.selection_note)}
                 </div>
               )}
               <div className="mx-auto mb-4 pl-4 md:pl-0 col-start-10">

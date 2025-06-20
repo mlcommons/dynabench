@@ -67,7 +67,10 @@
     "noResults": "No se encontraron resultados",
     "confirmDelete": "¿Estás seguro de que quieres eliminar este elemento?",
     "welcome": "Bienvenido a Dynabench",
-    "noData": "No hay datos disponibles"
+    "noData": "No hay datos disponibles",
+    "tie": "Hay un empate",
+    "bearModels": "El texto está siendo generado, ten paciencia con los modelos",
+    "welcomeBack": "Bienvenido de nuevo!"
   },
   "footer": {
     "copyright": "© 2023 Dynabench. Todos los derechos reservados.",

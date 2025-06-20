@@ -166,6 +166,12 @@
     color: #344854;
 }
 
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: #ccebd4;
+    color: white;
+}
+
 .navbar-dark .navbar-nav .nav-link:focus {
     color: #344854 !important;
     font-family: 'nb_international', Helvetica Neue, Helvetica, sans-serif !important;

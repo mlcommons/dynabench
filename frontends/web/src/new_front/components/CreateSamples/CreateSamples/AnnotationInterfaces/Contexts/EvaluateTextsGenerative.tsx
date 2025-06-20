@@ -1,21 +1,23 @@
+import React, { FC, useContext, useEffect, useState } from "react";
+import { PacmanLoader } from "react-spinners";
+import useFetch from "use-http";
+import Swal from "sweetalert2";
+import parse from "html-react-parser";
+import Modal from "react-bootstrap/Modal";
+import { useTranslation } from "react-i18next";
+
 import UserContext from "containers/UserContext";
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import Chatbot from "new_front/components/CreateSamples/CreateSamples/AnnotationInterfaces/Contexts/Chatbot";
 import BasicInput from "new_front/components/Inputs/BasicInput";
 import EvaluateText from "new_front/components/Inputs/EvaluateText";
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
+import SignContract from "new_front/components/Modals/SignContract";
+import RadioButton from "new_front/components/Lists/RadioButton";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
 import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import { ChatHistoryType } from "new_front/types/createSamples/createSamples/utils";
-import React, { FC, useContext, useEffect, useState } from "react";
-import { PacmanLoader } from "react-spinners";
-import Swal from "sweetalert2";
-import useFetch from "use-http";
-import SignContract from "new_front/components/Modals/SignContract";
-import Modal from "react-bootstrap/Modal";
-import RadioButton from "new_front/components/Lists/RadioButton";
-import parse from "html-react-parser";
 
 const EvaluateTextsGenerative: FC<
   ContextAnnotationFactoryType & ContextConfigType
@@ -58,6 +60,7 @@ const EvaluateTextsGenerative: FC<
     CreateInterfaceContext
   );
   const neccessaryFields = ["original_prompt", "category"];
+  const { t } = useTranslation();
 
   const handleSaveCategory = async (category: string) => {
     updateModelInputs({
@@ -225,12 +228,12 @@ const EvaluateTextsGenerative: FC<
   const handleSelectedText = () => {
     if (isTied) {
       Swal.fire({
-        title: "There's a tie",
-        text: "Are you sure that you want to continue?",
+        title: t("common:messages.tie"),
+        text: t("common:messages.sureToContinue"),
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
+        confirmButtonText: t("common:buttons.yes"),
+        cancelButtonText: t("common:buttons.no"),
       }).then((result: any) => {
         if (result.isConfirmed) {
           handleSaveText();
@@ -339,7 +342,7 @@ const EvaluateTextsGenerative: FC<
                           placement="left"
                           tooltip={
                             instruction.prompt ||
-                            "Select the text that best exemplifies the harm"
+                            t("tasks:annotation.selectText")
                           }
                         >
                           <BasicInput
@@ -353,7 +356,7 @@ const EvaluateTextsGenerative: FC<
                     ) : (
                       <div className="grid items-center justify-center grid-rows-2">
                         <div className="mr-2 text-letter-color">
-                          Texts are being generated, bear with the models
+                          {t("common:messages.bearModels")}
                         </div>
                         <PacmanLoader
                           color="#ccebd4"
@@ -376,7 +379,7 @@ const EvaluateTextsGenerative: FC<
                           >
                             <GeneralButton
                               onClick={generateTexts}
-                              text="Send"
+                              text={t("common:buttons.send")}
                               className="border-0 font-weight-bold light-gray-bg task-action-btn"
                               disabled={disabledInput}
                             />
@@ -415,7 +418,7 @@ const EvaluateTextsGenerative: FC<
                     <div className="grid col-span-1 py-3 justify-items-end">
                       <GeneralButton
                         onClick={handleSelectedText}
-                        text="Send"
+                        text={t("common:buttons.send")}
                         className="border-0 font-weight-bold light-gray-bg task-action-btn"
                       />
                     </div>

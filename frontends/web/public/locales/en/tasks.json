@@ -68,5 +68,11 @@
   },
   "Leaderboard": "Leaderboard",
   "Overview": "Overview",
-  "Documentation": "Documentation"
+  "Documentation": "Documentation",
+  "information": {
+    "rounds": "Rounds",
+    "examples": "Examples",
+    "topScore": "Top Score",
+    "submissions": "Submissions"
+  }
 }

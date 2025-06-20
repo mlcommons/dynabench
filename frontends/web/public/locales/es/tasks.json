@@ -74,5 +74,11 @@
   },
   "Leaderboard": "Tabla de Posiciones",
   "Overview": "Resumen",
-  "Documentation": "Documentación"
+  "Documentation": "Documentación",
+  "information": {
+    "rounds": "Rondas",
+    "examples": "Muestras",
+    "topScore": "Máxima Puntuación",
+    "submissions": "Envíos"
+  }
 }
