@@ -293,8 +293,8 @@ const SelectMultipleTextMultipleTags: FC<
     }
     const already = selectionInfo.find(
       (val: any) =>
-        (val.start <= start && val.end >= start) ||
-        (val.start <= end && val.end >= start)
+        (val.start < start && val.end > start) ||
+        (val.start < end && val.end > start)
     );
     value[valueLength - 1].start = start;
     value[valueLength - 1].end = end;
