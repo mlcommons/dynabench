@@ -1,22 +1,32 @@
-import GeneralButton from "new_front/components/Buttons/GeneralButton";
-import BasicInput from "new_front/components/Inputs/BasicInput";
-import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
-import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 import React, { FC, useContext, useEffect, useState } from "react";
-import DoubleDropDown from "new_front/components/Inputs/DoubleDropDown";
+import { useDispatch, useSelector } from "react-redux";
+import { PacmanLoader } from "react-spinners";
+import MDEditor from "@uiw/react-md-editor";
+import { Modal } from "react-bootstrap";
 import Select from "react-select";
 import useFetch from "use-http";
-import { PacmanLoader } from "react-spinners";
-import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 import axios from "axios";
-import { Modal } from "react-bootstrap";
-import MDEditor from "@uiw/react-md-editor";
+
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
+import {
+  updateCountry,
+  updatelanguage,
+  resetCategoryAndConcept,
+  resetAllButCountry,
+} from "state/wonders/wondersSlice";
+import { RootState } from "state/store";
+
+import GeneralButton from "new_front/components/Buttons/GeneralButton";
+import DoubleDropDown from "new_front/components/Inputs/DoubleDropDown";
+import { ContextConfigType } from "new_front/types/createSamples/createSamples/annotationContext";
+import { ContextAnnotationFactoryType } from "new_front/types/createSamples/createSamples/annotationFactory";
 
 type ImageUploadProps = {
   image: string;
   setFile: (file: File) => void;
   setImage: (image: string) => void;
   updateModelInputs: (input: object, metadata?: boolean) => void;
+  letMagnifier?: boolean;
 };
 
 const ImageUpload = ({
@@ -24,8 +34,16 @@ const ImageUpload = ({
   setFile,
   setImage,
   updateModelInputs,
+  letMagnifier,
 }: ImageUploadProps) => {
   const [dragging, setDragging] = useState(false);
+  const magnifierHeight = 200;
+  const magnifieWidth = 200;
+  const zoomLevel = 1.5;
+  const [imgWidth, setImgWidth] = useState(0);
+  const [imgHeight, setImgHeight] = useState(0);
+  const [showMagnifier, setShowMagnifier] = useState(false);
+  const [[x, y], setXY] = useState([0, 0]);
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -61,18 +79,37 @@ const ImageUpload = ({
     }
   };
 
+  const handleMouseEnter = (e: any) => {
+    const elem = e.currentTarget;
+    const { width, height } = elem.getBoundingClientRect();
+    setImgWidth(width);
+    setImgHeight(height);
+    setShowMagnifier(true);
+  };
+
+  const handleMouseMove = (e: any) => {
+    const elem = e.currentTarget;
+    const { top, left } = elem.getBoundingClientRect();
+    const x = e.pageX - left - window.scrollX;
+    const y = e.pageY - top - window.scrollY;
+    setXY([x, y]);
+  };
+
   return (
     <div>
-      <div className="flex items-center justify-center object-cover gap-8 pb-2">
+      <div className="flex relative items-center justify-center object-cover max-w-full max-h-96 gap-8 pb-2">
         <img
           src={image}
           alt="src"
-          className="rounded-lg"
+          className="rounded-lg w-full object-scale-down max-w-full max-h-96"
           onDrag={handleDragEnter}
           onDragEnd={handleDragLeave}
           onDragLeave={handleDragLeave}
           onDragOver={handleDragEnter}
           onDrop={handleDrop}
+          onMouseEnter={handleMouseEnter}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => setShowMagnifier(false)}
           onClick={() => {
             const input = document.getElementById("fileInput");
             if (input) {
@@ -80,6 +117,24 @@ const ImageUpload = ({
             }
           }}
         />
+        {letMagnifier && showMagnifier && (
+          <div
+            className="absolute pointer-events-none border border-gray-200 bg-white"
+            style={{
+              height: `${magnifierHeight}px`,
+              width: `${magnifieWidth}px`,
+              top: `${y - magnifierHeight / 2}px`,
+              left: `${x - magnifieWidth / 2}px`,
+              backgroundImage: `url('${image}')`,
+              backgroundSize: `${imgWidth * zoomLevel}px ${
+                imgHeight * zoomLevel
+              }px`,
+              backgroundPositionX: `${-x * zoomLevel + magnifieWidth / 2}px`,
+              backgroundPositionY: `${-y * zoomLevel + magnifierHeight / 2}px`,
+              backgroundRepeat: "no-repeat",
+            }}
+          />
+        )}
       </div>
       <div
         className={`flex justify-center items-center border-2 border-dashed rounded-lg p-4 ${
@@ -116,57 +171,56 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   setIsGenerativeContext,
   generative_context,
 }) => {
+  const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
+  const { post, response, loading } = useFetch();
+  const dispatch = useDispatch();
+  const { updateModelInputs } = useContext(CreateInterfaceContext);
+  const country = useSelector((state: RootState) => state.wonders.country);
+  const language = useSelector((state: RootState) => state.wonders.language);
+  const selectedCategory = useSelector(
+    (state: RootState) => state.wonders.selectedCategory
+  );
+  const selectedConcept = useSelector(
+    (state: RootState) => state.wonders.selectedConcept
+  );
+
   const [filterContext, setFilterContext] = useState<any>();
   const [image, setImage] = useState(
-    "https://w7.pngwing.com/pngs/527/625/png-transparent-scalable-graphics-computer-icons-upload-uploading-cdr-angle-text-thumbnail.png",
+    "https://w7.pngwing.com/pngs/527/625/png-transparent-scalable-graphics-computer-icons-upload-uploading-cdr-angle-text-thumbnail.png"
   );
   const [description, setDescription] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(
-    localStorage.getItem("selectedCategory")
-      ? JSON.parse(localStorage.getItem("selectedCategory") || "")
-      : null,
-  );
-  const [selectedConcept, setSelectedConcept] = useState(
-    localStorage.getItem("selectedConcept")
-      ? JSON.parse(localStorage.getItem("selectedConcept") || "")
-      : null,
-  );
   const [showExample, setShowExample] = useState(false);
-  const { post, response, loading } = useFetch();
   const [countries, setCountries] = useState<string[]>([]);
-  const [country, setCountry] = useState<string>(
-    localStorage.getItem("country") || "",
-  );
   const [languages, setLanguages] = useState<string[]>([]);
-  const [language, setLanguage] = useState<string>(
-    localStorage.getItem("language") || "",
-  );
   const [file, setFile] = useState<File>();
-  const BASE_URL_2 = process.env.REACT_APP_API_HOST_2;
-  const { modelInputs, updateModelInputs, removeItem } = useContext(CreateInterfaceContext);
 
-  const handleGetLanguages = async (e: any) => {
-    if (!e.value) return;
-    setCountry(e.value);
+  const handleGetLanguages = async (country: string) => {
     // @ts-ignore
     const extractedLanguages = generative_context.artifacts.options.reduce(
       (acc: string[], item: any) => {
-        if (item.primary === e.value) acc.push(...item.secondary);
+        if (item.primary === country) acc.push(...item.secondary);
         return acc;
       },
-      [] as string[],
+      [] as string[]
     );
-    setLanguage("");
+    dispatch(resetAllButCountry());
     setLanguages(extractedLanguages);
     setFilterContext(null);
     updateModelInputs({
-      origin_primary: e.value,
+      origin_primary: country,
       origin_secondary: extractedLanguages[0],
     });
   };
 
+  const handleCountryChange = (e: any) => {
+    if (!e.value) return;
+    dispatch(updateCountry(e.value));
+    handleGetLanguages(e.value);
+    dispatch(resetCategoryAndConcept());
+  };
+
   const handleLanguageChange = (e: any) => {
-    setLanguage(e.value);
+    dispatch(updatelanguage(e.value));
     updateModelInputs({ origin_primary: country, origin_secondary: e.value });
   };
 
@@ -190,14 +244,20 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
   };
 
   const handleSaveData = async () => {
-    if (description.length < 20) {
-      alert("Please enter a description with at least 20 characters.");
+    if (!selectedCategory) {
+      alert("Please pick a category.");
       return;
     }
-    if (!file || !description || !selectedCategory || !selectedConcept) {
-      alert(
-        "Please choose an image, describe it, and pick a category and concept.",
-      );
+    if (!selectedConcept) {
+      alert("Please pick a concept.");
+      return;
+    }
+    if (!file) {
+      alert("Please choose an image.");
+      return;
+    }
+    if (description.length < 20) {
+      alert("Please enter a description with at least 20 characters.");
       return;
     }
     const formData = new FormData();
@@ -228,50 +288,28 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
       // @ts-ignore
       const extractedCountries = generative_context.artifacts.options.map(
         // @ts-ignore
-        (item) => item.primary,
+        (item) => item.primary
       );
       setCountries(extractedCountries);
     }
   }, [generative_context]);
 
   useEffect(() => {
+    if (country && !language) {
+      handleGetLanguages(country);
+    }
     if (country && language) {
       handleGetCategories();
     }
-  }, [country, language]);
-
-  useEffect(() => {
-    localStorage.setItem("language", language);
-    localStorage.setItem("country", country);
-    localStorage.removeItem("selectedCategory");
-    localStorage.removeItem("selectedConcept");
-    removeItem("category");
-    removeItem("concept");
-    setSelectedCategory(null);
-    setSelectedConcept(null);
   }, [language, country]);
 
   useEffect(() => {
-    if (localStorage.getItem("language") && localStorage.getItem("country")) {
-      updateModelInputs({
-        origin_primary: localStorage.getItem("country"),
-        origin_secondary: localStorage.getItem("language"),
-      });
-    }
-    if (localStorage.getItem("selectedCategory")) {
-      updateModelInputs({ category: selectedCategory.value });
-    }
-    if (localStorage.getItem("selectedConcept")) {
-      updateModelInputs({ concept: selectedConcept.value });
-    }
-  }, [localStorage]);
+    selectedCategory && updateModelInputs({ category: selectedCategory.value });
+  }, [selectedCategory]);
 
   useEffect(() => {
-    // If language and country are already selected then fetch the context
-    if (localStorage.getItem("language") && localStorage.getItem("country")) {
-      handleGetCategories();
-    }
-  }, [localStorage.getItem("language")]);
+    selectedConcept && updateModelInputs({ concept: selectedConcept.value });
+  }, [selectedConcept]);
 
   return (
     <>
@@ -307,21 +345,22 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
         </div>
         <div className="grid grid-cols-1 gap-3 divide-x-2 md:grid-cols-3">
           <div className="col-span-1">
-            <div className="flex flex-col items-center pt-2 pb-4 space-y-5 md:pb-16 align-center">
-              <div className="flex gap-8">
+            <div className="flex flex-col items-center pt-2 pb-4 md:pb-16 align-center">
+              <div className="flex gap-4 px-2 grid grid-cols-2 w-full">
                 <div className="mr-4">
                   <p className="text-base">Country</p>
                   <Select
+                    className="w-full"
                     options={countries.map((country) => ({
                       value: country,
                       label: country,
                     }))}
-                    onChange={handleGetLanguages}
+                    onChange={handleCountryChange}
                     placeholder="Select a country"
                     defaultValue={
-                      localStorage.getItem("country") && {
-                        value: localStorage.getItem("country"),
-                        label: localStorage.getItem("country"),
+                      country && {
+                        value: country,
+                        label: country,
                       }
                     }
                   />
@@ -329,6 +368,12 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                 <div>
                   <p className="text-base">Language</p>
                   <Select
+                    value={
+                      language && {
+                        value: language,
+                        label: language,
+                      }
+                    }
                     options={languages.map((language) => ({
                       value: language,
                       label: language,
@@ -336,9 +381,9 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                     onChange={handleLanguageChange}
                     placeholder="Select a language"
                     defaultValue={
-                      localStorage.getItem("language") && {
-                        value: localStorage.getItem("language"),
-                        label: localStorage.getItem("language"),
+                      language && {
+                        value: language,
+                        label: language,
                       }
                     }
                   />
@@ -351,10 +396,6 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                   <DoubleDropDown
                     filterContext={filterContext}
                     updateModelInputs={updateModelInputs}
-                    selectedCategory={selectedCategory}
-                    setSelectedCategory={setSelectedCategory}
-                    selectedConcept={selectedConcept}
-                    setSelectedConcept={setSelectedConcept}
                   />
                 </div>
                 <div className="flex flex-row items-center justify-between py-8 mx-8 space-y-3 align-center">
@@ -371,7 +412,7 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                   </button>
                   <GeneralButton
                     onClick={handleSaveData}
-                    text="Submit"
+                    text="SAVE"
                     className="px-4 mt-[2px] font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
                   />
                 </div>
@@ -386,6 +427,7 @@ const DescribeImage: FC<ContextAnnotationFactoryType & ContextConfigType> = ({
                   setFile={setFile}
                   setImage={setImage}
                   updateModelInputs={updateModelInputs}
+                  letMagnifier={file ? true : false}
                 />
                 <input
                   placeholder="Enter text here. Do not copy and paste"
