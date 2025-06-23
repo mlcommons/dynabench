@@ -23,6 +23,7 @@ import {
   Button,
   Spinner,
   InputGroup,
+  OverlayTrigger,
 } from "react-bootstrap";
 import UserContext from "../../containers/UserContext";
 import {
@@ -32,6 +33,7 @@ import {
 } from "../../containers/Overlay";
 import AnnotationComponent from "./AnnotationComponent.js";
 import initializeData from "./InitializeAnnotationData.js";
+import { translateYamlConfig } from "../../utils/yamlTranslation";
 const yaml = require("js-yaml");
 
 function deepCopyJSON(obj) {
@@ -178,15 +180,18 @@ class ValidateInterface extends React.Component {
               ? taskConfig.metadata.validate
               : [];
 
+            // Apply translations to the YAML configuration
+            const translatedTaskConfig = translateYamlConfig(taskConfig);
+
             const context = JSON.parse(result.context.context_json);
             const input = JSON.parse(result.input_json);
             const createMetadata = JSON.parse(result.metadata_json);
             const validateMetadata = initializeData(
-              taskConfig.metadata.validate
+              translatedTaskConfig.metadata.validate
             );
             this.setState({
               example: result,
-              taskConfig: taskConfig,
+              taskConfig: translatedTaskConfig,
               data: Object.assign(
                 {},
                 input,

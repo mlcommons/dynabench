@@ -8,6 +8,7 @@ import AnnotationInstruction from "new_front/components/OverlayInstructions/Anno
 import React, { FC } from "react";
 import { Button, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const yaml = require("js-yaml");
 
@@ -32,6 +33,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
   MLCubeTutorialMarkdown,
   submitablePredictions,
 }) => {
+  const { t } = useTranslation();
   const hasTrainFileUpload =
     configYaml && yaml.load(configYaml).hasOwnProperty("train_file_metric");
 
@@ -42,14 +44,14 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
           <Nav.Item className="task-action-btn">
             <AnnotationInstruction
               placement="bottom"
-              tooltip="Click here to create new examples"
+              tooltip={t("tasks:create.tooltipCreate")}
             >
               <Button
                 as={Link}
                 className="mr-2 border-0 font-weight-bold light-gray-bg"
                 to={`/tasks/${taskCode}/create`}
               >
-                <i className="fas fa-pen"></i> Create Examples
+                <i className="fas fa-pen"></i> {t("tasks:create.title")}
               </Button>
             </AnnotationInstruction>
           </Nav.Item>
@@ -63,7 +65,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
               className="mr-2 border-0 font-weight-bold light-gray-bg"
               to={`/tasks/${taskCode}/validate`}
             >
-              <i className="fas fa-search"></i> Validate Examples
+              <i className="fas fa-search"></i> {t("tasks:validate.title")}
             </Button>
           </Nav.Item>
         </>
@@ -75,7 +77,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
             className="mr-2 border-0 font-weight-bold light-gray-bg"
             to={`/tasks/${taskCode}/uploadModel`}
           >
-            <i className="fas fa-upload"></i> Submit Models
+            <i className="fas fa-upload"></i> {t("tasks:submitModels.title")}
           </Button>
         </Nav.Item>
       )}
@@ -86,7 +88,8 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
             className="mr-2 border-0 font-weight-bold light-gray-bg"
             to={"/tasks/" + taskCode + "/submit_predictions"}
           >
-            <i className="fa fa-upload"></i> Submit Prediction Files
+            <i className="fa fa-upload"></i>{" "}
+            {t("tasks:submitPredictions.title")}
           </Button>
         </Nav.Item>
       )}
@@ -97,7 +100,8 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
             className="mr-2 border-0 font-weight-bold light-gray-bg"
             to={"/tasks/" + taskCode + "/submit_prediction"}
           >
-            <i className="fa fa-upload"></i> Submit Predictions
+            <i className="fa fa-upload"></i>{" "}
+            {t("tasks:submitPredictions.title")}
           </Button>
         </Nav.Item>
       )}
@@ -110,7 +114,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
                 className="mr-2 border-0 font-weight-bold light-gray-bg"
                 to={"/tasks/" + taskCode + "/submit_train_files"}
               >
-                <i className="fa fa-upload"></i> Submit Files
+                <i className="fa fa-upload"></i> {t("tasks:submitFiles.title")}
               </Button>
             </>
           </Nav.Item>
@@ -122,7 +126,8 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
                   className="mr-2 border-0 font-weight-bold light-gray-bg"
                   to={"/tasks/" + taskCode + "/mlcube_tutorial"}
                 >
-                  <i className="fa fa-upload"></i> MLCube Tutorial
+                  <i className="fa fa-upload"></i>{" "}
+                  {t("tasks:mlcubeTutorial.title")}
                 </Button>
               </>
             </Nav.Item>

@@ -1,0 +1,60 @@
+{
+  "placeholder": {
+    "enter_a_statement": "Entrez une déclaration",
+    "enter_statement": "Entrez une déclaration",
+    "enter_an_statement": "Entrez une déclaration",
+    "enter_response": "Entrez une réponse...",
+    "enter_context": "Entrez le contexte...",
+    "enter_source_language": "Entrez la langue source...",
+    "enter_target_language": "Entrez la langue cible...",
+    "enter_source_text": "Entrez le texte source...",
+    "enter_target_text": "Entrez le texte cible",
+    "explain_why_your_example_is_correct": "Expliquez pourquoi votre exemple est correct...",
+    "explain_why_you_thought_the_model_would_make_a_mist": "Expliquez pourquoi vous pensiez que le modèle ferait une erreur...",
+    "explain_why_you_think_the_model_made_a_mistake": "Expliquez pourquoi vous pensez que le modèle a fait une erreur...",
+    "enter_corrected_label": "Entrez l'étiquette corrigée",
+    "explain_why_your_proposed_target_is_correct": "Expliquez pourquoi votre cible proposée est correcte...",
+    "enter_the_reason_for_flagging": "Entrez la raison du signalement...",
+    "explain_why_the_example_is_correct": "Expliquez pourquoi l'exemple est correct...",
+    "enter_what_you_think_was_done_to_try_to_trick_the": "Entrez ce que vous pensez qui a été fait pour essayer de tromper le modèle...",
+    "select_a_language": "Sélectionnez une langue"
+  },
+  "display_name": {
+    "example_explanation": "explication de l'exemple",
+    "model_explanation": "explication du modèle"
+  },
+  "content_warning": {
+    "this_is_sensitive_content_if_you_do_not_want_to_s": "Ceci est du contenu sensible ! Si vous ne voulez pas voir d'exemples haineux, veuillez passer à une autre tâche.",
+    "this_involves_sensitive_content_if_you_do_not_wan": "Ceci implique du contenu sensible ! Si vous ne voulez pas voir d'exemples haineux, veuillez passer à une autre tâche."
+  },
+  "label": {
+    "negative": "négatif",
+    "positive": "positif",
+    "neutral": "neutre",
+    "hateful": "haineux",
+    "not_hateful": "non-haineux",
+    "not_counterspeech": "non_contre-discours",
+    "counterspeech": "contre-discours",
+    "other": "autre",
+    "counter_speech": "contre-discours",
+    "not_counter_speech": "non_contre-discours",
+    "entailed": "impliqué"
+  },
+  "goal_message": {
+    "label_the_text_with_the_languages_you_think_it_is": "Étiquetez le texte avec les langues dans lesquelles vous pensez qu'il est écrit",
+    "label_the_text_with_the_languages_you_think_it_is_": "Étiquetez le texte avec les langues dans lesquelles vous pensez qu'il est écrit"
+  },
+  "general": {
+    "please_select_a_language_you_are_proficient_in": "Veuillez sélectionner une langue dans laquelle vous êtes compétent"
+  },
+  "creation_samples_title": {
+    "label_the_text_with_the_languages_you_think_it_is": "Étiquetez le texte avec les langues dans lesquelles vous pensez qu'il est écrit",
+    "label_the_text_with_the_languages_you_think_it_is_": "Étiquetez le texte avec les langues dans lesquelles vous pensez qu'il est écrit"
+  },
+  "preselection": {
+    "please_select_a_language_you_are_proficient_in": "Veuillez sélectionner une langue dans laquelle vous êtes compétent"
+  },
+  "tag_name": {
+    "language": "langue"
+  }
+}

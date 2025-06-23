@@ -7,6 +7,7 @@
 import React, { FC } from "react";
 import { Button, Nav, OverlayTrigger } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Annotation } from "../../../containers/Overlay";
 import ShowToolTip from "../Utils/ShowToolTip";
 const yaml = require("js-yaml");
@@ -28,6 +29,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
   taskCode,
   taskDocumentationUrl,
 }) => {
+  const { t } = useTranslation();
   const hasTrainFileUpload =
     configYaml && yaml.load(configYaml).hasOwnProperty("train_file_metric");
 
@@ -38,13 +40,13 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
           <Nav.Item className="task-action-btn">
             <Annotation
               placement="bottom"
-              tooltip="Click here to create new examples"
+              tooltip={t("tasks:create.tooltipCreate")}
             >
               <OverlayTrigger
                 placement="bottom"
                 delay={{ show: 250, hide: 400 }}
                 overlay={() =>
-                  ShowToolTip("Create new examples where the model fails")
+                  ShowToolTip(t("tasks:create.tooltipCreateDetail"))
                 }
               >
                 <Button
@@ -52,7 +54,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
                   className="mr-2 border-0 font-weight-bold light-gray-bg"
                   to={`/tasks/${taskCode}/create`}
                 >
-                  <i className="fas fa-pen"></i> Create Examples
+                  <i className="fas fa-pen"></i> {t("tasks:create.title")}
                 </Button>
               </OverlayTrigger>
             </Annotation>
@@ -60,13 +62,13 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
           <Nav.Item className="task-action-btn">
             <Annotation
               placement="top"
-              tooltip="Click here to see examples created by others, and validate their correctness"
+              tooltip={t("tasks:validate.tooltipValidate")}
             >
               <OverlayTrigger
                 placement="bottom"
                 delay={{ show: 250, hide: 400 }}
                 overlay={() =>
-                  ShowToolTip("Verify examples where the model may have failed")
+                  ShowToolTip(t("tasks:validate.tooltipValidateDetail"))
                 }
               >
                 <Button
@@ -74,7 +76,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
                   className="mr-2 border-0 font-weight-bold light-gray-bg"
                   to={`/tasks/${taskCode}/validate`}
                 >
-                  <i className="fas fa-search"></i> Validate Examples
+                  <i className="fas fa-search"></i> {t("tasks:validate.title")}
                 </Button>
               </OverlayTrigger>
             </Annotation>
@@ -85,7 +87,7 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
         <Nav.Item className="task-action-btn">
           <Annotation
             placement="right"
-            tooltip="Click here to upload your models for this task."
+            tooltip={t("tasks:submitModels.tooltip")}
           >
             <OverlayTrigger
               placement="bottom"
@@ -97,7 +99,8 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
                 className="mr-2 border-0 font-weight-bold light-gray-bg"
                 to={`/tasks/${taskCode}/uploadModel`}
               >
-                <i className="fas fa-upload"></i> Submit Models
+                <i className="fas fa-upload"></i>{" "}
+                {t("tasks:submitModels.title")}
               </Button>
             </OverlayTrigger>
           </Annotation>
@@ -107,15 +110,13 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
         <Nav.Item className="task-action-btn">
           <Annotation
             placement="top"
-            tooltip={
-              "Click here to submit your model-generated prediction files"
-            }
+            tooltip={t("tasks:submitPredictions.tooltip")}
           >
             <OverlayTrigger
               placement="bottom"
               delay={{ show: 250, hide: 400 }}
               overlay={() =>
-                ShowToolTip("Verify examples where the model may have failed")
+                ShowToolTip(t("tasks:validate.tooltipValidateDetail"))
               }
             >
               <Button
@@ -123,7 +124,8 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
                 className="mr-2 border-0 font-weight-bold light-gray-bg"
                 to={"/tasks/" + taskCode + "/submit_predictions"}
               >
-                <i className="fa fa-upload"></i> Submit Prediction Files
+                <i className="fa fa-upload"></i>{" "}
+                {t("tasks:submitPredictions.title")}
               </Button>
             </OverlayTrigger>
           </Annotation>
@@ -133,20 +135,18 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
         <Nav.Item className="task-action-btn">
           <Annotation
             placement="top"
-            tooltip={"Click here to get more information about the task"}
+            tooltip={t("tasks:documentation.tooltip")}
           >
             <OverlayTrigger
               placement="bottom"
               delay={{ show: 250, hide: 400 }}
-              overlay={() =>
-                ShowToolTip("Click here to get more information about the task")
-              }
+              overlay={() => ShowToolTip(t("tasks:documentation.tooltip"))}
             >
               <Button
                 onClick={() => window.open(taskDocumentationUrl, "_blank")}
                 className="mr-2 border-0 font-weight-bold light-gray-bg"
               >
-                <i className="fa fa-file"></i> Documentation
+                <i className="fa fa-file"></i> {t("tasks:documentation.title")}
               </Button>
             </OverlayTrigger>
           </Annotation>
@@ -157,16 +157,13 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
           <Nav.Item className="task-action-btn">
             <Annotation
               placement="top"
-              tooltip={
-                "Click here to submit your train files to trigger the training of" +
-                " a model and evaluation on our datasets"
-              }
+              tooltip={t("tasks:submitFiles.tooltip")}
             >
               <OverlayTrigger
                 placement="bottom"
                 delay={{ show: 250, hide: 400 }}
                 overlay={() =>
-                  ShowToolTip("Verify examples where the model may have failed")
+                  ShowToolTip(t("tasks:validate.tooltipValidateDetail"))
                 }
               >
                 <>
@@ -175,7 +172,8 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
                     className="mr-2 border-0 font-weight-bold light-gray-bg"
                     to={"/tasks/" + taskCode + "/submit_train_files"}
                   >
-                    <i className="fa fa-upload"></i> Submit Files
+                    <i className="fa fa-upload"></i>{" "}
+                    {t("tasks:submitFiles.title")}
                   </Button>
                 </>
               </OverlayTrigger>
@@ -184,16 +182,13 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
           <Nav.Item className="task-action-btn">
             <Annotation
               placement="top"
-              tooltip={
-                "Click here to submit your train files to trigger the training of" +
-                " a model and evaluation on our datasets"
-              }
+              tooltip={t("tasks:mlcubeTutorial.tooltip")}
             >
               <OverlayTrigger
                 placement="bottom"
                 delay={{ show: 250, hide: 400 }}
                 overlay={() =>
-                  ShowToolTip("Verify examples where the model may have failed")
+                  ShowToolTip(t("tasks:validate.tooltipValidateDetail"))
                 }
               >
                 <>
@@ -202,7 +197,8 @@ const TaskActionButtons: FC<TaskActionButtonsProps> = ({
                     className="mr-2 border-0 font-weight-bold light-gray-bg"
                     to={"/tasks/" + taskCode + "/mlcube_tutorial"}
                   >
-                    <i className="fa fa-upload"></i> MLCube Tutorial
+                    <i className="fa fa-upload"></i>{" "}
+                    {t("tasks:mlcubeTutorial.title")}
                   </Button>
                 </>
               </OverlayTrigger>

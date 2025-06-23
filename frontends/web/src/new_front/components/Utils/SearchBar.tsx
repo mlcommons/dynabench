@@ -1,8 +1,10 @@
 import React, { ChangeEvent, FC } from "react";
 import { useHistory } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const SearchBar: FC = () => {
   const history = useHistory();
+  const { t } = useTranslation();
 
   const onSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const params = new URLSearchParams();
@@ -18,7 +20,7 @@ const SearchBar: FC = () => {
       <input
         type="search"
         name="serch"
-        placeholder="Search"
+        placeholder={t("common:labels.search")}
         onChange={onSearchInputChange}
         className="pl-4 pr-12 text-sm bg-white rounded-full h-11 focus:outline-none"
       />
