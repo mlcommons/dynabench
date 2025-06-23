@@ -157,6 +157,12 @@
     padding: 0;
 }
 
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: #ccebd4;
+    color: white;
+}
+
 .navbar-dark .dropdown-item:focus,
 .navbar-dark .dropdown-item:hover,
 .sidebar-wrapper .nav-link:focus,
