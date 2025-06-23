@@ -13,6 +13,7 @@ import { ContextAnnotationFactoryType } from "new_front/types/createSamples/crea
 import AnnotationInstruction from "new_front/components/OverlayInstructions/Annotation";
 import DropdownSearch from "new_front/components/Inputs/DropdownSearch";
 import MultiSelect from "new_front/components/Lists/MultiSelect";
+import ChipsSelector from "new_front/components/Buttons/ChipsSelector";
 import { getTranslationfromYamlFile } from "utils/yamlTranslation";
 
 import generateLightRandomColor from "new_front/utils/helpers/functions/GenerateRandomLightColor";
@@ -89,6 +90,9 @@ const SelectMultipleTextMultipleTags: FC<
   const [contextId, setContextId] = useState<number | null>(null);
   const [loading2, setLoading2] = useState<boolean>(false);
   const [extraLabel, setExtraLabel] = useState<any>({});
+  const [memoryOn, setMemoryOn] = useState<boolean>(false);
+  const [last3, setLast3] = useState<any>([]);
+  const [lastIndex, setLastIndex] = useState<number>(-1);
   const [rtl, setRTL] = useState<boolean>(false);
   const location = useLocation();
   const history = useHistory();
@@ -129,6 +133,9 @@ const SelectMultipleTextMultipleTags: FC<
     if (field_names_for_the_model?.preselected_tag) {
       setPreferedTag(field_names_for_the_model.preselected_tag);
     }
+    if (generative_context?.artifacts?.memory_on) {
+      setMemoryOn(generative_context.artifacts.memory_on);
+    }
   }, []);
 
   useEffect(() => {
@@ -143,6 +150,24 @@ const SelectMultipleTextMultipleTags: FC<
   useEffect(() => {
     text?.length && setLoading2(false);
   }, [text]);
+
+  useEffect(() => {
+    if (memoryOn && tagSelection && last3.includes(tagSelection)) {
+      setLastIndex(last3.indexOf(tagSelection));
+    }
+    if (memoryOn && tagSelection && !last3.includes(tagSelection)) {
+      if (last3.length < 3) {
+        const tempLast3 = [...last3, tagSelection];
+        setLastIndex(tempLast3.length - 1);
+        setLast3(tempLast3);
+      }
+      if (last3.length === 3) {
+        const tempLast3 = [...last3.slice(-2), tagSelection];
+        setLastIndex(tempLast3.length - 1);
+        setLast3(tempLast3);
+      }
+    }
+  }, [tagSelection]);
 
   const handleSubmit = (value: string | null) => {
     !value && (value = tagSelection.back_label);
@@ -417,6 +442,15 @@ const SelectMultipleTextMultipleTags: FC<
                   />
                 </span>
               </div>
+              {memoryOn && last3.length > 0 && (
+                <div className="">
+                  <ChipsSelector
+                    options={last3}
+                    onSelect={setTagSelection}
+                    selectedTag={lastIndex}
+                  />
+                </div>
+              )}
             </div>
             <div dir="auto" className={`unicode-text ${rtl ? "rtl" : "ltf"}`}>
               <span translate="no">
