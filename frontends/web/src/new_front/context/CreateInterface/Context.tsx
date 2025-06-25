@@ -9,7 +9,7 @@ interface CreateInterfaceContextType {
   amountExamplesCreatedToday: number;
   updateAmountExamplesCreatedToday: (
     realRoundId: number,
-    userId: number
+    userId: number,
   ) => void;
   removeItem: (key: string) => void;
 }
@@ -23,7 +23,7 @@ export const CreateInterfaceContext = createContext<CreateInterfaceContextType>(
     amountExamplesCreatedToday: 0,
     updateAmountExamplesCreatedToday: () => {},
     removeItem: () => {},
-  }
+  },
 );
 
 type CreateInterfaceProviderProps = {
@@ -57,7 +57,7 @@ export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
 
   const updateAmountExamplesCreatedToday = async (
     realRoundId: number,
-    userId: number
+    userId: number,
   ) => {
     fetch(
       `${process.env.REACT_APP_API_HOST_2}/rounduserexample/number_of_examples_created`,
@@ -70,7 +70,7 @@ export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
           round_id: realRoundId,
           user_id: userId,
         }),
-      }
+      },
     )
       .then((response) => response.json())
       .then((data) => {
