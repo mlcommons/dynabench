@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useContext } from "react";
 import { useLocation, useHistory } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import { TextAnnotator } from "react-text-annotate";
@@ -15,6 +15,7 @@ import DropdownSearch from "new_front/components/Inputs/DropdownSearch";
 import MultiSelect from "new_front/components/Lists/MultiSelect";
 import ChipsSelector from "new_front/components/Buttons/ChipsSelector";
 import { getTranslationfromYamlFile } from "utils/yamlTranslation";
+import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 
 import generateLightRandomColor from "new_front/utils/helpers/functions/GenerateRandomLightColor";
 
@@ -50,7 +51,7 @@ type Dictionary = { [key: string]: any };
 
 const cleanUpSelection = (
   selection: Array<Dictionary>,
-  keyToRemove: string,
+  keyToRemove: string
 ) => {
   const result: Array<Record<string, any>> = [];
 
@@ -94,6 +95,10 @@ const SelectMultipleTextMultipleTags: FC<
   const [last3, setLast3] = useState<any>([]);
   const [lastIndex, setLastIndex] = useState<number>(-1);
   const [rtl, setRTL] = useState<boolean>(false);
+  const { updateAmountExamplesCreatedToday } = useContext(
+    CreateInterfaceContext
+  );
+
   const location = useLocation();
   const history = useHistory();
   const { t } = useTranslation();
@@ -102,7 +107,7 @@ const SelectMultipleTextMultipleTags: FC<
   useEffect(() => {
     console.log(
       "SelectMultipleTextMultipleTags received instruction:",
-      instruction,
+      instruction
     );
     if (instruction?.preselection) {
       console.log("instruction.preselection:", instruction.preselection);
@@ -142,7 +147,7 @@ const SelectMultipleTextMultipleTags: FC<
     if (preferedTag) {
       setTagSelection(localTags.find((tag: any) => tag.value === preferedTag));
       handleSubmit(
-        localTags.find((tag: any) => tag.value === preferedTag)?.back_label,
+        localTags.find((tag: any) => tag.value === preferedTag)?.back_label
       );
     }
   }, [preferedTag]);
@@ -189,7 +194,7 @@ const SelectMultipleTextMultipleTags: FC<
           distinctive: generative_context?.distinctive,
           user_id: userId,
         }),
-      },
+      }
     )
       .then((response) => response.json())
       .then((data) => {
@@ -203,7 +208,7 @@ const SelectMultipleTextMultipleTags: FC<
             if (value !== field_names_for_the_model?.default_tag) {
               const predefault = localTags.filter(
                 (option: any) =>
-                  option.back_label === field_names_for_the_model?.default_tag,
+                  option.back_label === field_names_for_the_model?.default_tag
               );
               setTagSelection(predefault[0]);
               handleSubmit(field_names_for_the_model?.default_tag);
@@ -235,7 +240,7 @@ const SelectMultipleTextMultipleTags: FC<
           if (value !== field_names_for_the_model?.default_tag) {
             const predefault = localTags.filter(
               (option: any) =>
-                option.back_label === field_names_for_the_model?.default_tag,
+                option.back_label === field_names_for_the_model?.default_tag
             );
             setTagSelection(predefault[0]);
             handleSubmit(field_names_for_the_model?.default_tag);
@@ -294,6 +299,7 @@ const SelectMultipleTextMultipleTags: FC<
         },
       }).then(() => {
         handleSubmit(null);
+        userId && updateAmountExamplesCreatedToday(realRoundId, userId);
       });
     }
   };
@@ -315,11 +321,11 @@ const SelectMultipleTextMultipleTags: FC<
     }
     const start: number = Math.min(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     const end: number = Math.max(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     if (
       valueLength > 0 &&
