@@ -1,5 +1,4 @@
 import React, { createContext, useState, FC } from "react";
-import { set } from "react-ga";
 import useFetch from "use-http";
 
 interface CreateInterfaceContextType {
@@ -10,7 +9,7 @@ interface CreateInterfaceContextType {
   amountExamplesCreatedToday: number;
   updateAmountExamplesCreatedToday: (
     realRoundId: number,
-    userId: number
+    userId: number,
   ) => void;
   removeItem: (key: string) => void;
 }
@@ -24,7 +23,7 @@ export const CreateInterfaceContext = createContext<CreateInterfaceContextType>(
     amountExamplesCreatedToday: 0,
     updateAmountExamplesCreatedToday: () => {},
     removeItem: () => {},
-  }
+  },
 );
 
 type CreateInterfaceProviderProps = {
@@ -58,18 +57,25 @@ export const CreateInterfaceProvider: FC<CreateInterfaceProviderProps> = ({
 
   const updateAmountExamplesCreatedToday = async (
     realRoundId: number,
-    userId: number
+    userId: number,
   ) => {
-    const amountExamples = await post(
-      `/rounduserexample/number_of_examples_created`,
+    fetch(
+      `${process.env.REACT_APP_API_HOST_2}/rounduserexample/number_of_examples_created`,
       {
-        round_id: realRoundId,
-        user_id: userId,
-      }
-    );
-    if (response.ok) {
-      setAmountExamplesCreatedToday(amountExamples);
-    }
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          round_id: realRoundId,
+          user_id: userId,
+        }),
+      },
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        data && setAmountExamplesCreatedToday(data);
+      });
   };
 
   const removeItem = (key: string) => {
