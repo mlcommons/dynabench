@@ -232,6 +232,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
         secret=secrets.token_hex(),
         source_url=source_url if proof else None,
     )
+
     for dataset in datasets:
         if (
             dataset.access_type == AccessTypeEnum.scoring
@@ -348,6 +349,11 @@ def do_upload_via_train_files(credentials, tid, model_name):
                 "bucket_name": task.s3_bucket,
                 "key": name,
             }
+            s3_client.upload_fileobj(
+                upload.file,
+                task.s3_bucket,
+                f"dataperf/{task.task_code}/submissions/{name}_{model[1]}.json",
+            )
 
             light_model_endpoint = task.lambda_model
             r = requests.post(light_model_endpoint, json=payload)
