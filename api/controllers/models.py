@@ -344,6 +344,7 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         else:
             current_upload = json.loads(upload.file.read().decode("utf-8"))
+            upload.file.seek(0)
             payload = {
                 "id_json": current_upload,
                 "bucket_name": task.s3_bucket,
