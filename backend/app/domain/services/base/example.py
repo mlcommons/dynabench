@@ -168,19 +168,31 @@ class ExampleService:
         example_necessary_info["user_id"] = user_id
         example_necessary_info["task_id"] = task_id
         context_info = example_to_validate[1].__dict__
-        metadata_json = (
-            json.loads(example_info["metadata_json"])
-            if example_info["metadata_json"]
-            else {}
-        )
-        input_json = (
-            json.loads(example_info["input_json"]) if example_info["input_json"] else {}
-        )
-        context_info = (
-            json.loads(context_info["context_json"])
-            if context_info["context_json"]
-            else {}
-        )
+
+        raw_metadata = example_info.get("metadata_json")
+        if isinstance(raw_metadata, dict):
+            metadata_json = raw_metadata
+        elif isinstance(raw_metadata, str) and raw_metadata.strip():
+            metadata_json = json.loads(raw_metadata)
+        else:
+            metadata_json = {}
+
+        raw_example_input = example_info.get("input_json")
+        if isinstance(raw_example_input, dict):
+            input_json = raw_example_input
+        elif isinstance(raw_example_input, str) and raw_example_input.strip():
+            input_json = json.loads(raw_example_input)
+        else:
+            input_json = {}
+
+        raw_context = context_info.get("context_json")
+        if isinstance(raw_context, dict):
+            context_info = raw_context
+        elif isinstance(raw_context, str) and raw_context.strip():
+            context_info = json.loads(raw_context)
+        else:
+            context_info = {}
+
         example_necessary_info["context_info"] = {
             **input_json,
             **context_info,
