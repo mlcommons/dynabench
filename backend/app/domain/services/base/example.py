@@ -169,11 +169,11 @@ class ExampleService:
         example_necessary_info["task_id"] = task_id
         context_info = example_to_validate[1].__dict__
 
-        raw_metadad = example_info.get("metadata_json")
-        if isinstance(raw_metadad, dict):
-            metadata_json = raw_metadad
-        elif isinstance(raw_metadad, str) and raw_metadad.strip():
-            metadata_json = json.loads(raw_metadad)
+        raw_metadata = example_info.get("metadata_json")
+        if isinstance(raw_metadata, dict):
+            metadata_json = raw_metadata
+        elif isinstance(raw_metadata, str) and raw_metadata.strip():
+            metadata_json = json.loads(raw_metadata)
         else:
             metadata_json = {}
 
