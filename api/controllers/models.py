@@ -305,7 +305,9 @@ def do_upload_via_train_files(credentials, tid, model_name):
 
         return util.json_encode({"success": "ok", "model_id": model[1]})
 
-    for name, upload in train_files.items():
+    train_items = list(train_files.items())
+
+    for idx, (name, upload) in enumerate(train_items):
         if upload.content_type == "text/plain":
             with tempfile.NamedTemporaryFile() as tf:
                 try:
@@ -371,6 +373,12 @@ def do_upload_via_train_files(credentials, tid, model_name):
                     msg_dict={"name": model_name},
                     subject=subject,
                 )
+                for idx2, (rem_name, rem_upload) in enumerate(train_items[idx + 1 :]):
+                    s3_client.upload_fileobj(
+                        rem_upload.file,
+                        task.s3_bucket,
+                        f"dataperf/{task.task_code}/submissions/{rem_name}_{model[1]}.json",
+                    )
                 bottle.abort(400)
 
         did = dm.getByName(name).id
