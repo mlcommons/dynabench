@@ -9,23 +9,25 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+import React, { useContext, useEffect, useState, useCallback } from "react";
+import { useParams, useHistory } from "react-router-dom";
+import { PacmanLoader } from "react-spinners";
+import { useTranslation } from "react-i18next";
+import useFetch from "use-http";
+
 import TabOption from "new_front/components/Buttons/TabOption";
 import TaskActionButtons from "new_front/components/Buttons/TaskActionButtons_new";
 import TaskHelpersButton from "new_front/components/Buttons/TaskHelpersButton";
 import { TaskInfoType } from "new_front/types/task/taskInfo";
-import React, { useContext, useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
-import { PacmanLoader } from "react-spinners";
-import { useTranslation } from "react-i18next";
-import useFetch from "use-http";
 import Leaderboard from "new_front/pages/Task/LeaderBoard";
-import OverviewTask from "../../components/TaskPage/OverviewTask";
 import PrincipalTaskStats from "new_front/components/TaskPage/PrincipalTaskStats";
 import UserContext from "containers/UserContext";
 import MultipleLeaderboard from "new_front/components/Tables/Leaderboard/MultipleLeaderboard";
+import OverviewTask from "../../components/TaskPage/OverviewTask";
 
 const TaskPage = () => {
   const { t } = useTranslation();
+  const history = useHistory();
   const [task, setTask] = useState<TaskInfoType>();
   const [amountOfModels, setAmountOfModels] = useState<number>(0);
   const [maxScore, setMaxScore] = useState<number>(0);
@@ -54,6 +56,8 @@ const TaskPage = () => {
         setAmountOfModels(amountOfModels);
         setTaskInstructions(taskInstructions);
         setLoading(false);
+      } else {
+        history.push("/PageNotFound");
       }
     },
     [taskCode],

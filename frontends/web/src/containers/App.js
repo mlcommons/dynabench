@@ -48,6 +48,7 @@ import SubmitModel from "new_front/pages/SubmitModel/SubmitModel";
 import TaskModelLeaderboardPage from "./TaskModelLeaderboardPage.js";
 import TaskOwnerPage from "./TaskOwnerPage";
 import TaskPage from "new_front/pages/Task/TaskPage";
+import ErrorPage from "new_front/pages/Task/ErrorPage";
 // import Test from "new_front/pages/CommunitiesLandingPages/Test";
 import Test from "new_front/pages/Task/Test";
 import Landing from "new_front/pages/Landing/Landing";
@@ -591,7 +592,8 @@ class App extends React.Component {
                           component={ModelOverview}
                         />
                         <Route path="/communities" component={TasksPage} />
-                        <Route path="/" component={Landing} />
+                        <Route exact path="/" component={Landing} />
+                        <Route path="*" component={ErrorPage} />
                       </Switch>
                     </div>
                     {!showContentOnly && (
