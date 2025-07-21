@@ -18,30 +18,9 @@ import { getTranslationfromYamlFile } from "utils/yamlTranslation";
 import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
 
 import generateLightRandomColor from "new_front/utils/helpers/functions/GenerateRandomLightColor";
+import right_to_left_codes from "./rtl_text_codes.json";
 
-const RTLtexts = [
-  "ara",
-  "ary",
-  "arz",
-  "ars",
-  "arb",
-  "aeb",
-  "aii",
-  "aze",
-  "azj",
-  "azb",
-  "div",
-  "heb",
-  "hbo",
-  "ckb",
-  "kur",
-  "kmr",
-  "sdh",
-  "nqo",
-  "fas",
-  "syc",
-  "urd",
-];
+const RTLtexts = right_to_left_codes.RTLText;
 
 type MultipleTagsTypes = {
   preselectedTag?: string;
