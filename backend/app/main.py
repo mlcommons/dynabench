@@ -7,7 +7,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.endpoints import auth
@@ -17,6 +17,7 @@ from app.api.endpoints.base import (
     example,
     historical_data,
     model,
+    modelpublic,
     round,
     rounduserexample,
     score,
@@ -25,7 +26,7 @@ from app.api.endpoints.base import (
     user,
 )
 from app.api.endpoints.builder_and_evaluation import evaluation
-from app.infrastructure.connection import Connection
+from app.api.middleware.authorization import validate_access_token
 
 
 load_dotenv()
@@ -53,19 +54,43 @@ def read_root():
 
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
-app.include_router(model.router, prefix="/model", tags=["model"])
+app.include_router(
+    model.router,
+    prefix="/model",
+    tags=["model"],
+    dependencies=[Depends(validate_access_token)],
+)
+app.include_router(modelpublic.router, prefix="/model_public", tags=["model_public"])
 app.include_router(task.router, prefix="/task", tags=["task"])
 app.include_router(context.router, prefix="/context", tags=["context"])
-app.include_router(example.router, prefix="/example", tags=["example"])
+app.include_router(
+    example.router,
+    prefix="/example",
+    tags=["example"],
+    dependencies=[Depends(validate_access_token)],
+)
 app.include_router(score.router, prefix="/score", tags=["score"])
-app.include_router(dataset.router, prefix="/dataset", tags=["dataset"])
+app.include_router(
+    dataset.router,
+    prefix="/dataset",
+    tags=["dataset"],
+    dependencies=[Depends(validate_access_token)],
+)
 app.include_router(
     rounduserexample.router, prefix="/rounduserexample", tags=["rounduserexample"]
 )
 app.include_router(
-    evaluation.router, prefix="/builder_evaluation/evaluation", tags=["evaluation"]
+    evaluation.router,
+    prefix="/builder_evaluation/evaluation",
+    tags=["evaluation"],
+    dependencies=[Depends(validate_access_token)],
 )
-app.include_router(user.router, prefix="/user", tags=["user"])
+app.include_router(
+    user.router,
+    prefix="/user",
+    tags=["user"],
+    dependencies=[Depends(validate_access_token)],
+)
 app.include_router(
     task_proposals.router, prefix="/task_proposals", tags=["task_proposals"]
 )

@@ -6,13 +6,14 @@ from fastapi import APIRouter
 
 from app.domain.auth.authentication import LoginService
 from app.domain.schemas.auth.auth import CreateUserRequest, LoginRequest
+from app.domain.schemas.base.user import UserInfoBadges
 from app.domain.services.base.user import UserService
 
 
 router = APIRouter()
 
 
-@router.get("/get_user_with_badges/{user_id}", response_model={})
+@router.get("/get_user_with_badges/{user_id}", response_model=UserInfoBadges)
 async def get_task_id_by_task_code(user_id: str):
     return UserService().get_user_with_badges(user_id)
 
@@ -30,8 +31,3 @@ async def authenticate(model: LoginRequest):
 @router.post("/create_user")
 async def create_user(model: CreateUserRequest):
     return LoginService().create_user(model.email, model.password, model.username)
-
-
-@router.get("/download_users_info", response_model={})
-async def download_users_info():
-    return UserService().download_users_info()

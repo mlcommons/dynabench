@@ -98,7 +98,7 @@ class RouterMonitor extends React.Component {
       ) {
         this.props.history.push(
           "/login?msg=" +
-            encodeURIComponent("You need to be logged in to access this beta.")
+            encodeURIComponent("You need to be logged in to access this beta."),
         );
       }
     }
@@ -138,7 +138,7 @@ class App extends React.Component {
               <Redirect push to="/logout" />;
               //In Case Redirect doesn't work window.location.href = "/logout";
             }
-          }
+          },
         );
       });
     }
@@ -148,7 +148,7 @@ class App extends React.Component {
       },
       (error) => {
         console.warn(error);
-      }
+      },
     );
   }
   componentDidMount() {
@@ -171,7 +171,15 @@ class App extends React.Component {
     });
     const showContentOnly = query.content_only === "true";
     return (
-      <FetchProvider url={BASE_URL_2}>
+      <FetchProvider
+        url={BASE_URL_2}
+        options={{
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.api.getToken()}`,
+          },
+        }}
+      >
         <OverlayInstructionsProvider>
           <ParallaxProvider>
             <UserContext.Provider

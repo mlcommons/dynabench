@@ -48,7 +48,7 @@ class UserService:
     def get_user_with_badges(self, user_id: int):
         user_info = self.user_repository.get_info_by_user_id(user_id).__dict__
         badges = self.user_repository.get_badges_by_user_id(user_id)
-        user_info["badges"] = [badge for badge in badges]
+        user_info["badges"] = badges
         return user_info
 
     def get_stats_by_user_id(self, user_id: int):
