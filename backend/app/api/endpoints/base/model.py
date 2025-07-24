@@ -206,11 +206,6 @@ def get_model_prediction_by_dataset(model: ModelPredictionPerDatasetRequest):
     )
 
 
-@router.get("/get_amount_of_models_by_task/{task_id}", response_model=int)
-def get_amount_of_models_by_task(task_id: int):
-    return ModelService().get_amount_of_models_by_task(task_id)
-
-
 @router.post("/upload_prediction_to_s3")
 def upload_prediction_to_s3(
     user_id: int, task_code: str, model_name: str, predictions: UploadFile = File(...)

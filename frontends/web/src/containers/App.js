@@ -171,7 +171,15 @@ class App extends React.Component {
     });
     const showContentOnly = query.content_only === "true";
     return (
-      <FetchProvider url={BASE_URL_2}>
+      <FetchProvider
+        url={BASE_URL_2}
+        options={{
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.api.getToken()}`,
+          },
+        }}
+      >
         <OverlayInstructionsProvider>
           <ParallaxProvider>
             <UserContext.Provider
