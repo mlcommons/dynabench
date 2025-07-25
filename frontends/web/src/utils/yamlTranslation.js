@@ -49,7 +49,7 @@ const translateText = (text, context) => {
 
   const translationKey = createTranslationKey(text, context);
   console.log(
-    `Attempting to translate: "${text}" with key: "${translationKey}" for language: "${i18n.language}"`,
+    `Attempting to translate: "${text}" with key: "${translationKey}" for language: "${i18n.language}"`
   );
 
   const translated = i18n.t(translationKey, { defaultValue: text });
@@ -71,7 +71,7 @@ const translateObjectRecursively = (obj, parentKey = "") => {
     return obj.map((item, index) =>
       item == null
         ? item
-        : translateObjectRecursively(item, `${parentKey}[${index}]`),
+        : translateObjectRecursively(item, `${parentKey}[${index}]`)
     );
   }
 
@@ -87,14 +87,14 @@ const translateObjectRecursively = (obj, parentKey = "") => {
       // Map creation_samples_title to goal_message and translate it
       translated["goal_message"] = translateText(
         value,
-        "creation_samples_title",
+        "creation_samples_title"
       );
       // Also keep the original key translated
       translated[key] = translateText(value, key);
     } else if (key === "labels" && Array.isArray(value)) {
       // Special handling for labels array
       translated[key] = value.map((label) =>
-        typeof label === "string" ? translateText(label, "label") : label,
+        typeof label === "string" ? translateText(label, "label") : label
       );
     } else if (
       key === "instruction" &&
@@ -112,7 +112,7 @@ const translateObjectRecursively = (obj, parentKey = "") => {
         } else if (typeof instrValue === "object") {
           translated[key][instrKey] = translateObjectRecursively(
             instrValue,
-            `${fullKey}.${instrKey}`,
+            `${fullKey}.${instrKey}`
           );
         } else {
           translated[key][instrKey] = instrValue;
@@ -229,7 +229,7 @@ export const useTranslatedYamlConfig = (yamlConfig) => {
  */
 export const getTranslationfromYamlFile = (
   textObject,
-  fallbackLanguage = "en",
+  fallbackLanguage = "en"
 ) => {
   if (
     !textObject ||
