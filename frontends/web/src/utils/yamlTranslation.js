@@ -49,7 +49,7 @@ const translateText = (text, context) => {
 
   const translationKey = createTranslationKey(text, context);
   console.log(
-    `Attempting to translate: "${text}" with key: "${translationKey}" for language: "${i18n.language}"`
+    `Attempting to translate: "${text}" with key: "${translationKey}" for language: "${i18n.language}"`,
   );
 
   const translated = i18n.t(translationKey, { defaultValue: text });
@@ -69,7 +69,9 @@ const translateObjectRecursively = (obj, parentKey = "") => {
 
   if (Array.isArray(obj)) {
     return obj.map((item, index) =>
-      translateObjectRecursively(item, `${parentKey}[${index}]`)
+      item == null
+        ? item
+        : translateObjectRecursively(item, `${parentKey}[${index}]`),
     );
   }
 
@@ -85,16 +87,20 @@ const translateObjectRecursively = (obj, parentKey = "") => {
       // Map creation_samples_title to goal_message and translate it
       translated["goal_message"] = translateText(
         value,
-        "creation_samples_title"
+        "creation_samples_title",
       );
       // Also keep the original key translated
       translated[key] = translateText(value, key);
     } else if (key === "labels" && Array.isArray(value)) {
       // Special handling for labels array
       translated[key] = value.map((label) =>
-        typeof label === "string" ? translateText(label, "label") : label
+        typeof label === "string" ? translateText(label, "label") : label,
       );
-    } else if (key === "instruction" && typeof value === "object") {
+    } else if (
+      key === "instruction" &&
+      typeof value === "object" &&
+      value !== null
+    ) {
       // Special handling for instruction object
       translated[key] = {};
       for (const [instrKey, instrValue] of Object.entries(value)) {
@@ -106,13 +112,13 @@ const translateObjectRecursively = (obj, parentKey = "") => {
         } else if (typeof instrValue === "object") {
           translated[key][instrKey] = translateObjectRecursively(
             instrValue,
-            `${fullKey}.${instrKey}`
+            `${fullKey}.${instrKey}`,
           );
         } else {
           translated[key][instrKey] = instrValue;
         }
       }
-    } else if (typeof value === "object") {
+    } else if (typeof value === "object" && value !== null) {
       // Recursively process nested objects
       translated[key] = translateObjectRecursively(value, fullKey);
     } else {
@@ -151,9 +157,11 @@ export const extractTranslationKeys = (yamlConfig) => {
     if (!obj || typeof obj !== "object") return;
 
     if (Array.isArray(obj)) {
-      obj.forEach((item, index) =>
-        extractFromObject(item, `${parentKey}[${index}]`)
-      );
+      obj.forEach((item, index) => {
+        if (item != null) {
+          extractFromObject(item, `${parentKey}[${index}]`);
+        }
+      });
     } else {
       for (const [key, value] of Object.entries(obj)) {
         const fullKey = parentKey ? `${parentKey}.${key}` : key;
@@ -168,7 +176,7 @@ export const extractTranslationKeys = (yamlConfig) => {
               translations[translationKey] = label;
             }
           });
-        } else if (typeof value === "object") {
+        } else if (typeof value === "object" && value !== null) {
           extractFromObject(value, fullKey);
         }
       }
@@ -196,7 +204,7 @@ export const useTranslatedYamlConfig = (yamlConfig) => {
 
   // Also listen for language changes
   React.useEffect(() => {
-    const handleLanguageChange = (lng) => {
+    const handleLanguageChange = () => {
       if (yamlConfig) {
         const translated = translateYamlConfig(yamlConfig);
         setTranslatedConfig(translated);
@@ -221,7 +229,7 @@ export const useTranslatedYamlConfig = (yamlConfig) => {
  */
 export const getTranslationfromYamlFile = (
   textObject,
-  fallbackLanguage = "en"
+  fallbackLanguage = "en",
 ) => {
   if (
     !textObject ||
