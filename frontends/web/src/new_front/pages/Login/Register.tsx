@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ReactComponent as RegisterLogo } from "new_front/assets/register.svg";
 import { Button } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import Swal from "sweetalert2";
@@ -10,6 +11,7 @@ import UserContext from "containers/UserContext";
 
 const Register = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const { post, response } = useFetch();
 
   const schema = Yup.object().shape({
@@ -25,7 +27,8 @@ const Register = () => {
   };
 
   const onSubmit = async (values: any) => {
-    await post("user/create_user", {
+    setSubmitting(true);
+    await post("user_public/create_user", {
       email: values.email,
       password: values.password,
       username: values.username,
@@ -36,6 +39,7 @@ const Register = () => {
         title: "Success",
         text: "User created successfully",
       });
+      setSubmitting(false);
       window.location.href = "/";
     } else {
       Swal.fire({
@@ -133,9 +137,13 @@ const Register = () => {
                 <Button
                   className="w-full text-xl font-semibold bg-gray-200 border-0 px-7"
                   type="submit"
-                  disabled={!acceptTerms}
+                  disabled={!acceptTerms || submitting}
                 >
-                  Register
+                  {submitting ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    "Register"
+                  )}
                 </Button>
                 <p>
                   Already have an account? &nbsp;
