@@ -49,15 +49,15 @@ const EvaluateTextsGenerative: FC<
   const [isCreatingTexts, setIsCreatingTexts] = useState(false);
   const [isTied, setIsTied] = useState(true);
   const [artifactsInput, setArtifactsInput] = useState<any>(
-    generative_context.artifacts
+    generative_context.artifacts,
   );
   const [prompt, setPrompt] = useState(
-    "Enter text here. Do not copy and paste"
+    "Enter text here. Do not copy and paste",
   );
   const { post, response } = useFetch();
   const { user } = useContext(UserContext);
   const { metadataExample, modelInputs, updateModelInputs } = useContext(
-    CreateInterfaceContext
+    CreateInterfaceContext,
   );
   const neccessaryFields = ["original_prompt", "category"];
   const { t } = useTranslation();
@@ -79,7 +79,7 @@ const EvaluateTextsGenerative: FC<
         task_id: taskId,
         user_id: user.id,
         round_id: realRoundId,
-      }
+      },
     );
     if (response.ok) {
       if (redirectUrl) {
@@ -117,7 +117,7 @@ const EvaluateTextsGenerative: FC<
           generatedTexts.map((text: any) => ({
             ...text,
             score: 50,
-          }))
+          })),
         );
         updateModelInputs({
           [field_names_for_the_model.generated_answers ?? "generated_answers"]:
@@ -167,7 +167,7 @@ const EvaluateTextsGenerative: FC<
 
   const checkIsTied = () => {
     const isTied = texts.every(
-      (text) => text.score === texts[0].score && texts.length > 1
+      (text) => text.score === texts[0].score && texts.length > 1,
     );
     setIsTied(isTied);
   };
@@ -175,10 +175,10 @@ const EvaluateTextsGenerative: FC<
   const checkNotAnswers = async (generatedTexts: any) => {
     // check if in some of the texts the provider name is None, in that case return True
     const notAnswers = generatedTexts.every(
-      (text: any) => text.provider === "None"
+      (text: any) => text.provider === "None",
     );
     const allTheAnswersAreEmpty = generatedTexts.every(
-      (text: any) => text.text === "\n"
+      (text: any) => text.text === "\n",
     );
     return notAnswers || allTheAnswersAreEmpty;
   };
@@ -187,13 +187,13 @@ const EvaluateTextsGenerative: FC<
     updateModelInputs({
       [field_names_for_the_model.best_answer ?? "best_answer"]: texts.reduce(
         (max: { score: number }, answer: { score: number }) =>
-          answer.score > max.score ? answer : max
+          answer.score > max.score ? answer : max,
       ),
     });
     setBestAnswer(
       texts.reduce((max: { score: number }, answer: { score: number }) =>
-        answer.score > max.score ? answer : max
-      )
+        answer.score > max.score ? answer : max,
+      ),
     );
 
     setChatHistory({
@@ -204,7 +204,7 @@ const EvaluateTextsGenerative: FC<
           id: "1",
           text: texts.reduce(
             (max: { score: number }, answer: { score: number }) =>
-              answer.score > max.score ? answer : max
+              answer.score > max.score ? answer : max,
           ).text,
         },
       ],
@@ -262,7 +262,6 @@ const EvaluateTextsGenerative: FC<
         initial_timestamp: Date.now(),
       });
       setShowInput(true);
-      setShowCategory(false);
     } else {
       setShowCategory(true);
     }
