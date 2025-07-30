@@ -5,7 +5,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-from sqlalchemy import case, func
+from sqlalchemy import String, case, func
 from sqlalchemy.sql import and_
 
 from app.infrastructure.models.models import Context, Example
@@ -80,11 +80,18 @@ class ContextRepository(AbstractRepository):
     def get_context_by_key_value_in_contextjson(
         self, key_name: str, key_value: str, r_realid: int
     ):
+        json_path = f'$."{key_name}"'
         instance = (
             self.session.query(self.model)
             .filter(
                 self.model.r_realid == r_realid,
-                self.model.context_json[key_name] == key_value,
+                func.cast(
+                    func.json_unquote(
+                        func.json_extract(self.model.context_json, json_path)
+                    ),
+                    String(10),
+                )
+                == key_value,
             )
             .order_by(func.rand())
             .first()
@@ -94,6 +101,7 @@ class ContextRepository(AbstractRepository):
     def get_distinctive_context_by_key_value(
         self, key_name: str, key_value: str, r_realid: int, user_id
     ):
+        json_path = f'$."{key_name}"'
         instance = (
             self.session.query(self.model)
             .join(
@@ -103,7 +111,13 @@ class ContextRepository(AbstractRepository):
             )
             .filter(
                 self.model.r_realid == r_realid,
-                self.model.context_json[key_name] == key_value,
+                func.cast(
+                    func.json_unquote(
+                        func.json_extract(self.model.context_json, json_path)
+                    ),
+                    String(10),
+                )
+                == key_value,
             )
             .filter(Example.id.is_(None))
             .order_by(func.rand())
