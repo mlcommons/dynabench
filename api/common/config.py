@@ -1,3 +1,7 @@
+# Copyright (c) MLCommons and its affiliates.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Copyright (c) Facebook, Inc. and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -42,4 +46,5 @@ config = {
     "ssl_org_pem_file_path": os.environ["SSL_ORG_PEM_FILE"],
     "trial_jwtexp": 900,
     "frontend_ip": os.environ["FRONTEND_IP"],
+    "runpod_api_key": os.environ.get("RUNPOD_API_KEY", ""),
 }
