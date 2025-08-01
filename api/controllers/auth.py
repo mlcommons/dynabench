@@ -27,7 +27,7 @@ def authenticate():
     user_name = data["email"].split("@")[0]
     if any(provider in email_provider for provider in ["prolific", "amazonturk"]):
         requests.post(
-            "https://backend.dynabench.org/user/create_user",
+            "https://backend.dynabench.org/user_public/create_user",
             json={
                 "email": data["email"],
                 "password": data["password"],
