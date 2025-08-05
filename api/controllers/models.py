@@ -348,9 +348,12 @@ def do_upload_via_train_files(credentials, tid, model_name):
             current_upload = json.loads(upload.file.read().decode("utf-8"))
             upload.file.seek(0)
             payload = {
-                "id_json": current_upload,
-                "bucket_name": task.s3_bucket,
-                "key": name,
+                "input": {
+                    "id_json": current_upload,
+                    "bucket_name": task.s3_bucket,
+                    "key": name,
+                    "model_id": model[1],  # Add model_id for backend processing
+                }
             }
             s3_client.upload_fileobj(
                 upload.file,
@@ -359,19 +362,24 @@ def do_upload_via_train_files(credentials, tid, model_name):
             )
 
             light_model_endpoint = task.lambda_model
-            r = requests.post(light_model_endpoint, json=payload)
 
-            try:
-                score = r.json()["score"]
-            except Exception as ex:
-                logger.exception(ex)
-                subject = f"Model {model_name} failed training as {r.json()['detail']}"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {config['runpod_api_key']}",
+            }
+
+            r = requests.post(light_model_endpoint, json=payload, headers=headers)
+
+            if r.status_code != 200:
+                logger.error(
+                    f"RunPod request failed with status {r.status_code}: {r.text}"
+                )
                 Email().send(
                     contact=user.email,
                     cc_contact="dynabench-site@mlcommons.org",
                     template_name="model_train_failed.txt",
-                    msg_dict={"name": model_name},
-                    subject=subject,
+                    msg_dict={"name": model_name, "model_id": model[1]},
+                    subject=f"Model {model_name} submission failed",
                 )
                 for idx2, (rem_name, rem_upload) in enumerate(train_items[idx + 1 :]):
                     s3_client.upload_fileobj(
@@ -381,47 +389,74 @@ def do_upload_via_train_files(credentials, tid, model_name):
                     )
                 bottle.abort(400)
 
+            score = None  # Will be set by the async evaluation
+
         did = dm.getByName(name).id
         r_realid = rm.getByTid(tid)[0].rid
         if isinstance(task_config.get("perf_metric"), list):
             metric = task_config.get("perf_metric")[0].get("type")
         elif isinstance(task_config.get("perf_metric"), dict):
             metric = task_config.get("perf_metric").get("type")
-        new_score = {
-            metric: score,
-            "perf": score,
-            "perf_std": 0.0,
-            "perf_by_tag": [
-                {
-                    "tag": str(name),
-                    "pretty_perf": f"{score} %",
-                    "perf": score,
-                    "perf_std": 0.0,
-                    "perf_dict": {metric: score},
-                }
-            ],
-        }
 
-        new_score_string = json.dumps(new_score)
+        if score is not None:
+            new_score = {
+                metric: score,
+                "perf": score,
+                "perf_std": 0.0,
+                "perf_by_tag": [
+                    {
+                        "tag": str(name),
+                        "pretty_perf": f"{score} %",
+                        "perf": score,
+                        "perf_std": 0.0,
+                        "perf_dict": {metric: score},
+                    }
+                ],
+            }
 
-        sm.create(
-            model_id=model[1],
-            r_realid=r_realid,
-            did=did,
-            pretty_perf=f"{score} %",
-            perf=score,
-            metadata_json=new_score_string,
+            new_score_string = json.dumps(new_score)
+
+            sm.create(
+                model_id=model[1],
+                r_realid=r_realid,
+                did=did,
+                pretty_perf=f"{score} %",
+                perf=score,
+                metadata_json=new_score_string,
+            )
+
+    if any(upload.content_type != "text/plain" for upload in train_files.values()):
+        Email().send(
+            contact=user.email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": model_name, "model_id": model[1]},
+            subject=f"Model {model_name} submitted for evaluation.",
         )
 
-    Email().send(
-        contact=user.email,
-        cc_contact="dynabench-site@mlcommons.org",
-        template_name="model_train_successful.txt",
-        msg_dict={"name": model_name, "model_id": model[1]},
-        subject=f"Model {model_name} training succeeded.",
-    )
+        return util.json_encode(
+            {
+                "success": "ok",
+                "model_id": model[1],
+                "message": "Model submitted for evaluation. You will receive an email when evaluation is complete.",
+            }
+        )
+    else:
+        Email().send(
+            contact=user.email,
+            cc_contact="dynabench-site@mlcommons.org",
+            template_name="model_train_successful.txt",
+            msg_dict={"name": model_name, "model_id": model[1]},
+            subject=f"Model {model_name} evaluation completed.",
+        )
 
-    return util.json_encode({"success": "ok", "model_id": model[1]})
+        return util.json_encode(
+            {
+                "success": "ok",
+                "model_id": model[1],
+                "message": "Model evaluation completed successfully.",
+            }
+        )
 
 
 @bottle.post("/models/upload_predictions/<tid:int>/<model_name>")
