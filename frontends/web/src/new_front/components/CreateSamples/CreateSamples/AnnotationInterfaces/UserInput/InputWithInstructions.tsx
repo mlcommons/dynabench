@@ -14,8 +14,9 @@ const InputWithInstructions: FC<
   field_name_for_the_model,
   instruction,
   metadata,
+  initiate_open,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initiate_open);
   const { updateModelInputs } = useContext(CreateInterfaceContext);
 
   const handleChanges = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +24,7 @@ const InputWithInstructions: FC<
       {
         [field_name_for_the_model]: event.target.value,
       },
-      metadata,
+      metadata
     );
   };
 

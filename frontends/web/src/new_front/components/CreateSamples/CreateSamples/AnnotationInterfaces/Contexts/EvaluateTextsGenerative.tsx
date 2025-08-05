@@ -30,9 +30,9 @@ const EvaluateTextsGenerative: FC<
   setIsGenerativeContext,
   realRoundId,
 }) => {
-  const [signInConsent, setSignInConsent] = useState(true);
+  const [signInConsent, setSignInConsent] = useState(false);
   const [showInput, setShowInput] = useState(false);
-  const [showLoader, setShowLoader] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
   const [showCategory, setShowCategory] = useState(false);
   const [finishConversation, setFinishConversation] = useState(false);
   const [disabledInput, setDisabledInput] = useState(false);
@@ -40,6 +40,7 @@ const EvaluateTextsGenerative: FC<
     useState(false);
   const [bestAnswer, setBestAnswer] = useState<any>({});
   const [texts, setTexts] = useState<any[]>([]);
+
   const [chatHistory, setChatHistory] = useState<ChatHistoryType>({
     user: [],
     bot: [],
@@ -48,16 +49,22 @@ const EvaluateTextsGenerative: FC<
   const [showAnswers, setShowAnswers] = useState(false);
   const [isCreatingTexts, setIsCreatingTexts] = useState(false);
   const [isTied, setIsTied] = useState(true);
+  const [showReasonModal, setShowReasonModal] = useState(false);
+  const [badReason, setBadReason] = useState("");
+  const [currentGenerationId, setCurrentGenerationId] = useState<string | null>(
+    null
+  );
+  const [currentSelection, setCurrentSelection] = useState<string | null>(null);
   const [artifactsInput, setArtifactsInput] = useState<any>(
-    generative_context.artifacts,
+    generative_context.artifacts
   );
   const [prompt, setPrompt] = useState(
-    "Enter text here. Do not copy and paste",
+    "Enter text here. Do not copy and paste"
   );
   const { post, response } = useFetch();
   const { user } = useContext(UserContext);
   const { metadataExample, modelInputs, updateModelInputs } = useContext(
-    CreateInterfaceContext,
+    CreateInterfaceContext
   );
   const neccessaryFields = ["original_prompt", "category"];
   const { t } = useTranslation();
@@ -70,6 +77,7 @@ const EvaluateTextsGenerative: FC<
     if (response.ok) {
       setSignInConsent(signConsent);
     }
+    setShowLoader(false);
   };
 
   const checkIfUserReachedNecessaryExamples = async () => {
@@ -79,7 +87,7 @@ const EvaluateTextsGenerative: FC<
         task_id: taskId,
         user_id: user.id,
         round_id: realRoundId,
-      },
+      }
     );
     if (response.ok) {
       if (redirectUrl) {
@@ -99,6 +107,11 @@ const EvaluateTextsGenerative: FC<
     if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
       setIsCreatingTexts(true);
       setDisableTypeOfConversation(true);
+      // This unique ID is used to track the generation process
+      const generationId = `gen_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      setCurrentGenerationId(generationId);
       const generatedTexts = await post("/context/get_generative_contexts", {
         type: generative_context.type,
         artifacts: artifactsInput,
@@ -117,7 +130,8 @@ const EvaluateTextsGenerative: FC<
           generatedTexts.map((text: any) => ({
             ...text,
             score: 50,
-          })),
+            generationId: generationId,
+          }))
         );
         updateModelInputs({
           [field_names_for_the_model.generated_answers ?? "generated_answers"]:
@@ -166,19 +180,24 @@ const EvaluateTextsGenerative: FC<
   };
 
   const checkIsTied = () => {
-    const isTied = texts.every(
-      (text) => text.score === texts[0].score && texts.length > 1,
-    );
+    if (texts.length <= 1) {
+      setIsTied(false);
+      return;
+    }
+    const maxScore = Math.max(...texts.map((text) => text.score));
+
+    const textsWithMaxScore = texts.filter((text) => text.score === maxScore);
+    const isTied = textsWithMaxScore.length > 1;
     setIsTied(isTied);
   };
 
   const checkNotAnswers = async (generatedTexts: any) => {
     // check if in some of the texts the provider name is None, in that case return True
     const notAnswers = generatedTexts.every(
-      (text: any) => text.provider === "None",
+      (text: any) => text.provider === "None"
     );
     const allTheAnswersAreEmpty = generatedTexts.every(
-      (text: any) => text.text === "\n",
+      (text: any) => text.text === "\n"
     );
     return notAnswers || allTheAnswersAreEmpty;
   };
@@ -187,13 +206,13 @@ const EvaluateTextsGenerative: FC<
     updateModelInputs({
       [field_names_for_the_model.best_answer ?? "best_answer"]: texts.reduce(
         (max: { score: number }, answer: { score: number }) =>
-          answer.score > max.score ? answer : max,
+          answer.score > max.score ? answer : max
       ),
     });
     setBestAnswer(
       texts.reduce((max: { score: number }, answer: { score: number }) =>
-        answer.score > max.score ? answer : max,
-      ),
+        answer.score > max.score ? answer : max
+      )
     );
 
     setChatHistory({
@@ -204,7 +223,7 @@ const EvaluateTextsGenerative: FC<
           id: "1",
           text: texts.reduce(
             (max: { score: number }, answer: { score: number }) =>
-              answer.score > max.score ? answer : max,
+              answer.score > max.score ? answer : max
           ).text,
         },
       ],
@@ -215,7 +234,11 @@ const EvaluateTextsGenerative: FC<
   };
 
   const handleSelectedText = () => {
-    if (isTied) {
+    if (
+      isTied &&
+      !("no_tie_message" in artifactsInput) &&
+      !artifactsInput?.no_tie_message
+    ) {
       Swal.fire({
         title: t("common:messages.tie"),
         text: t("common:messages.sureToContinue"),
@@ -248,23 +271,34 @@ const EvaluateTextsGenerative: FC<
   };
 
   useEffect(() => {
-    checkIfUserReachedNecessaryExamples();
-    if ("show_category" in artifactsInput) {
-      setShowCategory(artifactsInput?.show_category);
-      let category = "Unguided";
-      if ("default_category" in artifactsInput) {
-        category = artifactsInput?.default_category;
+    const initializeComponent = async () => {
+      checkIfUserReachedNecessaryExamples();
+      if ("show_category" in artifactsInput) {
+        setShowCategory(artifactsInput?.show_category);
+        let category = "Unguided";
+        if ("default_category" in artifactsInput) {
+          category = artifactsInput?.default_category;
+        }
+        updateModelInputs({
+          category: category,
+        });
+        updateModelInputs({
+          initial_timestamp: Date.now(),
+        });
+        setShowInput(true);
+      } else {
+        setShowCategory(true);
       }
-      updateModelInputs({
-        category: category,
-      });
-      updateModelInputs({
-        initial_timestamp: Date.now(),
-      });
-      setShowInput(true);
-    } else {
-      setShowCategory(true);
-    }
+
+      if (!("need_consent" in artifactsInput) || artifactsInput.need_consent) {
+        console.log("need consent");
+        checkIfUserIsSignedInConsent();
+      } else {
+        setShowLoader(false);
+        setSignInConsent(true);
+      }
+    };
+    initializeComponent();
   }, []);
 
   useEffect(() => {
@@ -296,9 +330,97 @@ const EvaluateTextsGenerative: FC<
     }
   }, [modelInputs, texts, metadataExample]);
 
+  const handleOnClick = (option: string) => {
+    if (currentSelection === option) {
+      return;
+    }
+
+    setCurrentSelection(option);
+
+    if (option === "tie") {
+      setTexts(
+        texts.map((text: any) => ({
+          ...text,
+          score: 50,
+        }))
+      );
+
+      if (currentGenerationId) {
+        const existingReasons = modelInputs.all_bad_reasons || [];
+        const filteredReasons = existingReasons.filter(
+          (reason: any) => reason.generationId !== currentGenerationId
+        );
+        updateModelInputs({
+          all_bad_reasons:
+            filteredReasons.length > 0 ? filteredReasons : undefined,
+        });
+      }
+    } else if (option === "all_bad") {
+      setTexts(
+        texts.map((text: any) => ({
+          ...text,
+          score: 0,
+        }))
+      );
+      setShowReasonModal(true);
+    } else {
+      console.log("on top");
+      if (currentGenerationId) {
+        const existingReasons = modelInputs.all_bad_reasons || [];
+        const filteredReasons = existingReasons.filter(
+          (reason: any) => reason.generationId !== currentGenerationId
+        );
+        updateModelInputs({
+          all_bad_reasons:
+            filteredReasons.length > 0 ? filteredReasons : undefined,
+        });
+      }
+    }
+  };
+
+  const handleAllBadSubmit = () => {
+    setTexts(
+      texts.map((text: any) => ({
+        ...text,
+        score: 0,
+      }))
+    );
+    const existingReasons = modelInputs.all_bad_reasons || [];
+
+    updateModelInputs({
+      all_bad_reasons: [
+        ...existingReasons,
+        {
+          reason: badReason,
+          timestamp: Date.now(),
+          generation_id: currentGenerationId,
+          texts_affected: texts.map((text) => {
+            const provider = text.provider || "Unknown Provider";
+            return {
+              id: text.id,
+              model: text.model_name[provider].model_name,
+              text: text.text,
+            };
+          }),
+        },
+      ],
+    });
+    setShowReasonModal(false);
+    setBadReason("");
+  };
+
+  const handleReasonModalClose = () => {
+    setShowReasonModal(false);
+    setBadReason("");
+  };
+
   useEffect(() => {
-    checkIfUserIsSignedInConsent();
-  }, [signInConsent]);
+    console.log("texts", texts);
+  }, [texts]);
+
+  useEffect(() => {
+    console.log("artifacts input", artifactsInput);
+  }, []);
 
   return (
     <>
@@ -400,15 +522,34 @@ const EvaluateTextsGenerative: FC<
                           disabled={finishConversation}
                           bestAnswer={bestAnswer.text}
                           score={text.score}
+                          handleWhenButtons={handleOnClick}
                         />
                       ))}
+                      {!artifactsInput?.options_slider && (
+                        <div className="flex justify-end">
+                          <GeneralButton
+                            onClick={() => handleOnClick("tie")}
+                            text={"It's a tie 🤝"}
+                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                          />
+                        </div>
+                      )}
+                      {!artifactsInput?.options_slider && (
+                        <div>
+                          <GeneralButton
+                            onClick={() => handleOnClick("all_bad")}
+                            text={"All are bad 🚫"}
+                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                   {!finishConversation && (
                     <div className="grid col-span-1 py-3 justify-items-end">
                       <GeneralButton
                         onClick={handleSelectedText}
-                        text={t("common:buttons.send")}
+                        text={t("common:buttons.send_rating")}
                         className="border-0 font-weight-bold light-gray-bg task-action-btn"
                       />
                     </div>
@@ -444,9 +585,6 @@ const EvaluateTextsGenerative: FC<
         </>
       ) : (
         <div className="grid items-center justify-center grid-rows-2">
-          <div className="mr-2 text-letter-color">
-            Texts are being generated, bear with the models
-          </div>
           <PacmanLoader
             color="#ccebd4"
             loading={showLoader}
@@ -454,6 +592,41 @@ const EvaluateTextsGenerative: FC<
             className="align-center"
           />
         </div>
+      )}
+      {showReasonModal && (
+        <Modal show={showReasonModal} onHide={handleReasonModalClose} size="lg">
+          <Modal.Header closeButton>
+            <Modal.Title>Why are all answers bad?</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="mb-3">
+              <label htmlFor="reasonTextarea" className="form-label">
+                Please explain why you think all the generated answers are
+                inadequate:
+              </label>
+              <textarea
+                id="reasonTextarea"
+                className="form-control"
+                rows={4}
+                value={badReason}
+                onChange={(e) => setBadReason(e.target.value)}
+                placeholder="Enter your reason here..."
+              />
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <GeneralButton
+              onClick={handleReasonModalClose}
+              text="Cancel"
+              className="border-0 font-weight-bold btn-secondary"
+            />
+            <GeneralButton
+              onClick={handleAllBadSubmit}
+              text="Submit"
+              className="border-0 font-weight-bold light-gray-bg task-action-btn"
+            />
+          </Modal.Footer>
+        </Modal>
       )}
     </>
   );
