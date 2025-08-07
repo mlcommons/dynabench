@@ -95,11 +95,13 @@ const EvaluateText: FC<EvaluateTextProps> = ({
 
         {!optionsSlider && (
           <div className="flex items-center justify-end w-full gap-2 px-4 pt-4 pb-2 border-t">
+            <span className="text-gray-500 ">Option # {id + 1}</span>
             <GeneralButton
               key={id}
               onClick={() => handleOnClick(id)}
               text={"Top Answer 👍👍"}
               className="border-0 font-weight-bold light-gray-bg task-action-btn"
+              active={score === 100}
             />
           </div>
         )}

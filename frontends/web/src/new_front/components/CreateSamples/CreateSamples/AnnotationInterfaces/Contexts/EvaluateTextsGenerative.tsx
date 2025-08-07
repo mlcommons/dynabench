@@ -103,14 +103,16 @@ const EvaluateTextsGenerative: FC<
     }
   };
 
+  const generateId = (): string => {
+    return `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  };
+
   const generateTexts = async () => {
     if (neccessaryFields.every((item) => modelInputs.hasOwnProperty(item))) {
       setIsCreatingTexts(true);
       setDisableTypeOfConversation(true);
       // This unique ID is used to track the generation process
-      const generationId = `gen_${Date.now()}_${Math.random()
-        .toString(36)
-        .substr(2, 9)}`;
+      const generationId = generateId();
       setCurrentGenerationId(generationId);
       const generatedTexts = await post("/context/get_generative_contexts", {
         type: generative_context.type,
@@ -202,18 +204,30 @@ const EvaluateTextsGenerative: FC<
     return notAnswers || allTheAnswersAreEmpty;
   };
 
-  const handleSaveText = () => {
-    updateModelInputs({
-      [field_names_for_the_model.best_answer ?? "best_answer"]: texts.reduce(
-        (max: { score: number }, answer: { score: number }) =>
-          answer.score > max.score ? answer : max
-      ),
-    });
-    setBestAnswer(
-      texts.reduce((max: { score: number }, answer: { score: number }) =>
+  const handleSaveText = (option: string | null = null) => {
+    const reducedText = texts.reduce(
+      (max: { score: number }, answer: { score: number }) =>
         answer.score > max.score ? answer : max
-      )
     );
+    if (!option) {
+      updateModelInputs({
+        [field_names_for_the_model.best_answer ?? "best_answer"]: reducedText,
+      });
+      setBestAnswer(reducedText);
+    } else {
+      const selectedText = texts.find((text) => text.id === parseInt(option));
+      if (selectedText) {
+        updateModelInputs({
+          [field_names_for_the_model.best_answer ?? "best_answer"]:
+            selectedText,
+        });
+        setBestAnswer(selectedText);
+      }
+    }
+
+    const chosenText = option
+      ? texts.find((text) => text.id === parseInt(option))
+      : reducedText;
 
     setChatHistory({
       ...chatHistory,
@@ -221,10 +235,7 @@ const EvaluateTextsGenerative: FC<
         ...chatHistory.bot,
         {
           id: "1",
-          text: texts.reduce(
-            (max: { score: number }, answer: { score: number }) =>
-              answer.score > max.score ? answer : max
-          ).text,
+          text: chosenText.text,
         },
       ],
     });
@@ -233,11 +244,11 @@ const EvaluateTextsGenerative: FC<
     setShowInput(false);
   };
 
-  const handleSelectedText = () => {
+  const handleSelectedText = async () => {
     if (
       isTied &&
-      !("no_tie_message" in artifactsInput) &&
-      !artifactsInput?.no_tie_message
+      !("choose_when_tie" in artifactsInput) &&
+      !artifactsInput?.choose_when_tie
     ) {
       Swal.fire({
         title: t("common:messages.tie"),
@@ -251,6 +262,28 @@ const EvaluateTextsGenerative: FC<
           handleSaveText();
         }
       });
+    } else if (artifactsInput?.choose_when_tie && isTied) {
+      const inputOptions = texts.reduce(
+        (options: { [key: string]: string }, text: any, index: number) => {
+          options[text.id] = `Option #${text.id + 1}`;
+          return options;
+        },
+        {}
+      );
+      const result = await Swal.fire({
+        title: "Select an option to continue",
+        input: "select",
+        inputOptions: inputOptions,
+        inputPlaceholder: "Select the option you want to continue with",
+        inputValidator: (value) => {
+          if (!value) {
+            return "You need to select an option!";
+          }
+        },
+      });
+      if (result.isConfirmed && result.value) {
+        handleSaveText(result.value);
+      }
     } else {
       handleSaveText();
     }
@@ -348,7 +381,7 @@ const EvaluateTextsGenerative: FC<
       if (currentGenerationId) {
         const existingReasons = modelInputs.all_bad_reasons || [];
         const filteredReasons = existingReasons.filter(
-          (reason: any) => reason.generationId !== currentGenerationId
+          (reason: any) => reason.generation_id !== currentGenerationId
         );
         updateModelInputs({
           all_bad_reasons:
@@ -364,11 +397,10 @@ const EvaluateTextsGenerative: FC<
       );
       setShowReasonModal(true);
     } else {
-      console.log("on top");
       if (currentGenerationId) {
         const existingReasons = modelInputs.all_bad_reasons || [];
         const filteredReasons = existingReasons.filter(
-          (reason: any) => reason.generationId !== currentGenerationId
+          (reason: any) => reason.generation_id !== currentGenerationId
         );
         updateModelInputs({
           all_bad_reasons:
@@ -417,10 +449,6 @@ const EvaluateTextsGenerative: FC<
   useEffect(() => {
     console.log("texts", texts);
   }, [texts]);
-
-  useEffect(() => {
-    console.log("artifacts input", artifactsInput);
-  }, []);
 
   return (
     <>
@@ -531,6 +559,7 @@ const EvaluateTextsGenerative: FC<
                             onClick={() => handleOnClick("tie")}
                             text={"It's a tie 🤝"}
                             className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                            active={currentSelection === "tie"}
                           />
                         </div>
                       )}
@@ -540,6 +569,7 @@ const EvaluateTextsGenerative: FC<
                             onClick={() => handleOnClick("all_bad")}
                             text={"All are bad 🚫"}
                             className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                            active={currentSelection === "all_bad"}
                           />
                         </div>
                       )}
@@ -574,6 +604,11 @@ const EvaluateTextsGenerative: FC<
                   setFinishConversation={setFinishConversation}
                   updateModelInputs={updateModelInputs}
                   setIsGenerativeContext={setIsGenerativeContext}
+                  modelInputs={modelInputs}
+                  chooseWhenTie={
+                    "choose_when_tie" in artifactsInput &&
+                    artifactsInput?.choose_when_tie
+                  }
                 />
               )}
             </div>

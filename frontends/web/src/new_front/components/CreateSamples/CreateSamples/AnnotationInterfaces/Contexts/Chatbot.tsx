@@ -1,13 +1,16 @@
+import React, { FC, useEffect, useState } from "react";
+import { PacmanLoader } from "react-spinners";
+import Swal from "sweetalert2";
+import useFetch from "use-http";
+import parse from "html-react-parser";
+import Modal from "react-bootstrap/Modal";
+import { useTranslation } from "react-i18next";
+
 import GeneralButton from "new_front/components/Buttons/GeneralButton";
 import BasicInputSeveralRows from "new_front/components/Inputs/BasicInputSeveralRows";
 import EvaluateText from "new_front/components/Inputs/EvaluateText";
-import React, { FC, useEffect, useState } from "react";
-import { PacmanLoader } from "react-spinners";
-import useFetch from "use-http";
-import Swal from "sweetalert2";
 import { ChatbotProps } from "new_front/types/createSamples/createSamples/utils";
 import { Avatar } from "components/Avatar/Avatar";
-import parse from "html-react-parser";
 
 const Chatbot: FC<ChatbotProps> = ({
   instructions,
@@ -25,16 +28,25 @@ const Chatbot: FC<ChatbotProps> = ({
   updateModelInputs,
   setIsGenerativeContext,
   allowPaste,
+  modelInputs,
+  chooseWhenTie,
 }) => {
   const [prompt, setPrompt] = useState("");
   const [showSendButton, setShowSendButton] = useState(true);
   const [numInteractions, setNumInteractions] = useState(0);
   const [isAskingQuestion, setIsAskingQuestion] = useState(true);
-  const [newRespones, setNewResponses] = useState<any[]>([]);
+  const [newResponses, setNewResponses] = useState<any[]>([]);
   const { post, response, loading } = useFetch();
   const [responsesHistory, setResponsesHistory] = useState<
     { iteration: number; responses_model: any[] }[]
   >([]);
+  const [showReasonModal, setShowReasonModal] = useState(false);
+  const [badReason, setBadReason] = useState("");
+  const [currentGenerationId, setCurrentGenerationId] = useState<string | null>(
+    null
+  );
+  const [currentSelection, setCurrentSelection] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   // If optionsSlider does not exist always put isAskingQuestion to false
   // useEffect(() => {
@@ -42,6 +54,10 @@ const Chatbot: FC<ChatbotProps> = ({
   //     setIsAskingQuestion(false);
   //   }
   // }, [optionsSlider]);
+
+  const generateId = (): string => {
+    return `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  };
 
   const askQuestion = async () => {
     if (prompt !== "") {
@@ -78,12 +94,16 @@ const Chatbot: FC<ChatbotProps> = ({
             // window.location.reload();
           });
         }
+        const generationId = generateId();
         setNewResponses(
           generatedTexts.map((text: any) => ({
             ...text,
             score: 50,
+            generationId: generationId,
           })) as any
         );
+        setCurrentGenerationId(generationId);
+        setCurrentSelection(null);
         setIsAskingQuestion(false);
       }
     } else {
@@ -113,7 +133,16 @@ const Chatbot: FC<ChatbotProps> = ({
     setIsAskingQuestion(false);
   };
 
-  const saveHistory = () => {
+  const saveHistory = (option: string | null = null) => {
+    const reduceText = newResponses.reduce(
+      (max: { score: number }, answer: { score: number }) =>
+        answer.score > max.score ? answer : max
+    );
+
+    const choosenText = option
+      ? newResponses.find((text) => text.id === parseInt(option))
+      : reduceText;
+
     setChatHistory({
       ...chatHistory,
       user: [
@@ -132,14 +161,8 @@ const Chatbot: FC<ChatbotProps> = ({
             chatHistory.bot.length > 0
               ? chatHistory.bot[chatHistory.bot.length - 1].id + 1
               : 1,
-          text: newRespones.reduce(
-            (max: { score: number }, answer: { score: number }) =>
-              answer.score > max.score ? answer : max
-          ).text,
-          score: newRespones.reduce(
-            (max: { score: number }, answer: { score: number }) =>
-              answer.score > max.score ? answer : max
-          ).score,
+          text: choosenText.text,
+          score: choosenText.score,
         },
       ],
     });
@@ -151,7 +174,8 @@ const Chatbot: FC<ChatbotProps> = ({
       ...prevResponses,
       {
         iteration: numInteractions,
-        responses_model: newRespones,
+        responses_model: newResponses,
+        chosen_text: choosenText,
       },
     ]);
     updateModelInputs({
@@ -159,29 +183,105 @@ const Chatbot: FC<ChatbotProps> = ({
         ...responsesHistory,
         {
           iteration: numInteractions,
-          responses_model: newRespones,
+          responses_model: newResponses,
+          chosen_text: choosenText,
         },
       ],
     });
   };
 
-  const saveHistoryValidation = () => {
-    const isTied = newRespones.every(
-      (text) => text.score === newRespones[0].score && newRespones.length > 1
-    );
-    if (isTied) {
+  const handleOnClick = (option: string) => {
+    if (currentSelection === option) {
+      return;
+    }
+
+    setCurrentSelection(option);
+    if (option === "tie") {
+      setNewResponses(
+        newResponses.map((text: any) => ({
+          ...text,
+          score: 50,
+        }))
+      );
+
+      if (currentGenerationId) {
+        const existingReasons = modelInputs.all_bad_reasons || [];
+        const filteredReasons = existingReasons.filter(
+          (reason: any) => reason.generation_id !== currentGenerationId
+        );
+        updateModelInputs({
+          all_bad_reasons:
+            filteredReasons.length > 0 ? filteredReasons : undefined,
+        });
+      }
+    } else if (option === "all_bad") {
+      setNewResponses(
+        newResponses.map((text: any) => ({
+          ...text,
+          score: 0,
+        }))
+      );
+      setShowReasonModal(true);
+    } else {
+      if (currentGenerationId) {
+        const existingReasons = modelInputs.all_bad_reasons || [];
+        const filteredReasons = existingReasons.filter(
+          (reason: any) => reason.generation_id !== currentGenerationId
+        );
+        updateModelInputs({
+          all_bad_reasons:
+            filteredReasons.length > 0 ? filteredReasons : undefined,
+        });
+      }
+    }
+  };
+
+  const checkIsTied = () => {
+    if (newResponses.length <= 0) return false;
+
+    const maxScore = Math.max(...newResponses.map((r) => r.score));
+    const tiedResponses = newResponses.filter((r) => r.score === maxScore);
+    return tiedResponses.length > 1;
+  };
+
+  const saveHistoryValidation = async () => {
+    const isTied = checkIsTied();
+
+    if (isTied && !chooseWhenTie) {
       Swal.fire({
-        title: "There's a tie",
-        text: "Are you sure that you want to continue?",
+        title: t("common:messages.tie"),
+        text: t("common:messages.sureToContinue"),
         icon: "warning",
         showCancelButton: true,
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
+        confirmButtonText: t("common:buttons.yes"),
+        cancelButtonText: t("common:buttons.no"),
       }).then((result: any) => {
         if (result.isConfirmed) {
           saveHistory();
         }
       });
+    } else if (chooseWhenTie && isTied) {
+      const inputOptions = newResponses.reduce(
+        (options: { [key: string]: string }, text: any, index: number) => {
+          options[text.id] = `Option #${text.id + 1}`;
+          return options;
+        },
+        {}
+      );
+      const result = await Swal.fire({
+        title: "Select an option to continue",
+        input: "select",
+        inputOptions: inputOptions,
+        inputPlaceholder: "Select the option you want to continue with",
+        inputValidator: (value) => {
+          if (!value) {
+            return "You need to select an option!";
+          }
+        },
+      });
+      if (result.isConfirmed && result.value) {
+        saveHistory(result.value);
+      }
     } else {
       saveHistory();
     }
@@ -193,6 +293,40 @@ const Chatbot: FC<ChatbotProps> = ({
     finishSection();
     setIsGenerativeContext(false);
     // setFinishConversation(true);
+  };
+
+  const handleAllBadSubmit = () => {
+    setNewResponses(
+      newResponses.map((text: any) => ({
+        ...text,
+        score: 0,
+      }))
+    );
+    const existingReasons = modelInputs.all_bad_reasons || [];
+    updateModelInputs({
+      all_bad_reasons: [
+        ...existingReasons,
+        {
+          reason: badReason,
+          timestamp: Date.now(),
+          generation_id: currentGenerationId,
+          texts_affected: newResponses.map((text) => {
+            return {
+              id: text.id,
+              model: modelName,
+              text: text.text,
+            };
+          }),
+        },
+      ],
+    });
+    setShowReasonModal(false);
+    setBadReason("");
+  };
+
+  const handleReasonModalClose = () => {
+    setShowReasonModal(false);
+    setBadReason("");
   };
 
   return (
@@ -219,7 +353,7 @@ const Chatbot: FC<ChatbotProps> = ({
                                 isThumbnail={true}
                                 theme="dark"
                               />
-                              <span className="px-3 py-1 rounded-lg inline-block rounded-br-none bg-[#f0f2f5] text-letter-color">
+                              <span className="px-3 py-1 rounded-lg inline-block rounded-br-none bg-[#f0f2f5] text-white bg-third-color">
                                 {message.text}
                               </span>
                             </div>
@@ -231,7 +365,7 @@ const Chatbot: FC<ChatbotProps> = ({
                           <div className="flex flex-col items-end order-1 max-w-lg mx-2 space-y-2">
                             <div className="min-w-[16rem] md:min-w-[26rem] lg:min-w-[32rem]">
                               <textarea
-                                className="inline-block w-full px-3 py-2 text-white rounded-lg rounded-bl-none bg-third-color"
+                                className="inline-block w-full px-3 py-2 text-letter-color rounded-lg rounded-bl-none"
                                 disabled={true}
                                 value={chatHistory.bot[index].text}
                                 rows={5}
@@ -258,7 +392,7 @@ const Chatbot: FC<ChatbotProps> = ({
                             isThumbnail={true}
                             theme="dark"
                           />
-                          <span className="px-3 py-1 rounded-lg inline-block rounded-br-none bg-[#f0f2f5] text-letter-color">
+                          <span className="px-3 py-1 rounded-lg inline-block rounded-br-none bg-[#f0f2f5] text-letter-color text-white bg-third-color">
                             {prompt}
                           </span>
                         </div>
@@ -281,20 +415,80 @@ const Chatbot: FC<ChatbotProps> = ({
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-6 pt-8">
-                  {newRespones &&
-                    newRespones.map((response, key) => (
+                  {newResponses &&
+                    newResponses.map((response, key) => (
                       <EvaluateText
                         key={key}
                         name={response.model_letter}
                         text={response.text}
                         id={response.id}
-                        texts={newRespones}
+                        texts={newResponses}
                         setTexts={setNewResponses}
                         optionsSlider={optionsSlider}
                         score={response.score}
+                        handleWhenButtons={handleOnClick}
                       />
                     ))}
+                  {newResponses.length > 0 && !optionsSlider && (
+                    <div className="flex justify-end">
+                      <GeneralButton
+                        onClick={() => handleOnClick("tie")}
+                        text={"It's a tie 🤝 2"}
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                        active={currentSelection === "tie"}
+                      />
+                    </div>
+                  )}
+                  {newResponses.length > 0 && !optionsSlider && (
+                    <div>
+                      <GeneralButton
+                        onClick={() => handleOnClick("all_bad")}
+                        text={"All are bad 🚫"}
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                        active={currentSelection === "all_bad"}
+                      />
+                    </div>
+                  )}
                 </div>
+                {showReasonModal && (
+                  <Modal
+                    show={showReasonModal}
+                    onHide={handleReasonModalClose}
+                    size="lg"
+                  >
+                    <Modal.Header closeButton>
+                      <Modal.Title>Why are all answers bad?</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      <div className="mb-3">
+                        <label htmlFor="reasonTextarea" className="form-label">
+                          Please explain why you think all the generated answers
+                          are inadequate:
+                        </label>
+                        <textarea
+                          id="reasonTextarea"
+                          className="form-control"
+                          rows={4}
+                          value={badReason}
+                          onChange={(e) => setBadReason(e.target.value)}
+                          placeholder="Enter your reason here..."
+                        />
+                      </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <GeneralButton
+                        onClick={handleReasonModalClose}
+                        text="Cancel"
+                        className="border-0 font-weight-bold btn-secondary"
+                      />
+                      <GeneralButton
+                        onClick={handleAllBadSubmit}
+                        text="Submit"
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                      />
+                    </Modal.Footer>
+                  </Modal>
+                )}
                 <div className="flex justify-end gap-2 ">
                   {isAskingQuestion ? (
                     <>
