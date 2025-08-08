@@ -19,6 +19,8 @@ export type ChatbotProps = {
   setFinishConversation: (finishConversation: boolean) => void;
   updateModelInputs: (modelInputs: any) => void;
   setIsGenerativeContext: (isGenerativeContext: boolean) => void;
+  modelInputs?: any;
+  chooseWhenTie?: boolean;
 };
 
 export type SimpleChatbotProps = {

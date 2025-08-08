@@ -6,6 +6,7 @@ type GeneralButtonProps = {
   className: string;
   onClick: () => void;
   disabled?: boolean;
+  active?: boolean;
 };
 
 const GeneralButton: FC<GeneralButtonProps> = ({
@@ -13,9 +14,15 @@ const GeneralButton: FC<GeneralButtonProps> = ({
   className,
   onClick,
   disabled,
+  active,
 }) => {
   return (
-    <Button className={className} onClick={onClick} disabled={disabled}>
+    <Button
+      className={className}
+      onClick={onClick}
+      disabled={disabled}
+      active={active}
+    >
       {text}
     </Button>
   );

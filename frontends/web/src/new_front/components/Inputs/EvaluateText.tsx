@@ -1,5 +1,5 @@
-import { CreateInterfaceContext } from "new_front/context/CreateInterface/Context";
-import React, { FC, useContext, useState } from "react";
+import React, { FC, useEffect } from "react";
+import GeneralButton from "new_front/components/Buttons/GeneralButton";
 
 type EvaluateTextProps = {
   text: string;
@@ -11,6 +11,7 @@ type EvaluateTextProps = {
   disabled?: boolean;
   bestAnswer?: string;
   score?: number;
+  handleWhenButtons?: any;
 };
 
 const EvaluateText: FC<EvaluateTextProps> = ({
@@ -22,6 +23,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
   disabled = false,
   bestAnswer,
   score = 50,
+  handleWhenButtons,
 }) => {
   const handleUpdateScore = (event: any) => {
     setTexts(
@@ -33,8 +35,27 @@ const EvaluateText: FC<EvaluateTextProps> = ({
           };
         }
         return text;
-      }),
+      })
     );
+  };
+
+  const handleOnClick = (id: string) => {
+    setTexts(
+      texts.map((text: any) => {
+        if (text.id === id) {
+          return {
+            ...text,
+            score: 100,
+          };
+        } else {
+          return {
+            ...text,
+            score: 0,
+          };
+        }
+      })
+    );
+    handleWhenButtons("top");
   };
 
   return (
@@ -72,7 +93,18 @@ const EvaluateText: FC<EvaluateTextProps> = ({
           </div>
         )}
 
-        <div className="flex justify-between w-full"></div>
+        {!optionsSlider && (
+          <div className="flex items-center justify-end w-full gap-2 px-4 pt-4 pb-2 border-t">
+            <span className="text-gray-500 ">Option # {id + 1}</span>
+            <GeneralButton
+              key={id}
+              onClick={() => handleOnClick(id)}
+              text={"Top Answer 👍👍"}
+              className="border-0 font-weight-bold light-gray-bg task-action-btn"
+              active={score === 100}
+            />
+          </div>
+        )}
       </div>
     </form>
   );
