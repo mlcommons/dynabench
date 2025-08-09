@@ -557,6 +557,7 @@ const EvaluateTextsGenerative: FC<
                             text={"It's a tie 🤝"}
                             className="border-0 font-weight-bold light-gray-bg task-action-btn"
                             active={currentSelection === "tie"}
+                            disabled={finishConversation}
                           />
                         </div>
                       )}
@@ -567,20 +568,25 @@ const EvaluateTextsGenerative: FC<
                             text={"All are bad 🚫"}
                             className="border-0 font-weight-bold light-gray-bg task-action-btn"
                             active={currentSelection === "all_bad"}
+                            disabled={finishConversation}
                           />
                         </div>
                       )}
                     </div>
                   )}
-                  {!finishConversation && (
-                    <div className="grid col-span-1 py-3 justify-items-end">
-                      <GeneralButton
-                        onClick={handleSelectedText}
-                        text={t("common:buttons.send_rating")}
-                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                      />
-                    </div>
-                  )}
+                  {!finishConversation &&
+                    Object.keys(bestAnswer).length === 0 && (
+                      <div className="grid col-span-1 py-3 justify-items-end">
+                        <GeneralButton
+                          onClick={handleSelectedText}
+                          text={t("common:buttons.send_rating")}
+                          className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                          disabled={
+                            !currentSelection && !artifactsInput?.options_slider
+                          }
+                        />
+                      </div>
+                    )}
                 </>
               )}
               {showChatbot && (

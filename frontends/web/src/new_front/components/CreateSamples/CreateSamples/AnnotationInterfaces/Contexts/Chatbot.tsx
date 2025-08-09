@@ -573,6 +573,7 @@ const Chatbot: FC<ChatbotProps> = ({
                           onClick={saveHistoryValidation}
                           text="Save"
                           className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
+                          disabled={!currentSelection && !optionsSlider}
                         />
                       )}
                     </div>
