@@ -228,6 +228,7 @@ const EvaluateTextsGenerative: FC<
     const chosenText = option
       ? texts.find((text) => text.id === parseInt(option))
       : reducedText;
+    const secondaryTexts = texts.filter((text) => text.id !== chosenText?.id);
 
     setChatHistory({
       ...chatHistory,
@@ -236,6 +237,7 @@ const EvaluateTextsGenerative: FC<
         {
           id: "1",
           text: chosenText.text,
+          other_texts: secondaryTexts,
         },
       ],
     });
@@ -324,7 +326,6 @@ const EvaluateTextsGenerative: FC<
       }
 
       if (!("need_consent" in artifactsInput) || artifactsInput.need_consent) {
-        console.log("need consent");
         checkIfUserIsSignedInConsent();
       } else {
         setShowLoader(false);
@@ -445,10 +446,6 @@ const EvaluateTextsGenerative: FC<
     setShowReasonModal(false);
     setBadReason("");
   };
-
-  useEffect(() => {
-    console.log("texts", texts);
-  }, [texts]);
 
   return (
     <>
@@ -608,6 +605,10 @@ const EvaluateTextsGenerative: FC<
                   chooseWhenTie={
                     "choose_when_tie" in artifactsInput &&
                     artifactsInput?.choose_when_tie
+                  }
+                  showChosenHistory={
+                    "show_chosen_history" in artifactsInput &&
+                    artifactsInput?.show_chosen_history
                   }
                 />
               )}
