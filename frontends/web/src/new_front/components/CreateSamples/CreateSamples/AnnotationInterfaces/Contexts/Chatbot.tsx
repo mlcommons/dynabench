@@ -30,6 +30,7 @@ const Chatbot: FC<ChatbotProps> = ({
   allowPaste,
   modelInputs,
   chooseWhenTie,
+  showChosenHistory,
 }) => {
   const [prompt, setPrompt] = useState("");
   const [showSendButton, setShowSendButton] = useState(true);
@@ -142,6 +143,9 @@ const Chatbot: FC<ChatbotProps> = ({
     const choosenText = option
       ? newResponses.find((text) => text.id === parseInt(option))
       : reduceText;
+    const secondaryText = newResponses.filter(
+      (text) => text.id !== choosenText?.id
+    );
 
     setChatHistory({
       ...chatHistory,
@@ -163,6 +167,7 @@ const Chatbot: FC<ChatbotProps> = ({
               : 1,
           text: choosenText.text,
           score: choosenText.score,
+          other_texts: secondaryText,
         },
       ],
     });
@@ -361,22 +366,74 @@ const Chatbot: FC<ChatbotProps> = ({
                         </div>
                       </div>
                       <div className="chat-message">
-                        <div className="flex items-end justify-end">
-                          <div className="flex flex-col items-end order-1 max-w-lg mx-2 space-y-2">
-                            <div className="min-w-[16rem] md:min-w-[26rem] lg:min-w-[32rem]">
-                              <textarea
-                                className="inline-block w-full px-3 py-2 text-letter-color rounded-lg rounded-bl-none"
-                                disabled={true}
-                                value={chatHistory.bot[index].text}
-                                rows={5}
-                              />
+                        <div
+                          className={`flex ${
+                            showChosenHistory ? "items-start" : "items-end"
+                          } justify-end mt-3`}
+                        >
+                          {showChosenHistory ? (
+                            <div className="flex flex-col items-end order-1 max-w-5xl w-full">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-2">
+                                {chatHistory.bot[index].other_texts.length >
+                                  0 &&
+                                  chatHistory.bot[index].other_texts?.map(
+                                    (text: any, i: number) => (
+                                      <div
+                                        key={`index${i}id${text.id}`}
+                                        className="w-full"
+                                      >
+                                        <div className="relative p-3 bg-gray-100 border border-gray-200 rounded-lg">
+                                          <textarea
+                                            className="inline-block w-full px-3 py-2 text-letter-color rounded-lg rounded-bl-none"
+                                            disabled={true}
+                                            value={text.text}
+                                            rows={5}
+                                          />
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                <div className="w-full">
+                                  <div className="relative p-1 bg-green-50 border-2 border-green-300 rounded-lg shadow-md">
+                                    <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-semibold">
+                                      ✓ Selected
+                                    </div>
+                                    <textarea
+                                      className="w-full mt-6 p-2 text-letter-color bg-transparent border-0 resize-none focus:outline-none font-medium"
+                                      disabled={true}
+                                      value={chatHistory.bot[index].text}
+                                      rows={5}
+                                    />
+                                  </div>
+                                  <div className="flex justify-end mt-2">
+                                    <img
+                                      src="https://cdn-icons-png.flaticon.com/512/427/427995.png?w=1060&t=st=1687313158~exp=1687313758~hmac=a9f0bae6d29fe6f316f7fa531188e34fe0f562db16c7ea5fa53b3105bab66f6f"
+                                      alt="My profile"
+                                      className="rounded-full w-7 h-7"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                          <img
-                            src="https://cdn-icons-png.flaticon.com/512/427/427995.png?w=1060&t=st=1687313158~exp=1687313758~hmac=a9f0bae6d29fe6f316f7fa531188e34fe0f562db16c7ea5fa53b3105bab66f6f"
-                            alt="My profile"
-                            className="order-2 rounded-full w-7 h-7"
-                          />
+                          ) : (
+                            <div className="flex flex-col items-end order-1 mx-2 max-w-lg">
+                              <div className="min-w-[16rem] md:min-w-[26rem] lg:min-w-[32rem]">
+                                <textarea
+                                  className="inline-block w-full px-3 py-2 text-letter-color rounded-lg rounded-bl-none"
+                                  disabled={true}
+                                  value={chatHistory.bot[index].text}
+                                  rows={5}
+                                />
+                              </div>
+                              <div className="flex justify-end mt-2">
+                                <img
+                                  src="https://cdn-icons-png.flaticon.com/512/427/427995.png?w=1060&t=st=1687313158~exp=1687313758~hmac=a9f0bae6d29fe6f316f7fa531188e34fe0f562db16c7ea5fa53b3105bab66f6f"
+                                  alt="My profile"
+                                  className="order-2 rounded-full w-7 h-7"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -433,7 +490,7 @@ const Chatbot: FC<ChatbotProps> = ({
                     <div className="flex justify-end">
                       <GeneralButton
                         onClick={() => handleOnClick("tie")}
-                        text={"It's a tie 🤝 2"}
+                        text={"It's a tie 🤝"}
                         className="border-0 font-weight-bold light-gray-bg task-action-btn"
                         active={currentSelection === "tie"}
                       />
@@ -516,6 +573,7 @@ const Chatbot: FC<ChatbotProps> = ({
                           onClick={saveHistoryValidation}
                           text="Save"
                           className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
+                          disabled={!currentSelection && !optionsSlider}
                         />
                       )}
                     </div>

@@ -228,6 +228,7 @@ const EvaluateTextsGenerative: FC<
     const chosenText = option
       ? texts.find((text) => text.id === parseInt(option))
       : reducedText;
+    const secondaryTexts = texts.filter((text) => text.id !== chosenText?.id);
 
     setChatHistory({
       ...chatHistory,
@@ -236,6 +237,7 @@ const EvaluateTextsGenerative: FC<
         {
           id: "1",
           text: chosenText.text,
+          other_texts: secondaryTexts,
         },
       ],
     });
@@ -324,7 +326,6 @@ const EvaluateTextsGenerative: FC<
       }
 
       if (!("need_consent" in artifactsInput) || artifactsInput.need_consent) {
-        console.log("need consent");
         checkIfUserIsSignedInConsent();
       } else {
         setShowLoader(false);
@@ -446,10 +447,6 @@ const EvaluateTextsGenerative: FC<
     setBadReason("");
   };
 
-  useEffect(() => {
-    console.log("texts", texts);
-  }, [texts]);
-
   return (
     <>
       {!showLoader ? (
@@ -560,6 +557,7 @@ const EvaluateTextsGenerative: FC<
                             text={"It's a tie 🤝"}
                             className="border-0 font-weight-bold light-gray-bg task-action-btn"
                             active={currentSelection === "tie"}
+                            disabled={finishConversation}
                           />
                         </div>
                       )}
@@ -570,20 +568,25 @@ const EvaluateTextsGenerative: FC<
                             text={"All are bad 🚫"}
                             className="border-0 font-weight-bold light-gray-bg task-action-btn"
                             active={currentSelection === "all_bad"}
+                            disabled={finishConversation}
                           />
                         </div>
                       )}
                     </div>
                   )}
-                  {!finishConversation && (
-                    <div className="grid col-span-1 py-3 justify-items-end">
-                      <GeneralButton
-                        onClick={handleSelectedText}
-                        text={t("common:buttons.send_rating")}
-                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                      />
-                    </div>
-                  )}
+                  {!finishConversation &&
+                    Object.keys(bestAnswer).length === 0 && (
+                      <div className="grid col-span-1 py-3 justify-items-end">
+                        <GeneralButton
+                          onClick={handleSelectedText}
+                          text={t("common:buttons.send_rating")}
+                          className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                          disabled={
+                            !currentSelection && !artifactsInput?.options_slider
+                          }
+                        />
+                      </div>
+                    )}
                 </>
               )}
               {showChatbot && (
@@ -608,6 +611,10 @@ const EvaluateTextsGenerative: FC<
                   chooseWhenTie={
                     "choose_when_tie" in artifactsInput &&
                     artifactsInput?.choose_when_tie
+                  }
+                  showChosenHistory={
+                    "show_chosen_history" in artifactsInput &&
+                    artifactsInput?.show_chosen_history
                   }
                 />
               )}
