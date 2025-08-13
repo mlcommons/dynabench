@@ -102,6 +102,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
               text={"Top Answer 👍👍"}
               className="border-0 font-weight-bold light-gray-bg task-action-btn"
               active={score === 100}
+              disabled={disabled}
             />
           </div>
         )}

@@ -129,10 +129,11 @@ const EvaluateTextsGenerative: FC<
           window.location.reload();
         }
         setTexts(
-          generatedTexts.map((text: any) => ({
+          generatedTexts.map((text: any, index: number) => ({
             ...text,
             score: 50,
             generationId: generationId,
+            originalPosition: index + 1,
           }))
         );
         updateModelInputs({
@@ -228,7 +229,13 @@ const EvaluateTextsGenerative: FC<
     const chosenText = option
       ? texts.find((text) => text.id === parseInt(option))
       : reducedText;
-    const secondaryTexts = texts.filter((text) => text.id !== chosenText?.id);
+    const secondaryTexts = texts
+      .filter((text) => text.id !== chosenText?.id)
+      .map((text) => ({
+        id: text.id,
+        text: text.text,
+        originalPosition: text.originalPosition,
+      }));
 
     setChatHistory({
       ...chatHistory,
@@ -237,6 +244,7 @@ const EvaluateTextsGenerative: FC<
         {
           id: "1",
           text: chosenText.text,
+          originalPosition: chosenText.originalPosition,
           other_texts: secondaryTexts,
         },
       ],

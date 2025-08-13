@@ -97,10 +97,11 @@ const Chatbot: FC<ChatbotProps> = ({
         }
         const generationId = generateId();
         setNewResponses(
-          generatedTexts.map((text: any) => ({
+          generatedTexts.map((text: any, index: number) => ({
             ...text,
             score: 50,
             generationId: generationId,
+            originalPosition: index + 1,
           })) as any
         );
         setCurrentGenerationId(generationId);
@@ -380,7 +381,11 @@ const Chatbot: FC<ChatbotProps> = ({
                                     (text: any, i: number) => (
                                       <div
                                         key={`index${i}id${text.id}`}
-                                        className="w-full"
+                                        className={`w-full order-${
+                                          text.originalPosition <= 12
+                                            ? text.originalPosition
+                                            : "last"
+                                        }`}
                                       >
                                         <div className="relative p-3 bg-gray-100 border border-gray-200 rounded-lg">
                                           <textarea
@@ -393,7 +398,14 @@ const Chatbot: FC<ChatbotProps> = ({
                                       </div>
                                     )
                                   )}
-                                <div className="w-full">
+                                <div
+                                  className={`w-full order-${
+                                    chatHistory.bot[index].originalPosition <=
+                                    12
+                                      ? chatHistory.bot[index].originalPosition
+                                      : "last"
+                                  }`}
+                                >
                                   <div className="relative p-1 bg-green-50 border-2 border-green-300 rounded-lg shadow-md">
                                     <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-semibold">
                                       ✓ Selected
