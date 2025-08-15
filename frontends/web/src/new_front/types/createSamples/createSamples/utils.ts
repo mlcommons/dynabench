@@ -21,6 +21,7 @@ export type ChatbotProps = {
   setIsGenerativeContext: (isGenerativeContext: boolean) => void;
   modelInputs?: any;
   chooseWhenTie?: boolean;
+  showChosenHistory?: boolean;
 };
 
 export type SimpleChatbotProps = {
