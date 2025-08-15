@@ -168,6 +168,7 @@ const Chatbot: FC<ChatbotProps> = ({
               : 1,
           text: choosenText.text,
           score: choosenText.score,
+          originalPosition: choosenText.originalPosition,
           other_texts: secondaryText,
         },
       ],
