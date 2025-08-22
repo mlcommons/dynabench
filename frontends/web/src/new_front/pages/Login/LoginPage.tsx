@@ -43,7 +43,7 @@ const LoginPage: FC = () => {
 
   const handleLogin = () => {
     axios
-      .post(`${process.env.REACT_APP_API_HOST}/authenticate`, {
+      .post(`${process.env.REACT_APP_API_HOST_2}/user_public/authenticate`, {
         email: email,
         password: password,
       })
@@ -52,13 +52,14 @@ const LoginPage: FC = () => {
         updateState({
           user: response.data.user,
         });
+        console.log("Login successful", response);
         if (taskCode && srcURL) {
           history.push(
-            `/tasks/${taskCode}${srcURL}?assignmentId=${assignmentId}&treatmentId=${treatmentId}`
+            `/tasks/${taskCode}${srcURL}?assignmentId=${assignmentId}&treatmentId=${treatmentId}`,
           );
         } else if (taskCode) {
           history.push(
-            `/tasks/${taskCode}/create?assignmentId=${assignmentId}&treatmentId=${treatmentId}`
+            `/tasks/${taskCode}/create?assignmentId=${assignmentId}&treatmentId=${treatmentId}`,
           );
         } else if (originalPath === "/") {
           history.push("/account");
