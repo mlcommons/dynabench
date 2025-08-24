@@ -401,7 +401,7 @@ class ScoreService:
                 self.email_helper.send(
                     contact=user.email,
                     cc_contact=self.email_sender,
-                    template_name="model_inference_failed.txt",
+                    template_name="model_evaluation_failed.txt",
                     msg_dict={"name": model["name"], "message": message},
                     subject=f"Model {model['name']} evaluation failed.",
                 )
@@ -418,11 +418,57 @@ class ScoreService:
                 round_info = self.round_repository.get_round_info_by_round_and_task(
                     model["tid"], round_id
                 )
+
+                # Get task configuration to determine score handling
+                task_config = self.task_repository.get_config_file_by_task_id(
+                    model["tid"]
+                )[0]
+                task_config = yaml.safe_load(task_config)
+
                 metadata_json = dict(scores)
 
+                # Determine the main performance metric based on task configuration
+                perf_metric = task_config.get("perf_metric", {})
+                if isinstance(perf_metric, list):
+                    main_metric = perf_metric[0].get("type", "score")
+                elif isinstance(perf_metric, dict):
+                    main_metric = perf_metric.get("type", "score")
+                else:
+                    main_metric = "score"  # Default fallback
+
+                # Extract the score value - handle different formats
+                score_value = None
+
+                # First, try to extract from nested results (for RunPod format)
+                if "results" in metadata_json and "score" in metadata_json["results"]:
+                    score_value = metadata_json["results"]["score"]
+                elif "score" in metadata_json:
+                    score_value = metadata_json["score"]
+                elif main_metric in metadata_json:
+                    score_value = metadata_json[main_metric]
+                elif "Standard_CER_15_WORSE" in metadata_json:
+                    # Backward compatibility for speech tasks
+                    score_value = metadata_json["Standard_CER_15_WORSE"]
+                    main_metric = "Standard_CER_15_WORSE"
+                else:
+                    raise ValueError(f"No score found in metadata: {metadata_json}")
+
+                # Format the score appropriately based on metric type
+                if main_metric == "Standard_CER_15_WORSE":
+                    # Speech recognition - percentage format
+                    pretty_perf = f"{100 * score_value:.2f}%"
+                else:
+                    # Other tasks - decimal format
+                    pretty_perf = f"{score_value:.4f}"
+
+                # Store the main metric type in metadata for reference
+                metadata_json["main_metric"] = main_metric
+                metadata_json["task_perf_metric"] = perf_metric
+
+                # Build the score structure with proper metric information
                 new_score = {
-                    "perf": metadata_json["Standard_CER_15_WORSE"],
-                    "pretty_perf": f"{100*metadata_json['Standard_CER_15_WORSE']:.2f}%",
+                    "perf": score_value,
+                    "pretty_perf": pretty_perf,
                     "mid": model_id,
                     "r_realid": round_info.id,
                     "did": datasets[0]["id"],
@@ -437,7 +483,7 @@ class ScoreService:
                     cc_contact=self.email_sender,
                     template_name="model_evaluation_sucessful.txt",
                     msg_dict={"name": model["name"], "model_id": model["id"]},
-                    subject=f"Model {model['name']} evaluation succeeded.",
+                    subject=f"Model {model['name']} evaluation completed successfully.",
                 )
                 print(
                     f"sent email evaluation sucessful to {user.email} model {model['name']} "
