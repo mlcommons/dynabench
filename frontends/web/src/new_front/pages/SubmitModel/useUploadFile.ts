@@ -4,6 +4,8 @@ import Swal from "sweetalert2";
 
 const useUploadFile = () => {
   const [progress, setProgress] = useState(0);
+  const token = localStorage.getItem("id_token") || "";
+  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
   const sendModelData = (formData: FormData, heavy: boolean = false) => {
     const url = `${process.env.REACT_APP_API_HOST_2}${
@@ -20,17 +22,71 @@ const useUploadFile = () => {
           setProgress(p.loaded / p.total);
         },
       })
-      .then(() => {
+      .then((response) => {
         setProgress(1);
-        return true;
+        if (response.status >= 200 && response.status < 300) {
+          return {
+            success: true,
+            data: response.data,
+            message: "Upload successful",
+          };
+        } else {
+          throw new Error(`Unexpected response status: ${response.status}`);
+        }
       })
-      .catch(() => {
+      .catch((error) => {
         setProgress(0);
+
+        let errorMessage = "Something went wrong!";
+        let errorTitle = "Upload Failed";
+        let onCloseAction = false;
+
+        if (error.response) {
+          const status = error.response.status;
+          const data = error.response.data;
+
+          switch (status) {
+            case 401:
+              errorTitle = "Authentication Required";
+              errorMessage = "Please log in again to continue.";
+              onCloseAction = true;
+              break;
+            case 500:
+              errorTitle = "Server Error";
+              errorMessage =
+                data.message || "Your model could not be processed.";
+              break;
+            default:
+              errorMessage =
+                data.message || `Server error (${status}). Please try again.`;
+          }
+        } else if (error.request) {
+          errorTitle = "Connection Error";
+          errorMessage =
+            "Unable to connect to the server. Please check your internet connection and try again.";
+        } else if (error.code === "ECONNABORTED") {
+          errorTitle = "Upload Timeout";
+          errorMessage =
+            "The upload is taking too long. Please try again with a smaller file.";
+        } else {
+          errorTitle = "Unexpected Error";
+          errorMessage =
+            error.message || "An unexpected error occurred. Please try again.";
+        }
+
         Swal.fire({
           icon: "error",
-          title: "Oops...",
-          text: "Something went wrong!",
+          title: errorTitle,
+          text: errorMessage,
+          willClose: () => {
+            if (onCloseAction) {
+              localStorage.removeItem("id_token");
+              window.location.href = "/login";
+            }
+          },
         });
+
+        return { success: false, error: error, message: errorMessage };
       });
   };
 
