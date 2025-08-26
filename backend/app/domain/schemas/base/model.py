@@ -91,12 +91,8 @@ class DownloadAllExamplesRequest(BaseModel):
     task_id: int
 
 
-class UploadBigModelRequest(BaseModel):
-    model_name: str
-    file_name: str
+class UploadBigModelRequest(BaseforModelRequest):
     content_type: str
-    user_id: int
-    task_code: str
     parts_count: int
 
 
@@ -108,6 +104,7 @@ class PreSignedURL(BaseModel):
 class BatchURLsResponse(BaseModel):
     upload_id: str
     urls: List
+    model_id: int
 
 
 class FilePart(BaseModel):
@@ -116,6 +113,7 @@ class FilePart(BaseModel):
 
 
 class CompleteBigModelUploadRequest(BaseforModelRequest):
+    model_id: int
     upload_id: str
     parts: List[FilePart]
 
@@ -126,3 +124,4 @@ class AbortMultipartRequest(BaseModel):
     model_name: str
     user_id: int
     file_name: str
+    model_id: int
