@@ -92,14 +92,14 @@ async def upload_model_to_s3_and_evaluate(
 
 
 @router.post("/heavy_evaluation")
-def heavy_evaluation(
+async def heavy_evaluation(
     background_tasks: BackgroundTasks,
     model: UploadModelToS3AndEvaluateRequest = Depends(
         UploadModelToS3AndEvaluateRequest
     ),
 ):
     model_service = ModelService()
-    data = model_service.upload_and_create_model(
+    data = model_service.create_and_upload_model(
         model.model_name,
         model.description,
         model.num_paramaters,
@@ -127,8 +127,19 @@ def heavy_evaluation(
 
 
 @router.post("/initiate-mutipart-upload", response_model=BatchURLsResponse)
-def initiate_multipart_upload(model: UploadBigModelRequest):
-    return ModelService().initiate_multipart_upload(
+async def initiate_multipart_upload(model: UploadBigModelRequest):
+    model_service = ModelService()
+    data = model_service.create_model_for_multipart_upload(
+        model.model_name,
+        model.description,
+        model.num_paramaters,
+        model.languages,
+        model.license,
+        model.user_id,
+        model.task_code,
+    )
+    return model_service.initiate_multipart_upload(
+        data["model_id"],
         model.model_name,
         model.file_name,
         model.content_type,
@@ -139,8 +150,9 @@ def initiate_multipart_upload(model: UploadBigModelRequest):
 
 
 @router.post("/abort-mutipart-upload")
-def abort_multipart_upload(model: AbortMultipartRequest):
-    return ModelService().abort_multipart_upload(
+async def abort_multipart_upload(model: AbortMultipartRequest):
+    return await ModelService().abort_multipart_upload(
+        model.model_id,
         model.upload_id,
         model.task_code,
         model.model_name,
@@ -150,28 +162,19 @@ def abort_multipart_upload(model: AbortMultipartRequest):
 
 
 @router.post("/complete-multipart-upload")
-def complete_multipart_upload(
+async def complete_multipart_upload(
     model: CompleteBigModelUploadRequest,
     background_tasks: BackgroundTasks,
 ):
     model_service = ModelService()
-    model_service.complete_multipart_upload(
+    data = model_service.complete_multipart_upload(
+        model.model_id,
         model.upload_id,
         model.parts,
         model.user_id,
         model.task_code,
         model.model_name,
         model.file_name,
-    )
-    data = model_service.create_model(
-        model.model_name,
-        model.description,
-        model.num_paramaters,
-        model.languages,
-        model.license,
-        model.file_name,
-        model.user_id,
-        model.task_code,
     )
     background_tasks.add_task(
         model_service.run_heavy_evaluation,
