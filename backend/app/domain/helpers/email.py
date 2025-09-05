@@ -5,6 +5,7 @@
 import os
 import pathlib
 import smtplib
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from string import Template
@@ -44,6 +45,7 @@ class EmailHelper:
         template_name: str = "",
         msg_dict: dict = {},
         subject: str = "",
+        attachments=None,
     ):
         try:
             msg = MIMEMultipart()
@@ -56,11 +58,30 @@ class EmailHelper:
             msg.set_charset("utf-8")
             msg["Subject"] = subject
             msg.attach(MIMEText(message, "plain"))
+
+            # Attach files if provided. Expected format: list of (filename, content)
+            if attachments:
+                for attachment in attachments:
+                    try:
+                        filename, content = attachment
+                        if isinstance(content, str):
+                            content = content.encode("utf-8")
+                        part = MIMEApplication(content, _subtype="json")
+                        part.add_header(
+                            "Content-Disposition", "attachment", filename=filename
+                        )
+                        msg.attach(part)
+                    except Exception as _:
+                        print(f"Error attaching attachment {filename}: {_}")
+                        continue
             server = smtplib.SMTP(self.host, self.port)
             server.ehlo()
             server.starttls()
             server.login(self.login, self.pwd)
-            server.sendmail(self.login, contact, msg.as_string())
+            recipients = [contact]
+            if cc_contact:
+                recipients.append(cc_contact)
+            server.sendmail(self.login, recipients, msg.as_string())
             server.close()
             return f"e-mail sended to {contact}"
 
