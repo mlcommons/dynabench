@@ -30,7 +30,7 @@ type Dictionary = { [key: string]: any };
 
 const cleanUpSelection = (
   selection: Array<Dictionary>,
-  keyToRemove: string,
+  keyToRemove: string
 ) => {
   const result: Array<Record<string, any>> = [];
 
@@ -75,7 +75,7 @@ const SelectMultipleTextMultipleTags: FC<
   const [lastIndex, setLastIndex] = useState<number>(-1);
   const [rtl, setRTL] = useState<boolean>(false);
   const { updateAmountExamplesCreatedToday } = useContext(
-    CreateInterfaceContext,
+    CreateInterfaceContext
   );
 
   const location = useLocation();
@@ -86,7 +86,7 @@ const SelectMultipleTextMultipleTags: FC<
   useEffect(() => {
     console.log(
       "SelectMultipleTextMultipleTags received instruction:",
-      instruction,
+      instruction
     );
     if (instruction?.preselection) {
       console.log("instruction.preselection:", instruction.preselection);
@@ -126,7 +126,7 @@ const SelectMultipleTextMultipleTags: FC<
     if (preferedTag) {
       setTagSelection(localTags.find((tag: any) => tag.value === preferedTag));
       handleSubmit(
-        localTags.find((tag: any) => tag.value === preferedTag)?.back_label,
+        localTags.find((tag: any) => tag.value === preferedTag)?.back_label
       );
     }
   }, [preferedTag]);
@@ -173,7 +173,7 @@ const SelectMultipleTextMultipleTags: FC<
           distinctive: generative_context?.distinctive,
           user_id: userId,
         }),
-      },
+      }
     )
       .then((response) => response.json())
       .then((data) => {
@@ -187,7 +187,7 @@ const SelectMultipleTextMultipleTags: FC<
             if (value !== field_names_for_the_model?.default_tag) {
               const predefault = localTags.filter(
                 (option: any) =>
-                  option.back_label === field_names_for_the_model?.default_tag,
+                  option.back_label === field_names_for_the_model?.default_tag
               );
               setTagSelection(predefault[0]);
               handleSubmit(field_names_for_the_model?.default_tag);
@@ -219,7 +219,7 @@ const SelectMultipleTextMultipleTags: FC<
           if (value !== field_names_for_the_model?.default_tag) {
             const predefault = localTags.filter(
               (option: any) =>
-                option.back_label === field_names_for_the_model?.default_tag,
+                option.back_label === field_names_for_the_model?.default_tag
             );
             setTagSelection(predefault[0]);
             handleSubmit(field_names_for_the_model?.default_tag);
@@ -300,11 +300,11 @@ const SelectMultipleTextMultipleTags: FC<
     }
     const start: number = Math.min(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     const end: number = Math.max(
       value[valueLength - 1].start,
-      value[valueLength - 1].end,
+      value[valueLength - 1].end
     );
     if (
       valueLength > 0 &&
@@ -318,7 +318,7 @@ const SelectMultipleTextMultipleTags: FC<
     const already = selectionInfo.find(
       (val: any) =>
         (val.start < start && val.end > start) ||
-        (val.start < end && val.end > start),
+        (val.start < end && val.end > start)
     );
     value[valueLength - 1].start = start;
     value[valueLength - 1].end = end;
@@ -413,7 +413,7 @@ const SelectMultipleTextMultipleTags: FC<
               </div>
             </div>
             <div className="my-3 gap-4 grid grid-cols-3 sticky top-4">
-              <div className="col-span-2">
+              <div className="col-span-2 pb-3">
                 <span translate="no">
                   <DropdownSearch
                     options={localTags}

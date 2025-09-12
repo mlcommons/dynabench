@@ -33,6 +33,9 @@ import {
   ForkModal,
   SnapshotModal,
 } from "components/TaskLeaderboard/ForkAndSnapshotModalWrapper";
+import DropdownSearch from "new_front/components/Inputs/DropdownSearch";
+import Swal from "sweetalert2";
+const yaml = require("js-yaml");
 
 const TaskModelLeaderboardCard = ({
   title,
@@ -48,6 +51,8 @@ const TaskModelLeaderboardCard = ({
   getInitialWeights,
 }) => {
   const taskId = task.id;
+  const config_yaml = yaml.load(task.config_yaml);
+  const leaderboardFilter = config_yaml?.leaderboard?.filter || false;
   const lastCallArgs = useRef(null);
   const initialWeights = useRef(null);
   const [data, setData] = useState([]);
@@ -71,6 +76,13 @@ const TaskModelLeaderboardCard = ({
     useState(false);
   const { post, loading, response } = useFetch();
   const context = useContext(UserContext);
+  const [leaderboardOptions, setLeaderboardOptions] = useState([
+    { back_label: null, value: "Summary" },
+  ]);
+  const [filterSelected, setFilterSelected] = useState({
+    back_label: null,
+    value: "Summary",
+  });
 
   useEffect(() => {
     setPage(0);
@@ -121,8 +133,20 @@ const TaskModelLeaderboardCard = ({
         };
       });
     },
-    [disableToggleSort]
+    [disableToggleSort],
   );
+
+  const handleFilterChange = async (newFilter) => {
+    setFilterSelected(newFilter);
+    const { datasetWeightsList, metricWeightsList, metricsIDs } =
+      await weightCalculations;
+    handleScoreData(
+      datasetWeightsList,
+      metricWeightsList,
+      metricsIDs,
+      newFilter.back_label,
+    );
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -163,11 +187,11 @@ const TaskModelLeaderboardCard = ({
     }
     const datasetWeightsList = datasetWeights.map(
       (obj) =>
-        obj.weight / datasetWeights.reduce((sum, item) => sum + item.weight, 0)
+        obj.weight / datasetWeights.reduce((sum, item) => sum + item.weight, 0),
     );
 
     const metricWeightsList = metrics.map(
-      (obj) => obj.weight / metrics.reduce((sum, item) => sum + item.weight, 0)
+      (obj) => obj.weight / metrics.reduce((sum, item) => sum + item.weight, 0),
     );
 
     return {
@@ -178,10 +202,10 @@ const TaskModelLeaderboardCard = ({
   }, [datasetWeights, metrics]);
 
   const handleScoreData = useCallback(
-    async (datasetWeightsList, metricWeightsList, metricIds) => {
+    async (datasetWeightsList, metricWeightsList, metricIds, filter = null) => {
       setIsLoading(true);
       try {
-        const scoreData = await post("/task/get_dynaboard_info_by_task_id/", {
+        const params = {
           task_id: taskId,
           ordered_metric_weights: metricWeightsList,
           ordered_scoring_dataset_weights: datasetWeightsList,
@@ -190,18 +214,46 @@ const TaskModelLeaderboardCard = ({
           offset: page * pageLimit,
           limit: pageLimit,
           metrics: metricIds,
-        });
-        if (response.ok) {
-          setData(scoreData.data);
-          setTotal(scoreData.count);
+        };
+        if (filter) {
+          params.filtered = filter;
         }
+        const scoreData = await post(
+          "/task/get_dynaboard_info_by_task_id/",
+          params,
+        );
+        if (!response.ok) {
+          throw new Error(
+            `API Error: ${response.status} - ${
+              scoreData?.message || "Unknown error"
+            }`,
+          );
+        }
+        setData(scoreData.data);
+        setTotal(scoreData.count);
       } catch (error) {
-        console.error("Error fetching score data:", error);
+        console.log("Error fetching score data:", error);
+        if (filter) {
+          Swal.fire({
+            title: "No data",
+            text: "There are no data with the filter selected, try a new value",
+            icon: "error",
+          });
+        }
       } finally {
         setIsLoading(false);
       }
     },
-    [taskId, post, sort?.field, sort?.direction, page, pageLimit, response]
+    [
+      taskId,
+      post,
+      sort?.field,
+      sort?.direction,
+      page,
+      pageLimit,
+      response,
+      filterSelected,
+    ],
   );
 
   useEffect(() => {
@@ -228,6 +280,15 @@ const TaskModelLeaderboardCard = ({
 
     handleScoreData(datasetWeightsList, metricWeightsList, metricsIDs);
   }, [weightCalculations, handleScoreData]);
+
+  useEffect(() => {
+    leaderboardFilter &&
+      leaderboardOptions.length === 1 &&
+      setLeaderboardOptions((prevOptions) => [
+        ...prevOptions,
+        ...(config_yaml.leaderboard?.options || []),
+      ]);
+  }, []);
 
   const isEndOfPage = (page + 1) * pageLimit >= total;
 
@@ -270,6 +331,15 @@ const TaskModelLeaderboardCard = ({
                 }
               />
             </>
+          )}
+          {leaderboardFilter && (
+            <div className="dropdown-search-container mr-3 w-72">
+              <DropdownSearch
+                options={leaderboardOptions}
+                value={filterSelected.value}
+                onChange={handleFilterChange}
+              />
+            </div>
           )}
           <ForkModal
             metricWeights={metrics}
@@ -397,9 +467,9 @@ const TaskModelLeaderboardCard = ({
                       history.push(
                         "/login?msg=" +
                           encodeURIComponent(
-                            "You need to login to create a leaderboard snapshot."
+                            "You need to login to create a leaderboard snapshot.",
                           ) +
-                          `&src=/tasks/${taskCode}`
+                          `&src=/tasks/${taskCode}`,
                       );
                     }
                   }}
@@ -426,9 +496,9 @@ const TaskModelLeaderboardCard = ({
                       history.push(
                         "/login?msg=" +
                           encodeURIComponent(
-                            "You need to login to fork a leaderboard."
+                            "You need to login to fork a leaderboard.",
                           ) +
-                          `&src=/tasks/${taskCode}`
+                          `&src=/tasks/${taskCode}`,
                       );
                     }
                   }}

@@ -16,6 +16,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.instance_property imp
     instance_property,
 )
 from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import (
+    job_metrics_dict,
     meta_metrics_dict,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
@@ -129,10 +130,19 @@ class TaskService:
         ordered_metric_field_names = (
             type_values + aws_metric_names + delta_perf_metrics_type
         )
-        metrics_metadata = {
-            metric: meta_metrics_dict.get(metric)(task_info)
-            for metric in ordered_metric_field_names
-        }
+
+        # Get metrics from meta_metrics_dict and job_metrics_dict
+        metrics_metadata = {}
+        for metric in ordered_metric_field_names:
+            if metric in meta_metrics_dict:
+                metrics_metadata[metric] = meta_metrics_dict[metric](task_info)
+            elif metric in job_metrics_dict:
+                metrics_metadata[metric] = job_metrics_dict[metric](task_info)
+            else:
+                print(
+                    f"Warning: Metric '{metric}' not found in meta_metrics_dict or job_metrics_dict"
+                )
+                continue
         order_metrics = [
             dict(
                 {
@@ -187,6 +197,7 @@ class TaskService:
         offset: int = 0,
         limit: int = 5,
         metrics: list = [],
+        filtered: str = None,
     ):
         dynaboard_info = {}
         ordered_metrics = self.get_order_metrics_by_task_id(task_id)
@@ -194,6 +205,10 @@ class TaskService:
         task_info = self.get_task_info_by_task_id(task_id).__dict__
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
         perf_metric_info = task_configuration.get("perf_metric", {})
+        filtered_by = None
+        if filtered:
+            leaderboard_config = task_configuration.get("leaderboard", {})
+            filtered_by = leaderboard_config.get("key", None)
         order_metric_with_weight = [
             dict({"weight": weight}, **metric)
             for weight, metric in zip(ordered_metric_weights, ordered_metrics)
@@ -220,6 +235,8 @@ class TaskService:
             limit,
             metrics,
             perf_metric_info,
+            filtered,
+            filtered_by,
         )
         dynaboard_info["data"] = data
         return dynaboard_info
