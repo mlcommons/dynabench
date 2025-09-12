@@ -455,14 +455,13 @@ class ScoreService:
                 metadata_json = dict(scores)
 
                 new_score = {
-                    "perf": metadata_json["Standard_CER_15_WORSE"],
-                    "pretty_perf": f"{100*metadata_json['Standard_CER_15_WORSE']:.2f}%",
+                    "perf": metadata_json["main_metric"],
+                    "pretty_perf": f"{100*metadata_json['main_metric']:.2f}%",
                     "mid": model_id,
                     "r_realid": round_info.id,
                     "did": datasets[0]["id"],
                     "metadata_json": json.dumps(metadata_json),
                 }
-
                 self.score_repository.add(new_score)
 
                 self.model_repository.update_model_status(model_id)
@@ -472,6 +471,12 @@ class ScoreService:
                     template_name="model_evaluation_sucessful.txt",
                     msg_dict={"name": model["name"], "model_id": model["id"]},
                     subject=f"Model {model['name']} evaluation succeeded.",
+                    attachments=[
+                        (
+                            f"metadata_model_{model['id']}.json",
+                            json.dumps(metadata_json, ensure_ascii=False, indent=2),
+                        )
+                    ],
                 )
                 print(
                     f"sent email evaluation sucessful to {user.email} model {model['name']} "
