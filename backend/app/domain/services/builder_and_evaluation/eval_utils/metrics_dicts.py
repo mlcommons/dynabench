@@ -50,6 +50,8 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
     get_unperturbed_percent,
     get_vqa_accuracy,
     get_vqa_accuracy_meta,
+    get_wmdqs_fpr_meta,
+    get_wmdqs_latency_meta,
 )
 
 
@@ -109,4 +111,6 @@ meta_metrics_dict = {
     "Standard_CER_15_WORSE": get_CER_15_WORSE_meta,
     "Dialect_LangID_Accuracy": get_dialect_LID_Accuracy_meta,
     "Dialect_CER": get_dialect_CER_meta,
+    "fpr": get_wmdqs_fpr_meta,
+    "latency": get_wmdqs_latency_meta,
 }
