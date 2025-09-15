@@ -16,7 +16,6 @@ from app.domain.services.builder_and_evaluation.eval_utils.instance_property imp
     instance_property,
 )
 from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import (
-    job_metrics_dict,
     meta_metrics_dict,
 )
 from app.infrastructure.repositories.dataset import DatasetRepository
@@ -130,19 +129,10 @@ class TaskService:
         ordered_metric_field_names = (
             type_values + aws_metric_names + delta_perf_metrics_type
         )
-
-        # Get metrics from meta_metrics_dict and job_metrics_dict
-        metrics_metadata = {}
-        for metric in ordered_metric_field_names:
-            if metric in meta_metrics_dict:
-                metrics_metadata[metric] = meta_metrics_dict[metric](task_info)
-            elif metric in job_metrics_dict:
-                metrics_metadata[metric] = job_metrics_dict[metric](task_info)
-            else:
-                print(
-                    f"Warning: Metric '{metric}' not found in meta_metrics_dict or job_metrics_dict"
-                )
-                continue
+        metrics_metadata = {
+            metric: meta_metrics_dict.get(metric)(task_info)
+            for metric in ordered_metric_field_names
+        }
         order_metrics = [
             dict(
                 {
