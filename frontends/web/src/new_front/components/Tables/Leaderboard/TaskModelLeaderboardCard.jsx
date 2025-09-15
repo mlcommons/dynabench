@@ -236,7 +236,7 @@ const TaskModelLeaderboardCard = ({
         if (filter) {
           Swal.fire({
             title: "No data",
-            text: "There are no data with the filter selected, try a new value",
+            text: "There is no data for the selected filter, try a new value",
             icon: "error",
           });
         }
