@@ -229,6 +229,24 @@ def get_dialect_CER_meta(task=None):
     }
 
 
+def get_wmdqs_fpr_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "FPR",
+        "utility_direction": -1,
+        "offset": 0,
+    }
+
+
+def get_wmdqs_latency_meta(task=None):
+    return {
+        "unit": "ms",
+        "pretty_name": "Latency",
+        "utility_direction": -1,
+        "offset": 0,
+    }
+
+
 def get_chrf_pp(predictions: list, targets: list):
     """Chrf++ metric.
 

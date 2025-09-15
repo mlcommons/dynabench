@@ -81,6 +81,7 @@ async def get_dynaboard_info_by_task_id(model: GetDynaboardInfoByTaskIdRequest):
         model.offset,
         model.limit,
         model.metrics,
+        model.filtered,
     )
 
 

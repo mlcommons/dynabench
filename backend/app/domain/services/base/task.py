@@ -187,6 +187,7 @@ class TaskService:
         offset: int = 0,
         limit: int = 5,
         metrics: list = [],
+        filtered: str = None,
     ):
         dynaboard_info = {}
         ordered_metrics = self.get_order_metrics_by_task_id(task_id)
@@ -194,6 +195,10 @@ class TaskService:
         task_info = self.get_task_info_by_task_id(task_id).__dict__
         task_configuration = yaml.load(task_info.get("config_yaml"), yaml.SafeLoader)
         perf_metric_info = task_configuration.get("perf_metric", {})
+        filtered_by = None
+        if filtered:
+            leaderboard_config = task_configuration.get("leaderboard", {})
+            filtered_by = leaderboard_config.get("key", None)
         order_metric_with_weight = [
             dict({"weight": weight}, **metric)
             for weight, metric in zip(ordered_metric_weights, ordered_metrics)
@@ -220,6 +225,8 @@ class TaskService:
             limit,
             metrics,
             perf_metric_info,
+            filtered,
+            filtered_by,
         )
         dynaboard_info["data"] = data
         return dynaboard_info

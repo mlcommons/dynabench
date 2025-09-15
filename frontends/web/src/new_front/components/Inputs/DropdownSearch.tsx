@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect, useRef } from "react";
 
 type DropdownSearchProps = {
   options: any[];
@@ -15,6 +15,9 @@ const DropdownSearch: FC<DropdownSearchProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [maxHeight, setMaxHeight] = useState<number>(384);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const filteredOptions = options.filter(
     (option) => option.value?.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -26,16 +29,53 @@ const DropdownSearch: FC<DropdownSearchProps> = ({
     onChange(option);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+        setSearchTerm("");
+      }
+    };
+
+    if (open && buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - buttonRect.bottom - 20;
+      const spaceAbove = buttonRect.top - 20;
+
+      const availableSpace = Math.max(spaceBelow, spaceAbove);
+      const calculatedMaxHeight = Math.min(
+        384,
+        Math.max(200, availableSpace - 80),
+      );
+
+      setMaxHeight(calculatedMaxHeight);
+    }
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
+
   return (
-    <div className="w-full pb-6 text-right ">
+    <div className="w-full text-right relative" ref={dropdownRef}>
       <div>
         <button
+          ref={buttonRef}
           type="button"
           className=" h-[47px] inline-flex w-full gap-x-1.5 rounded-md bg-white px-3 py-2  text-letter-color shadow-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-none"
           id="menu-button"
-          aria-expanded="true"
+          aria-expanded={open}
           aria-haspopup="true"
           onClick={() => setOpen(!open)}
+          disabled={disabled}
         >
           <div className="flex justify-between w-full">
             <span className="pt-1">{value}</span>
@@ -60,23 +100,27 @@ const DropdownSearch: FC<DropdownSearchProps> = ({
       <div
         className={`${
           open ? "block" : "hidden"
-        } right-0 mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5`}
+        } absolute top-full left-0 right-0 mt-2 z-50 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5`}
         role="menu"
         aria-orientation="vertical"
         aria-labelledby="menu-button"
+        style={{ maxHeight: `${maxHeight}px` }}
       >
-        <div className="py-1" role="none">
+        <div className="p-2" role="none">
           <input
             type="text"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded mb-2"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <div className="max-h-96 overflow-y-auto mt-2">
+          <div
+            className="overflow-y-auto"
+            style={{ maxHeight: `${maxHeight - 60}px` }}
+          >
             {filteredOptions.map((option, key) => (
               <button
-                key={key}
+                key={"dropdown-key-" + key}
                 type="button"
                 className="block w-full px-4 py-2 text-left text-gray-700 border-solid rounded-sm focus:outline-none hover:bg-gray-100 hover:text-gray-900"
                 role="menuitem"
