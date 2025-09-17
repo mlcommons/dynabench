@@ -453,13 +453,18 @@ class ScoreService:
                     model["tid"], round_id
                 )
                 metadata_json = dict(scores)
+                dataset_name = metadata_json["dataset_name"]
+                for dataset in datasets:
+                    if dataset["name"] == dataset_name:
+                        dataset_id = dataset["id"]
+                        break
 
                 new_score = {
                     "perf": metadata_json["main_metric"],
                     "pretty_perf": f"{100*metadata_json['main_metric']:.2f}%",
                     "mid": model_id,
                     "r_realid": round_info.id,
-                    "did": datasets[0]["id"],
+                    "did": dataset_id,
                     "metadata_json": json.dumps(metadata_json),
                 }
                 self.score_repository.add(new_score)
