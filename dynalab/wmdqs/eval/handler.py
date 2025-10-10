@@ -61,21 +61,99 @@ def download_and_import_model(s3_path: str):
                 import subprocess
 
                 def _safe_install(req_path: str):
+                    """Install requirements with space optimization"""
                     try:
-                        # Ensure pip exists in the current interpreter
-                        subprocess.check_call([sys.executable, "-m", "pip", "--version"])  # type: ignore
+                        # Check available space before installation
+                        statvfs = os.statvfs('/')
+                        available_gb = (statvfs.f_bavail * statvfs.f_frsize) / (1024**3)
+                        print(f"Available disk space: {available_gb:.2f} GB")
+                        
+                        if available_gb < 2.0:  # Less than 2GB available
+                            print("Warning: Low disk space, attempting cleanup...")
+                            _cleanup_space()
+                        
+                        # Ensure pip exists
+                        subprocess.check_call([sys.executable, "-m", "pip", "--version"])
                     except Exception:
                         try:
-                            import ensurepip  # type: ignore
-
+                            import ensurepip
                             ensurepip.bootstrap()
                         except Exception:
                             pass
+                    
                     try:
-                        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", req_path])  # type: ignore
+                        # Install with space-saving options
+                        cmd = [
+                            sys.executable, "-m", "pip", "install", 
+                            "--no-cache-dir",  # Don't cache downloads
+                            "--no-deps",       # Install without dependencies first
+                            "-r", req_path
+                        ]
+                        subprocess.check_call(cmd)
+                        
+                        # Then install dependencies
+                        cmd_deps = [
+                            sys.executable, "-m", "pip", "install", 
+                            "--no-cache-dir",
+                            "--only-deps",
+                            "-r", req_path
+                        ]
+                        subprocess.check_call(cmd_deps)
+                        
                     except Exception as e:
-                        # Best-effort install; continue even if it fails so evaluation can proceed
                         print(f"Warning: requirements installation failed: {e}")
+                        # Try installing packages one by one
+                        _install_individually(req_path)
+
+                def _cleanup_space():
+                    """Clean up temporary files and caches"""
+                    try:
+                        # Clear pip cache
+                        subprocess.run([sys.executable, "-m", "pip", "cache", "purge"], 
+                                    capture_output=True)
+                        
+                        # Clear temporary files
+                        temp_dirs = ['/tmp', '/var/tmp']
+                        for temp_dir in temp_dirs:
+                            if os.path.exists(temp_dir):
+                                for item in os.listdir(temp_dir):
+                                    item_path = os.path.join(temp_dir, item)
+                                    try:
+                                        if os.path.isdir(item_path):
+                                            shutil.rmtree(item_path)
+                                        else:
+                                            os.remove(item_path)
+                                    except:
+                                        pass
+                        
+                        # Clear Python cache
+                        subprocess.run([sys.executable, "-m", "py_compile", "-q"], 
+                                    capture_output=True)
+                        
+                    except Exception as e:
+                        print(f"Cleanup failed: {e}")
+
+                def _install_individually(req_path: str):
+                    """Install packages one by one if batch install fails"""
+                    try:
+                        with open(req_path, 'r') as f:
+                            requirements = f.readlines()
+                        
+                        for req in requirements:
+                            req = req.strip()
+                            if req and not req.startswith('#'):
+                                try:
+                                    subprocess.check_call([
+                                        sys.executable, "-m", "pip", "install", 
+                                        "--no-cache-dir", req
+                                    ])
+                                    print(f"✓ Installed: {req}")
+                                except Exception as e:
+                                    print(f"✗ Failed to install {req}: {e}")
+                                    # Continue with other packages
+                                    
+                    except Exception as e:
+                        print(f"Individual installation failed: {e}")
 
                 _safe_install(requirements_path)
             # Ensure parent packages are importable
@@ -355,7 +433,7 @@ def handler(event, debug=True):
         return {"status": "error", "message": "model_path is required"}
 
     # Download and import model
-    print("Downloading and importing model...")
+    print(f"Downloading and importing model... {model_id} from {model_path}")
     model_result = download_and_import_model(model_path)
 
     if model_result["status"] != "success":
@@ -372,7 +450,7 @@ def handler(event, debug=True):
         return model_result
 
     model = model_result["model"]
-    print("Model imported successfully")
+    print(f"Model {model_id} imported successfully from {model_path}")
 
     # Determine datasets to evaluate
     print("Preparing datasets...")
