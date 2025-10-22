@@ -184,7 +184,7 @@ class ModelService:
     def single_model_prediction(self, model_url: str, model_input: dict):
         return requests.post(model_url, json=model_input).json()
 
-    def upload_and_create_model(
+    def create_and_upload_model(
         self,
         model_name: str,
         description: str,
@@ -196,52 +196,89 @@ class ModelService:
         task_code: str,
         file_to_upload: UploadFile,
     ):
+        """Create and upload a model to S3 to later evaluate it in the background."""
         task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         yaml_file = yaml.safe_load(yaml_file)
         task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
         user_email = self.user_repository.get_user_email(user_id)[0]
 
-        file_name = file_name.lower()
-        file_name = file_name.replace("/", ":")
-        file_name = re.sub(r"\s+", "_", file_name)
-        clean_file_name = re.sub(r"_+", "_", file_name)
+        "we need to clean the file name and model name to avoid issues with s3 keys"
+        clean_file_name = self.__clean_name(file_name)
+        model_name_clean = self.__clean_name(model_name)
 
-        model_name_clean = model_name.lower()
-        model_name_clean = model_name_clean.replace("/", ":")
-        model_name_clean = re.sub(r"\s+", "_", model_name_clean)
-        model_name_clean = re.sub(r"_+", "_", model_name_clean)
+        model = self.model_repository.create_new_model(
+            task_id=task_id,
+            user_id=user_id,
+            model_name=model_name,
+            shortname=model_name,
+            longdesc=description,
+            desc=description,
+            languages=languages,
+            license=license,
+            params=num_paramaters,
+            deployment_status="uploaded",
+            secret=secrets.token_hex(),
+        )
 
-        model_path = f"""{task_code}/submited_models/
-                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
-        uri_logging = f"""s3://{task_s3_bucket}/{task_code}/inference_logs/
-                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
-        uri_model = f"""s3://{task_s3_bucket}/{task_code}/submited_models/
-                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
+        model_path = (
+            f"{task_code}/submited_models/"
+            f"{model['id']}-{model_name_clean}-{clean_file_name}"
+        )
+        uri_logging = (
+            f"s3://{task_s3_bucket}/{task_code}/inference_logs/"
+            f"{model['id']}-{model_name_clean}-{clean_file_name}"
+        )
+        uri_model = (
+            f"s3://{task_s3_bucket}/{task_code}/submited_models/"
+            f"{model['id']}-{model_name_clean}-{clean_file_name}"
+        )
         inference_url = yaml_file["evaluation"]["inference_url"]
         metadata_url = f"s3://{task_s3_bucket}/{task_code}/metadata/"
 
-        try:
-            self.s3.put_object(
-                Body=file_to_upload.file,
-                Bucket=task_s3_bucket,
-                Key=model_path,
-                ContentType=file_to_upload.content_type,
-            )
+        max_retries = 2
+        upload_successful = False
+
+        for attempt in range(max_retries + 1):
+            # Retry 2 times if upload fails
+            try:
+                # Reset file pointer for each attempt to upload
+                file_to_upload.file.seek(0)
+
+                self.s3.put_object(
+                    Body=file_to_upload.file,
+                    Bucket=task_s3_bucket,
+                    Key=model_path,
+                    ContentType=file_to_upload.content_type,
+                )
+                upload_successful = True
+                break
+            except Exception as e:
+                print(f"S3 upload attempt {attempt + 1} failed: {e}")
+                if attempt == max_retries:
+                    # All retries exhausted, delete the model from DB
+                    self.email_helper.send(
+                        contact=user_email,
+                        cc_contact=self.email_sender,
+                        template_name="model_evaluation_failed.txt",
+                        msg_dict={"name": model_name},
+                        subject=f"Model {model_name} evaluation failed.",
+                    )
+                    try:
+                        self.model_repository.delete_model(model["id"])
+                        print(
+                            f"Model {model['id']} deleted from DB "
+                            f"due to upload failure"
+                        )
+                    except Exception as delete_error:
+                        print(f"Failed to delete model from DB: {delete_error}")
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Model upload failed after multiple retries",
+                    )
+
+        if upload_successful:
             self.user_repository.increment_model_submitted_count(user_id)
-            model = self.model_repository.create_new_model(
-                task_id=task_id,
-                user_id=user_id,
-                model_name=model_name,
-                shortname=model_name,
-                longdesc=description,
-                desc=description,
-                languages=languages,
-                license=license,
-                params=num_paramaters,
-                deployment_status="uploaded",
-                secret=secrets.token_hex(),
-            )
             print("The model has been uploaded and created in the DB")
             return {
                 "model_path": uri_model,
@@ -252,9 +289,6 @@ class ModelService:
                 "inference_url": inference_url,
                 "metadata_url": metadata_url,
             }
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-            return "Model upload failed"
 
     def run_heavy_evaluation(
         self,
@@ -639,6 +673,7 @@ class ModelService:
 
     def initiate_multipart_upload(
         self,
+        model_id: int,
         model_name: str,
         file_name: str,
         content_type: str,
@@ -650,19 +685,16 @@ class ModelService:
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         yaml_file = yaml.safe_load(yaml_file)
         task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+        user_email = self.user_repository.get_user_email(user_id)[0]
 
-        file_name = file_name.lower()
-        file_name = file_name.replace("/", ":")
-        file_name = re.sub(r"\s+", "_", file_name)
-        clean_file_name = re.sub(r"_+", "_", file_name)
+        "we need to clean the file name and model name to avoid issues with s3 keys"
+        clean_file_name = self.__clean_name(file_name)
+        model_name_clean = self.__clean_name(model_name)
 
-        model_name_clean = model_name.lower()
-        model_name_clean = model_name_clean.replace("/", ":")
-        model_name_clean = re.sub(r"\s+", "_", model_name_clean)
-        model_name_clean = re.sub(r"_+", "_", model_name_clean)
-
-        model_path = f"""{task_code}/submited_models/
-                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
+        model_path = (
+            f"{task_code}/submited_models/"
+            f"{model_id}-{model_name_clean}-{clean_file_name}"
+        )
         try:
             response = self.s3.create_multipart_upload(
                 Bucket=task_s3_bucket, Key=model_path, ContentType=content_type
@@ -684,12 +716,20 @@ class ModelService:
                 )
                 urls.append(presigned_url)
         except Exception as e:
+            self.email_helper.send(
+                contact=user_email,
+                cc_contact=self.email_sender,
+                template_name="model_evaluation_failed.txt",
+                msg_dict={"name": model_name},
+                subject=f"Model {model_name} evaluation failed.",
+            )
             print("There was an error while generating pre signed urls", e)
 
-        return {"upload_id": upload_id, "urls": urls}
+        return {"upload_id": upload_id, "urls": urls, "model_id": model_id}
 
     def complete_multipart_upload(
         self,
+        model_id: int,
         upload_id: int,
         parts: List,
         user_id: str,
@@ -697,23 +737,21 @@ class ModelService:
         model_name: str,
         file_name: str,
     ):
+        """Complete the multipart upload once all the parts are uploaded and increment the model submitted count."""
         task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         yaml_file = yaml.safe_load(yaml_file)
         task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+        user_email = self.user_repository.get_user_email(user_id)[0]
 
-        file_name = file_name.lower()
-        file_name = file_name.replace("/", ":")
-        file_name = re.sub(r"\s+", "_", file_name)
-        clean_file_name = re.sub(r"_+", "_", file_name)
+        "we need to clean the file name and model name to avoid issues with s3 keys"
+        clean_file_name = self.__clean_name(file_name)
+        model_name_clean = self.__clean_name(model_name)
 
-        model_name_clean = model_name.lower()
-        model_name_clean = model_name_clean.replace("/", ":")
-        model_name_clean = re.sub(r"\s+", "_", model_name_clean)
-        model_name_clean = re.sub(r"_+", "_", model_name_clean)
-
-        model_path = f"""{task_code}/submited_models/
-                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
+        model_path = (
+            f"{task_code}/submited_models/"
+            f"{model_id}-{model_name_clean}-{clean_file_name}"
+        )
 
         parts = sorted(parts, key=lambda x: x.PartNumber)
         parts = [p.dict() for p in parts]
@@ -731,45 +769,55 @@ class ModelService:
             )
         except Exception as e:
             print("Failed to complete upload:", e)
+            self.delete_model(model_id)
+            self.s3.abort_multipart_upload(
+                Bucket=task_s3_bucket,
+                Key=model_path,
+                UploadId=upload_id,
+            )
+            self.email_helper.send(
+                contact=user_email,
+                cc_contact=self.email_sender,
+                template_name="model_evaluation_failed.txt",
+                msg_dict={"name": model_name},
+                subject=f"Model {model_name} evaluation failed.",
+            )
             raise HTTPException(
                 status_code=500, detail=f"Failed to complete upload: {str(e)}"
             )
 
-    def create_model(
+        self.user_repository.increment_model_submitted_count(user_id)
+        uri_logging = f"s3://{task_s3_bucket}/{task_code}/inference_logs/"
+        uri_model = f"s3://{task_s3_bucket}/{model_path}"
+        inference_url = yaml_file["evaluation"]["inference_url"]
+        metadata_url = f"s3://{task_s3_bucket}/{task_code}/metadata/"
+        return {
+            "model_path": uri_model,
+            "save_s3_path": uri_logging,
+            "model_id": model_id,
+            "model_name": model_name,
+            "user_email": user_email,
+            "inference_url": inference_url,
+            "metadata_url": metadata_url,
+            "s3_bucket": task_s3_bucket,
+        }
+
+    def create_model_for_multipart_upload(
         self,
         model_name: str,
         description: str,
         num_paramaters: str,
         languages: str,
         license: str,
-        file_name: str,
         user_id: str,
         task_code: str,
     ):
+        """Create a model entry in the DB for multipart upload once the upload is succesfull the increment_model_submitted_count should be called."""
         task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         yaml_file = yaml.safe_load(yaml_file)
-        task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
-        user_email = self.user_repository.get_user_email(user_id)[0]
-
-        file_name = file_name.lower()
-        file_name = file_name.replace("/", ":")
-        file_name = re.sub(r"\s+", "_", file_name)
-        clean_file_name = re.sub(r"_+", "_", file_name)
-
-        model_name_clean = model_name.lower()
-        model_name_clean = model_name_clean.replace("/", ":")
-        model_name_clean = re.sub(r"\s+", "_", model_name_clean)
-        model_name_clean = re.sub(r"_+", "_", model_name_clean)
-
-        uri_logging = f"s3://{task_s3_bucket}/{task_code}/inference_logs/"
-        uri_model = f"""s3://{task_s3_bucket}/{task_code}/submited_models/
-                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
-        inference_url = yaml_file["evaluation"]["inference_url"]
-        metadata_url = f"""s3://{task_s3_bucket}/{task_code}/metadata/"""
 
         try:
-            self.user_repository.increment_model_submitted_count(user_id)
             model = self.model_repository.create_new_model(
                 task_id=task_id,
                 user_id=user_id,
@@ -783,23 +831,18 @@ class ModelService:
                 deployment_status="uploaded",
                 secret=secrets.token_hex(),
             )
-            print("The model has been uploaded and created in the DB")
+
+            print("The model has been created in the DB, model_id:", model["id"])
             return {
-                "model_path": uri_model,
-                "save_s3_path": uri_logging,
                 "model_id": model["id"],
-                "model_name": model_name,
-                "user_email": user_email,
-                "inference_url": inference_url,
-                "metadata_url": metadata_url,
-                "s3_bucket": task_s3_bucket,
             }
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             return "Model upload failed"
 
-    def abort_multipart_upload(
+    async def abort_multipart_upload(
         self,
+        model_id: int,
         upload_id: str,
         task_code: str,
         model_name: str,
@@ -810,28 +853,41 @@ class ModelService:
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         yaml_file = yaml.safe_load(yaml_file)
         task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+        user_email = self.user_repository.get_user_email(user_id)[0]
 
-        file_name = file_name.lower()
-        file_name = file_name.replace("/", ":")
-        file_name = re.sub(r"\s+", "_", file_name)
-        clean_file_name = re.sub(r"_+", "_", file_name)
+        "we need to clean the file name and model name to avoid issues with s3 keys"
+        clean_file_name = self.__clean_name(file_name)
+        model_name_clean = self.__clean_name(model_name)
 
-        model_name_clean = model_name.lower()
-        model_name_clean = model_name_clean.replace("/", ":")
-        model_name_clean = re.sub(r"\s+", "_", model_name_clean)
-        model_name_clean = re.sub(r"_+", "_", model_name_clean)
+        model_path = (
+            f"{task_code}/submited_models/"
+            f"{model_id}-{model_name_clean}-{clean_file_name}"
+        )
 
-        model_path = f"""{task_code}/submited_models/
-                         {task_id}-{user_id}-{model_name}-{clean_file_name}"""
-
+        self.model_repository.delete_model(model_id)
         try:
             self.s3.abort_multipart_upload(
                 Bucket=task_s3_bucket,
                 Key=model_path,
                 UploadId=upload_id,
             )
+            self.email_helper.send(
+                contact=user_email,
+                cc_contact=self.email_sender,
+                template_name="model_evaluation_failed.txt",
+                msg_dict={"name": model_name},
+                subject=f"Model {model_name} evaluation failed.",
+            )
             return {"message": "Multipart upload aborted successfully."}
         except Exception as e:
+            self.model_repository.delete_model(model_id)
             raise HTTPException(
                 status_code=500, detail=f"Failed to abort upload: {str(e)}"
             )
+
+    def __clean_name(self, name: str) -> str:
+        """Clean the name to avoid issues with S3 keys."""
+        name = name.lower()
+        name = name.replace("/", ":")
+        name = re.sub(r"\s+", "_", name)
+        return re.sub(r"_+", "_", name)

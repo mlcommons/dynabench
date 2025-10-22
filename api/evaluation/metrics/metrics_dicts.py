@@ -61,4 +61,7 @@ metrics_meta_dict = {
     "Standard_CER_15_WORSE": metrics.get_CER_15_WORSE_meta,
     "Dialect_LangID_Accuracy": metrics.get_dialect_LID_Accuracy_meta,
     "Dialect_CER": metrics.get_dialect_CER_meta,
+    "f1": metrics.get_wmdqs_f1_meta,
+    "fpr": metrics.get_wmdqs_fpr_meta,
+    "latency": metrics.get_wmdqs_latency_meta,
 }

@@ -89,24 +89,41 @@ const SubmitModel = () => {
                 text: "Something went wrong!",
               });
             }
-          },
+          }
         );
       } else {
-        sendModelData(formData, configYaml.evaluation?.type === "heavy").then(
-          () => {
+        sendModelData(formData, configYaml.evaluation?.type === "heavy")
+          .then((result) => {
             setLoading({ loading: true, text: "Done" });
+            if (result && result.success) {
+              Swal.fire({
+                title: "Good job!",
+                text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
+                icon: "success",
+                confirmButtonColor: "#007bff",
+              });
+            } else {
+              console.error("upload failed", result?.message);
+              setLoading({ loading: true, text: "Upload Failed" });
+            }
+          })
+          .catch((e) => {
+            console.error("Unexpected error", e);
+            setLoading({ loading: true, text: "Upload Failed" });
             Swal.fire({
-              title: "Good job!",
-              text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
-              icon: "success",
-              confirmButtonColor: "#007bff",
+              icon: "error",
+              title: "Unexpected Error",
+              text: "An Unexpected error occurred. Please try again.",
             });
-          },
-        );
+          });
       }
     } else {
       setLoadingFile(true);
-      alert("Please upload a model");
+      Swal.fire({
+        icon: "warning",
+        title: "No File Selected",
+        text: "Please upload a model file before submitting.",
+      });
       setLoading({ loading: true, text: "Done" });
     }
   };
@@ -114,12 +131,12 @@ const SubmitModel = () => {
   const getTaskData = async () => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
     const taskData = await get(
-      `/task/get_task_with_round_info_by_task_id/${taskId}`,
+      `/task/get_task_with_round_info_by_task_id/${taskId}`
     );
     const dynalabModel = await get(`/model/get_dynalab_model/${taskCode}`);
     if (response.ok) {
       setConfigYaml(
-        JSON.parse(JSON.stringify(yaml.load(taskData.config_yaml))),
+        JSON.parse(JSON.stringify(yaml.load(taskData.config_yaml)))
       );
       setDynalabModel(dynalabModel);
     }

@@ -460,3 +460,30 @@ def get_examples_per_second_meta(task):
         "utility_direction": 1,
         "offset": 0,
     }
+
+
+def get_wmdqs_f1_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "F1-Score",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
+def get_wmdqs_fpr_meta(task=None):
+    return {
+        "unit": "%",
+        "pretty_name": "FPR",
+        "utility_direction": -1,
+        "offset": 0,
+    }
+
+
+def get_wmdqs_latency_meta(task=None):
+    return {
+        "unit": "ms",
+        "pretty_name": "Latency",
+        "utility_direction": -1,
+        "offset": 0,
+    }

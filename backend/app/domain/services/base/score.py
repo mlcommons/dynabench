@@ -9,6 +9,7 @@ import boto3
 import numpy as np
 import pandas as pd
 import yaml
+from fastapi import HTTPException
 
 from app.domain.helpers.email import EmailHelper
 from app.domain.services.base.dataset import DatasetService
@@ -46,6 +47,8 @@ class ScoreService:
         scores_by_dataset_and_model_id: list,
         order_metric_with_weight: dict,
         perf_metric_field_name: str,
+        filter_key: str = None,
+        filtered_by: str = None,
     ):
         scores_by_dataset_and_model_id[
             perf_metric_field_name
@@ -64,9 +67,25 @@ class ScoreService:
                 ]
                 metric_with_score_and_weight["score"] = score
             else:
-                score = json.loads(scores_by_dataset_and_model_id["metadata_json"])[
-                    metric_with_score_and_weight["field_name"]
-                ]
+                if filter_key and filtered_by:
+                    filter_key_scores = json.loads(
+                        scores_by_dataset_and_model_id["metadata_json"]
+                    )
+                    filter_key_scores = filter_key_scores[filtered_by]
+                    try:
+                        filter_key_scores = filter_key_scores[filter_key]
+                        score = filter_key_scores[
+                            metric_with_score_and_weight["field_name"]
+                        ]
+                    except Exception:
+                        raise HTTPException(
+                            status_code=500,
+                            detail=f"Missing scores with filter: {filter_key}",
+                        )
+                else:
+                    score = json.loads(scores_by_dataset_and_model_id["metadata_json"])[
+                        metric_with_score_and_weight["field_name"]
+                    ]
                 metric_with_score_and_weight["score"] = score
         return metrics_with_score_and_weight
 
@@ -76,6 +95,8 @@ class ScoreService:
         model_id: int,
         order_metric_with_weight: dict,
         perf_metric_field_name: str,
+        filter_key: str = None,
+        filtered_by: str = None,
     ):
         scores_by_dataset_and_model_id = (
             self.score_repository.get_scores_by_dataset_and_model_id(
@@ -94,6 +115,8 @@ class ScoreService:
             scores_by_dataset_and_model_id,
             order_metric_with_weight,
             perf_metric_field_name,
+            filter_key,
+            filtered_by,
         )
         scores = [
             metric_score["score"] for metric_score in metrics_with_score_and_weight
@@ -147,6 +170,8 @@ class ScoreService:
         limit: int,
         metrics: list,
         perf_metric_info: dict,
+        filter_key: str = None,
+        filtered_by: str = None,
     ):
         models_dynaboard_info = []
         for model_id in model_ids:
@@ -158,6 +183,8 @@ class ScoreService:
                 order_scoring_datasets_with_weight,
                 order_metric_with_weight,
                 perf_metric_field_name,
+                filter_key,
+                filtered_by,
             )
             models_dynaboard_info.append(model_dynaboard_info)
         df_dynascore = self.calculate_all_dynascores(
@@ -204,6 +231,8 @@ class ScoreService:
         order_scoring_datasets_with_weight: list,
         order_metric_with_weight: dict,
         perf_metric_field_name: str,
+        filter_key: str = None,
+        filtered_by: str = None,
     ) -> dict:
         model_dynaboard_info = {}
         datasets_id = [dataset["did"] for dataset in order_scoring_datasets_with_weight]
@@ -219,7 +248,12 @@ class ScoreService:
         datasets_info = []
         for dataset_id in datasets_id:
             dataset_info = self.get_score_info_by_dataset_and_model_id(
-                dataset_id, model_id, order_metric_with_weight, perf_metric_field_name
+                dataset_id,
+                model_id,
+                order_metric_with_weight,
+                perf_metric_field_name,
+                filter_key,
+                filtered_by,
             )
             datasets_info.append(dataset_info)
 
@@ -421,14 +455,13 @@ class ScoreService:
                 metadata_json = dict(scores)
 
                 new_score = {
-                    "perf": metadata_json["Standard_CER_15_WORSE"],
-                    "pretty_perf": f"{100*metadata_json['Standard_CER_15_WORSE']:.2f}%",
+                    "perf": metadata_json["main_metric"],
+                    "pretty_perf": f"{100*metadata_json['main_metric']:.2f}%",
                     "mid": model_id,
                     "r_realid": round_info.id,
                     "did": datasets[0]["id"],
                     "metadata_json": json.dumps(metadata_json),
                 }
-
                 self.score_repository.add(new_score)
 
                 self.model_repository.update_model_status(model_id)
@@ -438,6 +471,12 @@ class ScoreService:
                     template_name="model_evaluation_sucessful.txt",
                     msg_dict={"name": model["name"], "model_id": model["id"]},
                     subject=f"Model {model['name']} evaluation succeeded.",
+                    attachments=[
+                        (
+                            f"metadata_model_{model['id']}.json",
+                            json.dumps(metadata_json, ensure_ascii=False, indent=2),
+                        )
+                    ],
                 )
                 print(
                     f"sent email evaluation sucessful to {user.email} model {model['name']} "
