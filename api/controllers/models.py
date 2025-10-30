@@ -327,6 +327,11 @@ def do_upload_via_train_files(credentials, tid, model_name):
                         subject=subject,
                     )
                     bottle.abort(400, "File is incorrectly formatted")
+                s3_client.upload_file(
+                    tf.name,
+                    task.s3_bucket,
+                    f"{task.task_code}/submissions/{name}_{model[1]}.txt",
+                )
                 light_model_endpoint = task.lambda_model
                 r = requests.post(light_model_endpoint, json=payload)
                 if r.status_code == 200:
