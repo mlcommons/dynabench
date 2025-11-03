@@ -20,7 +20,7 @@ async def verify_token(token: str):
     try:
         decoded_token = jwt.decode(
             token,
-            os.getenv("JWT_SECRET"),
+            os.getenv("AUTH_JWT_SECRET_KEY"),
             algorithms=[os.getenv("AUTH_HASH_ALGORITHM")],
             options={"verify_exp": True},
         )
