@@ -22,6 +22,7 @@ async def verify_token(token: str):
             token,
             os.getenv("JWT_SECRET"),
             algorithms=[os.getenv("AUTH_HASH_ALGORITHM")],
+            options={"verify_exp": True},
         )
         return decoded_token
     except Exception as e:
@@ -45,9 +46,11 @@ async def validate_access_token(
     # The OAuth2PasswordBearer already extracts and validates the Bearer token format
     # So we don't need to manually extract it from headers
     decoded: AccessTokenPayload = await verify_token(token)
+    refresh_token = request.cookies.get("dynabench_refresh_token", None)
+    if not refresh_token:
+        raise credentials_exception()
     # While we migrate the login into Backend we are using id
     # That is what the API sends in the token.
-    # email = decoded.get("email", None)
     id = decoded.get("id", None)
     if not id:
         raise credentials_exception()
@@ -55,5 +58,5 @@ async def validate_access_token(
     # Once we have mirated the login into Backend we will use email.
     # user = repository.get_by_email(email)
     if user is None or not user:
-        raise credentials_exception()
-    request.state.user = user
+        credentials_exception()
+    request.state.user = user["id"]

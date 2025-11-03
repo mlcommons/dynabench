@@ -1,7 +1,15 @@
 # Copyright (c) MLCommons and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Response, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Request,
+    Response,
+    UploadFile,
+)
 from fastapi.responses import FileResponse
 
 from app.domain.schemas.base.model import (
@@ -231,7 +239,9 @@ def update_model_status(model_id: int):
 
 
 @router.get("/get_models_by_user_id/{user_id}")
-def get_models_by_user_id(user_id: int):
+def get_models_by_user_id(user_id: int, request: Request):
+    if user_id != request.state.user:
+        raise PermissionError("Unauthorized access to model data.")
     return ModelService().get_models_by_user_id(user_id)
 
 

@@ -1,41 +1,48 @@
 # Copyright (c) MLCommons and its affiliates.
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-#TODO: change to self.AUTH_JWT_SECRET_KEY once everything is migrated
 
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any, Union
 
+from fastapi import HTTPException, status
 from jose import jwt
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.domain.helpers.exceptions import (
+    credentials_exception,
     password_is_incorrect,
+    refresh_token_expired,
     user_does_not_exist,
     user_with_email_already_exists,
 )
 from app.domain.services.base.user import UserService
 from app.infrastructure.repositories.badge import BadgeRepository
+from app.infrastructure.repositories.refreshtoken import RefreshTokenRepository
 from app.infrastructure.repositories.taskuserpermission import (
     TaskUserPermissionRepository,
 )
+from app.infrastructure.repositories.user import UserRepository
 
 
 class LoginService:
     def __init__(self) -> None:
         self.AUTH_JWT_SECRET_KEY = os.getenv("JWT_SECRET")
-        print("AUTH_JWT_SECRET_KEY", self.AUTH_JWT_SECRET_KEY)
-        self.ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("AUTH_ACCESS_TOKEN_EXPIRE_MINUTES")
-        self.REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv(
-            "AUTH_REFRESH_TOKEN_EXPIRE_MINUTES"
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = int(
+            os.getenv("AUTH_ACCESS_TOKEN_EXPIRE_MINUTES")
         )
-        self.AUTH_COOKIWE_SECRET_KEY = os.getenv("AUTH_COOKIE_SECRET_KEY", "")
-        self.AUTH_HASH_ALGORITHM = os.getenv("AUTH_HASH_ALGORITHM")
+        self.REFRESH_TOKEN_EXPIRE_DAYS = int(
+            os.getenv("AUTH_REFRESH_TOKEN_EXPIRE_DAYS")
+        )
+        self.AUTH_COOKIE_SECRET_KEY = os.getenv("AUTH_COOKIE_SECRET_KEY", "")
+        self.AUTH_HASH_ALGORITHM = os.getenv("AUTH_HASH_ALGORITHM", "HS256")
         self.users_service = UserService()
         self.task_user_permission_repository = TaskUserPermissionRepository()
         self.badges_repository = BadgeRepository()
+        self.refresh_token_repository = RefreshTokenRepository()
+        self.users_repository = UserRepository()
 
     def get_hashed_password(self, password: str) -> str:
         return generate_password_hash(password)
@@ -52,21 +59,30 @@ class LoginService:
         expires_delta: int = None,
     ) -> str:
         if expires_delta:
-            expires_delta = datetime.now() + expires_delta
+            expires_delta = datetime.now(timezone.utc) + expires_delta
         else:
-            expires_delta = datetime.now() + timedelta(minutes=int(minutes))
+            expires_delta = datetime.now(timezone.utc) + timedelta(minutes=int(minutes))
 
-        to_encode = {"exp": expires_delta, "sub": str(subject)}
+        to_encode = {"exp": expires_delta, **subject}
         encoded_jwt = jwt.encode(to_encode, secret_key, algorithm)
         return encoded_jwt
-    
-    def set_refresh_token(self, response):
-        """Create a refresh token using secure random generation"""
-        refresh_token = secrets.token_hex()
-        cookie_expires = datetime.now(timezone.utc) + timedelta(days=60)
 
-        print(f"Response type: {type(response)}")
-        print(f"Response has set_cookie: {hasattr(response, 'set_cookie')}")
+    def set_refresh_token(self, response, user_id: int) -> str:
+        """Create a refresh token using secure random generation"""
+        refresh_token = secrets.token_hex(32)
+        cookie_expires = datetime.now(timezone.utc) + timedelta(
+            days=self.REFRESH_TOKEN_EXPIRE_DAYS
+        )
+
+        self.cleanup_old_refresh_tokens(user_id)
+
+        self.refresh_token_repository.add(
+            {
+                "token": refresh_token,
+                "uid": user_id,
+                "generated_datetime": datetime.now(timezone.utc),
+            }
+        )
 
         response.set_cookie(
             key="dynabench_refresh_token",
@@ -74,7 +90,10 @@ class LoginService:
             httponly=True,
             path="/",
             expires=cookie_expires,
-            secure=True,
+            # For localhost testing set secure to False
+            secure=False,
+            # For Localhost testing set samesite to None, else lax
+            samesite="lax",
         )
         return refresh_token
 
@@ -107,23 +126,165 @@ class LoginService:
         hashed_pass = user["password"]
         if not self.verify_password(password, hashed_pass):
             password_is_incorrect()
-        token = self.create_access_token(user["email"])
-        self.set_refresh_token(response)
+        token = self.create_access_token({"id": user["id"]})
+        self.set_refresh_token(response, user["id"])
         return {
             "token": token,
             "user": user,
         }
+
+    def logout(self, request, response) -> dict:
+        """
+        Logout the user by deleting the refresh token from cookies and database
+
+        Args:
+            request: Request object to extract cookies
+            response: Response object to delete refresh token cookie
+        """
+        current_refresh_token = self.get_refresh_token_from_cookie(request)
+        db_token = self.refresh_token_repository.get_by_token(current_refresh_token)
+
+        if db_token:
+            uid = db_token.get("uid", None)
+        else:
+            credentials_exception()
+
+        user = self.users_repository.get_by_id(uid)
+        if not user or user["id"] != request.state.user:
+            raise credentials_exception()
+        if current_refresh_token and db_token:
+            self.refresh_token_repository.delete(db_token["id"])
+            response.delete_cookie("dynabench_refresh_token")
+            return {"message": "Logged out successfully"}
+        else:
+            refresh_token_expired()
 
     def is_admin_or_owner(self, user_id: int, task_id: int):
         return self.task_user_permission_repository.is_task_owner(
             user_id, task_id
         ) or self.users_service.get_is_admin(user_id)
 
-    def refresh_token(self, response):
-        """Refresh the JWT token and set a new refresh token cookie"""
-        new_token = self.create_access_token("refresh")
-        refresh_token = self.set_refresh_token(response)
-        return {
-            "token": new_token,
-            "refresh_token": refresh_token,
-        }
+    def refresh_token(self, request, response, authorization_header: str) -> dict:
+        """
+        Refresh the JWT token using the refresh token from cookie
+
+        Args:
+            request: Request object to extract cookies
+            response: Response object to set new refresh token cookie
+            authorization_header: Optional current access token to get user info
+
+        Returns:
+            Dict with new access token and user info
+        """
+        try:
+            current_refresh_token = None
+            user_id = None
+
+            # Step 1: Validate that authorization header is provided
+            if not authorization_header:
+                raise Exception("Invalid or expired bearer token")
+
+            current_refresh_token = self.get_refresh_token_from_cookie(request)
+
+            if not current_refresh_token:
+                refresh_token_expired()
+
+            # Step 2: Find user by refresh token in database and validate if user owns it
+            db_token = self.refresh_token_repository.get_by_token(current_refresh_token)
+            if not db_token:
+                refresh_token_expired()
+
+            user_id = db_token["uid"]
+            # Step 3: Validate user exists
+            user = self.users_repository.get_by_id(user_id)
+            if not user:
+                raise Exception("User not found")
+
+            # Step 4: Validate refresh token is not expired and the user from the token matches the user
+            if not self.validate_refresh_token_in_db(
+                db_token, authorization_header, user
+            ):
+                refresh_token_expired()
+
+            # Step 5: Create new access token
+            new_access_token = self.create_access_token({"id": user["id"]})
+
+            # Step 6: Create new refresh token and store it
+            self.set_refresh_token(response, user_id)
+
+            return {
+                "token": new_access_token,
+                "message": "Token refreshed successfully",
+            }
+
+        except Exception as e:
+            # Clean up any invalid tokens
+            if "current_refresh_token" in locals():
+                try:
+                    db_token = self.refresh_token_repository.get_by_token(
+                        current_refresh_token
+                    )
+                    if db_token:
+                        self.refresh_token_repository.delete(db_token["id"])
+                except Exception:
+                    pass
+
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Token refresh failed: {str(e)}",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    def get_refresh_token_from_cookie(self, request) -> str:
+        """Extract refresh token from HTTP-only cookie"""
+        return request.cookies.get("dynabench_refresh_token", None)
+
+    def validate_refresh_token_in_db(
+        self, refresh_token: dict, authorization_header: str, user: dict
+    ) -> bool:
+        """Validate if refresh token exists in database and is not expired also if it is from the user"""
+        try:
+            # Check if token is expired (assuming 60 days expiration)
+            # Maybe verify the age from the token itself?
+            deadline = refresh_token.get("generated_datetime", None)
+            if not deadline:
+                return False
+
+            if deadline.tzinfo is None:
+                deadline = deadline.replace(tzinfo=timezone.utc)
+
+            token_age = datetime.now(timezone.utc) - deadline
+
+            if token_age.days > self.REFRESH_TOKEN_EXPIRE_DAYS:
+                # Clean up expired token
+                self.refresh_token_repository.delete(refresh_token["id"])
+                return False
+
+            access_token = authorization_header[7:]
+            payload = jwt.decode(
+                access_token,
+                self.AUTH_JWT_SECRET_KEY,
+                algorithms=[self.AUTH_HASH_ALGORITHM],
+                options={"verify_exp": False},  # Allow expired tokens for refresh
+            )
+
+            payload_user_id = payload.get("id", None)
+            user_id = user.get("id", None)
+
+            if payload_user_id != user_id or payload_user_id is None:
+                return False
+
+            return True
+        except (jwt.JWTError, ValueError, KeyError, Exception) as e:
+            print(f"Token validation error: {e}")
+            return False
+
+    def cleanup_old_refresh_tokens(self, user_id: int):
+        """Remove old refresh tokens for the user (keep only the latest)"""
+        try:
+            old_tokens = self.refresh_token_repository.get_all_by_user_id(user_id)
+            for token in old_tokens:
+                self.refresh_token_repository.delete(token["id"])
+        except Exception as e:
+            print(f"Error cleaning up old refresh tokens: {e}")
+            pass

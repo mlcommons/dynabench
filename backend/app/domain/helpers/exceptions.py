@@ -38,3 +38,11 @@ def bad_token() -> HTTPException:
         detail="Invalid token",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+
+def refresh_token_expired() -> HTTPException:
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Refresh token has expired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )

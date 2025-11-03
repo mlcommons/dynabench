@@ -24,10 +24,9 @@ from app.api.endpoints.base import (
     task,
     task_proposals,
     user,
-    userpublic,
 )
 from app.api.endpoints.builder_and_evaluation import evaluation
-from app.api.middleware.authorization import validate_access_token
+from app.api.middleware.authentication import validate_access_token
 
 
 load_dotenv()
@@ -38,14 +37,26 @@ origins = [
     "http://localhost:3000",
     "https://www.dynabench.org",
     "https://front-dev.dynabench.org",
+    # "postman://app", include this only when testing with postman
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=[
+        "Accept",
+        "Accept-Language",
+        "Content-Language",
+        "Content-Type",
+        "Authorization",
+        "Cookie",
+        "Set-Cookie",
+        "Access-Control-Allow-Headers",
+        "Access-Control-Allow-Credentials",
+        "Access-Control-Allow-Origin",
+    ],
 )
 
 
@@ -91,11 +102,6 @@ app.include_router(
     prefix="/user",
     tags=["user"],
     dependencies=[Depends(validate_access_token)],
-)
-app.include_router(
-    userpublic.router,
-    prefix="/user_public",
-    tags=["user_public"],
 )
 app.include_router(
     task_proposals.router, prefix="/task_proposals", tags=["task_proposals"]

@@ -13,3 +13,17 @@ from app.infrastructure.repositories.abstract import AbstractRepository
 class RefreshTokenRepository(AbstractRepository):
     def __init__(self) -> None:
         super().__init__(RefreshToken)
+
+    def get_by_token(self, token: str) -> RefreshToken:
+        instance = (
+            self.session.query(RefreshToken).filter(RefreshToken.token == token).first()
+        )
+        return self.instance_converter.instance_to_dict(instance)
+
+    def get_all_by_user_id(self, user_id: int):
+        instances = (
+            self.session.query(RefreshToken).filter(RefreshToken.uid == user_id).all()
+        )
+        return [
+            self.instance_converter.instance_to_dict(instance) for instance in instances
+        ]
