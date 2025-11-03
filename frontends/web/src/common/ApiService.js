@@ -100,7 +100,7 @@ export default class ApiService {
         method: "PUT",
         body: JSON.stringify(data),
       },
-      includeCredentials,
+      includeCredentials
     );
   }
 
@@ -221,7 +221,7 @@ export default class ApiService {
     sort,
     sortDirection,
     metricWeights,
-    datasetWeights,
+    datasetWeights
   ) {
     const pageQuery = `limit=${limit || 10}&offset=${offset || 0}`;
     const sortQuery =
@@ -235,7 +235,7 @@ export default class ApiService {
 
     const datasetWeightsQuery = datasetWeights
       ? `&ordered_scoring_dataset_weights=${encodeURIComponent(
-          datasetWeights.join("|"),
+          datasetWeights.join("|")
         )}`
       : "";
 
@@ -298,7 +298,7 @@ export default class ApiService {
       {
         method: "GET",
       },
-      includeCredentials,
+      includeCredentials
     );
   }
 
@@ -315,12 +315,12 @@ export default class ApiService {
       `${
         this.domain
       }/contexts/${tid}/${rid}/${method}?tags=${encodeURIComponent(
-        tags.join("|"),
+        tags.join("|")
       )}`,
       {
         method: "GET",
       },
-      includeCredentials,
+      includeCredentials
     );
   }
 
@@ -329,7 +329,7 @@ export default class ApiService {
     rid,
     tags = [],
     context_tags = [],
-    annotator_id = null,
+    annotator_id = null
   ) {
     const includeCredentials = this.mode !== "mturk";
 
@@ -340,12 +340,12 @@ export default class ApiService {
         : "";
     return this.doFetch(
       `${this.domain}/examples/${tid}/${rid}?tags=${encodeURIComponent(
-        tags.join("|"),
+        tags.join("|")
       )}${context_tags_query}${annotator_query}`,
       {
         method: "GET",
       },
-      includeCredentials,
+      includeCredentials
     );
   }
 
@@ -356,17 +356,17 @@ export default class ApiService {
     maxNumFlags,
     minNumDisagreements,
     maxNumDisagreements,
-    tags = [],
+    tags = []
   ) {
     return this.fetch(
       `${
         this.domain
       }/examples/${tid}/${rid}/filtered/${minNumFlags}/${maxNumFlags}/${minNumDisagreements}/${maxNumDisagreements}?tags=${encodeURIComponent(
-        tags.join("|"),
+        tags.join("|")
       )}`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -386,7 +386,7 @@ export default class ApiService {
       `${this.domain}/notifications?limit=${limit || 10}&offset=${offset || 0}`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -397,7 +397,7 @@ export default class ApiService {
       }`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -408,7 +408,7 @@ export default class ApiService {
       }`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -417,7 +417,7 @@ export default class ApiService {
       `${this.domain}/users/${userId}/forks?limit=${limit}&offset=${offset}`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -426,7 +426,7 @@ export default class ApiService {
       `${this.domain}/users/${userId}/snapshots?limit=${limit}&offset=${offset}`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -498,7 +498,7 @@ export default class ApiService {
       {
         method: "GET",
       },
-      includeCredentials,
+      includeCredentials
     );
   }
 
@@ -523,7 +523,7 @@ export default class ApiService {
         method: "PUT",
         body: JSON.stringify(obj),
       },
-      includeCredentials,
+      includeCredentials
     );
   }
 
@@ -543,7 +543,7 @@ export default class ApiService {
         method: "PUT",
         body: JSON.stringify(obj),
       },
-      includeCredentials,
+      includeCredentials
     );
   }
 
@@ -565,7 +565,7 @@ export default class ApiService {
         method: "POST",
         body: JSON.stringify(data),
       },
-      false,
+      false
     );
   }
 
@@ -586,7 +586,7 @@ export default class ApiService {
       `${this.domain}/task_proposals/all/${page}/${pageLimit}`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -595,7 +595,7 @@ export default class ApiService {
       `${this.domain}/task_proposals/user/${page}/${pageLimit}`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -661,7 +661,7 @@ export default class ApiService {
       {
         method: "PUT",
         body: JSON.stringify(data),
-      },
+      }
     );
   }
 
@@ -746,7 +746,7 @@ export default class ApiService {
         headers: {
           Authorization: token ? "Bearer " + token : "None",
         },
-      },
+      }
     );
   }
 
@@ -764,7 +764,7 @@ export default class ApiService {
         headers: {
           Authorization: token ? "Bearer " + token : "None",
         },
-      },
+      }
     );
   }
 
@@ -779,7 +779,7 @@ export default class ApiService {
     metadata,
     modelWrong,
     tag = null,
-    modelEndpointName = null,
+    modelEndpointName = null
   ) {
     const includeCredentials = this.mode !== "mturk";
     return this.doFetch(
@@ -800,7 +800,7 @@ export default class ApiService {
           model_endpoint_name: modelEndpointName,
         }),
       },
-      includeCredentials,
+      includeCredentials
     );
   }
 
@@ -820,7 +820,7 @@ export default class ApiService {
       `${this.domain}/tasks/${tid}/leaderboard_configuration/${name}`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -833,7 +833,7 @@ export default class ApiService {
     orderedDatasetWeights,
     totalCount,
     description,
-    name,
+    name
   ) {
     return this.fetch(`${this.domain}/tasks/${tid}/leaderboard_snapshot`, {
       method: "PUT",
@@ -855,7 +855,7 @@ export default class ApiService {
       `${this.domain}/tasks/${tid}/leaderboard_snapshot/${name}`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -864,7 +864,7 @@ export default class ApiService {
       `${this.domain}/tasks/${tid}/disambiguate_forks_and_snapshots/${name}`,
       {
         method: "GET",
-      },
+      }
     );
   }
 
@@ -888,7 +888,7 @@ export default class ApiService {
           localStorage.removeItem("id_token");
           //window.location.href = '/login';
           return false;
-        },
+        }
       );
     }
   }
@@ -966,7 +966,7 @@ export default class ApiService {
     return this.doFetch(`${this.alternateDomain}/auth/refresh`, {}, true).then(
       (result) => {
         this.setToken(result.token);
-      },
+      }
     );
   }
 
@@ -1010,7 +1010,7 @@ export default class ApiService {
           localStorage.removeItem("id_token");
           //window.location.href = '/login';
           throw error;
-        },
+        }
       );
     }
     return this.doFetch(url, options, {}, true);
