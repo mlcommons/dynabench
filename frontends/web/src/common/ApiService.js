@@ -924,7 +924,7 @@ export default class ApiService {
 
   logout() {
     try {
-      this.fetch(`${this.domain}/authenticate/logout`, {
+      this.fetch(`${this.alternateDomain}/auth/logout`, {
         method: "POST",
       });
     } catch (e) {
@@ -963,13 +963,11 @@ export default class ApiService {
   }
 
   refreshToken() {
-    return this.doFetch(
-      `${this.alternateDomain}/authenticate/refresh`,
-      {},
-      true,
-    ).then((result) => {
-      this.setToken(result.token);
-    });
+    return this.doFetch(`${this.alternateDomain}/auth/refresh`, {}, true).then(
+      (result) => {
+        this.setToken(result.token);
+      },
+    );
   }
 
   doFetch(url, options, includeCredentials = false) {

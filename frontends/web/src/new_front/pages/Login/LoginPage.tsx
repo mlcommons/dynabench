@@ -1,6 +1,6 @@
 import React, { FC, useContext, useEffect, useState } from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
-import { Button } from "react-bootstrap";
+import { Button, Spinner } from "react-bootstrap";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
@@ -11,11 +11,13 @@ import { ReactComponent as Login } from "new_front/assets/login.svg";
 const LoginPage: FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { updateState } = useContext(UserContext);
+  const { updateState: updateUserContext } = useContext(UserContext);
   const originalPath = localStorage.getItem("originalPath");
   const history = useHistory();
   const location = useLocation();
   const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const [localSetted, setLocalSetted] = useState(false);
 
   const queryParams = new URLSearchParams(location.search);
   const assignmentId =
@@ -42,37 +44,35 @@ const LoginPage: FC = () => {
   }, []);
 
   const handleLogin = () => {
+    setLoading(true);
     axios
-      .post(`${process.env.REACT_APP_API_HOST_2}/user_public/authenticate`, {
-        email: email,
-        password: password,
-      })
+      .post(
+        `${process.env.REACT_APP_API_HOST_2}/auth/login`,
+        {
+          email: email,
+          password: password,
+        },
+        {
+          withCredentials: true,
+        }
+      )
       .then((response) => {
         localStorage.setItem("id_token", response.data.token);
-        updateState({
+        updateUserContext({
           user: response.data.user,
         });
-        console.log("Login successful", response);
-        if (taskCode && srcURL) {
-          history.push(
-            `/tasks/${taskCode}${srcURL}?assignmentId=${assignmentId}&treatmentId=${treatmentId}`,
-          );
-        } else if (taskCode) {
-          history.push(
-            `/tasks/${taskCode}/create?assignmentId=${assignmentId}&treatmentId=${treatmentId}`,
-          );
-        } else if (originalPath === "/") {
-          history.push("/account");
-        } else {
-          history.goBack();
-        }
+        setLocalSetted(true);
       })
       .catch((error) => {
+        console.error("Login error", error);
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: "Something went wrong! try another email or password",
         });
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -84,6 +84,26 @@ const LoginPage: FC = () => {
       }
     }
   }, [email]);
+
+  useEffect(() => {
+    if (localSetted) {
+      if (localStorage.getItem("id_token")) {
+        if (taskCode && srcURL) {
+          history.push(
+            `/tasks/${taskCode}${srcURL}?assignmentId=${assignmentId}&treatmentId=${treatmentId}`
+          );
+        } else if (taskCode) {
+          history.push(
+            `/tasks/${taskCode}/create?assignmentId=${assignmentId}&treatmentId=${treatmentId}`
+          );
+        } else if (originalPath === "/") {
+          history.push("/account");
+        } else {
+          history.goBack();
+        }
+      }
+    }
+  }, [localSetted]);
 
   return (
     <section className="h-screen bg-gradient-to-b from-white to-[#ccebd466]">
@@ -140,8 +160,13 @@ const LoginPage: FC = () => {
               <Button
                 className="w-full text-xl font-semibold bg-gray-200 border-0 px-7"
                 onClick={handleLogin}
+                disabled={loading}
               >
-                {t("auth:login.signIn")}
+                {loading ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  t("auth:login.signIn")
+                )}
               </Button>
             </form>
           </div>

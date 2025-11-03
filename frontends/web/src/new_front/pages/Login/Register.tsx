@@ -39,7 +39,6 @@ const Register = () => {
         title: "Success",
         text: "User created successfully",
       });
-      setSubmitting(false);
       window.location.href = "/";
     } else {
       Swal.fire({
@@ -48,6 +47,7 @@ const Register = () => {
         text: "Something went wrong! try another email or username",
       });
     }
+    setSubmitting(false);
   };
 
   const renderError = (message: string) => (

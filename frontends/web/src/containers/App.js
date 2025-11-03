@@ -178,6 +178,8 @@ class App extends React.Component {
             "Content-Type": "application/json",
             Authorization: `Bearer ${this.api.getToken()}`,
           },
+          credentials: "include",
+          mode: "cors",
         }}
       >
         <OverlayInstructionsProvider>
