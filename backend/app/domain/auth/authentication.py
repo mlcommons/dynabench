@@ -29,7 +29,7 @@ from app.infrastructure.repositories.user import UserRepository
 
 class LoginService:
     def __init__(self) -> None:
-        self.AUTH_JWT_SECRET_KEY = os.getenv("JWT_SECRET")
+        self.AUTH_JWT_SECRET_KEY = os.getenv("AUTH_JWT_SECRET_KEY")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = int(
             os.getenv("AUTH_ACCESS_TOKEN_EXPIRE_MINUTES")
         )
