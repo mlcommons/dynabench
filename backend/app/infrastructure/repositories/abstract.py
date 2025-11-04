@@ -35,3 +35,9 @@ class AbstractRepository:
         instance = self.session.query(self.model).get(id)
         instance = self.instance_converter.instance_to_dict(instance)
         return instance
+
+    def delete(self, id: int) -> None:
+        instance = self.session.query(self.model).get(id)
+        with self.session as session:
+            session.delete(instance)
+            session.commit()

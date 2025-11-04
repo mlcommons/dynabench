@@ -12,7 +12,6 @@ class CreateUserRequest(BaseModel):
 
 class CreateUserResponse(BaseModel):
     email: EmailStr
-    password: str
     username: str
     id: int
 
@@ -23,8 +22,8 @@ class LoginRequest(BaseModel):
 
 
 class LoginResponse(BaseModel):
-    access_token: str
-    token_type: str
+    token: str
+    user: CreateUserResponse
 
 
 class TokenPayload(BaseModel):

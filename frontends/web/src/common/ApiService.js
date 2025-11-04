@@ -25,6 +25,8 @@ export default class ApiService {
     } else {
       this.domain = domain || "https://www.dynabench.org:8080";
     }
+    this.alternateDomain =
+      process.env.REACT_APP_API_HOST_2 || "https://www.dynabench.org:8080";
     this.fetch = this.fetch.bind(this);
     this.setToken = this.setToken.bind(this);
     this.getToken = this.getToken.bind(this);
@@ -922,7 +924,7 @@ export default class ApiService {
 
   logout() {
     try {
-      this.fetch(`${this.domain}/authenticate/logout`, {
+      this.fetch(`${this.alternateDomain}/auth/logout`, {
         method: "POST",
       });
     } catch (e) {
@@ -961,7 +963,7 @@ export default class ApiService {
   }
 
   refreshToken() {
-    return this.doFetch(`${this.domain}/authenticate/refresh`, {}, true).then(
+    return this.doFetch(`${this.alternateDomain}/auth/refresh`, {}, true).then(
       (result) => {
         this.setToken(result.token);
       }
