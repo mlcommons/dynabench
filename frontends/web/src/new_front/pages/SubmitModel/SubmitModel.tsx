@@ -23,6 +23,7 @@ const SubmitModel = () => {
   const { bigProgress, getSignedURLS } = useStartMultipart();
   const [showHuggingFace, setShowHuggingFace] = useState(false);
   const [showDynalab, setShowDynalab] = useState(false);
+  const [includeDynalab, setIncludeDynalab] = useState(true);
   const [hfModel, setHfModel] = useState(false);
   const [languagePairs, setLanguagePairs] = useState<LanguagePair[]>([]);
   const [configYaml, setConfigYaml] = useState<any>();
@@ -151,12 +152,15 @@ const SubmitModel = () => {
 
   useEffect(() => {
     if (configYaml) {
-      if (configYaml.submit_config) {
-        if (configYaml.submit_config.allow_hf) {
+      if (configYaml?.submit_config) {
+        if ("allow_hf" in Object(configYaml.submit_config)) {
           setHfModel(configYaml.submit_config.allow_hf);
         }
-        if (configYaml.submit_config.languages_options) {
+        if ("languages_options" in Object(configYaml.submit_config)) {
           setLanguagePairs(configYaml.submit_config.languages_options);
+        }
+        if ("include_dynalab" in Object(configYaml.submit_config)) {
+          setIncludeDynalab(configYaml.submit_config.include_dynalab);
         }
       } else {
         setHfModel(false);
@@ -167,7 +171,7 @@ const SubmitModel = () => {
   return (
     <>
       {loading.loading && configYaml ? (
-        <div className="container">
+        <div className="container mb-6">
           <div className="flex flex-col items-center justify-center pt-8">
             <h1 className="text-3xl font-bold">Submit Model</h1>
             <p className="pt-3 text-lg">
@@ -175,7 +179,9 @@ const SubmitModel = () => {
             </p>
           </div>
           <div
-            className={`grid gap-6 ${hfModel ? "grid-cols-2" : "grid-cols-1"}`}
+            className={`grid gap-6 ${
+              hfModel && includeDynalab ? "grid-cols-2" : "grid-cols-1"
+            }`}
           >
             {hfModel && (
               <div className="flex flex-col items-center justify-center mt-4 border-2 border-gray-200 rounded-md">
@@ -201,54 +207,56 @@ const SubmitModel = () => {
                 )}
               </div>
             )}
-            <div className="flex flex-col items-center justify-center mt-4 border-2 border-gray-200 rounded-md">
-              <h3 className="pt-4 text-xl font-semibold">Dynalab</h3>
-              <p className="text-lg">Upload a Dynalab model</p>
-              <span className="pt-2 pb-2 text-gray-400">
-                <a
-                  href="https://docs.dynabench.org/docs/dynalab/upload_a_model"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-blue-500"
-                >
-                  Here
-                </a>{" "}
-                you can find the instructions to create a Dynalab model
-              </span>
-              <span className="pb-4 text-gray-400">
-                You can download the base model{" "}
-                <a
-                  href={dynalabModel}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-blue-500"
-                >
-                  here
-                </a>
-              </span>
-              {showDynalab ? (
-                <CreateModel
-                  isDynalab={true}
-                  languagePairs={languagePairs}
-                  handleClose={() => setShowDynalab(false)}
-                  handleSubmitModel={handleSubmitModel}
-                />
-              ) : (
-                <Button
-                  onClick={() => setShowDynalab(!showDynalab)}
-                  className="mb-4 border-0 font-weight-bold light-gray-bg btn-primary"
-                >
-                  <i className="fas fa-edit "></i> Upload model
-                </Button>
-              )}
-              <span className="pb-4 text-red-400">
-                Please refrain from renaming the files and directories of the
-                downloadable zip base file
-              </span>
-              <span className="pb-4 text-gray-400">
-                This may affect our pipeline thus your scoring
-              </span>
-            </div>
+            {includeDynalab && (
+              <div className="flex flex-col items-center justify-center mt-4 border-2 border-gray-200 rounded-md">
+                <h3 className="pt-4 text-xl font-semibold">Dynalab</h3>
+                <p className="text-lg">Upload a Dynalab model</p>
+                <span className="pt-2 pb-2 text-gray-400">
+                  <a
+                    href="https://docs.dynabench.org/docs/dynalab/upload_a_model"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-500"
+                  >
+                    Here
+                  </a>{" "}
+                  you can find the instructions to create a Dynalab model
+                </span>
+                <span className="pb-4 text-gray-400">
+                  You can download the base model{" "}
+                  <a
+                    href={dynalabModel}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-500"
+                  >
+                    here
+                  </a>
+                </span>
+                {showDynalab ? (
+                  <CreateModel
+                    isDynalab={true}
+                    languagePairs={languagePairs}
+                    handleClose={() => setShowDynalab(false)}
+                    handleSubmitModel={handleSubmitModel}
+                  />
+                ) : (
+                  <Button
+                    onClick={() => setShowDynalab(!showDynalab)}
+                    className="mb-4 border-0 font-weight-bold light-gray-bg btn-primary"
+                  >
+                    <i className="fas fa-edit "></i> Upload model
+                  </Button>
+                )}
+                <span className="pb-4 text-red-400">
+                  Please refrain from renaming the files and directories of the
+                  downloadable zip base file
+                </span>
+                <span className="pb-4 text-gray-400">
+                  This may affect our pipeline thus your scoring
+                </span>
+              </div>
+            )}
           </div>
         </div>
       ) : (
