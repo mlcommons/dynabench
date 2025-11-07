@@ -6,12 +6,7 @@ from fastapi import APIRouter, Depends, Header, Request, Response
 
 from app.api.middleware.authentication import validate_access_token
 from app.domain.auth.authentication import LoginService
-from app.domain.schemas.auth.auth import (
-    CreateUserRequest,
-    IsAdminOrOwnerRequest,
-    LoginRequest,
-    LoginResponse,
-)
+from app.domain.schemas.auth.auth import CreateUserRequest, LoginRequest, LoginResponse
 
 
 router = APIRouter()
@@ -22,11 +17,11 @@ async def create_user(model: CreateUserRequest):
     return LoginService().create_user(model.email, model.password, model.username)
 
 
-@router.post("/is_admin_or_owner", response_model=bool)
+@router.get("/is_admin_or_owner/{task_id}", response_model=bool)
 async def is_admin_or_owner(
-    model: IsAdminOrOwnerRequest, token_payload=Depends(validate_access_token)
+    task_id: int, request: Request, token_payload=Depends(validate_access_token)
 ):
-    return LoginService().is_admin_or_owner(model.user_id, model.task_id)
+    return LoginService().is_admin_or_owner(task_id, request)
 
 
 @router.get("/refresh")
