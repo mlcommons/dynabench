@@ -407,7 +407,7 @@ class ModelPage extends React.Component {
               this.context.api.getAdminOrOwner(this.state.model.tid).then(
                 (adminOrOwnerResult) => {
                   this.setState({
-                    isAdminOrTaskOwner: adminOrOwnerResult.admin_or_owner,
+                    isAdminOrTaskOwner: adminOrOwnerResult,
                   });
                 },
                 (error) => {

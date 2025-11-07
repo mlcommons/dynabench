@@ -25,41 +25,56 @@ type Props = {
 const ProfilePage: FC<Props> = () => {
   const [userInfo, setUserInfo] = useState<UserInfoProps>({} as UserInfoProps);
   const [userStats, setUserStats] = useState<UserStatsProps>(
-    {} as UserStatsProps,
+    {} as UserStatsProps
   );
   const [modelsInfo, setModelsInfo] = useState<ModelsInfo[]>(
-    [] as ModelsInfo[],
+    [] as ModelsInfo[]
   );
   const [tasksCategories, setTasksCategories] = useState<TaskCategories[]>([]);
   const [tasksInfo, setTasksInfo] = useState<TaskInfoType[]>(
-    [] as TaskInfoType[],
+    [] as TaskInfoType[]
   );
-  const { user } = useContext(UserContext);
-  const { get, response, loading } = useFetch();
+  const [loading, setLoading] = useState<boolean>(true);
+  const { user, api } = useContext(UserContext);
   const history = useHistory();
-
   const userId = user.id;
+
   const getUserInfo = async () => {
     if (!userId) {
       return;
     }
-    const [userInfo, tasksInfo, modelsInfo, userStats] = await Promise.all([
-      get(`/user/get_user_with_badges/${userId}`),
-      get(`/task/get_active_tasks_by_user_id/${userId}`),
-      get(`/model/get_models_by_user_id/${userId}`),
-      get(`/user/get_stats_by_user_id/${userId}`),
-    ]);
-    if (response.ok) {
+    try {
+      const backendUrl = process.env.REACT_APP_API_HOST_2;
+
+      const [userInfo, tasksInfo, modelsInfo, userStats] = await Promise.all([
+        api.fetch(`${backendUrl}/user/get_user_with_badges/${userId}`, {
+          method: "GET",
+        }),
+        api.fetch(`${backendUrl}/task/get_active_tasks_by_user_id/${userId}`, {
+          method: "GET",
+        }),
+        api.fetch(`${backendUrl}/model/get_models_by_user_id/${userId}`, {
+          method: "GET",
+        }),
+        api.fetch(`${backendUrl}/user/get_stats_by_user_id/${userId}`, {
+          method: "GET",
+        }),
+      ]);
       setUserInfo(userInfo);
       setTasksInfo(tasksInfo);
       setModelsInfo(modelsInfo);
       setUserStats(userStats);
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Something went wrong!",
-      });
+      setLoading(false);
+    } catch (error) {
+      if (error.status === 401) {
+        history.push("/login");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+      }
     }
   };
 

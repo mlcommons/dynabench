@@ -180,6 +180,7 @@ class App extends React.Component {
           },
           credentials: "include",
           mode: "cors",
+          cache: "no-cache",
         }}
       >
         <OverlayInstructionsProvider>

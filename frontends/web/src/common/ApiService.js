@@ -35,6 +35,7 @@ export default class ApiService {
     this.getCredentials = this.getCredentials.bind(this);
     this.setMturkMode = this.setMturkMode.bind(this);
     this.updating_already = false;
+    this.refreshPromise = null;
     this.mode = "normal";
     this.exportDatasetLog = this.exportDatasetLog.bind(this);
     this.exportPrediction = this.exportPrediction.bind(this);
@@ -494,7 +495,7 @@ export default class ApiService {
   getAdminOrOwner(tid) {
     const includeCredentials = this.mode !== "mturk";
     return this.doFetch(
-      `${this.domain}/tasks/admin_or_owner/${tid}`,
+      `${this.alternateDomain}/auth/is_admin_or_owner/${tid}`,
       {
         method: "GET",
       },
@@ -916,7 +917,8 @@ export default class ApiService {
     // handle access not allowed to localStorage if disabled in browser.
     // https://stackoverflow.com/questions/16427636/check-if-localstorage-is-available
     try {
-      return localStorage.getItem("id_token");
+      const token = localStorage.getItem("id_token");
+      return token;
     } catch (e) {
       return null;
     }
@@ -939,26 +941,27 @@ export default class ApiService {
     return this.getToken() ? decode(this.getToken()) : {};
   }
 
-  refreshTokenWrapper(callback, error) {
-    if (this.updating_already) {
-      // TODO: Make this actually wait for an event?
-      return delay(1048576).then(() => {
-        if (this.updating_already) {
-          return this.refreshTokenWrapper(callback, error);
-        }
+  async refreshTokenWrapper(callback, errorCallback) {
+    if (this.refreshPromise) {
+      try {
+        await this.refreshPromise;
         return callback();
+      } catch (error) {
+        return errorCallback();
+      }
+    }
+
+    // Start new refresh
+    this.refreshPromise = this.refreshToken()
+      .finally(() => {
+        this.refreshPromise = null; // Clear when done (success or failure)
       });
-    } else {
-      this.updating_already = true;
-      return this.refreshToken()
-        .then((result) => {
-          this.updating_already = false;
-          return callback();
-        })
-        .catch(() => {
-          this.updating_already = false;
-          return error();
-        });
+
+    try {
+      await this.refreshPromise;
+      return callback();
+    } catch (error) {
+      return errorCallback();
     }
   }
 
@@ -992,28 +995,32 @@ export default class ApiService {
     return fetch(url, options).then(this.errorHandler);
   }
 
-  fetch(url, options) {
+  async fetch(url, options) {
     const token = this.mode !== "mturk" ? this.getToken() : null;
     if (
       !!token &&
       this.isTokenExpired(token) &&
-      url !== `${this.domain}/authenticate`
+      url !== `${this.alternateDomain}/login`
     ) {
-      return this.refreshTokenWrapper(
-        (res) => {
-          //console.log("Our token was refreshed (fetch callback)");
-          return this.doFetch(url, options, {}, true);
-        },
-        (res) => {
-          console.log("Could not refresh token (fetch)");
-          var error = new Error("Could not refresh token");
-          localStorage.removeItem("id_token");
-          //window.location.href = '/login';
-          throw error;
-        }
-      );
+      try {
+        await this.refreshTokenWrapper(
+          () => {
+            //console.log("Our token was refreshed (fetch callback)");
+            return Promise.resolve();
+          },
+          () => {
+            localStorage.removeItem("id_token");
+            //window.location.href = '/login';
+            throw new Error("Could not refresh token");
+          }
+        );
+
+        return this.doFetch(url, options, true);
+      } catch (error) {
+        throw error;
+      }
     }
-    return this.doFetch(url, options, {}, true);
+    return this.doFetch(url, options, true);
   }
 
   errorHandler(response) {
