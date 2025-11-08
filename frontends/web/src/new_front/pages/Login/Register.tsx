@@ -28,7 +28,7 @@ const Register = () => {
 
   const onSubmit = async (values: any) => {
     setSubmitting(true);
-    await post("user_public/create_user", {
+    await post("auth/create_user", {
       email: values.email,
       password: values.password,
       username: values.username,
