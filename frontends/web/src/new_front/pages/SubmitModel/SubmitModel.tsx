@@ -1,16 +1,18 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useHistory, useParams } from "react-router-dom";
+import { PacmanLoader } from "react-spinners";
+import { Button } from "react-bootstrap";
+import useFetch from "use-http";
 import Swal from "sweetalert2";
 
 import useUploadFile from "./useUploadFile";
 import useStartMultipart from "./useUploadHeavyFile";
 import CreateModel from "new_front/pages/SubmitModel/CreateModel";
-import { Button } from "react-bootstrap";
 import ProgressBar from "new_front/components/Buttons/ProgressBar";
 import UserContext from "containers/UserContext";
 import { checkUserIsLoggedIn } from "new_front/utils/helpers/functions/LoginFunctions";
-import { useHistory, useParams } from "react-router-dom";
-import useFetch from "use-http";
 import { LanguagePair } from "new_front/types/uploadModel/uploadModel";
+
 const yaml = require("js-yaml");
 
 const SubmitModel = () => {
@@ -19,8 +21,9 @@ const SubmitModel = () => {
     text: "Done",
   });
   const [loadingFile, setLoadingFile] = useState(false);
-  const { progress, sendModelData } = useUploadFile();
+  const { progress, sendModelData, sendHFmodel } = useUploadFile();
   const { bigProgress, getSignedURLS } = useStartMultipart();
+  const [firstRenderLoading, setFirstRenderLoading] = useState(true);
   const [showHuggingFace, setShowHuggingFace] = useState(false);
   const [showDynalab, setShowDynalab] = useState(false);
   const [includeDynalab, setIncludeDynalab] = useState(true);
@@ -28,7 +31,7 @@ const SubmitModel = () => {
   const [languagePairs, setLanguagePairs] = useState<LanguagePair[]>([]);
   const [configYaml, setConfigYaml] = useState<any>();
   const [dynalabModel, setDynalabModel] = useState<string>();
-  const { user } = useContext(UserContext);
+  const { user, api } = useContext(UserContext);
   const history = useHistory();
   let { taskCode } = useParams<{ taskCode: string }>();
   const { get, response } = useFetch();
@@ -38,7 +41,36 @@ const SubmitModel = () => {
       await checkUserIsLoggedIn(history, `/uploadModel`, null, taskCode);
     }
   };
-  const handleSubmitModel = (modelData: any) => {
+
+  const checkApiLogin = async (): Promise<boolean> => {
+    try {
+      const loginResult = api.loggedIn();
+
+      // Handle both synchronous boolean and Promise<boolean>
+      const isLoggedIn =
+        loginResult instanceof Promise ? await loginResult : loginResult;
+
+      return isLoggedIn;
+    } catch (error) {
+      console.error("Error checking login status:", error);
+      return false;
+    }
+  };
+
+  const handleSubmitModel = async (modelData: any) => {
+    const isLoggedIn = await checkApiLogin();
+
+    if (!isLoggedIn) {
+      Swal.fire({
+        icon: "warning",
+        title: "Session Expired",
+        text: "Your session has expired. Please login again to continue.",
+        confirmButtonColor: "#007bff",
+      }).then(() => {
+        history.push("/login");
+      });
+      return;
+    }
     if (modelData.file && modelData.file.length !== 0) {
       setLoading({
         loading: false,
@@ -57,7 +89,6 @@ const SubmitModel = () => {
 
       const THRESHOLD = 4 * 1024 * 1024 * 1024; //4GB
 
-      console.log("Model Size", modelData.file.size);
       if (
         configYaml.evaluation?.type === "heavy" &&
         modelData.file.size > THRESHOLD
@@ -75,7 +106,6 @@ const SubmitModel = () => {
         getSignedURLS(formData, modelData.file, data, chunkSize).then(
           (succeed) => {
             setLoading({ loading: true, text: "Done" });
-            console.log("fin", succeed);
             if (succeed) {
               Swal.fire({
                 title: "Good job!",
@@ -90,7 +120,7 @@ const SubmitModel = () => {
                 text: "Something went wrong!",
               });
             }
-          }
+          },
         );
       } else {
         sendModelData(formData, configYaml.evaluation?.type === "heavy")
@@ -119,27 +149,69 @@ const SubmitModel = () => {
           });
       }
     } else {
-      setLoadingFile(true);
-      Swal.fire({
-        icon: "warning",
-        title: "No File Selected",
-        text: "Please upload a model file before submitting.",
-      });
-      setLoading({ loading: true, text: "Done" });
+      if (hfModel && !includeDynalab) {
+        setLoading({
+          loading: false,
+          text: "Your model is being uploaded.",
+        });
+        const formData = new FormData();
+        formData.append("model_name", modelData.modelName);
+        formData.append("description", modelData.desc);
+        formData.append("num_paramaters", modelData.numParams);
+        formData.append("languages", modelData.languages);
+        formData.append("license", modelData.license);
+        formData.append("user_id", user.id);
+        formData.append("task_code", taskCode);
+        formData.append("repo_url", modelData.repoUrl);
+        formData.append("hf_api_token", modelData.hfApiToken);
+        sendHFmodel(formData)
+          .then((result) => {
+            setLoading({ loading: true, text: "Done" });
+            if (result && result.success) {
+              Swal.fire({
+                title: "Good job!",
+                text: "Your model will be uploaded and soon you will be able to see the results in the dynaboard (you will receive an email!)",
+                icon: "success",
+                confirmButtonColor: "#007bff",
+              });
+            } else {
+              console.error("upload failed", result?.message);
+              setLoading({ loading: true, text: "Upload Failed" });
+            }
+          })
+          .catch((e) => {
+            console.error("Unexpected error", e);
+            setLoading({ loading: true, text: "Upload Failed" });
+            Swal.fire({
+              icon: "error",
+              title: "Unexpected Error",
+              text: "An Unexpected error occurred. Please try again.",
+            });
+          });
+      } else {
+        setLoadingFile(true);
+        Swal.fire({
+          icon: "warning",
+          title: "No File Selected",
+          text: "Please upload a model file before submitting.",
+        });
+        setLoading({ loading: true, text: "Done" });
+      }
     }
   };
 
   const getTaskData = async () => {
     const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
     const taskData = await get(
-      `/task/get_task_with_round_info_by_task_id/${taskId}`
+      `/task/get_task_with_round_info_by_task_id/${taskId}`,
     );
     const dynalabModel = await get(`/model/get_dynalab_model/${taskCode}`);
     if (response.ok) {
       setConfigYaml(
-        JSON.parse(JSON.stringify(yaml.load(taskData.config_yaml)))
+        JSON.parse(JSON.stringify(yaml.load(taskData.config_yaml))),
       );
       setDynalabModel(dynalabModel);
+      setFirstRenderLoading(false);
     }
   };
 
@@ -258,6 +330,14 @@ const SubmitModel = () => {
               </div>
             )}
           </div>
+        </div>
+      ) : firstRenderLoading ? (
+        <div className="flex items-center justify-center h-screen">
+          <PacmanLoader
+            color="#ccebd4"
+            loading={firstRenderLoading}
+            size={50}
+          />
         </div>
       ) : (
         <div className="flex items-center justify-center h-screen">
