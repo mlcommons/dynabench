@@ -4,7 +4,7 @@
 
 from fastapi import APIRouter, Request
 
-from app.domain.schemas.base.user import UserInfoBadges
+from app.domain.schemas.base.user import UserInfoBadges, UserInfoBasic
 from app.domain.services.base.user import UserService
 
 
@@ -23,3 +23,10 @@ async def get_stats_by_user_id(user_id: int, request: Request):
     if user_id != request.state.user:
         raise PermissionError("Unauthorized access to user data.")
     return UserService().get_stats_by_user_id(user_id)
+
+
+@router.get("/{user_id}", response_model=UserInfoBasic)
+async def get_user_by_id(user_id: int, request: Request):
+    if user_id != request.state.user:
+        raise PermissionError("Unauthorized access to user data.")
+    return UserService().get_user_basics_by_id(user_id)

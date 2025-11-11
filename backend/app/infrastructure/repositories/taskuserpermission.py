@@ -22,3 +22,11 @@ class TaskUserPermissionRepository(AbstractRepository):
             .filter(self.model.type == "owner")
             .first()
         ) is not None
+
+    def get_task_permissions_by_user_id(self, user_id: int):
+        instances = (
+            self.session.query(self.model).filter(self.model.uid == user_id).all()
+        )
+        return [
+            self.instance_converter.instance_to_dict(instance) for instance in instances
+        ]

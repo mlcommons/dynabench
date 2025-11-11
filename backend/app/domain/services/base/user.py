@@ -4,6 +4,9 @@
 
 from app.infrastructure.repositories.example import ExampleRepository
 from app.infrastructure.repositories.model import ModelRepository
+from app.infrastructure.repositories.taskuserpermission import (
+    TaskUserPermissionRepository,
+)
 from app.infrastructure.repositories.user import UserRepository
 from app.infrastructure.repositories.validation import ValidationRepository
 
@@ -14,6 +17,8 @@ class UserService:
         self.example_repository = ExampleRepository()
         self.validation_repository = ValidationRepository()
         self.model_repository = ModelRepository()
+        self.user_permissions_repository = UserRepository()
+        self.task_user_permissions_repository = TaskUserPermissionRepository()
 
     def increment_examples_fooled(self, user_id: int):
         self.user_repository.increment_examples_fooled(user_id)
@@ -69,3 +74,20 @@ class UserService:
 
     def download_users_info(self):
         return self.user_repository.download_users_info()
+
+    def get_user_basics_by_id(self, user_id: int):
+        admin = self.user_repository.get_is_admin(user_id)
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        username = self.user_repository.get_user_name_by_id(user_id)[0]
+        task_permissions = (
+            self.task_user_permissions_repository.get_task_permissions_by_user_id(
+                user_id
+            )
+        )
+        return {
+            "admin": admin,
+            "email": user_email,
+            "username": username,
+            "id": user_id,
+            "task_permissions": task_permissions,
+        }

@@ -27,3 +27,16 @@ class UserInfoBadges(BaseModel):
     examples_verified_incorrect_fooled: Optional[int] = None
     examples_fooled: Optional[int] = None
     badges: List[UserBadges] = []
+
+
+class taskPermission(BaseModel):
+    tid: int
+    type: str
+
+
+class UserInfoBasic(BaseModel):
+    id: int
+    email: str
+    username: str
+    task_permissions: Optional[List[taskPermission]] = []
+    admin: bool

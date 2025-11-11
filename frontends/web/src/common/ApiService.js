@@ -283,7 +283,7 @@ export default class ApiService {
   }
 
   getUser(id, badges = false) {
-    var url = `${this.domain}/users/${id}`;
+    var url = `${this.alternateDomain}/user/${id}`;
     if (badges) {
       url += "/badges";
     }
