@@ -952,10 +952,9 @@ export default class ApiService {
     }
 
     // Start new refresh
-    this.refreshPromise = this.refreshToken()
-      .finally(() => {
-        this.refreshPromise = null; // Clear when done (success or failure)
-      });
+    this.refreshPromise = this.refreshToken().finally(() => {
+      this.refreshPromise = null; // Clear when done (success or failure)
+    });
 
     try {
       await this.refreshPromise;
