@@ -12,6 +12,7 @@ type EvaluateTextProps = {
   bestAnswer?: string;
   score?: number;
   handleWhenButtons?: any;
+  rateAtTheEnd?: boolean;
 };
 
 const EvaluateText: FC<EvaluateTextProps> = ({
@@ -24,6 +25,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
   bestAnswer,
   score = 50,
   handleWhenButtons,
+  rateAtTheEnd,
 }) => {
   const handleUpdateScore = (event: any) => {
     setTexts(
@@ -93,7 +95,7 @@ const EvaluateText: FC<EvaluateTextProps> = ({
           </div>
         )}
 
-        {!optionsSlider && (
+        {!optionsSlider && !rateAtTheEnd && (
           <div className="flex items-center justify-end w-full gap-2 px-4 pt-4 pb-2 border-t">
             <span className="text-gray-500 ">Option # {id + 1}</span>
             <GeneralButton
