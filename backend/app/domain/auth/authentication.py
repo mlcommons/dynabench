@@ -7,7 +7,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any, Union
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Request, status
 from jose import jwt
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -90,10 +90,11 @@ class LoginService:
             httponly=True,
             path="/",
             expires=cookie_expires,
-            # For localhost testing set secure to False
-            secure=False,
-            # For Localhost testing set samesite to None, else lax
+            # For localhost testing set secure to False in Prod to True
+            secure=True,
             samesite="lax",
+            # For localhost testing set domain to localhost
+            # domain="localhost"
         )
         return refresh_token
 
@@ -159,7 +160,10 @@ class LoginService:
         else:
             refresh_token_expired()
 
-    def is_admin_or_owner(self, user_id: int, task_id: int):
+    def is_admin_or_owner(self, task_id: int, request: Request) -> bool:
+        user_id = request.state.user
+        if not user_id:
+            return False
         return self.task_user_permission_repository.is_task_owner(
             user_id, task_id
         ) or self.users_service.get_is_admin(user_id)

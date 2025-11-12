@@ -97,7 +97,7 @@ class TaskOwnerPage extends React.Component {
           (adminOrOwnerResult) => {
             this.setState(
               {
-                admin_or_owner: adminOrOwnerResult.admin_or_owner,
+                admin_or_owner: adminOrOwnerResult,
                 task: result,
               },
               callback

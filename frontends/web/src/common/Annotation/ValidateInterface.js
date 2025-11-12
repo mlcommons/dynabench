@@ -106,7 +106,7 @@ class ValidateInterface extends React.Component {
               this.context.api
                 .getAdminOrOwner(this.state.task.id)
                 .then((result) => {
-                  this.setState({ admin_or_owner: result.admin_or_owner });
+                  this.setState({ admin_or_owner: result });
                 });
               // eslint-disable-next-line react/no-direct-mutation-state
               this.state.task.selected_round = this.state.task.cur_round;

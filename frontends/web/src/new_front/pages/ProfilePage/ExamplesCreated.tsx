@@ -11,6 +11,9 @@ const ExamplesCreated = () => {
   const { user } = useContext(UserContext);
 
   const getTasks = async () => {
+    if (!user.id) {
+      return;
+    }
     const tasks = await get(
       `/task/get_tasks_with_samples_created_by_user/${user.id}`
     );

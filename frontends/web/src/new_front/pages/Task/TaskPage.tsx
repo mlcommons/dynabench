@@ -60,28 +60,22 @@ const TaskPage = () => {
         history.push("/PageNotFound");
       }
     },
-    [taskCode],
+    [taskCode]
   );
 
-  const checkAdminOrOwner = useCallback(
-    async (user_id: number) => {
-      if (user?.id && task?.id) {
-        const adminOrOwner = await post("/auth/is_admin_or_owner", {
-          task_id: task?.id,
-          user_id: user_id,
-        });
-        if (response.ok) {
-          setAdminOrOwner(adminOrOwner);
-        }
-      } else {
-        setAdminOrOwner(false);
+  const checkAdminOrOwner = useCallback(async () => {
+    if (user?.id && task?.id) {
+      const adminOrOwner = await get(`/auth/is_admin_or_owner/${task?.id}`);
+      if (response.ok) {
+        setAdminOrOwner(adminOrOwner);
       }
-    },
-    [user?.id, task],
-  );
+    } else {
+      setAdminOrOwner(false);
+    }
+  }, [user?.id, task]);
 
   useEffect(() => {
-    user?.id && task && checkAdminOrOwner(user?.id);
+    user?.id && task && checkAdminOrOwner();
   }, [user, task]);
 
   useEffect(() => {
@@ -181,10 +175,10 @@ const TaskPage = () => {
                   <TaskActionButtons
                     configYaml={task.config_yaml}
                     dynamicAdversarialDataValidation={Boolean(
-                      task.dynamic_adversarial_data_validation,
+                      task.dynamic_adversarial_data_validation
                     )}
                     dynamicAdversarialDataCollection={Boolean(
-                      task.dynamic_adversarial_data_collection,
+                      task.dynamic_adversarial_data_collection
                     )}
                     submitable={Boolean(task.submitable)}
                     hasPredictionsUpload={Boolean(task.has_predictions_upload)}
@@ -209,10 +203,10 @@ const TaskPage = () => {
                             showLeaderboard={Boolean(task.show_leaderboard)}
                             showTrends={Boolean(task.show_trends)}
                             showUserLeaderboard={Boolean(
-                              task.show_user_leaderboard,
+                              task.show_user_leaderboard
                             )}
                             showUserLeaderboardCSV={Boolean(
-                              task.show_user_leaderboard_csv,
+                              task.show_user_leaderboard_csv
                             )}
                           />
                         ) : (
@@ -239,10 +233,10 @@ const TaskPage = () => {
                           showLeaderboard={Boolean(task.show_leaderboard)}
                           showTrends={Boolean(task.show_trends)}
                           showUserLeaderboard={Boolean(
-                            task.show_user_leaderboard,
+                            task.show_user_leaderboard
                           )}
                           showUserLeaderboardCSV={Boolean(
-                            task.show_user_leaderboard_csv,
+                            task.show_user_leaderboard_csv
                           )}
                         />
                       )}
