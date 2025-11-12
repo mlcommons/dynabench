@@ -22,7 +22,6 @@ export type ChatbotProps = {
   modelInputs?: any;
   chooseWhenTie?: boolean;
   showChosenHistory?: boolean;
-  rateAtTheEnd?: boolean;
 };
 
 export type SimpleChatbotProps = {

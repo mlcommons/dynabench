@@ -22,7 +22,6 @@ const Chatbot: FC<ChatbotProps> = ({
   numInteractionsChatbot,
   finishConversation,
   optionsSlider,
-  rateAtTheEnd,
   setChatHistory,
   showOriginalInteractions,
   setFinishConversation,
@@ -496,35 +495,30 @@ const Chatbot: FC<ChatbotProps> = ({
                         texts={newResponses}
                         setTexts={setNewResponses}
                         optionsSlider={optionsSlider}
-                        rateAtTheEnd={rateAtTheEnd}
                         score={response.score}
                         handleWhenButtons={handleOnClick}
                       />
                     ))}
-                  {newResponses.length > 0 &&
-                    !optionsSlider &&
-                    !rateAtTheEnd && (
-                      <div className="flex justify-end">
-                        <GeneralButton
-                          onClick={() => handleOnClick("tie")}
-                          text={"It's a tie 🤝 1"}
-                          className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                          active={currentSelection === "tie"}
-                        />
-                      </div>
-                    )}
-                  {newResponses.length > 0 &&
-                    !optionsSlider &&
-                    !rateAtTheEnd && (
-                      <div>
-                        <GeneralButton
-                          onClick={() => handleOnClick("all_bad")}
-                          text={"All are bad 🚫"}
-                          className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                          active={currentSelection === "all_bad"}
-                        />
-                      </div>
-                    )}
+                  {newResponses.length > 0 && !optionsSlider && (
+                    <div className="flex justify-end">
+                      <GeneralButton
+                        onClick={() => handleOnClick("tie")}
+                        text={"It's a tie 🤝"}
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                        active={currentSelection === "tie"}
+                      />
+                    </div>
+                  )}
+                  {newResponses.length > 0 && !optionsSlider && (
+                    <div>
+                      <GeneralButton
+                        onClick={() => handleOnClick("all_bad")}
+                        text={"All are bad 🚫"}
+                        className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                        active={currentSelection === "all_bad"}
+                      />
+                    </div>
+                  )}
                 </div>
                 {showReasonModal && (
                   <Modal
@@ -592,9 +586,7 @@ const Chatbot: FC<ChatbotProps> = ({
                           onClick={saveHistoryValidation}
                           text="Save"
                           className="px-4 py-1 font-semibold border-0 font-weight-bold light-gray-bg task-action-btn "
-                          disabled={
-                            !currentSelection && !optionsSlider && !rateAtTheEnd
-                          }
+                          disabled={!currentSelection && !optionsSlider}
                         />
                       )}
                     </div>
