@@ -551,6 +551,11 @@ const EvaluateTextsGenerative: FC<
                           id={text.id}
                           texts={texts}
                           setTexts={setTexts}
+                          rateAtTheEnd={
+                            "rate_at_the_end" in artifactsInput
+                              ? artifactsInput?.rate_at_the_end
+                              : true
+                          }
                           optionsSlider={artifactsInput.options_slider}
                           disabled={finishConversation}
                           bestAnswer={bestAnswer.text}
@@ -558,28 +563,34 @@ const EvaluateTextsGenerative: FC<
                           handleWhenButtons={handleOnClick}
                         />
                       ))}
-                      {!artifactsInput?.options_slider && (
-                        <div className="flex justify-end">
-                          <GeneralButton
-                            onClick={() => handleOnClick("tie")}
-                            text={"It's a tie 🤝"}
-                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                            active={currentSelection === "tie"}
-                            disabled={finishConversation}
-                          />
-                        </div>
-                      )}
-                      {!artifactsInput?.options_slider && (
-                        <div>
-                          <GeneralButton
-                            onClick={() => handleOnClick("all_bad")}
-                            text={"All are bad 🚫"}
-                            className="border-0 font-weight-bold light-gray-bg task-action-btn"
-                            active={currentSelection === "all_bad"}
-                            disabled={finishConversation}
-                          />
-                        </div>
-                      )}
+                      {!artifactsInput?.options_slider &&
+                        !("rate_at_the_end" in artifactsInput
+                          ? artifactsInput?.rate_at_the_end
+                          : true) && (
+                          <div className="flex justify-end">
+                            <GeneralButton
+                              onClick={() => handleOnClick("tie")}
+                              text={"It's a tie 🤝"}
+                              className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                              active={currentSelection === "tie"}
+                              disabled={finishConversation}
+                            />
+                          </div>
+                        )}
+                      {!artifactsInput?.options_slider &&
+                        !("rate_at_the_end" in artifactsInput
+                          ? artifactsInput?.rate_at_the_end
+                          : true) && (
+                          <div>
+                            <GeneralButton
+                              onClick={() => handleOnClick("all_bad")}
+                              text={"All are bad 🚫"}
+                              className="border-0 font-weight-bold light-gray-bg task-action-btn"
+                              active={currentSelection === "all_bad"}
+                              disabled={finishConversation}
+                            />
+                          </div>
+                        )}
                     </div>
                   )}
                   {!finishConversation &&
@@ -619,6 +630,11 @@ const EvaluateTextsGenerative: FC<
                   chooseWhenTie={
                     "choose_when_tie" in artifactsInput &&
                     artifactsInput?.choose_when_tie
+                  }
+                  rateAtTheEnd={
+                    "rate_at_the_end" in artifactsInput
+                      ? artifactsInput?.rate_at_the_end
+                      : true
                   }
                   showChosenHistory={
                     "show_chosen_history" in artifactsInput &&
