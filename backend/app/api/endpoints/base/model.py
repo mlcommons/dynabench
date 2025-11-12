@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse
 
 from app.domain.schemas.base.model import (
     AbortMultipartRequest,
+    BaseforHFModelRequest,
     BatchCreateExampleRequest,
     BatchURLsResponse,
     CompleteBigModelUploadRequest,
@@ -284,3 +285,36 @@ def download_model_results(
 @router.get("/get_dynalab_model/{task_code}")
 def get_dynalab_model(task_code: str):
     return ModelService().get_dynalab_model(task_code)
+
+
+@router.post("/upload_hf_model")
+async def upload_hf_model(
+    model: BaseforHFModelRequest, background_tasks: BackgroundTasks
+):
+    model_service = ModelService()
+    data = await model_service.upload_hf_model(
+        model.model_name,
+        model.description,
+        model.num_paramaters,
+        model.languages,
+        model.license,
+        model.user_id,
+        model.task_code,
+        model.hf_api_token,
+        model.repo_url,
+    )
+    background_tasks.add_task(
+        model_service.run_heavy_evaluation,
+        data["model_path"],
+        data["model_id"],
+        data["save_s3_path"],
+        data["inference_url"],
+        data["metadata_url"],
+        model.hf_api_token,
+    )
+    background_tasks.add_task(
+        model_service.send_uploaded_model_email,
+        data["user_email"],
+        data["model_name"],
+    )
+    return "The model will be evaluated in the background"
