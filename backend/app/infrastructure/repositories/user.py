@@ -38,6 +38,13 @@ class UserRepository(AbstractRepository):
             )
             session.commit()
 
+    def decrement_model_submitted_count(self, user_id: int):
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {self.model.models_submitted: self.model.models_submitted - 1}
+            )
+            session.commit()
+
     def get_user_email(self, user_id: int) -> str:
         return (
             self.session.query(self.model.email)

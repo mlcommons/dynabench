@@ -47,6 +47,19 @@ class BaseforModelRequest(BaseModel):
 
 
 @form_body
+class BaseforHFModelRequest(BaseModel):
+    model_name: Optional[str]
+    description: Optional[str]
+    num_paramaters: Optional[float]
+    languages: Optional[str]
+    license: Optional[str]
+    user_id: int
+    task_code: str
+    hf_api_token: Optional[str]
+    repo_url: str
+
+
+@form_body
 class UploadModelToS3AndEvaluateRequest(BaseforModelRequest):
     file_to_upload: UploadFile = File(...)
 

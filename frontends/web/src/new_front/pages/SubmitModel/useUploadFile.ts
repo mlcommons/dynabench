@@ -21,6 +21,7 @@ const useUploadFile = () => {
         onUploadProgress: (p) => {
           setProgress(p.loaded / p.total);
         },
+        withCredentials: true,
       })
       .then((response) => {
         setProgress(1);
@@ -90,7 +91,46 @@ const useUploadFile = () => {
       });
   };
 
-  return { progress, sendModelData };
+  const sendHFmodel = (formData: FormData) => {
+    const url = `${process.env.REACT_APP_API_HOST_2}/model/upload_hf_model`;
+    return axios
+      .request({
+        method: "post",
+        url: url,
+        data: formData,
+        onUploadProgress: (p) => {
+          setProgress(p.loaded / p.total);
+        },
+        withCredentials: true,
+      })
+      .then((response) => {
+        setProgress(1);
+        if (response.status >= 200 && response.status < 300) {
+          return {
+            success: true,
+            data: response.data,
+            message: "Upload successful",
+          };
+        } else {
+          throw new Error(`Unexpected response status: ${response.status}`);
+        }
+      })
+      .catch((error) => {
+        setProgress(0);
+        Swal.fire({
+          icon: "error",
+          title: "Upload Failed",
+          text: "Something went wrong! Please try again.",
+        });
+        return {
+          success: false,
+          error: error,
+          message: "Something went wrong!",
+        };
+      });
+  };
+
+  return { progress, sendModelData, sendHFmodel };
 };
 
 export default useUploadFile;
