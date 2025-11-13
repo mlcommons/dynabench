@@ -27,6 +27,7 @@ const CreateModel = ({
     license: " ",
     modelCard: " ",
     repoUrl: " ",
+    hfApiToken: " ",
   };
 
   const options = languagePairs.map((pair, index) => {
@@ -155,6 +156,18 @@ const CreateModel = ({
               autoFocus
               {...register("repoUrl")}
             />
+            <BootstrapForm.Label className="text-base mt-4">
+              HF API Token (Optional)
+            </BootstrapForm.Label>
+            <BootstrapForm.Control
+              placeholder="HF API Token"
+              autoFocus
+              {...register("hfApiToken")}
+            />
+            <BootstrapForm.Text className="text-muted">
+              If your HF repository is private, please provide an API token with
+              read access.
+            </BootstrapForm.Text>
           </BootstrapForm.Group>
         )}
       </div>

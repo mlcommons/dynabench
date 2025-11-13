@@ -78,6 +78,7 @@ class ModelRepository(AbstractRepository):
         params: str,
         deployment_status: str,
         secret: str,
+        source_url: str = None,
     ) -> dict:
         model = self.model(
             tid=task_id,
@@ -91,6 +92,7 @@ class ModelRepository(AbstractRepository):
             params=params,
             deployment_status=deployment_status,
             secret=secret,
+            source_url=source_url,
         )
         with self.session as session:
             session.add(model)

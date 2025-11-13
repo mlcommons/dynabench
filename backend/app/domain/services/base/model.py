@@ -297,6 +297,7 @@ class ModelService:
         save_s3_path: str,
         inference_url: str,
         metadata_url: str,
+        model_api_key: str = None,
     ):
         try:
             api_key = os.getenv("RUNPOD")
@@ -308,6 +309,7 @@ class ModelService:
                     "endpoint_url": """https://backend.dynabench.org/
                                        score/heavy_evaluation_scores""",
                     "metadata_s3_path": metadata_url,
+                    "api_key": model_api_key,
                 }
             }
             print("background task before request to Runpod")
@@ -865,6 +867,7 @@ class ModelService:
         )
 
         self.model_repository.delete_model(model_id)
+        self.user_repository.decrement_model_submitted_count(user_id)
         try:
             self.s3.abort_multipart_upload(
                 Bucket=task_s3_bucket,
@@ -884,6 +887,63 @@ class ModelService:
             raise HTTPException(
                 status_code=500, detail=f"Failed to abort upload: {str(e)}"
             )
+
+    async def upload_hf_model(
+        self,
+        model_name,
+        description,
+        num_paramaters,
+        languages,
+        license,
+        user_id,
+        task_code,
+        hf_api_token,
+        repo_url,
+    ):
+        """Create Model with HF url and API Key if needed and evaluate it."""
+        task_id = self.task_repository.get_task_id_by_task_code(task_code)[0]
+        yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
+        yaml_file = yaml.safe_load(yaml_file)
+        task_s3_bucket = self.task_repository.get_s3_bucket_by_task_id(task_id)[0]
+        user_email = self.user_repository.get_user_email(user_id)[0]
+        inference_url = yaml_file["evaluation"]["inference_url"]
+        model_name_clean = self.__clean_name(model_name)
+
+        model = self.model_repository.create_new_model(
+            task_id=task_id,
+            user_id=user_id,
+            model_name=model_name,
+            shortname=model_name,
+            longdesc=description,
+            desc=description,
+            languages=languages,
+            license=license,
+            params=num_paramaters,
+            deployment_status="uploaded",
+            secret=hf_api_token,
+            source_url=repo_url,
+        )
+
+        uri_logging = (
+            f"s3://{task_s3_bucket}/{task_code}/inference_logs/"
+            f"{model['id']}-{model_name_clean}"
+        )
+        uri_model = (
+            f"s3://{task_s3_bucket}/{task_code}/submited_models/"
+            f"{model['id']}-{model_name_clean}"
+        )
+        metadata_url = f"s3://{task_s3_bucket}/{task_code}/metadata/"
+        self.user_repository.increment_model_submitted_count(user_id)
+
+        return {
+            "model_path": uri_model,
+            "save_s3_path": uri_logging,
+            "model_id": model["id"],
+            "model_name": model_name,
+            "user_email": user_email,
+            "inference_url": inference_url,
+            "metadata_url": metadata_url,
+        }
 
     def __clean_name(self, name: str) -> str:
         """Clean the name to avoid issues with S3 keys."""
