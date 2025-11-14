@@ -99,7 +99,7 @@ class LoginService:
             secure=False,
             samesite="lax",
             # For localhost testing set domain to localhost
-            # domain="localhost",
+            domain="localhost",
         )
         return refresh_token
 
