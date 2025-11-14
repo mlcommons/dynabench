@@ -577,7 +577,7 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `realname`, `affilia
 VALUES
 (1, 'user1', 'user1@example.com', 'password1', 'John Doe', 'Company A', 10, 20, 15, 'https://example.com/avatar1.jpg', 5, 2, 30, 50, 0, 8, 6, 2, 'token1', '{"key1": "value1"}', 3);
 
---Challenges_type
+-- Challenges_type
 
 INSERT INTO `challenges_types` (`id`, `name`, `url`) VALUES
 (1, 'challenge', 'https://example.com/mock-challenge');
@@ -603,7 +603,7 @@ INSERT INTO `tasks` (
     `dynamic_adversarial_data_collection`,
     `dynamic_adversarial_data_validation`,
     `image_url`,
-    `bucket_for_aditional_example_data`,
+    `bucket_for_aditional_example_data`
 ) VALUES (
 	  1,
     'Adversarial Nibbler',
