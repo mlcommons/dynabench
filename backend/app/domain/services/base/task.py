@@ -372,3 +372,23 @@ class TaskService:
         consent_file = json.loads(consent_file["Body"].read())
 
         return consent_file
+
+    def get_tasks(self, exclude_hidden: bool = True):
+        filters = {
+            "active": int(exclude_hidden),
+        }
+        tasks = self.task_repository.get_tasks_current_round(filters)
+        converted_tasks = []
+        flag = 0
+        for task, round_obj in tasks:
+            task_dict = {
+                **{k: v for k, v in task.__dict__.items() if not k.startswith("_")},
+                "round": {
+                    k: v for k, v in round_obj.__dict__.items() if not k.startswith("_")
+                },
+            }
+            converted_tasks.append(task_dict)
+            if flag < 1:
+                print("task_dict", task_dict)
+                flag += 1
+        return converted_tasks

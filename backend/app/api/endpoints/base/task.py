@@ -150,3 +150,8 @@ def get_random_provider_and_model_info(task_id: int, user_id: int):
 @router.get("/get_task_consent", response_model={})
 def get_task_consent(task_id: int):
     return TaskService().get_task_consent(task_id)
+
+
+@router.get("/all_active")
+def get_tasks():
+    return TaskService().get_tasks()
