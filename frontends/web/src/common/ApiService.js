@@ -153,7 +153,7 @@ export default class ApiService {
   }
 
   getTasks() {
-    return this.fetch(`${this.domain}/tasks`, {
+    return this.fetch(`${this.alternateDomain}/task/all_active`, {
       method: "GET",
     });
   }
@@ -449,7 +449,7 @@ export default class ApiService {
   }
 
   exportData(tid, rid = null) {
-    var export_link = `${this.domain}/tasks/${tid}`;
+    var export_link = `${this.alternateDomain}/tasks/${tid}`;
     if (rid !== null) {
       export_link += `/rounds/${rid}`;
     }

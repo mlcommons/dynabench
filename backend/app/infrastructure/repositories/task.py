@@ -187,3 +187,14 @@ class TaskRepository(AbstractRepository):
             .filter(self.model.id == task_id)
             .first()
         )
+
+    def get_tasks_current_round(self, filters: dict = {}):
+        query = self.session.query(self.model, Round).join(
+            Round, (Round.tid == self.model.id) & (Round.rid == self.model.cur_round)
+        )
+        for column_name, value in filters.items():
+            if hasattr(self.model, column_name):
+                column = getattr(self.model, column_name)
+                query = query.filter(column == value)
+        instances = query.all()
+        return self.instance_converter.instance_to_dict(instances)
