@@ -392,3 +392,91 @@ class TaskService:
                 print("task_dict", task_dict)
                 flag += 1
         return converted_tasks
+
+    def get_task_with_round_and_metric_data(self, task_code: str):
+        try:
+            task, round_obj = self.task_repository.get_task_with_round_info(task_code)
+
+            datasets = self.dataset_repository.get_order_datasets_by_task_id(task.id)
+            dataset_list = []
+            scoring_dataset_list = []
+            for dataset in datasets:
+                dataset_list.append({"id": dataset.id, "name": dataset.name})
+                if dataset.access_type == "scoring":
+                    scoring_dataset_list.append(
+                        {
+                            "id": dataset.id,
+                            "name": dataset.name,
+                            "default_weight": self.get_dataset_weight(dataset.id),
+                        }
+                    )
+            dataset_list.sort(key=lambda dataset: dataset["id"])
+            scoring_dataset_list.sort(key=lambda dataset: dataset["id"])
+
+            task_dict = task.__dict__
+            round_dict = round_obj.__dict__
+            task_dict["ordered_scoring_datasets"] = scoring_dataset_list
+            task_dict["ordered_datasets"] = dataset_list
+            config = yaml.load(task_dict["config_yaml"], yaml.SafeLoader)
+            if "perf_metric" in config:
+                if isinstance(config["perf_metric"], list):
+                    principal_metric = config["perf_metric"][0]
+                    task_dict["perf_metric_field_name"] = principal_metric["type"]
+                elif isinstance(config["perf_metric"], dict):
+                    task_dict["perf_metric_field_name"] = config["perf_metric"]["type"]
+                metrics_meta, ordered_field_names = self.get_task_metrics_meta(
+                    task_dict
+                )
+                print("ordered_field_names", ordered_field_names)
+                ordered_metrics = [
+                    dict(
+                        {
+                            "name": metrics_meta[field_name]["pretty_name"],
+                            "field_name": field_name,
+                            "default_weight": self.get_metric_weight(
+                                field_name,
+                                task_dict.get("perf_metric_field_name"),
+                                config.get("aggregation_metric", {}).get(
+                                    "default_weights", {-1: 1}
+                                ),
+                            ),
+                        },
+                        **metrics_meta[field_name],
+                    )
+                    for field_name in ordered_field_names
+                ]
+
+                task_dict["ordered_metrics"] = ordered_metrics
+            task_dict["round"] = round_dict
+            return task_dict
+        except Exception as e:
+            return False
+
+    def get_task_metrics_meta(self, task):
+        task_config = yaml.load(task["config_yaml"], yaml.SafeLoader)
+        if isinstance(task_config["perf_metric"], list):
+            perf_metric_type = [obj["type"] for obj in task_config["perf_metric"]]
+        elif isinstance(task_config["perf_metric"], dict):
+            perf_metric_type = [task_config["perf_metric"]["type"]]
+        delta_metric_types = [
+            obj["type"] for obj in task_config.get("delta_metrics", [])
+        ]
+        aws_metric_names = instance_property.get(task.get("instance_type"), {}).get(
+            "aws_metrics", []
+        )
+        principal_metric = perf_metric_type[0]
+
+        # TODO: make it possible to display some modes with aws metrics and some
+        # models without aws metrics on the same leaderboard?
+        if task.get("predictions_upload", False) or "train_file_metric" in task_config:
+            aws_metric_names = []
+        ordered_metric_field_names = (
+            perf_metric_type + aws_metric_names + delta_metric_types
+        )
+        metrics_meta = {
+            metric: meta_metrics_dict.get(metric, meta_metrics_dict[principal_metric])(
+                task
+            )
+            for metric in ordered_metric_field_names
+        }
+        return metrics_meta, ordered_metric_field_names

@@ -86,7 +86,6 @@ job_metrics_dict = {
 meta_metrics_dict = {
     "accuracy": get_accuracy_meta,
     "new_accuracy": get_new_accuracy_meta,
-    "perf": get_accuracy_meta,
     "matthews_correlation": get_matthews_correlation_meta,
     "f1": get_f1_meta,
     "macro_f1": get_macro_f1_meta,
