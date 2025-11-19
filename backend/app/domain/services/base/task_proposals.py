@@ -2,6 +2,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import os
 import random
 
 from app.domain.helpers.email import EmailHelper
@@ -12,6 +13,7 @@ from app.infrastructure.repositories.user import UserRepository
 
 class TaskProposalService:
     def __init__(self):
+        self.cc_contact = os.getenv("MAIL_LOGIN")
         self.task_proposal_repository = TaskProposalRepository()
         self.user_repository = UserRepository()
         self.task_repository = TaskRepository()
@@ -32,14 +34,14 @@ class TaskProposalService:
         user_email = self.user_repository.get_user_email(user_id)[0]
         self.email_helper.send(
             contact=user_email,
-            cc_contact="dynabench-site@mlcommons.org",
+            cc_contact=self.cc_contact,
             template_name="task_proposal_update.txt",
             msg_dict={"name": name, "code": task_code, "desc": longdesc},
             subject=f"Proposal for task {task_code}",
         )
         self.email_helper.send(
             contact="juan.ciro@factored.ai",
-            cc_contact="dynabench-site@mlcommons.org",
+            cc_contact=self.cc_contact,
             template_name="task_proposal_update.txt",
             msg_dict={"name": name, "code": task_code, "desc": longdesc},
             subject=f"Proposal for task {task_code}",

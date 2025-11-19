@@ -295,7 +295,7 @@ export default class ApiService {
   getTask(idOrCode) {
     const includeCredentials = this.mode !== "mturk";
     return this.doFetch(
-      `${this.domain}/tasks/${idOrCode}`,
+      `${this.alternateDomain}/task/round_and_metric_data/${idOrCode}`,
       {
         method: "GET",
       },

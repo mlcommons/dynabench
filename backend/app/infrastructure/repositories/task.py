@@ -198,3 +198,14 @@ class TaskRepository(AbstractRepository):
                 query = query.filter(column == value)
         instances = query.all()
         return self.instance_converter.instance_to_dict(instances)
+
+    def get_task_with_round_info(self, task_code: str):
+        return (
+            self.session.query(self.model, Round)
+            .filter(self.model.task_code == task_code)
+            .join(
+                Round,
+                (Round.tid == self.model.id) & (Round.rid == self.model.cur_round),
+            )
+            .first()
+        )

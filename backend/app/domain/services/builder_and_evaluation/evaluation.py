@@ -53,6 +53,7 @@ class EvaluationService:
         self.s3 = self.session.client("s3")
         self.cloud_watch = self.session.client("cloudwatch")
         self.s3_bucket = os.getenv("AWS_S3_BUCKET")
+        self.cc_contact = os.getenv("MAIL_LOGIN")
         self.builder = BuilderService()
         self.task_repository = TaskRepository()
         self.score_repository = ScoreRepository()
@@ -449,7 +450,7 @@ class EvaluationService:
         user_email = self.user_repository.get_user_email(user_id)[0]
         self.email_helper.send(
             contact=user_email,
-            cc_contact="dynabench-site@mlcommons.org",
+            cc_contact=self.cc_contact,
             template_name="model_train_successful.txt",
             msg_dict={"name": model_name, "model_id": model_id},
             subject=f"Model {model_name} training succeeded.",
@@ -561,7 +562,7 @@ class EvaluationService:
             user_email = self.user_repository.get_user_email(user_id)[0]
             self.email_helper.send(
                 contact=user_email,
-                cc_contact="dynabench-site@mlcommons.org",
+                cc_contact=self.cc_contact,
                 template_name="model_train_successful.txt",
                 msg_dict={"name": model_name, "model_id": model_id},
                 subject=f"Model {model_name} training succeeded.",
@@ -572,7 +573,7 @@ class EvaluationService:
             user_email = self.user_repository.get_user_email(user_id)[0]
             self.email_helper.send(
                 contact=user_email,
-                cc_contact="dynabench-site@mlcommons.org",
+                cc_contact=self.cc_contact,
                 template_name="model_eval_failed.txt",
                 msg_dict={"name": model_name, "model_id": model_id},
                 subject=f"Model {model_name} evaluation failed.",
@@ -843,7 +844,7 @@ class EvaluationService:
         self.score_repository.fix_f1_score(model_id)
         self.email_helper.send(
             contact=user_email,
-            cc_contact="dynabench-site@mlcommons.org",
+            cc_contact=self.cc_contact,
             template_name="model_train_successful.txt",
             msg_dict={"name": model_id, "model_id": model_id},
             subject=f"Model {model_id} training succeeded.",
