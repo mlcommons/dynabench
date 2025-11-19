@@ -155,3 +155,8 @@ def get_task_consent(task_id: int):
 @router.get("/all_active")
 def get_tasks():
     return TaskService().get_tasks()
+
+
+@router.get("/round_and_metric_data/{task_code}", response_model={})
+def get_task_with_round_and_metric_data(task_code: str):
+    return TaskService().get_task_with_round_and_metric_data(task_code)
