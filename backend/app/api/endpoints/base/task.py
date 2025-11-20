@@ -160,3 +160,8 @@ def get_tasks():
 @router.get("/round_and_metric_data/{task_code}", response_model={})
 def get_task_with_round_and_metric_data(task_code: str):
     return TaskService().get_task_with_round_and_metric_data(task_code)
+
+
+@router.get("/trends/{task_id}", response_model={})
+def get_task_trends(task_id: int):
+    return TaskService().get_task_trends(task_id)

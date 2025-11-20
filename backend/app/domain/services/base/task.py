@@ -6,6 +6,7 @@ import json
 import os
 import random
 from ast import literal_eval
+from typing import Union
 
 import boto3
 import yaml
@@ -393,9 +394,11 @@ class TaskService:
                 flag += 1
         return converted_tasks
 
-    def get_task_with_round_and_metric_data(self, task_code: str):
+    def get_task_with_round_and_metric_data(self, task_id_or_code: Union[int, str]):
         try:
-            task, round_obj = self.task_repository.get_task_with_round_info(task_code)
+            task, round_obj = self.task_repository.get_task_with_round_info(
+                task_id_or_code
+            )
 
             datasets = self.dataset_repository.get_order_datasets_by_task_id(task.id)
             dataset_list = []
@@ -449,7 +452,7 @@ class TaskService:
                 task_dict["ordered_metrics"] = ordered_metrics
             task_dict["round"] = round_dict
             return task_dict
-        except Exception as e:
+        except Exception:
             return False
 
     def get_task_metrics_meta(self, task):
@@ -480,3 +483,120 @@ class TaskService:
             for metric in ordered_metric_field_names
         }
         return metrics_meta, ordered_metric_field_names
+
+    def get_task_trends(self, task_id: int):
+        """
+        Get top perform models and its round wise performance metrics at task level
+        It will fetch only top 10 models and its round wise performance metrics
+        :param tid: Task id
+        :return: Json Object
+        """
+        task_dict = self.get_task_with_round_and_metric_data(task_id)
+        ordered_metric_and_weight = list(
+            map(
+                lambda metric: dict({"weight": metric["default_weight"]}, **metric),
+                task_dict["ordered_metrics"],
+            )
+        )
+        ordered_did_and_weight = list(
+            map(
+                lambda dataset: dict(
+                    {"weight": dataset["default_weight"], "did": dataset["id"]},
+                    **dataset,
+                ),
+                task_dict["ordered_scoring_datasets"],
+            )
+        )
+        dynaboard_response = self.score_services.get_dynaboard_by_task(
+            task_id,
+            task_dict.get("unpublished_models_in_leaderboard"),
+            task_dict.get("perf_metric_field_name"),
+            ordered_metric_and_weight,
+            ordered_did_and_weight,
+            "dynascore",
+            True,
+            10,
+            0,
+        )
+        mid_and_rid_to_perf = {}
+        did_to_rid = {}
+        for dataset in self.dataset_repository.get_all():
+            did_to_rid[dataset.id] = dataset.rid
+        rid_to_did_to_weight = {}
+        for did_and_weight in ordered_did_and_weight:
+            rid = did_to_rid[did_and_weight["did"]]
+            if rid in rid_to_did_to_weight:
+                rid_to_did_to_weight[rid][did_and_weight["did"]] = did_and_weight[
+                    "weight"
+                ]
+            else:
+                rid_to_did_to_weight[rid] = {
+                    did_and_weight["did"]: did_and_weight["weight"]
+                }
+        mid_to_name = {}
+        for model in self.model_repository.get_all():
+            mid_to_name[model.id] = model.name
+
+        if isinstance(dynaboard_response, tuple):
+            dynaboard_response = dynaboard_response[0]
+
+        for model_results in dynaboard_response["data"]:
+            for dataset_results in model_results["datasets"]:
+                rid = did_to_rid[dataset_results["id"]]
+                if rid != 0:
+                    ordered_metric_field_names = list(
+                        map(
+                            lambda metric: metric["field_name"],
+                            task_dict["ordered_metrics"],
+                        )
+                    )
+                    perf = dataset_results["scores"][
+                        ordered_metric_field_names.index(
+                            task_dict["perf_metric_field_name"]
+                        )
+                    ]
+                    mid_and_rid = (model_results["model_id"], rid)
+                    # Weighting is needed in case there are multiple scoring
+                    # datasets for the same round.
+                    weighted_perf = (
+                        perf
+                        * rid_to_did_to_weight[rid][dataset_results["id"]]
+                        / sum(rid_to_did_to_weight[rid].values())
+                    )
+                    if mid_and_rid in mid_and_rid_to_perf:
+                        mid_and_rid_to_perf[
+                            (model_results["model_id"], rid)
+                        ] += weighted_perf
+                    else:
+                        mid_and_rid_to_perf[
+                            (model_results["model_id"], rid)
+                        ] = weighted_perf
+        query_result = []
+        for (mid, rid), perf in mid_and_rid_to_perf.items():
+            query_result.append(
+                {
+                    "model_id": mid,
+                    "model_name": mid_to_name[mid],
+                    "performance": perf,
+                    "round_id": rid,
+                }
+            )
+
+        response_obj = {}
+        for result in query_result:
+            round_id = result["round_id"]
+            model_key = f"{result['model_name']}_{result['model_id']}"
+
+            if round_id in response_obj:
+                response_obj[round_id][model_key] = result["performance"]
+            else:
+                response_obj[round_id] = {
+                    "round": round_id,
+                    model_key: result["performance"],
+                }
+
+        return (
+            sorted(list(response_obj.values()), key=lambda x: x["round"])
+            if response_obj
+            else []
+        )
