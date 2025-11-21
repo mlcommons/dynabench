@@ -6,6 +6,7 @@ import json
 import os
 import random
 from ast import literal_eval
+from typing import Union
 
 import boto3
 import yaml
@@ -22,8 +23,12 @@ from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.example import ExampleRepository
 from app.infrastructure.repositories.historical_data import HistoricalDataRepository
 from app.infrastructure.repositories.model import ModelRepository
+from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.taskcategories import TaskCategoriesRepository
+from app.infrastructure.repositories.taskuserpermission import (
+    TaskUserPermissionRepository,
+)
 from app.infrastructure.repositories.user import UserRepository
 from app.infrastructure.repositories.validation import ValidationRepository
 
@@ -35,10 +40,12 @@ class TaskService:
         self.model_repository = ModelRepository()
         self.example_repository = ExampleRepository()
         self.score_services = ScoreService()
+        self.round_repository = RoundRepository()
         self.task_categories_repository = TaskCategoriesRepository()
         self.user_repository = UserRepository()
         self.validation_repository = ValidationRepository()
         self.historical_task_repository = HistoricalDataRepository()
+        self.task_user_permission_repository = TaskUserPermissionRepository()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
@@ -375,7 +382,7 @@ class TaskService:
 
     def get_tasks(self, exclude_hidden: bool = True):
         filters = {
-            "active": int(exclude_hidden),
+            "hidden": int(not exclude_hidden),
         }
         tasks = self.task_repository.get_tasks_current_round(filters)
         converted_tasks = []
@@ -393,9 +400,11 @@ class TaskService:
                 flag += 1
         return converted_tasks
 
-    def get_task_with_round_and_metric_data(self, task_code: str):
+    def get_task_with_round_and_metric_data(self, task_id_or_code: Union[int, str]):
         try:
-            task, round_obj = self.task_repository.get_task_with_round_info(task_code)
+            task, round_obj = self.task_repository.get_task_with_round_info(
+                task_id_or_code
+            )
 
             datasets = self.dataset_repository.get_order_datasets_by_task_id(task.id)
             dataset_list = []
@@ -449,7 +458,7 @@ class TaskService:
                 task_dict["ordered_metrics"] = ordered_metrics
             task_dict["round"] = round_dict
             return task_dict
-        except Exception as e:
+        except Exception:
             return False
 
     def get_task_metrics_meta(self, task):
@@ -480,3 +489,196 @@ class TaskService:
             for metric in ordered_metric_field_names
         }
         return metrics_meta, ordered_metric_field_names
+
+    def get_task_trends(self, task_id: int):
+        """
+        Get top performance models and its round-wise performance metrics at task level
+        It will fetch only top 10 models and its round wise performance metrics
+        :param tid: Task id
+        :return: Json Object
+        """
+        task_dict = self.get_task_with_round_and_metric_data(task_id)
+        ordered_metric_and_weight = list(
+            map(
+                lambda metric: dict({"weight": metric["default_weight"]}, **metric),
+                task_dict["ordered_metrics"],
+            )
+        )
+        ordered_did_and_weight = list(
+            map(
+                lambda dataset: dict(
+                    {"weight": dataset["default_weight"], "did": dataset["id"]},
+                    **dataset,
+                ),
+                task_dict["ordered_scoring_datasets"],
+            )
+        )
+        dynaboard_response = self.score_services.get_dynaboard_by_task(
+            task_id,
+            task_dict.get("unpublished_models_in_leaderboard"),
+            task_dict.get("perf_metric_field_name"),
+            ordered_metric_and_weight,
+            ordered_did_and_weight,
+            "dynascore",
+            True,
+            10,
+            0,
+        )
+        mid_and_rid_to_perf = {}
+        did_to_rid = {}
+        for dataset in self.dataset_repository.get_all():
+            did_to_rid[dataset.id] = dataset.rid
+        rid_to_did_to_weight = {}
+        for did_and_weight in ordered_did_and_weight:
+            rid = did_to_rid[did_and_weight["did"]]
+            if rid in rid_to_did_to_weight:
+                rid_to_did_to_weight[rid][did_and_weight["did"]] = did_and_weight[
+                    "weight"
+                ]
+            else:
+                rid_to_did_to_weight[rid] = {
+                    did_and_weight["did"]: did_and_weight["weight"]
+                }
+        mid_to_name = {}
+        for model in self.model_repository.get_all():
+            mid_to_name[model.id] = model.name
+
+        if isinstance(dynaboard_response, tuple):
+            dynaboard_response = dynaboard_response[0]
+
+        for model_results in dynaboard_response["data"]:
+            for dataset_results in model_results["datasets"]:
+                rid = did_to_rid[dataset_results["id"]]
+                if rid != 0:
+                    ordered_metric_field_names = list(
+                        map(
+                            lambda metric: metric["field_name"],
+                            task_dict["ordered_metrics"],
+                        )
+                    )
+                    perf = dataset_results["scores"][
+                        ordered_metric_field_names.index(
+                            task_dict["perf_metric_field_name"]
+                        )
+                    ]
+                    mid_and_rid = (model_results["model_id"], rid)
+                    # Weighting is needed in case there are multiple scoring
+                    # datasets for the same round.
+                    weighted_perf = (
+                        perf
+                        * rid_to_did_to_weight[rid][dataset_results["id"]]
+                        / sum(rid_to_did_to_weight[rid].values())
+                    )
+                    if mid_and_rid in mid_and_rid_to_perf:
+                        mid_and_rid_to_perf[
+                            (model_results["model_id"], rid)
+                        ] += weighted_perf
+                    else:
+                        mid_and_rid_to_perf[
+                            (model_results["model_id"], rid)
+                        ] = weighted_perf
+        query_result = []
+        for (mid, rid), perf in mid_and_rid_to_perf.items():
+            query_result.append(
+                {
+                    "model_id": mid,
+                    "model_name": mid_to_name[mid],
+                    "performance": perf,
+                    "round_id": rid,
+                }
+            )
+
+        response_obj = {}
+        for result in query_result:
+            round_id = result["round_id"]
+            model_key = f"{result['model_name']}_{result['model_id']}"
+
+            if round_id in response_obj:
+                response_obj[round_id][model_key] = result["performance"]
+            else:
+                response_obj[round_id] = {
+                    "round": round_id,
+                    model_key: result["performance"],
+                }
+
+        return (
+            sorted(list(response_obj.values()), key=lambda x: x["round"])
+            if response_obj
+            else []
+        )
+
+    def update_task(self, task_id, data):
+        for field in data:
+            if field not in (
+                "unpublished_models_in_leaderboard",
+                "validate_non_fooling",
+                "num_matching_validations",
+                "instructions_md",
+                "predictions_upload_instructions_md",
+                "train_file_upload_instructions_md",
+                "mlcube_tutorial_markdown",
+                "dynamic_adversarial_data_collection",
+                "dynamic_adversarial_data_validation",
+                "hidden",
+                "submitable",
+                "create_endpoint",
+                "build_sqs_queue",
+                "eval_sqs_queue",
+                "is_decen_task",
+                "task_aws_account_id",
+                "task_gateway_predict_prefix",
+                "config_yaml",
+                "context",
+                "leaderboard_description",
+            ):
+                raise HTTPException(
+                    status_code=403, detail=f"Field {field} cannot be updated."
+                )
+        return self.task_repository.update_task(task_id, data)
+
+    def get_task_owners(self, task_id):
+        tasks = self.task_user_permission_repository.get_task_owners(task_id)
+        users = []
+        for user in tasks:
+            user_name = self.user_repository.get_user_name_by_id(user["uid"])
+            users.append({"user_id": user["uid"], "username": user_name["username"]})
+        return users
+
+    def toogle_user_task_permission(self, task_id: int, username: str):
+        user_to_toggle = self.user_repository.get_user_by_username(username)
+
+        if (task_id, "owner") in [
+            (perm.tid, perm.type) for perm in user_to_toggle.task_permissions
+        ]:
+            self.task_user_permission_repository.delete_task_user_permission(
+                task_id, user_to_toggle.id, "owner"
+            )
+            print("Removed task owner: " + username)
+        else:
+            self.task_user_permission_repository.create_user_task_permission(
+                task_id, user_to_toggle.id, "owner"
+            )
+            print("Added task owner: " + username)
+
+        return {"success": "ok"}
+
+    def get_models_in_the_loop(self, task_id: int):
+        rounds = self.round_repository.get_rounds_by_task_id(task_id)
+        models = self.model_repository.get_models_by_task_id(task_id)
+        rid_to_model_identifiers = {}
+        for round in rounds:
+            model_identifiers = []
+            for model in models:
+                if model.light_model:
+                    if model.is_published and model.deployment_status == "deployed":
+                        model_identifiers.append(
+                            {
+                                "model_name": model.name,
+                                "model_id": model.id,
+                                "uid": model.uid,
+                                "username": model.user.username,
+                                "is_in_the_loop": model.is_in_the_loop,
+                            }
+                        )
+            rid_to_model_identifiers[round.rid] = model_identifiers
+        return rid_to_model_identifiers

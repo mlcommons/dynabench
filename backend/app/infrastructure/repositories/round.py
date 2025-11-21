@@ -59,3 +59,6 @@ class RoundRepository(AbstractRepository):
             .filter((self.model.rid == round_id) & (self.model.tid == task_id))
             .first()
         )
+
+    def get_rounds_by_task_id(self, task_id: int):
+        return self.session.query(self.model).filter(self.model.tid == task_id).all()

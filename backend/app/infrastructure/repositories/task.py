@@ -199,13 +199,20 @@ class TaskRepository(AbstractRepository):
         instances = query.all()
         return self.instance_converter.instance_to_dict(instances)
 
-    def get_task_with_round_info(self, task_code: str):
-        return (
-            self.session.query(self.model, Round)
-            .filter(self.model.task_code == task_code)
-            .join(
-                Round,
-                (Round.tid == self.model.id) & (Round.rid == self.model.cur_round),
-            )
-            .first()
+    def get_task_with_round_info(self, task_code_or_id: str):
+        query = self.session.query(self.model, Round)
+        if isinstance(task_code_or_id, int) or task_code_or_id.isdigit():
+            query = query.filter(self.model.id == int(task_code_or_id))
+        else:
+            query = query.filter(self.model.task_code == task_code_or_id)
+        return query.join(
+            Round,
+            (Round.tid == self.model.id) & (Round.rid == self.model.cur_round),
+        ).first()
+
+    def update_task(self, task_id: int, update_data: dict):
+        self.session.query(self.model).filter(self.model.id == task_id).update(
+            update_data
         )
+        self.session.flush()
+        self.session.commit()

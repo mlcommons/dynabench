@@ -210,7 +210,7 @@ export default class ApiService {
   }
 
   getTrends(taskId) {
-    return this.fetch(`${this.domain}/tasks/${taskId}/trends`, {
+    return this.fetch(`${this.alternateDomain}/task/trends/${taskId}`, {
       method: "GET",
     });
   }
@@ -625,20 +625,23 @@ export default class ApiService {
   }
 
   updateTask(tid, data) {
-    return this.fetch(`${this.domain}/tasks/update/${tid}`, {
+    return this.fetch(`${this.alternateDomain}/task/update/${tid}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
   toggleOwner(tid, username) {
-    return this.fetch(`${this.domain}/tasks/toggle_owner/${tid}/${username}`, {
-      method: "PUT",
-    });
+    return this.fetch(
+      `${this.alternateDomain}/task/toggle_owner/${tid}/${username}`,
+      {
+        method: "PUT",
+      }
+    );
   }
 
   getOwners(tid, username) {
-    return this.fetch(`${this.domain}/tasks/owners/${tid}`, {
+    return this.fetch(`${this.alternateDomain}/task/owners/${tid}`, {
       method: "GET",
     });
   }
@@ -673,9 +676,12 @@ export default class ApiService {
   }
 
   getModelIdentifiersForTargetSelection(tid) {
-    return this.fetch(`${this.domain}/tasks/get_models_in_the_loop/${tid}`, {
-      method: "GET",
-    });
+    return this.fetch(
+      `${this.alternateDomain}/task/get_models_in_the_loop/${tid}`,
+      {
+        method: "GET",
+      }
+    );
   }
 
   getModelIdentifiers(tid) {

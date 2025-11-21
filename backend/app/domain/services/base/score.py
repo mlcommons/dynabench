@@ -3,6 +3,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import json
+import math
 import os
 
 import boto3
@@ -344,7 +345,7 @@ class ScoreService:
             )
         return converted_data
 
-    def get_maximun_principal_score_by_task(self, task_id: int) -> float:
+    def get_maximum_principal_score_by_task(self, task_id: int) -> float:
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         yaml_file = yaml.safe_load(yaml_file)
         perf_metric = yaml_file.get("perf_metric", {})
@@ -484,3 +485,220 @@ class ScoreService:
                 return {"response": "Scores added successfully"}
         except Exception as e:
             return {"error": str(e)}
+
+    def get_dynaboard_by_task(
+        self,
+        tid: int,
+        include_unpublished_models: bool,
+        perf_metric_field_name,
+        ordered_metrics_with_weight_and_conversion,
+        ordered_dids_with_weight,
+        sort_by="dynascore",
+        reverse_sort=False,
+        limit=5,
+        offset=0,
+    ):
+        ordered_dids = [
+            did_and_weight["did"] for did_and_weight in ordered_dids_with_weight
+        ]
+        try:
+            scores_users_datasets_models = (
+                self.score_repository.get_scores_users_dataset_and_model_by_task_id(
+                    tid,
+                    ordered_dids,
+                    include_unpublished_models,
+                )
+            )
+            scores, users, datasets, models = zip(*scores_users_datasets_models)
+
+        except Exception:
+            return ({"count": 0, "data": []},)
+
+        scores, users, datasets, models = (
+            set(scores),
+            set(users),
+            set(datasets),
+            set(models),
+        )
+
+        # Order datasets as in ordered_dids, for display purposes
+        ordered_datasets = []
+        did_to_dataset = {}
+        for dataset in datasets:
+            did_to_dataset[dataset.id] = dataset
+        for dataset in datasets:
+            ordered_datasets.append(did_to_dataset[ordered_dids[len(ordered_datasets)]])
+        datasets = ordered_datasets
+
+        # Filter models and scores so that we have complete sets of scores.
+        # Unclear what the "null" values should be if we wanted to complete them.
+        mid_to_unique_dids = {}
+        all_unique_dids = set(ordered_dids)
+        for score in scores:
+            complete_score_for_dataset = True
+            score_metadata_dict = self._get_metadata_dict(score)
+
+            for metric_info in ordered_metrics_with_weight_and_conversion:
+                if (score.__dict__.get(metric_info["field_name"], None) is None) and (
+                    score.metadata_json is None
+                    or score_metadata_dict.get(metric_info["field_name"], None) is None
+                ):
+                    complete_score_for_dataset = False
+            if complete_score_for_dataset:
+                if score.mid in mid_to_unique_dids:
+                    mid_to_unique_dids[score.mid].add(score.did)
+                else:
+                    mid_to_unique_dids[score.mid] = {score.did}
+        filtered_scores = []
+        for score in scores:
+            if mid_to_unique_dids.get(score.mid, set()) == all_unique_dids:
+                filtered_scores.append(score)
+        scores = filtered_scores
+        filtered_models = []
+        for model in models:
+            if mid_to_unique_dids.get(model.id, set()) == all_unique_dids:
+                filtered_models.append(model)
+        models = filtered_models
+
+        mid_and_did_to_scores = {}
+        for score in scores:
+            mid_and_did_to_scores[(score.mid, score.did)] = score
+        dataset_results_dict = {}
+        for dataset in datasets:
+            dataset_results_dict[dataset.id] = {
+                metric_info["field_name"]: []
+                for metric_info in ordered_metrics_with_weight_and_conversion
+            }
+            for model in models:
+                score = mid_and_did_to_scores[(model.id, dataset.id)]
+                for field_name in dataset_results_dict[dataset.id]:
+                    result = score.__dict__.get(field_name, None)
+                    if result is None:
+                        metadata_dict = self._get_metadata_dict(score)
+                        result = metadata_dict.get(field_name)
+                    dataset_results_dict[dataset.id][field_name].append(result)
+
+        # Average the results accross datasets.
+        averaged_dataset_results = None
+        did_to_weight = {
+            did_and_weight["did"]: did_and_weight["weight"]
+            for did_and_weight in ordered_dids_with_weight
+        }
+        for key, value in dataset_results_dict.items():
+            df = pd.DataFrame.from_dict(value)
+            dataset_results_dict[key] = df
+            if averaged_dataset_results is None:
+                averaged_dataset_results = did_to_weight[key] * df
+            else:
+                averaged_dataset_results += did_to_weight[key] * df
+
+        # Compute the dynascore.
+        converted_dataset_results = self.calculate_dynascore(
+            perf_metric_field_name,
+            averaged_dataset_results,
+            weights={
+                metric_info["field_name"]: metric_info["weight"]
+                for metric_info in ordered_metrics_with_weight_and_conversion
+            },
+            direction_multipliers={
+                metric_info["field_name"]: metric_info["utility_direction"]
+                for metric_info in ordered_metrics_with_weight_and_conversion
+            },
+            offsets={
+                metric_info["field_name"]: metric_info["offset"]
+                for metric_info in ordered_metrics_with_weight_and_conversion
+            },
+        )
+        uid_to_username = {}
+        for user in users:
+            uid_to_username[user.id] = user.username
+        data_list = []
+        model_index = 0
+        ordered_metric_field_names = [
+            metric_info["field_name"]
+            for metric_info in ordered_metrics_with_weight_and_conversion
+        ]
+        for model in models:
+            datasets_list = []
+            for dataset in datasets:
+                scores = []
+                for field_name in ordered_metric_field_names:
+                    scores.append(
+                        dataset_results_dict[dataset.id][field_name][model_index]
+                    )
+                variances = [0] * len(scores)  # TODO
+                datasets_list.append(
+                    {
+                        "id": dataset.id,
+                        "name": dataset.name,
+                        "scores": scores,
+                        "variances": variances,
+                    }
+                )
+            averaged_scores = []
+            for field_name in ordered_metric_field_names:
+                averaged_scores.append(
+                    averaged_dataset_results[field_name][model_index]
+                )
+            averaged_variances = [0] * len(averaged_scores)  # TODO
+            dynascore = converted_dataset_results["dynascore"][model_index]
+            data_list.append(
+                {
+                    "model_id": model.id,
+                    "model_name": model.name if model.is_published else None,
+                    # Don't give away the users for unpublished models.
+                    "uid": model.uid
+                    if model.is_published and not model.is_anonymous
+                    else None,
+                    "username": uid_to_username[model.uid]
+                    if model.is_published and not model.is_anonymous
+                    else None,
+                    "averaged_scores": averaged_scores,
+                    "averaged_variances": averaged_variances,
+                    "dynascore": dynascore
+                    if not math.isnan(dynascore)
+                    else 0,  # It is possible for the dynascore to be nan if
+                    # the leaderboard is uninteresting. For example, if,
+                    # for any metric, all models on the leaderboard have that
+                    # metric as 0. In these cases, dynascores for all models
+                    # will be nan.
+                    "dynavariance": 0,  # TODO
+                    "datasets": datasets_list,
+                }
+            )
+            model_index += 1
+        ordered_metric_pretty_names = [
+            metric_info["pretty_name"]
+            for metric_info in ordered_metrics_with_weight_and_conversion
+        ]
+        if sort_by == "dynascore":
+            data_list.sort(reverse=reverse_sort, key=lambda model: model["dynascore"])
+        elif sort_by in ordered_metric_pretty_names:
+            data_list.sort(
+                reverse=reverse_sort,
+                key=lambda model: model["averaged_scores"][
+                    ordered_metric_pretty_names.index(sort_by)
+                ],
+            )
+        elif sort_by == "model_name":
+            data_list.sort(reverse=reverse_sort, key=lambda model: model["model_name"])
+
+        return {
+            "count": len(data_list),
+            "data": data_list[offset : offset + limit],
+        }
+
+    def _get_metadata_dict(self, score):
+        """Safely parse metadata_json string to dictionary"""
+        if not score.metadata_json:
+            return {}
+
+        try:
+            if isinstance(score.metadata_json, str):
+                return json.loads(score.metadata_json)
+            elif isinstance(score.metadata_json, dict):
+                return score.metadata_json
+            else:
+                return {}
+        except (json.JSONDecodeError, TypeError):
+            return {}

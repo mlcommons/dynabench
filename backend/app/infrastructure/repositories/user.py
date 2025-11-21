@@ -119,3 +119,10 @@ class UserRepository(AbstractRepository):
         return self.session.query(
             self.model.id, self.model.email, self.model.username
         ).all()
+
+    def get_user_by_username(self, username: str):
+        return (
+            self.session.query(self.model)
+            .filter(self.model.username == username)
+            .first()
+        )
