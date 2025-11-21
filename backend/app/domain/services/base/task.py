@@ -382,7 +382,7 @@ class TaskService:
 
     def get_tasks(self, exclude_hidden: bool = True):
         filters = {
-            "active": int(exclude_hidden),
+            "hidden": int(not exclude_hidden),
         }
         tasks = self.task_repository.get_tasks_current_round(filters)
         converted_tasks = []
