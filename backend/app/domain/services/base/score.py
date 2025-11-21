@@ -345,7 +345,7 @@ class ScoreService:
             )
         return converted_data
 
-    def get_maximun_principal_score_by_task(self, task_id: int) -> float:
+    def get_maximum_principal_score_by_task(self, task_id: int) -> float:
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         if not yaml_file:
             return {"perf": 0.00}
