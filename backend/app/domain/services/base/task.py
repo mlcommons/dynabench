@@ -23,8 +23,12 @@ from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.example import ExampleRepository
 from app.infrastructure.repositories.historical_data import HistoricalDataRepository
 from app.infrastructure.repositories.model import ModelRepository
+from app.infrastructure.repositories.round import RoundRepository
 from app.infrastructure.repositories.task import TaskRepository
 from app.infrastructure.repositories.taskcategories import TaskCategoriesRepository
+from app.infrastructure.repositories.taskuserpermission import (
+    TaskUserPermissionRepository,
+)
 from app.infrastructure.repositories.user import UserRepository
 from app.infrastructure.repositories.validation import ValidationRepository
 
@@ -36,10 +40,12 @@ class TaskService:
         self.model_repository = ModelRepository()
         self.example_repository = ExampleRepository()
         self.score_services = ScoreService()
+        self.round_repository = RoundRepository()
         self.task_categories_repository = TaskCategoriesRepository()
         self.user_repository = UserRepository()
         self.validation_repository = ValidationRepository()
         self.historical_task_repository = HistoricalDataRepository()
+        self.task_user_permission_repository = TaskUserPermissionRepository()
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
@@ -600,3 +606,79 @@ class TaskService:
             if response_obj
             else []
         )
+
+    def update_task(self, task_id, data):
+        for field in data:
+            if field not in (
+                "unpublished_models_in_leaderboard",
+                "validate_non_fooling",
+                "num_matching_validations",
+                "instructions_md",
+                "predictions_upload_instructions_md",
+                "train_file_upload_instructions_md",
+                "mlcube_tutorial_markdown",
+                "dynamic_adversarial_data_collection",
+                "dynamic_adversarial_data_validation",
+                "hidden",
+                "submitable",
+                "create_endpoint",
+                "build_sqs_queue",
+                "eval_sqs_queue",
+                "is_decen_task",
+                "task_aws_account_id",
+                "task_gateway_predict_prefix",
+                "config_yaml",
+                "context",
+                "leaderboard_description",
+            ):
+                raise HTTPException(
+                    status_code=403, detail=f"Field {field} cannot be updated."
+                )
+        return self.task_repository.update_task(task_id, data)
+
+    def get_task_owners(self, task_id):
+        tasks = self.task_user_permission_repository.get_task_owners(task_id)
+        users = []
+        for user in tasks:
+            user_name = self.user_repository.get_user_name_by_id(user["uid"])
+            users.append({"user_id": user["uid"], "username": user_name["username"]})
+        return users
+
+    def toogle_user_task_permission(self, task_id: int, username: str):
+        user_to_toggle = self.user_repository.get_user_by_username(username)
+
+        if (task_id, "owner") in [
+            (perm.tid, perm.type) for perm in user_to_toggle.task_permissions
+        ]:
+            self.task_user_permission_repository.delete_task_user_permission(
+                task_id, user_to_toggle.id, "owner"
+            )
+            print("Removed task owner: " + username)
+        else:
+            self.task_user_permission_repository.create_user_task_permission(
+                task_id, user_to_toggle.id, "owner"
+            )
+            print("Added task owner: " + username)
+
+        return {"success": "ok"}
+
+    def get_models_in_the_loop(self, task_id: int):
+        rounds = self.round_repository.get_rounds_by_task_id(task_id)
+        models = self.model_repository.get_models_by_task_id(task_id)
+        rid_to_model_identifiers = {}
+        for round in rounds:
+            model_identifiers = []
+            for model in models:
+                if model.light_model:
+                    if model.is_published and model.deployment_status == "deployed":
+                        model_identifiers.append(
+                            {
+                                "model_name": model.name,
+                                "model_id": model.id,
+                                "uid": model.uid,
+                                "username": model.user.username,
+                                "is_in_the_loop": model.is_in_the_loop,
+                            }
+                        )
+            rid_to_model_identifiers[round.rid] = model_identifiers
+        return rid_to_model_identifiers

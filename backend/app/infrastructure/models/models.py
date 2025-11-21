@@ -375,8 +375,8 @@ class TaskUserPermission(Base):
     type = Column(String(255))
     tid = Column(ForeignKey("tasks.id"), index=True)
 
-    task = relationship("Task")
-    user = relationship("User")
+    task = relationship("Task", backref="task_permissions")
+    user = relationship("User", backref="task_permissions")
 
 
 class Context(Base):

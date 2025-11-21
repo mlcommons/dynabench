@@ -3,9 +3,11 @@
 # LICENSE file in the root directory of this source tree.
 import os
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body, Depends, Request
 from fastapi.responses import FileResponse
 
+from app.api.middleware.authentication import validate_access_token
+from app.domain.auth.authentication import LoginService
 from app.domain.schemas.base.task import (
     CheckSignConsentRequest,
     GetDynaboardInfoByTaskIdRequest,
@@ -165,3 +167,45 @@ def get_task_with_round_and_metric_data(task_code: str):
 @router.get("/trends/{task_id}", response_model={})
 def get_task_trends(task_id: int):
     return TaskService().get_task_trends(task_id)
+
+
+@router.put("/update/{task_id}", response_model={})
+async def update_task(
+    task_id: int,
+    request: Request,
+    datadict=Body(...),
+    token_payload=Depends(validate_access_token),
+):
+    if not LoginService().is_admin_or_owner(task_id, request):
+        raise PermissionError("Unauthorized access to update task data.")
+    return TaskService().update_task(task_id, datadict)
+
+
+@router.get("/owners/{task_id}", response_model={})
+async def get_task_owners(
+    task_id: int, request: Request, token_payload=Depends(validate_access_token)
+):
+    if not LoginService().is_admin_or_owner(task_id, request):
+        raise PermissionError("Unauthorized access to get task data.")
+    return TaskService().get_task_owners(task_id)
+
+
+@router.put("/toggle_owner/{task_id}/{username}", response_model={})
+async def toogle_user_task_permission(
+    task_id: int,
+    username: str,
+    request: Request,
+    token_payload=Depends(validate_access_token),
+):
+    if not LoginService().is_admin_or_owner(task_id, request):
+        raise PermissionError("Unauthorized access to update task data.")
+    return TaskService().toogle_user_task_permission(task_id, username)
+
+
+@router.get("/get_models_in_the_loop/{task_id}", response_model={})
+async def get_models_in_the_loop(
+    task_id: int, request: Request, token_payload=Depends(validate_access_token)
+):
+    if not LoginService().is_admin_or_owner(task_id, request):
+        raise PermissionError("Unauthorized access to get task data.")
+    return TaskService().get_models_in_the_loop(task_id)

@@ -209,3 +209,10 @@ class TaskRepository(AbstractRepository):
             Round,
             (Round.tid == self.model.id) & (Round.rid == self.model.cur_round),
         ).first()
+
+    def update_task(self, task_id: int, update_data: dict):
+        self.session.query(self.model).filter(self.model.id == task_id).update(
+            update_data
+        )
+        self.session.flush()
+        self.session.commit()
