@@ -307,3 +307,6 @@ class ModelRepository(AbstractRepository):
             )
             .scalar()
         )
+
+    def get_models_by_task_id(self, task_id: int):
+        return self.session.query(self.model).filter(self.model.tid == task_id).all()

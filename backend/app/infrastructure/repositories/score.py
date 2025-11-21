@@ -30,7 +30,7 @@ class ScoreRepository(AbstractRepository):
             .filter(Model.tid == task_id)
             .filter(Score.did.in_(ordered_datasets_id))
         )
-        if unpublished_models_in_leaderboard:
+        if not unpublished_models_in_leaderboard:
             query = query.filter(Model.is_published)
         return query.all()
 
