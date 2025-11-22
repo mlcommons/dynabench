@@ -493,7 +493,7 @@ class TaskService:
 
     def get_task_trends(self, task_id: int):
         """
-        Get top perform models and its round wise performance metrics at task level
+        Get top performance models and its round-wise performance metrics at task level
         It will fetch only top 10 models and its round wise performance metrics
         :param tid: Task id
         :return: Json Object
