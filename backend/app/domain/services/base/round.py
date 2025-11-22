@@ -24,3 +24,15 @@ class RoundService:
         return self.round_repository.get_examples_collected_per_round(
             round_id, task_id
         ).total_collected
+
+    def get_rounds_by_task_id(self, task_id: int):
+        rounds = self.round_repository.get_rounds_by_task_id(task_id)
+        rounds_dicts = []
+        for round_instance in rounds:
+            rounds_dicts.append(
+                self.round_repository.instance_converter.instance_to_dict(
+                    round_instance
+                )
+            )
+        rounds_dicts.sort(key=lambda r: r["rid"])
+        return rounds_dicts
