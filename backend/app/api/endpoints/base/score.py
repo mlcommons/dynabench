@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("/get_maximun_principal_score_by_task/{task_id}", response_model={})
 async def get_maximun_principal_score_by_task(task_id: int):
-    return ScoreService().get_maximun_principal_score_by_task(task_id)
+    return ScoreService().get_maximum_principal_score_by_task(task_id)
 
 
 @router.post("/read_users_score_csv/", response_model=CsvResponseModel)

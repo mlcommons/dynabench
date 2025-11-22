@@ -7,7 +7,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from pydantic import Json
-from sqlalchemy import func
+from sqlalchemy import exists, func, not_
 
 from app.infrastructure.models.models import Context, Example, Round, Validation
 from app.infrastructure.repositories.abstract import AbstractRepository
@@ -223,3 +223,36 @@ class ExampleRepository(AbstractRepository):
             .distinct()
             .all()
         )
+
+    def get_examples_by_task_id_and_round_id_with_validations_ids(
+        self, task_id: int, round_id: int
+    ):
+        try:
+            validation_ids_concat = func.group_concat(Validation.id)
+            validations_query = (
+                self.session.query(Example, validation_ids_concat)
+                .join(Context, Example.cid == Context.id)
+                .join(Round, Context.r_realid == Round.id)
+                .filter(Round.tid == task_id)
+                .filter(Round.rid == round_id)
+                .join(Validation, Validation.eid == Example.id)
+                .group_by(Validation.eid)
+            )
+            empty_concat = func.group_concat("")
+
+            no_validations_query = (
+                self.session.query(Example, empty_concat)
+                .join(Context, Example.cid == Context.id)
+                .join(Round, Context.r_realid == Round.id)
+                .filter(Round.tid == task_id)
+                .filter(Round.rid == round_id)
+                .filter(not_(exists().where(Validation.eid == Example.id)))
+                .group_by(Example.id)
+            )
+            return validations_query.union(no_validations_query).all()
+        except Exception as e:
+            # Handle any database-related exceptions
+            print(
+                f"Error in get_examples_by_task_id_and_round_id_with_validations_ids: {e}"
+            )
+            return []

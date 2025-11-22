@@ -209,3 +209,21 @@ async def get_models_in_the_loop(
     if not LoginService().is_admin_or_owner(task_id, request):
         raise PermissionError("Unauthorized access to get task data.")
     return TaskService().get_models_in_the_loop(task_id)
+
+
+@router.post("/create_round/{task_id}", response_model={})
+async def create_round(
+    task_id: int, request: Request, token_payload=Depends(validate_access_token)
+):
+    if not LoginService().is_admin_or_owner(task_id, request):
+        raise PermissionError("Unauthorized access to create round.")
+    return TaskService().create_round(task_id)
+
+
+@router.get("/get_model_identifiers/{task_id}", response_model={})
+async def get_model_identifiers(
+    task_id: int, request: Request, token_payload=Depends(validate_access_token)
+):
+    if not LoginService().is_admin_or_owner(task_id, request):
+        raise PermissionError("Unauthorized access to get model identifiers.")
+    return TaskService().get_model_identifiers(task_id)

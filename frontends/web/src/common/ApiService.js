@@ -647,9 +647,12 @@ export default class ApiService {
   }
 
   getRounds(tid) {
-    return this.fetch(`${this.domain}/tasks/get_all_rounds/${tid}`, {
-      method: "GET",
-    });
+    return this.fetch(
+      `${this.alternateDomain}/round/get_all_task_rounds/${tid}`,
+      {
+        method: "GET",
+      }
+    );
   }
 
   activateTask(tid, config_yaml) {
@@ -670,7 +673,7 @@ export default class ApiService {
   }
 
   createRound(tid) {
-    return this.fetch(`${this.domain}/tasks/create_round/${tid}`, {
+    return this.fetch(`${this.alternateDomain}/task/create_round/${tid}`, {
       method: "POST",
     });
   }
@@ -685,9 +688,12 @@ export default class ApiService {
   }
 
   getModelIdentifiers(tid) {
-    return this.fetch(`${this.domain}/tasks/get_model_identifiers/${tid}`, {
-      method: "GET",
-    });
+    return this.fetch(
+      `${this.alternateDomain}/task/get_model_identifiers/${tid}`,
+      {
+        method: "GET",
+      }
+    );
   }
 
   getAvailableDatasetAccessTypes() {
