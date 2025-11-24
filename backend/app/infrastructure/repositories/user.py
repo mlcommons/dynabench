@@ -126,3 +126,32 @@ class UserRepository(AbstractRepository):
             .filter(self.model.username == username)
             .first()
         )
+
+    def store_password_recovery_token(self, user_id: int, token: str, expires_at):
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {
+                    self.model.forgot_password_token: token,
+                    self.model.forgot_password_token_expiry_date: expires_at,
+                }
+            )
+            session.commit()
+
+    def get_by_forgot_token(self, forgot_token: str):
+        instance = (
+            self.session.query(self.model)
+            .filter(self.model.forgot_password_token == forgot_token)
+            .first()
+        )
+        return self.instance_converter.instance_to_dict(instance)
+
+    def update_password(self, user_id: int, new_hashed_password: str):
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == user_id).update(
+                {
+                    self.model.password: new_hashed_password,
+                    self.model.forgot_password_token: None,
+                    self.model.forgot_password_token_expiry_date: None,
+                }
+            )
+            session.commit()

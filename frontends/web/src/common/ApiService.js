@@ -77,17 +77,20 @@ export default class ApiService {
   }
 
   forgotPassword(email) {
-    return this.fetch(`${this.domain}/recover/initiate`, {
+    return this.fetch(`${this.alternateDomain}/auth/recover/initiate`, {
       method: "POST",
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email: email }),
     });
   }
 
   resetPassword({ email, password, token }) {
-    return this.fetch(`${this.domain}/recover/resolve/${token}`, {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+    return this.fetch(
+      `${this.alternateDomain}/auth/recover/resolve?forgot_token=${token}`,
+      {
+        method: "POST",
+        body: JSON.stringify({ email: email, new_password: password }),
+      }
+    );
   }
 
   updateExample(id, data, uid = null) {
