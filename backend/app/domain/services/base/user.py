@@ -91,3 +91,12 @@ class UserService:
             "id": user_id,
             "task_permissions": task_permissions,
         }
+
+    def store_password_recovery_token(self, user_id: int, token: str, expires_at):
+        self.user_repository.store_password_recovery_token(user_id, token, expires_at)
+
+    def get_by_forgot_token(self, forgot_token: str):
+        return self.user_repository.get_by_forgot_token(forgot_token)
+
+    def update_password(self, user_id: int, new_password: str):
+        self.user_repository.update_password(user_id, new_password)
