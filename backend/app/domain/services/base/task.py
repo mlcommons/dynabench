@@ -5,6 +5,7 @@
 import json
 import os
 import random
+import secrets
 from ast import literal_eval
 from typing import Union
 
@@ -682,3 +683,31 @@ class TaskService:
                         )
             rid_to_model_identifiers[round.rid] = model_identifiers
         return rid_to_model_identifiers
+
+    def create_round(self, task_id: int):
+        task = self.task_repository.get_task_info_by_task_id(task_id).__dict__
+        self.task_repository.increment_task_round(task_id)
+        self.round_repository.add(
+            {
+                "tid": task_id,
+                "rid": task["cur_round"] + 1,
+                "secret": secrets.token_hex(),
+            }
+        )
+        return {"success": "ok"}
+
+    def get_model_identifiers(self, task_id):
+        models = self.model_repository.get_models_by_task_id(task_id)
+        model_identifiers = []
+        for model in models:
+            model_identifiers.append(
+                {
+                    "model_name": model.name,
+                    "model_id": model.id,
+                    "deployment_status": model.deployment_status,
+                    "is_published": bool(model.is_published),
+                    "uid": model.uid,
+                    "username": model.user.username,
+                }
+            )
+        return model_identifiers
