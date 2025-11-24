@@ -11,7 +11,10 @@ from fastapi import HTTPException, Request, status
 from jose import jwt
 from werkzeug.security import check_password_hash, generate_password_hash
 
+import app.domain.helpers.helper as util
+from app.domain.helpers.email import EmailHelper
 from app.domain.helpers.exceptions import (
+    bad_token,
     credentials_exception,
     password_is_incorrect,
     refresh_token_expired,
@@ -43,6 +46,8 @@ class LoginService:
         self.badges_repository = BadgeRepository()
         self.refresh_token_repository = RefreshTokenRepository()
         self.users_repository = UserRepository()
+        self.email_helper = EmailHelper()
+        self.email_sender = os.getenv("MAIL_LOGIN")
 
     def get_hashed_password(self, password: str) -> str:
         return generate_password_hash(password)
@@ -91,10 +96,10 @@ class LoginService:
             path="/",
             expires=cookie_expires,
             # For localhost testing set secure to False in Prod to True
-            secure=True,
+            secure=False,
             samesite="lax",
             # For localhost testing set domain to localhost
-            # domain="localhost"
+            domain="localhost",
         )
         return refresh_token
 
@@ -292,3 +297,68 @@ class LoginService:
         except Exception as e:
             print(f"Error cleaning up old refresh tokens: {e}")
             pass
+
+    def initiate_password_recovery(self, email: str, request: Request):
+        """Initiate password recovery process by sending a recovery email with temporal token"""
+        parsed_origin_url = request.headers.get("origin")
+        if not (
+            (hasattr(parsed_origin_url, "hostname"))
+            and (parsed_origin_url.hostname is not None)
+            and (
+                parsed_origin_url.hostname
+                in [
+                    "dynabench.org",
+                    "dev.dynabench.org",
+                    "www.dynabench.org",
+                    "beta.dynabench.org",
+                    "api.dynabench.org",
+                ]
+            )
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid origin header",
+            )
+
+        user = self.users_service.get_by_email(email)
+        if not user:
+            user_does_not_exist()
+        try:
+            forgot_password_token = secrets.token_hex(64)
+            expiry_datetime = datetime.now() + timedelta(hours=4)
+            self.users_service.store_password_recovery_token(
+                user["id"], forgot_password_token, expiry_datetime
+            )
+            ui_server_host = util.parse_url(request.url._url, parsed_origin_url)
+
+            self.email_helper.send(
+                contact=email,
+                cc_contact=self.email_sender,
+                template_name="forgot_password.txt",
+                msg_dict={
+                    "username": user["username"],
+                    "token": forgot_password_token,
+                    "ui_server_host": ui_server_host,
+                },
+                subject="Password Reset Request",
+            )
+
+            return {"status": "success"}
+        except Exception as e:
+            print(f"Error initiating password recovery: {e}")
+
+    def resolve_password_recovery(self, forgot_token, email, new_password):
+        """Resolve password recovery by validating the token and updating the user's password"""
+        print("password", new_password)
+        user = self.users_service.get_by_forgot_token(forgot_token)
+        if not user:
+            print("User does not exist")
+            user_does_not_exist()
+        if datetime.now() > user["forgot_password_token_expiry_date"]:
+            bad_token()
+        if user["email"] != email:
+            user_does_not_exist()
+
+        self.users_repository.update_password(
+            user["id"], self.get_hashed_password(new_password)
+        )

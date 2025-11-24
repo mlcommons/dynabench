@@ -2,11 +2,17 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from fastapi import APIRouter, Depends, Header, Request, Response
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
 from app.api.middleware.authentication import validate_access_token
 from app.domain.auth.authentication import LoginService
-from app.domain.schemas.auth.auth import CreateUserRequest, LoginRequest, LoginResponse
+from app.domain.schemas.auth.auth import (
+    CreateUserRequest,
+    LoginRequest,
+    LoginResponse,
+    NewPasswordRequest,
+    RecoverPasswordRequest,
+)
 
 
 router = APIRouter()
@@ -43,3 +49,17 @@ async def logout(
     request: Request, response: Response, token_payload=Depends(validate_access_token)
 ):
     return LoginService().logout(request, response)
+
+
+@router.post("/recover/initiate")
+async def recover_password(model: RecoverPasswordRequest, request: Request):
+    return LoginService().initiate_password_recovery(model.email, request)
+
+
+@router.post("/recover/resolve")
+async def resolve_recovery(
+    model: NewPasswordRequest, forgot_token: str = Query(..., alias="forgot_token")
+):
+    return LoginService().resolve_password_recovery(
+        forgot_token, model.email, model.new_password
+    )

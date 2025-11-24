@@ -29,3 +29,11 @@ class LoginResponse(BaseModel):
 class TokenPayload(BaseModel):
     access_token: str
     token_type: str
+
+
+class RecoverPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class NewPasswordRequest(RecoverPasswordRequest):
+    new_password: str
