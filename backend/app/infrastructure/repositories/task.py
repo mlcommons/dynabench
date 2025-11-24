@@ -216,3 +216,11 @@ class TaskRepository(AbstractRepository):
         )
         self.session.flush()
         self.session.commit()
+
+    def increment_task_round(self, task_id: int):
+        with self.session as session:
+            session.query(self.model).filter(self.model.id == task_id).update(
+                {self.model.cur_round: self.model.cur_round + 1}
+            )
+            session.flush()
+            session.commit()
