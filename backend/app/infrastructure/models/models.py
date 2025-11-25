@@ -6,6 +6,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import enum
+
 # coding: utf-8
 from sqlalchemy import (
     JSON,
@@ -191,6 +193,17 @@ class Badge(Base):
     user = relationship("User")
 
 
+class AccessTypeEnum(enum.Enum):
+    scoring = "scoring"
+    standard = "standard"
+    hidden = "hidden"
+
+
+class LogAccessTypeEnum(enum.Enum):
+    owner = "owner"
+    user = "user"
+
+
 class Dataset(Base):
     __tablename__ = "datasets"
 
@@ -201,8 +214,8 @@ class Dataset(Base):
     desc = Column(String(255))
     longdesc = Column(Text)
     source_url = Column(Text)
-    access_type = Column(Enum("scoring", "standard", "hidden"))
-    log_access_type = Column(Enum("owner", "user"))
+    access_type = Column(Enum(AccessTypeEnum))
+    log_access_type = Column(Enum(LogAccessTypeEnum))
     tags = Column(Integer)
     has_downstream = Column(TINYINT(1))
     weight = Column(Float)

@@ -711,3 +711,73 @@ class TaskService:
                 }
             )
         return model_identifiers
+
+    def update_models_in_the_loop(self, task_id, model_ids=[]):
+        self.model_repository.clean_models_in_the_loop(task_id)
+        if len(model_ids) > 0:
+            for model_id in model_ids:
+                self.model_repository.update_model_in_the_loop(model_id)
+        return {"success": "ok"}
+
+    def get_user_leaderboard(self, task_id: int, limit: int, offset: int):
+        """
+        Return users and MER based on their examples score based on tasks
+        :param tid: Task id, limit: limit, offset: offset
+        :return: Json Object
+        """
+        try:
+            task_r_realids = []
+            rounds = self.round_repository.get_rounds_by_task_id(task_id)
+            for round_instance in rounds:
+                round_dict = round_instance.__dict__
+                task_r_realids.append(round_dict["rid"])
+            (
+                query_result,
+                total_count,
+            ) = self.example_repository.getUserLeaderByRoundRealids(
+                task_r_realids, limit, offset
+            )
+            return self.__construct_user_board_response_json(query_result, total_count)
+
+        except Exception as e:
+            print(e)
+            return {"count": 0, "data": []}
+
+    def get_leaderboard_by_task_and_round(self, task_id, round_id, limit, offset):
+        """
+        Get top leaders based on their examples score for specific task and round
+        :param tid: Task id, limit: limit, offset: offset, :param rid: round id
+        :return: Json Object
+        """
+        try:
+            round_instance = self.round_repository.get_round_info_by_round_and_task(
+                task_id, round_id
+            ).__dict__
+            (
+                query_result,
+                total_count,
+            ) = self.example_repository.getUserLeaderByRoundRealids(
+                [round_instance["id"]], limit, offset
+            )
+            return self.__construct_user_board_response_json(query_result, total_count)
+
+        except Exception as e:
+            print(e)
+            return {"count": 0, "data": []}
+
+    def __construct_user_board_response_json(self, query_result, total_count=0):
+        list_objs = []
+        for result in query_result:
+            obj = {}
+            obj["uid"] = result[0]
+            obj["username"] = result[1]
+            obj["avatar_url"] = result[2] if result[2] is not None else ""
+            obj["count"] = int(result[3])
+            obj["MER"] = str(round(result[4] * 100, 2))
+            obj["created"] = result[5]
+            obj["total"] = str(result[3]) + "/" + str(result[5])
+            list_objs.append(obj)
+        if list_objs:
+            return {"count": total_count, "data": list_objs}
+        else:
+            return {"count": 0, "data": []}

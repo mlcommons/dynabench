@@ -310,3 +310,23 @@ class ModelRepository(AbstractRepository):
 
     def get_models_by_task_id(self, task_id: int):
         return self.session.query(self.model).filter(self.model.tid == task_id).all()
+
+    def clean_models_in_the_loop(self, task_id: int):
+        all_models_for_task = (
+            self.session.query(self.model)
+            .filter(self.model.tid == task_id, self.model.is_in_the_loop == 1)
+            .all()
+        )
+        for model in all_models_for_task:
+            model.is_in_the_loop = False
+            self.session.flush()
+        self.session.commit()
+
+    def update_model_in_the_loop(self, model_id: int):
+        with self.session as session:
+            instance = (
+                session.query(self.model).filter(self.model.id == model_id).first()
+            )
+            instance.is_in_the_loop = True
+            session.commit()
+            session.flush()
