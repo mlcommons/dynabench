@@ -50,3 +50,7 @@ class CheckSignConsentRequest(BaseModel):
 class UpdateYamlConfiguration(BaseModel):
     task_id: int
     config_yaml: str
+
+
+class UpdateModelsInTheLoopRequest(BaseModel):
+    model_ids: Optional[List[int]] = []

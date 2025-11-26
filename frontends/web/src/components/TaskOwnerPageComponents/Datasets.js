@@ -67,6 +67,8 @@ const Datasets = (props) => {
   const config = yaml.load(props.task.config_yaml);
   const delta_metric_configs = config.delta_metrics ? config.delta_metrics : [];
   const delta_files = {};
+  const token = localStorage.getItem("id_token") || "";
+  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
   for (const config of delta_metric_configs) {
     delta_files[config.type] = null;
@@ -86,6 +88,7 @@ const Datasets = (props) => {
           dataset_name: values.name,
           task_code: props.task.task_code,
         },
+        withCredentials: true,
       })
       .then((response) => {
         if (response.status === 200) {

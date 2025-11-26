@@ -6,6 +6,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from app.domain.schemas.base.dataset import UpdateDatasetInfo
 from app.infrastructure.models.models import Dataset
 from app.infrastructure.repositories.abstract import AbstractRepository
 
@@ -131,3 +132,20 @@ class DatasetRepository(AbstractRepository):
             .filter(self.model.id == dataset_id)
             .one()
         )
+
+    def get_datasets_by_task_id(self, task_id: int):
+        return self.session.query(self.model).filter(self.model.tid == task_id).all()
+
+    def update_dataset_info(self, dataset_id: int, update_data: UpdateDatasetInfo):
+        self.session.query(self.model).filter(self.model.id == dataset_id).update(
+            update_data
+        )
+        with self.session as session:
+            session.commit()
+
+    def hide_dataset(self, dataset_id: int):
+        self.session.query(self.model).filter(self.model.id == dataset_id).update(
+            {"tid": 0}
+        )
+        with self.session as session:
+            session.commit()

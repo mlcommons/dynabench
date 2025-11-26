@@ -3,7 +3,7 @@
 # LICENSE file in the root directory of this source tree.
 import os
 
-from fastapi import APIRouter, Body, Depends, Request
+from fastapi import APIRouter, Body, Depends, Query, Request
 from fastapi.responses import FileResponse
 
 from app.api.middleware.authentication import validate_access_token
@@ -13,6 +13,7 @@ from app.domain.schemas.base.task import (
     GetDynaboardInfoByTaskIdRequest,
     PreliminaryQuestionsRequest,
     SignInConsentRequest,
+    UpdateModelsInTheLoopRequest,
     UpdateTaskInstructions,
     UpdateYamlConfiguration,
 )
@@ -227,3 +228,36 @@ async def get_model_identifiers(
     if not LoginService().is_admin_or_owner(task_id, request):
         raise PermissionError("Unauthorized access to get model identifiers.")
     return TaskService().get_model_identifiers(task_id)
+
+
+@router.put("/update_models_in_the_loop/{task_id}", response_model={})
+async def update_models_in_the_loop(
+    task_id: int,
+    request: Request,
+    model: UpdateModelsInTheLoopRequest,
+    token_payload=Depends(validate_access_token),
+):
+    if not LoginService().is_admin_or_owner(task_id, request):
+        raise PermissionError("Unauthorized access to update models in the loop.")
+    return TaskService().update_models_in_the_loop(task_id, model.model_ids)
+
+
+@router.get("/{task_id}/users", response_model={})
+async def get_user_leaderboard(
+    task_id: int,
+    limit: int = Query(5, alias="limit"),
+    offset: int = Query(0, alias="offset"),
+):
+    return TaskService().get_user_leaderboard(task_id, limit, offset)
+
+
+@router.get("/{task_id}/rounds/{round_id}/users", response_model={})
+async def get_leaderboard_by_task_and_round(
+    task_id: int,
+    round_id: int,
+    limit: int = Query(5, alias="limit"),
+    offset: int = Query(0, alias="offset"),
+):
+    return TaskService().get_leaderboard_by_task_and_round(
+        task_id, round_id, limit, offset
+    )
