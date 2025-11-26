@@ -103,11 +103,6 @@ class DatasetService:
         dataset = self.dataset_repository.get_dataset_info_by_id(dataset_id)
         if not LoginService().is_admin_or_owner(dataset["tid"], request):
             raise PermissionError("Unauthorized access to delete dataset.")
-        scores_to_delete = self.score_repository.get_scores_for_dataset(dataset_id)
-
-        for score in scores_to_delete:
-            score_dict = score.__dict__
-            self.score_repository.hide(score_dict["id"])
 
         self.dataset_repository.hide_dataset(dataset_id)
         return {"success": "ok"}

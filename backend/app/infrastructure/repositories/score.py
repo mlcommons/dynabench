@@ -121,8 +121,3 @@ class ScoreRepository(AbstractRepository):
 
     def get_scores_for_dataset(self, dataset_id: int):
         return self.session.query(Score).filter(Score.did == dataset_id).all()
-
-    def hide(self, score_id: int):
-        with self.session as session:
-            session.query(Score).filter(Score.id == score_id).update({"r_realid": 0})
-            session.commit()
