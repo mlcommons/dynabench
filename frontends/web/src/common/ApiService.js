@@ -280,7 +280,7 @@ export default class ApiService {
       round === "overall"
         ? `/users?limit=${limit || 10}&offset=${offset || 0}`
         : `/rounds/${round}/users?limit=${limit || 10}&offset=${offset || 0}`;
-    return this.fetch(`${this.domain}/tasks/${taskId}${url}`, {
+    return this.fetch(`${this.alternateDomain}/task/${taskId}${url}`, {
       method: "GET",
     });
   }
@@ -667,7 +667,7 @@ export default class ApiService {
 
   updateModelsInTheLoop(tid, rid, data) {
     return this.fetch(
-      `${this.domain}/tasks/update_models_in_the_loop/${tid}/${rid}`,
+      `${this.alternateDomain}/task/update_models_in_the_loop/${tid}`,
       {
         method: "PUT",
         body: JSON.stringify(data),
@@ -700,25 +700,25 @@ export default class ApiService {
   }
 
   getAvailableDatasetAccessTypes() {
-    return this.fetch(`${this.domain}/datasets/get_access_types`, {
+    return this.fetch(`${this.alternateDomain}/dataset/get_access_types`, {
       method: "GET",
     });
   }
 
   getAvailableDatasetLogAccessTypes() {
-    return this.fetch(`${this.domain}/datasets/get_log_access_types`, {
+    return this.fetch(`${this.alternateDomain}/dataset/get_log_access_types`, {
       method: "GET",
     });
   }
 
   getDatasets(tid) {
-    return this.fetch(`${this.domain}/tasks/datasets/${tid}`, {
+    return this.fetch(`${this.alternateDomain}/dataset/task/${tid}`, {
       method: "GET",
     });
   }
 
   updateDataset(did, data) {
-    return this.fetch(`${this.domain}/datasets/update/${did}`, {
+    return this.fetch(`${this.alternateDomain}/dataset/update/${did}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
@@ -740,7 +740,7 @@ export default class ApiService {
   }
 
   deleteDataset(did) {
-    return this.fetch(`${this.domain}/datasets/delete/${did}`, {
+    return this.fetch(`${this.alternateDomain}/dataset/delete/${did}`, {
       method: "DELETE",
     });
   }

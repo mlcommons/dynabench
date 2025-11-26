@@ -23,6 +23,8 @@ const SubmitPrediction = () => {
     reValidateMode: "onSubmit",
     defaultValues: initState,
   });
+  const token = localStorage.getItem("id_token") || "";
+  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
   const isLogin = async () => {
     if (!user.id) {
@@ -72,6 +74,7 @@ const SubmitPrediction = () => {
             task_code: taskCode,
             model_name: modelData.modelName.replace(/\s/g, "_"),
           },
+          withCredentials: true,
         })
         .then(() => {
           Swal.fire({

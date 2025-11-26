@@ -118,3 +118,6 @@ class ScoreRepository(AbstractRepository):
             session.execute(sql, {"model_id": model_id})
             session.flush()
             session.commit()
+
+    def get_scores_for_dataset(self, dataset_id: int):
+        return self.session.query(Score).filter(Score.did == dataset_id).all()

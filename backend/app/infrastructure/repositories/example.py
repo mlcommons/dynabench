@@ -7,9 +7,16 @@
 # LICENSE file in the root directory of this source tree.
 
 from pydantic import Json
-from sqlalchemy import func
+from sqlalchemy import desc, func
 
-from app.infrastructure.models.models import Context, Example, Round, Validation
+from app.infrastructure.models.models import (
+    Context,
+    Example,
+    Round,
+    RoundUserExampleInfo,
+    User,
+    Validation,
+)
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -223,3 +230,44 @@ class ExampleRepository(AbstractRepository):
             .distinct()
             .all()
         )
+
+    def getUserLeaderByRoundRealids(
+        self, task_r_realids: list, limit: int, offset: int
+    ):
+        total_fooled_cnt = func.sum(RoundUserExampleInfo.total_fooled).label(
+            "total_fooled_cnt"
+        )
+        total_verified_not_correct_fooled_cnt = func.sum(
+            RoundUserExampleInfo.total_verified_not_correct_fooled
+        ).label("total_verified_not_correct_fooled_cnt")
+        examples_submitted_cnt = func.sum(
+            RoundUserExampleInfo.examples_submitted
+        ).label("examples_submitted_cnt")
+
+        verified_fooled = (
+            total_fooled_cnt - total_verified_not_correct_fooled_cnt
+        ).label("verified_fooled")
+        fooling_rate = (
+            (total_fooled_cnt - total_verified_not_correct_fooled_cnt)
+            / examples_submitted_cnt
+        ).label("fooling_rate")
+
+        query_res = (
+            self.session.query(
+                User.id,
+                User.username,
+                User.avatar_url,
+                verified_fooled,
+                fooling_rate,
+                examples_submitted_cnt,
+            )
+            .join(RoundUserExampleInfo, RoundUserExampleInfo.uid == User.id)
+            .filter(RoundUserExampleInfo.r_realid.in_(task_r_realids))
+            .group_by(RoundUserExampleInfo.uid)
+            .order_by(desc(examples_submitted_cnt))
+        )
+        results = query_res.limit(limit).offset(offset * limit).all()
+
+        total_count = query_res.count()
+
+        return results, total_count
