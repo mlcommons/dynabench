@@ -7,7 +7,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from app.domain.schemas.base.dataset import UpdateDatasetInfo
-from app.infrastructure.models.models import Dataset
+from app.infrastructure.models.models import AccessTypeEnum, Dataset
 from app.infrastructure.repositories.abstract import AbstractRepository
 
 
@@ -17,7 +17,8 @@ class DatasetRepository(AbstractRepository):
 
     def get_scoring_datasets(self, task_id: int, dataset_name: str = None) -> dict:
         scoring_datasets = self.session.query(self.model).filter(
-            (self.model.access_type == "scoring") & (self.model.tid == task_id)
+            (self.model.access_type == AccessTypeEnum.scoring)
+            & (self.model.tid == task_id)
         )
         if dataset_name:
             scoring_datasets = scoring_datasets.filter(self.model.name == dataset_name)
@@ -33,7 +34,8 @@ class DatasetRepository(AbstractRepository):
 
     def get_not_scoring_datasets(self, task_id: int) -> dict:
         no_scoring_datasets = self.session.query(self.model).filter(
-            (self.model.access_type != "scoring") & (self.model.tid == task_id)
+            (self.model.access_type != AccessTypeEnum.scoring)
+            & (self.model.tid == task_id)
         )
 
         jsonl_no_scoring_datasets = []
@@ -66,7 +68,7 @@ class DatasetRepository(AbstractRepository):
             self.session.query(self.model)
             .order_by(self.model.id)
             .filter(self.model.tid == task_id)
-            .filter(self.model.access_type == "scoring")
+            .filter(self.model.access_type == AccessTypeEnum.scoring)
             .all()
         )
 
@@ -95,7 +97,7 @@ class DatasetRepository(AbstractRepository):
         return (
             self.session.query(self.model.id)
             .filter(self.model.tid == task_id)
-            .filter(self.model.access_type == "scoring")
+            .filter(self.model.access_type == AccessTypeEnum.scoring)
             .all()
         )
 
@@ -114,7 +116,7 @@ class DatasetRepository(AbstractRepository):
         downstream_datasets = (
             self.session.query(self.model)
             .filter(self.model.tid == task_id)
-            .filter(self.model.access_type == "scoring")
+            .filter(self.model.access_type == AccessTypeEnum.scoring)
         )
         jsonl_downstream_datasets = []
         for downstream_dataset in downstream_datasets:
