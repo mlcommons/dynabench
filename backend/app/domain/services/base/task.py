@@ -20,6 +20,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.instance_property imp
 from app.domain.services.builder_and_evaluation.eval_utils.metrics_dicts import (
     meta_metrics_dict,
 )
+from app.infrastructure.models.models import AccessTypeEnum
 from app.infrastructure.repositories.dataset import DatasetRepository
 from app.infrastructure.repositories.example import ExampleRepository
 from app.infrastructure.repositories.historical_data import HistoricalDataRepository
@@ -412,7 +413,7 @@ class TaskService:
             scoring_dataset_list = []
             for dataset in datasets:
                 dataset_list.append({"id": dataset.id, "name": dataset.name})
-                if dataset.access_type == "scoring":
+                if dataset.access_type == AccessTypeEnum.scoring:
                     scoring_dataset_list.append(
                         {
                             "id": dataset.id,
