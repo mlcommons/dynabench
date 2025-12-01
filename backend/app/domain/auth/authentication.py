@@ -96,7 +96,7 @@ class LoginService:
             path="/",
             expires=cookie_expires,
             # For localhost testing set secure to False in Prod to True
-            secure=True,
+            secure=False,
             samesite="lax",
             # For localhost testing set domain to localhost
             # domain="localhost",
