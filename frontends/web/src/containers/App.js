@@ -133,14 +133,16 @@ class App extends React.Component {
           },
           (error) => {
             console.warn(error);
-            if (error.status_code === 401) {
-              console.log("Logging out due to 401");
-              <Redirect push to="/logout" />;
-              //In Case Redirect doesn't work window.location.href = "/logout";
+            if (error && (error.status_code === 401 || error.status === 401)) {
+              this.setState({ user: {} });
+              localStorage.removeItem("id_token");
+              window.location.href = "/login";
             }
           }
         );
       });
+    } else {
+      this.setState({ user: {} });
     }
     this.api.getTasks().then(
       (result) => {
@@ -176,7 +178,9 @@ class App extends React.Component {
         options={{
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${this.api.getToken()}`,
+            ...(this.api.getToken()
+              ? { Authorization: `Bearer ${this.api.getToken()}` }
+              : {}),
           },
           credentials: "include",
           mode: "cors",

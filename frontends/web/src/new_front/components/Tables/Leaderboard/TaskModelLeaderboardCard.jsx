@@ -148,6 +148,17 @@ const TaskModelLeaderboardCard = ({
     );
   };
 
+  // When Dynascore column is hidden, default sort to first metric
+  useEffect(() => {
+    if (
+      config_yaml?.leaderboard?.show_dynascore === false &&
+      metrics?.length > 0 &&
+      sort?.field === "dynascore"
+    ) {
+      setSort((s) => ({ ...s, field: metrics[0].id }));
+    }
+  }, [config_yaml?.leaderboard?.show_dynascore, metrics]);
+
   useEffect(() => {
     setIsLoading(true);
     const currentArgs = JSON.stringify({
@@ -595,6 +606,7 @@ const TaskModelLeaderboardCard = ({
               modelColumnTitle={modelColumnTitle}
               showUserNames={task.show_username_leaderboard}
               multiplyResultsByHundred={multiplyResultsByHundred}
+              showDynascoreColumn={config_yaml?.leaderboard?.show_dynascore !== false}
             />
           )}
         </Card.Body>

@@ -66,7 +66,7 @@ const ProfilePage: FC<Props> = () => {
       setUserStats(userStats);
       setLoading(false);
     } catch (error) {
-      if (error.status === 401) {
+      if (error && (error.status === 401 || error.status_code === 401)) {
         history.push("/login");
       } else {
         Swal.fire({

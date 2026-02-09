@@ -13,9 +13,10 @@ import "./WeightIndicator.css";
  * @param {number} props.weight the weight to render
  */
 export default function WeightIndicator({ weight }) {
+  const safeLength = Math.max(0, Math.floor(Number(weight) || 0));
   return (
     <svg width={10} height={12}>
-      {[...Array(weight)].map((x, i) => (
+      {[...Array(safeLength)].map((x, i) => (
         <rect
           key={"" + i}
           width="10"

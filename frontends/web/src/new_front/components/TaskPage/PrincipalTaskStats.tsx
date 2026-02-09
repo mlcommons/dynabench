@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import useFetch from "use-http";
 import { useTranslation } from "react-i18next";
 
@@ -26,27 +26,30 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
 
   const { t } = useTranslation();
 
-  const getAmountOfExamplesPerRound = async () => {
+  const getAmountOfExamplesPerRound = useCallback(async () => {
     const amountOfExamples = await get(
       `/round/get_examples_collected_per_round/${selectedRound}-${taskId}`
     );
     if (response.ok) {
       setTotalExamples(amountOfExamples);
     }
-  };
+  }, [get, selectedRound, taskId]);
 
   useEffect(() => {
     getAmountOfExamplesPerRound();
-  }, [selectedRound]);
+  }, [getAmountOfExamplesPerRound]);
 
   return (
     <div className="pl-32 md:grid md:grid-rows-2">
       <div className="grid items-center justify-end px-8 py-4 gap-y-8 md:grid-cols-2">
-        {totalRounds !== 0 && (
+        {totalRounds != null && totalRounds > 0 && (
           <div className="text-center ">
             <h6 className="text-3xl font-bold text-white">{selectedRound}</h6>
             <DropDownStats
-              options={Array.from({ length: totalRounds }, (_, i) => i + 1)}
+              options={Array.from(
+                { length: Math.max(0, Math.floor(Number(totalRounds))) },
+                (_, i) => i + 1
+              )}
               placeholder={t("tasks:information.rounds")}
               onChange={setSelectedRound}
             />
@@ -65,7 +68,7 @@ const PrincipalTaskStats: FC<PrincipalTaskStatsProps> = ({
         {maxScore !== 0 && (
           <div className="text-center ">
             <h6 className="text-3xl font-bold text-white">
-              {maxScore!.toFixed(2)}
+              {(maxScore ?? 0).toFixed(2)}
             </h6>
             <p className="text-sm font-medium tracking-widest text-white uppercase ">
               {t("tasks:information.topScore")}

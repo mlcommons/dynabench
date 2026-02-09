@@ -1038,16 +1038,25 @@ export default class ApiService {
   }
 
   errorHandler(response) {
-    try {
-      if (response.status >= 200 && response.status < 300) {
-        return Promise.resolve(response.json());
-      } else {
-        return Promise.resolve(response.json()).then((responseInJson) => {
-          return Promise.reject(responseInJson);
-        });
-      }
-    } catch (error) {
-      console.log(error);
+    const status = response.status;
+    if (status >= 200 && status < 300) {
+      return response.json();
     }
+    return response
+      .json()
+      .then((responseInJson) => {
+        const err =
+          responseInJson && typeof responseInJson === "object"
+            ? { ...responseInJson, status_code: status }
+            : { detail: responseInJson, status_code: status };
+        return Promise.reject(err);
+      })
+      .catch((parseError) => {
+        console.warn(parseError);
+        return Promise.reject({
+          detail: "Request failed",
+          status_code: status,
+        });
+      });
   }
 }

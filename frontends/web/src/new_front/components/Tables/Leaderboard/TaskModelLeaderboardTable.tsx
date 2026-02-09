@@ -159,7 +159,7 @@ const MetricWeightTableHeader: FC<MetricWeightTableHeaderProps> = memo(
             <span>
               {metric.label}&nbsp;
               <svg width={10} height={12}>
-                {[...Array(metric.weight)].map((x, i) => (
+                {[...Array(Math.max(0, Math.floor(Number(metric.weight) || 0)))].map((x, i) => (
                   <rect
                     key={"" + i}
                     width="10"
@@ -228,6 +228,8 @@ type TaskModelLeaderboardTableProps = {
   modelColumnTitle: any;
   showUserNames: boolean;
   multiplyResultsByHundred: boolean;
+  /** When false, hide the Dynascore column (e.g. via task config leaderboard.show_dynascore: false) */
+  showDynascoreColumn?: boolean;
 };
 
 const arePropsEqual = (prevProps: any, nextProps: any) => {
@@ -241,6 +243,7 @@ const arePropsEqual = (prevProps: any, nextProps: any) => {
     prevProps.modelColumnTitle === nextProps.modelColumnTitle &&
     prevProps.showUserNames === nextProps.showUserNames &&
     prevProps.multiplyResultsByHundred === nextProps.multiplyResultsByHundred &&
+    prevProps.showDynascoreColumn === nextProps.showDynascoreColumn &&
     prevProps.data === nextProps.data &&
     prevProps.setMetricWeight === nextProps.setMetricWeight &&
     prevProps.setDatasetWeight === nextProps.setDatasetWeight
@@ -261,11 +264,13 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = memo(
     modelColumnTitle,
     showUserNames,
     multiplyResultsByHundred,
+    showDynascoreColumn = true,
   }) => {
     const metricColumnWidth =
       60 / ((metrics?.length ?? 0) === 0 ? 1 : metrics.length);
 
-    const showDynascore = metrics && metrics.length !== 1;
+    const showDynascore =
+      showDynascoreColumn !== false && metrics && metrics.length !== 1;
 
     return (
       <Table hover className="mb-0">
@@ -346,7 +351,7 @@ const TaskModelLeaderboardTable: FC<TaskModelLeaderboardTableProps> = memo(
                                   <span className="d-flex align-items-center justify-content-end">
                                     {dataset.name}&nbsp;
                                     <svg width={10} height={12}>
-                                      {[...Array(dataset.weight)].map(
+                                      {[...Array(Math.max(0, Math.floor(Number(dataset.weight) || 0)))].map(
                                         (x, i) => (
                                           <rect
                                             key={"" + i}

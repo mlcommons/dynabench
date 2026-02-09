@@ -35,24 +35,42 @@ const TaskPage = () => {
   const [openTab, setOpenTab] = React.useState(1);
   const [taskInstructions, setTaskInstructions] = useState<any>();
   const [loading, setLoading] = useState(true);
-  const { get, post, response } = useFetch();
+  const { get, response } = useFetch();
   const { taskCode } = useParams<{ taskCode: string }>();
   const userContext = useContext(UserContext);
-  const { user } = userContext;
+  const { user, api } = userContext;
 
   const getTask = useCallback(
     async (taskCode: string) => {
-      const taskId = await get(`/task/get_task_id_by_task_code/${taskCode}`);
+      const taskIdRaw = await get(`/task/get_task_id_by_task_code/${taskCode}`);
+      const taskId =
+        typeof taskIdRaw === "number" && !isNaN(taskIdRaw)
+          ? taskIdRaw
+          : typeof taskIdRaw === "object" && taskIdRaw != null && "id" in taskIdRaw
+            ? (taskIdRaw as { id: number }).id
+            : null;
+      if (taskId == null) {
+        history.push("/PageNotFound");
+        return;
+      }
       const [taskData, maxScore, amountOfModels, taskInstructions] =
         await Promise.all([
-          await get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
-          await get(`/score/get_maximun_principal_score_by_task/${taskId}`),
-          await get(`/model_public/get_amount_of_models_by_task/${taskId}`),
-          await get(`/task/get_task_instructions/${taskId}`),
+          get(`/task/get_task_with_round_info_by_task_id/${taskId}`),
+          get(`/score/get_maximun_principal_score_by_task/${taskId}`),
+          get(`/model_public/get_amount_of_models_by_task/${taskId}`),
+          get(`/task/get_task_instructions/${taskId}`),
         ]);
-      if (response.ok) {
+      // Don't use shared response.ok: concurrent requests (e.g. auth) can overwrite
+      // it and cause a 401 to wrongly trigger redirect. Treat success by valid task.
+      const hasValidTask =
+        taskData &&
+        typeof taskData === "object" &&
+        (taskData.id != null || taskData.tid != null || taskData.name != null);
+      if (hasValidTask) {
         setTask(taskData);
-        setMaxScore(maxScore.perf);
+        setMaxScore(
+          typeof maxScore?.perf === "number" ? maxScore.perf : Number(maxScore) || 0
+        );
         setAmountOfModels(amountOfModels);
         setTaskInstructions(taskInstructions);
         setLoading(false);
@@ -60,27 +78,33 @@ const TaskPage = () => {
         history.push("/PageNotFound");
       }
     },
-    [taskCode]
+    [get, history, taskCode]
   );
 
   const checkAdminOrOwner = useCallback(async () => {
-    if (user?.id && task?.id) {
-      const adminOrOwner = await get(`/auth/is_admin_or_owner/${task?.id}`);
+    const taskId = task?.id;
+    // Only call auth endpoint when logged in to avoid 401s when not authenticated
+    if (api?.loggedIn?.() && user?.id && taskId != null) {
+      const adminOrOwner = await get(`/auth/is_admin_or_owner/${taskId}`);
       if (response.ok) {
         setAdminOrOwner(adminOrOwner);
+      } else {
+        setAdminOrOwner(false);
       }
     } else {
       setAdminOrOwner(false);
     }
-  }, [user?.id, task]);
+    // response.ok intentionally omitted: would change every request and cause callback churn
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api, user?.id, task, get]);
 
   useEffect(() => {
     user?.id && task && checkAdminOrOwner();
-  }, [user, task]);
+  }, [user, task, checkAdminOrOwner]);
 
   useEffect(() => {
     getTask(taskCode);
-  }, [taskCode]);
+  }, [taskCode, getTask]);
 
   useEffect(() => {
     if (
