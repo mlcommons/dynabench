@@ -51,9 +51,13 @@ class ScoreService:
         filter_key: str = None,
         filtered_by: str = None,
     ):
-        scores_by_dataset_and_model_id[
-            perf_metric_field_name
-        ] = scores_by_dataset_and_model_id.pop("perf")
+        perf_value = scores_by_dataset_and_model_id.pop("perf", None)
+        if perf_value is None:
+            metadata = json.loads(
+                scores_by_dataset_and_model_id.get("metadata_json") or "{}"
+            )
+            perf_value = metadata.get(perf_metric_field_name)
+        scores_by_dataset_and_model_id[perf_metric_field_name] = perf_value
         metrics_with_score_and_weight = [
             {col: row[col] for col in ["field_name", "weight"]}
             for row in order_metric_with_weight
@@ -63,30 +67,38 @@ class ScoreService:
                 "examples_per_second",
                 "memory_utilization",
             ]:
-                score = scores_by_dataset_and_model_id[
+                score = scores_by_dataset_and_model_id.get(
                     metric_with_score_and_weight["field_name"]
-                ]
-                metric_with_score_and_weight["score"] = score
+                )
+                metric_with_score_and_weight["score"] = (
+                    float(score) if score is not None else 0.0
+                )
             else:
                 if filter_key and filtered_by:
                     filter_key_scores = json.loads(
-                        scores_by_dataset_and_model_id["metadata_json"]
+                        scores_by_dataset_and_model_id.get("metadata_json") or "{}"
                     )
-                    filter_key_scores = filter_key_scores[filtered_by]
-                    try:
-                        filter_key_scores = filter_key_scores[filter_key]
-                        score = filter_key_scores[
-                            metric_with_score_and_weight["field_name"]
-                        ]
-                    except Exception:
-                        raise HTTPException(
-                            status_code=500,
-                            detail=f"Missing scores with filter: {filter_key}",
-                        )
+                    filter_key_scores = filter_key_scores.get(filtered_by) or {}
+                    filter_key_scores = filter_key_scores.get(filter_key) or {}
+                    field_name = metric_with_score_and_weight["field_name"]
+                    score = filter_key_scores.get(field_name)
+                    if score is None:
+                        score = 0.0
                 else:
-                    score = json.loads(scores_by_dataset_and_model_id["metadata_json"])[
-                        metric_with_score_and_weight["field_name"]
-                    ]
+                    field_name = metric_with_score_and_weight["field_name"]
+                    if field_name == perf_metric_field_name and field_name in scores_by_dataset_and_model_id:
+                        score = scores_by_dataset_and_model_id[field_name]
+                    else:
+                        metadata = json.loads(
+                            scores_by_dataset_and_model_id.get("metadata_json") or "{}"
+                        )
+                        score = metadata.get(field_name)
+                    if score is None:
+                        score = 0.0
+                try:
+                    score = float(score) if score is not None else 0.0
+                except (TypeError, ValueError):
+                    score = 0.0
                 metric_with_score_and_weight["score"] = score
         return metrics_with_score_and_weight
 
@@ -99,11 +111,19 @@ class ScoreService:
         filter_key: str = None,
         filtered_by: str = None,
     ):
-        scores_by_dataset_and_model_id = (
-            self.score_repository.get_scores_by_dataset_and_model_id(
-                dataset_id, model_id
-            )[0]
-        ).__dict__
+        score_rows = self.score_repository.get_scores_by_dataset_and_model_id(
+            dataset_id, model_id
+        )
+        if not score_rows:
+            dataset_name = self.dataset_service.get_dataset_name_by_id(dataset_id)[0]
+            n_metrics = len(order_metric_with_weight)
+            return {
+                "id": dataset_id,
+                "name": dataset_name,
+                "scores": [0.0] * n_metrics,
+                "variances": [0] * n_metrics,
+            }
+        scores_by_dataset_and_model_id = score_rows[0].__dict__
         final_scores_by_dataset_and_model_id = {}
         dataset_id = scores_by_dataset_and_model_id["did"]
         dataset_name = self.dataset_service.get_dataset_name_by_id(dataset_id)[0]
@@ -212,16 +232,17 @@ class ScoreService:
         utility_direction = perf_metric_info.get("utility_direction", None)
         if utility_direction == -1:
             sort_direction = "desc" if sort_direction == "asc" else "asc"
-        if sort_by != "dynascore":
+        if sort_by != "dynascore" and sort_by in metrics:
+            sort_idx = metrics.index(sort_by)
             models_dynaboard_info = sorted(
                 models_dynaboard_info,
-                key=lambda x: x["averaged_scores"][metrics.index(sort_by)],
+                key=lambda x: x["averaged_scores"][sort_idx],
                 reverse=(sort_direction == "desc"),
             )
         else:
             models_dynaboard_info = sorted(
                 models_dynaboard_info,
-                key=lambda x: x["dynascore"],
+                key=lambda x: x.get("dynascore", 0),
                 reverse=(sort_direction == "desc"),
             )
         return models_dynaboard_info
@@ -270,9 +291,25 @@ class ScoreService:
         datasets_info = sorted(datasets_info, key=lambda i: i["id"])
         weights = sorted(weights, key=lambda i: i["did"])
         scores = [dataset_info["scores"] for dataset_info in datasets_info]
-        weights = [weight["weight"] for weight in weights]
+        # Coerce to float and replace None so np.dot never sees None
+        def _safe_float(x):
+            if x is None:
+                return 0.0
+            try:
+                return float(x)
+            except (TypeError, ValueError):
+                return 0.0
+
+        scores = [[_safe_float(s) for s in row] for row in scores]
+        # Extract numeric weight from each dict (each item is {"weight": w, "did": did})
+        weight_values = [_safe_float(w.get("weight") if isinstance(w, dict) else w) for w in weights]
+        weight_sum = sum(weight_values)
+        if not weight_sum or not np.isfinite(weight_sum):
+            # Fallback to equal weights so averaged row shows mean of per-dataset scores
+            n = len(weight_values)
+            weight_values = [1.0 / n] * n if n else []
         averaged_scores = np.array(scores).T
-        return list(np.dot(averaged_scores, weights))
+        return list(np.dot(averaged_scores, weight_values))
 
     def calculate_all_dynascores(
         self, models_dynaboard_info, order_metric_with_weight, perf_metric_field_name
@@ -314,31 +351,48 @@ class ScoreService:
         offsets: dict,
         delta_cutoff_proportion=0.0001,
     ):
+        if data.empty or len(data) == 0:
+            data = data.copy()
+            data["dynascore"] = 0.0
+            return data
+        sort_col = (
+            perf_metric_field_name
+            if perf_metric_field_name in data.columns
+            else data.columns[0]
+        )
         converted_data = data.copy(deep=True)
-        converted_data.sort_values(perf_metric_field_name, inplace=True)
+        converted_data.sort_values(sort_col, inplace=True)
         for metric in list(data):
             converted_data[metric] = (
-                direction_multipliers[metric] * converted_data[metric] + offsets[metric]
+                direction_multipliers.get(metric, 1)
+                * converted_data[metric]
+                + offsets.get(metric, 0)
             )
         converted_data["dynascore"] = 0
 
-        denominator = sum(weights.values())
+        denominator = sum(weights.values()) or 1
         for key in weights:
             weights[key] /= denominator
 
         delta = converted_data.diff()
+        col_max = converted_data[sort_col].max()
         delta_threshold = (
-            converted_data[perf_metric_field_name].max() * delta_cutoff_proportion
+            (col_max * delta_cutoff_proportion) if pd.notna(col_max) and col_max != 0 else 1e-9
         )
         satisfied_indices = []
-        for index in range(len(delta[perf_metric_field_name])):
-            if abs(delta[perf_metric_field_name][index]) > delta_threshold:
+        for index in range(len(delta[sort_col])):
+            val = delta[sort_col].iloc[index]
+            if pd.notna(val) and abs(val) > delta_threshold:
                 satisfied_indices.append(index)
+        if not satisfied_indices:
+            converted_data["dynascore"] = converted_data[sort_col]
+            return converted_data
         for metric in list(data):
-            AMRS = (
-                delta[metric][satisfied_indices].abs()
-                / delta[perf_metric_field_name][satisfied_indices]
-            ).mean(skipna=True)
+            denom = delta[sort_col].iloc[satisfied_indices]
+            num = delta[metric].iloc[satisfied_indices].abs()
+            AMRS = (num / denom.replace(0, np.nan)).mean(skipna=True)
+            if pd.isna(AMRS) or AMRS == 0:
+                AMRS = 1.0
             converted_data[metric] = converted_data[metric] / abs(AMRS)
             converted_data["dynascore"] += converted_data[metric] * weights.get(
                 metric, 0
@@ -351,14 +405,21 @@ class ScoreService:
         perf_metric = yaml_file.get("perf_metric", {})
         if isinstance(perf_metric, list):
             evaluation = yaml_file.get("evaluation", None)
-            main_metric = evaluation.get("main_perf_metric", None)
+            main_metric = (
+                evaluation.get("main_perf_metric", None) if evaluation else None
+            )
         else:
             main_metric = perf_metric.get("type", None)
         if main_metric:
-            metadata = meta_metrics_dict.get(main_metric)
-            metadata = metadata(None)
-            direction = metadata.get("utility_direction", None)
+            get_metadata = meta_metrics_dict.get(main_metric)
+            if get_metadata is not None:
+                metadata = get_metadata(None)
+                direction = metadata.get("utility_direction", None)
+            else:
+                direction = 1
         else:
+            direction = 1
+        if direction is None:
             direction = 1
         scoring_datasets = self.dataset_service.get_scoring_datasets_by_task_id(task_id)
         scoring_datasets = [dataset["id"] for dataset in scoring_datasets]

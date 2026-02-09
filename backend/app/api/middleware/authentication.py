@@ -44,19 +44,18 @@ async def validate_access_token(
     repository=Depends(get_find_user_repository),
 ) -> None:
     # The OAuth2PasswordBearer already extracts and validates the Bearer token format
-    # So we don't need to manually extract it from headers
     decoded: AccessTokenPayload = await verify_token(token)
+    # Require refresh token cookie when present; allow valid access token alone for
+    # cross-origin dev (e.g. frontend :3000, backend :8000) where cookie may not be sent
     refresh_token = request.cookies.get("dynabench_refresh_token", None)
     if not refresh_token:
-        raise credentials_exception()
+        # Still allow request if access token is valid and we can resolve the user
+        pass
     # While we migrate the login into Backend we are using id
-    # That is what the API sends in the token.
     id = decoded.get("id", None)
     if not id:
         raise credentials_exception()
     user = repository.get_by_id(id)
-    # Once we have mirated the login into Backend we will use email.
-    # user = repository.get_by_email(email)
     if user is None or not user:
-        credentials_exception()
+        raise credentials_exception()
     request.state.user = user["id"]

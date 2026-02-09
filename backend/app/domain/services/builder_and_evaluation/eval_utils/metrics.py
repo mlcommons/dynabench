@@ -193,6 +193,26 @@ def get_CER_meta(task=None):
     }
 
 
+def get_ARI_meta(task=None):
+    """Adjusted Rand Index (e.g. UPS task); higher is better."""
+    return {
+        "unit": "",
+        "pretty_name": "ARI",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
+def get_main_metric_meta(task=None):
+    """Principal aggregate metric (e.g. UPS main_metric = macro-f1)."""
+    return {
+        "unit": "%",
+        "pretty_name": "Main",
+        "utility_direction": 1,
+        "offset": 0,
+    }
+
+
 def get_STD_CER_meta(task=None):
     return {
         "unit": "%",

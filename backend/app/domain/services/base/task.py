@@ -134,10 +134,26 @@ class TaskService:
         aws_metric_names = instance_property.get(
             task_info.get("instance_type"), {}
         ).get("aws_metrics", [])
+        # Omit Throughput/Memory for tasks that don't use AWS evaluation (e.g. heavy/external eval)
+        if task_info.get("has_predictions_upload") or (
+            (task_configuration.get("evaluation") or {}).get("type") == "heavy"
+        ):
+            aws_metric_names = []
 
         ordered_metric_field_names = (
             type_values + aws_metric_names + delta_perf_metrics_type
         )
+        # Only include metrics that have metadata (e.g. UPS may use exact_match/dynascore
+        # in config but not in meta_metrics_dict); skip unknown to avoid crash.
+        ordered_metric_field_names = [
+            m for m in ordered_metric_field_names if m in meta_metrics_dict
+        ]
+        if not ordered_metric_field_names:
+            # Config may reference metrics not in meta_metrics_dict (e.g. exact_match).
+            # Use accuracy so leaderboard still renders; model's "perf" maps to principal.
+            ordered_metric_field_names = (
+                ["accuracy"] if "accuracy" in meta_metrics_dict else list(meta_metrics_dict.keys())[:1]
+            )
         metrics_metadata = {
             metric: meta_metrics_dict.get(metric)(task_info)
             for metric in ordered_metric_field_names
@@ -184,6 +200,10 @@ class TaskService:
             perf_metric_type = principal_metric["type"]
         elif isinstance(task_configuration["perf_metric"], dict):
             perf_metric_type = task_configuration.get("perf_metric", {})["type"]
+        else:
+            perf_metric_type = "accuracy"
+        if perf_metric_type not in meta_metrics_dict:
+            perf_metric_type = "accuracy" if "accuracy" in meta_metrics_dict else next(iter(meta_metrics_dict), "accuracy")
         return perf_metric_type
 
     def get_dynaboard_info_by_task_id(
@@ -337,14 +357,18 @@ class TaskService:
     def get_random_provider_and_model_info(self, task_id: int, user_id: int):
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         yaml_file = yaml.safe_load(yaml_file)
-        providers = yaml_file["context"]["generative_context"]["artifacts"].get(
-            "providers", None
-        )
-        provider = random.choice(list(providers))
+        context = yaml_file.get("context")
+        # Context can be a list (annotation-style) or a dict (generative_context)
+        if not isinstance(context, dict):
+            return {"model": "", "provider": None}
+        generative = context.get("generative_context") or {}
+        artifacts = generative.get("artifacts") or {}
+        providers = artifacts.get("providers", None)
         if providers is None:
             return {"model": "", "provider": None}
+        provider = random.choice(list(providers))
 
-        is_unique = yaml_file["context"]["generative_context"].get("is_unique", False)
+        is_unique = generative.get("is_unique", False)
         if is_unique:
             model_names = [
                 model[0]
@@ -368,9 +392,11 @@ class TaskService:
     def get_task_consent(self, task_id: int):
         yaml_file = self.task_repository.get_config_file_by_task_id(task_id)[0]
         yaml_file = yaml.safe_load(yaml_file)
-        consent_URI = yaml_file["context"]["generative_context"]["artifacts"].get(
-            "consent_uri", None
-        )
+        context = yaml_file.get("context")
+        if not isinstance(context, dict):
+            return {"consent_terms": None, "agree_text": None, "disagree_text": None}
+        artifacts = (context.get("generative_context") or {}).get("artifacts") or {}
+        consent_URI = artifacts.get("consent_uri", None)
         if consent_URI is None:
             return {"consent_terms": None, "agree_text": None, "disagree_text": None}
 
@@ -438,7 +464,6 @@ class TaskService:
                 metrics_meta, ordered_field_names = self.get_task_metrics_meta(
                     task_dict
                 )
-                print("ordered_field_names", ordered_field_names)
                 ordered_metrics = [
                     dict(
                         {
@@ -469,6 +494,8 @@ class TaskService:
             perf_metric_type = [obj["type"] for obj in task_config["perf_metric"]]
         elif isinstance(task_config["perf_metric"], dict):
             perf_metric_type = [task_config["perf_metric"]["type"]]
+        else:
+            perf_metric_type = ["accuracy"]
         delta_metric_types = [
             obj["type"] for obj in task_config.get("delta_metrics", [])
         ]
@@ -476,19 +503,32 @@ class TaskService:
             "aws_metrics", []
         )
         principal_metric = perf_metric_type[0]
+        fallback_metric = (
+            principal_metric
+            if principal_metric in meta_metrics_dict
+            else ("accuracy" if "accuracy" in meta_metrics_dict else next(iter(meta_metrics_dict), "accuracy"))
+        )
 
         # TODO: make it possible to display some modes with aws metrics and some
         # models without aws metrics on the same leaderboard?
-        if task.get("predictions_upload", False) or "train_file_metric" in task_config:
+        if (
+            task.get("predictions_upload", False)
+            or task.get("has_predictions_upload")
+            or "train_file_metric" in task_config
+            or (task_config.get("evaluation") or {}).get("type") == "heavy"
+        ):
             aws_metric_names = []
         ordered_metric_field_names = (
             perf_metric_type + aws_metric_names + delta_metric_types
         )
+        ordered_metric_field_names = [
+            m for m in ordered_metric_field_names if m in meta_metrics_dict
+        ]
+        if not ordered_metric_field_names:
+            ordered_metric_field_names = [fallback_metric]
+        get_meta = lambda m: meta_metrics_dict.get(m, meta_metrics_dict[fallback_metric])
         metrics_meta = {
-            metric: meta_metrics_dict.get(metric, meta_metrics_dict[principal_metric])(
-                task
-            )
-            for metric in ordered_metric_field_names
+            metric: get_meta(metric)(task) for metric in ordered_metric_field_names
         }
         return metrics_meta, ordered_metric_field_names
 

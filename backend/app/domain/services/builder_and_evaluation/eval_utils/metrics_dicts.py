@@ -7,6 +7,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
+    get_ARI_meta,
     get_accuracy,
     get_accuracy_meta,
     get_bleu,
@@ -32,6 +33,7 @@ from app.domain.services.builder_and_evaluation.eval_utils.metrics import (
     get_f1_meta,
     get_fairness_meta,
     get_kullback_leibler_divergence_meta,
+    get_main_metric_meta,
     get_macro_f1,
     get_macro_f1_meta,
     get_matthews_correlation,
@@ -89,6 +91,10 @@ meta_metrics_dict = {
     "matthews_correlation": get_matthews_correlation_meta,
     "f1": get_f1_meta,
     "macro_f1": get_macro_f1_meta,
+    "macro-f1": get_macro_f1_meta,
+    "CER": get_CER_meta,
+    "ARI": get_ARI_meta,
+    "main_metric": get_main_metric_meta,
     "squad_f1": get_squad_f1_meta,
     "bleu": get_bleu_meta,
     "sp_bleu": get_sp_bleu_meta,
