@@ -18,10 +18,14 @@ We actively welcome your pull requests.
 * Dynabench uses pre-commit hooks to ensure style consistency and prevent common mistakes. Enable it by:
 
 ```sh
-pip install pre-commit && pre-commit install
+# Install pre-commit tool
+uv tool install pre-commit --with pre-commit-uv
+
+# Set up git hooks for this repository
+pre-commit install
 ```
 
-After this pre-commit hooks will be run before every commit.
+After this, pre-commit hooks will be run before every commit.
 
 * Read the [editorconfig](https://github.com/mlcommons/dynabench/blob/main/.editorconfig) file to understand the exact coding style preferences.
 
