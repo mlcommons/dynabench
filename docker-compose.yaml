@@ -55,18 +55,18 @@ services:
     restart: on-failure
 
   # Frontend (React)
-  # frontend:
-  #   build:
-  #     context: ./frontends/web
-  #     dockerfile: Dockerfile
-  #   container_name: dynabench-frontend
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - api
-  #     - backend
-  #   environment:
-  #     REACT_APP_API_HOST: https://localhost:8080
+  frontend:
+    build:
+      context: ./frontends/web
+      dockerfile: Dockerfile
+    container_name: dynabench-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+      - backend
+    env_file:
+      - ./frontends/web/.env
 
 volumes:
   dynabench-mysql:
