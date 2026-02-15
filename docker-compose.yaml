@@ -1,13 +1,72 @@
 version: '3.9'
 
 services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.4
+    container_name: dynabench-mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - dynabench-mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: dynabench
+      MYSQL_DATABASE: dynabench
+      MYSQL_USER: dynabench
+      MYSQL_PASSWORD: dynabench
+    command:
+      - --mysql-native-password=ON
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --sql-mode=
+
+  # Legacy API (Bottle)
   api:
-    build: .
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: dynabench-api
     ports:
-    - "8081:8081"
-    container_name: backend
-  react:
-    build: ./frontends/web
+      - "8081:8081"
+    depends_on:
+      - mysql
+    env_file:
+      - ./api/.env
+    environment:
+      # Override DB_HOST to use Docker Compose service name
+      DB_HOST: mysql
+    restart: on-failure
+
+  # Modern Backend (FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dynabench-backend
     ports:
-    - "3000:3000"
-    container_name: frontend
+      - "8000:8000"
+    depends_on:
+      - mysql
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override DB_HOST to use Docker Compose service name
+      DB_HOST: mysql
+    restart: on-failure
+
+  # Frontend (React)
+  # frontend:
+  #   build:
+  #     context: ./frontends/web
+  #     dockerfile: Dockerfile
+  #   container_name: dynabench-frontend
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - api
+  #     - backend
+  #   environment:
+  #     REACT_APP_API_HOST: https://localhost:8080
+
+volumes:
+  dynabench-mysql:

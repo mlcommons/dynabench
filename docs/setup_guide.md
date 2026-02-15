@@ -18,19 +18,100 @@ Dynabench has 4 main components: a frontend, a MySQL database, and two backend s
 3) Run the legacy API backend (Bottle)
 4) Run the modern backend (FastAPI)
 5) Run the frontend with npm
-
 ---
+
+## Recommended Setup: Docker Compose (Easiest)
+
+This is the easiest way to get Dynabench running - all services start with a single command.
 
 ### Prerequisites
 - **Docker Desktop** - Follow the [official installation guide](https://docs.docker.com/get-docker/)
-- **MySQL 8.4 client** - Follow the [official installation guide](https://dev.mysql.com/doc/mysql-getting-started/en/)
-- **Node.js 18 and npm** - Install via [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) (recommended)
+
+### Setup Steps
+
+**1. Create `.env` files:**
+
+```bash
+cp api/.env.example api/.env
+cp backend/.env.example backend/.env
+```
+
+**2. Build and start all services:**
+
+```bash
+docker-compose up --build
+```
+
+Or run in detached mode (background):
+```bash
+docker-compose up -d --build
+```
+
+**Note:** The backends will automatically retry if MySQL isn't ready yet. You may see a few connection errors in the logs initially - this is normal and they will connect once MySQL is ready.
+
+**3. Seed the database** (first time only):
+
+Wait for MySQL to be ready (watch the logs for "ready for connections"), then in another terminal:
+
+```bash
+docker exec -i dynabench-mysql mysql -u dynabench -pdynabench dynabench < backend/resources/dbs/db.sql
+```
+
+### What's Running
+
+You now should have:
+- **MySQL 8.4**: `localhost:3306`
+- **Legacy API** (dev mode): `http://localhost:8081`
+- **Modern Backend**: `http://localhost:8000` (Swagger UI at `/docs`)
+- **Frontend**: `http://localhost:3000`
+
+### Useful Commands
+
+**View logs:**
+```bash
+docker-compose logs -f                 # All services
+docker-compose logs -f api             # Legacy Bottle backend
+docker-compose logs -f backend         # Modern FastAPI backend
+docker-compose logs -f mysql           # Database
+```
+
+**Stop services:**
+```bash
+docker-compose down
+```
+
+**Stop and remove volumes (clean slate):**
+```bash
+docker-compose down -v
+```
+
+**Rebuild after code changes:**
+```bash
+docker-compose up --build
+```
+
+**Restart a specific service:**
+```bash
+docker-compose restart api
+```
+
+### Sanity Checks
+- DB: `docker exec dynabench-mysql mysql -u dynabench -pdynabench -e "SELECT 1" dynabench`
+- Legacy API: open `http://localhost:8081/` in a browser
+- Modern Backend: open `http://localhost:8000/docs` in a browser
+- Frontend: open `http://localhost:3000` in a browser
 
 ---
 
-### 1) Start MySQL 8.4 in Docker
+## Alternative: Individual Docker Containers
 
-**Recommended:** Follow the Docker-based MySQL setup:
+If you prefer to run Docker containers individually without Docker Compose:
+
+### Prerequisites
+- **Docker Desktop** - Follow the [official installation guide](https://docs.docker.com/get-docker/)
+- **Node.js 18 and npm** - Install via [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) (recommended)
+
+### 1) Start MySQL 8.4 in Docker
 
 ```bash
 docker volume create dynabench-mysql
@@ -59,24 +140,14 @@ Verify the container is up:
 docker ps
 ```
 
-**Alternative:** [Local MySQL 8.4 installation](database.md)
-
----
-
 ### 2) Seed the database (one-time)
 
-Use the seed file included in the repo:
-
 ```bash
-mysql -h 127.0.0.1 -P 3306 -u dynabench -pdynabench dynabench \
+docker exec -i dynabench-mysql mysql -u dynabench -pdynabench dynabench \
   < backend/resources/dbs/db.sql
 ```
 
----
-
 ### 3) Create `.env` files
-
-Each project directory includes a ready-to-use `.env.example` configured for Docker. Copy them to `.env`:
 
 ```bash
 cp api/.env.example api/.env
@@ -86,8 +157,6 @@ cp backend/.env.example backend/.env
 **Important:** Verify that `api/.env` and `backend/.env` have `DB_HOST=host.docker.internal` (this should be the default in `.env.example`).
 
 The example files use `DB_HOST=host.docker.internal` which allows Docker containers to connect to the MySQL container on the host. On Linux, if you encounter connection issues, edit the `.env` files and change `host.docker.internal` to `172.17.0.1`, or use `--add-host=host.docker.internal:host-gateway` when running containers.
-
----
 
 ### 4) Build and run the backends using Docker
 
@@ -158,8 +227,6 @@ docker stop dynabench-api dynabench-backend
 docker rm dynabench-api dynabench-backend
 ```
 
----
-
 ### 5) Run the Frontend
 
 To install and run the frontend, we recommend using [nvm](https://github.com/nvm-sh/nvm) (see [installation instructions](https://github.com/nvm-sh/nvm#installing-and-updating)) to manage and install Node.js versions.
@@ -178,14 +245,10 @@ npm start
 
 The frontend runs at `https://localhost:3000`. It is configured to talk to the legacy API by default; the app also uses the modern backend for newer endpoints.
 
----
-
 ### Sanity checks
-- DB: `mysql -h 127.0.0.1 -P 3306 -u dynabench -pdynabench -e "SELECT 1" dynabench`
-- FastAPI root: open  `http://localhost:8000/` in a browser
+- DB: `docker exec dynabench-mysql mysql -u dynabench -pdynabench -e "SELECT 1" dynabench`
 - Legacy API (dev mode): open `https://localhost:8081/` in a browser
-
----
+- Modern Backend: open `http://localhost:8000/` in a browser (Swagger UI at `/docs`)
 
 ### That's it
 You now have:
@@ -206,6 +269,8 @@ If you prefer to run the backends locally without Docker:
 - **uv** (Python version manager & package installer): `curl -LsSf https://astral.sh/uv/install.sh | sh`
   - uv will automatically install Python 3.13 as needed
   - **Note:** Python 3.14+ is not yet supported due to dependency compatibility issues (Pydantic V1)
+- **MySQL 8.4** - See [database setup guide](database.md)
+- **Node.js 18 and npm** - Install via [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) (recommended)
 
 ### Create `.env` files for local setup
 
@@ -271,19 +336,22 @@ uv run uvicorn app.main:app --reload --port 8000
 
 This serves the modern API at `http://localhost:8000`. Swagger UI: `http://localhost:8000/docs`.
 
----
-
-## Alternative: Docker Compose (Full Stack)
-
-For a completely containerized development environment:
+### Run the Frontend
 
 ```bash
-docker-compose build --no-cache
-docker-compose up
+cd frontends/web
+nvm install 18
+nvm use 18
+nvm install-latest-npm
+npm install
+echo 'REACT_APP_API_HOST = "https://localhost:8081"' >> .env
+npm start
 ```
 
-This starts all services in containers:
-- Backend (legacy API): `http://localhost:8081`
-- Frontend: `http://localhost:3000`
+The frontend runs at `https://localhost:3000`.
 
-**Note:** Ensure your `docker-compose.yml` is configured for both backend services.
+### Sanity Checks
+- DB: `mysql -h 127.0.0.1 -P 3306 -u dynabench -pdynabench -e "SELECT 1" dynabench`
+- Legacy API (dev mode): open `https://localhost:8081/` in a browser
+- Modern Backend: open `http://localhost:8000/docs` in a browser
+- Frontend: open `https://localhost:3000` in a browser

@@ -37,5 +37,14 @@ CREATE DATABASE dynabench;
 GRANT ALL PRIVILEGES ON dynabench.* TO 'dynabench'@'localhost';
 ```
 
+## Seeding the Database
+
+Once you've created the database and user, seed it with the provided schema and data:
+
+```bash
+mysql -h 127.0.0.1 -P 3306 -u dynabench -p dynabench < backend/resources/dbs/db.sql
+```
+
+**Note:** Replace the password in your `.env` files with the password you set for the `dynabench` user above.
 
 For database access, we recommend using the DBeaver viewer.
