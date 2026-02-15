@@ -1,26 +1,25 @@
 # Setting up your database
 
-Dynabench assumes MySQL 5.7 to be installed.
+**Recommended:** Use Docker with MySQL 8.4 as described in the [main setup guide](setup_guide.md). This is the easiest and most reliable method.
 
-## Installing MySQL
+## Alternative: Local MySQL 8.4 installation
 
-On **Mac OS X**, we recommend using [homebrew](https://docs.brew.sh/Installation) to install and run:
+If you prefer to install MySQL locally instead of using Docker:
 
+**Mac OS X** (using [homebrew](https://docs.brew.sh/Installation)):
 ```
-brew install mysql@5.7
-brew link --force mysql@5.7
-brew services start mysql@5.7
+brew install mysql@8.4
+brew services start mysql@8.4
 ```
 
-On **Ubuntu**, you would download the latest .deb from https://downloads.mysql.com/archives/community and install it:
+**Ubuntu/Debian**:
+```
+sudo apt update
+sudo apt install mysql-server-8.4
+sudo systemctl start mysql
+```
 
-```
-wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_5.7.34-1ubuntu18.04_i386.deb-bundle.tar
-tar xvf mysql-server_5.7.34-1ubuntu18.04_i386.deb-bundle.tar
-rm *test*.deb # remove test stuff
-sudo dpkg -i *.deb # this will throw some warnings about missing dependencies
-sudo apt --fix-broken install # fix the dependencies
-```
+**Other platforms:** Follow the [official MySQL 8.4 installation guide](https://dev.mysql.com/doc/refman/8.4/en/installing.html)
 
 ## Configuration
 
@@ -37,3 +36,6 @@ CREATE USER 'dynabench'@'localhost' IDENTIFIED BY 'ENTER_YOUR_PASSWORD';
 CREATE DATABASE dynabench;
 GRANT ALL PRIVILEGES ON dynabench.* TO 'dynabench'@'localhost';
 ```
+
+
+For database access, we recommend using the DBeaver viewer.

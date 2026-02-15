@@ -24,14 +24,18 @@ Both backends are required for the platform to function properly. The frontend c
 ---
 
 ### Prerequisites
-- Docker Desktop (or compatible Docker)
-- MySQL client (e.g., `mysql` CLI; on macOS: `brew install mysql-client`)
-- uv (Python package manager): `curl -LsSf https://astral.sh/uv/install.sh | sh`
-- Node.js 18 and npm (install via nvm recommended)
+- **uv** (Python version manager & package installer): `curl -LsSf https://astral.sh/uv/install.sh | sh`
+  - uv will automatically install Python 3.13 as needed
+  - **Note:** Python 3.14+ is not yet supported due to dependency compatibility issues (Pydantic V1)
+- **Docker Desktop** - Follow the [official installation guide](https://docs.docker.com/get-docker/)
+- **MySQL 8.4 client** - Follow the [official installation guide](https://dev.mysql.com/doc/mysql-getting-started/en/)
+- **Node.js 18 and npm** - Install via [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) (recommended)
 
 ---
 
-### 1) Start MySQL 8.0 in Docker
+### 1) Start MySQL 8.4 in Docker
+
+**Recommended:** Follow the Docker-based MySQL setup:
 
 ```bash
 docker volume create dynabench-mysql
@@ -43,8 +47,8 @@ docker run -d --name dynabench-mysql \
   -e MYSQL_USER=dynabench \
   -e MYSQL_PASSWORD=dynabench \
   -v dynabench-mysql:/var/lib/mysql \
-  mysql:8.0 \
-  --default-authentication-plugin=mysql_native_password \
+  mysql:8.4 \
+  --mysql-native-password=ON \
   --character-set-server=utf8mb4 \
   --collation-server=utf8mb4_unicode_ci \
   --sql-mode=""
@@ -59,6 +63,8 @@ Verify the container is up:
 ```bash
 docker ps
 ```
+
+**Alternative:** [Local MySQL 8.4 installation](database.md)
 
 ---
 
@@ -179,7 +185,7 @@ The frontend runs at `https://localhost:3000`. It is configured to talk to the l
 
 ### That's it
 You now have:
-- MySQL 8.0 (Docker) with seeded schema/data
+- MySQL 8.4 (Docker) with seeded schema/data
 - Legacy API on `https://localhost:8081`
 - Modern Backend on `http://localhost:8000`
 - Frontend on `https://localhost:3000`
