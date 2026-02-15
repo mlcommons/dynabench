@@ -2,31 +2,26 @@
 
 This guide walks you from zero to a running local Dynabench environment.
 
-Dynabench uses **two backend servers** that must run simultaneously:
+Dynabench has 4 main components: a frontend, a MySQL database, and two backend services that must run simultaneously:
 
 1. **Legacy API** (Bottle framework) - `api/` directory
    - Handles existing functionality and data collection
-   - Runs on `https://localhost:8081`
+   - Runs on `https://localhost:8081` (dev mode) or `https://localhost:8080` (prod mode)
 
 2. **Modern Backend** (FastAPI framework) - `backend/` directory
    - Powers newer features and endpoints
    - Runs on `http://localhost:8000`
 
-Both backends are required for the platform to function properly. The frontend communicates with both.
-
 ## Order of operations:
 1) Start MySQL server
 2) Seed the database with the provided SQL
-3) Run the legacy API backend (Bottle) with uv
-4) Run the modern Backend (FastAPI) with uv
+3) Run the legacy API backend (Bottle)
+4) Run the modern backend (FastAPI)
 5) Run the frontend with npm
 
 ---
 
 ### Prerequisites
-- **uv** (Python version manager & package installer): `curl -LsSf https://astral.sh/uv/install.sh | sh`
-  - uv will automatically install Python 3.13 as needed
-  - **Note:** Python 3.14+ is not yet supported due to dependency compatibility issues (Pydantic V1)
 - **Docker Desktop** - Follow the [official installation guide](https://docs.docker.com/get-docker/)
 - **MySQL 8.4 client** - Follow the [official installation guide](https://dev.mysql.com/doc/mysql-getting-started/en/)
 - **Node.js 18 and npm** - Install via [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) (recommended)
@@ -81,28 +76,156 @@ mysql -h 127.0.0.1 -P 3306 -u dynabench -pdynabench dynabench \
 
 ### 3) Create `.env` files
 
-Each project directory includes a ready-to-use `.env.example`. Copy it to `.env`:
+Each project directory includes a ready-to-use `.env.example` configured for Docker. Copy them to `.env`:
+
+```bash
+cp api/.env.example api/.env
+cp backend/.env.example backend/.env
+```
+
+**Important:** Verify that `api/.env` and `backend/.env` have `DB_HOST=host.docker.internal` (this should be the default in `.env.example`).
+
+The example files use `DB_HOST=host.docker.internal` which allows Docker containers to connect to the MySQL container on the host. On Linux, if you encounter connection issues, edit the `.env` files and change `host.docker.internal` to `172.17.0.1`, or use `--add-host=host.docker.internal:host-gateway` when running containers.
+
+---
+
+### 4) Build and run the backends using Docker
+
+**Build the legacy API (Bottle):**
+
+```bash
+cd api
+docker build -t dynabench-api .
+cd ..
+```
+
+**Build the modern backend (FastAPI):**
+
+```bash
+cd backend
+docker build -t dynabench-backend .
+cd ..
+```
+
+**Run the legacy API container:**
+
+```bash
+docker run -d --name dynabench-api \
+  -p 8081:8081 \
+  dynabench-api
+```
+
+This serves the legacy API at `https://localhost:8081` (dev mode with self-signed cert).
+
+**Run the modern backend container:**
+
+```bash
+docker run -d --name dynabench-backend \
+  -p 8000:8000 \
+  dynabench-backend
+```
+
+This serves the modern API at `http://localhost:8000`. Swagger UI: `http://localhost:8000/docs`.
+
+**Note:** The `.env` file is copied into the Docker image at build time. If you modify the `.env` file, you must rebuild the image:
+```bash
+# Remove old containers
+docker rm -f dynabench-api dynabench-backend
+
+# Rebuild images
+cd api && docker build -t dynabench-api . && cd ..
+cd backend && docker build -t dynabench-backend . && cd ..
+
+# Run containers again (using commands above)
+```
+
+**View logs:**
+
+```bash
+docker logs -f dynabench-api      # Legacy API logs
+docker logs -f dynabench-backend  # Modern backend logs
+```
+
+**Stop containers:**
+
+```bash
+docker stop dynabench-api dynabench-backend
+```
+
+**Remove containers (for rebuild):**
+
+```bash
+docker rm dynabench-api dynabench-backend
+```
+
+---
+
+### 5) Run the Frontend
+
+To install and run the frontend, we recommend using [nvm](https://github.com/nvm-sh/nvm) (see [installation instructions](https://github.com/nvm-sh/nvm#installing-and-updating)) to manage and install Node.js versions.
+
+Once nvm is installed:
+
+```bash
+cd frontends/web
+nvm install 18
+nvm use 18
+nvm install-latest-npm
+npm install
+echo 'REACT_APP_API_HOST = "https://localhost:8081"' >> .env
+npm start
+```
+
+The frontend runs at `https://localhost:3000`. It is configured to talk to the legacy API by default; the app also uses the modern backend for newer endpoints.
+
+---
+
+### Sanity checks
+- DB: `mysql -h 127.0.0.1 -P 3306 -u dynabench -pdynabench -e "SELECT 1" dynabench`
+- FastAPI root: open  `http://localhost:8000/` in a browser
+- Legacy API (dev mode): open `https://localhost:8081/` in a browser
+
+---
+
+### That's it
+You now have:
+- MySQL 8.4 (Docker) with seeded schema/data
+- Legacy API (Docker, dev mode) on `https://localhost:8081`
+- Modern Backend (Docker) on `http://localhost:8000`
+- Frontend on `https://localhost:3000`
+
+You're almost done! The final step is to navigate to the task, admin configuration, and update the YAML file.
+
+---
+
+## Alternative: Local Setup with uv
+
+If you prefer to run the backends locally without Docker:
+
+### Prerequisites for local setup
+- **uv** (Python version manager & package installer): `curl -LsSf https://astral.sh/uv/install.sh | sh`
+  - uv will automatically install Python 3.13 as needed
+  - **Note:** Python 3.14+ is not yet supported due to dependency compatibility issues (Pydantic V1)
+
+### Create `.env` files for local setup
+
+Copy the `.env.example` files and update them for local MySQL:
 
 ```bash
 cd api && cp .env.example .env && cd -
 cd backend && cp .env.example .env && cd -
 ```
 
-If you’re running the frontend locally, copy its example too:
-
+**Important:** Edit both `api/.env` and `backend/.env` to change the database host:
 ```bash
-cd frontends/web && cp .env.example .env && cd -
+DB_HOST=127.0.0.1
 ```
 
-The examples are pre-filled for a local Docker MySQL on `127.0.0.1:3306`. Adjust only if you changed the Docker settings.
+(The `.env.example` files default to `host.docker.internal` for Docker setup)
 
----
+### Run the legacy API backend (Bottle) with uv
 
-### 4) Run the legacy API backend (Bottle) with uv
-
-Open Terminal A:
-
-**Standard setup (recommended):**
+**Standard setup:**
 
 ```bash
 cd api
@@ -138,11 +261,7 @@ If you need custom SSL certificates or prefer interactive setup:
    python server.py dev
    ```
 
----
-
-### 5) Run the modern Backend (FastAPI) with uv
-
-Open Terminal B:
+### Run the modern Backend (FastAPI) with uv
 
 ```bash
 cd backend
@@ -151,46 +270,6 @@ uv run uvicorn app.main:app --reload --port 8000
 ```
 
 This serves the modern API at `http://localhost:8000`. Swagger UI: `http://localhost:8000/docs`.
-
----
-
-### 6) Run the Frontend
-
-Open Terminal C:
-
-To install and run the frontend, we recommend using [nvm](https://github.com/nvm-sh/nvm) (see [installation instructions](https://github.com/nvm-sh/nvm#installing-and-updating)) to manage and install Node.js versions.
-
-Once nvm is installed:
-
-```bash
-cd frontends/web
-nvm install 18
-nvm use 18
-nvm install-latest-npm
-npm install
-echo 'REACT_APP_API_HOST = "https://localhost:8081"' >> .env
-npm start
-```
-
-The frontend runs at `https://localhost:3000`. It is configured to talk to the legacy API by default; the app also uses the modern backend for newer endpoints.
-
----
-
-### Sanity checks
-- DB: `mysql -h 127.0.0.1 -P 3306 -u dynabench -pdynabench -e "SELECT 1" dynabench`
-- FastAPI root: open  `http://localhost:8000/` in a browser
-- Legacy API example: open `https://localhost:8081/` in a browser
-
----
-
-### That's it
-You now have:
-- MySQL 8.4 (Docker) with seeded schema/data
-- Legacy API on `https://localhost:8081`
-- Modern Backend on `http://localhost:8000`
-- Frontend on `https://localhost:3000`
-
-You're almost done! The final step is to navigate to the task, admin configuration, and update the YAML file.
 
 ---
 
