@@ -2,14 +2,24 @@
 
 This guide walks you from zero to a running local Dynabench environment.
 
-Order of operations:
-1) Start MySQL in Docker
+Dynabench uses **two backend servers** that must run simultaneously:
+
+1. **Legacy API** (Bottle framework) - `api/` directory
+   - Handles existing functionality and data collection
+   - Runs on `https://localhost:8081`
+
+2. **Modern Backend** (FastAPI framework) - `backend/` directory
+   - Powers newer features and endpoints
+   - Runs on `http://localhost:8000`
+
+Both backends are required for the platform to function properly. The frontend communicates with both.
+
+## Order of operations:
+1) Start MySQL server
 2) Seed the database with the provided SQL
 3) Run the legacy API backend (Bottle) with uv
 4) Run the modern Backend (FastAPI) with uv
-5) Run the Frontend with npm
-
-You’ll open two terminal windows for the two backends, plus one for the frontend.
+5) Run the frontend with npm
 
 ---
 
@@ -86,13 +96,41 @@ The examples are pre-filled for a local Docker MySQL on `127.0.0.1:3306`. Adjust
 
 Open Terminal A:
 
+**Standard setup (recommended):**
+
 ```bash
 cd api
-uv sync           # installs from pyproject/uv.lock
+uv sync           # installs Python (if needed) and dependencies from pyproject/uv.lock
 uv run python server.py dev
 ```
 
 This serves the legacy API at `https://localhost:8081` (self‑signed cert in dev; accept the browser warning if you hit it via HTTPS).
+
+**Alternative: Using install.py for interactive configuration**
+
+If you need custom SSL certificates or prefer interactive setup:
+
+1. Set up self-signed SSL certificates (if needed):
+   ```bash
+   mkdir ~/.ssl
+   cd ~/.ssl
+   openssl req -newkey rsa:2048 -x509 -new -nodes \
+     -keyout local-cert.key -out local-cert.crt \
+     -subj /CN=test1 -sha256 -days 365 \
+     -addext "extendedKeyUsage = serverAuth"
+   cat local-cert.key local-cert.crt > local-cert.pem
+   chmod 600 *
+   ln -s local-cert.key dynabench.org-key.pem
+   ln -s local-cert.crt dynabench.org.crt
+   ```
+
+2. Run the interactive configuration script:
+   ```bash
+   cd api
+   uv sync
+   python install.py  # Prompts for db credentials and SSL paths
+   python server.py dev
+   ```
 
 ---
 
@@ -114,11 +152,17 @@ This serves the modern API at `http://localhost:8000`. Swagger UI: `http://local
 
 Open Terminal C:
 
+To install and run the frontend, we recommend using [nvm](https://github.com/nvm-sh/nvm) (see [installation instructions](https://github.com/nvm-sh/nvm#installing-and-updating)) to manage and install Node.js versions.
+
+Once nvm is installed:
+
 ```bash
 cd frontends/web
 nvm install 18
 nvm use 18
+nvm install-latest-npm
 npm install
+echo 'REACT_APP_API_HOST = "https://localhost:8081"' >> .env
 npm start
 ```
 
@@ -133,9 +177,28 @@ The frontend runs at `https://localhost:3000`. It is configured to talk to the l
 
 ---
 
-### That’s it
+### That's it
 You now have:
 - MySQL 8.0 (Docker) with seeded schema/data
 - Legacy API on `https://localhost:8081`
 - Modern Backend on `http://localhost:8000`
 - Frontend on `https://localhost:3000`
+
+You're almost done! The final step is to navigate to the task, admin configuration, and update the YAML file.
+
+---
+
+## Alternative: Docker Compose (Full Stack)
+
+For a completely containerized development environment:
+
+```bash
+docker-compose build --no-cache
+docker-compose up
+```
+
+This starts all services in containers:
+- Backend (legacy API): `http://localhost:8081`
+- Frontend: `http://localhost:3000`
+
+**Note:** Ensure your `docker-compose.yml` is configured for both backend services.
